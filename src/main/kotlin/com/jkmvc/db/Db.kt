@@ -17,6 +17,13 @@ class Db:IDb{
     lateinit protected var conn: Connection;
 
     /**
+     * 转移字符
+     */
+    protected val identityQuoteString by lazy(LazyThreadSafetyMode.NONE) {
+        conn.metaData.identifierQuoteString
+    }
+
+    /**
      * 当前事务的嵌套层级
      */
     protected var transDepth:Int = 0;
@@ -326,6 +333,6 @@ class Db:IDb{
             return value;
 
         // 非string => string
-        return value.toString();
+        return "$identityQuoteString$value$identityQuoteString";
     }
 }
