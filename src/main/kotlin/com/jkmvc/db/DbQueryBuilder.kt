@@ -23,9 +23,13 @@ class DbQueryBuilder(db:Db/* 数据库连接 */, table:String = "" /*表名*/) :
      */
     public override fun compile(action:String):Pair<String, List<Any?>>
     {
+        params.clear();
+
         // 动作子句 + 修饰子句
         val actionSql:String = this.action(action).compileAction();
         val decorationSql:String = compileDecoration();
+        println(actionSql + decorationSql)
+        println(params)
         return Pair(actionSql + decorationSql, params);
     }
 
@@ -85,7 +89,11 @@ class DbQueryBuilder(db:Db/* 数据库连接 */, table:String = "" /*表名*/) :
         val (sql, params) = select(Pair("count(1)", "num")).compile("select");
 
         // 2 执行 select
-        return db.queryCell(sql, params) as Int;
+        val (hasNext, count) = db.queryCell(sql, params);
+        return if(hasNext)
+                    0
+                else
+                    count as Int;
     }
 
     /**
