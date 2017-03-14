@@ -78,10 +78,11 @@ class DataSourceFactory {
         /**
          * 关闭所有数据源
          */
-        public fun close(){
+        public fun closeAllDataSources(){
             for((name, dataSource) in dataSources){
                 dataSource.close()
             }
+            dataSources.clear();
         }
     }
 
