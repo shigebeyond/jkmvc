@@ -9,13 +9,13 @@ import kotlin.test.assertFalse
 
 class DbTests{
 
-    /*@Test
+    @Test
     fun testConnection(){
         val dataSource = getDruidDataSource();
         val db: Db = Db.connect(dataSource);
         val count = DbQueryBuilder(db).table("user").count();
         println("查询user表：" + count)
-    }*/
+    }
 
     @Test
     fun testInsert(){
@@ -25,7 +25,7 @@ class DbTests{
         println("插入user表：" + id)
     }
 
-    /*@Test
+    @Test
     fun testFind(){
         val dataSource = getDruidDataSource();
         val db: Db = Db.connect(dataSource);
@@ -49,7 +49,6 @@ class DbTests{
         println("统计user表：" + count)
     }
 
-
     @Test
     fun testUpdate(){
         val dataSource = getDruidDataSource();
@@ -64,7 +63,7 @@ class DbTests{
         val db: Db = Db.connect(dataSource);
         val f = DbQueryBuilder(db).table("user").where("id", "=", 1).delete();
         println("删除user表：" + f)
-    }*/
+    }
 
 }
 
