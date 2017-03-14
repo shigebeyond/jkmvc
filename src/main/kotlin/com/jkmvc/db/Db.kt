@@ -278,17 +278,17 @@ class Db:IDb{
                 table = "`${arr[0]}`.";
                 col = arr[1]
             }
-        }
 
-        // 字段名
-        if(column != "*") // 非*
-            col = "`$col`"; // 转义
+            // 字段名
+            if(column != "*") // 非*
+                col = "`$col`"; // 转义
+        }
 
         // 字段别名
         if(alias == null)
             return table + col;
 
-        return return table + col + " AS `$alias`"; // 转义
+        return table + col + " AS `$alias`"; // 转义
     }
 
     /**
