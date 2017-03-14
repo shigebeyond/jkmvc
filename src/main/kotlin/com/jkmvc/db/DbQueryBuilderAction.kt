@@ -237,7 +237,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
 
         // 2 填充字段谓句
         // 针对 update :table set :column = :value
-        sql = "/:column(.+):value/".toRegex().replace(sql) { result: MatchResult ->
+        sql = ":column(.+):value".toRegex().replace(sql) { result: MatchResult ->
             fillColumnPredicate(result.groupValues[1]);
         };
 
@@ -314,7 +314,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
         var sql: StringBuilder = StringBuilder();
         for ((column, value) in updateRow) {
             // column = value,
-            sql.append(db.quoteColumn(column)).append(" ").append(operator).append(" ").append(db.quote(value)).append(delimiter);
+            sql.append(db.quoteColumn(column)).append(" ").append(operator).append(" ").append(quote(value)).append(delimiter);
         }
 
         return sql.delete(delimiter).toString();
