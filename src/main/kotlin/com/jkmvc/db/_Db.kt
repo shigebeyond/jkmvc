@@ -110,7 +110,7 @@ public fun Connection.execute(sql: String, paras: List<Any?>?): Int {
         // 执行
         val rows:Int = pst.executeUpdate()
         // 如果是insert语句，则返回新增id
-        if("INSERT INTO".toRegex(RegexOption.IGNORE_CASE).matches(sql)){
+        if("INSERT.*".toRegex(RegexOption.IGNORE_CASE).matches(sql)){
             rs = pst.getGeneratedKeys(); //获取新增id
             rs.next();
             return rs.getInt(1); //返回新增id
