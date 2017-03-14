@@ -1,20 +1,14 @@
 package com.jkmvc.db
 
 import java.sql.Connection
-import java.sql.DriverManager
 import java.sql.ResultSet
-import javax.sql.DataSource
+import java.util.*
 
 
 /**
  * 封装db操作
  */
-class Db:IDb{
-
-    /**
-     * 数据库连接
-     */
-    lateinit protected var conn: Connection;
+class Db(protected val conn: Connection /* 数据库连接 */, protected val name:String = "database" /* 标识 */):IDb{
 
     /**
      * 转移字符
@@ -33,41 +27,42 @@ class Db:IDb{
      */
     protected var rollbacked = false;
 
-    protected constructor(conn: Connection){
-        this.conn = conn;
-        threadLocal.set(this);
-    }
-
     companion object {
-        protected val threadLocal:ThreadLocal<Db> = ThreadLocal<Db>()
-
         /**
-         * 获得当前数据库连接
+         * 线程安全的db缓存
          */
-        public fun current():Db {
-            return threadLocal.get()!!;
+        protected val dbs:ThreadLocal<MutableMap<String, Db>> = ThreadLocal.withInitial {
+            LinkedHashMap<String, Db>();
         }
 
         /**
-         * 连接数据库
+         * 获得db
          */
-        public fun connect(datasource: DataSource): Db {
-            return Db(datasource.connection)
+        public fun getDb(name:String = "database"):Db{
+            return dbs.get().getOrPut(name){
+                //获得数据源
+                val dataSource  = DataSourceFactory.getDruidDataSource(name);
+                // 新建db
+                Db(dataSource.connection, name);
+            }
         }
 
         /**
-         * 连接数据库
+         * 关闭db
          */
-        public fun connect(url: String, driver: String, user: String = "", password: String = ""): Db {
-            Class.forName(driver).newInstance()
-            return Db(DriverManager.getConnection(url, user, password));
+        public fun closeDb(db:Db){
+            db.conn.close()
+            dbs.get().remove(db.name);
         }
 
         /**
-         * 关闭数据库连接
+         * 关闭所有db
          */
-        public fun close(){
-            threadLocal.get()?.close();
+        public fun closeAllDb(db:Db){
+            for((name, db) in dbs.get()){
+                db.conn.close()
+            }
+            dbs.get().clear();
         }
     }
 
@@ -180,8 +175,7 @@ class Db:IDb{
      * 关闭
      */
     public override fun close():Unit{
-        conn.close();
-        threadLocal.set(null);
+        closeDb(this)
     }
 
     /**
