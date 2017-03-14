@@ -19,6 +19,26 @@ public fun StringBuilder.delete(str:String):StringBuilder {
 }
 
 /**
+ * 首字母大写
+ */
+public fun String.ucFirst(): String {
+    val cs = this.toCharArray()
+    if(cs[0] in 'a'..'z')
+        cs[0] = cs[0] - 32
+    return String(cs)
+}
+
+/**
+ * 首字母小写
+ */
+public fun String.lcFirst(): String {
+    val cs = this.toCharArray()
+    if(cs[0] in 'A'..'Z')
+        cs[0] = cs[0] + 32
+    return String(cs)
+}
+
+/**
  * 匹配方法的名称与参数类型
  */
 public fun KFunction<*>.matches(name:String, paramTypes:Array<out Class<*>>? = null):Boolean{
