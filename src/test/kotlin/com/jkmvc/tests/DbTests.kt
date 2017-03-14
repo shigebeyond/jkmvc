@@ -1,16 +1,12 @@
 package com.jkmvc.tests
 
-import com.jkmvc.db.getDruidDataSource
 import com.jkmvc.db.Db
 import com.jkmvc.db.DbQueryBuilder
-import java.sql.Connection
 import org.junit.Test
-import kotlin.test.assertFalse
 
 class DbTests{
 
-    val dataSource = getDruidDataSource();
-    val db: Db = Db.connect(dataSource);
+    val db: Db = Db.getDb()
     var id = 0;
 
     @Test

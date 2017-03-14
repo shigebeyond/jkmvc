@@ -14,7 +14,7 @@ import kotlin.reflect.memberFunctions
  * @date 2016-10-12
  *
  */
-abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, var table: String = "" /*表名*/) : IDbQueryBuilder {
+abstract class DbQueryBuilderAction(override val db: IDb, var table: String = "" /*表名*/) : IDbQueryBuilder {
     companion object {
         /**
          * 动作子句的sql模板
@@ -41,7 +41,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
             return fillers.getOrPut(field){
                 val method = "fill" + field.ucFirst()
                 DbQueryBuilder::class.memberFunctions.find {
-                    it.matches(field);
+                    it.matches(method);
                 }
             }
         }

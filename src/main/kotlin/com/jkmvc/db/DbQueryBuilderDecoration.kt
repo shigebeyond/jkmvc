@@ -12,7 +12,7 @@ import kotlin.jvm.internal.FunctionImpl
  * @date 2016-10-12
  *
  */
-abstract class DbQueryBuilderDecoration(db: IDb/* 数据库连接 */, table: String = "" /*表名*/) : DbQueryBuilderAction(db, table) {
+abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) : DbQueryBuilderAction(db, table) {
     /**
      * 转义列
      */

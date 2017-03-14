@@ -13,8 +13,11 @@ import java.sql.Connection
  * @date 2016-10-13
  *
  */
-class DbQueryBuilder(db:Db/* 数据库连接 */, table:String = "" /*表名*/) :DbQueryBuilderDecoration(db, table)
+class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQueryBuilderDecoration(db, table)
 {
+    public constructor(dbName:String /* db名 */, table:String = "" /*表名*/):this(Db.getDb(dbName), table){
+    }
+
     /**
      * 编译sql
      *
