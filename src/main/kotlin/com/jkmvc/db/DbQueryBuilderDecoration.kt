@@ -99,7 +99,7 @@ abstract class DbQueryBuilderDecoration(db: IDb/* 数据库连接 */, table: Str
      * @return string
      */
     public override fun compileDecoration(): String {
-        val sql: StringBuilder = StringBuilder();
+        val sql: StringBuilder = StringBuilder(" ");
         // 逐个编译修饰表达式
         visitDecorationClauses { clause: IDbQueryBuilderDecorationClauses<*> ->
             sql.append(clause.compile()).append(' ');
