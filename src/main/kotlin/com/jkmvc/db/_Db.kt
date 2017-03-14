@@ -6,15 +6,42 @@ import java.io.InputStream
 import java.io.Reader
 import java.sql.*
 import java.util.*
+import kotlin.reflect.KFunction
+import kotlin.reflect.jvm.javaType
 
 /**
  * StringBuilder扩展
  *  删除最后的一段子字符串
  */
 public fun StringBuilder.delete(str:String):StringBuilder {
-    val end = length - 1;
-    val start = end - str.length;
-    return delete(start, end);
+    val start = length - str.length;
+    return delete(start, length);
+}
+
+/**
+ * 匹配方法的名称与参数类型
+ */
+public fun KFunction<*>.matches(name:String, paramTypes:Array<out Class<*>>? = null):Boolean{
+    // 1 匹配名称
+    if(name != this.name)
+        return false
+
+    // 2 匹配参数
+    // 注： fn.parameters 第一个参数是this，因此比 paramTypes 要多一个参数
+    // 2.1 匹配参数个数
+    val size = if(paramTypes == null) 0 else paramTypes.size;
+    if(size != this.parameters.size - 1)
+        return false;
+
+    // 2.2 匹配参数类型
+    if(paramTypes != null){
+        for (i in paramTypes.indices){
+            if(paramTypes[i] != this.parameters[i + 1].type.javaType)
+                return false
+        }
+    }
+
+    return true;
 }
 
 /**
