@@ -20,12 +20,31 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
          * 动作子句的sql模板
          * @var array
          */
-        public val SqlTemplates = mapOf(
+        public val SqlTemplates:Map<String, String> = mapOf(
                 "select" to "SELECT :distinct :columns FROM :table",
                 "insert" to "INSERT INTO :table (:columns) VALUES :values", // quoteColumn 默认不加(), quotevalue 默认加()
                 "update" to "UPDATE :table SET :column = :value",
                 "delete" to "DELETE FROM :table"
         );
+
+        /**
+         * 缓存填充方法
+         */
+        protected val fillers:MutableMap<String, KFunction<*>?> by lazy {
+            LinkedHashMap<String, KFunction<*>?>();
+        }
+
+        /**
+         * 获得填充方法
+         */
+        public fun getFillMethod(field: String): KFunction<*>? {
+            return fillers.getOrPut(field){
+                val method = "fill" + field.ucFirst()
+                DbQueryBuilder::class.memberFunctions.find {
+                    it.matches(field);
+                }
+            }
+        }
     }
 
     /**
@@ -205,15 +224,6 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     }
 
     /**
-     * 获得方法
-     */
-    public fun getMethod(method: String): KFunction<*>? {
-        return DbQueryBuilder::class.memberFunctions.find {
-            it.matches(method);
-        }
-    }
-
-    /**
      * 编译动作子句
      * @return string
      */
@@ -230,8 +240,8 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
         // 1 填充表名/多个字段名/多个字段值
         // 针对 select :columns from :table / insert into :table :columns values :values
         sql = ":(table|columns|values)".toRegex().replace(sql) { result: MatchResult ->
-            // 调用对应的方法: filltable() / fillcolumns() / fillvalues()
-            val method = getMethod("fill" + result.groupValues[1]);
+            // 调用对应的方法: fillTable() / fillColumns() / fillValues()
+            val method = getFillMethod(result.groupValues[1]);
             method?.call(this).toString();
         };
 
@@ -249,7 +259,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * 编译表名: 转义
      * @return string
      */
-    public fun filltable(): String {
+    public fun fillTable(): String {
         return db.quoteTable(table);
     }
 
@@ -259,7 +269,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      *
      * @return string
      */
-    public fun fillcolumns(): String {
+    public fun fillColumns(): String {
         // 1 select子句:  data是要查询的字段名, [alias to column]
         if (action == "select") {
             if (selectColumns.isEmpty())
@@ -283,7 +293,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      *
      * @return string
      */
-    public fun fillvalues(): String {
+    public fun fillValues(): String {
         // insert子句:  data是要插入的多行: [<column to value>]
         if (insertRows.isEmpty())
             return "";
