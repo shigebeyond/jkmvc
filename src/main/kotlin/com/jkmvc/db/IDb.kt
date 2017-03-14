@@ -15,27 +15,27 @@ interface IDb{
     /**
      * 执行更新
      */
-    fun execute(sql: String, paras: List<Any?>?): Int;
+    fun execute(sql: String, paras: List<Any?>? = null): Int;
 
     /**
      * 查询多行
      */
-    fun <T> queryResult(sql: String, paras: List<Any?>?, action:(ResultSet) -> T): T ;
+    fun <T> queryResult(sql: String, paras: List<Any?>? = null, action:(ResultSet) -> T): T ;
 
     /**
      * 查询多行
      */
-    fun <T> queryRows(sql: String, paras: List<Any?>?, transform:(MutableMap<String, Any?>) -> T): List<T>;
+    fun <T> queryRows(sql: String, paras: List<Any?>? = null, transform:(MutableMap<String, Any?>) -> T): List<T>;
 
     /**
      * 查询一行(多列)
      */
-    fun <T> queryRow(sql: String, paras: List<Any?>?, transform:(MutableMap<String, Any?>) -> T): T? ;
+    fun <T> queryRow(sql: String, paras: List<Any?>? = null, transform:(MutableMap<String, Any?>) -> T): T? ;
 
     /**
      * 查询一行一列
      */
-    fun queryCell(sql: String, paras: List<Any?>?): Pair<Boolean, Any?>;
+    fun queryCell(sql: String, paras: List<Any?>? = null): Pair<Boolean, Any?>;
 
     /**
      * 开启事务

@@ -97,7 +97,7 @@ public fun getDruidDataSource(name:String = "database"): DruidDataSource {
  * Connection扩展
  * 执行更新
  */
-public fun Connection.execute(sql: String, paras: List<Any?>?): Int {
+public fun Connection.execute(sql: String, paras: List<Any?>? = null): Int {
     var pst: PreparedStatement? = null
     var rs: ResultSet? = null;
     try{
@@ -126,7 +126,7 @@ public fun Connection.execute(sql: String, paras: List<Any?>?): Int {
 /**
  * 查询多行
  */
-public fun <T> Connection.queryResult(sql: String, paras: List<Any?>?, action:(ResultSet) -> T): T {
+public fun <T> Connection.queryResult(sql: String, paras: List<Any?>? = null, action:(ResultSet) -> T): T {
     var pst: PreparedStatement? = null;
     var rs: ResultSet? = null;
     try {
@@ -149,7 +149,7 @@ public fun <T> Connection.queryResult(sql: String, paras: List<Any?>?, action:(R
 /**
  * 查询多行
  */
-public fun <T> Connection.queryRows(sql: String, paras: List<Any?>?, transform:(MutableMap<String, Any?>) -> T): List<T> {
+public fun <T> Connection.queryRows(sql: String, paras: List<Any?>? = null, transform:(MutableMap<String, Any?>) -> T): List<T> {
     return queryResult<List<T>>(sql, paras){ rs: ResultSet ->
         // 处理查询结果
         val result = LinkedList<T>()
@@ -163,7 +163,7 @@ public fun <T> Connection.queryRows(sql: String, paras: List<Any?>?, transform:(
 /**
  * 查询一行(多列)
  */
-public fun <T> Connection.queryRow(sql: String, paras: List<Any?>?, transform:(MutableMap<String, Any?>) -> T): T? {
+public fun <T> Connection.queryRow(sql: String, paras: List<Any?>? = null, transform:(MutableMap<String, Any?>) -> T): T? {
     return queryResult<T?>(sql, paras){ rs: ResultSet ->
         // 处理查询结果
         val row:MutableMap<String, Any?>? = rs.nextRow()
@@ -177,7 +177,7 @@ public fun <T> Connection.queryRow(sql: String, paras: List<Any?>?, transform:(M
 /**
  * 查询一行一列
  */
-public fun Connection.queryCell(sql: String, paras: List<Any?>?): Pair<Boolean, Any?> {
+public fun Connection.queryCell(sql: String, paras: List<Any?>? = null): Pair<Boolean, Any?> {
     return queryResult<Pair<Boolean, Any?>>(sql, paras){ rs: ResultSet ->
         // 处理查询结果
         rs.nextCell(1)
