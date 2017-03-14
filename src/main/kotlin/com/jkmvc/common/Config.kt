@@ -32,12 +32,9 @@ class Config {
          * @param encoding the encoding
          */
         public fun instance(fileName: String, encoding: String = "UTF-8"): Config? {
-            var result: Config? = map[fileName]
-            if (result == null) {
-                result = Config(fileName, encoding)
-                map.put(fileName, result)
+            return map.getOrPut(fileName){
+                Config(fileName, encoding)
             }
-            return result
         }
     }
 
