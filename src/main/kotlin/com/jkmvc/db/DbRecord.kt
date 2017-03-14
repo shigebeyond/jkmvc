@@ -112,4 +112,8 @@ class DbRecord(protected val map: MutableMap<String, Any?> = LinkedHashMap<Strin
     public override fun getNumber(name: String): Number {
         return map[name] as Number
     }
+
+    override fun toString(): String {
+        return map.toString()
+    }
 }
