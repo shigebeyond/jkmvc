@@ -80,7 +80,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * @return DbQueryBuilder
      */
     public fun action(action: String): IDbQueryBuilder {
-        if (SqlTemplates.containsKey(action))
+        if (!SqlTemplates.containsKey(action))
             throw IllegalArgumentException("无效sql动作: $action");
 
         this.action = action;
@@ -208,14 +208,9 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * 获得方法
      */
     public fun getMethod(method: String): KFunction<*>? {
-        // 获得方法
-        val clazz = DbQueryBuilder::class;
-        for (m in  clazz.memberFunctions) {
-            if (m.name.equals(method))
-                return m;
+        return DbQueryBuilder::class.memberFunctions.find {
+            it.matches(method);
         }
-
-        return null
     }
 
     /**
@@ -223,7 +218,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * @return string
      */
     public override fun compileAction(): String {
-        if (SqlTemplates.containsKey(action))
+        if (!SqlTemplates.containsKey(action))
             throw DbException("未设置sql动作: $action");
 
         // 清空sql参数
@@ -254,7 +249,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * 编译表名: 转义
      * @return string
      */
-    protected fun filltable(): String {
+    public fun filltable(): String {
         return db.quoteTable(table);
     }
 
@@ -264,7 +259,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      *
      * @return string
      */
-    protected fun fillcolumns(): String {
+    public fun fillcolumns(): String {
         // 1 select子句:  data是要查询的字段名, [alias to column]
         if (action == "select") {
             if (selectColumns.isEmpty())
@@ -288,16 +283,19 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      *
      * @return string
      */
-    protected fun fillvalues(): String {
+    public fun fillvalues(): String {
         // insert子句:  data是要插入的多行: [<column to value>]
         if (insertRows.isEmpty())
             return "";
 
-        //对每行执行db.quote(row);
-        val str: StringBuilder = StringBuilder();
-        return insertRows.map {
-            quote(it)
-        }.joinToString(", ");
+        //对每行每值执行db.quote(value);
+        val sql = StringBuilder("(");
+        for (row in insertRows){
+            for((k, v) in row){
+                sql.append(quote(v)).append(", ")
+            }
+        }
+        return sql.delete(", ").append(")").toString();
     }
 
     /**
@@ -308,7 +306,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * @param string delimiter 拼接谓句的连接符
      * @return string
      */
-    protected fun fillColumnPredicate(operator: String, delimiter: String = ", "): String {
+    public fun fillColumnPredicate(operator: String, delimiter: String = ", "): String {
         // update子句:  data是要更新字段值: <column to value>
         if (updateRow.isEmpty())
             return "";
