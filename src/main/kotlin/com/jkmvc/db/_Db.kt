@@ -4,10 +4,10 @@ import java.io.InputStream
 import java.io.Reader
 import java.sql.*
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.jvm.javaType
+import kotlin.reflect.memberFunctions
 
 /**
  * StringBuilder扩展
@@ -41,21 +41,23 @@ public fun String.lcFirst(): String {
 /**
  * 匹配方法的名称与参数类型
  */
-public fun KFunction<*>.matches(name:String, vararg paramTypes:Class<*>):Boolean{
+public fun KFunction<*>.matches(name:String, paramTypes:List<Class<*>>? = null):Boolean{
     // 1 匹配名称
     if(name != this.name)
         return false
 
     // 2 匹配参数
-    // 注： fn.parameters 第一个参数是this，因此比 paramTypes 要多一个参数
     // 2.1 匹配参数个数
-    if(paramTypes.size != this.parameters.size - 1)
+    var size = 0;
+    if(paramTypes != null)
+        size = paramTypes.size
+    if(size != this.parameters.size)
         return false;
 
     // 2.2 匹配参数类型
     if(paramTypes != null){
         for (i in paramTypes.indices){
-            if(paramTypes[i] != this.parameters[i + 1].type.javaType)
+            if(paramTypes[i] != this.parameters[i].type.javaType)
                 return false
         }
     }
@@ -63,25 +65,26 @@ public fun KFunction<*>.matches(name:String, vararg paramTypes:Class<*>):Boolean
     return true;
 }
 
-/****************************** Connection直接提供查询与更新数据的方法 *******************************/
 /**
- * 缓存记录构造器
+ * 查找方法
  */
-val recordConstructors:MutableMap<KClass<*>, KFunction<*>?> by lazy {
-    ConcurrentHashMap<KClass<*>, KFunction<*>?>();
-}
-
-/**
- * 获得记录构造器
- */
-public fun getRecordConstructor(cls: KClass<*>): KFunction<*>? {
-    return recordConstructors.getOrPut(cls){
-        cls.constructors.find {
-            it.matches("constructor", MutableMap::class.java);
-        }
+public fun KClass<*>.findFunction(name:String, paramTypes:MutableList<Class<*>> = mutableListOf()): KFunction<*>?{
+    paramTypes.add(0, this.java); // 第一个参数为this
+    return memberFunctions.find {
+        it.matches(name, paramTypes);
     }
 }
 
+/**
+ * 查找构造函数
+ */
+public fun KClass<*>.findConstructor(paramTypes:MutableList<Class<*>>? = null): KFunction<*>?{
+    return constructors.find {
+        it.matches("<init>", paramTypes); // 构造函数的名称为 <init>
+    }
+}
+
+/****************************** Connection直接提供查询与更新数据的方法 *******************************/
 /**
  * Connection扩展
  * 执行更新
@@ -150,22 +153,6 @@ public fun <T> Connection.queryRows(sql: String, paras: List<Any?>? = null, tran
 }
 
 /**
- * 查询多行 -- 简写
- */
-public inline fun <reified T> Connection.queryRows(sql: String, paras: List<Any?>? = null): List<T> {
-    // 获得类的构造函数
-    val cls = T::class;
-    val construtor = getRecordConstructor(cls);
-    if(construtor == null)
-        throw RuntimeException("类${cls}没有构造函数constructor(MutableMap)");
-
-    // 处理查询结果
-    return this.queryRows(sql, paras){
-        construtor.call(it) as T; // 转换一行数据: 直接调用构造函数
-    }
-}
-
-/**
  * 查询一行(多列)
  */
 public fun <T> Connection.queryRow(sql: String, paras: List<Any?>? = null, transform:(MutableMap<String, Any?>) -> T): T? {
@@ -179,21 +166,6 @@ public fun <T> Connection.queryRow(sql: String, paras: List<Any?>? = null, trans
     }
 }
 
-/**
- * 查询一行(多列) -- 简写
- */
-public inline fun <reified T> Connection.queryRow(sql: String, paras: List<Any?>? = null): T? {
-    // 获得类的构造函数
-    val cls = T::class;
-    val construtor = getRecordConstructor(cls);
-    if(construtor == null)
-        throw RuntimeException("类${cls}没有构造函数constructor(MutableMap)");
-
-    // 处理查询结果
-    return this.queryRow(sql, paras){
-        construtor.call(it) as T;
-    }
-}
 /**
  * 查询一行一列
  */
