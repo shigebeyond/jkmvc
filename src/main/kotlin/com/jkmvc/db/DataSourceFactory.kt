@@ -3,8 +3,6 @@ package com.jkmvc.db
 import com.alibaba.druid.pool.DruidDataSource
 import com.jkmvc.common.Config
 import java.util.*
-import kotlin.reflect.KFunction
-import kotlin.reflect.memberFunctions
 
 class DataSourceFactory {
 
