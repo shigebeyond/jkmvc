@@ -11,7 +11,7 @@ interface IRecord {
     /**
      * 设置属性
      */
-    public operator fun set(k: String, v: Any?);
+    public operator fun set(column: String, value: Any?);
 
     /**
      * 读取属性

@@ -36,12 +36,12 @@ abstract class OrmEntity(data: MutableMap<String, Any?> = LinkedHashMap<String, 
 	 * @param  string column 字段名
 	 * @param  mixed  value  字段值
 	 */
-	public override operator fun set(k: String, v: Any?) {
-		if(!hasColumn(k))
+	public override operator fun set(column: String, value: Any?) {
+		if(!hasColumn(column))
 			throw OrmException("类 class 没有字段 column");
 
-		dirty.add(k);
-		super.set(k, v);
+		dirty.add(column);
+		super.set(column, value);
 	}
 
 	/**
@@ -50,11 +50,11 @@ abstract class OrmEntity(data: MutableMap<String, Any?> = LinkedHashMap<String, 
 	 * @param   string column 字段名
 	 * @return  mixed
 	 */
-	public override operator fun <T> get(name: String, defaultValue: Any?): T {
-		if(!hasColumn(name))
+	public override operator fun <T> get(column: String, defaultValue: Any?): T {
+		if(!hasColumn(column))
 			throw OrmException("类 class 没有字段 column");
 
-		return super.get(name, defaultValue);
+		return super.get(column, defaultValue);
 	}
 
 	/**

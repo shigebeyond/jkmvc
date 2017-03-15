@@ -11,6 +11,7 @@ import java.util.*
  *
  */
 abstract class OrmMetaData : OrmValid {
+
     companion object {
         /****************** 部分元数据有不一样的默认值, 不能在基类定义 => 默认值不能保存在类结构中, 因此只能缓存默认值 ********************/
         /**

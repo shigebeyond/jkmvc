@@ -72,8 +72,8 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * 要查询的字段名: [alias to column]
      * @var array
      */
-    protected val selectColumns: MutableList<Any> by lazy {
-        LinkedList<Any>();
+    protected val selectColumns: MutableSet<Any> by lazy {
+        HashSet<Any>();
     }
 
     /**
@@ -188,8 +188,16 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * @return DbQueryBuilder
      */
     public override fun select(vararg columns: Any): IDbQueryBuilder {
-        if (!columns.isEmpty())
+        if (!columns.isEmpty()){
+            for(column in columns){
+                when(column){
+                    is Array<*> -> selectColumns.addAll(column as Array<Any>)
+                    is Collection<*> -> selectColumns.addAll(columns);
+                    else -> selectColumns.add(column);
+                }
+            }
             selectColumns.addAll(columns); // 假设: 有先后, 无覆盖
+        }
 
         return this;
     }

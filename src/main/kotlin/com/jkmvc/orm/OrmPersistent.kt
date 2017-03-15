@@ -1,3 +1,5 @@
+import java.util.*
+
 /**
  * ORM之持久化，主要是负责数据库的增删改查
  *
@@ -7,41 +9,15 @@
  * @date 2016-10-10
  *
  */
-abstract class OrmPersistent : OrmMetaData
-{
-	/**
-	 * 获得sql构建器
-	 * @return OrmQueryBuilder
-	 */
-	public static fun querybuilder()
-	{
-		return OrmQueryBuilder(getcalledclass());
-	}
+abstract class OrmPersistent : OrmMetaData {
 
-	/**
-	 * 构造函数
-	 * @param string|array id 主键/查询条件
-	 */
-	public fun construct(id = null)
-	{
-		if(id === null)
-			return;
-
-		// 根据id来查询结果
-		query = querybuilder();
-		if(isarray(id)) // id是多个查询条件
-			query.wheres(id);
-		else // id是主键
-			query.where(primaryKey, id);
-		query.find(this);
-	}
+	var loaded:Boolean = false;
 
 	/**
 	 * 判断当前记录是否存在于db: 有原始数据就认为它是存在的
 	 */
-	public fun exists()
-	{
-		return !empty(this.data);
+	public fun exists(): Boolean {
+		return loaded;
 	}
 
 	/**
@@ -71,28 +47,35 @@ abstract class OrmPersistent : OrmMetaData
 	 */
 	public fun create()
 	{
-		if(empty(this.dirty))
+		if(this.dirty.isEmpty())
 			throw OrmException("没有要创建的数据");
 
 		// 校验
 		this.check();
 
 		// 插入数据库
-		pk = querybuilder().value(this.dirty).insert();
+		val pk = queryBuilder().value(buildDirtyData()).insert();
 
 		// 更新内部数据
-		this.data = this.dirty + this.data; //　原始字段值
 		this.data[primaryKey] = pk; // 主键
-		this.dirty = array(); // 变化的字段值
+		this.dirty.clear(); // 变化的字段值
 
 		return pk;
+	}
+
+	public fun buildDirtyData(): MutableMap<String, Any?> {
+		val result:MutableMap<String, Any?> = HashMap<String, Any?>();
+		for(column in dirty){
+			result[column] = data[column];
+		}
+		return result;
 	}
 
 	/**
 	 * 更新数据: update sql
 	 *
 	 * <code>
-	 *    user = ModelUser.querybuilder().where("id", 1).find();
+	 *    user = ModelUser.queryBuilder().where("id", 1).find();
 	 *    user.name = "li";
 	 *    user.update();
 	 * </code>
@@ -102,20 +85,19 @@ abstract class OrmPersistent : OrmMetaData
 	public fun update()
 	{
 		if(!this.exists())
-			throw OrmException("更新对象[".name."#".this.pk()."]前先检查是否存在");
+			throw OrmException("更新对象[$this]前先检查是否存在");
 
-		if (empty(this.dirty))
+		if (this.dirty.isEmpty())
 			throw OrmException("没有要更新的数据");
 
 		// 校验
 		this.check();
 
 		// 更新数据库
-		result = querybuilder().sets(this.dirty).where(primaryKey, this.pk()).update();
+		val result = queryBuilder().sets(buildDirtyData()).where(primaryKey, this.pk()).update();
 
 		// 更新内部数据
-		this.data = this.dirty + this.data;
-		this.dirty = array();
+		this.dirty.clear()
 
 		return result;
 	}
@@ -124,7 +106,7 @@ abstract class OrmPersistent : OrmMetaData
 	 * 删除数据: delete sql
 	 *
 	 *　<code>
-	 *    user = ModelUser.querybuilder().where("id", "=", 1).find();
+	 *    user = ModelUser.queryBuilder().where("id", "=", 1).find();
 	 *    user.delete();
 	 *　</code>
 	 *
@@ -133,17 +115,18 @@ abstract class OrmPersistent : OrmMetaData
 	public fun delete()
 	{
 		if(!this.exists())
-			throw OrmException("删除对象[".name."#".this.pk()."]前先检查是否存在");
+			throw OrmException("删除对象[$this]前先检查是否存在");
 
 		//　校验
 		if(!this.check())
 			return;
 
 		// 删除数据
-		result = querybuilder().where(primaryKey, this.pk()).delete();
+		val result = queryBuilder().where(primaryKey, this.pk()).delete();
 
 		// 更新内部数据
-		this.data = this.dirty = array();
+		this.data.clear()
+		this.dirty.clear()
 
 		return result;
 	}

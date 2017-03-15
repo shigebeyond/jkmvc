@@ -1,3 +1,7 @@
+import com.jkmvc.orm.MetaRelation
+import com.jkmvc.orm.RelationType
+import java.util.*
+
 /**
  * ORM之关联对象操作
  *
@@ -7,126 +11,62 @@
  * @date 2016-10-10 上午12:52:34
  *
  */
-abstract class OrmRelated : OrmPersistent
+open abstract class OrmRelated : OrmPersistent
 {
-	/**
-	 * 关联关系 - 有一个
-	 *    当前表是主表, 关联表是从表
-	 */
-	const RELATIONBELONGSTO = "belongsto";
 
-	/**
-	 * 关联关系 - 有多个
-	 * 	当前表是主表, 关联表是从表
-	 */
-	const RELATIONHASMANY = "hasmany";
+	companion object{
+		/**
+		 * 自定义关联关系
+		 * @var array
+		 */
+		protected val relations:Map<String, MetaRelation> = LinkedHashMap<String, MetaRelation>()
 
-	/**
-	 * 关联关系 - 从属于
-	 *    当前表是从表, 关联表是主表
-	 */
-	const RELATIONHASONE = "hasone";
-
-	/**
-	 * 自定义关联关系
-	 * @var array
-	 */
-	protected static relations = array();
-
-	/**
-	 * 获得关联关系
-	 *
-	 * @param string name
-	 * @return array
-	 */
-	public static fun relation(name = null)
-	{
-		if(name === null)
-			return relations;
-
-		return Arr.get(relations, name);
-	}
-
-	/**
-	 * 缓存关联对象
-	 * @var array <name => Orm>
-	 */
-	protected related = array();
-	
-	/**
-	 * 返回要序列化的属性
-	 * @return array
-	 */
-	public fun sleep()
-	{
-		props = super.sleep();
-		props[] = "related";
-		return props;
-	}
-
-	/**
-	 * 判断对象是否存在指定字段
-	 *
-	 * @param  string column Column name
-	 * @return boolean
-	 */
-	public fun isset(column)
-	{
-		return isset(relations[column]) && super.isset(column);
-	}
-	
-	/**
-	 * 尝试获得对象字段
-	 *
-	 * @param   string column 字段名
-	 * @param   mixed value 字段值，引用传递，用于获得值
-	 * @return  bool
-	 */
-	public fun tryGet(column, &value)
-	{
-		// 获得关联对象
-		if (isset(relations[column]))
-		{
-			value = this.related(column);
-			return true;
+		/**
+		 * 获得关联关系
+		 *
+		 * @param string name
+		 * @return array
+		 */
+		public fun relation(name:String): MetaRelation? {
+			return relations.get(name);
 		}
-
-		return super.tryGet(column, value);
 	}
 
 	/**
-	 * 尝试设置字段值
+	 * 设置对象字段值
 	 *
 	 * @param  string column 字段名
 	 * @param  mixed  value  字段值
-	 * @return ORM
 	 */
-	public fun trySet(column, value)
-	{
+	public override operator fun set(column: String, value: Any?) {
+		if(!hasColumn(column))
+			throw OrmException("类 class 没有字段 column");
+
 		// 设置关联对象
-		if (isset(relations[column]))
-		{
-			this.related[column] = value;
+		if (relations.containsKey(column)) {
+			this[column] = value;
 			// 如果关联的是主表，则更新从表的外键
-			extract(relations[column]);
-			if(type == RELATIONBELONGSTO)
-				this.foreignkey = value.pk();
-			return true;
+			val (type, model, foreignKey) = relations[column]!!;
+			if(type == RelationType.BELONGS_TO)
+				this[foreignKey] = (value as Orm).pk();
+			return;
 		}
 
-		return super.trySet(column, value);
+		super.set(column, value);
 	}
-	
+
 	/**
-	 * 删除某个字段值
+	 * 获得对象字段
 	 *
-	 * @param  string column 字段名
-	 * @return
+	 * @param   string column 字段名
+	 * @return  mixed
 	 */
-	public fun unset(column)
-	{
-		super.unset(column);
-		unset(this.related[column]);
+	public override operator fun <T> get(name: String, defaultValue: Any?): T {
+		// 获得关联对象
+		if (relations.containsKey(name))
+			return related(name);
+
+		return super.get(name, defaultValue);
 	}
 
 	/**
@@ -135,25 +75,20 @@ abstract class OrmRelated : OrmPersistent
 	 * @param array data
 	 * @return Orm|array
 	 */
-	public fun data(array data = null)
+	public fun original(data:Map<String, Any?>):Orm
 	{
-		// getter
-		if (data === null)
-			return this.data;
-
-		// setter
-		related = array();
-		foreach (data as column => value)
+		for ((column, value) in data)
 		{
 			// 关联查询时，会设置关联表字段的列别名（列别名 = 表别名 : 列名），可以据此来设置关联对象的字段值
-			if(strpos(column, ":") === false) // 自身字段
+			if(!column.contains(":")) // 自身字段
 			{
 				this.data[column] = value;
 			}
-			elseif(value !== null) // 关联对象字段: 不处理null的值, 因为left join查询时, 关联对象可能没有匹配的行
+
+			if(value !== null) // 关联对象字段: 不处理null的值, 因为left join查询时, 关联对象可能没有匹配的行
 			{
-				list(name, column) = explode(":", column);
-				obj = this.related(name, true); // 创建关联对象
+				val (name, column) = column.split(":");
+				val obj = this.related(name, true); // 创建关联对象
 				obj.data[column] = value;
 			}
 		}
@@ -170,38 +105,36 @@ abstract class OrmRelated : OrmPersistent
 	 * 													如 array("name", "age", "birt" => "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
 	 * @return Orm
 	 */
-	public fun related(name, = false, columns = null)
+	public fun related(name:String, newed:Boolean, vararg columns:String):Orm
 	{
 		// 已缓存
-		if(isset(this.related[name]))
-			return this.related[name];
+		if(this.data.contains(name))
+			return this.data[name];
 
 		// 获得关联关系
-		extract(relations[name]);
+		val (type, model, foreignKey) = relations[name]!!;
 		
-		// 获得关联模型类
-		class = "Model".ucfirst(model);
-
 		// 创建新对象
-		if(new)
-			return this.related[name] = class;
-
-		// 根据关联关系来构建查询
-		obj = null;
-		switch (type)
-		{
-			case RELATIONBELONGSTO: // belongsto: 查主表
-				obj = this.querymaster(class, foreignkey).select(columns).find();
-				break;
-			case RELATIONHASONE: // hasxxx: 查从表
-				obj = this.queryslave(class, foreignkey).select(columns).find();
-				break;
-			case RELATIONHASMANY: // hasxxx: 查从表
-				obj = this.queryslave(class, foreignkey).select(columns).findall();
-				break;
+		if(newed){
+			val item = model.java.newInstance() as Orm;
+			this.data[name] = item;
+			return item;
 		}
 
-		return this.related[name] = obj;
+		// 根据关联关系来构建查询
+		var obj:Orm = null;
+		when (type)
+		{
+			RelationType.BELONGS_TO -> // belongsto: 查主表
+				obj = this.querymaster(model, foreignkey).select(columns).find();
+			RelationType.HAS_ONE -> // hasxxx: 查从表
+				obj = this.queryslave(model, foreignkey).select(columns).find();
+			RelationType.HAS_MANY -> // hasxxx: 查从表
+				obj = this.queryslave(model, foreignkey).select(columns).findall();
+		}
+
+		this.related[name] = obj;
+		return obj;
 	}
 
 	/**
@@ -211,9 +144,9 @@ abstract class OrmRelated : OrmPersistent
 	 * @param string foreignkey 外键
 	 * @return OrmQueryBuilder
 	 */
-	protected fun queryslave(class, foreignkey)
+	protected fun queryslave(model, foreignkey)
 	{
-		return class.querybuilder().where(foreignkey, this.pk()); // 从表.外键 = 主表.主键
+		return model.queryBuilder().where(foreignkey, this.pk()); // 从表.外键 = 主表.主键
 	}
 
 	/**
@@ -223,24 +156,9 @@ abstract class OrmRelated : OrmPersistent
 	 * @param string foreignkey 外键
 	 * @return OrmQueryBuilder
 	 */
-	protected fun querymaster(class, foreignkey)
+	protected fun querymaster(model, foreignkey)
 	{
-		return class.querybuilder().where(class.primaryKey, this.foreignkey); // 主表.主键 = 从表.外键
-	}
-
-	/**
-	 * 获得字段值
-	 * @return array
-	 */
-	public fun asArray()
-	{
-		result = super.asArray();
-
-		// 包含已加载的关联对象
-		foreach (this.related as name => model)
-			result[name] = model.asArray();
-
-		return result;
+		return model.queryBuilder().where(class.primaryKey, this.foreignkey); // 主表.主键 = 从表.外键
 	}
 
 }

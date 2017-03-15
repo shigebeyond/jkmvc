@@ -10,8 +10,8 @@ open class Record(protected val data: MutableMap<String, Any?> = LinkedHashMap<S
     /**
      * 设置属性
      */
-    public override operator fun set(k: String, v: Any?) {
-        data.set(k, v)
+    public override operator fun set(column: String, value: Any?) {
+        data.set(column, value)
     }
 
     /**
