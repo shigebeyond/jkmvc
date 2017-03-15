@@ -1,3 +1,5 @@
+package com.jkmvc.orm
+
 import com.jkmvc.db.Record
 import java.util.*
 
@@ -10,87 +12,86 @@ import java.util.*
  * @date 2016-10-10 上午12:52:34
  *
  */
-abstract class OrmEntity(data: MutableMap<String, Any?> = LinkedHashMap<String, Any?>()): Record(data)
-{
-	/**
-	 * 判断是否有某字段
-	 *
-	 * @param string column
-	 * @return
-	 */
-	public fun hasColumn(column:String): Boolean {
-		return true;
-	}
+abstract class OrmEntity(data: MutableMap<String, Any?> = LinkedHashMap<String, Any?>()) : Record(data), IOrm {
 
-	/**
-	 * 变化的字段值：<字段名 => 字段值>
-	 * @var array
-	*/
-	protected val dirty:MutableSet<String> by lazy{
-		HashSet<String>()
-	};
+    /**
+     * 变化的字段值：<字段名 => 字段值>
+     * @var array
+     */
+    protected val dirty: MutableSet<String> by lazy {
+        HashSet<String>()
+    };
 
-	/**
-	 * 设置对象字段值
-	 *
-	 * @param  string column 字段名
-	 * @param  mixed  value  字段值
-	 */
-	public override operator fun set(column: String, value: Any?) {
-		if(!hasColumn(column))
-			throw OrmException("类 class 没有字段 column");
+    /**
+     * 判断是否有某字段
+     *
+     * @param string column
+     * @return
+     */
+    public override fun hasColumn(column: String): Boolean {
+        return true;
+    }
 
-		dirty.add(column);
-		super.set(column, value);
-	}
+    /**
+     * 设置对象字段值
+     *
+     * @param  string column 字段名
+     * @param  mixed  value  字段值
+     */
+    public override operator fun set(column: String, value: Any?) {
+        if (!hasColumn(column))
+            throw OrmException("类 class 没有字段 column");
 
-	/**
-	 * 获得对象字段
-	 *
-	 * @param   string column 字段名
-	 * @return  mixed
-	 */
-	public override operator fun <T> get(column: String, defaultValue: Any?): T {
-		if(!hasColumn(column))
-			throw OrmException("类 class 没有字段 column");
+        dirty.add(column);
+        super.set(column, value);
+    }
 
-		return super.get(column, defaultValue);
-	}
+    /**
+     * 获得对象字段
+     *
+     * @param   string column 字段名
+     * @return  mixed
+     */
+    public override operator fun <T> get(column: String, defaultValue: Any?): T {
+        if (!hasColumn(column))
+            throw OrmException("类 class 没有字段 column");
 
-	/**
-	 * 设置多个字段值
-	 *
-	 * @param  array values   字段值的数组：<字段名 => 字段值>
-	 * @param  array expected 要设置的字段名的数组
-	 * @return ORM
-	 */
-	public fun values(values:Map<String, Any?>, expected:List<String>? = null): IOrm {
-		val columns = if (expected === null)
-							values.keys
-						else
-							expected;
+        return super.get(column, defaultValue);
+    }
 
-		for (column in columns)
-			this[column] = values[column];
+    /**
+     * 设置多个字段值
+     *
+     * @param  array values   字段值的数组：<字段名 => 字段值>
+     * @param  array expected 要设置的字段名的数组
+     * @return ORM
+     */
+    public override fun values(values: Map<String, Any?>, expected: List<String>?): IOrm {
+        val columns = if (expected === null)
+            values.keys
+        else
+            expected;
 
-		return this;
-	}
+        for (column in columns)
+            this[column] = values[column];
 
-	/**
-	 * 获得变化的字段值
-	 * @return array
-	 */
-	public fun dirty(): List<String> {
-		return this.dirty;
-	}
+        return this;
+    }
 
-	/**
-	 * 获得字段值
-	 * @return array
-	 */
-	public fun asArray()
-	{
-		return data;
-	}
+    /**
+     * 获得变化的字段值
+     * @return array
+     */
+    public override fun dirty(): Collection<String> {
+        return dirty;
+    }
+
+    /**
+     * 获得字段值
+     * @return array
+     */
+    public override fun asArray(): Map<String, Any?> {
+        return data;
+    }
 
 }

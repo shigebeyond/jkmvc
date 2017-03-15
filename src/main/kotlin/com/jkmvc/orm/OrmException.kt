@@ -1,3 +1,5 @@
+package com.jkmvc.orm
+
 /**
  * orm操作异常
  *

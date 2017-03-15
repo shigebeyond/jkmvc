@@ -1,6 +1,8 @@
 package com.jkmvc.orm
 
+import com.jkmvc.common.findStaticFunction
 import kotlin.reflect.KClass
+import kotlin.reflect.companionObjectInstance
 
 /**
  * 关联类型
@@ -30,4 +32,10 @@ enum class RelationType {
  */
 data class MetaRelation(public val type:RelationType /* 关联关系 */, public val model: KClass<*> /* 关联模型 */, public val foreignKey:String /* 外键 */){
 
+    /**
+     * 获得关联模型的元数据
+     *  伴随对象就是元数据
+     */
+    public val metadata:MetaData
+        get() = model.companionObjectInstance as MetaData
 }

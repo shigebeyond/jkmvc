@@ -1,3 +1,5 @@
+package com.jkmvc.orm
+
 import java.util.*
 
 /**
@@ -9,7 +11,7 @@ import java.util.*
  * @date 2016-10-10
  *
  */
-abstract class OrmPersistent : OrmMetaData {
+abstract class OrmPersistent(data: MutableMap<String, Any?> = LinkedHashMap<String, Any?>()): OrmMetaData(data) {
 
 	var loaded:Boolean = false;
 
@@ -21,16 +23,22 @@ abstract class OrmPersistent : OrmMetaData {
 	}
 
 	/**
+	 * 获得sql构建器
+	 * @return Orm_Query_Builder
+	 */
+	public override fun queryBuilder(): OrmQueryBuilder {
+		return metadata.queryBuilder();
+	}
+	/**
 	 * 保存数据
 	 *
 	 * @return int 对insert返回新增数据的主键，对update返回影响行数
 	 */
-	public fun save()
-	{
+	public override fun save(): Boolean {
 		if(this.exists())
 			return this.update();
 
-		return this.create();
+		return this.create() > 0;
 	}
 
 	/**
@@ -45,8 +53,7 @@ abstract class OrmPersistent : OrmMetaData {
 	 * 
 	 * @return int 新增数据的主键
 	 */
-	public fun create()
-	{
+	public override fun create(): Int {
 		if(this.dirty.isEmpty())
 			throw OrmException("没有要创建的数据");
 
@@ -57,7 +64,7 @@ abstract class OrmPersistent : OrmMetaData {
 		val pk = queryBuilder().value(buildDirtyData()).insert();
 
 		// 更新内部数据
-		this.data[primaryKey] = pk; // 主键
+		this.data[metadata.primaryKey] = pk; // 主键
 		this.dirty.clear(); // 变化的字段值
 
 		return pk;
@@ -82,8 +89,7 @@ abstract class OrmPersistent : OrmMetaData {
 	 * 
 	 * @return int 影响行数
 	 */
-	public fun update()
-	{
+	public override fun update(): Boolean {
 		if(!this.exists())
 			throw OrmException("更新对象[$this]前先检查是否存在");
 
@@ -94,7 +100,7 @@ abstract class OrmPersistent : OrmMetaData {
 		this.check();
 
 		// 更新数据库
-		val result = queryBuilder().sets(buildDirtyData()).where(primaryKey, this.pk()).update();
+		val result = queryBuilder().sets(buildDirtyData()).where(metadata.primaryKey, this.pk()).update();
 
 		// 更新内部数据
 		this.dirty.clear()
@@ -112,17 +118,16 @@ abstract class OrmPersistent : OrmMetaData {
 	 *
 	 * @return int 影响行数
 	 */
-	public fun delete()
-	{
+	public override fun delete(): Boolean {
 		if(!this.exists())
 			throw OrmException("删除对象[$this]前先检查是否存在");
 
 		//　校验
 		if(!this.check())
-			return;
+			return false;
 
 		// 删除数据
-		val result = queryBuilder().where(primaryKey, this.pk()).delete();
+		val result = queryBuilder().where(metadata.primaryKey, this.pk()).delete();
 
 		// 更新内部数据
 		this.data.clear()

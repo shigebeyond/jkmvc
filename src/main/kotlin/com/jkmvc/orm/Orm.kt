@@ -1,5 +1,7 @@
 package com.jkmvc.orm
 
+import java.util.*
+
 /**
  * ORM
 
@@ -11,6 +13,6 @@ package com.jkmvc.orm
  * *
  * @date 2016-10-10 上午12:52:34
  */
-class Orm : OrmRelated {
+abstract class Orm(data: MutableMap<String, Any?> = LinkedHashMap<String, Any?>())  : OrmRelated(data) {
 
 }

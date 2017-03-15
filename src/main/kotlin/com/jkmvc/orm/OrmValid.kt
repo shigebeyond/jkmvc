@@ -1,4 +1,5 @@
-import com.sun.xml.internal.ws.developer.MemberSubmissionAddressing
+package com.jkmvc.orm
+
 import java.util.*
 
 /**
@@ -10,7 +11,8 @@ import java.util.*
  * @date 2016-10-10 上午12:52:34
  *
  */
-abstract class OrmValid : OrmEntity {
+abstract class OrmValid(data: MutableMap<String, Any?> = LinkedHashMap<String, Any?>()) : OrmEntity(data) {
+
     companion object {
         /**
          * 每个字段的校验规则
@@ -33,8 +35,8 @@ abstract class OrmValid : OrmEntity {
      * 校验数据
      * @return boolean
      */
-    public fun check(): Boolean {
-        // 逐个字段校验
+    public override fun check(): Boolean {
+        /*// 逐个字段校验
         for ((column, exp) in rules) {
             val value: Any = this[column];
             var last: Any = value;
@@ -48,7 +50,7 @@ abstract class OrmValid : OrmEntity {
             // 更新被修改的字段值
             if (value !== last)
                 this[column] = value;
-        }
+        }*/
 
         return true;
     }
