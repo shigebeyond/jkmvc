@@ -10,23 +10,6 @@ import java.util.*
  */
 class Db(protected val conn: Connection /* 数据库连接 */, protected val name:String = "database" /* 标识 */):IDb{
 
-    /**
-     * 转移字符
-     */
-    protected val identityQuoteString by lazy(LazyThreadSafetyMode.NONE) {
-        conn.metaData.identifierQuoteString
-    }
-
-    /**
-     * 当前事务的嵌套层级
-     */
-    protected var transDepth:Int = 0;
-
-    /**
-     * 标记当前事务是否回滚
-     */
-    protected var rollbacked = false;
-
     companion object {
         /**
          * 线程安全的db缓存
@@ -65,6 +48,23 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
             dbs.get().clear();
         }
     }
+
+    /**
+     * 转移字符
+     */
+    protected val identityQuoteString by lazy(LazyThreadSafetyMode.NONE) {
+        conn.metaData.identifierQuoteString
+    }
+
+    /**
+     * 当前事务的嵌套层级
+     */
+    protected var transDepth:Int = 0;
+
+    /**
+     * 标记当前事务是否回滚
+     */
+    protected var rollbacked = false;
 
     /**
      * 执行事务
