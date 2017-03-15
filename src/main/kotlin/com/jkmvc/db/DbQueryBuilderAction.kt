@@ -313,7 +313,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
                 sql.append(quote(v)).append(", ")
             }
         }
-        return sql.delete(", ").append(")").toString();
+        return sql.deleteSuffix(", ").append(")").toString();
     }
 
     /**

@@ -227,7 +227,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
             // 单个表转义
             str.append(quoteTable(table, alias)).append(", ");
         }
-        str.delete(", ");
+        str.deleteSuffix(", ");
         return if(with_brackets)  "($str)" else str.toString();
     }
 
@@ -273,7 +273,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
         }
 
         // 删最后逗号
-        str.delete(", ");
+        str.deleteSuffix(", ");
 
         // 加括号
         if(with_brackets)

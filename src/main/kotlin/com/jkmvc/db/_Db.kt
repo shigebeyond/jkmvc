@@ -15,9 +15,12 @@ import kotlin.reflect.memberFunctions
  * StringBuilder扩展
  *  删除最后的一段子字符串
  */
-public fun StringBuilder.delete(str:String):StringBuilder {
-    val start = length - str.length;
-    return delete(start, length);
+public fun StringBuilder.deleteSuffix(str:String):StringBuilder {
+    if(this.endsWith(str)) {
+        val start = length - str.length;
+        delete(start, length);
+    }
+    return this;
 }
 
 /**
