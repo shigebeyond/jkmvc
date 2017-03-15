@@ -1,98 +1,9 @@
 package com.jkmvc.db
 
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl
 import java.io.InputStream
 import java.io.Reader
 import java.sql.*
 import java.util.*
-import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
-import kotlin.reflect.jvm.javaType
-import kotlin.reflect.memberFunctions
-
-/****************************** 字符串扩展 *******************************/
-/**
- * StringBuilder扩展
- *  删除最后的一段子字符串
- */
-public fun StringBuilder.deleteSuffix(str:String):StringBuilder {
-    if(this.endsWith(str)) {
-        val start = length - str.length;
-        delete(start, length);
-    }
-    return this;
-}
-
-/**
- * 首字母大写
- */
-public fun String.ucFirst(): String {
-    val cs = this.toCharArray()
-    if(cs[0] in 'a'..'z')
-        cs[0] = cs[0] - 32
-    return String(cs)
-}
-
-/**
- * 首字母小写
- */
-public fun String.lcFirst(): String {
-    val cs = this.toCharArray()
-    if(cs[0] in 'A'..'Z')
-        cs[0] = cs[0] + 32
-    return String(cs)
-}
-
-/****************************** 反射扩展 *******************************/
-/**
- * 匹配方法的名称与参数类型
- */
-public fun KFunction<*>.matches(name:String, paramTypes:List<Class<*>>? = null):Boolean{
-    // 1 匹配名称
-    if(name != this.name)
-        return false
-
-    // 2 匹配参数
-    // 2.1 匹配参数个数
-    var size = 0;
-    if(paramTypes != null)
-        size = paramTypes.size
-    if(size != this.parameters.size)
-        return false;
-
-    // 2.2 匹配参数类型
-    if(paramTypes != null){
-        for (i in paramTypes.indices){
-            var targetType = this.parameters[i].type.javaType;
-            if(targetType is ParameterizedTypeImpl) // 若是泛型类型，则去掉泛型，只保留原始类型
-                targetType = targetType.rawType;
-
-            if(paramTypes[i] != targetType)
-                return false
-        }
-    }
-
-    return true;
-}
-
-/**
- * 查找方法
- */
-public fun KClass<*>.findFunction(name:String, paramTypes:MutableList<Class<*>> = mutableListOf()): KFunction<*>?{
-    paramTypes.add(0, this.java); // 第一个参数为this
-    return memberFunctions.find {
-        it.matches(name, paramTypes);
-    }
-}
-
-/**
- * 查找构造函数
- */
-public fun KClass<*>.findConstructor(paramTypes:List<Class<*>>? = null): KFunction<*>?{
-    return constructors.find {
-        it.matches("<init>", paramTypes); // 构造函数的名称为 <init>
-    }
-}
 
 /****************************** Connection直接提供查询与更新数据的方法 *******************************/
 /**
