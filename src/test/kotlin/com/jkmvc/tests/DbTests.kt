@@ -37,7 +37,7 @@ class DbTests{
 
     @Test
     fun testFindAll(){
-        val records = DbQueryBuilder(db).table("user").where("id", "<=", id).findAll<DbRecord>()
+        val records = DbQueryBuilder(db).table("user").findAll<DbRecord>()
         println("查询user表：" + records)
     }
 
