@@ -50,36 +50,6 @@ class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQueryB
     }
 
     /**
-     * 查找多个： select 语句
-     *
-     * @return array
-     */
-    public override fun findAll(): List<DbRecord> {
-        // 1 编译
-        val (sql, params) = compile("select");
-
-        // 2 执行 select
-        return db.queryRows<DbRecord>(sql, params){ row:MutableMap<String, Any?> ->
-            DbRecord(row)
-        }
-    }
-
-    /**
-     * 查找一个： select ... limit 1语句
-     *
-     * @return object
-     */
-    public override fun find(): DbRecord? {
-        // 1 编译
-        val (sql, params) = compile("select");
-
-        // 2 执行 select
-        return db.queryRow<DbRecord>(sql, params){ row:MutableMap<String, Any?> ->
-            DbRecord(row)
-        }
-    }
-
-    /**
      * 统计行数： count语句
      * @return int
      */

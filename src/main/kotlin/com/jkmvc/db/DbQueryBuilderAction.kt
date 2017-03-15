@@ -14,14 +14,14 @@ import kotlin.reflect.memberFunctions
  * @date 2016-10-12
  *
  */
-abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, var table: String = "" /*表名*/) : IDbQueryBuilder {
+abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, var table: String = "" /*表名*/) : IDbQueryBuilder() {
 
     companion object {
         /**
          * 动作子句的sql模板
          * @var array
          */
-        public val SqlTemplates:Map<String, String> = mapOf(
+        protected val SqlTemplates:Map<String, String> = mapOf(
                 "select" to "SELECT :distinct :columns FROM :table",
                 "insert" to "INSERT INTO :table (:columns) VALUES :values", // quoteColumn 默认不加(), quotevalue 默认加()
                 "update" to "UPDATE :table SET :column = :value",
@@ -38,12 +38,10 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
         /**
          * 获得字段填充方法
          */
-        public fun getFieldFiller(field: String): KFunction<*>? {
+        protected fun getFieldFiller(field: String): KFunction<*>? {
             return fieldFillers.getOrPut(field){
                 val method = "fill" + field.ucFirst()
-                DbQueryBuilder::class.memberFunctions.find {
-                    it.matches(method);
-                }
+                DbQueryBuilderAction::class.findFunction(method)
             }
         }
     }
