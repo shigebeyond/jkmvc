@@ -45,7 +45,7 @@ class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如w
      *
      * @return DbQueryBuilderDecorationClausesSimple
      */
-    public fun endSubexp(): DbQueryBuilderDecorationClausesSimple {
+    protected fun endSubexp(): DbQueryBuilderDecorationClausesSimple {
         var last:Any? = if(subexps.isEmpty()) null else subexps.last()
         if (last !is DbQueryBuilderDecorationClausesSimple) {
             last = DbQueryBuilderDecorationClausesSimple("", elementHandlers);

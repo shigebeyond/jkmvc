@@ -3,6 +3,7 @@ package com.jkmvc.db
 import com.alibaba.druid.pool.DruidDataSource
 import com.jkmvc.common.Config
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 class DataSourceFactory {
 

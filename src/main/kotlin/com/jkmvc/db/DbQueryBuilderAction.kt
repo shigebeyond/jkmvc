@@ -57,7 +57,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * 要插入的多行: [<column to value>]
      * @var array
      */
-    protected val insertRows: MutableList<Map<String, Any?>> by lazy {
+    protected val insertRows: MutableList<Map<String, Any?>> by lazy(LazyThreadSafetyMode.NONE) {
         LinkedList<Map<String, Any?>>();
     };
 
@@ -65,7 +65,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * 要更新字段值: <column to value>
      * @var array
      */
-    protected val updateRow: MutableMap<String, Any?> by lazy {
+    protected val updateRow: MutableMap<String, Any?> by lazy(LazyThreadSafetyMode.NONE) {
         LinkedHashMap<String, Any?>();
     }
 
@@ -73,7 +73,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * 要查询的字段名: [alias to column]
      * @var array
      */
-    protected val selectColumns: MutableSet<Any> by lazy {
+    protected val selectColumns: MutableSet<Any> by lazy(LazyThreadSafetyMode.NONE) {
         HashSet<Any>();
     }
 
