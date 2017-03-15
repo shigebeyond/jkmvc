@@ -10,6 +10,7 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.jvm.javaType
 import kotlin.reflect.memberFunctions
 
+/****************************** 字符串扩展 *******************************/
 /**
  * StringBuilder扩展
  *  删除最后的一段子字符串
@@ -39,6 +40,7 @@ public fun String.lcFirst(): String {
     return String(cs)
 }
 
+/****************************** 反射扩展 *******************************/
 /**
  * 匹配方法的名称与参数类型
  */
