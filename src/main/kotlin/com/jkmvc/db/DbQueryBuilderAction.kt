@@ -15,13 +15,14 @@ import kotlin.reflect.memberFunctions
  * @date 2016-10-12
  *
  */
-abstract class DbQueryBuilderAction(override val db: IDb, var table: String = "" /*表名*/) : IDbQueryBuilder {
+abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, var table: String = "" /*表名*/) : IDbQueryBuilder() {
+
     companion object {
         /**
          * 动作子句的sql模板
          * @var array
          */
-        public val SqlTemplates:Map<String, String> = mapOf(
+        protected val SqlTemplates:Map<String, String> = mapOf(
                 "select" to "SELECT :distinct :columns FROM :table",
                 "insert" to "INSERT INTO :table (:columns) VALUES :values", // quoteColumn 默认不加(), quotevalue 默认加()
                 "update" to "UPDATE :table SET :column = :value",
@@ -29,21 +30,19 @@ abstract class DbQueryBuilderAction(override val db: IDb, var table: String = ""
         );
 
         /**
-         * 缓存填充方法
+         * 缓存字段填充方法
          */
-        protected val fillers:MutableMap<String, KFunction<*>?> by lazy {
+        protected val fieldFillers:MutableMap<String, KFunction<*>?> by lazy {
             ConcurrentHashMap<String, KFunction<*>?>();
         }
 
         /**
-         * 获得填充方法
+         * 获得字段填充方法
          */
-        public fun getFillMethod(field: String): KFunction<*>? {
-            return fillers.getOrPut(field){
+        protected fun getFieldFiller(field: String): KFunction<*>? {
+            return fieldFillers.getOrPut(field){
                 val method = "fill" + field.ucFirst()
-                DbQueryBuilder::class.memberFunctions.find {
-                    it.matches(method);
-                }
+                DbQueryBuilderAction::class.findFunction(method)
             }
         }
     }
@@ -74,8 +73,8 @@ abstract class DbQueryBuilderAction(override val db: IDb, var table: String = ""
      * 要查询的字段名: [alias to column]
      * @var array
      */
-    protected val selectColumns: MutableList<Any> by lazy {
-        LinkedList<Any>();
+    protected val selectColumns: MutableSet<Any> by lazy {
+        HashSet<Any>();
     }
 
     /**
@@ -190,8 +189,16 @@ abstract class DbQueryBuilderAction(override val db: IDb, var table: String = ""
      * @return DbQueryBuilder
      */
     public override fun select(vararg columns: Any): IDbQueryBuilder {
-        if (!columns.isEmpty())
+        if (!columns.isEmpty()){
+            for(column in columns){
+                when(column){
+                    is Array<*> -> selectColumns.addAll(column as Array<Any>)
+                    is Collection<*> -> selectColumns.addAll(columns);
+                    else -> selectColumns.add(column);
+                }
+            }
             selectColumns.addAll(columns); // 假设: 有先后, 无覆盖
+        }
 
         return this;
     }
@@ -242,7 +249,7 @@ abstract class DbQueryBuilderAction(override val db: IDb, var table: String = ""
         // 针对 select :columns from :table / insert into :table :columns values :values
         sql = ":(table|columns|values)".toRegex().replace(sql) { result: MatchResult ->
             // 调用对应的方法: fillTable() / fillColumns() / fillValues()
-            val method = getFillMethod(result.groupValues[1]);
+            val method = getFieldFiller(result.groupValues[1]);
             method?.call(this).toString();
         };
 

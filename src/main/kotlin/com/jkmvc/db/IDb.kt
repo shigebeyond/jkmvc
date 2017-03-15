@@ -8,6 +8,11 @@ import java.sql.ResultSet
 interface IDb{
 
     /**
+     * 获得表的所有列
+     */
+    fun listColumns(table:String): List<String>;
+
+    /**
      * 执行事务
      */
     fun <T> transaction(statement: Db.() -> T):T;

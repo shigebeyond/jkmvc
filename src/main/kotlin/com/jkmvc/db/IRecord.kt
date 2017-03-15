@@ -6,12 +6,12 @@ import java.util.*
  * 封装查询结果
  * 扩展 [] 操作符，来代理属性读写
  */
-interface IDbRecord {
+interface IRecord {
 
     /**
      * 设置属性
      */
-    public operator fun set(k: String, v: Any?);
+    public operator fun set(column: String, value: Any?);
 
     /**
      * 读取属性

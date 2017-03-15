@@ -1,7 +1,5 @@
 package com.jkmvc.db
 
-import java.sql.Connection
-
 /**
  * sql构建器
  *   依次继承 DbQueryBuilderAction 处理动作子句 + DbQueryBuilderDecoration 处理修饰子句
@@ -13,7 +11,7 @@ import java.sql.Connection
  * @date 2016-10-13
  *
  */
-class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQueryBuilderDecoration(db, table)
+open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQueryBuilderDecoration(db, table)
 {
     public constructor(dbName:String /* db名 */, table:String = "" /*表名*/):this(Db.getDb(dbName), table){
     }
@@ -52,41 +50,10 @@ class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQueryB
     }
 
     /**
-     * 查找多个： select 语句
-     *
-     * @return array
-     */
-    public override fun findAll(): List<DbRecord> {
-        // 1 编译
-        val (sql, params) = compile("select");
-
-        // 2 执行 select
-        return db.queryRows<DbRecord>(sql, params){ row:MutableMap<String, Any?> ->
-            DbRecord(row)
-        }
-    }
-
-    /**
-     * 查找一个： select ... limit 1语句
-     *
-     * @param bool|int|string|Orm fetchvalue fetchvalue 如果类型是int，则返回某列FETCHCOLUMN，如果类型是string，则返回指定类型的对象，如果类型是object，则给指定对象设置数据, 其他返回关联数组
-     * @return object
-     */
-    public override fun find(): DbRecord? {
-        // 1 编译
-        val (sql, params) = compile("select");
-
-        // 2 执行 select
-        return db.queryRow<DbRecord>(sql, params){ row:MutableMap<String, Any?> ->
-            DbRecord(row)
-        }
-    }
-
-    /**
      * 统计行数： count语句
-     * @return int
+     * @return long
      */
-    public override fun count():Int
+    public override fun count():Long
     {
         // 1 编译
         val (sql, params) = select(Pair("count(1)", "num")).compile("select");
@@ -94,9 +61,9 @@ class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQueryB
         // 2 执行 select
         val (hasNext, count) = db.queryCell(sql, params);
         return if(hasNext)
-                    0
+                    count as Long;
                 else
-                    count as Int;
+                    0
     }
 
     /**

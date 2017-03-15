@@ -14,7 +14,12 @@ import java.util.concurrent.ConcurrentHashMap
 class Config {
 
     companion object{
-        val map:MutableMap<String, Config?> = ConcurrentHashMap<String, Config?>()
+        /**
+         * 缓存配置数据
+         *   key 文件名
+         *   value 配置数据
+         */
+        val configs:MutableMap<String, Config?> = ConcurrentHashMap<String, Config?>()
 
         /**
          * Using the properties file. It will loading the properties file if not loading.
@@ -33,7 +38,7 @@ class Config {
          * @param encoding the encoding
          */
         public fun instance(fileName: String, encoding: String = "UTF-8"): Config? {
-            return map.getOrPut(fileName){
+            return configs.getOrPut(fileName){
                 Config(fileName, encoding)
             }
         }
