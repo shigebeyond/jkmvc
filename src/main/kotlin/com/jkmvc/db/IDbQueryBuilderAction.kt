@@ -21,7 +21,7 @@ interface IDbQueryBuilderAction
      * 编译动作子句
      * @return string
      */
-    public fun compileAction():String;
+    fun compileAction():String;
 
     /**
      * 设置表名: 一般是单个表名
@@ -29,7 +29,7 @@ interface IDbQueryBuilderAction
      * 								  如 array("user", "contact", "addr" to "useraddress"), 其中 user 与 contact 表不带别名, 而 useraddress 表带别名 addr
      * @return DbQueryBuilder
      */
-    public fun table(tables:String):IDbQueryBuilder;
+    fun table(tables:String):IDbQueryBuilder;
 
     /**
      * 设置表名: 可能有多个表名
@@ -37,7 +37,7 @@ interface IDbQueryBuilderAction
      * 								  如 array("user", "contact", "addr" to "useraddress"), 其中 user 与 contact 表不带别名, 而 useraddress 表带别名 addr
      * @return DbQueryBuilder
      */
-    public fun from(tables:String):IDbQueryBuilder;
+    fun from(tables:String):IDbQueryBuilder;
 
     /**
      * 设置插入的单行, insert时用
@@ -45,7 +45,7 @@ interface IDbQueryBuilderAction
      * @param array row
      * @return DbQueryBuilder
      */
-    public fun value(row:Map<String, Any?>):IDbQueryBuilder;
+    fun value(row:Map<String, Any?>):IDbQueryBuilder;
 
     /**
      * 设置插入的多行, insert时用
@@ -53,7 +53,7 @@ interface IDbQueryBuilderAction
      * @param array rows
      * @return DbQueryBuilder
      */
-    public fun values(rows:List<Map<String, Any?>>):IDbQueryBuilder;
+    fun values(rows:List<Map<String, Any?>>):IDbQueryBuilder;
 
     /**
      * 设置更新的单个值, update时用
@@ -62,7 +62,7 @@ interface IDbQueryBuilderAction
      * @param string value
      * @return DbQueryBuilder
      */
-    public fun set(column:String, value:Any?):IDbQueryBuilder;
+    fun set(column:String, value:Any?):IDbQueryBuilder;
 
     /**
      * 设置更新的多个值, update时用
@@ -70,7 +70,7 @@ interface IDbQueryBuilderAction
      * @param array row
      * @return DbQueryBuilder
      */
-    public fun sets(row:Map<String, Any?>):IDbQueryBuilder;
+    fun sets(row:Map<String, Any?>):IDbQueryBuilder;
 
     /**
      * 设置查询的字段, select时用
@@ -79,7 +79,7 @@ interface IDbQueryBuilderAction
      * 													如 array("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
      * @return DbQueryBuilder
      */
-    public fun select(vararg columns:Any):IDbQueryBuilder;
+    fun select(vararg columns:Any):IDbQueryBuilder;
 
     /**
      * 设置查询结果是否去重唯一
@@ -87,11 +87,11 @@ interface IDbQueryBuilderAction
      * @param boolean value
      * @return DbQueryBuilderAction
      */
-    public fun distinct(value:Boolean):IDbQueryBuilder;
+    fun distinct(value:Boolean):IDbQueryBuilder;
 
     /**
      * 清空条件
      * @return DbQueryBuilder
      */
-    public fun clear():IDbQueryBuilder;
+    fun clear():IDbQueryBuilder;
 }

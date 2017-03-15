@@ -1,5 +1,6 @@
 package com.jkmvc.db
 
+import com.jkmvc.common.findConstructor
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction

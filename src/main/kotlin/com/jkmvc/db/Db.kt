@@ -1,5 +1,6 @@
 package com.jkmvc.db
 
+import com.jkmvc.common.deleteSuffix
 import java.sql.Connection
 import java.sql.ResultSet
 import java.util.*

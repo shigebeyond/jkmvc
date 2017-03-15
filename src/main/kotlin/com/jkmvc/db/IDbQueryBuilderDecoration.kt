@@ -15,7 +15,7 @@ interface IDbQueryBuilderDecoration
      * 编译修饰子句
      * @return string
      */
-    public fun compileDecoration():String;
+    fun compileDecoration():String;
 
     /**
      * 改写转义值的方法，搜集sql参数
@@ -23,28 +23,28 @@ interface IDbQueryBuilderDecoration
      * @param mixed value
      * @return string
      */
-    public fun quote(value:Any?):String;
+    fun quote(value:Any?):String;
 
     /**
      * 多个where条件
      * @param conditions:Map<String, Any?>
      * @return DbQueryBuilderDecoration
      */
-    public fun wheres(conditions:Map<String, Any?>):IDbQueryBuilder;
+    fun wheres(conditions:Map<String, Any?>):IDbQueryBuilder;
 
     /**
      * 多个on条件
      * @param conditions:Map<String, String>
      * @return DbQueryBuilderDecoration
      */
-    public fun ons(conditions:Map<String, String>):IDbQueryBuilder;
+    fun ons(conditions:Map<String, String>):IDbQueryBuilder;
 
     /**
      * 多个having条件
      * @param conditions:Map<String, Any?>
      * @return DbQueryBuilderDecoration
      */
-    public fun havings(conditions:Map<String, Any?>):IDbQueryBuilder;
+    fun havings(conditions:Map<String, Any?>):IDbQueryBuilder;
 
     /**
      * Alias of andWhere()
@@ -54,7 +54,19 @@ interface IDbQueryBuilderDecoration
      * @param   mixed   value   column value
      * @return DbQueryBuilder
      */
-    public fun where(column:String, op:String, value:Any?):IDbQueryBuilder;
+    fun where(column:String, op:String, value:Any?):IDbQueryBuilder;
+
+    /**
+     * Alias of andWhere()
+     *
+     * @param   mixed   column  column name or array(column, alias) or object
+     * @param   string  op      logic operator
+     * @param   mixed   value   column value
+     * @return DbQueryBuilder
+     */
+    fun where(column:String, value:Any?):IDbQueryBuilder{
+        return where(column, "=", value);
+    }
 
     /**
      * Creates a new "AND WHERE" condition for the query.
@@ -64,7 +76,7 @@ interface IDbQueryBuilderDecoration
      * @param   mixed   value   column value
      * @return DbQueryBuilder
      */
-    public fun andWhere(column:String, op:String, value:Any?):IDbQueryBuilder;
+    fun andWhere(column:String, op:String, value:Any?):IDbQueryBuilder;
 
     /**
      * Creates a new "OR WHERE" condition for the query.
@@ -74,49 +86,49 @@ interface IDbQueryBuilderDecoration
      * @param   mixed   value   column value
      * @return DbQueryBuilder
      */
-    public fun orWhere(column:String, op:String, value:Any?):IDbQueryBuilder;
+    fun orWhere(column:String, op:String, value:Any?):IDbQueryBuilder;
 
     /**
      * Alias of andWhereOpen()
      *
      * @return DbQueryBuilder
      */
-    public fun whereOpen():IDbQueryBuilder;
+    fun whereOpen():IDbQueryBuilder;
 
     /**
      * Opens a new "AND WHERE (...)" grouping.
      *
      * @return DbQueryBuilder
      */
-    public fun andWhereOpen():IDbQueryBuilder;
+    fun andWhereOpen():IDbQueryBuilder;
 
     /**
      * Opens a new "OR WHERE (...)" grouping.
      *
      * @return DbQueryBuilder
      */
-    public fun orwhereOpen():IDbQueryBuilder;
+    fun orwhereOpen():IDbQueryBuilder;
 
     /**
      * Closes an open "WHERE (...)" grouping.
      *
      * @return DbQueryBuilder
      */
-    public fun whereclose():IDbQueryBuilder;
+    fun whereclose():IDbQueryBuilder;
 
     /**
      * Closes an open "WHERE (...)" grouping.
      *
      * @return DbQueryBuilder
      */
-    public fun andWhereclose():IDbQueryBuilder;
+    fun andWhereclose():IDbQueryBuilder;
 
     /**
      * Closes an open "WHERE (...)" grouping.
      *
      * @return DbQueryBuilder
      */
-    public fun orWhereclose():IDbQueryBuilder;
+    fun orWhereclose():IDbQueryBuilder;
 
     /**
      * Creates a "GROUP BY ..." filter.
@@ -124,7 +136,7 @@ interface IDbQueryBuilderDecoration
      * @param   mixed   columns  column name or array(column, alias) or object
      * @return DbQueryBuilder
      */
-    public fun groupBy(columns:String):IDbQueryBuilder;
+    fun groupBy(columns:String):IDbQueryBuilder;
 
     /**
      * Alias of andHaving()
@@ -134,7 +146,7 @@ interface IDbQueryBuilderDecoration
      * @param   mixed   value   column value
      * @return DbQueryBuilder
      */
-    public fun having(column:String, op:String, value:Any? = null):IDbQueryBuilder;
+    fun having(column:String, op:String, value:Any? = null):IDbQueryBuilder;
 
     /**
      * Creates a new "AND HAVING" condition for the query.
@@ -144,7 +156,7 @@ interface IDbQueryBuilderDecoration
      * @param   mixed   value   column value
      * @return DbQueryBuilder
      */
-    public fun andHaving(column:String, op:String, value:Any?):IDbQueryBuilder;
+    fun andHaving(column:String, op:String, value:Any?):IDbQueryBuilder;
 
     /**
      * Creates a new "OR HAVING" condition for the query.
@@ -154,49 +166,49 @@ interface IDbQueryBuilderDecoration
      * @param   mixed   value   column value
      * @return DbQueryBuilder
      */
-    public fun orHaving(column:String, op:String, value:Any?):IDbQueryBuilder;
+    fun orHaving(column:String, op:String, value:Any?):IDbQueryBuilder;
 
     /**
      * Alias of andHavingOpen()
      *
      * @return DbQueryBuilder
      */
-    public fun havingOpen():IDbQueryBuilder;
+    fun havingOpen():IDbQueryBuilder;
 
     /**
      * Opens a new "AND HAVING (...)" grouping.
      *
      * @return DbQueryBuilder
      */
-    public fun andHavingOpen():IDbQueryBuilder;
+    fun andHavingOpen():IDbQueryBuilder;
 
     /**
      * Opens a new "OR HAVING (...)" grouping.
      *
      * @return DbQueryBuilder
      */
-    public fun orHavingOpen():IDbQueryBuilder;
+    fun orHavingOpen():IDbQueryBuilder;
 
     /**
      * Closes an open "AND HAVING (...)" grouping.
      *
      * @return DbQueryBuilder
      */
-    public fun havingClose():IDbQueryBuilder;
+    fun havingClose():IDbQueryBuilder;
 
     /**
      * Closes an open "AND HAVING (...)" grouping.
      *
      * @return DbQueryBuilder
      */
-    public fun andHavingClose():IDbQueryBuilder;
+    fun andHavingClose():IDbQueryBuilder;
 
     /**
      * Closes an open "OR HAVING (...)" grouping.
      *
      * @return DbQueryBuilder
      */
-    public fun orHavingClose():IDbQueryBuilder;
+    fun orHavingClose():IDbQueryBuilder;
 
     /**
      * Applies sorting with "ORDER BY ..."
@@ -205,7 +217,7 @@ interface IDbQueryBuilderDecoration
      * @param   string  direction  direction of sorting
      * @return DbQueryBuilder
      */
-    public fun orderBy(column:String, direction:String? = null):IDbQueryBuilder;
+    fun orderBy(column:String, direction:String? = null):IDbQueryBuilder;
 
     /**
      * Return up to "LIMIT ..." results
@@ -214,7 +226,7 @@ interface IDbQueryBuilderDecoration
      * @param   integer  offset
      * @return DbQueryBuilder
      */
-    public fun limit(limit:Int, offset:Int = 0):IDbQueryBuilder;
+    fun limit(limit:Int, offset:Int = 0):IDbQueryBuilder;
 
     /**
      * Adds addition tables to "JOIN ...".
@@ -223,7 +235,7 @@ interface IDbQueryBuilderDecoration
      * @param   string  type   join type (LEFT, RIGHT, INNER, etc)
      * @return DbQueryBuilder
      */
-    public fun join(table:String, type:String? = null):IDbQueryBuilder;
+    fun join(table:Any, type:String? = null):IDbQueryBuilder;
 
     /**
      * Adds "ON ..." conditions for the last created JOIN statement.
@@ -233,5 +245,5 @@ interface IDbQueryBuilderDecoration
      * @param   mixed   c2  column name or array(column, alias) or object
      * @return DbQueryBuilder
      */
-    public fun on(c1:String, op:String, c2:String):IDbQueryBuilder;
+    fun on(c1:String, op:String, c2:String):IDbQueryBuilder;
 }

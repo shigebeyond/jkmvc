@@ -1,9 +1,11 @@
 package com.jkmvc.db
 
+import com.jkmvc.common.deleteSuffix
+import com.jkmvc.common.findFunction
+import com.jkmvc.common.ucFirst
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KFunction
-import kotlin.reflect.memberFunctions
 
 /**
  * sql构建器 -- 动作子句: 由动态select/insert/update/delete来构建的子句
@@ -335,6 +337,6 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
             sql.append(db.quoteColumn(column)).append(" ").append(operator).append(" ").append(quote(value)).append(delimiter);
         }
 
-        return sql.delete(delimiter).toString();
+        return sql.deleteSuffix(delimiter).toString();
     }
 }
