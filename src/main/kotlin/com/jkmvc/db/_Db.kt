@@ -39,7 +39,7 @@ public fun String.lcFirst(): String {
 /**
  * 匹配方法的名称与参数类型
  */
-public fun KFunction<*>.matches(name:String, paramTypes:Array<out Class<*>>? = null):Boolean{
+public fun KFunction<*>.matches(name:String, vararg paramTypes:Class<*>):Boolean{
     // 1 匹配名称
     if(name != this.name)
         return false
@@ -47,8 +47,7 @@ public fun KFunction<*>.matches(name:String, paramTypes:Array<out Class<*>>? = n
     // 2 匹配参数
     // 注： fn.parameters 第一个参数是this，因此比 paramTypes 要多一个参数
     // 2.1 匹配参数个数
-    val size = if(paramTypes == null) 0 else paramTypes.size;
-    if(size != this.parameters.size - 1)
+    if(paramTypes.size != this.parameters.size - 1)
         return false;
 
     // 2.2 匹配参数类型

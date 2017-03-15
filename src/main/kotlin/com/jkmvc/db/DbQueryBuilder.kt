@@ -1,6 +1,10 @@
 package com.jkmvc.db
 
 import java.sql.Connection
+import java.util.*
+import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
+import kotlin.reflect.memberFunctions
 
 /**
  * sql构建器
@@ -69,7 +73,6 @@ class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQueryB
     /**
      * 查找一个： select ... limit 1语句
      *
-     * @param bool|int|string|Orm fetchvalue fetchvalue 如果类型是int，则返回某列FETCHCOLUMN，如果类型是string，则返回指定类型的对象，如果类型是object，则给指定对象设置数据, 其他返回关联数组
      * @return object
      */
     public override fun find(): DbRecord? {

@@ -14,7 +14,8 @@ import kotlin.reflect.memberFunctions
  * @date 2016-10-12
  *
  */
-abstract class DbQueryBuilderAction(override val db: IDb, var table: String = "" /*表名*/) : IDbQueryBuilder {
+abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, var table: String = "" /*表名*/) : IDbQueryBuilder {
+
     companion object {
         /**
          * 动作子句的sql模板
@@ -28,17 +29,17 @@ abstract class DbQueryBuilderAction(override val db: IDb, var table: String = ""
         );
 
         /**
-         * 缓存填充方法
+         * 缓存字段填充方法
          */
-        protected val fillers:MutableMap<String, KFunction<*>?> by lazy {
+        protected val fieldFillers:MutableMap<String, KFunction<*>?> by lazy {
             LinkedHashMap<String, KFunction<*>?>();
         }
 
         /**
-         * 获得填充方法
+         * 获得字段填充方法
          */
-        public fun getFillMethod(field: String): KFunction<*>? {
-            return fillers.getOrPut(field){
+        public fun getFieldFiller(field: String): KFunction<*>? {
+            return fieldFillers.getOrPut(field){
                 val method = "fill" + field.ucFirst()
                 DbQueryBuilder::class.memberFunctions.find {
                     it.matches(method);
@@ -241,7 +242,7 @@ abstract class DbQueryBuilderAction(override val db: IDb, var table: String = ""
         // 针对 select :columns from :table / insert into :table :columns values :values
         sql = ":(table|columns|values)".toRegex().replace(sql) { result: MatchResult ->
             // 调用对应的方法: fillTable() / fillColumns() / fillValues()
-            val method = getFillMethod(result.groupValues[1]);
+            val method = getFieldFiller(result.groupValues[1]);
             method?.call(this).toString();
         };
 

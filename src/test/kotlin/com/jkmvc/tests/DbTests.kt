@@ -9,7 +9,7 @@ class DbTests{
     val db: Db = Db.getDb()
     var id = 0;
 
-    @Test
+    /*@Test
     fun testConnection(){
         db.execute("""
         CREATE TABLE IF NOT EXISTS `user` (
@@ -21,6 +21,7 @@ class DbTests{
         """);
         println("创建user表")
     }
+    */
 
     @Test
     fun testInsert(){
@@ -28,6 +29,7 @@ class DbTests{
         println("插入user表：" + id)
     }
 
+    /*
     @Test
     fun testFind(){
         val record = DbQueryBuilder(db).table("user").where("id", "=", id).find()
@@ -57,7 +59,7 @@ class DbTests{
         val f = DbQueryBuilder(db).table("user").where("id", "=", id).delete();
         println("删除user表：" + f)
     }
-
+    */
 }
 
 
