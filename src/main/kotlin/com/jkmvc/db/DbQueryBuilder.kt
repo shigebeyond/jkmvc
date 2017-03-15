@@ -1,11 +1,5 @@
 package com.jkmvc.db
 
-import java.sql.Connection
-import java.util.*
-import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
-import kotlin.reflect.memberFunctions
-
 /**
  * sql构建器
  *   依次继承 DbQueryBuilderAction 处理动作子句 + DbQueryBuilderDecoration 处理修饰子句

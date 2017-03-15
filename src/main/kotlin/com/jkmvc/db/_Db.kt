@@ -4,6 +4,8 @@ import java.io.InputStream
 import java.io.Reader
 import java.sql.*
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.jvm.javaType
 
@@ -59,6 +61,25 @@ public fun KFunction<*>.matches(name:String, vararg paramTypes:Class<*>):Boolean
     }
 
     return true;
+}
+
+/****************************** Connection直接提供查询与更新数据的方法 *******************************/
+/**
+ * 缓存记录构造器
+ */
+val recordConstructors:MutableMap<KClass<*>, KFunction<*>?> by lazy {
+    ConcurrentHashMap<KClass<*>, KFunction<*>?>();
+}
+
+/**
+ * 获得记录构造器
+ */
+public fun getRecordConstructor(cls: KClass<*>): KFunction<*>? {
+    return recordConstructors.getOrPut(cls){
+        cls.constructors.find {
+            it.matches("constructor", MutableMap::class.java);
+        }
+    }
 }
 
 /**
@@ -129,6 +150,22 @@ public fun <T> Connection.queryRows(sql: String, paras: List<Any?>? = null, tran
 }
 
 /**
+ * 查询多行 -- 简写
+ */
+public inline fun <reified T> Connection.queryRows(sql: String, paras: List<Any?>? = null): List<T> {
+    // 获得类的构造函数
+    val cls = T::class;
+    val construtor = getRecordConstructor(cls);
+    if(construtor == null)
+        throw RuntimeException("类${cls}没有构造函数constructor(MutableMap)");
+
+    // 处理查询结果
+    return this.queryRows(sql, paras){
+        construtor.call(it) as T; // 转换一行数据: 直接调用构造函数
+    }
+}
+
+/**
  * 查询一行(多列)
  */
 public fun <T> Connection.queryRow(sql: String, paras: List<Any?>? = null, transform:(MutableMap<String, Any?>) -> T): T? {
@@ -143,6 +180,21 @@ public fun <T> Connection.queryRow(sql: String, paras: List<Any?>? = null, trans
 }
 
 /**
+ * 查询一行(多列) -- 简写
+ */
+public inline fun <reified T> Connection.queryRow(sql: String, paras: List<Any?>? = null): T? {
+    // 获得类的构造函数
+    val cls = T::class;
+    val construtor = getRecordConstructor(cls);
+    if(construtor == null)
+        throw RuntimeException("类${cls}没有构造函数constructor(MutableMap)");
+
+    // 处理查询结果
+    return this.queryRow(sql, paras){
+        construtor.call(it) as T;
+    }
+}
+/**
  * 查询一行一列
  */
 public fun Connection.queryCell(sql: String, paras: List<Any?>? = null): Pair<Boolean, Any?> {
@@ -152,6 +204,7 @@ public fun Connection.queryCell(sql: String, paras: List<Any?>? = null): Pair<Bo
     }
 }
 
+/****************************** 从ResultSet中获取数据 *******************************/
 /**
  * 获得结果集的下一行
  */
@@ -227,6 +280,7 @@ public inline fun ResultSet.forEachCell(i:Int, action: (Any?) -> Unit): Unit {
     }
 }
 
+/****************************** 读取Blob/Clob字段 *******************************/
 /**
  * Blob转ByteArray
  */
