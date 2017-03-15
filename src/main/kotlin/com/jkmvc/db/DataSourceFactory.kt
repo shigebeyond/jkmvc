@@ -2,9 +2,7 @@ package com.jkmvc.db
 
 import com.alibaba.druid.pool.DruidDataSource
 import com.jkmvc.common.Config
-import java.util.*
-import kotlin.reflect.KFunction
-import kotlin.reflect.memberFunctions
+import java.util.concurrent.ConcurrentHashMap
 
 class DataSourceFactory {
 
@@ -13,7 +11,7 @@ class DataSourceFactory {
          * 缓存数据源
          */
         protected val dataSources:MutableMap<String, DruidDataSource> by lazy {
-            LinkedHashMap<String, DruidDataSource>();
+            ConcurrentHashMap<String, DruidDataSource>();
         }
 
         /**

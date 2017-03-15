@@ -6,6 +6,7 @@ import java.io.FileInputStream
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Config data, can load properties file from CLASSPATH or File object.
@@ -13,7 +14,7 @@ import java.util.*
 class Config {
 
     companion object{
-        val map:MutableMap<String, Config?> = LinkedHashMap<String, Config?>()
+        val map:MutableMap<String, Config?> = ConcurrentHashMap<String, Config?>()
 
         /**
          * Using the properties file. It will loading the properties file if not loading.

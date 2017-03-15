@@ -1,6 +1,7 @@
 package com.jkmvc.db
 
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KFunction
 import kotlin.reflect.memberFunctions
 
@@ -31,7 +32,7 @@ abstract class DbQueryBuilderAction(override val db: IDb, var table: String = ""
          * 缓存填充方法
          */
         protected val fillers:MutableMap<String, KFunction<*>?> by lazy {
-            LinkedHashMap<String, KFunction<*>?>();
+            ConcurrentHashMap<String, KFunction<*>?>();
         }
 
         /**
