@@ -101,7 +101,7 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration
      * 统计行数： count语句
      * @return int
      */
-    public abstract fun count():Int;
+    public abstract fun count():Long;
 
     /**
      * 插入：insert语句

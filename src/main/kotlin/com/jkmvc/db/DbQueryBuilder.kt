@@ -51,9 +51,9 @@ class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQueryB
 
     /**
      * 统计行数： count语句
-     * @return int
+     * @return long
      */
-    public override fun count():Int
+    public override fun count():Long
     {
         // 1 编译
         val (sql, params) = select(Pair("count(1)", "num")).compile("select");
@@ -61,9 +61,9 @@ class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQueryB
         // 2 执行 select
         val (hasNext, count) = db.queryCell(sql, params);
         return if(hasNext)
-                    0
+                    count as Long;
                 else
-                    count as Int;
+                    0
     }
 
     /**
