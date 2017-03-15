@@ -57,6 +57,24 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
     }
 
     /**
+     * 表的字段
+     */
+    protected val tableColumns: Map<String, List<String>> by lazy {
+        val tables = HashMap<String, MutableList<String>>()
+        // 查询所有表的所有列
+        val rs = conn.metaData.getColumns(conn.catalog, null, null, null)
+        while (rs.next()) { // 逐个处理每一列
+            val table = rs.getString("TABLE_NAME")!! // 表名
+            val column = rs.getString("COLUMN_NAME")!! // 列名
+            // 添加表的列
+            tables.getOrPut(table){
+                LinkedList<String>()
+            }.add(column);
+        }
+        tables
+    }
+
+    /**
      * 当前事务的嵌套层级
      */
     protected var transDepth:Int = 0;
@@ -81,6 +99,13 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
         }finally{
             close() // 关闭连接
         }
+    }
+
+    /**
+     * 获得表的所有列
+     */
+    public override fun listColumns(table:String): List<String> {
+        return tableColumns.get(table)!!;
     }
 
     /**

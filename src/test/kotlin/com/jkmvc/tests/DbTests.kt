@@ -2,7 +2,7 @@ package com.jkmvc.tests
 
 import com.jkmvc.db.Db
 import com.jkmvc.db.DbQueryBuilder
-import com.jkmvc.db.DbRecord
+import com.jkmvc.db.Record
 import org.junit.Test
 
 class DbTests{
@@ -31,13 +31,13 @@ class DbTests{
 
     @Test
     fun testFind(){
-        val record = DbQueryBuilder(db).table("user").where("id", "=", id).find<DbRecord>()
+        val record = DbQueryBuilder(db).table("user").where("id", "=", id).find<Record>()
         println("查询user表：" + record)
     }
 
     @Test
     fun testFindAll(){
-        val records = DbQueryBuilder(db).table("user").findAll<DbRecord>()
+        val records = DbQueryBuilder(db).table("user").findAll<Record>()
         println("查询user表：" + records)
     }
 

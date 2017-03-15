@@ -6,7 +6,7 @@ import java.util.*
  * 封装查询结果
  * 扩展 [] 操作符，来代理属性读写
  */
-interface IDbRecord {
+interface IRecord {
 
     /**
      * 设置属性
