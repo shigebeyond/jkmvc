@@ -1,5 +1,6 @@
 package com.jkmvc.db
 
+import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl
 import java.io.InputStream
 import java.io.Reader
 import java.sql.*
@@ -57,7 +58,11 @@ public fun KFunction<*>.matches(name:String, paramTypes:List<Class<*>>? = null):
     // 2.2 匹配参数类型
     if(paramTypes != null){
         for (i in paramTypes.indices){
-            if(paramTypes[i] != this.parameters[i].type.javaType)
+            var targetType = this.parameters[i].type.javaType;
+            if(targetType is ParameterizedTypeImpl) // 若是泛型类型，则去掉泛型，只保留原始类型
+                targetType = targetType.rawType;
+
+            if(paramTypes[i] != targetType)
                 return false
         }
     }
@@ -78,7 +83,7 @@ public fun KClass<*>.findFunction(name:String, paramTypes:MutableList<Class<*>> 
 /**
  * 查找构造函数
  */
-public fun KClass<*>.findConstructor(paramTypes:MutableList<Class<*>>? = null): KFunction<*>?{
+public fun KClass<*>.findConstructor(paramTypes:List<Class<*>>? = null): KFunction<*>?{
     return constructors.find {
         it.matches("<init>", paramTypes); // 构造函数的名称为 <init>
     }
