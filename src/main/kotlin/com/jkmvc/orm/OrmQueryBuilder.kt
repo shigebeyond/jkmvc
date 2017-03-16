@@ -1,10 +1,8 @@
 package com.jkmvc.orm
 
 import com.jkmvc.db.DbQueryBuilder
-import com.jkmvc.orm.MetaData
-import com.jkmvc.orm.MetaRelation
-import com.jkmvc.orm.RelationType
 import java.util.*
+import kotlin.reflect.KClass
 
 /**
  * 面向orm对象的sql构建器
@@ -15,8 +13,22 @@ import java.util.*
  * @date 2016-10-16 下午8:02:28
  *
  */
-class OrmQueryBuilder(protected val metadata: MetaData) : DbQueryBuilder(metadata.db, metadata.table) {
+class OrmQueryBuilder(protected val metadata: IMetaData) : DbQueryBuilder(metadata.db, metadata.table) {
 
+    /**
+     * 获得记录转换器
+     */
+    public override fun <T:Any> getRecordTranformer(clazz: KClass<T>): ((MutableMap<String, Any?>) -> T) {
+        // 如果是orm类，则直接返回
+        if(IOrm::class.java.isAssignableFrom(clazz.java)){
+            return {
+                val obj = clazz.java.newInstance() as IOrm;
+                obj.original(it) as T
+            }
+        }
+
+        return super.getRecordTranformer(clazz)
+    }
     /**
      * 联查表
      *
@@ -27,8 +39,8 @@ class OrmQueryBuilder(protected val metadata: MetaData) : DbQueryBuilder(metadat
      */
     public fun with(name: String, vararg columns: String): OrmQueryBuilder {
         // select当前表字段
-        if (this.selectColumns.isEmpty())
-            this.select(metadata.table + ".*");
+        if (selectColumns.isEmpty())
+            select(metadata.table + ".*");
 
         // 获得关联关系
         val relation: MetaRelation? = metadata.getRelation(name)!!;
@@ -37,12 +49,12 @@ class OrmQueryBuilder(protected val metadata: MetaData) : DbQueryBuilder(metadat
             when (relation.type) {
             // belongsto: 查主表
                 RelationType.BELONGS_TO ->
-                    this.joinMaster(relation.metadata, relation.foreignKey, name);
+                    joinMaster(relation.metadata, relation.foreignKey, name);
             // hasxxx: 查从表
-                else -> this.joinSlave(relation.metadata, relation.foreignKey, name);
+                else -> joinSlave(relation.metadata, relation.foreignKey, name);
             }
             // select关联表字段
-            this.selectRelated(relation.metadata, name);
+            selectRelated(relation.metadata, name);
         }
 
         return this;
@@ -52,44 +64,44 @@ class OrmQueryBuilder(protected val metadata: MetaData) : DbQueryBuilder(metadat
      * 联查从表
      *     从表.外键 = 主表.主键
      *
-     * @param MetaData slave 从类元数据
+     * @param IMetaData slave 从类元数据
      * @param string foreignKey 外键
      * @param string tableAlias 表别名
      * @return OrmQueryBuilder
      */
-    protected fun joinSlave(slave: MetaData, foreignKey: String, tableAlias: String): OrmQueryBuilder {
+    protected fun joinSlave(slave: IMetaData, foreignKey: String, tableAlias: String): OrmQueryBuilder {
         // 联查从表
-        val master: MetaData = metadata;
+        val master: IMetaData = metadata;
         val masterPk = master.table + "." + master.primaryKey;
         val slaveFk = tableAlias + "." + foreignKey;
-        return this.join(tableAlias to slave.table, "LEFT").on(slaveFk, "=", masterPk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
+        return join(tableAlias to slave.table, "LEFT").on(slaveFk, "=", masterPk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
     }
 
     /**
      * 联查主表
      *     主表.主键 = 从表.外键
      *
-     * @param MetaData master 主类元数据
+     * @param IMetaData master 主类元数据
      * @param string foreignKey 外键
      * @param string tableAlias 表别名
      * @return OrmQueryBuilder
      */
-    protected fun joinMaster(master: MetaData, foreignKey: String, tableAlias: String): OrmQueryBuilder {
+    protected fun joinMaster(master: IMetaData, foreignKey: String, tableAlias: String): OrmQueryBuilder {
         // 联查从表
-        val slave: MetaData = metadata;
+        val slave: IMetaData = metadata;
         val masterPk = master.table + "." + master.primaryKey;
         val slaveFk = slave.table + "." + foreignKey;
-        return this.join(master.table, "LEFT").on(masterPk, "=", slaveFk) as OrmQueryBuilder; // 主表.主键 = 从表.外键
+        return join(master.table, "LEFT").on(masterPk, "=", slaveFk) as OrmQueryBuilder; // 主表.主键 = 从表.外键
     }
 
     /**
      * select关联表的字段
      *
-     * @param MetaData related 关联类元数据
+     * @param IMetaData related 关联类元数据
      * @param string tableAlias 表别名
      * @param array columns 查询的列
      */
-    protected fun selectRelated(related: MetaData, tableAlias: String, columns: List<String>? = null): OrmQueryBuilder {
+    protected fun selectRelated(related: IMetaData, tableAlias: String, columns: List<String>? = null): OrmQueryBuilder {
         // 默认查询全部列
         var cols = columns
         if (cols === null)

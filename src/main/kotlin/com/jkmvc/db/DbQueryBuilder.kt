@@ -1,6 +1,9 @@
 package com.jkmvc.db
 
+import com.jkmvc.common.findConstructor
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
 
 /**
  * sql构建器
@@ -16,6 +19,46 @@ import kotlin.reflect.KClass
 open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQueryBuilderDecoration(db, table)
 {
     public constructor(dbName:String /* db名 */, table:String = "" /*表名*/):this(Db.getDb(dbName), table){
+    }
+
+    companion object{
+        /**
+         * 缓存记录构造器
+         */
+        protected val recordConstructors:MutableMap<KClass<*>, KFunction<*>?> by lazy {
+            ConcurrentHashMap<KClass<*>, KFunction<*>?>();
+        }
+
+        /**
+         * 获得记录构造器
+         */
+        public fun getRecordConstructor(clazz: KClass<*>): KFunction<*>? {
+            return recordConstructors.getOrPut(clazz){
+                clazz.findConstructor(listOf(MutableMap::class.java))
+            }
+        }
+    }
+
+    /**
+     * 获得记录转换器
+     */
+    public override fun <T:Any> getRecordTranformer(clazz: KClass<T>): ((MutableMap<String, Any?>) -> T) {
+        // 1 如果是map类，则直接返回
+        if(Map::class.java.isAssignableFrom(clazz.java)){
+            return {
+                it as T;
+            }
+        }
+        // 2 否则，调用其构造函数
+        // 获得类的构造函数
+        val construtor = getRecordConstructor(clazz);
+        if(construtor == null)
+            throw RuntimeException("类${clazz}没有构造函数constructor(MutableMap)");
+
+        // 调用构造函数
+        return {
+            construtor.call(it) as T; // 转换一行数据: 直接调用构造函数
+        }
     }
 
     /**
@@ -39,29 +82,29 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
     /**
      * 查找多个： select 语句
      *
-     * @param KClass<T> clazz 返回对象的类型
+     * @param fun transform 转换函数
      * @return array
      */
-    public override fun <T:Any>  findAll(clazz: KClass<T>): List<T>{
+    public override fun <T:Any> findAll(transform:(MutableMap<String, Any?>) -> T): List<T>{
         // 1 编译
         val (sql, params) = compile("select");
 
         // 2 执行 select
-        return db.queryRows<T>(sql, params, getRecordTranformer<T>(clazz))
+        return db.queryRows<T>(sql, params, transform)
     }
 
     /**
      * 查找一个： select ... limit 1语句
      *
-     * @param KClass<T> clazz 返回对象的类型
+     * @param fun transform 转换函数
      * @return object
      */
-    public override fun <T:Any>  find(clazz:KClass<T>): T?{
+    public override fun <T:Any> find(transform:(MutableMap<String, Any?>) -> T): T?{
         // 1 编译
         val (sql, params) = compile("select");
 
         // 2 执行 select
-        return db.queryRow<T>(sql, params, getRecordTranformer<T>(clazz));
+        return db.queryRow<T>(sql, params, transform);
     }
 
     /**
