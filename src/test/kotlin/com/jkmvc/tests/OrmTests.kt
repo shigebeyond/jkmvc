@@ -1,62 +1,60 @@
 package com.jkmvc.tests
 
-import com.jkmvc.db.Db
-import com.jkmvc.db.DbQueryBuilder
-import com.jkmvc.db.Record
+import com.jkmvc.orm.MetaData
+import com.jkmvc.orm.Orm
+import com.jkmvc.orm.isLoaded
 import org.junit.Test
 
-class DbTests{
+class UserModel: Orm() {
+    // 伴随用户就是元数据
+    companion object m: MetaData(UserModel::class)
 
-    val db: Db = Db.getDb()
-    var id = 0;
+    public var name:String by m.property<String>();
 
-    @Test
-    fun testConnection(){
-        db.execute("""
-        CREATE TABLE IF NOT EXISTS `user` (
-          `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '用户编号',
-          `name` varchar(50) NOT NULL DEFAULT '' COMMENT '用户名',
-          `age` tinyint(4) unsigned NOT NULL DEFAULT '0' COMMENT '年龄',
-          PRIMARY KEY (`id`)
-        )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户';
-        """);
-        println("创建user表")
-    }
+    public var age:Int by m.property<Int>();
+}
 
-    @Test
-    fun testInsert(){
-        id = DbQueryBuilder(db).table("user").value(mapOf("name" to "shi", "age" to 1)).insert();
-        println("插入user表：" + id)
-    }
+class OrmTests{
+
+    var id = 1;
 
     @Test
     fun testFind(){
-        val record = DbQueryBuilder(db).table("user").where("id", "=", id).find<Record>()
-        println("查询user表：" + record)
+        val user = UserModel.queryBuilder().where("id", 1).find<UserModel>()
+        println("查找用户: $user" )
     }
 
     @Test
-    fun testFindAll(){
-        val records = DbQueryBuilder(db).table("user").findAll<Record>()
-        println("查询user表：" + records)
-    }
+    fun testCreate(){
+        val user = UserModel()
+        user.name = "shi";
+        user.age = 12
+        id = user.create();
 
-    @Test
-    fun testCount(){
-        val count = DbQueryBuilder(db).table("user").count();
-        println("统计user表：" + count)
+        println("创建用户: $user")
     }
 
     @Test
     fun testUpdate(){
-        val f = DbQueryBuilder(db).table("user").sets(mapOf("name" to "wang", "age" to 2)).where("id", "=", id).update();
-        println("更新user表：" + f)
+        val user = UserModel.queryBuilder().where("id", id).find<UserModel>()
+        if(!user.isLoaded()){
+            println("用户[$id]不存在")
+            return
+        }
+        user!!.name = "li";
+        user!!.age = 13;
+        user!!.update();
+        println("更新用户：$user")
     }
 
     @Test
     fun testDelete(){
-        val f = DbQueryBuilder(db).table("user").where("id", "=", id).delete();
-        println("删除user表：" + f)
+        val user = UserModel.queryBuilder().where("id", id).find<UserModel>()
+        if(user == null || !user.isLoaded()){
+            println("用户[$id]不存在")
+            return
+        }
+        println("删除用户：$user, result: ${user.delete()}")
     }
 }
 
