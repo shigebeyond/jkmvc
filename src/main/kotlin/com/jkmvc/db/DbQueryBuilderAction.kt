@@ -199,7 +199,6 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
                     else -> selectColumns.add(column);
                 }
             }
-            selectColumns.addAll(columns); // 假设: 有先后, 无覆盖
         }
 
         return this;
