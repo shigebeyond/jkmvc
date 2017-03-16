@@ -1,6 +1,6 @@
 package com.jkmvc.orm
 
-import com.jkmvc.db.Record
+import com.jkmvc.db.IRecord
 import java.util.*
 
 /**
@@ -12,7 +12,9 @@ import java.util.*
  * @date 2016-10-10 上午12:52:34
  *
  */
-abstract class OrmEntity(data: MutableMap<String, Any?> = LinkedHashMap<String, Any?>()) : Record(data), IOrm {
+abstract class OrmEntity : IRecord, IOrm {
+
+    protected val data: MutableMap<String, Any?> = LinkedHashMap<String, Any?>()
 
     /**
      * 变化的字段值：<字段名 => 字段值>
@@ -43,7 +45,7 @@ abstract class OrmEntity(data: MutableMap<String, Any?> = LinkedHashMap<String, 
             throw OrmException("类 ${this.javaClass} 没有字段 $column");
 
         dirty.add(column);
-        super.set(column, value);
+        data.set(column, value);
     }
 
     /**
@@ -56,7 +58,7 @@ abstract class OrmEntity(data: MutableMap<String, Any?> = LinkedHashMap<String, 
         if (!hasColumn(column))
             throw OrmException("类 ${this.javaClass} 没有字段 $column");
 
-        return super.get(column, defaultValue);
+        return (data.get(column) ?: defaultValue) as T
     }
 
     /**

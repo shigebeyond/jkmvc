@@ -33,7 +33,7 @@ interface IOrmEntity{
      * @param   string column 字段名
      * @return  mixed
      */
-    operator fun <T> get(column: String, defaultValue: Any?): T;
+    operator fun <T> get(column: String, defaultValue: Any? = null): T;
 
     /**
      * 设置多个字段值
