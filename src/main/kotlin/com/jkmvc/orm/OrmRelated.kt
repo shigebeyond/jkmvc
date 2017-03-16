@@ -42,7 +42,7 @@ open abstract class OrmRelated: OrmPersistent() {
     public override operator fun <T> get(name: String, defaultValue: Any?): T {
         // 获得关联对象
         if (metadata.hasRelation(name))
-            return related(name) as T;
+            return related(name, false) as T;
 
         return super.get(name, defaultValue);
     }
@@ -86,22 +86,22 @@ open abstract class OrmRelated: OrmPersistent() {
         // 获得关联关系
         val relation: MetaRelation = metadata.getRelation(name)!!;
 
-        // 创建新对象
-        if (newed) {
-            val item = relation.model.java.newInstance() as Orm;
-            data[name] = item;
-            return item;
-        }
-
-        // 根据关联关系来构建查询
         var result: Any?;
-        when (relation.type) {
-            RelationType.BELONGS_TO -> // belongsto: 查主表
-                result = queryMaster(relation.metadata, relation.foreignKey).select(columns).find<IOrm>();
-            RelationType.HAS_ONE -> // hasxxx: 查从表
-                result = querySlave(relation.metadata, relation.foreignKey).select(columns).find<IOrm>();
-            else -> // hasxxx: 查从表
-                result = querySlave(relation.metadata, relation.foreignKey).select(columns).findAll<IOrm>();
+        if (newed) {  // 创建新对象
+            result = relation.model.java.newInstance();
+        }else{  // 根据关联关系来构建查询
+            val transform:(MutableMap<String, Any?>) -> IOrm = {
+                val obj = relation.model.java.newInstance() as IOrm;
+                obj.original(it)
+            }
+            when (relation.type) {
+                RelationType.BELONGS_TO -> // belongsto: 查主表
+                    result = queryMaster(relation.metadata, relation.foreignKey).select(columns).find(transform);
+                RelationType.HAS_ONE -> // hasxxx: 查从表
+                    result = querySlave(relation.metadata, relation.foreignKey).select(columns).find(transform);
+                else -> // hasxxx: 查从表
+                    result = querySlave(relation.metadata, relation.foreignKey).select(columns).findAll(transform);
+            }
         }
 
         data[name] = result;
