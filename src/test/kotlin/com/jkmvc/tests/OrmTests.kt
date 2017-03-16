@@ -1,10 +1,11 @@
 package com.jkmvc.tests
 
-import com.jkmvc.orm.MetaData
-import com.jkmvc.orm.Orm
-import com.jkmvc.orm.isLoaded
+import com.jkmvc.orm.*
 import org.junit.Test
 
+/**
+ * 用户模型
+ */
 class UserModel(id:Int? = null): Orm(id) {
     // 伴随用户就是元数据
     companion object m: MetaData(UserModel::class)
@@ -12,11 +13,33 @@ class UserModel(id:Int? = null): Orm(id) {
     public var name:String by m.property<String>();
 
     public var age:Int by m.property<Int>();
+
+    // 关联地址：一个用户有一个地址
+    public var address:AddressModel by m.property<AddressModel>();
 }
+
+/**
+ * 地址模型
+ */
+class AddressModel(id:Int? = null): Orm(id) {
+    // 伴随用户就是元数据
+    companion object m: MetaData(AddressModel::class, relations = mapOf("user" to MetaRelation(RelationType.BELONGS_TO, UserModel::class, "user_id") /* 关联用户：一个地址从属于一个用户 */))
+
+    public var user_id:Int by m.property<Int>();
+
+    public var addr:String by m.property<String>();
+
+    public var tel:String by m.property<String>();
+
+    // 关联用户：一个地址从属于一个用户
+    public var user:UserModel by m.property<UserModel>();
+}
+
+
 
 class OrmTests{
 
-    var id = 14;
+    var id = 13;
 
     @Test
     fun testFind(){
