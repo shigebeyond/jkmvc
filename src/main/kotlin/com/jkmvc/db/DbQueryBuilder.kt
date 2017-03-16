@@ -1,5 +1,7 @@
 package com.jkmvc.db
 
+import kotlin.reflect.KClass
+
 /**
  * sql构建器
  *   依次继承 DbQueryBuilderAction 处理动作子句 + DbQueryBuilderDecoration 处理修饰子句
@@ -32,6 +34,34 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
         println(actionSql + decorationSql)
         println(params)
         return Pair(actionSql + decorationSql, params);
+    }
+
+    /**
+     * 查找多个： select 语句
+     *
+     * @param KClass<T> clazz 返回对象的类型
+     * @return array
+     */
+    public override fun <T:Any>  findAll(clazz: KClass<T>): List<T>{
+        // 1 编译
+        val (sql, params) = compile("select");
+
+        // 2 执行 select
+        return db.queryRows<T>(sql, params, getRecordTranformer<T>(clazz))
+    }
+
+    /**
+     * 查找一个： select ... limit 1语句
+     *
+     * @param KClass<T> clazz 返回对象的类型
+     * @return object
+     */
+    public override fun <T:Any>  find(clazz:KClass<T>): T?{
+        // 1 编译
+        val (sql, params) = compile("select");
+
+        // 2 执行 select
+        return db.queryRow<T>(sql, params, getRecordTranformer<T>(clazz));
     }
 
     /**

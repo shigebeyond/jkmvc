@@ -4,7 +4,6 @@ import com.jkmvc.common.findConstructor
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
-import kotlin.reflect.primaryConstructor
 
 /**
  * sql构建器
@@ -34,28 +33,27 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration
         /**
          * 获得记录构造器
          */
-        protected fun getRecordConstructor(cls: KClass<*>): KFunction<*>? {
-            return recordConstructors.getOrPut(cls){
-                cls.findConstructor(listOf(MutableMap::class.java))
+        public fun getRecordConstructor(clazz: KClass<*>): KFunction<*>? {
+            return recordConstructors.getOrPut(clazz){
+                clazz.findConstructor(listOf(MutableMap::class.java))
             }
         }
 
         /**
          * 获得记录转换器
          */
-        protected inline fun <reified T:Any> getRecordTranformer(): ((MutableMap<String, Any?>) -> T) {
-            val cls = T::class;
+        public fun <T:Any> getRecordTranformer(clazz: KClass<T>): ((MutableMap<String, Any?>) -> T) {
             // 1 如果是map类，则直接返回
-            if(Map::class.java.isAssignableFrom(cls.java)){
+            if(Map::class.java.isAssignableFrom(clazz.java)){
                 return {
                     it as T;
                 }
             }
             // 2 否则，调用其构造函数
             // 获得类的构造函数
-            val construtor = getRecordConstructor(cls);
+            val construtor = getRecordConstructor(clazz);
             if(construtor == null)
-                throw RuntimeException("类${cls}没有构造函数constructor(MutableMap)");
+                throw RuntimeException("类${clazz}没有构造函数constructor(MutableMap)");
 
             // 调用构造函数
             return {
@@ -75,6 +73,23 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration
     /**
      * 查找多个： select 语句
      *
+     * @param KClass<T> clazz 返回对象的类型
+     * @return array
+     */
+    public abstract fun <T:Any>  findAll(clazz:KClass<T>): List<T>;
+
+    /**
+     * 查找一个： select ... limit 1语句
+     *
+     * @param KClass<T> clazz 返回对象的类型
+     * @return object
+     */
+    public abstract fun <T:Any>  find(clazz:KClass<T>): T?;
+
+    /**
+     * 查找多个： select 语句
+     *  对 findAll(clazz:KClass<T>) 的精简版，直接根据泛型 T 来确定返回对象的类型
+     *
      * @return array
      */
     public inline fun <reified T:Any>  findAll(): List<T> {
@@ -82,11 +97,12 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration
         val (sql, params) = compile("select");
 
         // 2 执行 select
-        return db.queryRows<T>(sql, params, getRecordTranformer<T>())
+        return db.queryRows<T>(sql, params, getRecordTranformer<T>(T::class))
     }
 
     /**
      * 查找一个： select ... limit 1语句
+     *  对 findAll(clazz:KClass<T>) 的精简版，直接根据泛型 T 来确定返回对象的类型
      *
      * @return object
      */
@@ -95,7 +111,7 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration
         val (sql, params) = compile("select");
 
         // 2 执行 select
-        return db.queryRow<T>(sql, params, getRecordTranformer<T>());
+        return db.queryRow<T>(sql, params, getRecordTranformer<T>(T::class));
     }
 
     /**
