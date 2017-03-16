@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
+import kotlin.reflect.jvm.jvmName
 
 /**
  * orm的元数据
@@ -18,8 +19,8 @@ abstract class IMetaData{
         /**
          * 缓存属性代理
          */
-        val props:MutableMap<KClass<*>, ReadWriteProperty<IOrm, *>> by lazy{
-            ConcurrentHashMap<KClass<*>, ReadWriteProperty<IOrm, *>>()
+        val props:ConcurrentHashMap<String, ReadWriteProperty<IOrm, *>> by lazy{
+            ConcurrentHashMap<String, ReadWriteProperty<IOrm, *>>()
         }
     }
 
@@ -46,7 +47,7 @@ abstract class IMetaData{
     /**
      * 关联关系
      */
-    public abstract val relations:Map<String, MetaRelation>?
+    public abstract val relations:ConcurrentHashMap<String, MetaRelation>
 
     /**
      * 数据库
@@ -78,8 +79,9 @@ abstract class IMetaData{
      *   代理模型的属性读写
      */
     public inline fun <reified T> property(): ReadWriteProperty<IOrm, T>{
-        val clazz:KClass<*> = T::class;
-        return props.getOrPut(clazz){
+        //属性类型作为key: 同一类型的属性，共用一个代理
+        val key:String = T::class.jvmName
+        return props.getOrPut(key){
             // 生成属性代理对象
             object : ReadWriteProperty<IOrm, T> {
                 // 获得属性
@@ -93,6 +95,40 @@ abstract class IMetaData{
                 }
             } as ReadWriteProperty<IOrm, *>
         } as ReadWriteProperty<IOrm, T>;
+    }
+
+    /**
+     * 获得关联属性代理
+     *   代理模型的关联属性读写
+     */
+    public inline fun <reified T:IOrm> relatedProperty(type:RelationType, foreignKey:String): ReadWriteProperty<IOrm, T>{
+        // 属性全名作为key: 同一个模型的同一个属性，共用一个代理
+        val key:String = model.jvmName + "-" + foreignKey;
+        return props.getOrPut(key){
+            // 生成属性代理对象
+            object : ReadWriteProperty<IOrm, T> {
+                // 获得属性
+                public override operator fun getValue(thisRef: IOrm, property: KProperty<*>): T {
+                    prepareRelation(property.name, type, T::class, foreignKey) // 准备关联关系
+                    return thisRef[property.name]
+                }
+
+                // 设置属性
+                public override operator fun setValue(thisRef: IOrm, property: KProperty<*>, value: T) {
+                    prepareRelation(property.name, type, T::class, foreignKey) // 准备关联关系
+                    thisRef[property.name] = value
+                }
+            } as ReadWriteProperty<IOrm, *>
+        } as ReadWriteProperty<IOrm, T>;
+    }
+
+    /**
+     * 准备关联关系
+     */
+    public fun prepareRelation(name: String, type:RelationType, relatedModel: KClass<out IOrm>, foreignKey:String){
+        relations.getOrPut(name){
+            MetaRelation(type, relatedModel, foreignKey)
+        }
     }
 
 }
