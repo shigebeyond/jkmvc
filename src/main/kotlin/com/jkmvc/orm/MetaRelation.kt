@@ -36,6 +36,6 @@ data class MetaRelation(public val type:RelationType /* 关联关系 */, public 
      * 获得关联模型的元数据
      *  伴随对象就是元数据
      */
-    public val metadata:MetaData
-        get() = model.companionObjectInstance as MetaData
+    public val metadata:IMetaData
+        get() = model.companionObjectInstance as IMetaData
 }
