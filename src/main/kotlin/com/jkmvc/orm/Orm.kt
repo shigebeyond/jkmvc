@@ -13,12 +13,13 @@ import java.util.*
  * *
  * @date 2016-10-10 上午12:52:34
  */
-abstract class Orm(): OrmRelated() {
+abstract class Orm(id:Int? = null): OrmRelated() {
 
-    public constructor(id:Int):this(){
-        queryBuilder().where(metadata.primaryKey, id).find(){
-            this.original(it);
-        }
+    init{
+        if(id != null)
+            queryBuilder().where(metadata.primaryKey, id).find(){
+                this.original(it);
+            }
     }
 
     public override fun toString(): String {

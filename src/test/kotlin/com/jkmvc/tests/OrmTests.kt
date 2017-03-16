@@ -5,7 +5,7 @@ import com.jkmvc.orm.Orm
 import com.jkmvc.orm.isLoaded
 import org.junit.Test
 
-class UserModel: Orm() {
+class UserModel(id:Int? = null): Orm(id) {
     // 伴随用户就是元数据
     companion object m: MetaData(UserModel::class)
 
@@ -16,12 +16,19 @@ class UserModel: Orm() {
 
 class OrmTests{
 
-    var id = 1;
+    var id = 14;
 
     @Test
     fun testFind(){
-        val user = UserModel.queryBuilder().where("id", 1).find<UserModel>()
+//        val user = UserModel.queryBuilder().where("id", 1).find<UserModel>()
+        val user = UserModel(id)
         println("查找用户: $user" )
+    }
+
+    @Test
+    fun testFindAll(){
+        val users = UserModel.queryBuilder().findAll<UserModel>()
+        println("查找所有用户: $users" )
     }
 
     @Test
