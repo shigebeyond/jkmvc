@@ -30,9 +30,8 @@ abstract class OrmPersistent: OrmValid() {
 	 * 获得主键值
 	 * @return int|string
 	 */
-	public override fun pk():Int {
-		return this[metadata.primaryKey];
-	}
+	public override val pk:Int
+		get() = this[metadata.primaryKey];
 
 	/**
 	 * 获得sql构建器
@@ -117,7 +116,7 @@ abstract class OrmPersistent: OrmValid() {
 		check();
 
 		// 更新数据库
-		val result = queryBuilder().sets(buildDirtyData()).where(metadata.primaryKey, pk()).update();
+		val result = queryBuilder().sets(buildDirtyData()).where(metadata.primaryKey, pk).update();
 
 		// 更新内部数据
 		dirty.clear()
@@ -144,7 +143,7 @@ abstract class OrmPersistent: OrmValid() {
 			return false;
 
 		// 删除数据
-		val result = queryBuilder().where(metadata.primaryKey, pk()).delete();
+		val result = queryBuilder().where(metadata.primaryKey, pk).delete();
 
 		// 更新内部数据
 		data.clear()

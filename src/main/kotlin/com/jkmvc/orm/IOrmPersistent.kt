@@ -20,7 +20,7 @@ interface IOrmPersistent :IOrmValid {
 	 * 获得主键值
 	 * @return int|string
 	 */
-	public fun pk(): Int;
+	public val pk: Int;
 
 	/**
 	 * 获得sql构建器
