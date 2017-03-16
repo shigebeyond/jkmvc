@@ -13,6 +13,15 @@ import java.util.*
  * *
  * @date 2016-10-10 上午12:52:34
  */
-abstract class Orm(data: MutableMap<String, Any?> = LinkedHashMap<String, Any?>())  : OrmRelated(data) {
+abstract class Orm(): OrmRelated() {
 
+    public constructor(id:Int):this(){
+        queryBuilder().where(metadata.primaryKey, id).find(){
+            this.original(it);
+        }
+    }
+
+    public override fun toString(): String {
+        return "${this.javaClass}: " + data.toString()
+    }
 }
