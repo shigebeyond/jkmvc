@@ -30,12 +30,18 @@ enum class RelationType {
 /**
  * 关联关系的元数据
  */
-data class MetaRelation(public val type:RelationType /* 关联关系 */, public val model: KClass<*> /* 关联模型 */, public val foreignKey:String /* 外键 */){
+data class MetaRelation(public val type:RelationType /* 关联关系 */, public val model: KClass<out IOrm> /* 关联模型类型 */, public var foreignKey:String = "" /* 外键 */){
+
+    init {
+        // 设置默认的外键：模型名_id
+        if(foreignKey == "")
+            foreignKey = "${model.modelName}_id"
+    }
 
     /**
      * 获得关联模型的元数据
      *  伴随对象就是元数据
      */
     public val metadata:IMetaData
-        get() = model.companionObjectInstance as IMetaData
+        get() = model.modelMetaData
 }
