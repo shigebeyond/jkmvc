@@ -9,7 +9,18 @@ package com.jkmvc.orm
  * @date 2016-10-10
  *
  */
-interface IOrmPersistent : IOrmMetaData {
+interface IOrmPersistent :IOrmValid {
+
+	/**
+	 * 元数据
+	 */
+	val metadata: MetaData;
+
+	/**
+	 * 获得主键值
+	 * @return int|string
+	 */
+	public fun pk();
 
 	/**
 	 * 获得sql构建器

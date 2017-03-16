@@ -1,6 +1,7 @@
 package com.jkmvc.orm
 
 import java.util.*
+import kotlin.reflect.companionObjectInstance
 
 /**
  * ORM之持久化，主要是负责数据库的增删改查
@@ -11,15 +12,26 @@ import java.util.*
  * @date 2016-10-10
  *
  */
-abstract class OrmPersistent(data: MutableMap<String, Any?> = LinkedHashMap<String, Any?>()): OrmMetaData(data) {
-
-	var loaded:Boolean = false;
+abstract class OrmPersistent(data: MutableMap<String, Any?> = LinkedHashMap<String, Any?>()): OrmValid(data) {
 
 	/**
 	 * 判断当前记录是否存在于db: 有原始数据就认为它是存在的
 	 */
-	public fun exists(): Boolean {
-		return loaded;
+	var loaded:Boolean = false;
+
+	/**
+	 * 元数据
+	 *   伴随对象就是元数据
+	 */
+	public override val metadata:MetaData
+		get() = this.javaClass.kotlin.companionObjectInstance as MetaData
+
+	/**
+	 * 获得主键值
+	 * @return int|string
+	 */
+	public override fun pk() {
+		return this[metadata.primaryKey];
 	}
 
 	/**
@@ -29,13 +41,14 @@ abstract class OrmPersistent(data: MutableMap<String, Any?> = LinkedHashMap<Stri
 	public override fun queryBuilder(): OrmQueryBuilder {
 		return metadata.queryBuilder();
 	}
+
 	/**
 	 * 保存数据
 	 *
 	 * @return int 对insert返回新增数据的主键，对update返回影响行数
 	 */
 	public override fun save(): Boolean {
-		if(this.exists())
+		if(loaded)
 			return this.update();
 
 		return this.create() > 0;
@@ -70,7 +83,10 @@ abstract class OrmPersistent(data: MutableMap<String, Any?> = LinkedHashMap<Stri
 		return pk;
 	}
 
-	public fun buildDirtyData(): MutableMap<String, Any?> {
+	/**
+	* 构建要改变的数据
+	 */
+	protected fun buildDirtyData(): MutableMap<String, Any?> {
 		val result:MutableMap<String, Any?> = HashMap<String, Any?>();
 		for(column in dirty){
 			result[column] = data[column];
@@ -90,7 +106,7 @@ abstract class OrmPersistent(data: MutableMap<String, Any?> = LinkedHashMap<Stri
 	 * @return int 影响行数
 	 */
 	public override fun update(): Boolean {
-		if(!this.exists())
+		if(!loaded)
 			throw OrmException("更新对象[$this]前先检查是否存在");
 
 		if (this.dirty.isEmpty())
@@ -119,7 +135,7 @@ abstract class OrmPersistent(data: MutableMap<String, Any?> = LinkedHashMap<Stri
 	 * @return int 影响行数
 	 */
 	public override fun delete(): Boolean {
-		if(!this.exists())
+		if(!loaded)
 			throw OrmException("删除对象[$this]前先检查是否存在");
 
 		//　校验
