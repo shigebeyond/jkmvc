@@ -11,7 +11,7 @@ class DataSourceFactory {
         /**
          * 缓存数据源
          */
-        protected val dataSources:MutableMap<String, DruidDataSource> by lazy {
+        protected val dataSources:ConcurrentHashMap<String, DruidDataSource> by lazy {
             ConcurrentHashMap<String, DruidDataSource>();
         }
 

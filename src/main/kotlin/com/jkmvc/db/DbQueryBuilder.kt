@@ -25,7 +25,7 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
         /**
          * 缓存记录构造器
          */
-        protected val recordConstructors:MutableMap<KClass<*>, KFunction<*>?> by lazy {
+        protected val recordConstructors:ConcurrentHashMap<KClass<*>, KFunction<*>?> by lazy {
             ConcurrentHashMap<KClass<*>, KFunction<*>?>();
         }
 

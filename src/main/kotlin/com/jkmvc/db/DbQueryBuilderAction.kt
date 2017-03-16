@@ -34,7 +34,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
         /**
          * 缓存字段填充方法
          */
-        protected val fieldFillers:MutableMap<String, KFunction<*>?> by lazy {
+        protected val fieldFillers:ConcurrentHashMap<String, KFunction<*>?> by lazy {
             ConcurrentHashMap<String, KFunction<*>?>();
         }
 

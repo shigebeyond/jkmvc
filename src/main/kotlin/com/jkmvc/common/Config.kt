@@ -19,7 +19,7 @@ class Config {
          *   key 文件名
          *   value 配置数据
          */
-        val configs:MutableMap<String, Config?> = ConcurrentHashMap<String, Config?>()
+        val configs:ConcurrentHashMap<String, Config?> = ConcurrentHashMap<String, Config?>()
 
         /**
          * Using the properties file. It will loading the properties file if not loading.
