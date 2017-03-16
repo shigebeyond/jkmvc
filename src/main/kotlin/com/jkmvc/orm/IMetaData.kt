@@ -27,7 +27,7 @@ abstract class IMetaData{
     /**
      * 模型类
      */
-    public abstract val model: KClass<*>
+    public abstract val model: KClass<out IOrm>
 
     /**
      * 数据库名

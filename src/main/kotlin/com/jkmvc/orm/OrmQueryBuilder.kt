@@ -20,7 +20,7 @@ class OrmQueryBuilder(protected val metadata: IMetaData) : DbQueryBuilder(metada
      */
     public override fun <T:Any> getRecordTranformer(clazz: KClass<T>): ((MutableMap<String, Any?>) -> T) {
         // 如果是orm类，则直接返回
-        if(IOrm::class.java.isAssignableFrom(clazz.java)){
+        if(clazz.java.isAssignableFrom(metadata.model.java)){
             return {
                 val obj = clazz.java.newInstance() as IOrm;
                 obj.original(it) as T
