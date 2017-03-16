@@ -2,8 +2,10 @@ package com.jkmvc.orm
 
 import kotlin.reflect.KProperty
 
-object OrmProperty//: ReadWriteProperty
-{
+/**
+ * orm的属性代理对象
+ */
+object OrmProperty /* : ReadWriteProperty */ {
     operator fun getValue(thisRef: Orm, property: KProperty<*>): Any? {
         return thisRef[property.name]
     }
