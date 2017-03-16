@@ -21,6 +21,16 @@ class DbTests{
         )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户';
         """);
         println("创建user表")
+        db.execute("""
+        CREATE TABLE IF NOT EXISTS `address` (
+          `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '地址编号',
+          `user_id` int(11) unsigned NOT NULL COMMENT '用户编号',
+          `addr` varchar(50) NOT NULL DEFAULT '' COMMENT '地址',
+          `tel` varchar(50) NOT NULL DEFAULT '' COMMENT '电话',
+          PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8 COMMENT='地址';
+        """);
+        println("创建user表")
     }
 
     @Test
