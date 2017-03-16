@@ -45,12 +45,6 @@ interface IOrmEntity{
     fun values(values: Map<String, Any?>, expected: List<String>? = null): IOrm;
 
     /**
-     * 获得变化的字段值
-     * @return array
-     */
-    fun dirty(): Collection<String>;
-
-    /**
      * 获得字段值
      * @return array
      */

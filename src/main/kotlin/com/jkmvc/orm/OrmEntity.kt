@@ -79,14 +79,6 @@ abstract class OrmEntity(data: MutableMap<String, Any?> = LinkedHashMap<String, 
     }
 
     /**
-     * 获得变化的字段值
-     * @return array
-     */
-    public override fun dirty(): Collection<String> {
-        return dirty;
-    }
-
-    /**
      * 获得字段值
      * @return array
      */
