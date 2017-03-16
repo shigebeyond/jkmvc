@@ -40,7 +40,7 @@ abstract class OrmEntity(data: MutableMap<String, Any?> = LinkedHashMap<String, 
      */
     public override operator fun set(column: String, value: Any?) {
         if (!hasColumn(column))
-            throw OrmException("类 class 没有字段 column");
+            throw OrmException("类 ${this.javaClass} 没有字段 $column");
 
         dirty.add(column);
         super.set(column, value);
@@ -54,7 +54,7 @@ abstract class OrmEntity(data: MutableMap<String, Any?> = LinkedHashMap<String, 
      */
     public override operator fun <T> get(column: String, defaultValue: Any?): T {
         if (!hasColumn(column))
-            throw OrmException("类 class 没有字段 column");
+            throw OrmException("类 ${this.javaClass} 没有字段 $column");
 
         return super.get(column, defaultValue);
     }
