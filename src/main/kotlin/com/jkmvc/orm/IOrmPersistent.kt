@@ -14,13 +14,13 @@ interface IOrmPersistent :IOrmValid {
 	/**
 	 * 元数据
 	 */
-	val metadata: MetaData;
+	val metadata: IMetaData;
 
 	/**
 	 * 获得主键值
 	 * @return int|string
 	 */
-	public fun pk();
+	public fun pk(): Int;
 
 	/**
 	 * 获得sql构建器

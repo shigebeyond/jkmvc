@@ -12,7 +12,7 @@ import kotlin.reflect.companionObjectInstance
  * @date 2016-10-10
  *
  */
-abstract class OrmPersistent(data: MutableMap<String, Any?> = LinkedHashMap<String, Any?>()): OrmValid(data) {
+abstract class OrmPersistent: OrmValid() {
 
 	/**
 	 * 判断当前记录是否存在于db: 有原始数据就认为它是存在的
@@ -23,14 +23,14 @@ abstract class OrmPersistent(data: MutableMap<String, Any?> = LinkedHashMap<Stri
 	 * 元数据
 	 *   伴随对象就是元数据
 	 */
-	public override val metadata:MetaData
-		get() = this.javaClass.kotlin.companionObjectInstance as MetaData
+	public override val metadata:IMetaData
+		get() = javaClass.kotlin.companionObjectInstance as IMetaData
 
 	/**
 	 * 获得主键值
 	 * @return int|string
 	 */
-	public override fun pk() {
+	public override fun pk():Int {
 		return this[metadata.primaryKey];
 	}
 
@@ -49,9 +49,9 @@ abstract class OrmPersistent(data: MutableMap<String, Any?> = LinkedHashMap<Stri
 	 */
 	public override fun save(): Boolean {
 		if(loaded)
-			return this.update();
+			return update();
 
-		return this.create() > 0;
+		return create() > 0;
 	}
 
 	/**
@@ -67,19 +67,20 @@ abstract class OrmPersistent(data: MutableMap<String, Any?> = LinkedHashMap<Stri
 	 * @return int 新增数据的主键
 	 */
 	public override fun create(): Int {
-		if(this.dirty.isEmpty())
+		if(dirty.isEmpty())
 			throw OrmException("没有要创建的数据");
 
 		// 校验
-		this.check();
+		check();
 
 		// 插入数据库
 		val pk = queryBuilder().value(buildDirtyData()).insert();
 
 		// 更新内部数据
-		this.data[metadata.primaryKey] = pk; // 主键
-		this.dirty.clear(); // 变化的字段值
-
+		data[metadata.primaryKey] = pk; // 主键
+		dirty.clear(); // 变化的字段值
+		loaded = true;
+		
 		return pk;
 	}
 
@@ -88,9 +89,9 @@ abstract class OrmPersistent(data: MutableMap<String, Any?> = LinkedHashMap<Stri
 	 */
 	protected fun buildDirtyData(): MutableMap<String, Any?> {
 		val result:MutableMap<String, Any?> = HashMap<String, Any?>();
-		for(column in dirty){
+		// 挑出变化的属性
+		for(column in dirty)
 			result[column] = data[column];
-		}
 		return result;
 	}
 
@@ -109,17 +110,17 @@ abstract class OrmPersistent(data: MutableMap<String, Any?> = LinkedHashMap<Stri
 		if(!loaded)
 			throw OrmException("更新对象[$this]前先检查是否存在");
 
-		if (this.dirty.isEmpty())
+		if (dirty.isEmpty())
 			throw OrmException("没有要更新的数据");
 
 		// 校验
-		this.check();
+		check();
 
 		// 更新数据库
-		val result = queryBuilder().sets(buildDirtyData()).where(metadata.primaryKey, this.pk()).update();
+		val result = queryBuilder().sets(buildDirtyData()).where(metadata.primaryKey, pk()).update();
 
 		// 更新内部数据
-		this.dirty.clear()
+		dirty.clear()
 
 		return result;
 	}
@@ -139,15 +140,15 @@ abstract class OrmPersistent(data: MutableMap<String, Any?> = LinkedHashMap<Stri
 			throw OrmException("删除对象[$this]前先检查是否存在");
 
 		//　校验
-		if(!this.check())
+		if(!check())
 			return false;
 
 		// 删除数据
-		val result = queryBuilder().where(metadata.primaryKey, this.pk()).delete();
+		val result = queryBuilder().where(metadata.primaryKey, pk()).delete();
 
 		// 更新内部数据
-		this.data.clear()
-		this.dirty.clear()
+		data.clear()
+		dirty.clear()
 
 		return result;
 	}

@@ -11,7 +11,7 @@ import java.util.*
  * @date 2016-10-10 上午12:52:34
  *
  */
-abstract class OrmValid(data: MutableMap<String, Any?> = LinkedHashMap<String, Any?>()) : OrmEntity(data) {
+abstract class OrmValid: OrmEntity() {
 
     companion object {
         /**
