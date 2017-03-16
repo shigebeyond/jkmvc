@@ -45,7 +45,7 @@ abstract class OrmEntity : IRecord, IOrm {
             throw OrmException("类 ${this.javaClass} 没有字段 $column");
 
         dirty.add(column);
-        data.set(column, value);
+        data[column] = value;
     }
 
     /**
@@ -58,7 +58,7 @@ abstract class OrmEntity : IRecord, IOrm {
         if (!hasColumn(column))
             throw OrmException("类 ${this.javaClass} 没有字段 $column");
 
-        return (data.get(column) ?: defaultValue) as T
+        return (data[column] ?: defaultValue) as T
     }
 
     /**
