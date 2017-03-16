@@ -22,11 +22,11 @@ open abstract class OrmRelated: OrmPersistent() {
         // 设置关联对象
         val relation = metadata.getRelation(column);
         if (relation != null) {
-            this[column] = value;
+            data[column] = value;
             // 如果关联的是主表，则更新从表的外键
             val (type, model, foreignKey) = relation;
             if (type == RelationType.BELONGS_TO)
-                this[foreignKey] = (value as Orm).pk();
+                this[foreignKey] = (value as Orm).pk; // 更新字段 super.set(foreignKey, value.pk);
             return;
         }
 
@@ -60,7 +60,7 @@ open abstract class OrmRelated: OrmPersistent() {
                 data[column] = value;
             } else if (value !== null) {// 关联对象字段: 不处理null的值, 因为left join查询时, 关联对象可能没有匹配的行
                 val (name, column) = column.split(":");
-                val obj:Orm = related(name, true) as Orm; // 创建关联对象
+                val obj:OrmRelated = related(name, true) as OrmRelated; // 创建关联对象
                 obj.data[column] = value;
             }
         }
@@ -116,7 +116,7 @@ open abstract class OrmRelated: OrmPersistent() {
      * @return OrmQueryBuilder
      */
     protected fun querySlave(model: IMetaData, foreignKey: String): OrmQueryBuilder {
-        return model.queryBuilder().where(foreignKey, pk()) as OrmQueryBuilder; // 从表.外键 = 主表.主键
+        return model.queryBuilder().where(foreignKey, pk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
     }
 
     /**
