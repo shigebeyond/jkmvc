@@ -147,7 +147,7 @@ abstract class IMetaData{
                     prepareRelation(property.name, type, relatedModel, foreignKey) // 准备关联关系
                     thisRef[property.name] = value
                 }
-            } as ReadWriteProperty<IOrm, *>
+            }
         } as ReadWriteProperty<IOrm, T>;
     }
 
@@ -173,7 +173,7 @@ abstract class IMetaData{
                     prepareRelation(property.name, type, relatedModel, foreignKey) // 准备关联关系
                     thisRef[property.name] = value
                 }
-            } as ReadWriteProperty<IOrm, *>
+            }
         } as ReadWriteProperty<IOrm, List<T>>;
     }
 
