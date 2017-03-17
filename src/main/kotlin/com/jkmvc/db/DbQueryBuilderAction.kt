@@ -101,7 +101,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * @return DbQueryBuilder
      */
     public fun action(action: String): IDbQueryBuilder {
-        if (!SqlTemplates.containsKey(action))
+        if (action !in SqlTemplates)
             throw IllegalArgumentException("无效sql动作: $action");
 
         this.action = action;
@@ -237,7 +237,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * @return string
      */
     public override fun compileAction(): String {
-        if (!SqlTemplates.containsKey(action))
+        if (action !in SqlTemplates)
             throw DbException("未设置sql动作: $action");
 
         // 清空sql参数

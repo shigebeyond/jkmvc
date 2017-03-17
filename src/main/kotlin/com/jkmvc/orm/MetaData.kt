@@ -45,7 +45,7 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
      * 是否有某个关联关系
      */
     public override fun hasRelation(name:String):Boolean{
-        return relations.containsKey(name);
+        return name in relations;
 
     }
 

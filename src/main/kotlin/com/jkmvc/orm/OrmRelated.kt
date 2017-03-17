@@ -77,33 +77,32 @@ open abstract class OrmRelated: OrmPersistent() {
      * @return Orm
      */
     public override fun related(name: String, newed: Boolean, vararg columns: String): Any? {
-        // 已缓存
-        if (data.contains(name))
-            return data[name] as Orm;
+        if (name !in data){
+            // 获得关联关系
+            val relation: MetaRelation = metadata.getRelation(name)!!;
 
-        // 获得关联关系
-        val relation: MetaRelation = metadata.getRelation(name)!!;
+            var result: Any?;
+            if (newed) {  // 创建新对象
+                result = relation.model.java.newInstance();
+            }else{  // 根据关联关系来构建查询
+                val transform:(MutableMap<String, Any?>) -> IOrm = {
+                    val obj = relation.model.java.newInstance() as IOrm;
+                    obj.original(it)
+                }
+                when (relation.type) {
+                    RelationType.BELONGS_TO -> // belongsto: 查主表
+                        result = queryMaster(relation).select(columns).find(transform);
+                    RelationType.HAS_ONE -> // hasxxx: 查从表
+                        result = querySlave(relation).select(columns).find(transform);
+                    else -> // hasxxx: 查从表
+                        result = querySlave(relation).select(columns).findAll(transform);
+                }
+            }
 
-        var result: Any?;
-        if (newed) {  // 创建新对象
-            result = relation.model.java.newInstance();
-        }else{  // 根据关联关系来构建查询
-            val transform:(MutableMap<String, Any?>) -> IOrm = {
-                val obj = relation.model.java.newInstance() as IOrm;
-                obj.original(it)
-            }
-            when (relation.type) {
-                RelationType.BELONGS_TO -> // belongsto: 查主表
-                    result = queryMaster(relation).select(columns).find(transform);
-                RelationType.HAS_ONE -> // hasxxx: 查从表
-                    result = querySlave(relation).select(columns).find(transform);
-                else -> // hasxxx: 查从表
-                    result = querySlave(relation).select(columns).findAll(transform);
-            }
+            data[name] = result;
         }
 
-        data[name] = result;
-        return result;
+        return data[name];
     }
 
     /**
