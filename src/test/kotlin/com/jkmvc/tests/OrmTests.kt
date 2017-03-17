@@ -1,6 +1,8 @@
 package com.jkmvc.tests
 
-import com.jkmvc.orm.*
+import com.jkmvc.orm.MetaData
+import com.jkmvc.orm.Orm
+import com.jkmvc.orm.isLoaded
 import org.junit.Test
 
 /**
@@ -8,40 +10,53 @@ import org.junit.Test
  */
 class UserModel(id:Int? = null): Orm(id) {
     // 伴随用户就是元数据
-    companion object m: MetaData(UserModel::class)
+    companion object m: MetaData(UserModel::class){
+        init {
+            hasOne("address", AddressModel::class)
+            hasMany("addresses", AddressModel::class)
+        }
+    }
 
-    public var name:String by m.property<String>();
+    public var name:String by property<String>();
 
-    public var age:Int by m.property<Int>();
+    public var age:Int by property<Int>();
 
     // 关联地址：一个用户有一个地址
-    public var address:AddressModel by m.relatedProperty<AddressModel>(RelationType.HAS_ONE, "user_id");
+    public var address:AddressModel by property<AddressModel>();
+
+    // 关联地址：一个用户有多个地址
+    public var addresses:List<AddressModel> by property<List<AddressModel>>();
 }
+
 
 /**
  * 地址模型
  */
 class AddressModel(id:Int? = null): Orm(id) {
     // 伴随用户就是元数据
-    companion object m: MetaData(AddressModel::class)
+    companion object m: MetaData(AddressModel::class){
+        init {
+            belongsTo("user", UserModel::class, "user_id")
+        }
+    }
 
-    public var user_id:Int by m.property<Int>();
+    public var user_id:Int by property<Int>();
 
-    public var addr:String by m.property<String>();
+    public var addr:String by property<String>();
 
-    public var tel:String by m.property<String>();
+    public var tel:String by property<String>();
 
     // 关联用户：一个地址从属于一个用户
-    public var user:UserModel by m.relatedProperty<UserModel>(RelationType.BELONGS_TO,  "user_id");
+    public var user:UserModel by property<UserModel>()
 }
 
 
 
 class OrmTests{
 
-    var id = 10;
-/*
-    @Test
+    var id = 11;
+
+    /*@Test
     fun testFind(){
 //        val user = UserModel.queryBuilder().where("id", 1).find<UserModel>()
         val user = UserModel(id)
@@ -85,14 +100,20 @@ class OrmTests{
             return
         }
         println("删除用户：$user, result: ${user.delete()}")
-    }
- */
+    }*/
 
     @Test
     fun testRelateFind(){
         val user = UserModel(id)
         val address = user.address
         println(address)
+    }
+
+    @Test
+    fun testRelateFindMany(){
+        val user = UserModel(id)
+        val addresses = user.addresses
+        println(addresses)
     }
 
     @Test
@@ -117,6 +138,7 @@ class OrmTests{
 
         address.addr = "gx"
         address.tel = "119"
+        address.update()
         println("更新地址: $address")
     }
 
@@ -131,7 +153,6 @@ class OrmTests{
 
         println("删除用户：$address, result: ${address.delete()}")
     }
-
 
 }
 
