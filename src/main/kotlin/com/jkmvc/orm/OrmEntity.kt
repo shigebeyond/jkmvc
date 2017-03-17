@@ -2,6 +2,8 @@ package com.jkmvc.orm
 
 import com.jkmvc.db.IRecord
 import java.util.*
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
 /**
  * ORM之实体对象
@@ -14,6 +16,25 @@ import java.util.*
  */
 abstract class OrmEntity : IRecord, IOrm {
 
+    companion object{
+        /**
+         * 缓存属性代理
+         */
+        protected val prop = (object : ReadWriteProperty<IOrm, Any?> {
+            // 获得属性
+            public override operator fun getValue(thisRef: IOrm, property: KProperty<*>): Any? {
+                return thisRef[property.name]
+            }
+
+            // 设置属性
+            public override operator fun setValue(thisRef: IOrm, property: KProperty<*>, value: Any?) {
+                thisRef[property.name] = value
+            }
+        })
+
+
+    }
+
     protected val data: MutableMap<String, Any?> = LinkedHashMap<String, Any?>()
 
     /**
@@ -23,6 +44,13 @@ abstract class OrmEntity : IRecord, IOrm {
     protected val dirty: MutableSet<String> by lazy {
         HashSet<String>()
     };
+
+    /**
+     * 获得属性代理
+     */
+    public override fun <T> property(): ReadWriteProperty<IOrm, T> {
+        return prop as ReadWriteProperty<IOrm, T>;
+    }
 
     /**
      * 判断是否有某字段

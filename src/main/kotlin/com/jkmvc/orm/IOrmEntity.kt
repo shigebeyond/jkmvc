@@ -1,5 +1,7 @@
 package com.jkmvc.orm
 
+import kotlin.properties.ReadWriteProperty
+
 /**
  * ORM之实体对象
  *
@@ -10,6 +12,11 @@ package com.jkmvc.orm
  *
  */
 interface IOrmEntity{
+
+    /**
+     * 获得属性代理
+     */
+    fun <T> property(): ReadWriteProperty<IOrm, T>;
 
     /**
      * 判断是否有某字段
