@@ -97,29 +97,84 @@ abstract class IMetaData{
         } as ReadWriteProperty<IOrm, T>;
     }
 
+
+
     /**
-     * 获得关联属性代理
+     * 获得从属于的关联属性代理 -- belongs to
+     *   代理模型的关联属性读写
+     */
+    public inline fun <reified T:IOrm> belongsTo( foreignKey:String): ReadWriteProperty<IOrm, T>{
+        return relatedProperty(RelationType.BELONGS_TO, foreignKey)
+    }
+
+
+    /**
+     * 获得有一个的关联属性代理 -- has one
+     *   代理模型的关联属性读写
+     */
+    public inline fun <reified T:IOrm> hasOne(foreignKey:String): ReadWriteProperty<IOrm, T>{
+        return relatedProperty(RelationType.HAS_ONE, foreignKey)
+    }
+
+
+    /**
+     * 获得有多个的关联属性代理 -- has many
+     *   代理模型的关联属性读写
+     */
+    public inline fun <reified T:IOrm> hasMany(foreignKey:String): ReadWriteProperty<IOrm, List<T>>{
+        return relatedManyProperty(RelationType.HAS_MANY, foreignKey)
+    }
+
+    /**
+     * 获得一对一关联属性代理 -- has one / belongs to
      *   代理模型的关联属性读写
      */
     public inline fun <reified T:IOrm> relatedProperty(type:RelationType, foreignKey:String): ReadWriteProperty<IOrm, T>{
         // 属性全名作为key: 同一个模型的同一个属性，共用一个代理
         val key:String = model.jvmName + "-" + foreignKey;
+        val relatedModel = T::class;
         return props.getOrPut(key){
             // 生成属性代理对象
             object : ReadWriteProperty<IOrm, T> {
                 // 获得属性
                 public override operator fun getValue(thisRef: IOrm, property: KProperty<*>): T {
-                    prepareRelation(property.name, type, T::class, foreignKey) // 准备关联关系
+                    prepareRelation(property.name, type, relatedModel, foreignKey) // 准备关联关系
                     return thisRef[property.name]
                 }
 
                 // 设置属性
                 public override operator fun setValue(thisRef: IOrm, property: KProperty<*>, value: T) {
-                    prepareRelation(property.name, type, T::class, foreignKey) // 准备关联关系
+                    prepareRelation(property.name, type, relatedModel, foreignKey) // 准备关联关系
                     thisRef[property.name] = value
                 }
             } as ReadWriteProperty<IOrm, *>
         } as ReadWriteProperty<IOrm, T>;
+    }
+
+    /**
+     * 获得一对多关联属性代理 -- has many
+     *   代理模型的关联属性读写
+     */
+    public inline fun <reified T:IOrm> relatedManyProperty(type:RelationType, foreignKey:String): ReadWriteProperty<IOrm, List<T>>{
+        // 属性全名作为key: 同一个模型的同一个属性，共用一个代理
+        val key:String = model.jvmName + "-" + foreignKey;
+        val relatedModel = T::class;
+        return props.getOrPut(key){
+            // 生成属性代理对象
+            object : ReadWriteProperty<IOrm, List<T>> {
+                // 获得属性
+                public override operator fun getValue(thisRef: IOrm, property: KProperty<*>): List<T> {
+                    prepareRelation(property.name, type, relatedModel, foreignKey) // 准备关联关系
+                    return thisRef[property.name]
+                }
+
+                // 设置属性
+                public override operator fun setValue(thisRef: IOrm, property: KProperty<*>, value: List<T>) {
+                    prepareRelation(property.name, type, relatedModel, foreignKey) // 准备关联关系
+                    thisRef[property.name] = value
+                }
+            } as ReadWriteProperty<IOrm, *>
+        } as ReadWriteProperty<IOrm, List<T>>;
     }
 
     /**
