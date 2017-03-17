@@ -3,9 +3,7 @@ package com.jkmvc.orm
 import com.jkmvc.db.Db
 import com.jkmvc.db.IDbQueryBuilder
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
-import kotlin.reflect.KProperty
 
 /**
  * orm的元数据

@@ -1,7 +1,6 @@
 package com.jkmvc.orm
 
 import java.util.*
-import kotlin.reflect.companionObjectInstance
 
 /**
  * ORM之持久化，主要是负责数据库的增删改查
