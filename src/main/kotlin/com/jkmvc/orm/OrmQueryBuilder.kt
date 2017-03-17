@@ -46,11 +46,10 @@ class OrmQueryBuilder(protected val metadata: IMetaData) : DbQueryBuilder(metada
         val relation: MetaRelation = metadata.getRelation(name)!!;
         // 根据关联关系联查表
         when (relation.type) {
-        // belongsto: 查主表
-            RelationType.BELONGS_TO ->
-                joinMaster(relation.metadata, relation.foreignKey, name);
-        // hasxxx: 查从表
-            else -> joinSlave(relation.metadata, relation.foreignKey, name);
+            // belongsto: 查主表
+            RelationType.BELONGS_TO -> joinMaster(relation, name);
+            // hasxxx: 查从表
+            else -> joinSlave(relation, name);
         }
         // select关联表字段
         return selectRelated(relation.metadata, name, columns);
@@ -60,40 +59,46 @@ class OrmQueryBuilder(protected val metadata: IMetaData) : DbQueryBuilder(metada
      * 联查从表
      *     从表.外键 = 主表.主键
      *
-     * @param IMetaData slave 从类元数据
-     * @param string foreignKey 外键
+     * @param MetaRelation relation 从类的关联关系
      * @param string tableAlias 表别名
      * @return OrmQueryBuilder
      */
-    protected fun joinSlave(slave: IMetaData, foreignKey: String, tableAlias: String): OrmQueryBuilder {
-        // 联查从表
+    protected fun joinSlave(relation: MetaRelation, tableAlias: String): OrmQueryBuilder {
+        // 准备条件
+        val slave = relation.metadata
+        val slaveFk = tableAlias + "." + relation.foreignKey; // 从表.外键
+
         val master: IMetaData = metadata;
-        val masterPk = master.table + "." + master.primaryKey;
-        val slaveFk = tableAlias + "." + foreignKey;
-        return join(tableAlias to slave.table, "LEFT").on(slaveFk, "=", masterPk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
+        val masterPk = master.table + "." + master.primaryKey; // 主表.主键o
+
+        // 查从表
+        return join(slave.table to tableAlias, "LEFT").on(slaveFk, "=", masterPk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
     }
 
     /**
      * 联查主表
      *     主表.主键 = 从表.外键
      *
-     * @param IMetaData master 主类元数据
-     * @param string foreignKey 外键
+     * @param MetaRelation slave 从表关系
      * @param string tableAlias 表别名
      * @return OrmQueryBuilder
      */
-    protected fun joinMaster(master: IMetaData, foreignKey: String, tableAlias: String): OrmQueryBuilder {
-        // 联查从表
+    protected fun joinMaster(relation: MetaRelation, tableAlias: String): OrmQueryBuilder {
+        // 准备条件
+        val master: IMetaData = relation.metadata;
+        val masterPk = tableAlias + "." + master.primaryKey; // 主表.主键
+
         val slave: IMetaData = metadata;
-        val masterPk = master.table + "." + master.primaryKey;
-        val slaveFk = slave.table + "." + foreignKey;
-        return join(master.table, "LEFT").on(masterPk, "=", slaveFk) as OrmQueryBuilder; // 主表.主键 = 从表.外键
+        val slaveFk = slave.table + "." + relation.foreignKey; // 从表.外键
+
+        // 查主表
+        return join(master.table to tableAlias, "LEFT").on(masterPk, "=", slaveFk) as OrmQueryBuilder; // 主表.主键 = 从表.外键
     }
 
     /**
      * select关联表的字段
      *
-     * @param IMetaData related 关联类元数据
+     * @param IMetaData related 主表关系
      * @param string tableAlias 表别名
      * @param array columns 查询的列
      */

@@ -118,10 +118,10 @@ open abstract class OrmRelated: OrmPersistent() {
     /**
      * 查询关联的主表
      *
-     * @param MetaRelation relation 从表关系
+     * @param MetaRelation relation 主表关系
      * @return OrmQueryBuilder
      */
     protected fun queryMaster(relation:MetaRelation): OrmQueryBuilder {
-        return relation.queryBuilder().where(metadata.primaryKey, this[relation.foreignKey]) as OrmQueryBuilder; // 主表.主键 = 从表.外键
+        return relation.queryBuilder().where(relation.metadata.primaryKey, this[relation.foreignKey]) as OrmQueryBuilder; // 主表.主键 = 从表.外键
     }
 }
