@@ -1,7 +1,5 @@
 package com.jkmvc.orm
 
-import java.util.*
-
 /**
  * ORM之关联对象操作
  *
@@ -96,11 +94,11 @@ open abstract class OrmRelated: OrmPersistent() {
             }
             when (relation.type) {
                 RelationType.BELONGS_TO -> // belongsto: 查主表
-                    result = queryMaster(relation.metadata, relation.foreignKey).select(columns).find(transform);
+                    result = queryMaster(relation).select(columns).find(transform);
                 RelationType.HAS_ONE -> // hasxxx: 查从表
-                    result = querySlave(relation.metadata, relation.foreignKey).select(columns).find(transform);
+                    result = querySlave(relation).select(columns).find(transform);
                 else -> // hasxxx: 查从表
-                    result = querySlave(relation.metadata, relation.foreignKey).select(columns).findAll(transform);
+                    result = querySlave(relation).select(columns).findAll(transform);
             }
         }
 
@@ -111,22 +109,20 @@ open abstract class OrmRelated: OrmPersistent() {
     /**
      * 查询关联的从表
      *
-     * @param string class 从类元数据
-     * @param string foreignKey 外键
+     * @param MetaRelation relation 从表关系
      * @return OrmQueryBuilder
      */
-    protected fun querySlave(model: IMetaData, foreignKey: String): OrmQueryBuilder {
-        return model.queryBuilder().where(foreignKey, pk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
+    protected fun querySlave(relation:MetaRelation): OrmQueryBuilder {
+        return relation.queryBuilder().where(relation.foreignKey, pk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
     }
 
     /**
      * 查询关联的主表
      *
-     * @param string class 主类元数据
-     * @param string foreignKey 外键
+     * @param MetaRelation relation 从表关系
      * @return OrmQueryBuilder
      */
-    protected fun queryMaster(model: IMetaData, foreignKey: String): OrmQueryBuilder {
-        return model.queryBuilder().where(metadata.primaryKey, foreignKey) as OrmQueryBuilder; // 主表.主键 = 从表.外键
+    protected fun queryMaster(relation:MetaRelation): OrmQueryBuilder {
+        return relation.queryBuilder().where(metadata.primaryKey, this[relation.foreignKey]) as OrmQueryBuilder; // 主表.主键 = 从表.外键
     }
 }
