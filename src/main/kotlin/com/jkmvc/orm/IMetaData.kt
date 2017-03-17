@@ -93,7 +93,7 @@ abstract class IMetaData{
                 public override operator fun setValue(thisRef: IOrm, property: KProperty<*>, value: T) {
                     thisRef[property.name] = value
                 }
-            } as ReadWriteProperty<IOrm, *>
+            }
         } as ReadWriteProperty<IOrm, T>;
     }
 
