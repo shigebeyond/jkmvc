@@ -45,8 +45,8 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
      * 是否有某个关联关系
      */
     public override fun hasRelation(name:String):Boolean{
-        return name in relations;
-
+        //return name in relations; // 啃爹啊，ConcurrentHashMap下的 in 语义是调用 contains()，但是我想调用 containsKey()
+        return relations.containsKey(name)
     }
 
     /**
