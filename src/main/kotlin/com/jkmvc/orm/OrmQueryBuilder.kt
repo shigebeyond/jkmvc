@@ -37,27 +37,23 @@ class OrmQueryBuilder(protected val metadata: IMetaData) : DbQueryBuilder(metada
      * 													如 array("name", "age", "birt" => "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
      * @return OrmQueryBuilder
      */
-    public fun with(name: String, vararg columns: String): OrmQueryBuilder {
+    public fun with(name: String, columns: List<String>? = null): OrmQueryBuilder {
         // select当前表字段
         if (selectColumns.isEmpty())
             select(metadata.table + ".*");
 
         // 获得关联关系
-        val relation: MetaRelation? = metadata.getRelation(name)!!;
-        if (relation != null) {
-            // 根据关联关系联查表
-            when (relation.type) {
-            // belongsto: 查主表
-                RelationType.BELONGS_TO ->
-                    joinMaster(relation.metadata, relation.foreignKey, name);
-            // hasxxx: 查从表
-                else -> joinSlave(relation.metadata, relation.foreignKey, name);
-            }
-            // select关联表字段
-            selectRelated(relation.metadata, name);
+        val relation: MetaRelation = metadata.getRelation(name)!!;
+        // 根据关联关系联查表
+        when (relation.type) {
+        // belongsto: 查主表
+            RelationType.BELONGS_TO ->
+                joinMaster(relation.metadata, relation.foreignKey, name);
+        // hasxxx: 查从表
+            else -> joinSlave(relation.metadata, relation.foreignKey, name);
         }
-
-        return this;
+        // select关联表字段
+        return selectRelated(relation.metadata, name, columns);
     }
 
     /**
