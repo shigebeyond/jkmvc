@@ -3,6 +3,14 @@ package com.jkmvc.common
 /****************************** 字符串扩展 *******************************/
 /**
  * StringBuilder扩展
+ * 清空
+ */
+public fun StringBuilder.clear(): StringBuilder {
+    return this.delete(0, this.length - 1)
+}
+
+/**
+ * StringBuilder扩展
  *  删除最后的一段子字符串
  */
 public fun StringBuilder.deleteSuffix(str:String):StringBuilder {
