@@ -42,7 +42,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
         /**
          * 关闭所有db
          */
-        public fun closeAllDb(db:Db){
+        public fun closeAllDb(){
             for((name, db) in dbs.get()){
                 db.conn.close()
             }

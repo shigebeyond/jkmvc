@@ -1,6 +1,10 @@
 package com.jkmvc.http
 
-import com.jkmvc.common.clear
+import com.jkmvc.common.Config
+import java.io.File
+import java.io.FileInputStream
+import java.net.URLEncoder
+import javax.servlet.http.HttpServletResponse
 
 /**
  * 响应对象
@@ -12,7 +16,7 @@ import com.jkmvc.common.clear
  * @date 2016-10-7 下午11:32:07 
  *
  */
-class Response 
+class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpServletResponse by res
 {
 	companion object{
 		/**
@@ -21,7 +25,14 @@ class Response
 		 */
 		protected val EXPIRESOVERDUE = "Mon, 26 Jul 1997 05:00:00 GMT";
 
-		// http状态码及其消息
+		/**
+		* 获得cookie配置
+		 */
+		protected val cookieConfig = Config.instance("cookie");
+
+		/**
+		* http状态码及其消息
+		 */
 		public val messages:Map<Int, String> = mapOf(
 				// 信息性状态码 1xx
 				100 to "Continue",
@@ -76,245 +87,161 @@ class Response
 		);
 	}
 
-	
 	/**
-	 * 响应状态码
-	 * @var  integer
-	*/
-	protected val status:Int = 200;
-	
-	/**
-	 * http协议
-	 * @var string
-	 */
-	protected val protocol:String = "HTTP/1.1";
-	
-	/**
-	 * 响应头部
-	 * @var array
-	 */
-	protected val headers = array();
-	
-	/**
-	 * 响应主体
-	 * @var string
-	 */
-	protected var body:StringBuilder = StringBuilder();
-	
-	/**
-	 * 设置响应主体
-	 * 
-	 * @param string content
-	 * @return string|Response
-	 */
-	public fun body(content:String)
-	{
-		this.body.clear().append(content);
-		return this;
-	}
-	/**
-	 * 设置响应主体
+	 * 响应视图
 	 *
 	 * @param View content
-	 * @return string|Response
 	 */
-	public fun body(content:View)
+	public fun render(view:View):Unit
 	{
-		return this.body(content.render());
+		view.render();
 	}
 
 	/**
-	 * 追加响应主体
+	 * 响应文本
 	 *
 	 * @param string content
-	 * @return string|Response
 	 */
-	public fun append(content:String)
+	public fun render(content:String):Unit
 	{
-		this.body.append(content);
-		return this;
+		res.writer.print(content);
 	}
 
 	/**
-	 * 追加响应主体
+	 * 响应文件
 	 *
-	 * @param string content
-	 * @return string|Response
+	 * @param File file
 	 */
-	public fun append(content:View)
+	public fun render(file: File):Unit
 	{
-		return this.append(content.render())
+
+		//通知客户端文件的下载    URLEncoder.encode解决文件名中文的问题
+		res.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(file.name, "utf-8"))
+		res.setHeader("Content-Type", "application/octet-stream")
+
+		// 输出文件
+		val `in` = FileInputStream(file)
+		val out = res.getOutputStream()
+		var length = -1
+		val buffer = ByteArray(1024)
+		do{
+			length = `in`.read(buffer)
+			out.write(buffer, 0, length)
+		}while(length != -1)
+		`in`.close()
 	}
 
 	/**
-	 * 获得与设置http协议
+	 * 设置响应状态码
 	 * 
-	 * @param string protocol 协议
-	 * @return Response|string
+	 * @param int status 状态码
+	 * @return Response
 	 */
-	public fun protocol(protocol = null)
-	{
-		//getter
-		if (protocol === null)
-			return this.protocol;
-		
-		//setter
-		this.protocol = strtoupper(protocol);
-		return this;
+	public override fun setStatus(status: Int) {
+		if(!messages.containsKey(status))
+			throw Exception("无效响应状态码");
+
+		res.setStatus(status)
 	}
-	
+
 	/**
-	 * 读取与设置响应状态码
-	 * 
-	 * @param string status 状态码
-	 * @return number|Response
+	* 获得缓存时间
 	 */
-	public fun status(status = null)
-	{
-		// getter
-		if (status === null)
-			return this.status;
-		
-		// setter
-		if(!isset(static::messages[status]))
-			throw new Exception("无效响应状态码");
-		
-		this.status = (int) status;
-		return this;
-	}
-	
-	/**
-	 * 读取与设置全部头部字段
-	 *
-	 *       // 获得全部头部字段
-	 *       headers = response.headers();
-	 *
-	 *       // 设置头部
-	 *       response.headers(array("Content-Type" => "text/html", "Cache-Control" => "no-cache"));
-	 *
-	 * @param array headers 头部字段 
-	 * @return mixed
-	 */
-	public fun headers(array headers = null, merge = true)
-	{
-		// getter
-		if (headers === null)
-			return this.headers;
-		
-		// setter
-		this.headers = merge ? mergearray(this.headers, headers) : headers;
-		return this;
-	}
-	
-	/**
-	 * 获得与设置单个头部字段
-	 * 
-	 *       // 获得一个头部字段
-	 *       accept = response.header("Content-Type");
-	 *
-	 *       // 设置一个头部字段
-	 *       response.header("Content-Type", "text/html");
-	 * 
-	 * @param string key 字段名
-	 * @param string value 字段值
-	 * @return string|Response
-	 */
-	public fun header(key, value = null)
-	{
-		// getter
-		if (value === null)
-			return Arr::get(this.headers, key);
-		
-		// setter
-		this.headers[key] = value;
-		return this;
+	public fun getCache():String?{
+		// 无缓存
+		val expires = getHeader("Expires")
+		if(expires == EXPIRESOVERDUE)
+			return null
+
+		// 有缓存
+		return expires;
 	}
 	
 	/**
 	 * 设置响应缓存
 	 *
-	 * @param int|string expires 过期时间
+	 * @param long expires 过期时间
 	 * @return string|Response
 	 */
-	public fun cache(expires = null) {
-		// getter
-		if (expires === null) 
-		{
-			// 无缓存
-			if(!isset(this.headers["Expires"]) OR this.headers["Expires"] == static::EXPIRESOVERDUE)
-				return false;
-			
-			// 有缓存
-			return this.headers["Expires"];
-		}
-		
+	public fun setCache(expires:Long) {
 		// setter
-		if (expires) { // 有过期时间, 则缓存
-			expires = isint(expires) ? expires : strtotime(expires);
-			this.headers["Expires"] = gmdate("D, d M Y H:i:s", expires) . " GMT";
-			this.headers["Cache-Control"] = "max-age=".(expires - time());
-			if (isset(this.headers["Pragma"]) && this.headers["Pragma"] == "no-cache")
-				unset(this.headers["Pragma"]);
+		if (expires > 0) { // 有过期时间, 则缓存
+			val now:Long =  System.currentTimeMillis()
+			this.addDateHeader("Last-Modified", now);
+			this.addDateHeader("Expires", now + expires);
+			this.addHeader("Cache-Control", "max-age=$expires");
+			this.addHeader("Pragma", "Pragma")
 		}else{ // 否则, 不缓存
-			this.headers["Expires"] = static::EXPIRESOVERDUE;
-			this.headers["Cache-Control"] = array(
-					"no-store, no-cache, must-revalidate",
-					"post-check=0, pre-check=0",
-					"max-age=0"
-			);
-			this.headers["Pragma"] = "no-cache";
+			this.addHeader("Expires", EXPIRESOVERDUE);
+			this.addHeader("Cache-Control", "no-cache")
+			this.addHeader("Pragma", "no-cache");
 		}
-		return this;
 	}
-	
+
 	/**
-	 * 发送头部给客户端
-	 * @return Response
+	 * 设置cookie值
+	 *
+	 * <code>
+	 *     static::set("theme", "red");
+	 * </code>
+	 *
+	 * @param   string  name       cookie名
+	 * @param   string  value      cookie值
+	 * @param   integer expiration 期限
 	 */
-	public fun sendheaders()
-	{
-		if(headerssent())
-			return;
-		
-		// 1 状态行
-		header(this.protocol." ".this.status." ".static::messages[this.status]);
-	
-		// 2 各个头部字段
-		foreach (this.headers as header => value)
-		{
-			// cookie字段
-			if(key == "Set-Cookie")
-			{
-				Cookie::set(value);
-				continue;
-			}
-			
-			// 其他字段
-			if (isarray(value)) // 多值拼接
-				value = implode(", ", value);
-		
-			header(Text::ucfirst(header).": ".value, true);
-		}
-		
-		// 正文大小
-		if ((length = strlen(this.body)) > 0) {
-			header("Content-Length: ".length);
-		}
-	
-		return this;
+	public fun setCookie(name:String, value:String, expiry:Int? = null){
+		val cookie: javax.servlet.http.Cookie = javax.servlet.http.Cookie(name, value);
+		// expiry
+		val maxAage:Int? = cookieConfig?.getInt("expiry", expiry);
+		if(maxAage != null)
+			cookie.maxAge = maxAage
+		// path
+		val path:String? = cookieConfig?.get("path");
+		if(path != null)
+			cookie.path = path
+		// domain
+		val domain:String? = cookieConfig?.get("domain");
+		if(domain != null)
+			cookie.domain = domain
+		// secure
+		val secure:Boolean? = cookieConfig?.getBoolean("secure");
+		if(secure != null)
+			cookie.secure = secure
+		// httponly
+		val httponly:Boolean? = cookieConfig?.getBoolean("httponly");
+		if(httponly != null)
+			cookie.isHttpOnly = httponly
+		addCookie(cookie);
 	}
-	
+
 	/**
-	 * 发送响应该客户端
+	 * 设置cookie值
+	 *
+	 * <code>
+	 *     static::set("theme", "red");
+	 * </code>
+	 *
+	 * @param   string  name       cookie名
+	 * @param   string  value      cookie值
+	 * @param   integer expiration 期限
 	 */
-	public fun send()
-	{
-		// 先略过, 不排除有其他输出
-		// 清空内容缓存
-		/* if (obgetlength() > 0)
-			obendclean(); */
-		
-		// 先头部，后主体
-		echo this.sendheaders().body();
+	public fun setCookies(data:Map<String, String>, expiry:Int? = null){
+		for((name, value) in data){
+			setCookie(name, value, expiry);
+		}
+	}
+
+	/**
+	 * 删除cookie
+	 *
+	 * <code>
+	 *     static::delete("theme");
+	 * </code>
+	 *
+	 * @param   string  name   cookie名
+	 * @return  boolean
+	 */
+	public fun deleteCookie(name:String){
+		setCookie(name, "", -86400) // 让他过期
 	}
 }

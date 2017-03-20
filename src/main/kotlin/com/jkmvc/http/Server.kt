@@ -1,5 +1,11 @@
 package com.jkmvc.http
 
+import com.jkmvc.common.findConstructor
+import com.jkmvc.common.findFunction
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
+import kotlin.reflect.KFunction
+
 /**
  * 服务端对象，用于处理请求
  *
@@ -9,96 +15,65 @@ package com.jkmvc.http
  * @date 2016-10-6 上午9:27:56
  *
  */
-class Server 
-{
+object Server {
+    /**
+     * 处理请求
+     *
+     * @param HttpServletRequest req
+     * @param HttpServletResponse res
+     */
+    public fun run(request: HttpServletRequest, response: HttpServletResponse) {
+        // 构建请求与响应对象
+        val req = Request(request);
+        val res = Response(response);
 
-	/**
-	 * 结束输出缓冲
-	 */
-	public static fun obend()
-	{
-		if (funexists("fastcgifinishrequest")) {
-			fastcgifinishrequest();
-		} elseif ("cli" !== PHPSAPI) {
-			// obgetlevel() never returns 0 on some Windows configurations, so if
-			// the level is the same two times in a row, the loop should be stopped.
-			previous = null;
-			obStatus = obgetstatus(1);
-			while ((level = obgetlevel()) > 0 && level !== previous) {
-				previous = level;
-				if (obStatus[level - 1] && isset(obStatus[level - 1]["del"]) && obStatus[level - 1]["del"]) {
-					obendflush();
-				}
-			}
-			flush();
-		}
-	}
+        try {
+            // 解析路由
+            if (!req.parseRoute())
+                throw RouteException("当前uri没有匹配路由：" + req.requestURI);
 
-	/**
-	 * 处理请求
-	 *
-	 * @param Request req
-	 * @param Response res
-	 */
-	public static fun run()
-	{
-		// 开始输出缓冲
-		obstart();
+            // 调用路由对应的controller与action
+            callController(req, res);
+        }
+        /* catch (e：RouteException)
+        {
+            // 输出404响应
+            res.setStatus(404).send();
+        }  */
+        catch (e: Exception) {
+            res.render("异常 - " + e.message)
+        }
 
-		try {
-			// 构建请求与响应对象
-			req = new Request();
-			res = new Response();
+    }
 
-			// 解析路由
-			if(!req.parseroute())
-				throw new RouteException("当前uri没有匹配路由：".req.uri());
+    /**
+     * 调用controller与action
+     *
+     * @param Request req
+     * @param Response res
+     */
+    fun callController(req: Request, res: Response) {
+        // 获得controller类
+        val clazz:Class<*>? = ControllerLoader.getControllerClass(req.controller())
+        if (clazz == null)
+            throw RouteException ("Controller类不存在：" + req.controller());
 
-			// 调用路由对应的controller与action
-			self::callcontroller(req, res);
+        // 获得构造函数
+        val cst: KFunction<*>? = clazz.kotlin.findConstructor(listOf(Request::class.java, Response::class.java))
+        if(cst == null)
+            throw RouteException ("Controller类无对应构造函数" + req.controller());
 
-			// 输出响应
-			res.send();
-		} 
-		/* catch (RouteException e) 
-		{
-			// 输出404响应
-			res.status(404).send();
-		}  */
-		catch (Exception e) 
-		{
-			echo "异常 - ", e.getMessage();
-		}
+        // 创建controller
+        val controller = cst.call(req, res);
 
-		//结束输出缓冲
-		//die();
-		static::obend();
-	}
+        // 获得action方法
+        val action: KFunction<*>? = clazz.kotlin.findFunction(req.action())
+        if (action == null)
+            throw RouteException ("类${clazz}不存在方法：$action");
 
-	/**
-	 * 调用controller与action
-	 *
-	 * @param Request req
-	 * @param Response res
-	 */
-	private static fun callcontroller(req, res)
-	 {
-		// 获得controller类
-		class = req.controllerclass();
-		if (!classexists(class))
-			throw new RouteException("Controller类不存在：".req.controller());
-
-		// 创建controller
-		controller = new class(req, res);
-
-		// 获得action方法
-		action = "action".req.action();
-		if (!methodexists(controller, action))
-			throw new RouteException(class."类不存在方法：".action);
-
-		// 调用controller的action方法
-		controller.action();
-	}
+        // 调用controller的action方法
+        action.call(controller);
+    }
 
 
 }

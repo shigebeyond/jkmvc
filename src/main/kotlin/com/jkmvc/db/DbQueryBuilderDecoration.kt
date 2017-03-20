@@ -79,9 +79,9 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     }
 
     /**
-     * 修饰子句
+     * 遍历修饰子句
      */
-    protected fun visitDecorationClauses(visitor: (IDbQueryBuilderDecorationClauses<*>) -> Unit) {
+    protected fun travelDecorationClauses(visitor: (IDbQueryBuilderDecorationClauses<*>) -> Unit) {
         // 逐个处理修饰词及其表达式
         // 1 join
         for (j in join)
@@ -99,7 +99,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     public override fun compileDecoration(): String {
         val sql: StringBuilder = StringBuilder(" ");
         // 逐个编译修饰表达式
-        visitDecorationClauses { clause: IDbQueryBuilderDecorationClauses<*> ->
+        travelDecorationClauses { clause: IDbQueryBuilderDecorationClauses<*> ->
             sql.append(clause.compile()).append(' ');
         }
         return sql.toString();
@@ -111,7 +111,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      */
     public override fun clear(): IDbQueryBuilder {
         // 逐个清空修饰表达式
-        visitDecorationClauses { clause: IDbQueryBuilderDecorationClauses<*> ->
+        travelDecorationClauses { clause: IDbQueryBuilderDecorationClauses<*> ->
             clause.clear();
         }
 

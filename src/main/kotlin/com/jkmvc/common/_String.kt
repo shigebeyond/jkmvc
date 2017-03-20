@@ -1,5 +1,8 @@
 package com.jkmvc.common
 
+import java.text.ParseException
+import java.util.*
+
 /****************************** 字符串扩展 *******************************/
 /**
  * StringBuilder扩展
@@ -39,4 +42,41 @@ public fun String.lcFirst(): String {
     if(cs[0] in 'A'..'Z')
         cs[0] = cs[0] + 32
     return String(cs)
+}
+
+/**
+ * 转换为日期类型
+ */
+public fun String.toDate(): Date {
+    return java.text.SimpleDateFormat("yyyy-MM-dd").parse(this)
+}
+
+/**
+ * 去掉两头的字符
+ */
+public fun String.trim(str:String): String {
+    var start = 0;
+    var end = length
+    if(this.startsWith(str))
+        start = str.length;
+    if(this.endsWith(str))
+        end = length - str.length;
+    if(start == 0 && end == length)
+        return this;
+    return this.substring(start, end);
+}
+
+/**
+ * 去掉两头的字符
+ */
+public fun String.trim(preffix:String, suffix:String): String {
+    var start = 0;
+    var end = length
+    if(this.startsWith(preffix))
+        start = preffix.length;
+    if(this.endsWith(suffix))
+        end = length - suffix.length;
+    if(start == 0 && end == length)
+        return this;
+    return this.substring(start, end);
 }

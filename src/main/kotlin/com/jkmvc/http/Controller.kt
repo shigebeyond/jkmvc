@@ -1,7 +1,6 @@
 package com.jkmvc.http
 
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import java.util.*
 
 /**
  * 控制器
@@ -12,17 +11,22 @@ import javax.servlet.http.HttpServletResponse
  * @date 2016-10-8 下午8:02:47
  *
  */
-class Controller(val req: HttpServletRequest /* 请求对象 */, val res: HttpServletResponse /* 响应对象 */) {
-
+abstract class Controller(protected val req: Request /* 请求对象 */, protected val res: Response /* 响应对象 */) {
 
     /**
-     * 给默认的视图
-     *
-     * @param array $data
-     * @return View
+     * 视图
      */
-    public fun view(data:Map<String, Any?>)
+    public fun view(file:String, data:MutableMap<String, Any?> = HashMap<String, Any?>()):View
     {
-        return View($this->req->controller()."/".$this->req->action(), $data);
+        return View(req, res, file, data);
     }
+
+    /**
+     * 视图
+     */
+    public fun view(data:MutableMap<String, Any?> = HashMap<String, Any?>()):View
+    {
+        return view( req.controller() + "/" + req.action(), data)
+    }
+
 }

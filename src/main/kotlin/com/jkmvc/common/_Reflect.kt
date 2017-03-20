@@ -1,5 +1,6 @@
 package com.jkmvc.common
 
+import java.util.LinkedList
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -42,8 +43,14 @@ public fun KFunction<*>.matches(name:String, paramTypes:List<Class<*>>? = null):
 /**
  * 查找方法
  */
-public fun KClass<*>.findFunction(name:String, paramTypes:MutableList<Class<*>> = mutableListOf()): KFunction<*>?{
-    paramTypes.add(0, this.java); // 第一个参数为this
+public fun KClass<*>.findFunction(name:String, paramTypes:MutableList<Class<*>>? = null): KFunction<*>?{
+    var pt = paramTypes;
+    if(pt == null)
+        pt = LinkedList<Class<*>>()
+
+    // 第一个参数为this
+    pt.add(0, this.java);
+
     return memberFunctions.find {
         it.matches(name, paramTypes);
     }
@@ -52,7 +59,7 @@ public fun KClass<*>.findFunction(name:String, paramTypes:MutableList<Class<*>> 
 /**
  * 查找静态方法
  */
-public fun KClass<*>.findStaticFunction(name:String, paramTypes:List<Class<*>> = mutableListOf()): KFunction<*>?{
+public fun KClass<*>.findStaticFunction(name:String, paramTypes:List<Class<*>>? = null): KFunction<*>?{
     return staticFunctions.find {
         it.matches(name, paramTypes);
     }

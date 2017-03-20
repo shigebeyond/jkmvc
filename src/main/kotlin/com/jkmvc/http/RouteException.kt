@@ -1,9 +1,9 @@
-package com.jkmvc.db
+package com.jkmvc.http
 
 /**
- * db异常
+ * 路由异常
  */
-class DbException : RuntimeException {
+class RouteException : RuntimeException {
     constructor(message: String) : super(message) {
     }
 

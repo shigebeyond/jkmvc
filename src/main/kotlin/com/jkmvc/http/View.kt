@@ -1,5 +1,7 @@
 package com.jkmvc.http
 
+import java.util.concurrent.ConcurrentHashMap
+
 /**
  * 视图
  *
@@ -9,96 +11,60 @@ package com.jkmvc.http
  * @date 2016-10-21 下午3:14:54  
  *
  */
-class View 
+class View(protected val req: Request /* 请求对象 */, protected val res: Response /* 响应对象 */, protected val file:String/* 视图文件 */, protected var data:MutableMap<String, Any?> /* 局部变量 */)
 {
-	/**
-	 * 全局变量
-	 * @var array
-	 */
-	protected static globaldata = array();
-	
-	/**
-	 * 设置全局变量
-	 * @param string key
-	 * @param mixed value
-	 * @return View
-	 */
-	public fun setglobal(key, value)
-	{
-		static::globaldata[key] = value;
-		return this;
+	companion object{
+		/**
+		 * 全局变量
+		 * @var array
+		 */
+		protected val globalData:MutableMap<String, Any?> = ConcurrentHashMap<String, Any?>();
+
+		/**
+		 * 设置全局变量
+		 * @param string key
+		 * @param mixed value
+		 * @return View
+		 */
+		public fun setGlobal(key:String, value:Any?): Companion {
+			globalData.set(key, value);
+			return this;
+		}
 	}
-	
-	/**
-	 * 视图文件
-	 * @var string
-	 */
-	protected file;
-	
-	/**
-	 * 局部变量
-	 * @var array
-	 */
-	protected data = array();
-	
-	public constructor(file, data = null)
-	{
-		this.file = file;
-		if(data !== null)
-			this.data = data;
-	}
-	
+
 	/**
 	 * 设置局部变量
 	 * @param string key
 	 * @param mixed value
 	 * @return View
 	 */
-	public fun set(key, value)
-	{
-			this.data[key] = value;
-			return this;
+	public fun set(key:String, value:Any?): View {
+		this.data[key] = value;
+		return this;
 	}
-	
+
 	/**
 	 * 渲染视图
-	 * 
-	 * @return string
 	 */
-	public fun render():String
-	{
-		// 释放变量
-		extract(this.data, EXTRREFS | EXTRIP);
-		
-		// 开输出缓冲
-		obstart();
-		
-		// 找到视图
-		view = Loader::findfile("views", this.file);
-		if(!view)
-			throw new ViewException("视图文件[this.file]不存在");
-			
-		try {
-			// 加载视图, 并输出
-			include view;
-			
-			// 获得输出缓存
-			return obgetcontents();
-		} 
-		catch (Exception e) 
-		{
-			throw new ViewException("视图[this.file]渲染出错", 500, e);
-		}
-		finally 
-		{
-			// 结束输出缓存
-			obendclean();
-		}
+	public fun render(){
+
+		// 设置全局变量
+		renderData(globalData)
+
+		// 设置局部变量
+		renderData(data)
+
+		// 渲染jsp
+		req.getRequestDispatcher(file).forward(req, res)
 	}
-	
-	// 由于php中约定toString()不能抛出异常, 因此不能调用render()
-	/* public fun toString()
-	{
-		return this.render();
-	} */
+
+	/**
+	* 设置渲染参数
+	 */
+	private fun renderData(data:MutableMap<String, Any?>) {
+		if (data != null)
+			for ((k, v) in data)
+				req.setAttribute(k, v);
+	}
+
 }
