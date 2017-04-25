@@ -29,6 +29,7 @@ class OrmQueryBuilder(protected val metadata: IMetaData) : DbQueryBuilder(metada
 
         return super.getRecordTranformer(clazz)
     }
+
     /**
      * 联查表
      *
@@ -43,7 +44,7 @@ class OrmQueryBuilder(protected val metadata: IMetaData) : DbQueryBuilder(metada
             select(metadata.table + ".*");
 
         // 获得关联关系
-        val relation: MetaRelation = metadata.getRelation(name)!!;
+        val relation = metadata.getRelation(name)!!;
         // 根据关联关系联查表
         when (relation.type) {
             // belongsto: 查主表
@@ -59,11 +60,11 @@ class OrmQueryBuilder(protected val metadata: IMetaData) : DbQueryBuilder(metada
      * 联查从表
      *     从表.外键 = 主表.主键
      *
-     * @param MetaRelation relation 从类的关联关系
+     * @param IMetaRelation relation 从类的关联关系
      * @param string tableAlias 表别名
      * @return OrmQueryBuilder
      */
-    protected fun joinSlave(relation: MetaRelation, tableAlias: String): OrmQueryBuilder {
+    protected fun joinSlave(relation: IMetaRelation, tableAlias: String): OrmQueryBuilder {
         // 准备条件
         val slave = relation.metadata
         val slaveFk = tableAlias + "." + relation.foreignKey; // 从表.外键
@@ -79,11 +80,11 @@ class OrmQueryBuilder(protected val metadata: IMetaData) : DbQueryBuilder(metada
      * 联查主表
      *     主表.主键 = 从表.外键
      *
-     * @param MetaRelation slave 从表关系
+     * @param IMetaRelation slave 从表关系
      * @param string tableAlias 表别名
      * @return OrmQueryBuilder
      */
-    protected fun joinMaster(relation: MetaRelation, tableAlias: String): OrmQueryBuilder {
+    protected fun joinMaster(relation: IMetaRelation, tableAlias: String): OrmQueryBuilder {
         // 准备条件
         val master: IMetaData = relation.metadata;
         val masterPk = tableAlias + "." + master.primaryKey; // 主表.主键

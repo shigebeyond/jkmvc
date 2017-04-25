@@ -37,9 +37,9 @@ interface IMetaData{
     val defaultForeignKey:String
 
     /**
-     * 关联关系
+     * 每个字段的关联关系
      */
-    val relations:ConcurrentHashMap<String, MetaRelation>
+    val relations:ConcurrentHashMap<String, IMetaRelation>
 
     /**
      * 数据库
@@ -59,7 +59,7 @@ interface IMetaData{
     /**
      * 获得某个关联关系
      */
-    fun getRelation(name:String):MetaRelation?;
+    fun getRelation(name:String):IMetaRelation?;
 
     /**
      * 获得orm查询构建器

@@ -22,7 +22,7 @@ open abstract class OrmRelated: OrmPersistent() {
         if (relation != null) {
             data[column] = value;
             // 如果关联的是主表，则更新从表的外键
-            val (type, model, foreignKey) = relation;
+            val (type, model, foreignKey) = relation as MetaRelation;
             if (type == RelationType.BELONGS_TO)
                 this[foreignKey] = (value as Orm).pk; // 更新字段 super.set(foreignKey, value.pk);
             return;
@@ -79,7 +79,7 @@ open abstract class OrmRelated: OrmPersistent() {
     public override fun related(name: String, newed: Boolean, vararg columns: String): Any? {
         if (name !in data){
             // 获得关联关系
-            val relation: MetaRelation = metadata.getRelation(name)!!;
+            val relation = metadata.getRelation(name)!!;
 
             var result: Any?;
             if (newed) {  // 创建新对象
@@ -108,20 +108,20 @@ open abstract class OrmRelated: OrmPersistent() {
     /**
      * 查询关联的从表
      *
-     * @param MetaRelation relation 从表关系
+     * @param IMetaRelation relation 从表关系
      * @return OrmQueryBuilder
      */
-    protected fun querySlave(relation:MetaRelation): OrmQueryBuilder {
+    protected fun querySlave(relation:IMetaRelation): OrmQueryBuilder {
         return relation.queryBuilder().where(relation.foreignKey, pk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
     }
 
     /**
      * 查询关联的主表
      *
-     * @param MetaRelation relation 主表关系
+     * @param IMetaRelation relation 主表关系
      * @return OrmQueryBuilder
      */
-    protected fun queryMaster(relation:MetaRelation): OrmQueryBuilder {
+    protected fun queryMaster(relation:IMetaRelation): OrmQueryBuilder {
         return relation.queryBuilder().where(relation.metadata.primaryKey, this[relation.foreignKey]) as OrmQueryBuilder; // 主表.主键 = 从表.外键
     }
 }

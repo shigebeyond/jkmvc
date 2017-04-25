@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
  *  1 模型映射表的映射元数据，如模型类/数据库/表名
  *  2 代理模型的属性读写
  */
-open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */, public override val dbName:String = "database" /* 数据库名 */, public override var table:String = "" /* 表名 */, public override var primaryKey:String = "id" /* 主键 */, public final override val relations:ConcurrentHashMap<String, MetaRelation> = ConcurrentHashMap<String, MetaRelation>() /* 关联关系 */ ):IMetaData{
+open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */, public override val dbName:String = "database" /* 数据库名 */, public override var table:String = "" /* 表名 */, public override var primaryKey:String = "id" /* 主键 */, public final override val relations:ConcurrentHashMap<String, IMetaRelation> = ConcurrentHashMap<String, IMetaRelation>() /* 关联关系 */ ):IMetaData{
 
     init {
         // 设置默认表名： 假定model类名, 都是以"Model"作为后缀
@@ -52,7 +52,7 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
     /**
      * 获得某个关联关系
      */
-    public override fun getRelation(name:String):MetaRelation?{
+    public override fun getRelation(name:String):IMetaRelation?{
         return relations.get(name);
     }
 
