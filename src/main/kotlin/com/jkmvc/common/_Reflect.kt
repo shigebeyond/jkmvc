@@ -12,29 +12,24 @@ import kotlin.reflect.staticFunctions
 /**
  * 匹配方法的名称与参数类型
  */
-public fun KFunction<*>.matches(name:String, paramTypes:List<Class<*>>? = null):Boolean{
+public fun KFunction<*>.matches(name:String, paramTypes:List<Class<*>> = emptyList()):Boolean{
     // 1 匹配名称
     if(name != this.name)
         return false
 
     // 2 匹配参数
     // 2.1 匹配参数个数
-    var size = 0;
-    if(paramTypes != null)
-        size = paramTypes.size
-    if(size != this.parameters.size)
+    if(paramTypes.size != this.parameters.size)
         return false;
 
     // 2.2 匹配参数类型
-    if(paramTypes != null){
-        for (i in paramTypes.indices){
-            var targetType = this.parameters[i].type.javaType;
-            if(targetType is ParameterizedTypeImpl) // 若是泛型类型，则去掉泛型，只保留原始类型
-                targetType = targetType.rawType;
+    for (i in paramTypes.indices){
+        var targetType = this.parameters[i].type.javaType;
+        if(targetType is ParameterizedTypeImpl) // 若是泛型类型，则去掉泛型，只保留原始类型
+            targetType = targetType.rawType;
 
-            if(paramTypes[i] != targetType)
-                return false
-        }
+        if(paramTypes[i] != targetType)
+            return false
     }
 
     return true;
@@ -43,23 +38,23 @@ public fun KFunction<*>.matches(name:String, paramTypes:List<Class<*>>? = null):
 /**
  * 查找方法
  */
-public fun KClass<*>.findFunction(name:String, paramTypes:MutableList<Class<*>>? = null): KFunction<*>?{
-    var pt = paramTypes;
-    if(pt == null)
-        pt = LinkedList<Class<*>>()
+public fun KClass<*>.findFunction(name:String, paramTypes:List<Class<*>> = emptyList()): KFunction<*>?{
+    var pt = LinkedList<Class<*>>();
+    if(!paramTypes.isEmpty())
+        pt.addAll(paramTypes);
 
     // 第一个参数为this
     pt.add(0, this.java);
 
     return memberFunctions.find {
-        it.matches(name, paramTypes);
+        it.matches(name, pt);
     }
 }
 
 /**
  * 查找静态方法
  */
-public fun KClass<*>.findStaticFunction(name:String, paramTypes:List<Class<*>>? = null): KFunction<*>?{
+public fun KClass<*>.findStaticFunction(name:String, paramTypes:List<Class<*>> = emptyList()): KFunction<*>?{
     return staticFunctions.find {
         it.matches(name, paramTypes);
     }
@@ -68,7 +63,7 @@ public fun KClass<*>.findStaticFunction(name:String, paramTypes:List<Class<*>>? 
 /**
  * 查找构造函数
  */
-public fun KClass<*>.findConstructor(paramTypes:List<Class<*>>? = null): KFunction<*>?{
+public fun KClass<*>.findConstructor(paramTypes:List<Class<*>> = emptyList()): KFunction<*>?{
     return constructors.find {
         it.matches("<init>", paramTypes); // 构造函数的名称为 <init>
     }
