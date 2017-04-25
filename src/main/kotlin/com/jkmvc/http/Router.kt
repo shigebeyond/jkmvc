@@ -19,7 +19,7 @@ object Router
 	 * 全部路由规则
 	 * @var array
 	 */
-	val routes:MutableMap<String, Route> = HashMap<String, Route>();
+	public val routes:MutableMap<String, Route> = HashMap<String, Route>();
 
 	/**
 	 * 添加路由

@@ -215,4 +215,14 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	public fun containsParameter(key: String): Boolean {
 		return req.parameterMap.containsKey(key);
 	}
+
+	/**
+	* 设置多个属性
+	 */
+	public fun setAttributes(data:Map<String, Any?>) {
+		if (data != null)
+			for ((k, v) in data)
+				req.setAttribute(k, v);
+	}
+
 }

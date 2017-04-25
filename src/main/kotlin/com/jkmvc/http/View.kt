@@ -49,22 +49,13 @@ class View(protected val req: Request /* 请求对象 */, protected val res: Res
 	public fun render(){
 
 		// 设置全局变量
-		renderData(globalData)
+		req.setAttributes(globalData)
 
 		// 设置局部变量
-		renderData(data)
+		req.setAttributes(data)
 
 		// 渲染jsp
 		req.getRequestDispatcher(file).forward(req, res)
-	}
-
-	/**
-	* 设置渲染参数
-	 */
-	private fun renderData(data:MutableMap<String, Any?>) {
-		if (data != null)
-			for ((k, v) in data)
-				req.setAttribute(k, v);
 	}
 
 }
