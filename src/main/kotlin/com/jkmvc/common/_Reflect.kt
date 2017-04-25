@@ -39,9 +39,11 @@ public fun KFunction<*>.matches(name:String, paramTypes:List<Class<*>> = emptyLi
  * 查找方法
  */
 public fun KClass<*>.findFunction(name:String, paramTypes:List<Class<*>> = emptyList()): KFunction<*>?{
-    var pt = LinkedList<Class<*>>();
-    if(!paramTypes.isEmpty())
-        pt.addAll(paramTypes);
+    var pt = if(paramTypes is MutableList){
+        paramTypes
+    }else{
+        LinkedList<Class<*>>(paramTypes);
+    }
 
     // 第一个参数为this
     pt.add(0, this.java);
