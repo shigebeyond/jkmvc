@@ -72,11 +72,11 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
         params.clear();
 
         // 动作子句 + 修饰子句
-        val actionSql:String = this.action(action).compileAction();
-        val decorationSql:String = compileDecoration();
-        println(actionSql + decorationSql)
+        val sql:StringBuilder = StringBuilder();
+        this.action(action).compileAction(sql).compileDecoration(sql);
+        println(sql)
         println(params)
-        return Pair(actionSql + decorationSql, params);
+        return Pair(sql.toString(), params);
     }
 
     /**

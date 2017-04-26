@@ -13,9 +13,9 @@ interface IDbQueryBuilderDecoration
 {
     /**
      * 编译修饰子句
-     * @return string
+     * @return IDbQueryBuilder
      */
-    fun compileDecoration():String;
+    fun compileDecoration(sql: StringBuilder): IDbQueryBuilder;
 
     /**
      * 改写转义值的方法，搜集sql参数

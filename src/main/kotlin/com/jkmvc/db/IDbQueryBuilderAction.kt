@@ -19,9 +19,9 @@ interface IDbQueryBuilderAction
 
     /**
      * 编译动作子句
-     * @return string
+     * @return IDbQueryBuilder
      */
-    fun compileAction():String;
+    fun compileAction(sql: StringBuilder): IDbQueryBuilder;
 
     /**
      * 设置表名: 一般是单个表名
