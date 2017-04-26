@@ -25,7 +25,7 @@ object ControllerLoader{
      *   key为相对路径
      *   value为类
      */
-    val controllers:MutableMap<String, Class<*>> by lazy {
+    val controllers:MutableMap<String, ControllerClass> by lazy {
         scan()
     };
 
@@ -47,11 +47,11 @@ object ControllerLoader{
      * 扫描指定包下的Controller类
      * @return
      */
-    fun scan(): MutableMap<String, Class<*>> {
+    fun scan(): MutableMap<String, ControllerClass> {
 
         // 获得类加载器
         val cld = Thread.currentThread().contextClassLoader ?: throw ClassNotFoundException("Can't get class loader.")
-        val controllers:MutableMap<String, Class<*>> = HashMap<String, Class<*>>()
+        val controllers:MutableMap<String, ControllerClass> = HashMap<String, ControllerClass>()
 
         // 遍历包来扫描
         for (pck in packages){
@@ -73,7 +73,8 @@ object ControllerLoader{
                     // 过滤Controller子类
                     val ctrl = Controller::class.java
                     if(ctrl != clazz && ctrl.isAssignableFrom(clazz)){
-                        controllers.put(name, clazz)
+                        // 收集controller的构造函数+所有action方法
+                        controllers.put(name, ControllerClass(clazz.kotlin))
                     }
                 }
             }
@@ -83,9 +84,9 @@ object ControllerLoader{
     }
 
     /**
-     * 根据相对路径来获得controller类
+     * 获得controller类
      */
-    public fun getControllerClass(name: String): Class<*>? {
+    public fun getControllerClass(name: String): ControllerClass? {
         return controllers.get(name);
     }
 

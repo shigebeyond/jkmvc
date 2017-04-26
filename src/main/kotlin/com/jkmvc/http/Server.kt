@@ -1,7 +1,5 @@
 package com.jkmvc.http
 
-import com.jkmvc.common.findConstructor
-import com.jkmvc.common.findFunction
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import kotlin.reflect.KFunction
@@ -16,6 +14,7 @@ import kotlin.reflect.KFunction
  *
  */
 object Server {
+
     /**
      * 处理请求
      *
@@ -54,26 +53,20 @@ object Server {
      */
     fun callController(req: Request, res: Response) {
         // 获得controller类
-        val clazz:Class<*>? = ControllerLoader.getControllerClass(req.controller())
+        val clazz:ControllerClass? = ControllerLoader.getControllerClass(req.controller());
         if (clazz == null)
             throw RouteException ("Controller类不存在：" + req.controller());
 
-        // 获得构造函数
-        val cst: KFunction<*>? = clazz.kotlin.findConstructor(listOf(Request::class.java, Response::class.java))
-        if(cst == null)
-            throw RouteException ("Controller类无对应构造函数" + req.controller());
+        // 获得action方法
+        val action: KFunction<*>? = clazz.getActionMethod(req.action());
+        if (action == null)
+            throw RouteException ("控制器${req.controller()}不存在方法：${req.action()}");
 
         // 创建controller
-        val controller = cst.call(req, res);
-
-        // 获得action方法
-        val action: KFunction<*>? = clazz.kotlin.findFunction(req.action())
-        if (action == null)
-            throw RouteException ("类${clazz}不存在方法：$action");
+        val controller = clazz.constructer.call(req, res);
 
         // 调用controller的action方法
         action.call(controller);
     }
-
 
 }
