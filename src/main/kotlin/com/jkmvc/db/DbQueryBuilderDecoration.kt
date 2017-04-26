@@ -100,7 +100,8 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
         val sql: StringBuilder = StringBuilder(" ");
         // 逐个编译修饰表达式
         travelDecorationClauses { clause: IDbQueryBuilderDecorationClauses<*> ->
-            sql.append(clause.compile()).append(' ');
+            clause.compile(sql);
+            sql.append(' ');
         }
         return sql.toString();
     }

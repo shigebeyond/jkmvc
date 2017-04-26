@@ -35,7 +35,6 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
      * 编译一个子表达式
      *
      * @param array subexp
-     * @return string
      */
     public override fun compileSubexp(subexp: Pair<Array<Any?>, String>, sql: StringBuilder): Unit {
         val (exp, delimiter) = subexp;

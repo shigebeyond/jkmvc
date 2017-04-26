@@ -15,9 +15,8 @@ interface IDbQueryBuilderDecorationClauses<T>
 {
     /**
      * 编译多个子表达式
-     * @return string
      */
-    public fun compile():String;
+    public fun compile(sql:StringBuilder):Unit;
 
     /**
      * 添加一个子表达式+连接符
@@ -31,9 +30,8 @@ interface IDbQueryBuilderDecorationClauses<T>
     /**
      * 编译一个子表达式
      * @param unknown subexp
-     * @return
      */
-    public fun compileSubexp(subexp:T, sql:StringBuilder):Unit
+    public fun compileSubexp(subexp:T, sql:StringBuilder):Unit;
 
     /**
      * 开启一个分组

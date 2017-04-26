@@ -72,12 +72,14 @@ class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如w
      * 编译一个子表达式
      *
      * @param array subexp
-     * @return
      */
     public override fun compileSubexp(subexp: Any, sql: StringBuilder): Unit {
         // 子表达式是: string / DbQueryBuilderDecorationClausesSimple
-        // DbQueryBuilderDecorationClausesSimple 转字符串自动compile
-        sql.append(subexp);
+        if (subexp is DbQueryBuilderDecorationClausesSimple) {
+            subexp.compile(sql);
+        }else{
+            sql.append(subexp);
+        }
     }
 
 }

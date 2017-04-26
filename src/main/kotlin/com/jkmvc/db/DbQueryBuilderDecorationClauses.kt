@@ -26,19 +26,16 @@ abstract class DbQueryBuilderDecorationClauses<T>(protected val operator: String
 
     /**
      * 编译多个子表达式
-     * @return string
      */
-    public override fun compile(): String {
+    public override fun compile(sql:StringBuilder): Unit {
         if (subexps.isEmpty())
-            return ""; // toString() 必须返回字符串，不能返回null
+            return;
 
         // 逐个子表达式编译+合并
-        val sql: StringBuilder = StringBuilder(operator).append(' ');
+        sql.append(operator).append(' ');
         subexps.forEach {
             compileSubexp(it, sql);
         }
-
-        return sql.toString();
     }
 
     /**
@@ -49,13 +46,4 @@ abstract class DbQueryBuilderDecorationClauses<T>(protected val operator: String
         subexps.clear();
         return this;
     }
-
-    /**
-     * 转换字符串时, 直接编译
-     * @return string
-     */
-    public override fun toString(): String {
-        return compile ();
-    }
-
 }
