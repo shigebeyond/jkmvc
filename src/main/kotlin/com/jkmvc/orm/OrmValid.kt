@@ -36,12 +36,12 @@ abstract class OrmValid: OrmEntity() {
      * @return boolean
      */
     public override fun check(): Boolean {
-        /*// 逐个字段校验
+        // 逐个字段校验
         for ((column, exp) in rules) {
             val value: Any = this[column];
             var last: Any = value;
             // 校验单个字段: 字段值可能被修改
-            val (succ, message) = Validation.execute(exp, value, this, message)
+            val (succ, message) = Validation.execute(exp, value, this)
             if (!succ) {
                 val label: String = labels.getOrElse(column){ column }; // 字段标签（中文名）
                 throw OrmException(label + message);
@@ -50,7 +50,7 @@ abstract class OrmValid: OrmEntity() {
             // 更新被修改的字段值
             if (value !== last)
                 this[column] = value;
-        }*/
+        }
 
         return true;
     }

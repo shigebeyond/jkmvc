@@ -80,3 +80,22 @@ public fun String.trim(preffix:String, suffix:String): String {
         return this;
     return this.substring(start, end);
 }
+
+/**
+ * 替换字符串
+ *
+ * @param string str 字符串模板
+ * @param array params 参数
+ * @return string
+ */
+public fun String.replaces(params:List<String>):String
+{
+    return this.replace(":([\\w\\d]+)".toRegex()){ matches:MatchResult ->
+        val i = matches.groupValues[1]
+        val value = params.get(i.toInt());
+        if(value == null)
+            ""
+        else
+            value.toString()
+    };
+}
