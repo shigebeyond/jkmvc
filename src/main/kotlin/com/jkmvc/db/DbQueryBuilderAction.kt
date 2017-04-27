@@ -247,7 +247,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
         var sql: String = SqlTemplates[action]!!;
 
         // 1 填充表名/多个字段名/多个字段值
-        // 针对 select :columns from :table / insert into :table :columns values :values
+        // 针对 select :columns from :table / insert into :table :columns values :values / update :table
         sql = ":(table|columns|values)".toRegex().replace(sql) { result: MatchResult ->
             // 调用对应的方法: fillTable() / fillColumns() / fillValues()
             val method = getFieldFiller(result.groupValues[1]);
@@ -256,12 +256,13 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
 
         // 2 填充字段谓句
         // 针对 update :table set :column = :value
-        sql = ":column(.+):value".toRegex().replace(sql) { result: MatchResult ->
-            fillColumnPredicate(result.groupValues[1]);
-        };
-
+        if("update" == action)
+            sql = ":column(.+):value".toRegex().replace(sql) { result: MatchResult ->
+                fillColumnPredicate(result.groupValues[1]);
+            };
         // 3 填充distinct
-        sql = sql.replace(":distinct", if (distinct) "distinct" else "");
+        else if("select" == action)
+            sql = sql.replace(":distinct", if (distinct) "distinct" else "");
 
         sb.append(sql);
         return this;

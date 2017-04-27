@@ -74,8 +74,8 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
         // 动作子句 + 修饰子句
         val sql:StringBuilder = StringBuilder();
         this.action(action).compileAction(sql).compileDecoration(sql);
-        println(sql)
-        println(params)
+//        println(sql)
+//        println(params)
         return Pair(sql.toString(), params);
     }
 
