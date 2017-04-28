@@ -34,24 +34,17 @@ object Validation
 	 *
 	 * @param string exp 校验表达式
 	 * @param unknown value 要校验的数值，该值可能被修改
-	 * @param array data 其他参数
+	 * @param array data 变量
 	 * @return mixed
 	 */
-	public fun execute(exp:String, value:Any, data:Map<String, Any> = emptyMap()):Any?
+	public fun execute(exp:String, value:Any, binds:Map<String, Any?> = emptyMap()): Pair<Any?, ValidationUint?>
 	{
-		if(exp.isEmpty())
-			return value;
-		
 		// 编译
 		val expCompiled = expsCached.getOrPut(exp){
 			ValidationExpression(exp);
 		}
 		// 执行
-		val result = expCompiled.execute(value, data);
-		
-		// 构建结果消息
-
-		return result;
+		return expCompiled.execute(value, binds);
 	}
 	
 	/**
@@ -99,5 +92,5 @@ object Validation
 	public fun email(value:String): Boolean {
 		return "^[\\w\\-\\.]+@[\\w\\-]+(\\.\\w+)+".toRegex().matches(value);
 	}
-	
+
 }

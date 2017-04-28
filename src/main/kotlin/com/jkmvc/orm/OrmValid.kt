@@ -1,5 +1,6 @@
 package com.jkmvc.orm
 
+import com.jkmvc.validate.Validation
 import java.util.*
 
 /**
@@ -18,8 +19,8 @@ abstract class OrmValid: OrmEntity() {
          * 每个字段的校验规则
          * @var array
          */
-        protected val rules: MutableMap<String, Array<String>> by lazy {
-            LinkedHashMap<String, Array<String>>()
+        protected val rules: MutableMap<String, String> by lazy {
+            LinkedHashMap<String, String>()
         };
 
         /**
@@ -41,8 +42,8 @@ abstract class OrmValid: OrmEntity() {
             val value: Any = this[column];
             var last: Any = value;
             // 校验单个字段: 字段值可能被修改
-            val (succ, message) = Validation.execute(exp, value, this)
-            if (!succ) {
+            val (succ, message) = Validation.execute(exp, value, data)
+            if (succ == false) {
                 val label: String = labels.getOrElse(column){ column }; // 字段标签（中文名）
                 throw OrmException(label + message);
             }

@@ -66,9 +66,9 @@ class ValidationExpression(val exp:String)
 
 			val subexps:MutableList<ValidationUint> = LinkedList<ValidationUint>();
 			for(m in matches){
-				val op = m.groups[1]!!.value; // 操作符
+				val op = m.groups[1]?.value; // 操作符
 				val func = m.groups[2]!!.value; // 函数名
-				val params = m.groups[4]!!.value; // 函数参数
+				val params = m.groups[4]?.value; // 函数参数
 				subexps.add(ValidationUint(op, func, compileParams(params)));
 			}
 
@@ -81,7 +81,10 @@ class ValidationExpression(val exp:String)
 		 * @param params
 		 * @return array
 		 */
-		public fun compileParams(exp:String): List<String> {
+		public fun compileParams(exp:String?): List<String> {
+			if(exp == null)
+				return emptyList();
+
 			val matches: Sequence<MatchResult> = RegexParam.toRegex().findAll(exp);
 			val result:MutableList<String> = LinkedList<String>();
 			for(m in matches){
@@ -100,13 +103,6 @@ class ValidationExpression(val exp:String)
 	protected val subexps:List<ValidationUint> = compile(exp);
 
 	/**
-	* 获得最后一个子表达式
-	 */
-	public fun lastSubexp():ValidationUint{
-		return subexps.last();
-	}
-
-	/**
 	 * 执行校验表达式
 	 *
 	 * <code>
@@ -116,14 +112,14 @@ class ValidationExpression(val exp:String)
 	 *     result = exp->execute(value, data, lastsubexp);
 	 * </code>
 	 *
-	 * @param mixed value 要校验的数值，该值可能被修改
-	 * @param array|ArrayAccess data 其他参数
-	 * @return mixed
+	 * @param Any? value 要校验的数值，该值可能被修改
+	 * @param Map binds 变量
+	 * @return Pair
 	 */
-	public fun execute(v:Any?, data:Map<String, Any>):Any?
+	public fun execute(v:Any?, binds:Map<String, Any?> = emptyMap()):Pair<Any?, ValidationUint?>
 	{
 		if(subexps.isEmpty())
-			return null;
+			return Pair(v, null);
 
 		// 逐个运算子表达式
 		var result:Any? = null;
@@ -134,14 +130,14 @@ class ValidationExpression(val exp:String)
 
 			// 短路
 			if(isShortReturn(op, result))
-				return result;
+				return Pair(result, subexp);
 
 			// 累积结果运算: 当前结果 result 作为下一参数 value
 			if(op === ">")
 				value = result;
 
 			// 运算子表达式
-			val curr = subexp.execute(value, data);
+			val curr = subexp.execute(value, binds);
 
 			// 处理结果
 			when (op)
@@ -160,16 +156,16 @@ class ValidationExpression(val exp:String)
 
 			// 短路
 			if(isShortReturn(op, result))
-				return result;
+				return Pair(result, subexp);
 		}
 
-		return result;
+		return Pair(result, null);
 	}
 
 	/**
 	* 是否短路
 	 */
-	protected fun isShortReturn(op: String, result: Any?):Boolean{
+	protected fun isShortReturn(op: String?, result: Any?):Boolean{
 		return (op == "&&" && result == false || op == "||" && result == true)
 	}
 }
