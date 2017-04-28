@@ -138,8 +138,7 @@ abstract class OrmPersistent: OrmValid() {
 			throw OrmException("删除对象[$this]前先检查是否存在");
 
 		//　校验
-		if(!check())
-			return false;
+		check();
 
 		// 删除数据
 		val result = queryBuilder().where(metadata.primaryKey, pk).delete();
