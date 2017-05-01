@@ -36,7 +36,7 @@ class ValidationExpression(val exp:String)
 		 * 函数的正则
 		 * @var string
 		 */
-		val RegexFunc:String = "(\\w+)(\\(([\\w\\d:,]*)\\))?";
+		val RegexFunc:String = "(\\w+)(\\(([\\s\\w\\d-:,]*)\\))?";
 
 		/**
 		* 表达式的正则
@@ -47,7 +47,7 @@ class ValidationExpression(val exp:String)
 		 * 函数参数的正则
 		 * @var string
 		 */
-		val RegexParam:String = "([\\w\\d:]+),?";
+		val RegexParam:String = "([\\w\\d-:]+),?";
 
 		/**
 		 * 编译 表达式

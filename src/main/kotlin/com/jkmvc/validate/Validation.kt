@@ -4,6 +4,7 @@ import java.util.*
 
 /**
  * 校验器
+ *   其校验方法是要被ValidationUnit调用的，通过反射来调用，反射时不能识别参数的默认值，因此在定义校验方法时不要设置参数默认值
  *
  * @Package packagename 
  * @category 
@@ -46,20 +47,20 @@ object Validation
 		// 执行
 		return expCompiled.execute(value, binds);
 	}
-	
+
 	/**
 	 * 检查非空
-	 * 
+	 *
 	 * @param unknown value
 	 * @return bool
 	 */
 	public fun notEmpty(value:String): Boolean {
 		return value.isEmpty();
 	}
-	
+
 	/**
 	 * 检查长度
-	 * 
+	 *
 	 * @param unknown value
 	 * @param int min
 	 * @param int max
@@ -69,7 +70,7 @@ object Validation
 		val len = value.length
 		return len >= min && (max > -1 || len <= max);
 	}
-	
+
 	/**
 	 * 检查是否在某个范围内
 	 *
@@ -83,7 +84,7 @@ object Validation
 		return (value >= min && value <= max) // 是否在范围内
 						&& ((value - min) % step === 0); // 是否间隔指定步长
 	}
-	
+
 	/**
 	 * 检查是否邮件格式
 	 * @param String value
@@ -93,4 +94,50 @@ object Validation
 		return "^[\\w\\-\\.]+@[\\w\\-]+(\\.\\w+)+".toRegex().matches(value);
 	}
 
+	/**
+	 * 删除两边的空白字符
+	 */
+	public fun trim(value:String): String {
+		return  value.trim()
+	}
+
+
+	/**
+	 * 转换为大写
+	 */
+	public fun toUpperCase(value:String): String {
+		return  value.toUpperCase();
+	}
+
+	/**
+	 * 转换为小写
+	 */
+	public fun toLowerCase(value:String): String {
+		return  value.toLowerCase();
+	}
+
+
+	/**
+	 * 截取子字符串
+	 * @param int startIndex 开始的位置
+	 * @param int endIndex 结束的位置，如果为-1，则到末尾
+	 * @return string
+	 */
+	public fun substring(value:String, startIndex: Int, endIndex: Int): String {
+		return value.substring(startIndex, if(endIndex == -1) value.length else endIndex);
+	}
+
+	/**
+	 * 以..开头
+	 */
+	public fun startsWith(value:String, prefix: CharSequence, ignoreCase: Boolean = false): Boolean {
+		return value.startsWith(prefix, ignoreCase);
+	}
+
+	/**
+	 * 以..结尾
+	 */
+	public fun endsWith(value:String, suffix: CharSequence, ignoreCase: Boolean = false): Boolean {
+		return value.endsWith(suffix, ignoreCase);
+	}
 }
