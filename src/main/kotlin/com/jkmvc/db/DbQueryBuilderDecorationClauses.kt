@@ -1,7 +1,7 @@
 package com.jkmvc.db
 
 import java.util.*
-import kotlin.jvm.internal.FunctionImpl
+import kotlin.reflect.KCallable
 
 /**
  * sql修饰子句的模拟构建
@@ -14,7 +14,7 @@ import kotlin.jvm.internal.FunctionImpl
  * @date 2016-10-13
  *
  */
-abstract class DbQueryBuilderDecorationClauses<T>(protected val operator: String /* 修饰符， 如where/group by */, protected val elementHandlers: Array<FunctionImpl?> /* 每个元素的处理器, 可视为列的处理*/)
+abstract class DbQueryBuilderDecorationClauses<T>(protected val operator: String /* 修饰符， 如where/group by */, protected val elementHandlers: Array<((Any?) -> String)?> /* 每个元素的处理器, 可视为列的处理*/)
 : IDbQueryBuilderDecorationClauses<T> {
     /**
      * 子表达式, 可视为行

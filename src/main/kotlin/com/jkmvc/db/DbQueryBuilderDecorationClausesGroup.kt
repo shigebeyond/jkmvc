@@ -1,6 +1,7 @@
 package com.jkmvc.db
 
-import kotlin.jvm.internal.FunctionImpl
+import kotlin.reflect.KCallable
+
 
 /**
  * 分组子句
@@ -16,7 +17,7 @@ import kotlin.jvm.internal.FunctionImpl
  * @date 2016-10-13
  *
  */
-class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如where/group by */, elementHandlers: Array<FunctionImpl?> /* 每个元素的处理器, 可视为列的处理*/)
+class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如where/group by */, elementHandlers: Array<((Any?) -> String)?> /* 每个元素的处理器, 可视为列的处理*/)
 : DbQueryBuilderDecorationClauses<Any>/* subexps 是字符串 或 DbQueryBuilderDecorationClausesSimple */(operator, elementHandlers) {
     /**
      * 开启一个分组

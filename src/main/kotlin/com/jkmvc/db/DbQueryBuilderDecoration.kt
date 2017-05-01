@@ -1,7 +1,7 @@
 package com.jkmvc.db
 
 import java.util.*
-import kotlin.jvm.internal.FunctionImpl
+import kotlin.reflect.KCallable
 
 /**
  * sql构建器 -- 修饰子句: 由修饰词where/group by/order by/limit来构建的子句
@@ -16,8 +16,8 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * 转义列
      */
-    protected val columnQuoter: (String) -> String = { value: String ->
-        db.quoteColumn(value);
+    protected val columnQuoter: (Any?) -> String = { value: Any? ->
+        db.quoteColumn(value as String);
     }
 
     /**
@@ -30,12 +30,12 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * 转义表
      */
-    protected val tableQuoter: (String) -> String = { value: String ->
-        db.quoteTable(value);
+    protected val tableQuoter: (Any?) -> String = { value: Any? ->
+        db.quoteTable(value as String);
     }
 
-    protected val orderDirection: (String?) -> String = { value: String? ->
-        if (value != null && "^(ASC|DESC)$".toRegex().matches(value))
+    protected val orderDirection: (Any?) -> String = { value: Any? ->
+        if (value != null && "^(ASC|DESC)$".toRegex().matches(value as String))
             value;
         else
             "";
@@ -64,15 +64,15 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
         return clauses.getOrPut(name){
             when(name) {
                 //条件数组, 每个条件 = 字段名 + 运算符 + 字段值
-                "where" -> DbQueryBuilderDecorationClausesGroup("WHERE", arrayOf<FunctionImpl?>(columnQuoter as FunctionImpl, null, valueQuoter as FunctionImpl));
+                "where" -> DbQueryBuilderDecorationClausesGroup("WHERE", arrayOf<((Any?) -> String)?>(columnQuoter, null, valueQuoter));
                 //字段数组
-                "groupBy" -> DbQueryBuilderDecorationClausesSimple("GROUP BY", arrayOf<FunctionImpl?>(columnQuoter as FunctionImpl));
+                "groupBy" -> DbQueryBuilderDecorationClausesSimple("GROUP BY", arrayOf<((Any?) -> String)?>(columnQuoter));
                 //条件数组, 每个条件 = 字段名 + 运算符 + 字段值
-                "having" -> DbQueryBuilderDecorationClausesGroup("HAVING", arrayOf<FunctionImpl?>(columnQuoter as FunctionImpl, null, valueQuoter as FunctionImpl));
+                "having" -> DbQueryBuilderDecorationClausesGroup("HAVING", arrayOf<((Any?) -> String)?>(columnQuoter, null, valueQuoter));
                 //排序数组, 每个排序 = 字段+方向
-                "orderBy" -> DbQueryBuilderDecorationClausesSimple("ORDER BY", arrayOf<FunctionImpl?>(columnQuoter as FunctionImpl, orderDirection as FunctionImpl));
+                "orderBy" -> DbQueryBuilderDecorationClausesSimple("ORDER BY", arrayOf<((Any?) -> String)?>(columnQuoter, orderDirection));
                 //行限数组 limit, offset
-                "limit" -> DbQueryBuilderDecorationClausesSimple("LIMIT", arrayOf<FunctionImpl?>(null));
+                "limit" -> DbQueryBuilderDecorationClausesSimple("LIMIT", arrayOf<((Any?) -> String)?>(null));
                 else -> throw RuntimeException("未知修饰词[$name]");
             }
         }
@@ -437,11 +437,11 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      */
     public override fun join(table: Any, type: String?): IDbQueryBuilder {
         // join　子句
-        val j = DbQueryBuilderDecorationClausesGroup("$type JOIN", arrayOf<FunctionImpl?>(tableQuoter as FunctionImpl));
+        val j = DbQueryBuilderDecorationClausesGroup("$type JOIN", arrayOf<((Any?) -> String)?>(tableQuoter));
         j.addSubexp(arrayOf<Any?>(table));
 
         // on　子句
-        val on = DbQueryBuilderDecorationClausesGroup("ON", arrayOf<FunctionImpl?>(columnQuoter as FunctionImpl, null, columnQuoter as FunctionImpl));
+        val on = DbQueryBuilderDecorationClausesGroup("ON", arrayOf<((Any?) -> String)?>(columnQuoter, null, columnQuoter));
 
         join.add(j);
         join.add(on);

@@ -1,6 +1,6 @@
 package com.jkmvc.db
 
-import kotlin.jvm.internal.FunctionImpl
+import kotlin.reflect.KCallable
 
 /**
  * 简单的(sql修饰)子句
@@ -16,7 +16,7 @@ import kotlin.jvm.internal.FunctionImpl
  * @date 2016-10-13
  *
  */
-class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如where/group by */, elementHandlers: Array<FunctionImpl?> /* 每个元素的处理器, 可视为列的处理*/)
+class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如where/group by */, elementHandlers: Array<((Any?) -> String)?> /* 每个元素的处理器, 可视为列的处理*/)
 : DbQueryBuilderDecorationClauses<Pair<Array<Any?>, String>>/* subexps 是子表达式+连接符 */(operator, elementHandlers) {
     /**
      * 添加一个子表达式+连接符
@@ -40,11 +40,11 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
         val (exp, delimiter) = subexp;
         // 遍历处理器来处理对应元素, 没有处理的元素也直接拼接
         for (i in elementHandlers.indices) {
-            val handler: FunctionImpl? = elementHandlers[i];
+            val handler: ((Any?) -> String)? = elementHandlers[i];
             // 处理某个元素的值
             var value: Any? = exp[i];
             if (exp.size > i && handler != null) {
-                value = handler.invoke(exp[i]); // 调用元素处理函数
+                value = handler?.invoke(exp[i]); // 调用元素处理函数
             }
             sql.append(value).append(' '); // // 用空格拼接多个元素
         }
