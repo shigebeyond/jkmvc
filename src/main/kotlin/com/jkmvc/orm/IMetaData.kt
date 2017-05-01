@@ -2,7 +2,6 @@ package com.jkmvc.orm
 
 import com.jkmvc.db.Db
 import com.jkmvc.db.IDbQueryBuilder
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
 /**
@@ -37,9 +36,19 @@ interface IMetaData{
     val defaultForeignKey:String
 
     /**
-     * 每个字段的关联关系
+     * 关联关系
      */
-    val relations:ConcurrentHashMap<String, IMetaRelation>
+    val relations: MutableMap<String, IMetaRelation>
+
+    /**
+     * 每个字段的规则
+     */
+    val rules: MutableMap<String, String>
+
+    /**
+     * 每个字段的标签
+     */
+    val labels: MutableMap<String, String>
 
     /**
      * 数据库
@@ -65,6 +74,16 @@ interface IMetaData{
      * 获得orm查询构建器
      */
     fun queryBuilder(): OrmQueryBuilder;
+
+    /**
+     * 添加规则
+     */
+    fun addRule(name: String, rule: String): MetaData;
+
+    /**
+     * 添加标签
+     */
+    fun addLabel(name: String, label: String): MetaData;
 
     /**
      * 生成属性代理 + 设置关联关系(belongs to)

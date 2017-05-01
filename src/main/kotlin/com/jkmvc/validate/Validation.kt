@@ -72,6 +72,42 @@ object Validation
 	}
 
 	/**
+	 * 检查最小值
+	 *
+	 * @param string value
+	 * @param int min 最小值
+	 * @param int max 最大值
+	 * @return  bool
+	 */
+	public fun min(value:Int, min:Int): Boolean {
+		return value >= min
+	}
+
+	/**
+	 * 检查最大值
+	 *
+	 * @param string value
+	 * @param int min 最小值
+	 * @param int max 最大值
+	 * @return  bool
+	 */
+	public fun max(value:Int, max:Int): Boolean {
+		return value <= max
+	}
+
+	/**
+	 * 检查是否在某个范围内
+	 *
+	 * @param string value
+	 * @param int min 最小值
+	 * @param int max 最大值
+	 * @return  bool
+	 */
+	public fun between(value:Int, min:Int, max:Int): Boolean {
+		return value >= min && value <= max
+	}
+
+	/**
 	 * 检查是否在某个范围内
 	 *
 	* @param string value
@@ -92,6 +128,20 @@ object Validation
 	 */
 	public fun email(value:String): Boolean {
 		return "^[\\w\\-\\.]+@[\\w\\-]+(\\.\\w+)+".toRegex().matches(value);
+	}
+
+	/**
+	 * 检查是否数字，不包含.-
+	 */
+	public fun digit(value:String): Boolean{
+		return "^\\d+$".toRegex().matches(value);
+	}
+
+	/**
+	 * 检查是否数值，包含.-
+	 */
+	public fun numeric(value:String): Boolean{
+		return "^-?\\d+(\\.\\d+)?$".toRegex().matches(value);
 	}
 
 	/**
