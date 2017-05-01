@@ -1,12 +1,13 @@
 package com.jkmvc.common
 
-import java.util.LinkedList
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl
+import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import kotlin.reflect.KParameter
+import kotlin.reflect.full.memberFunctions
+import kotlin.reflect.full.staticFunctions
 import kotlin.reflect.jvm.javaType
-import kotlin.reflect.memberFunctions
-import kotlin.reflect.staticFunctions
 
 /****************************** 反射扩展 *******************************/
 /**
@@ -69,4 +70,11 @@ public fun KClass<*>.findConstructor(paramTypes:List<Class<*>> = emptyList()): K
     return constructors.find {
         it.matches("<init>", paramTypes); // 构造函数的名称为 <init>
     }
+}
+
+/**
+ * 转换参数类型
+ */
+public fun KParameter.convert(value: String): Any {
+    return value.to(this.type)
 }
