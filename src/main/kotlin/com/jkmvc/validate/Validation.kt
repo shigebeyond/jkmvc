@@ -54,19 +54,19 @@ object Validation
 	 * @param unknown value
 	 * @return bool
 	 */
-	public fun notEmpty(value:String): Boolean {
-		return value.isEmpty();
+	public fun notEmpty(value:String?): Boolean {
+		return value != null && !value.isEmpty();
 	}
 
 	/**
 	 * 检查长度
 	 *
 	 * @param unknown value
-	 * @param int min
-	 * @param int max
+	 * @param int min 最小长度
+	 * @param int max 最大长度，如果为-1，则不检查最大长度
 	 * @return bool
 	 */
-	public fun length(value:String, min:Int, max:Int = -1): Boolean {
+	public fun length(value:String, min:Int, max:Int): Boolean {
 		val len = value.length
 		return len >= min && (max > -1 || len <= max);
 	}
@@ -80,7 +80,7 @@ object Validation
 	* @param int step 步长
 	* @return  bool
 	*/
-	public fun range(value:Int, min:Int, max:Int, step:Int = 1): Boolean {
+	public fun range(value:Int, min:Int, max:Int, step:Int): Boolean {
 		return (value >= min && value <= max) // 是否在范围内
 						&& ((value - min) % step === 0); // 是否间隔指定步长
 	}
