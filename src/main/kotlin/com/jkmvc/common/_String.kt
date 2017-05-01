@@ -1,7 +1,8 @@
 package com.jkmvc.common
 
-import java.text.ParseException
 import java.util.*
+import kotlin.reflect.KClass
+import kotlin.reflect.KType
 
 /****************************** 字符串扩展 *******************************/
 /**
@@ -117,4 +118,26 @@ public fun String.replaces(params:Map<String, Any?>):String
         else
             value.toString()
     };
+}
+
+/**
+ * 将字符串转换为指定类型
+ */
+public fun <T: Any> String.to(clazz: KClass<T>): T{
+    var result: Any?;
+    when(clazz){
+        Int::class -> result = this.toInt()
+        Float::class -> result = this.toFloat()
+        Double::class -> result = this.toDouble()
+        Boolean::class -> result = this.toBoolean()
+        else -> result = this;
+    }
+    return result as T;
+}
+
+/**
+ * 将字符串转换为指定类型
+ */
+public fun String.to(type: KType): Any{
+    return this.to(type.classifier as KClass<*>)
 }
