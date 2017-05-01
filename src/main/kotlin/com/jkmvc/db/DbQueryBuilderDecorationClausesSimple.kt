@@ -1,7 +1,5 @@
 package com.jkmvc.db
 
-import kotlin.reflect.KCallable
-
 /**
  * 简单的(sql修饰)子句
  *

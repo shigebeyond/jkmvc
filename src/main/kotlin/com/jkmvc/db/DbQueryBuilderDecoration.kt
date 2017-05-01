@@ -1,7 +1,6 @@
 package com.jkmvc.db
 
 import java.util.*
-import kotlin.reflect.KCallable
 
 /**
  * sql构建器 -- 修饰子句: 由修饰词where/group by/order by/limit来构建的子句

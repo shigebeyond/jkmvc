@@ -1,7 +1,6 @@
 package com.jkmvc.db
 
 import java.util.*
-import kotlin.reflect.KCallable
 
 /**
  * sql修饰子句的模拟构建
