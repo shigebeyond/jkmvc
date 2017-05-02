@@ -71,7 +71,6 @@ class MyTests{
         for(m in String.javaClass.methods)
             println(m.name)
     }
-    */
 
     @Test
     fun testType(){
@@ -80,6 +79,7 @@ class MyTests{
         println(type.javaClass)
         println(type.classifier)
     }
+*/
 
     @Test
     fun testTo(){
@@ -87,6 +87,13 @@ class MyTests{
         println("123.45".to(Float::class))
         println("123.4567".to(Double::class))
         println("true".to(Boolean::class))
+    }
+
+    @Test
+    fun testPattern(){
+        val reg = "^\\d+$".toRegex()
+        println(reg.matches("123"));
+        println(reg.matches("123#"));
     }
 }
 

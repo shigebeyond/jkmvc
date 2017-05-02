@@ -114,7 +114,7 @@ class ValidationExpression(val exp:String)
 	 *
 	 * @param Any? value 要校验的数值，该值可能被修改
 	 * @param Map binds 变量
-	 * @return Pair
+	 * @return Pair 结果+最后一个校验单元
 	 */
 	public fun execute(v:Any?, binds:Map<String, Any?> = emptyMap()):Pair<Any?, ValidationUint?>
 	{
@@ -159,7 +159,7 @@ class ValidationExpression(val exp:String)
 				return Pair(result, subexp);
 		}
 
-		return Pair(result, null);
+		return Pair(result, subexps.last());
 	}
 
 	/**

@@ -21,7 +21,14 @@ object Validation
 	val messages:Map<String, String> = mapOf(
 			"notempty" to "不能为空",
 			"length" to "的长度必须在:0到:1之间",
-			"range" to "的数值必须是:0到:1之间的整数"
+			"range" to "的数值必须是:0到:1之间的整数",
+			"min" to "的数值必须不少于:0",
+			"max" to "的数值必须不大于:0",
+			"between" to "的数值必须是:0到:1之间的整数",
+			"digit" to "的数值必须是数字",
+			"numeric" to "的数值必须是数值",
+			"startsWith" to "必须以:0开头",
+			"endsWith" to "必须以:0结尾"
 	);
 
 	/**
@@ -36,7 +43,7 @@ object Validation
 	 * @param string exp 校验表达式
 	 * @param unknown value 要校验的数值，该值可能被修改
 	 * @param array data 变量
-	 * @return mixed
+	 * @return Pair
 	 */
 	public fun execute(exp:String, value:Any, binds:Map<String, Any?> = emptyMap()): Pair<Any?, ValidationUint?>
 	{
@@ -145,6 +152,20 @@ object Validation
 	}
 
 	/**
+	 * 以..开头
+	 */
+	public fun startsWith(value:String, prefix: CharSequence, ignoreCase: Boolean = false): Boolean {
+		return value.startsWith(prefix, ignoreCase);
+	}
+
+	/**
+	 * 以..结尾
+	 */
+	public fun endsWith(value:String, suffix: CharSequence, ignoreCase: Boolean = false): Boolean {
+		return value.endsWith(suffix, ignoreCase);
+	}
+
+	/**
 	 * 删除两边的空白字符
 	 */
 	public fun trim(value:String): String {
@@ -175,19 +196,5 @@ object Validation
 	 */
 	public fun substring(value:String, startIndex: Int, endIndex: Int): String {
 		return value.substring(startIndex, if(endIndex == -1) value.length else endIndex);
-	}
-
-	/**
-	 * 以..开头
-	 */
-	public fun startsWith(value:String, prefix: CharSequence, ignoreCase: Boolean = false): Boolean {
-		return value.startsWith(prefix, ignoreCase);
-	}
-
-	/**
-	 * 以..结尾
-	 */
-	public fun endsWith(value:String, suffix: CharSequence, ignoreCase: Boolean = false): Boolean {
-		return value.endsWith(suffix, ignoreCase);
 	}
 }

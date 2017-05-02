@@ -145,7 +145,7 @@ class OrmTests{
         val user = UserModel(id)
         val address = AddressModel()
         address.addr = "nanning"
-        address.tel = "110"
+        address.tel = "110a"
         address.user = user;
         address.create()
         println("创建地址: $address")

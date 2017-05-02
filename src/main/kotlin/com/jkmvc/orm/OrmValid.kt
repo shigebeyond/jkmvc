@@ -23,10 +23,10 @@ abstract class OrmValid: OrmEntity() {
             val value: Any = this[column];
             var last: Any = value;
             // 校验单个字段: 字段值可能被修改
-            val (succ, message) = Validation.execute(exp, value, data)
+            val (succ, uint) = Validation.execute(exp, value, data)
             if (succ == false) {
                 val label: String = metadata.labels.getOrElse(column){ column }; // 字段标签（中文名）
-                throw OrmException(label + message);
+                throw OrmException(label + uint?.message());
             }
 
             // 更新被修改的字段值
