@@ -8,8 +8,8 @@ import javax.servlet.http.HttpServletResponse
 
 class JkFilter : Filter {
 
-    override fun init(filterConfig: FilterConfig?) {
-
+    override fun init(filterConfig: FilterConfig) {
+        val debug: Boolean = "true" == filterConfig.getInitParameter("configClass");
     }
 
     override fun doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) {
