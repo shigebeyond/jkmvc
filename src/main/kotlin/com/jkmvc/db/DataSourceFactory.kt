@@ -28,7 +28,7 @@ class DataSourceFactory {
          * 构建数据源
          */
         protected fun buildDruidDataSource(name:String): DruidDataSource {
-            val config: Config = Config.instance("$name.properties")!!;
+            val config: Config = Config.instance(name)!!;
             val ds: DruidDataSource = DruidDataSource()
 
             // 基本属性 url、user、password

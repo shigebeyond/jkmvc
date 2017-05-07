@@ -38,8 +38,9 @@ class Config {
          * @param encoding the encoding
          */
         public fun instance(fileName: String, encoding: String = "UTF-8"): Config? {
-            return configs.getOrPut(fileName){
-                Config(fileName, encoding)
+            val fullName = "$fileName.properties";
+            return configs.getOrPut(fullName){
+                Config(fullName, encoding)
             }
         }
     }
@@ -47,15 +48,15 @@ class Config {
     protected lateinit var props: Properties;
 
     /**
-     * Prop constructor
+     * Config constructor
      *
      *
      * Example:
-     * Prop prop = new Prop("my_config.txt", "UTF-8");
-     * String userName = prop.get("userName");
+     * Config config = new Config("my_config.txt", "UTF-8");
+     * String userName = config.get("userName");
 
-     * prop = new Prop("com/jfinal/file_in_sub_path_of_classpath.txt", "UTF-8");
-     * String value = prop.get("key");
+     * config = new Config("com/jfinal/file_in_sub_path_of_classpath.txt", "UTF-8");
+     * String value = config.get("key");
 
      * @param fileName the properties file's name in classpath or the sub directory of classpath
      * *
