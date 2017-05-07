@@ -61,6 +61,25 @@ dependencies {
     testCompile 'ru.yandex.qatools.embed:postgresql-embedded:1.13'
 }
 
+/*sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java', 'src/main/kotlin']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+    test {
+        java {
+            srcDirs = ['src/test/java', 'src/test/kotlin']
+        }
+        resources {
+            srcDirs = ['src/test/resources']
+        }
+    }
+}*/
+
 jettyRun{
     webAppSourceDirectory file("$projectDir/src/main/webapp")
     httpPort 8081
