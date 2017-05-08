@@ -48,6 +48,9 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	 * @return bool
 	 */
 	public fun parseRoute(): Boolean {
+		// 中文编码
+		req.characterEncoding = "UTF-8";
+
 		// 解析路由
 		val result = Router.parse(requestURI);
 

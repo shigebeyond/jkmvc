@@ -104,6 +104,8 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	 */
 	public fun render(content:String):Unit
 	{
+		// 中文编码
+		res.characterEncoding = "UTF-8";
 		res.writer.print(content);
 	}
 
@@ -114,6 +116,8 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	 */
 	public fun render(file: File):Unit
 	{
+		// 中文编码
+		res.characterEncoding = "UTF-8";
 
 		//通知客户端文件的下载    URLEncoder.encode解决文件名中文的问题
 		res.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(file.name, "utf-8"))
