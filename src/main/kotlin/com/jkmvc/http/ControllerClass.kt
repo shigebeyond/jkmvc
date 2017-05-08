@@ -1,6 +1,7 @@
 package com.jkmvc.http
 
 import com.jkmvc.common.findConstructor
+import com.jkmvc.common.lcFirst
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -26,8 +27,9 @@ class ControllerClass(public val clazz: KClass<*> /* controller类 */){
     init{
         // 获得所有action方法
         for (func in clazz.memberFunctions) {
-            if(func.name.startsWith("action_")) {
-                actions[func.name.substring(7)] = func;
+            if(func.name.startsWith("action")) {
+                val name = func.name.substring(6).lcFirst() // 首字母小写
+                actions[name] = func;
             }
         }
     }
