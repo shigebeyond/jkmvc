@@ -92,8 +92,9 @@ class MyTests{
     @Test
     fun testPattern(){
         val reg = "^\\d+$".toRegex()
-        println(reg.matches("123"));
-        println(reg.matches("123#"));
+//        println(reg.matches("123"));
+//        println(reg.matches("123#"));
+        println("hello".endsWith("")); // true
     }
 }
 
