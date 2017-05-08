@@ -102,14 +102,14 @@ class Route(protected val regex:String /* 原始正则: <controller>(\/<action>(
 	protected fun buildGroupRangs():List<GroupRange>{
 		// 计算所有子正则的范围
 		val rangs:MutableList<GroupRange> = ArrayList<GroupRange>();
-		var level:Int = -1;
+		val levels:MutableList<Int> = ArrayList<Int>();
 		for(i in 0..(groupRegex.length - 1)){
 			if(groupRegex[i] == '('){ // 子正则开始
-				rangs.add(GroupRange(i, -1))
-				level++;
+				levels.add(rangs.size); // 层级 + 1
+				rangs.add(GroupRange(i + 1, -1)) // 记录(开始
 			}else if(groupRegex[i] == ')'){ // 子正则结束
-				rangs[level].end = i
-				level--;
+				val level = levels.removeAt(levels.lastIndex) // // 层级 - 1
+				rangs[level].end = i // 记录)结束
 			}
 		}
 		return rangs;
@@ -126,7 +126,7 @@ class Route(protected val regex:String /* 原始正则: <controller>(\/<action>(
 			val paramRange = param.range // 参数的范围
 			val paramName = param.value // 参数名
 			val i = findGroupRang(paramRange) // 找到参数在哪个子正则中
-			mapping[paramName] = i;
+			mapping[paramName] = i + 1; // 匹配结果从1开始
 		}
 
 		return mapping;
@@ -161,7 +161,9 @@ class Route(protected val regex:String /* 原始正则: <controller>(\/<action>(
 		if(defaults != null)// 默认参数值
 			params.putAll(defaults);
 		for((name, group) in paramGroupMapping){ // 匹配的参数值
-			params[name] = matches.groupValues[group];
+			val value = matches.groupValues[group]
+			if(value != "")
+				params[name] = value;
 		}
 		return params;
 	}
