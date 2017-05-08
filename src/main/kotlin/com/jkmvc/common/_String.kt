@@ -79,6 +79,8 @@ public fun String.trim(preffix:String, suffix:String): String {
         end = length - suffix.length;
     if(start == 0 && end == length)
         return this;
+    if(start >= end)
+        return "";
     return this.substring(start, end);
 }
 
