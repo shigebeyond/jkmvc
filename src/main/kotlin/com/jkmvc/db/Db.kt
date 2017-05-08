@@ -9,7 +9,7 @@ import java.util.*
 /**
  * 封装db操作
  */
-class Db(protected val conn: Connection /* 数据库连接 */, protected val name:String = "database" /* 标识 */):IDb{
+class Db(protected val conn: Connection /* 数据库连接 */, protected val name:String = "default" /* 标识 */):IDb{
 
     companion object {
         /**
@@ -22,7 +22,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
         /**
          * 获得db
          */
-        public fun getDb(name:String = "database"):Db{
+        public fun getDb(name:String = "default"):Db{
             return dbs.get().getOrPut(name){
                 //获得数据源
                 val dataSource  = DataSourceFactory.getDruidDataSource(name);

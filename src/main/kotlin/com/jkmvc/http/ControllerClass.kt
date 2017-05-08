@@ -4,7 +4,7 @@ import com.jkmvc.common.findConstructor
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
-import kotlin.reflect.memberFunctions
+import kotlin.reflect.full.memberFunctions
 
 /**
  * 封装Controller类
