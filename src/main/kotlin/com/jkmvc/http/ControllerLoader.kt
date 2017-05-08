@@ -1,5 +1,6 @@
 package com.jkmvc.http
 
+import com.jkmvc.common.lcFirst
 import com.jkmvc.common.travel
 import com.jkmvc.common.trim
 import java.io.File
@@ -60,21 +61,23 @@ object ControllerLoader{
             val resource = cld.getResource(path) ?: throw ClassNotFoundException("No resource for " + path)
 
             // 获得指定包的目录
-            val directory = File(resource.file)
+            val dir = File(resource.file)
+            val dirPath = dir.absolutePath + "/"
 
             // 获得包下的类
-            directory.travel { file:File ->
+            dir.travel { file:File ->
                 // 过滤Controller的类文件
                 if(file.name.endsWith("Controller.class")){
                     // 去掉 .class 后缀
-                    var name = file.absolutePath.trim(directory.absolutePath, "Controller.class")
+                    var name = file.absolutePath.trim(dirPath, "Controller.class")
                     // 获得类
-                    val clazz = Class.forName(pck + '.' + name.replace('.', '/'))
+                    val className = pck + '.' + name.replace('.', '/') + "Controller"
+                    val clazz = Class.forName(className)
                     // 过滤Controller子类
                     val ctrl = Controller::class.java
                     if(ctrl != clazz && ctrl.isAssignableFrom(clazz)){
                         // 收集controller的构造函数+所有action方法
-                        controllers.put(name, ControllerClass(clazz.kotlin))
+                        controllers.put(name.lcFirst() /* 首字母小写 */, ControllerClass(clazz.kotlin))
                     }
                 }
             }
