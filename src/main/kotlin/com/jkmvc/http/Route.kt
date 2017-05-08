@@ -43,7 +43,7 @@ data class GroupRange(var start:Int, var end:Int){
  * @param array params 参数的正则
  * @return  string
  */
-class Route(protected val regex:String /* 原始正则: <controller>(\/<action>(\/<id>)?)? */, protected val paramRegex:Map<String, String>? /* 参数的子正则 */, protected val defaults:Map<String, String>? /* 参数的默认值 */){
+class Route(protected val regex:String /* 原始正则: <controller>(\/<action>(\/<id>)?)? */, protected val paramRegex:Map<String, String> = emptyMap() /* 参数的子正则 */, protected val defaults:Map<String, String>? /* 参数的默认值 */ = null){
 
 	companion object{
 		/**
@@ -148,19 +148,18 @@ class Route(protected val regex:String /* 原始正则: <controller>(\/<action>(
 	 * 检查uri是否匹配路由正则
 	 *
 	 * @param string uri
-	 * @return boolean|array
+	 * @return Map? 如果为null，则没有匹配
 	 */
 	public fun match(uri:String):Map<String, String>?{
 		// 匹配uri
-		val matches:MatchResult? = compileRegex.toRegex().find(uri.trim("/")) // 去掉两头的/
+		val matches:MatchResult? = compileRegex.toRegex().find(uri)
 		if(matches == null)
-			return null;
+			return defaults;
 
 		//返回 默认参数值 + 匹配的参数值
 		val params: MutableMap<String, String> = HashMap<String, String>();
-		if(defaults != null){ // 默认参数值
+		if(defaults != null)// 默认参数值
 			params.putAll(defaults);
-		}
 		for((name, group) in paramGroupMapping){ // 匹配的参数值
 			params[name] = matches.groupValues[group];
 		}
