@@ -1,6 +1,7 @@
 package com.jkmvc.http
 
 import java.util.*
+import com.jkmvc.common.trim
 
 /**
  * 路由器
@@ -15,6 +16,12 @@ import java.util.*
  */
 object Router
 {
+	/**
+	* 根url，不作为路由解析
+	 * @var string
+	 */
+	public var baseUrl:String = "/";
+
 	/**
 	 * 全部路由规则
 	 * @var array
@@ -37,10 +44,11 @@ object Router
 	 */
 	public fun parse(uri:String):Pair<Map<String, String>, Route>?
 	{
+		val cleanUri = uri.trim(baseUrl, "/");
 		// 逐个匹配路由规则
 		for((name, route) in routes){
 			//匹配路由规则
-			val params = route.match(uri);
+			val params = route.match(cleanUri);
 			if(params != null)
 				return Pair(params, route);
 		}

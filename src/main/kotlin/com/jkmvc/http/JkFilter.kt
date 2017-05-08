@@ -6,10 +6,11 @@ import javax.servlet.*
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class JkFilter : Filter {
+open class JkFilter : Filter {
 
     override fun init(filterConfig: FilterConfig) {
-        val debug: Boolean = "true" == filterConfig.getInitParameter("configClass");
+        // 获得根url
+        Router.baseUrl = filterConfig.getInitParameter("baseUrl");
     }
 
     override fun doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) {
