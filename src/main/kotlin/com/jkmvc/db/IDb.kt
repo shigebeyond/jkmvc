@@ -11,6 +11,13 @@ import java.sql.ResultSet
 interface IDb{
 
     /**
+     * 执行事务
+     * @param statement db操作过程
+     * @return
+     */
+    fun <T> transaction(statement: Db.() -> T):T;
+
+    /**
      * 获得表的所有列
      *
      * @param table
@@ -24,7 +31,7 @@ interface IDb{
      * @param paras
      * @return
      */
-    fun execute(sql: String, paras: List<Any?>?): Int;
+    fun execute(sql: String, paras: List<Any?>? = null): Int;
 
     /**
      * 查询多行
@@ -33,7 +40,7 @@ interface IDb{
      * @param action 处理结果的函数
      * @return
      */
-    fun <T> queryResult(sql: String, paras: List<Any?>?, action: (ResultSet) -> T): T;
+    fun <T> queryResult(sql: String, paras: List<Any?>? = null, action: (ResultSet) -> T): T;
 
     /**
      * 查询多行
@@ -42,7 +49,7 @@ interface IDb{
      * @param transform 处理结果的函数
      * @return
      */
-    fun <T> queryRows(sql: String, paras: List<Any?>?, transform: (MutableMap<String, Any?>) -> T): List<T>;
+    fun <T> queryRows(sql: String, paras: List<Any?>? = null, transform: (MutableMap<String, Any?>) -> T): List<T>;
 
     /**
      * 查询一行(多列)
@@ -51,7 +58,7 @@ interface IDb{
      * @param transform 处理结果的函数
      * @return
      */
-    fun <T> queryRow(sql: String, paras: List<Any?>?, transform: (MutableMap<String, Any?>) -> T): T?;
+    fun <T> queryRow(sql: String, paras: List<Any?>? = null, transform: (MutableMap<String, Any?>) -> T): T?;
 
     /**
      * 查询一行一列
@@ -59,7 +66,7 @@ interface IDb{
      * @param paras
      * @return
      */
-    fun queryCell(sql: String, paras: List<Any?>?): Pair<Boolean, Any?>;
+    fun queryCell(sql: String, paras: List<Any?>? = null): Pair<Boolean, Any?>;
     
     /**
      * 开启事务
