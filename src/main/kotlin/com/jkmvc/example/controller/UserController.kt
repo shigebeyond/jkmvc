@@ -17,7 +17,7 @@ class UserController: Controller()
         // 查询所有用户
         val users = UserModel.queryBuilder().findAll<UserModel>()
         // 渲染视图
-        res.render(view("index", mutableMapOf("users" to users)))
+        res.render(view("user/index", mutableMapOf("users" to users)))
     }
 
     /**
@@ -35,7 +35,7 @@ class UserController: Controller()
             return
         }
         // 渲染视图
-        val view = view("detail")
+        val view = view("user/detail")
         view["user"] = user; // 设置视图参数
         res.render(view)
     }
@@ -45,18 +45,17 @@ class UserController: Controller()
      */
     public fun actionNew()
     {
-        // 创建空的用户
-        val user = UserModel()
         // 处理请求
         if(req.isPost()){ //  post请求：保存表单数据
+            // 创建空的用户
+            val user = UserModel()
             user.name = "li";
             user.age = 13;
             user.create();
             // 重定向到列表页
             redirect("user/index");
         }else{ // get请求： 渲染视图
-            val view = view() // 默认视图为action名： new
-            view["user"] = user; // 设置视图参数
+            val view = view() // 默认视图为action名： user/new
             res.render(view)
         }
     }
@@ -82,7 +81,7 @@ class UserController: Controller()
             // 重定向到列表页
             redirect("user/index");
         }else{ // get请求： 渲染视图
-            val view = view() // 默认视图为action名： edit
+            val view = view() // 默认视图为action名： user/edit
             view["user"] = user; // 设置视图参数
             res.render(view)
         }
