@@ -1,3 +1,4 @@
+<%@ page language="java" import="com.jkmvc.example.model.UserModel" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,7 +18,7 @@
     </div>
 
     <!-- Form -->
-    <form action="<%= request.absoluteUrl("user/new") %>" method="post">
+    <form class="form-horizontal" action="<%= request.absoluteUrl("user/new") %>" method="post">
       <div class="form-group">
         <label for="name">name</label>
         <input type="text" class="form-control" id="name" placeholder="name" name="name">

@@ -1,3 +1,4 @@
+<%@ page language="java" import="com.jkmvc.example.model.UserModel" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,17 +18,16 @@
     </div>
 
     <!-- Form -->
-    <form action="<%= request.absoluteUrl("user/edit/" + request.getAttribute("user").id) %>" method="post">
+    <div class="form-horizontal">
       <div class="form-group">
         <label for="name">name</label>
-        <input type="text" class="form-control" id="name" placeholder="name" name="name">
+        <span><%= user.name %></span>
       </div>
       <div class="form-group">
         <label for="age">Password</label>
-        <input type="text" class="form-control" id="age" placeholder="Password" name="age">
+        <span><%= user.age %></span>
       </div>
-      <button type="submit" class="btn btn-default">Submit</button>
-    </form>
+    </div>
 
   </div>
   <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
