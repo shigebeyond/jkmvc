@@ -61,7 +61,7 @@ object Server:IServer {
             throw RouteException ("控制器${req.controller()}不存在方法：${req.action()}");
 
         // 创建controller
-        val controller:Controller = clazz.constructer.call(req, res) as Controller;
+        val controller:Controller = clazz.constructer.call() as Controller;
 
         // 设置req/res属性
         controller.req = req;
