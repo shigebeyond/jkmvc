@@ -16,6 +16,6 @@ class MyFilter: JkFilter() {
                     mapOf("id" to "\\d+"), // 参数子正则
                     mapOf("controller" to "welcome", "action" to "index"))); //
         // 添加controller的扫描的包
-        ControllerLoader.addPackage("com.jkmvc.example");
+        ControllerLoader.addPackage("com.jkmvc.example.controller");
     }
 }
