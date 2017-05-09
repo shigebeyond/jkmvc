@@ -182,7 +182,7 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	 * 设置cookie值
 	 *
 	 * <code>
-	 *     static::set("theme", "red");
+	 *     set("theme", "red");
 	 * </code>
 	 *
 	 * @param  name       cookie名
@@ -220,7 +220,7 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	 * 设置cookie值
 	 *
 	 * <code>
-	 *     static::set("theme", "red");
+	 *     set("theme", "red");
 	 * </code>
 	 *
 	 * @param  name       cookie名
@@ -239,7 +239,7 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	 * 删除cookie
 	 *
 	 * <code>
-	 *     static::delete("theme");
+	 *     delete("theme");
 	 * </code>
 	 *
 	 * @param  name   cookie名

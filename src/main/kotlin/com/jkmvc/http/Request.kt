@@ -225,4 +225,17 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 				req.setAttribute(k, v);
 	}
 
+	/**
+	 * 将相对路径转为绝对路径
+	 * @param uri 相对路径
+	 * @return 绝对路径
+	 */
+	public fun absoluteUrl(uri:String):String
+	{
+		if(uri.startsWith("http"))
+			return uri;
+
+		return req.getScheme() + "://" + req.getServerName() + Router.baseUrl + uri;
+	}
+
 }

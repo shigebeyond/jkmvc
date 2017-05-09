@@ -40,5 +40,12 @@ abstract class Controller :IController {
         return view( req.controller() + "/" + req.action(), data)
     }
 
-
+    /**
+     * 重定向到指定url
+     * @param uri
+     */
+    public override fun redirect(uri: String):Unit
+    {
+        res.sendRedirect(req.absoluteUrl(uri));
+    }
 }
