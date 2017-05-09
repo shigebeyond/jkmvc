@@ -50,7 +50,7 @@ class View(override val req: Request /* 请求对象 */, override val res: Respo
 		req.setAttributes(data)
 
 		// 渲染jsp
-		req.getRequestDispatcher(file + ".jsp").forward(req, res)
+		req.getRequestDispatcher("/" + file + ".jsp").forward(req, res)
 	}
 
 }
