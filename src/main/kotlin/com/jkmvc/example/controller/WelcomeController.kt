@@ -5,12 +5,21 @@ import com.jkmvc.http.Request
 import com.jkmvc.http.Response
 import com.jkmvc.http.View
 
-class WelcomeController(req: Request /* 请求对象 */, res: Response /* 响应对象 */): Controller(req, res) {
+/**
+ * 主页
+ */
+class WelcomeController: Controller() {
 
+    /**
+     * 主页
+     */
     public fun actionIndex() {
         res.render("hello world");
     }
 
+    /**
+     * 显示jsp视图
+     */
     public fun actionJsp(){
         res.render(view("index", mutableMapOf("name" to "shijianhang")))
     }
