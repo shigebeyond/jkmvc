@@ -38,7 +38,8 @@ object Server:IServer {
             res.setStatus(404).send();
         }  */
         catch (e: Exception) {
-            res.render("异常 - " + e.message)
+//            res.render("异常 - " + e.message)
+            e.printStackTrace(res.writer)
         }
 
     }
