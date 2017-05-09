@@ -7,8 +7,6 @@ import kotlin.reflect.KClass
 /**
  * 面向orm对象的sql构建器
  *
- * @Package packagename
- * @category
  * @author shijianhang
  * @date 2016-10-16 下午8:02:28
  *
@@ -17,6 +15,8 @@ class OrmQueryBuilder(protected val metadata: IMetaData) : DbQueryBuilder(metada
 
     /**
      * 获得记录转换器
+     * @param clazz 要转换的类型
+     * @return 转换函数
      */
     public override fun <T:Any> getRecordTranformer(clazz: KClass<T>): ((MutableMap<String, Any?>) -> T) {
         // 如果是orm类，则直接返回
@@ -33,10 +33,10 @@ class OrmQueryBuilder(protected val metadata: IMetaData) : DbQueryBuilder(metada
     /**
      * 联查表
      *
-     * @param string name 关联关系名
-     * @param array columns 字段名数组: array(column1, column2, alias => column3),
-     * 													如 array("name", "age", "birt" => "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
-     * @return OrmQueryBuilder
+     * @param name 关联关系名
+     * @param columns 字段名数组: Array(column1, column2, alias to column3),
+     * 													如 Array("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
+     * @return
      */
     public fun with(name: String, columns: List<String>? = null): OrmQueryBuilder {
         // select当前表字段
@@ -60,9 +60,9 @@ class OrmQueryBuilder(protected val metadata: IMetaData) : DbQueryBuilder(metada
      * 联查从表
      *     从表.外键 = 主表.主键
      *
-     * @param IMetaRelation relation 从类的关联关系
-     * @param string tableAlias 表别名
-     * @return OrmQueryBuilder
+     * @param relation 从类的关联关系
+     * @param tableAlias 表别名
+     * @return
      */
     protected fun joinSlave(relation: IMetaRelation, tableAlias: String): OrmQueryBuilder {
         // 准备条件
@@ -80,9 +80,9 @@ class OrmQueryBuilder(protected val metadata: IMetaData) : DbQueryBuilder(metada
      * 联查主表
      *     主表.主键 = 从表.外键
      *
-     * @param IMetaRelation slave 从表关系
-     * @param string tableAlias 表别名
-     * @return OrmQueryBuilder
+     * @param relation 从表关系
+     * @param tableAlias 表别名
+     * @return
      */
     protected fun joinMaster(relation: IMetaRelation, tableAlias: String): OrmQueryBuilder {
         // 准备条件
@@ -99,9 +99,9 @@ class OrmQueryBuilder(protected val metadata: IMetaData) : DbQueryBuilder(metada
     /**
      * select关联表的字段
      *
-     * @param IMetaData related 主表关系
-     * @param string tableAlias 表别名
-     * @param array columns 查询的列
+     * @param related 主表关系
+     * @param tableAlias 表别名
+     * @param columns 查询的列
      */
     protected fun selectRelated(related: IMetaData, tableAlias: String, columns: List<String>? = null): OrmQueryBuilder {
         // 默认查询全部列

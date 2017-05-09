@@ -3,8 +3,6 @@ package com.jkmvc.orm
 /**
  * orm操作异常
  *
- * @Package packagename 
- * @category 
  * @author shijianhang
  * @date 2016-10-21 下午5:16:59  
  *

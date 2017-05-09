@@ -19,7 +19,6 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
 
     /**
      * 关联关系
-     * @var map
      */
     public override val relations: MutableMap<String, IMetaRelation> by lazy {
         LinkedHashMap<String, IMetaRelation>()
@@ -27,7 +26,6 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
 
     /**
      * 每个字段的校验规则
-     * @var map
      */
     public override val rules: MutableMap<String, String> by lazy {
         LinkedHashMap<String, String>()
@@ -35,7 +33,6 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
 
     /**
      * 每个字段的标签（中文名）
-     * @var map
      */
     public override val labels: MutableMap<String, String> by lazy {
         LinkedHashMap<String, String>()
@@ -61,6 +58,8 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
 
     /**
      * 是否有某个关联关系
+     * @param name
+     * @return
      */
     public override fun hasRelation(name: String): Boolean {
         //return name in relations; // 啃爹啊，ConcurrentHashMap下的 in 语义是调用 contains()，但是我想调用 containsKey()
@@ -69,6 +68,8 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
 
     /**
      * 获得某个关联关系
+     * @param name
+     * @return
      */
     public override fun getRelation(name: String): IMetaRelation? {
         return relations.get(name);
@@ -76,6 +77,7 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
 
     /**
      * 获得orm查询构建器
+     * @return
      */
     public override fun queryBuilder(): OrmQueryBuilder {
         return OrmQueryBuilder(this);
@@ -83,6 +85,9 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
 
     /**
      * 添加规则
+     * @param name
+     * @param rule
+     * @return
      */
     public override fun addRule(name: String, rule: String): MetaData {
         rules[name] = rule;
@@ -91,6 +96,9 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
 
     /**
      * 添加标签
+     * @param name
+     * @param label
+     * @return
      */
     public override fun addLabel(name: String, label: String): MetaData {
         labels[name] = label;
@@ -99,6 +107,10 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
 
     /**
      * 生成属性代理 + 设置关联关系(belongs to)
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param foreignKey 外键
+     * @param conditions 关联查询条件
      */
     public override fun belongsTo(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, conditions: ((IDbQueryBuilder) -> Unit)?): IMetaData {
         // 获得外键
@@ -116,6 +128,10 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
 
     /**
      * 设置关联关系(has one)
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param foreignKey 外键
+     * @param conditions 关联查询条件
      */
     public override fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, conditions: ((IDbQueryBuilder) -> Unit)?): IMetaData {
         // 获得外键
@@ -134,6 +150,10 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
 
     /**
      * 设置关联关系(has many)
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param foreignKey 外键
+     * @param conditions 关联查询条件
      */
     public override fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, conditions: ((IDbQueryBuilder) -> Unit)?): IMetaData {
         // 获得外键

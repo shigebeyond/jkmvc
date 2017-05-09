@@ -10,8 +10,11 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Config data, can load properties file from CLASSPATH or File object.
+ *
+ * @author shijianhang
+ * @date 2016-10-8 下午8:02:47
  */
-class Config {
+class Config:IConfig {
 
     companion object{
         /**
@@ -52,14 +55,10 @@ class Config {
      *
      *
      * Example:
-     * Config config = new Config("my_config.txt", "UTF-8");
-     * String userName = config.get("userName");
-
-     * config = new Config("com/jfinal/file_in_sub_path_of_classpath.txt", "UTF-8");
-     * String value = config.get("key");
+     * val config = Config("my_config.txt", "UTF-8");
+     * val userName = config.get("userName");
 
      * @param fileName the properties file's name in classpath or the sub directory of classpath
-     * *
      * @param encoding the encoding
      */
     constructor(fileName: String, encoding: String = "UTF-8") {
@@ -75,11 +74,10 @@ class Config {
      *
      *
      * Example:
-     * Prop prop = new Prop(new File("/var/config/my_config.txt"), "UTF-8");
-     * String userName = prop.get("userName");
+     * val prop = Prop(new File("/var/config/my_config.txt"), "UTF-8");
+     * val userName = prop.get("userName");
 
      * @param file the properties File object
-     * *
      * @param encoding the encoding
      */
     constructor(file: File?, encoding: String = "UTF-8") {
@@ -92,7 +90,10 @@ class Config {
         load(FileInputStream(file), encoding);
     }
 
-    protected fun load(inputStream: InputStream?, encoding: String = "UTF-8") {
+    /**
+     * 加载配置文件
+     */
+    public override fun load(inputStream: InputStream?, encoding: String) {
         if(inputStream == null)
             throw IllegalArgumentException("InputStream is null")
 
@@ -104,11 +105,17 @@ class Config {
         }
     }
 
-    public operator fun get(key: String, defaultValue: String? = null): String? {
+    /**
+     * 获得配置项
+     */
+    public override operator fun get(key: String, defaultValue: String?): String? {
         return props.getProperty(key, defaultValue)
     }
 
-    public fun getInt(key: String, defaultValue: Int? = null): Int? {
+    /**
+     * 获得int类型的配置项
+     */
+    public override fun getInt(key: String, defaultValue: Int?): Int? {
         val value = props.getProperty(key)
         return if(value == null)
                     defaultValue
@@ -116,7 +123,10 @@ class Config {
                     value.toInt();
     }
 
-    public fun getLong(key: String, defaultValue: Long? = null): Long? {
+    /**
+     * 获得long类型的配置项
+     */
+    public override fun getLong(key: String, defaultValue: Long?): Long? {
         val value = props.getProperty(key)
         return if(value == null)
                     defaultValue
@@ -124,7 +134,10 @@ class Config {
                     value.toLong();
     }
 
-    public fun getBoolean(key: String, defaultValue: Boolean? = null): Boolean? {
+    /**
+     * 获得bool类型的配置项
+     */
+    public override fun getBoolean(key: String, defaultValue: Boolean?): Boolean? {
         var value: String? = props.getProperty(key)
         return if(value == null)
                     defaultValue
@@ -132,7 +145,10 @@ class Config {
                     value.toBoolean();
     }
 
-    public fun containsKey(key: String): Boolean {
+    /**
+     * 判断是否含有配置项
+     */
+    public override fun containsKey(key: String): Boolean {
         return props.containsKey(key)
     }
 }

@@ -12,6 +12,9 @@ import kotlin.reflect.jvm.javaType
 /****************************** 反射扩展 *******************************/
 /**
  * 匹配方法的名称与参数类型
+ * @param name 方法名
+ * @param paramTypes 参数类型
+ * @return
  */
 public fun KFunction<*>.matches(name:String, paramTypes:List<Class<*>> = emptyList()):Boolean{
     // 1 匹配名称
@@ -38,6 +41,9 @@ public fun KFunction<*>.matches(name:String, paramTypes:List<Class<*>> = emptyLi
 
 /**
  * 查找方法
+ * @param name 方法名
+ * @param paramTypes 参数类型
+ * @return
  */
 public fun KClass<*>.findFunction(name:String, paramTypes:List<Class<*>> = emptyList()): KFunction<*>?{
     var pt = if(paramTypes is MutableList){
@@ -56,6 +62,9 @@ public fun KClass<*>.findFunction(name:String, paramTypes:List<Class<*>> = empty
 
 /**
  * 查找静态方法
+ * @param name 方法名
+ * @param paramTypes 参数类型
+ * @return
  */
 public fun KClass<*>.findStaticFunction(name:String, paramTypes:List<Class<*>> = emptyList()): KFunction<*>?{
     return staticFunctions.find {
@@ -65,6 +74,8 @@ public fun KClass<*>.findStaticFunction(name:String, paramTypes:List<Class<*>> =
 
 /**
  * 查找构造函数
+ * @param paramTypes 参数类型
+ * @return
  */
 public fun KClass<*>.findConstructor(paramTypes:List<Class<*>> = emptyList()): KFunction<*>?{
     return constructors.find {
@@ -74,6 +85,8 @@ public fun KClass<*>.findConstructor(paramTypes:List<Class<*>> = emptyList()): K
 
 /**
  * 转换参数类型
+ * @param value
+ * @return
  */
 public fun KParameter.convert(value: String): Any {
     return value.to(this.type)

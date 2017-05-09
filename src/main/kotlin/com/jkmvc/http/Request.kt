@@ -9,8 +9,6 @@ import javax.servlet.http.HttpServletRequest
 /**
  * 请求对象
  *
- * @Package packagename
- * @category
  * @author shijianhang
  * @date 2016-10-6 上午9:27:56
  *
@@ -25,7 +23,6 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 
 		/**
 		 * 可信任的代理服务器ip
-		 * @var array
 		 */
 		public val proxyips = arrayOf("127.0.0.1", "localhost", "localhost.localdomain");
 
@@ -33,24 +30,24 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 
 	/**
 	 * 当前匹配的路由规则
-	 * @var Route
 	 */
 	public lateinit var route:Route;
 
 	/**
 	 * 当前匹配的路由参数
-	 * @var array
 	 */
 	public lateinit var params:Map<String, String>;
 
-	/**
-	 * 解析路由
-	 * @return bool
-	 */
-	public fun parseRoute(): Boolean {
+	init{
 		// 中文编码
 		req.characterEncoding = "UTF-8";
+	}
 
+	/**
+	 * 解析路由
+	 * @return
+	 */
+	public fun parseRoute(): Boolean {
 		// 解析路由
 		val result = Router.parse(requestURI);
 
@@ -65,7 +62,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 
 	/**
 	 * 是否post请求
-	 * @return bool
+	 * @return
 	 */
 	public fun isPost(): Boolean {
 		return this.method === "POST";
@@ -73,7 +70,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 
 	/**
 	 * 是否get请求
-	 * @return bool
+	 * @return
 	 */
 	public fun isGet(): Boolean {
 		return this.method === "GET";
@@ -81,7 +78,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 
 	/**
 	 * 是否ajax请求
-	 * @return boolean
+	 * @return
 	 */
 	public fun isajax(): Boolean {
 		return "XMLHttpRequest".equals(req.getHeader("x-requested-with")) // // 通过XMLHttpRequest发送请求
@@ -95,9 +92,9 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	 *     theme = Cookie::get("theme", "blue");
 	 * </code>
 	 *
-	 * @param   string  key        cookie名
-	 * @param   mixed   default    默认值
-	 * @return  string
+	 * @param  key        cookie名
+	 * @param  default    默认值
+	 * @return
 	 */
 	public fun getCookie(name:String): Cookie {
 		return this.cookies.first(){
@@ -108,10 +105,10 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	/**
 	 * 获得当前匹配路由的所有参数/单个参数
 	 *
-	 * @param string key 如果是null，则返回所有参数，否则，返回该key对应的单个参数
-	 * @param string default 单个参数的默认值
-	 * @param   string filter  参数过滤表达式, 如 "trim > htmlspecialchars"
-	 * @return multitype
+	 * @param key 如果是null，则返回所有参数，否则，返回该key对应的单个参数
+	 * @param default 单个参数的默认值
+	 * @param filter  参数过滤表达式, 如 "trim > htmlspecialchars"
+	 * @return
 	 */
 	/*public fun getRouteParameter(key = null, default = null, filterexp = null)
 	{
@@ -125,7 +122,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 
 	/**
 	 * 获得当前目录
-	 * @return string
+	 * @return
 	 */
 	public fun directory(): String {
 		return this.getRouteParameter("directory", "")!!
@@ -133,7 +130,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 
 	/**
 	 * 获得当前controller
-	 * @return string
+	 * @return
 	 */
 	public fun controller(): String {
 		return this.getRouteParameter("controller")!!;
@@ -141,7 +138,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 
 	/**
 	 * 获得当前action
-	 * @return string
+	 * @return
 	 */
 	public fun action(): String {
 		return this.getRouteParameter("action")!!;

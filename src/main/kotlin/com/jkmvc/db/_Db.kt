@@ -9,6 +9,10 @@ import java.util.*
 /**
  * Connection扩展
  * 执行更新
+ *
+ * @param sql
+ * @param paras 参数
+ * @return
  */
 public fun Connection.execute(sql: String, paras: List<Any?>? = null): Int {
     var pst: PreparedStatement? = null
@@ -38,6 +42,11 @@ public fun Connection.execute(sql: String, paras: List<Any?>? = null): Int {
 
 /**
  * 查询多行
+
+ * @param sql
+ * @param paras 参数
+ * @param action 结果转换函数
+ * @return
  */
 public fun <T> Connection.queryResult(sql: String, paras: List<Any?>? = null, action:(ResultSet) -> T): T {
     var pst: PreparedStatement? = null;
@@ -61,6 +70,10 @@ public fun <T> Connection.queryResult(sql: String, paras: List<Any?>? = null, ac
 
 /**
  * 查询多行
+ * @param sql
+ * @param paras 参数
+ * @param transform 结果转换函数
+ * @return
  */
 public fun <T> Connection.queryRows(sql: String, paras: List<Any?>? = null, transform:(MutableMap<String, Any?>) -> T): List<T> {
     return queryResult<List<T>>(sql, paras){ rs: ResultSet ->
@@ -75,6 +88,10 @@ public fun <T> Connection.queryRows(sql: String, paras: List<Any?>? = null, tran
 
 /**
  * 查询一行(多列)
+ * @param sql
+ * @param paras 参数
+ * @param transform 结果转换函数
+ * @return
  */
 public fun <T> Connection.queryRow(sql: String, paras: List<Any?>? = null, transform:(MutableMap<String, Any?>) -> T): T? {
     return queryResult<T?>(sql, paras){ rs: ResultSet ->
@@ -89,6 +106,9 @@ public fun <T> Connection.queryRow(sql: String, paras: List<Any?>? = null, trans
 
 /**
  * 查询一行一列
+ * @param sql
+ * @param paras 参数
+ * @return
  */
 public fun Connection.queryCell(sql: String, paras: List<Any?>? = null): Pair<Boolean, Any?> {
     return queryResult<Pair<Boolean, Any?>>(sql, paras){ rs: ResultSet ->
@@ -100,6 +120,7 @@ public fun Connection.queryCell(sql: String, paras: List<Any?>? = null): Pair<Bo
 /****************************** 从ResultSet中获取数据 *******************************/
 /**
  * 获得结果集的下一行
+ * @return
  */
 public inline fun ResultSet.nextRow(): MutableMap<String, Any?>? {
     if(next()) {
@@ -125,6 +146,7 @@ public inline fun ResultSet.nextRow(): MutableMap<String, Any?>? {
 }
 /**
  * 遍历结果集的每一行
+ * @param action 访问者函数
  */
 public inline fun ResultSet.forEachRow(action: (MutableMap<String, Any?>) -> Unit): Unit {
     while(true){
@@ -140,6 +162,8 @@ public inline fun ResultSet.forEachRow(action: (MutableMap<String, Any?>) -> Uni
 
 /**
  * 访问结果集的下一行的某列
+ * @param i 第几列
+ * @return
  */
 public inline fun ResultSet.nextCell(i:Int): Pair<Boolean, Any?> {
     val hasNext = next()
@@ -161,6 +185,9 @@ public inline fun ResultSet.nextCell(i:Int): Pair<Boolean, Any?> {
 
 /**
  * 遍历结果集的每一行的某列
+ * @param i 第几列
+ * @param action 处理函数
+ * @return
  */
 public inline fun ResultSet.forEachCell(i:Int, action: (Any?) -> Unit): Unit {
     while(true){
@@ -176,6 +203,7 @@ public inline fun ResultSet.forEachCell(i:Int, action: (Any?) -> Unit): Unit {
 /****************************** 读取Blob/Clob字段 *******************************/
 /**
  * Blob转ByteArray
+ * @return
  */
 public fun Blob?.toByteArray(): ByteArray? {
     if (this == null)
@@ -199,6 +227,7 @@ public fun Blob?.toByteArray(): ByteArray? {
 
 /**
  * Clob转String
+ * @return
  */
 public fun Clob?.toString(): String? {
     if (this == null)

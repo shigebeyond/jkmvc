@@ -26,7 +26,7 @@ data class GroupRange(var start:Int, var end:Int){
  * <code>
  * 	   // 将 <controller>(\/<action>(\/<id>)?)? 编译为 /([^\/]+)(\/([^\/]+)\/(\d+)?)?/
  *     // 其中参数对子正则的映射关系保存在 paramGroupMapping 中
- *     val routeRegex = RouteRegex(
+ *     val route = Route(
  *        "<controller>(\/<action>(\/<id>)?)?",
  *         mapOf(
  *           "controller" to "[a-z]+",
@@ -34,21 +34,18 @@ data class GroupRange(var start:Int, var end:Int){
  *           "id" to "\d+",
  *         )
  *     );
- *
- *  2 匹配路由正则
- *
  * </code>
  *
- * @param array regex 整个uri的正则　
- * @param array params 参数的正则
- * @return  string
+ *  2 匹配路由正则
+ * <code>
+ *     route.mathes('welcome/index');
+ * </code>
  */
-class Route(protected val regex:String /* 原始正则: <controller>(\/<action>(\/<id>)?)? */, protected val paramRegex:Map<String, String> = emptyMap() /* 参数的子正则 */, protected val defaults:Map<String, String>? /* 参数的默认值 */ = null){
+class Route(override val regex:String /* 原始正则: <controller>(\/<action>(\/<id>)?)? */, override val paramRegex:Map<String, String> = emptyMap() /* 参数的子正则 */, override val defaults:Map<String, String>? /* 参数的默认值 */ = null): IRoute{
 
 	companion object{
 		/**
 		 * 参数的默认正则
-		 * @var string
 		 */
 		protected val REGEX_PARAM = "[^\\/]+";
 	}
@@ -61,7 +58,6 @@ class Route(protected val regex:String /* 原始正则: <controller>(\/<action>(
 	/**
 	 * 编译后正则: 将 <controller>(\/<action>(\/<id>)?)? 编译为 /([^\/]+)(\/([^\/]+)\/(\d+)?)?/
 	 *   其中参数对子正则的映射关系保存在 paramGroupMapping 中
-	 * @var string
 	 */
 	protected lateinit var compileRegex:String;
 
@@ -118,7 +114,7 @@ class Route(protected val regex:String /* 原始正则: <controller>(\/<action>(
 	/**
 	 * 构建参数对子正则的映射
 	 */
-	public fun buildParamGroupMapping(): MutableMap<String, Int> {
+	protected fun buildParamGroupMapping(): MutableMap<String, Int> {
 		val matches: Sequence<MatchResult> = "<(\\w+)>".toRegex().findAll(groupRegex)
 		val mapping:MutableMap<String, Int> = HashMap<String, Int>();
 		for(m in matches){
@@ -134,6 +130,8 @@ class Route(protected val regex:String /* 原始正则: <controller>(\/<action>(
 
 	/**
 	 * 找到参数在哪个子正则中
+	 * @param paramRange 参数的范围
+	 * @return
 	 */
 	protected fun findGroupRang(paramRange: IntRange): Int {
 		var result:Int = -1
@@ -147,10 +145,10 @@ class Route(protected val regex:String /* 原始正则: <controller>(\/<action>(
 	/**
 	 * 检查uri是否匹配路由正则
 	 *
-	 * @param string uri
-	 * @return Map? 如果为null，则没有匹配
+	 * @param uri
+	 * @return 匹配的路由参数，如果为null，则没有匹配
 	 */
-	public fun match(uri:String):Map<String, String>?{
+	public override fun match(uri:String):Map<String, String>?{
 		// 匹配uri
 		val matches:MatchResult? = compileRegex.toRegex().find(uri)
 		if(matches == null)

@@ -6,8 +6,6 @@ import java.util.*
 /**
  * ORM之数据校验
  *
- * @Package packagename
- * @category
  * @author shijianhang
  * @date 2016-10-10 上午12:52:34
  *
@@ -15,7 +13,7 @@ import java.util.*
 abstract class OrmValid: OrmEntity() {
     /**
      * 校验数据
-     * @return boolean
+     * @return
      */
     public override fun check(): Boolean {
         // 逐个字段校验

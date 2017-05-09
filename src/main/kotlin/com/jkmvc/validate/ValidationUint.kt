@@ -10,13 +10,11 @@ import kotlin.reflect.full.memberFunctions
 /**
  * 校验计算单位： 1 运算符 2 函数名 3 函数参数
  *
- * @Package packagename
- * @category
  * @author shijianhang
  * @date 2016-10-19 下午3:40:55
  *
  */
-data class ValidationUint(public val operator:String? /* 运算符 */, public val func:String /* 函数名 */, public val params:List<String> /* 函数参数 */) {
+data class ValidationUint(public override val operator:String? /* 运算符 */, public override val func:String /* 函数名 */, public override val params:List<String> /* 函数参数 */) :IValidationUint{
 
     companion object{
 
@@ -39,7 +37,6 @@ data class ValidationUint(public val operator:String? /* 运算符 */, public va
             for (f in String::class.memberExtensionFunctions)
                 stringFuncs[f.name] = f;
             */
-            print("init")
         }
 
 
@@ -49,11 +46,11 @@ data class ValidationUint(public val operator:String? /* 运算符 */, public va
     /**
      * 执行校验表达式
      *
-     * @param unknown value 待校验的值
-     * @param Map binds 变量
-     * @return Anys
+     * @param value 待校验的值
+     * @param binds 变量
+     * @returns
      */
-    public fun execute(value:Any?, binds:Map<String, Any?> = emptyMap()): Any? {
+    public override fun execute(value:Any?, binds:Map<String, Any?>): Any? {
         // 获得函数
         val f = validationFuncs[func]
         if(f == null)
@@ -86,9 +83,9 @@ data class ValidationUint(public val operator:String? /* 运算符 */, public va
 
     /**
      * 构建结果消息
-     * @return string
+     * @return
      */
-    public fun message():String
+    public override fun message():String
     {
         val msg = Validation.messages[func];
         return if (msg == null)

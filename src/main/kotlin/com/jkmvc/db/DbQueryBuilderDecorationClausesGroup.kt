@@ -9,19 +9,16 @@ package com.jkmvc.db
  *  实现:
  *     子表达式还是子句
  *
- * @Package packagename
- * @category
  * @author shijianhang
  * @date 2016-10-13
- *
  */
 class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如where/group by */, elementHandlers: Array<((Any?) -> String)?> /* 每个元素的处理器, 可视为列的处理*/)
 : DbQueryBuilderDecorationClauses<Any>/* subexps 是字符串 或 DbQueryBuilderDecorationClausesSimple */(operator, elementHandlers) {
     /**
      * 开启一个分组
      *
-     * @param    delimiter
-     * @return DbQueryBuilderDecorationClausesGroup
+     * @param  delimiter
+     * @return
      */
     public override fun open(delimiter: String): IDbQueryBuilderDecorationClauses<Any> {
         // 将连接符也记录到子表达式中, 忽略第一个子表达式
@@ -32,7 +29,7 @@ class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如w
     /**
      * 结束一个分组
      *
-     * @return DbQueryBuilderDecorationClausesGroup
+     * @return
      */
     public override fun close(): IDbQueryBuilderDecorationClauses<Any> {
         subexps.add(")")
@@ -42,7 +39,7 @@ class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如w
     /**
      * 获得最后一个子表达式
      *
-     * @return DbQueryBuilderDecorationClausesSimple
+     * @return
      */
     protected fun endSubexp(): DbQueryBuilderDecorationClausesSimple {
         var last:Any? = if(subexps.isEmpty()) null else subexps.last()
@@ -57,9 +54,9 @@ class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如w
     /**
      * 添加子表达式
      *
-     * @param array subexp
-     * @param string delimiter
-     * @return DbQueryBuilderDecorationClausesGroup
+     * @param subexp 子表达式
+     * @param delimiter 连接符
+     * @return
      */
     public override fun addSubexp(subexp: Array<Any?>, delimiter: String): IDbQueryBuilderDecorationClauses<Any> {
         // 代理最后一个子表达式
@@ -70,7 +67,8 @@ class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如w
     /**
      * 编译一个子表达式
      *
-     * @param array subexp
+     * @param subexp 子表达式
+     * @param sql 保存编译的sql
      */
     public override fun compileSubexp(subexp: Any, sql: StringBuilder): Unit {
         // 子表达式是: string / DbQueryBuilderDecorationClausesSimple

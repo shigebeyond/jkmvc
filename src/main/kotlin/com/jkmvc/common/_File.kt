@@ -1,9 +1,11 @@
 package com.jkmvc.common
 
 import java.io.File
-import java.io.FilenameFilter
-import java.util.*
 
+/**
+ * 遍历文件
+ * @param action 访问者函数
+ */
 public tailrec fun File.travel(action:(file: File) -> Unit): Unit {
     val files = listFiles()
     if (files == null) {

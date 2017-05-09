@@ -8,6 +8,8 @@ import kotlin.reflect.KType
 /**
  * StringBuilder扩展
  * 清空
+ *
+ * @return
  */
 public fun StringBuilder.clear(): StringBuilder {
     return this.delete(0, this.length - 1)
@@ -16,6 +18,8 @@ public fun StringBuilder.clear(): StringBuilder {
 /**
  * StringBuilder扩展
  *  删除最后的一段子字符串
+ * @param str 要删除的子字符串
+ * @return
  */
 public fun StringBuilder.deleteSuffix(str:String):StringBuilder {
     if(this.endsWith(str)) {
@@ -27,6 +31,7 @@ public fun StringBuilder.deleteSuffix(str:String):StringBuilder {
 
 /**
  * 首字母大写
+ * @return
  */
 public fun String.ucFirst(): String {
     val cs = this.toCharArray()
@@ -37,6 +42,7 @@ public fun String.ucFirst(): String {
 
 /**
  * 首字母小写
+ * @return
  */
 public fun String.lcFirst(): String {
     val cs = this.toCharArray()
@@ -47,6 +53,7 @@ public fun String.lcFirst(): String {
 
 /**
  * 转换为日期类型
+ * @return
  */
 public fun String.toDate(): Date {
     return java.text.SimpleDateFormat("yyyy-MM-dd").parse(this)
@@ -54,6 +61,9 @@ public fun String.toDate(): Date {
 
 /**
  * 去掉两头的字符
+ *
+ * @param str 要去掉的字符串
+ * @return
  */
 public fun String.trim(str:String): String {
     var start = 0;
@@ -69,6 +79,9 @@ public fun String.trim(str:String): String {
 
 /**
  * 去掉两头的字符
+ * @param preffix 头部要去掉的子字符串
+ * @param suffix 尾部要去掉的子字符串
+ * @return
  */
 public fun String.trim(preffix:String, suffix:String): String {
     var start = 0;
@@ -87,9 +100,8 @@ public fun String.trim(preffix:String, suffix:String): String {
 /**
  * 替换字符串
  *
- * @param string str 字符串模板
- * @param List params 参数
- * @return string
+ * @param params 参数
+ * @return
  */
 public fun String.replaces(params:List<String>):String
 {
@@ -106,9 +118,8 @@ public fun String.replaces(params:List<String>):String
 /**
  * 替换字符串
  *
- * @param string str 字符串模板
- * @param Map params 参数
- * @return string
+ * @param params 参数
+ * @return
  */
 public fun String.replaces(params:Map<String, Any?>):String
 {
@@ -124,6 +135,8 @@ public fun String.replaces(params:Map<String, Any?>):String
 
 /**
  * 将字符串转换为指定类型
+ * @param class 要转换的类型
+ * @return
  */
 public fun <T: Any> String.to(clazz: KClass<T>): T{
     var result: Any?;
@@ -139,6 +152,8 @@ public fun <T: Any> String.to(clazz: KClass<T>): T{
 
 /**
  * 将字符串转换为指定类型
+ * @param type
+ * @return
  */
 public fun String.to(type: KType): Any{
     return this.to(type.classifier as KClass<*>)

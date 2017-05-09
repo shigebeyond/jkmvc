@@ -10,8 +10,6 @@ import javax.servlet.http.HttpServletResponse
  * 响应对象
  * 	TODO: 支持响应文件
  * 
- * @Package packagename 
- * @category 
  * @author shijianhang
  * @date 2016-10-7 下午11:32:07 
  *
@@ -21,7 +19,6 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	companion object{
 		/**
 		 * 过期的期限
-		 * @var string
 		 */
 		protected val EXPIRESOVERDUE = "Mon, 26 Jul 1997 05:00:00 GMT";
 
@@ -100,12 +97,13 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	/**
 	 * 响应文本
 	 *
-	 * @param string content
+	 * @param content
 	 */
 	public fun render(content:String):Unit
 	{
 		// 中文编码
 		res.characterEncoding = "UTF-8";
+		res.contentType = "text/html;charset=UTF-8";
 		res.writer.print(content);
 	}
 
@@ -116,9 +114,6 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	 */
 	public fun render(file: File):Unit
 	{
-		// 中文编码
-		res.characterEncoding = "UTF-8";
-
 		//通知客户端文件的下载    URLEncoder.encode解决文件名中文的问题
 		res.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(file.name, "utf-8"))
 		res.setHeader("Content-Type", "application/octet-stream")
@@ -138,10 +133,10 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	/**
 	 * 设置响应状态码
 	 * 
-	 * @param int status 状态码
-	 * @return Response
+	 * @param status 状态码
+	 * @return
 	 */
-	public override fun setStatus(status: Int) {
+	public override fun setStatus(status: Int):Unit {
 		if(!messages.containsKey(status))
 			throw Exception("无效响应状态码");
 
@@ -165,9 +160,9 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	 * 设置响应缓存
 	 *
 	 * @param long expires 过期时间
-	 * @return string|Response
+	 * @return
 	 */
-	public fun setCache(expires:Long) {
+	public fun setCache(expires:Long): Response {
 		// setter
 		if (expires > 0) { // 有过期时间, 则缓存
 			val now:Long =  System.currentTimeMillis()
@@ -180,6 +175,7 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 			this.addHeader("Cache-Control", "no-cache")
 			this.addHeader("Pragma", "no-cache");
 		}
+		return this;
 	}
 
 	/**
@@ -189,11 +185,12 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	 *     static::set("theme", "red");
 	 * </code>
 	 *
-	 * @param   string  name       cookie名
-	 * @param   string  value      cookie值
-	 * @param   integer expiration 期限
+	 * @param  name       cookie名
+	 * @param  value      cookie值
+	 * @param expiration 期限
+	 * @return
 	 */
-	public fun setCookie(name:String, value:String, expiry:Int? = null){
+	public fun setCookie(name:String, value:String, expiry:Int? = null): Response {
 		val cookie: javax.servlet.http.Cookie = javax.servlet.http.Cookie(name, value);
 		// expiry
 		val maxAage:Int? = cookieConfig?.getInt("expiry", expiry);
@@ -216,6 +213,7 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 		if(httponly != null)
 			cookie.isHttpOnly = httponly
 		addCookie(cookie);
+		return this;
 	}
 
 	/**
@@ -225,14 +223,16 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	 *     static::set("theme", "red");
 	 * </code>
 	 *
-	 * @param   string  name       cookie名
-	 * @param   string  value      cookie值
-	 * @param   integer expiration 期限
+	 * @param  name       cookie名
+	 * @param  value      cookie值
+	 * @param expiration 期限
+	 * @return
 	 */
-	public fun setCookies(data:Map<String, String>, expiry:Int? = null){
+	public fun setCookies(data:Map<String, String>, expiry:Int? = null): Response {
 		for((name, value) in data){
 			setCookie(name, value, expiry);
 		}
+		return this;
 	}
 
 	/**
@@ -242,10 +242,11 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	 *     static::delete("theme");
 	 * </code>
 	 *
-	 * @param   string  name   cookie名
-	 * @return  boolean
+	 * @param  name   cookie名
+	 * @return
 	 */
-	public fun deleteCookie(name:String){
+	public fun deleteCookie(name:String): Response {
 		setCookie(name, "", -86400) // 让他过期
+		return this;
 	}
 }

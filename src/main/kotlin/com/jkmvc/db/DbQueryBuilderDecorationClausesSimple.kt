@@ -8,20 +8,17 @@ package com.jkmvc.db
  *     2 在addSubexp()就将连接符也记录到子表达式中 => 在compile()时直接连接子表达式的内容就行，不需要关心连接符的特殊处理
  *     我采用的是第二种
  *
- * @Package packagename
- * @category
  * @author shijianhang
  * @date 2016-10-13
- *
  */
 class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如where/group by */, elementHandlers: Array<((Any?) -> String)?> /* 每个元素的处理器, 可视为列的处理*/)
 : DbQueryBuilderDecorationClauses<Pair<Array<Any?>, String>>/* subexps 是子表达式+连接符 */(operator, elementHandlers) {
     /**
      * 添加一个子表达式+连接符
      *
-     * @param array subexp 子表达式
-     * @param string delimiter 当前子表达式的连接符
-     * @return DbQueryBuilderExpression
+     * @param subexp 子表达式
+     * @param delimiter 当前子表达式的连接符
+     * @return
      */
     public override fun addSubexp(subexp: Array<Any?>, delimiter: String): IDbQueryBuilderDecorationClauses<Pair<Array<Any?>, String>> {
         // 将连接符也记录到子表达式中, 忽略第一个子表达式的连接符 => 编译好子表达式直接拼接就行
@@ -32,7 +29,7 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
     /**
      * 编译一个子表达式
      *
-     * @param array subexp
+     * @param subexp
      */
     public override fun compileSubexp(subexp: Pair<Array<Any?>, String>, sql: StringBuilder): Unit {
         val (exp, delimiter) = subexp;
@@ -51,8 +48,8 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
     /**
      * 开启一个分组
      *
-     * @param    delimiter
-     * @return DbQueryBuilderDecorationClausesGroup
+     * @param delimiter 连接符
+     * @return
      */
     public override fun open(delimiter: String): IDbQueryBuilderDecorationClauses<Pair<Array<Any?>, String>> {
         throw UnsupportedOperationException("not implemented")
@@ -61,7 +58,7 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
     /**
      * 结束一个分组
      *
-     * @return DbQueryBuilderDecorationClausesGroup
+     * @return
      */
     public override fun close(): IDbQueryBuilderDecorationClauses<Pair<Array<Any?>, String>> {
         throw UnsupportedOperationException("not implemented")

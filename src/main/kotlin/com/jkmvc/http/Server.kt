@@ -7,21 +7,19 @@ import kotlin.reflect.KFunction
 /**
  * 服务端对象，用于处理请求
  *
- * @Package packagename
- * @category
  * @author shijianhang
  * @date 2016-10-6 上午9:27:56
  *
  */
-object Server {
+object Server:IServer {
 
     /**
      * 处理请求
      *
-     * @param HttpServletRequest req
-     * @param HttpServletResponse res
+     * @param req
+     * @param res
      */
-    public fun run(request: HttpServletRequest, response: HttpServletResponse) {
+    public override fun run(request: HttpServletRequest, response: HttpServletResponse) {
         // 构建请求与响应对象
         val req = Request(request);
         val res = Response(response);
@@ -48,8 +46,8 @@ object Server {
     /**
      * 调用controller与action
      *
-     * @param Request req
-     * @param Response res
+     * @param req
+     * @param res
      */
     fun callController(req: Request, res: Response) {
         // 获得controller类

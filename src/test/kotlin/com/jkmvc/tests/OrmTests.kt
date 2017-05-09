@@ -55,7 +55,6 @@ class AddressModel(id:Int? = null): Orm(id) {
 
         /**
          * 每个字段的标签（中文名）
-         * @var map
          */
         public override val labels: MutableMap<String, String>  = mutableMapOf(
                 "user_id" to "用户",

@@ -10,11 +10,8 @@ import kotlin.reflect.KFunction
  *   依次继承 DbQueryBuilderAction 处理动作子句 + DbQueryBuilderDecoration 处理修饰子句
  *  提供select/where等类sql的方法, 但是调用方法时, 不直接拼接sql, 而是在compile()时才延迟拼接sql, 因为调用方法时元素可以无序, 但生成sql时元素必须有序
  *
- * @Package packagename
- * @category
  * @author shijianhang
  * @date 2016-10-13
- *
  */
 open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQueryBuilderDecoration(db, table)
 {
@@ -41,6 +38,8 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
 
     /**
      * 获得记录转换器
+     * @param clazz 要转换的类
+     * @return 转换的匿名函数
      */
     public override fun <T:Any> getRecordTranformer(clazz: KClass<T>): ((MutableMap<String, Any?>) -> T) {
         // 1 如果是map类，则直接返回
@@ -64,8 +63,8 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
     /**
      * 编译sql
      *
-     * @param string action sql动作：select/insert/update/delete
-     * @return array(sql, 参数)
+     * @param action sql动作：select/insert/update/delete
+     * @return Pair(sql, 参数)
      */
     public override fun compile(action:String):Pair<String, List<Any?>>
     {
@@ -82,8 +81,8 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
     /**
      * 查找多个： select 语句
      *
-     * @param fun transform 转换函数
-     * @return array
+     * @param transform 转换函数
+     * @return 列表
      */
     public override fun <T:Any> findAll(transform:(MutableMap<String, Any?>) -> T): List<T>{
         // 1 编译
@@ -96,8 +95,8 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
     /**
      * 查找一个： select ... limit 1语句
      *
-     * @param fun transform 转换函数
-     * @return object
+     * @param transform 转换函数
+     * @return 单个数据
      */
     public override fun <T:Any> find(transform:(MutableMap<String, Any?>) -> T): T?{
         // 1 编译
@@ -110,8 +109,8 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
     /**
      * 编译 + 执行
      *
-     * @param string action sql动作：select/insert/update/delete
-     * @return int 影响行数|新增id
+     * @param action sql动作：select/insert/update/delete
+     * @return 影响行数|新增id
      */
     protected fun execute(action:String):Int
     {
@@ -124,7 +123,7 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
 
     /**
      * 统计行数： count语句
-     * @return long
+     * @return
      */
     public override fun count():Long
     {
@@ -141,7 +140,7 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
 
     /**
      * 插入：insert语句
-     * @return int 新增的id
+     * @return 新增的id
      */
     public override fun insert():Int
     {

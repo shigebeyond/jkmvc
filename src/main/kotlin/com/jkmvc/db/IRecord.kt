@@ -1,10 +1,11 @@
 package com.jkmvc.db
 
-import java.util.*
-
 /**
  * 封装查询结果
  * 扩展 [] 操作符，来代理属性读写
+ *
+ * @author shijianhang
+ * @date 2016-10-8 下午8:02:47
  */
 interface IRecord {
 

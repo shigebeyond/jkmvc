@@ -12,17 +12,17 @@ import kotlin.reflect.full.memberFunctions
  *   方便访问其构造函数与所有的action方法
  * Created by shi on 4/26/17.
  */
-class ControllerClass(public val clazz: KClass<*> /* controller类 */){
+class ControllerClass(public override val clazz: KClass<*> /* controller类 */):IControllerClass{
 
     /**
      * 构造函数
      */
-    public val constructer: KFunction<*> = clazz.findConstructor(listOf(Request::class.java, Response::class.java))!!;
+    public override val constructer: KFunction<*> = clazz.findConstructor(listOf(Request::class.java, Response::class.java))!!;
 
     /**
      * 所有action方法
      */
-    public val actions: MutableMap<String, KFunction<*>> = HashMap<String, KFunction<*>>();
+    public override val actions: MutableMap<String, KFunction<*>> = HashMap<String, KFunction<*>>();
 
     init{
         // 获得所有action方法
@@ -37,7 +37,7 @@ class ControllerClass(public val clazz: KClass<*> /* controller类 */){
     /**
      * 获得action方法
      */
-    public fun getActionMethod(name:String): KFunction<*>? {
+    public override fun getActionMethod(name:String): KFunction<*>? {
         return actions.get(name);
     }
 }

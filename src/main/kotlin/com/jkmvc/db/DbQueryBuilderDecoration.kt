@@ -5,11 +5,8 @@ import java.util.*
 /**
  * sql构建器 -- 修饰子句: 由修饰词where/group by/order by/limit来构建的子句
  *
- * @Package packagename
- * @category
  * @author shijianhang
  * @date 2016-10-12
- *
  */
 abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) : DbQueryBuilderAction(db, table) {
     /**
@@ -49,7 +46,6 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
 
     /**
      * 联表数组，每个联表join = 表名 + 联表方式 | 每个联表条件on = 字段 + 运算符 + 字段, 都写死在DbQueryBuilderDecorationClausesJoin类
-     * @var array
      */
     protected val join: MutableList<DbQueryBuilderDecorationClausesGroup> by lazy(LazyThreadSafetyMode.NONE) {
         LinkedList<DbQueryBuilderDecorationClausesGroup>()
@@ -79,8 +75,9 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
 
     /**
      * 遍历修饰子句
+     * @param visitor 访问者函数，遍历时调用
      */
-    protected fun travelDecorationClauses(visitor: (IDbQueryBuilderDecorationClauses<*>) -> Unit) {
+    protected fun travelDecorationClauses(visitor: (IDbQueryBuilderDecorationClauses<*>) -> Unit):Unit {
         // 逐个处理修饰词及其表达式
         // 1 join
         for (j in join)
@@ -93,7 +90,9 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
 
     /**
      * 编译修饰子句
-     * @return IDbQueryBuilder
+     *
+     * @param sql 保存编译的sql
+     * @return
      */
     public override fun compileDecoration(sql: StringBuilder): IDbQueryBuilder{
         // 逐个编译修饰表达式
@@ -106,7 +105,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
 
     /**
      * 清空条件
-     * @return DbQueryBuilder
+     * @return
      */
     public override fun clear(): IDbQueryBuilder {
         // 逐个清空修饰表达式
@@ -122,8 +121,8 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * 改写转义值的方法，搜集sql参数
      *
-     * @param mixed value
-     * @return string
+     * @param value
+     * @return
      */
     public override fun quote(value: Any?): String {
         // 1 将参数值直接拼接到sql
@@ -137,8 +136,8 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * 检查是否是sql操作符
      *
-     * @param    string
-     * @return    bool
+     * @param str
+     * @return
      */
     public fun isOperator(str: String): Boolean {
         return "(\\s|<|>|!|=|is|is not)".toRegex(RegexOption.IGNORE_CASE).matches(str);
@@ -146,8 +145,8 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
 
     /**
      * 多个where条件
-     * @param conditions:Map<String, Any?>
-     * @return DbQueryBuilder
+     * @param conditions
+     * @return
      */
     public override fun wheres(conditions: Map<String, Any?>): IDbQueryBuilder {
         for ((column, value) in conditions)
@@ -158,8 +157,8 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
 
     /**
      * 多个on条件
-     * @param conditions:Map<String, String>
-     * @return DbQueryBuilder
+     * @param conditions
+     * @return
      */
     public override fun ons(conditions: Map<String, String>): IDbQueryBuilder {
         for ((column, value) in conditions)
@@ -170,8 +169,8 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
 
     /**
      * 多个having条件
-     * @param conditions:Map<String, Any?>
-     * @return DbQueryBuilder
+     * @param conditions
+     * @return
      */
     public override fun havings(conditions: Map<String, Any?>): IDbQueryBuilder {
         for ((column, value) in conditions)
@@ -183,10 +182,10 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Alias of andWhere()
      *
-     * @param   mixed   column  column name or array(column, alias) or object
-     * @param   string  op      logic operator
-     * @param   mixed   value   column value
-     * @return DbQueryBuilder
+     * @param   column  column name or array(column, alias) or object
+     * @param   op      logic operator
+     * @param   value   column value
+     * @return
      */
     public override fun where(column: String, op: String, value: Any?): IDbQueryBuilder {
         return andWhere (column, op, value);
@@ -195,10 +194,10 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Creates a new "AND WHERE" condition for the query.
      *
-     * @param   mixed   column  column name or array(column, alias) or object
-     * @param   string  op      logic operator
-     * @param   mixed   value   column value
-     * @return DbQueryBuilder
+     * @param   column  column name or array(column, alias) or object
+     * @param   op      logic operator
+     * @param   value   column value
+     * @return
      */
     public override fun andWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
         getClause("where").addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "AND");
@@ -208,10 +207,10 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Creates a new "OR WHERE" condition for the query.
      *
-     * @param   mixed   column  column name or array(column, alias) or object
-     * @param   string  op      logic operator
-     * @param   mixed   value   column value
-     * @return DbQueryBuilder
+     * @param   column  column name or array(column, alias) or object
+     * @param   op      logic operator
+     * @param   value   column value
+     * @return
      */
     public override fun orWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
         getClause("where").addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "OR");
@@ -222,9 +221,9 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Prepare operator
      *
-     * @param   string  op      logic operator
-     * @param   mixed   value   column value
-     * @return DbQueryBuilderDecoration
+     * @param   op      logic operator
+     * @param   value   column value
+     * @return
      */
     protected fun prepareOperator(value: Any?, op: String = "="): String {
         if (value == null && op == "=") // IS null
@@ -237,7 +236,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Alias of andWhereOpen()
      *
-     * @return DbQueryBuilder
+     * @return
      */
     public override fun whereOpen(): IDbQueryBuilder {
         return andWhereOpen();
@@ -246,7 +245,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Opens a new "AND WHERE (...)" grouping.
      *
-     * @return DbQueryBuilder
+     * @return
      */
     public override fun andWhereOpen(): IDbQueryBuilder {
         getClause("where").open("AND");
@@ -256,7 +255,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Opens a new "OR WHERE (...)" grouping.
      *
-     * @return DbQueryBuilder
+     * @return
      */
     public override fun orwhereOpen(): IDbQueryBuilder {
         getClause("where").open("OR");
@@ -266,7 +265,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Closes an open "WHERE (...)" grouping.
      *
-     * @return DbQueryBuilder
+     * @return
      */
     public override fun whereclose(): IDbQueryBuilder {
         return andWhereclose();
@@ -275,7 +274,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Closes an open "WHERE (...)" grouping.
      *
-     * @return DbQueryBuilder
+     * @return
      */
     public override fun andWhereclose(): IDbQueryBuilder {
         getClause("where").close();
@@ -285,7 +284,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Closes an open "WHERE (...)" grouping.
      *
-     * @return DbQueryBuilder
+     * @return
      */
     public override fun orWhereclose(): IDbQueryBuilder {
         getClause("where").close();
@@ -295,8 +294,8 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Creates a "GROUP BY ..." filter.
      *
-     * @param   mixed   columns  column name or array(column, alias) or object
-     * @return DbQueryBuilder
+     * @param   columns  column name or array(column, alias) or object
+     * @return
      */
     public override fun groupBy(column: String): IDbQueryBuilder {
         getClause("groupBy").addSubexp(arrayOf(column));
@@ -306,10 +305,10 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Alias of andHaving()
      *
-     * @param   mixed   column  column name or array(column, alias) or object
-     * @param   string  op      logic operator
-     * @param   mixed   value   column value
-     * @return DbQueryBuilder
+     * @param   column  column name or array(column, alias) or object
+     * @param   op      logic operator
+     * @param   value   column value
+     * @return
      */
     public override fun having(column: String, op: String, value: Any?): IDbQueryBuilder {
         return andHaving(column, op, value);
@@ -318,10 +317,10 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Creates a new "AND HAVING" condition for the query.
      *
-     * @param   mixed   column  column name or array(column, alias) or object
-     * @param   string  op      logic operator
-     * @param   mixed   value   column value
-     * @return DbQueryBuilder
+     * @param   column  column name or array(column, alias) or object
+     * @param   op      logic operator
+     * @param   value   column value
+     * @return
      */
     public override fun andHaving(column: String, op: String, value: Any?): IDbQueryBuilder {
         getClause("having").addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "AND");
@@ -331,10 +330,10 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Creates a new "OR HAVING" condition for the query.
      *
-     * @param   mixed   column  column name or array(column, alias) or object
-     * @param   string  op      logic operator
-     * @param   mixed   value   column value
-     * @return DbQueryBuilder
+     * @param   column  column name or array(column, alias) or object
+     * @param   op      logic operator
+     * @param   value   column value
+     * @return
      */
     public override fun orHaving(column: String, op: String, value: Any?): IDbQueryBuilder {
         getClause("having").addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "OR");
@@ -344,7 +343,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Alias of andHavingOpen()
      *
-     * @return DbQueryBuilder
+     * @return
      */
     public override fun havingOpen(): IDbQueryBuilder {
         return andHavingOpen();
@@ -353,7 +352,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Opens a new "AND HAVING (...)" grouping.
      *
-     * @return DbQueryBuilder
+     * @return
      */
     public override fun andHavingOpen(): IDbQueryBuilder {
         getClause("where").open("AND");
@@ -363,7 +362,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Opens a new "OR HAVING (...)" grouping.
      *
-     * @return DbQueryBuilder
+     * @return
      */
     public override fun orHavingOpen(): IDbQueryBuilder {
         getClause("where").open("OR");
@@ -373,7 +372,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Closes an open "AND HAVING (...)" grouping.
      *
-     * @return DbQueryBuilder
+     * @return
      */
     public override fun havingClose(): IDbQueryBuilder {
         return andHavingClose();
@@ -382,7 +381,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Closes an open "AND HAVING (...)" grouping.
      *
-     * @return DbQueryBuilder
+     * @return
      */
     public override fun andHavingClose(): IDbQueryBuilder {
         getClause("where").close();
@@ -392,7 +391,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Closes an open "OR HAVING (...)" grouping.
      *
-     * @return DbQueryBuilder
+     * @return
      */
     public override fun orHavingClose(): IDbQueryBuilder {
         getClause("where").close();
@@ -402,9 +401,9 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Applies sorting with "ORDER BY ..."
      *
-     * @param   mixed   column     column name or array(column, alias) or object
-     * @param   string  direction  direction of sorting
-     * @return DbQueryBuilder
+     * @param   column     column name or array(column, alias) or object
+     * @param   direction  direction of sorting
+     * @return
      */
     public override fun orderBy(column: String, direction: String?): IDbQueryBuilder {
         getClause("orderBy").addSubexp(arrayOf<Any?>(column, direction));
@@ -414,9 +413,9 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Return up to "LIMIT ..." results
      *
-     * @param   integer  limit
-     * @param   integer  offset
-     * @return DbQueryBuilder
+     * @param   limit
+     * @param   offset
+     * @return
      */
     public override fun limit(limit: Int, offset: Int): IDbQueryBuilder {
         if (offset === 0)
@@ -430,9 +429,9 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Adds addition tables to "JOIN ...".
      *
-     * @param   mixed   table  column name or array(column, alias) or object
-     * @param   string  type   join type (LEFT, RIGHT, INNER, etc)
-     * @return DbQueryBuilder
+     * @param   table  column name or array(column, alias) or object
+     * @param   type   join type (LEFT, RIGHT, INNER, etc)
+     * @return
      */
     public override fun join(table: Any, type: String?): IDbQueryBuilder {
         // join　子句
@@ -451,10 +450,10 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Adds "ON ..." conditions for the last created JOIN statement.
      *
-     * @param   mixed   c1  column name or array(column, alias) or object
-     * @param   string  op  logic operator
-     * @param   mixed   c2  column name or array(column, alias) or object
-     * @return DbQueryBuilder
+     * @param   c1  column name or array(column, alias) or object
+     * @param   op  logic operator
+     * @param   c2  column name or array(column, alias) or object
+     * @return
      */
     public override fun on(c1: String, op: String, c2: String): IDbQueryBuilder {
         join.last().addSubexp(arrayOf(c1, op, c2), "AND");

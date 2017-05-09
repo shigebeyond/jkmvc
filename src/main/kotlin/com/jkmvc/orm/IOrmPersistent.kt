@@ -3,8 +3,6 @@ package com.jkmvc.orm
 /**
  * ORM之持久化，主要是负责数据库的增删改查
  *
- * @Package packagename
- * @category
  * @author shijianhang
  * @date 2016-10-10
  *
@@ -18,22 +16,22 @@ interface IOrmPersistent :IOrmValid {
 
 	/**
 	 * 获得主键值
-	 * @return int|string
+	 * @return|string
 	 */
-	public val pk: Int;
+	val pk: Int;
 
 	/**
 	 * 获得sql构建器
-	 * @return Orm_Query_Builder
+	 * @return
 	 */
-	public fun queryBuilder(): OrmQueryBuilder;
+	fun queryBuilder(): OrmQueryBuilder;
 
 	/**
 	 * 保存数据
 	 *
-	 * @return int 对insert返回新增数据的主键，对update返回影响行数
+	 * @return 对insert返回新增数据的主键，对update返回影响行数
 	 */
-	public fun save(): Boolean;
+	fun save(): Boolean;
 
 	/**
 	 * 插入数据: insert sql
@@ -45,9 +43,9 @@ interface IOrmPersistent :IOrmValid {
 	 *    user.create();
 	 * </code>
 	 * 
-	 * @return int 新增数据的主键
+	 * @return 新增数据的主键
 	 */
-	public fun create(): Int;
+	fun create(): Int;
 
 	/**
 	 * 更新数据: update sql
@@ -58,9 +56,9 @@ interface IOrmPersistent :IOrmValid {
 	 *    user.update();
 	 * </code>
 	 * 
-	 * @return int 影响行数
+	 * @return 影响行数
 	 */
-	public fun update(): Boolean;
+	fun update(): Boolean;
 
 	/**
 	 * 删除数据: delete sql
@@ -70,7 +68,7 @@ interface IOrmPersistent :IOrmValid {
 	 *    user.delete();
 	 *　</code>
 	 *
-	 * @return int 影响行数
+	 * @return 影响行数
 	 */
-	public fun delete(): Boolean;
+	fun delete(): Boolean;
 }

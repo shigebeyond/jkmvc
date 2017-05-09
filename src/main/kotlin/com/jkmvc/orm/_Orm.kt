@@ -1,10 +1,11 @@
 package com.jkmvc.orm
 
 import kotlin.reflect.KClass
-import kotlin.reflect.companionObjectInstance
+import kotlin.reflect.full.companionObjectInstance
 
 /**
  * 检查数据是否存在于db
+ * @return
  */
 public fun Orm?.isLoaded(): Boolean {
     return this != null && this.loaded;

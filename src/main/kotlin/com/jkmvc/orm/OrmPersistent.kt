@@ -5,8 +5,6 @@ import java.util.*
 /**
  * ORM之持久化，主要是负责数据库的增删改查
  *
- * @Package packagename
- * @category
  * @author shijianhang
  * @date 2016-10-10
  *
@@ -27,14 +25,14 @@ abstract class OrmPersistent: OrmValid() {
 
 	/**
 	 * 获得主键值
-	 * @return int|string
+	 * @return|string
 	 */
 	public override val pk:Int
 		get() = this[metadata.primaryKey];
 
 	/**
 	 * 获得sql构建器
-	 * @return Orm_Query_Builder
+	 * @return
 	 */
 	public override fun queryBuilder(): OrmQueryBuilder {
 		return metadata.queryBuilder();
@@ -43,7 +41,7 @@ abstract class OrmPersistent: OrmValid() {
 	/**
 	 * 保存数据
 	 *
-	 * @return int 对insert返回新增数据的主键，对update返回影响行数
+	 * @return 对insert返回新增数据的主键，对update返回影响行数
 	 */
 	public override fun save(): Boolean {
 		if(loaded)
@@ -62,7 +60,7 @@ abstract class OrmPersistent: OrmValid() {
 	 *    user.create();
 	 * </code>
 	 * 
-	 * @return int 新增数据的主键
+	 * @return 新增数据的主键
 	 */
 	public override fun create(): Int {
 		if(dirty.isEmpty())
@@ -84,6 +82,7 @@ abstract class OrmPersistent: OrmValid() {
 
 	/**
 	* 构建要改变的数据
+	 * @return
 	 */
 	protected fun buildDirtyData(): MutableMap<String, Any?> {
 		val result:MutableMap<String, Any?> = HashMap<String, Any?>();
@@ -102,7 +101,7 @@ abstract class OrmPersistent: OrmValid() {
 	 *    user.update();
 	 * </code>
 	 * 
-	 * @return int 影响行数
+	 * @return 影响行数
 	 */
 	public override fun update(): Boolean {
 		if(!loaded)
@@ -131,7 +130,7 @@ abstract class OrmPersistent: OrmValid() {
 	 *    user.delete();
 	 *　</code>
 	 *
-	 * @return int 影响行数
+	 * @return 影响行数
 	 */
 	public override fun delete(): Boolean {
 		if(!loaded)

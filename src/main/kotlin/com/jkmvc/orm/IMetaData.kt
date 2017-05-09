@@ -62,41 +62,65 @@ interface IMetaData{
 
     /**
      * 是否有某个关联关系
+     * @param name
+     * @return
      */
     fun hasRelation(name:String):Boolean;
 
     /**
      * 获得某个关联关系
+     * @param name
+     * @return
      */
     fun getRelation(name:String):IMetaRelation?;
 
     /**
      * 获得orm查询构建器
+     * @return
      */
     fun queryBuilder(): OrmQueryBuilder;
 
     /**
      * 添加规则
+     * @param name
+     * @param rule
+     * @return
      */
     fun addRule(name: String, rule: String): MetaData;
 
     /**
      * 添加标签
+     * @param name
+     * @param label
+     * @return
      */
     fun addLabel(name: String, label: String): MetaData;
 
     /**
      * 生成属性代理 + 设置关联关系(belongs to)
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param foreignKey 外键
+     * @param conditions 关联查询条件
+     * @return
      */
     fun belongsTo(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = "", conditions:((IDbQueryBuilder) -> Unit)? = null): IMetaData;
 
     /**
      * 设置关联关系(has one)
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param foreignKey 外键
+     * @param conditions 关联查询条件
      */
     fun hasOne(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = "", conditions:((IDbQueryBuilder) -> Unit)? = null): IMetaData;
 
     /**
      * 设置关联关系(has many)
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param foreignKey 外键
+     * @param conditions 关联查询条件
      */
     fun hasMany(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = "", conditions:((IDbQueryBuilder) -> Unit)? = null): IMetaData;
 

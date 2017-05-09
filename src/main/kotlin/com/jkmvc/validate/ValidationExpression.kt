@@ -17,24 +17,20 @@ import java.util.*
  *   无意于实现完整语义的布尔表达式, 暂时先满足于输入校验与orm保存数据时的校验, 因此:
  *       运算符没有优先级, 只能按顺序执行, 不支持带括号的子表达式
  *
- * @Package packagename
- * @category
  * @author shijianhang
  * @date 2016-10-19 下午3:40:55
  *
  */
-class ValidationExpression(val exp:String)
+class ValidationExpression(override val exp:String /* 原始表达式 */):IValidationExpression
 {
 	companion object{
 		/**
 		 * 运算符的正则
-		 * @var string
 		 */
 		val RegexOperator:String = "[&\\|\\.\\>]+";
 
 		/**
 		 * 函数的正则
-		 * @var string
 		 */
 		val RegexFunc:String = "(\\w+)(\\(([\\s\\w\\d-:,]*)\\))?";
 
@@ -45,7 +41,6 @@ class ValidationExpression(val exp:String)
 
 		/**
 		 * 函数参数的正则
-		 * @var string
 		 */
 		val RegexParam:String = "([\\w\\d-:]+),?";
 
@@ -57,8 +52,8 @@ class ValidationExpression(val exp:String)
 		 *     list(ops, subexps) = ValidationExpression::compile("trim > notempty && email");
 		 * </code>
 		 *
-		 * @param string exp
-		 * @return array
+		 * @param exp
+		 * @return
 		 */
 		public fun compile(exp:String): List<ValidationUint> {
 			// 第一个()是操作符，第二个()是函数名，第四个()是函数参数
@@ -79,7 +74,7 @@ class ValidationExpression(val exp:String)
 		 * 编译函数参数
 		 *
 		 * @param params
-		 * @return array
+		 * @return
 		 */
 		public fun compileParams(exp:String?): List<String> {
 			if(exp == null)
@@ -98,7 +93,6 @@ class ValidationExpression(val exp:String)
 	 * 子表达式的数组
 	 *   一个子表达式 = array(操作符, 函数名, 参数数组)
 	 *   参数列表 = listOf("1", "2", ":name") 参数有值/变量（如:name）
-	 * @var array
 	 */
 	protected val subexps:List<ValidationUint> = compile(exp);
 
@@ -113,10 +107,10 @@ class ValidationExpression(val exp:String)
 	 * </code>
 	 *
 	 * @param Any? value 要校验的数值，该值可能被修改
-	 * @param Map binds 变量
+	 * @param binds 变量
 	 * @return Pair 结果+最后一个校验单元
 	 */
-	public fun execute(v:Any?, binds:Map<String, Any?> = emptyMap()):Pair<Any?, ValidationUint?>
+	public override fun execute(v:Any?, binds:Map<String, Any?>):Pair<Any?, ValidationUint?>
 	{
 		if(subexps.isEmpty())
 			return Pair(v, null);

@@ -9,12 +9,10 @@ import java.util.*
 /**
  * 获得某个包下的类
  *
- * <code>
- *     val classes = ControllerLoader().listClasses("com.test");
- * </code>
- * @author shi
+ * @author shijianhang
+ * @date 2016-10-8 下午8:02:47
  */
-object ControllerLoader{
+object ControllerLoader:IControllerLoader{
 
     /**
      * 自动扫描的包
@@ -32,23 +30,27 @@ object ControllerLoader{
 
     /**
      * 添加单个包
+     * @param pck 包名
+     * @return
      */
-    public fun addPackage(pck:String){
+    public override fun addPackage(pck:String): IControllerLoader {
         packages.add(pck)
+        return this;
     }
 
     /**
      * 添加多个包
      */
-    public fun addPackage(pcks:Collection<String>){
+    public override fun addPackages(pcks:Collection<String>): IControllerLoader {
         packages.addAll(pcks)
+        return this;
     }
 
     /**
      * 扫描指定包下的Controller类
      * @return
      */
-    fun scan(): MutableMap<String, ControllerClass> {
+    override fun scan(): MutableMap<String, ControllerClass> {
 
         // 获得类加载器
         val cld = Thread.currentThread().contextClassLoader ?: throw ClassNotFoundException("Can't get class loader.")
@@ -88,8 +90,10 @@ object ControllerLoader{
 
     /**
      * 获得controller类
+     * @param controller名
+     * @return
      */
-    public fun getControllerClass(name: String): ControllerClass? {
+    public override fun getControllerClass(name: String): ControllerClass? {
         return controllers.get(name);
     }
 

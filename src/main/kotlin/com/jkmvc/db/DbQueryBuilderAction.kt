@@ -11,18 +11,14 @@ import kotlin.reflect.KFunction
  * sql构建器 -- 动作子句: 由动态select/insert/update/delete来构建的子句
  *   通过字符串模板来实现
  *
- * @Package packagename
- * @category
  * @author shijianhang
  * @date 2016-10-12
- *
  */
 abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, var table: String = "" /*表名*/) : IDbQueryBuilder() {
 
     companion object {
         /**
          * 动作子句的sql模板
-         * @var array
          */
         protected val SqlTemplates:Map<String, String> = mapOf(
                 "select" to "SELECT :distinct :columns FROM :table",
@@ -51,13 +47,11 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
 
     /**
      * 动作
-     * @var String
      */
     protected var action: String = "";
 
     /**
      * 要插入的多行: [<column to value>]
-     * @var array
      */
     protected val insertRows: MutableList<Map<String, Any?>> by lazy(LazyThreadSafetyMode.NONE) {
         LinkedList<Map<String, Any?>>();
@@ -65,7 +59,6 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
 
     /**
      * 要更新字段值: <column to value>
-     * @var array
      */
     protected val updateRow: MutableMap<String, Any?> by lazy(LazyThreadSafetyMode.NONE) {
         LinkedHashMap<String, Any?>();
@@ -73,7 +66,6 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
 
     /**
      * 要查询的字段名: [alias to column]
-     * @var array
      */
     protected val selectColumns: MutableSet<Any> by lazy(LazyThreadSafetyMode.NONE) {
         HashSet<Any>();
@@ -81,13 +73,11 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
 
     /**
      * select语句中, 控制查询结果是否去重唯一
-     * @var bool
      */
     protected var distinct: Boolean = false;
 
     /**
      * sql参数
-     * @var array
      */
     protected val params: MutableList<Any?> by lazy {
         LinkedList<Any?>();
@@ -97,8 +87,8 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * 设置动作
      * 　　延时设置动作，此时可获得对应的数据库连接
      *
-     * @param string action sql动作：select/insert/update/delete
-     * @return DbQueryBuilder
+     * @param action sql动作：select/insert/update/delete
+     * @return
      */
     public fun action(action: String): IDbQueryBuilder {
         if (action !in SqlTemplates)
@@ -112,7 +102,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * 设置表名: 一般是单个表名
      * @param tables 表名数组: array(table1, table2, alias to table3),
      * 								  如 array("user", "contact", "addr" to "useraddress"), 其中 user 与 contact 表不带别名, 而 useraddress 表带别名 addr
-     * @return DbQueryBuilder
+     * @return
      */
     public override fun table(tables: String): IDbQueryBuilder {
         return this.tables(tables);
@@ -122,7 +112,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * 设置表名: 可能有多个表名
      * @param tables 表名数组: array(table1, table2, alias to table3),
      * 								  如 array("user", "contact", "addr" to "useraddress"), 其中 user 与 contact 表不带别名, 而 useraddress 表带别名 addr
-     * @return DbQueryBuilder
+     * @return
      */
     public override fun from(tables: String): IDbQueryBuilder {
         return tables(tables);
@@ -132,6 +122,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * 处理多个表名的设置
      * @param tables 表名数组: array(table1, table2, alias to table3),
      * 								  如 array("user", "contact", "addr" to "useraddress"), 其中 user 与 contact 表不带别名, 而 useraddress 表带别名 addr
+     * @return
      */
     protected fun tables(tables: String): IDbQueryBuilder {
         table = tables;
@@ -141,8 +132,8 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     /**
      * 设置插入的单行, insert时用
      *
-     * @param array row
-     * @return DbQueryBuilder
+     * @param row 单行数据
+     * @return
      */
     public override fun value(row: Map<String, Any?>): IDbQueryBuilder {
         insertRows.add(row);
@@ -152,8 +143,8 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     /**
      * 设置插入的多行, insert时用
      *
-     * @param array rows
-     * @return DbQueryBuilder
+     * @param rows 多行数据
+     * @return
      */
     public override fun values(rows: List<Map<String, Any?>>): IDbQueryBuilder {
         insertRows.addAll(rows);
@@ -163,9 +154,9 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     /**
      * 设置更新的单个值, update时用
      *
-     * @param string column
-     * @param mixed value
-     * @return DbQueryBuilder
+     * @param column 字段名
+     * @param value 字段值
+     * @return
      */
     public override fun set(column: String, value: Any?): IDbQueryBuilder {
         updateRow.put(column, value);
@@ -175,8 +166,8 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     /**
      * 设置更新的多个值, update时用
      *
-     * @param array row
-     * @return DbQueryBuilder
+     * @param row 单行数据
+     * @return
      */
     public override fun sets(row: Map<String, Any?>): IDbQueryBuilder {
         updateRow.putAll(row);
@@ -186,9 +177,9 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     /**
      * 设置查询的字段, select时用
      *
-     * @param array columns 字段名数组: array(column1, column2, alias to column3),
+     * @param columns 字段名数组: array(column1, column2, alias to column3),
      * 													如 array("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
-     * @return DbQueryBuilder
+     * @return
      */
     public override fun select(vararg columns: Any): IDbQueryBuilder {
         if (!columns.isEmpty()){
@@ -207,8 +198,8 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     /**
      * 设置查询结果是否去重唯一
      *
-     * @param boolean value
-     * @return DbQueryBuilderAction
+     * @param value
+     * @return
      */
     public override fun distinct(value: Boolean): IDbQueryBuilder {
         distinct = value;
@@ -217,7 +208,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
 
     /**
      * 清空条件
-     * @return DbQueryBuilder
+     * @return
      */
     public override fun clear(): IDbQueryBuilder {
         action = "";
@@ -234,7 +225,9 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
 
     /**
      * 编译动作子句
-     * @return IDbQueryBuilder
+     *
+     * @param sb 记录编译后的sql
+     * @return
      */
     public override fun compileAction(sb: StringBuilder): IDbQueryBuilder {
         if (action !in SqlTemplates)
@@ -270,7 +263,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
 
     /**
      * 编译表名: 转义
-     * @return string
+     * @return
      */
     public fun fillTable(): String {
         return db.quoteTable(table);
@@ -280,7 +273,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * 编译多个字段名: 转义
      *     select/insert时用
      *
-     * @return string
+     * @return
      */
     public fun fillColumns(): String {
         // 1 select子句:  data是要查询的字段名, [alias to column]
@@ -304,7 +297,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * 编译多个字段值: 转义
      *     insert时用
      *
-     * @return string
+     *  @return
      */
     public fun fillValues(): String {
         // insert子句:  data是要插入的多行: [<column to value>]
@@ -325,9 +318,9 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * 编译字段谓句: 转义 + 拼接谓句
      *    update时用
      *
-     * @param stirng operator 谓语
-     * @param string delimiter 拼接谓句的连接符
-     * @return string
+     * @param operator 谓语
+     * @param delimiter 拼接谓句的连接符
+     * @return
      */
     public fun fillColumnPredicate(operator: String, delimiter: String = ", "): String {
         // update子句:  data是要更新字段值: <column to value>

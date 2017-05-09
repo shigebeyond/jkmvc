@@ -3,8 +3,6 @@ package com.jkmvc.orm
 /**
  * ORM之关联对象操作
  *
- * @Package packagename
- * @category
  * @author shijianhang
  * @date 2016-10-10 上午12:52:34
  *
@@ -13,8 +11,8 @@ open abstract class OrmRelated: OrmPersistent() {
     /**
      * 设置对象字段值
      *
-     * @param  string column 字段名
-     * @param  mixed  value  字段值
+     * @param column 字段名
+     * @param  value  字段值
      */
     public override operator fun set(column: String, value: Any?) {
         // 设置关联对象
@@ -34,8 +32,8 @@ open abstract class OrmRelated: OrmPersistent() {
     /**
      * 获得对象字段
      *
-     * @param   string column 字段名
-     * @return  mixed
+     * @param column 字段名
+     * @return
      */
     public override operator fun <T> get(name: String, defaultValue: Any?): T {
         // 获得关联对象
@@ -48,8 +46,8 @@ open abstract class OrmRelated: OrmPersistent() {
     /**
      * 设置原始的字段值
      *
-     * @param array data
-     * @return Orm|array
+     * @param data
+     * @return
      */
     public override fun original(orgn: Map<String, Any?>): IOrm {
         for ((column, value) in orgn) {
@@ -70,11 +68,11 @@ open abstract class OrmRelated: OrmPersistent() {
     /**
      * 获得关联对象
      *
-     * @param string name 关联对象名
-     * @param boolean 是否创建新对象：在查询db后设置原始字段值data()时使用
-     * @param array columns 字段名数组: array(column1, column2, alias => column3),
-     * 													如 array("name", "age", "birt" => "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
-     * @return Orm
+     * @param name 关联对象名
+     * @param 是否创建新对象：在查询db后设置原始字段值data()时使用
+     * @param columns 字段名数组: Array(column1, column2, alias to column3),
+     * 													如 Array("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
+     * @return
      */
     public override fun related(name: String, newed: Boolean, vararg columns: String): Any? {
         if (name !in data){
@@ -108,8 +106,8 @@ open abstract class OrmRelated: OrmPersistent() {
     /**
      * 查询关联的从表
      *
-     * @param IMetaRelation relation 从表关系
-     * @return OrmQueryBuilder
+     * @param relation 从表关系
+     * @return
      */
     protected fun querySlave(relation:IMetaRelation): OrmQueryBuilder {
         return relation.queryBuilder().where(relation.foreignKey, pk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
@@ -118,8 +116,8 @@ open abstract class OrmRelated: OrmPersistent() {
     /**
      * 查询关联的主表
      *
-     * @param IMetaRelation relation 主表关系
-     * @return OrmQueryBuilder
+     * @param relation 主表关系
+     * @return
      */
     protected fun queryMaster(relation:IMetaRelation): OrmQueryBuilder {
         return relation.queryBuilder().where(relation.metadata.primaryKey, this[relation.foreignKey]) as OrmQueryBuilder; // 主表.主键 = 从表.外键

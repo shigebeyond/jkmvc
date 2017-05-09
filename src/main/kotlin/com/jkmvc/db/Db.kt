@@ -8,6 +8,9 @@ import java.util.*
 
 /**
  * 封装db操作
+ *
+ * @author shijianhang
+ * @date 2016-10-8 下午8:02:47
  */
 class Db(protected val conn: Connection /* 数据库连接 */, protected val name:String = "default" /* 标识 */):IDb{
 
@@ -87,6 +90,8 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
 
     /**
      * 执行事务
+     * @param statement db操作过程
+     * @return
      */
     public override fun <T> transaction(statement: Db.() -> T):T{
         try{
@@ -104,6 +109,9 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
 
     /**
      * 获得表的所有列
+     *
+     * @param table
+     * @return
      */
     public override fun listColumns(table:String): List<String> {
         return tableColumns.get(table)!!;
@@ -111,6 +119,9 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
 
     /**
      * 执行更新
+     * @param sql
+     * @param paras
+     * @return
      */
     public override fun execute(sql: String, paras: List<Any?>?): Int {
         return conn.execute(sql, paras);
@@ -118,6 +129,10 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
 
     /**
      * 查询多行
+     * @param sql
+     * @param paras
+     * @param action 处理结果的函数
+     * @return
      */
     public override fun <T> queryResult(sql: String, paras: List<Any?>?, action: (ResultSet) -> T): T {
         return conn.queryResult(sql, paras, action)
@@ -125,6 +140,10 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
 
     /**
      * 查询多行
+     * @param sql
+     * @param paras
+     * @param transform 处理结果的函数
+     * @return
      */
     public override fun <T> queryRows(sql: String, paras: List<Any?>?, transform: (MutableMap<String, Any?>) -> T): List<T> {
         return conn.queryRows(sql, paras, transform);
@@ -132,6 +151,10 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
 
     /**
      * 查询一行(多列)
+     * @param sql
+     * @param paras
+     * @param transform 处理结果的函数
+     * @return
      */
     public override fun <T> queryRow(sql: String, paras: List<Any?>?, transform: (MutableMap<String, Any?>) -> T): T? {
         return conn.queryRow(sql, paras, transform);
@@ -139,6 +162,9 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
 
     /**
      * 查询一行一列
+     * @param sql
+     * @param paras
+     * @return
      */
     public override fun queryCell(sql: String, paras: List<Any?>?): Pair<Boolean, Any?> {
         return conn.queryCell(sql, paras);
@@ -207,8 +233,9 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
     /**
      * 转义多个表名
      *
-     * @param Collection<Any> tables 表名集合，其元素可以是String, 也可以是Pair<表名, 别名>
-     * @return string
+     * @param tables 表名集合，其元素可以是String, 也可以是Pair<表名, 别名>
+     * @param with_brackets 当拼接数组时, 是否用()包裹
+     * @return
      */
     public override fun quoteTables(tables:Collection<Any>, with_brackets:Boolean):String
     {
@@ -235,8 +262,9 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
     /**
      * 转义表名
      *
-     * @param string table
-     * @return string
+     * @param table
+     * @param alias 表别名
+     * @return
      */
     public override fun quoteTable(table:String, alias:String?):String
     {
@@ -249,9 +277,9 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
     /**
      * 转义多个字段名
      *
-     * @param Collection<Any> columns 表名集合，其元素可以是String, 也可以是Pair<字段名, 别名>
-     * @param bool with_brackets 当拼接数组时, 是否用()包裹
-     * @return string
+     * @param columns 表名集合，其元素可以是String, 也可以是Pair<字段名, 别名>
+     * @param with_brackets 当拼接数组时, 是否用()包裹
+     * @return
      */
     public override fun quoteColumns(columns:Collection<Any>, with_brackets:Boolean):String
     {
@@ -286,10 +314,10 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
     /**
      * 转义字段名
      *
-     * @param string|array column 字段名, 可以是字段数组
-     * @param string alias 字段别名
-     * @param bool with_brackets 当拼接数组时, 是否用()包裹
-     * @return string
+     * @param column 字段名, 可以是字段数组
+     * @param alias 字段别名
+     * @param with_brackets 当拼接数组时, 是否用()包裹
+     * @return
      */
     public override fun quoteColumn(column:String, alias:String?, with_brackets:Boolean):String
     {
@@ -321,8 +349,8 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
     /**
      * 转义值
      *
-     * @param string|array value 字段值, 可以是值数组
-     * @return string
+     * @param value 字段值, 可以是值数组
+     * @return
      */
     public override fun quote(values:Collection<Any?>):String
     {
@@ -335,8 +363,8 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
     /**
      * 转义值
      *
-     * @param string|array value 字段值, 可以是值数组
-     * @return Any
+     * @param value 字段值, 可以是值数组
+     * @return
      */
     public override fun quote(value:Any?):Any?
     {

@@ -8,8 +8,6 @@ import kotlin.reflect.KProperty
 /**
  * ORM之实体对象
  *
- * @Package packagename
- * @category
  * @author shijianhang
  * @date 2016-10-10 上午12:52:34
  *
@@ -38,8 +36,7 @@ abstract class OrmEntity : IRecord, IOrm {
     protected val data: MutableMap<String, Any?> = LinkedHashMap<String, Any?>()
 
     /**
-     * 变化的字段值：<字段名 => 字段值>
-     * @var array
+     * 变化的字段值：<字段名 to 字段值>
      */
     protected val dirty: MutableSet<String> by lazy {
         HashSet<String>()
@@ -55,7 +52,7 @@ abstract class OrmEntity : IRecord, IOrm {
     /**
      * 判断是否有某字段
      *
-     * @param string column
+     * @param column
      * @return
      */
     public override fun hasColumn(column: String): Boolean {
@@ -65,8 +62,8 @@ abstract class OrmEntity : IRecord, IOrm {
     /**
      * 设置对象字段值
      *
-     * @param  string column 字段名
-     * @param  mixed  value  字段值
+     * @param column 字段名
+     * @param  value  字段值
      */
     public override operator fun set(column: String, value: Any?) {
         if (!hasColumn(column))
@@ -79,8 +76,8 @@ abstract class OrmEntity : IRecord, IOrm {
     /**
      * 获得对象字段
      *
-     * @param   string column 字段名
-     * @return  mixed
+     * @param column 字段名
+     * @return
      */
     public override operator fun <T> get(column: String, defaultValue: Any?): T {
         if (!hasColumn(column))
@@ -92,9 +89,9 @@ abstract class OrmEntity : IRecord, IOrm {
     /**
      * 设置多个字段值
      *
-     * @param  array values   字段值的数组：<字段名 => 字段值>
-     * @param  array expected 要设置的字段名的数组
-     * @return ORM
+     * @param values   字段值的数组：<字段名 to 字段值>
+     * @param expected 要设置的字段名的数组
+     * @return
      */
     public override fun values(values: Map<String, Any?>, expected: List<String>?): IOrm {
         val columns = if (expected === null)
@@ -110,7 +107,7 @@ abstract class OrmEntity : IRecord, IOrm {
 
     /**
      * 获得字段值
-     * @return array
+     * @return
      */
     public override fun asArray(): Map<String, Any?> {
         return data;
