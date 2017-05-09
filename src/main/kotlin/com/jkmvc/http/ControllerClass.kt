@@ -15,9 +15,9 @@ import kotlin.reflect.full.memberFunctions
 class ControllerClass(public override val clazz: KClass<*> /* controller类 */):IControllerClass{
 
     /**
-     * 构造函数
+     * 无参数的构造函数
      */
-    public override val constructer: KFunction<*> = clazz.findConstructor(listOf(Request::class.java, Response::class.java))!!;
+    public override val constructer: KFunction<*> = clazz.findConstructor()!!;
 
     /**
      * 所有action方法
