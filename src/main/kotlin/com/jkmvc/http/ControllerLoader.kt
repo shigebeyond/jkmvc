@@ -73,7 +73,7 @@ object ControllerLoader:IControllerLoader{
                     // 去掉 .class 后缀
                     var name = file.absolutePath.trim(dirPath, "Controller.class")
                     // 获得类
-                    val className = pck + '.' + name.replace('.', '/') + "Controller"
+                    val className = pck + '.' + name.replace('/', '.') + "Controller"
                     val clazz = Class.forName(className)
                     // 过滤Controller子类
                     val ctrl = Controller::class.java
