@@ -1,4 +1,4 @@
-package com.jkmvc.example
+package com.jkmvc.example.controller
 
 import com.jkmvc.http.Controller
 import com.jkmvc.http.Request
