@@ -12,20 +12,25 @@
 <body>
   <div class="panel panel-default">
     <!-- Default panel contents -->
-    <div class="panel-heading">新建用户</div>
+    <div class="panel-heading">用户详情</div>
     <div class="panel-body">
       <p>...</p>
     </div>
 
     <!-- Form -->
-    <div class="form-horizontal">
+    <% UserModel user = (UserModel) request.getAttribute("user"); %>
+    <div>
+      <div class="form-group">
+        <label for="id">id</label>
+        <span><%= user.getId() %></span>
+      </div>
       <div class="form-group">
         <label for="name">name</label>
-        <span><%= user.name %></span>
+        <span><%= user.getName() %></span>
       </div>
       <div class="form-group">
         <label for="age">Password</label>
-        <span><%= user.age %></span>
+        <span><%= user.getAge() %></span>
       </div>
     </div>
 

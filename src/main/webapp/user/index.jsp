@@ -1,4 +1,6 @@
 <%@ page language="java" import="java.util.*,com.jkmvc.http.Request,com.jkmvc.example.model.UserModel" pageEncoding="UTF-8"%>
+<% Request req = (Request) request; %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,7 +16,7 @@
     <!-- Default panel contents -->
     <div class="panel-heading">用户列表</div>
     <div class="panel-body">
-      <p>...</p>
+      <p><a href="<%= req.absoluteUrl("user/new/") %>" class="btn btn-warning">新建</a></p>
     </div>
 
     <!-- Table -->
@@ -28,17 +30,17 @@
         </tr>
       </thead>
       <tbody>
-        <% Request req = (Request) request;
-            List<UserModel> users = (List<UserModel>)request.getAttribute("users");
-            for(UserModel user : users.iterator()){ %>
+        <%  List<UserModel> users = (List<UserModel>)request.getAttribute("users");
+            for (Iterator<UserModel> it = users.iterator(); it.hasNext();) {
+             UserModel user = it.next(); %>
             <tr>
-              <th scope="row"><%= user.get("id", null) %></th>
-              <td><%= user.get("name", null) %></td>
-              <td><%= user.get("name", null) %></td>
+              <th scope="row"><%= user.getId() %></th>
+              <td><%= user.getName() %></td>
+              <td><%= user.getName() %></td>
               <td>
-                <a href="<%= req.absoluteUrl("user/show/" + user.get("id", null)) %>" class="btn btn-default">详情</a>
-                <a href="<%= req.absoluteUrl("user/edit/" + user.get("id", null)) %>" class="btn btn-warn">编辑</a>
-                <a href="<%= req.absoluteUrl("user/delete/" + user.get("id", null))%>" class="btn btn-error">删除</a>
+                <a href="<%= req.absoluteUrl("user/detail/" + user.getId()) %>" class="btn btn-default">详情</a>
+                <a href="<%= req.absoluteUrl("user/edit/" + user.getId()) %>" class="btn btn-primary">编辑</a>
+                <a href="<%= req.absoluteUrl("user/delete/" + user.getId())%>" class="btn btn-info">删除</a>
                </td>
             </tr>
          <% } %>

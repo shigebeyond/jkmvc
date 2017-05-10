@@ -1,4 +1,4 @@
-<%@ page language="java" import="com.jkmvc.example.model.UserModel" pageEncoding="UTF-8"%>
+<%@ page language="java" import="com.jkmvc.http.Request,com.jkmvc.example.model.UserModel" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,16 +17,16 @@
       <p>...</p>
     </div>
 
-    <% UserModel user = request.getAttribute("user"); %>
     <!-- Form -->
-    <form class="form-horizontal" action="<%= request.absoluteUrl("user/edit/" + user.id) %>" method="post">
+    <% UserModel user = (UserModel) request.getAttribute("user"); %>
+    <form action="<%= ((Request)request).absoluteUrl("user/edit/" + user.getId()) %>" method="post">
       <div class="form-group">
         <label for="name">name</label>
-        <input type="text" class="form-control" id="name" placeholder="name" name="name" value="<%= user.name %>">
+        <input type="text" class="form-control" id="name" placeholder="name" name="name" value="<%= user.getName() %>">
       </div>
       <div class="form-group">
         <label for="age">Password</label>
-        <input type="text" class="form-control" id="age" placeholder="Password" name="age" value="<%= user.age %>">
+        <input type="text" class="form-control" id="age" placeholder="Password" name="age" value="<%= user.getAge() %>">
       </div>
       <button type="submit" class="btn btn-default">Submit</button>
     </form>
