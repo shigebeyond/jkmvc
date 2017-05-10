@@ -1,11 +1,8 @@
 package com.jkmvc.db
 
 import com.jkmvc.common.deleteSuffix
-import com.jkmvc.common.findFunction
-import com.jkmvc.common.ucFirst
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
-import kotlin.reflect.KFunction
+import kotlin.reflect.KFunction1
 
 /**
  * sql构建器 -- 动作子句: 由动态select/insert/update/delete来构建的子句
@@ -30,19 +27,11 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
         /**
          * 缓存字段填充方法
          */
-        protected val fieldFillers:ConcurrentHashMap<String, KFunction<*>?> by lazy {
-            ConcurrentHashMap<String, KFunction<*>?>();
-        }
-
-        /**
-         * 获得字段填充方法
-         */
-        protected fun getFieldFiller(field: String): KFunction<*>? {
-            return fieldFillers.getOrPut(field){
-                val method = "fill" + field.ucFirst()
-                DbQueryBuilderAction::class.findFunction(method)
-            }
-        }
+        protected val fieldFillers: Map<String, KFunction1<DbQueryBuilderAction, String>> = mapOf(
+                "table" to DbQueryBuilderAction::fillTable,
+                "columns" to DbQueryBuilderAction::fillColumns,
+                "values" to DbQueryBuilderAction::fillValues
+        )
     }
 
     /**
@@ -243,7 +232,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
         // 针对 select :columns from :table / insert into :table :columns values :values / update :table
         sql = ":(table|columns|values)".toRegex().replace(sql) { result: MatchResult ->
             // 调用对应的方法: fillTable() / fillColumns() / fillValues()
-            val method = getFieldFiller(result.groupValues[1]);
+            val method = fieldFillers[result.groupValues[1]];
             method?.call(this).toString();
         };
 
