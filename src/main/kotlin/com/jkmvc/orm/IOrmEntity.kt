@@ -36,7 +36,21 @@ interface IOrmEntity{
     /**
      * 智能设置属性
      *    在不知属性类型的情况下，将string赋值给属性
-     *    需要将string转换为属性类型
+     *    => 需要将string转换为属性类型
+     *    => 需要显式声明属性
+     *
+     * <code>
+     *     class UserModel(id:Int? = null): Orm(id) {
+     *          ...
+     *          public var id:Int by property<Int>(); //需要显式声明属性
+     *     }
+     *
+     *     val user = UserModel()
+     *     user.id = String.parseInt("123")
+     *     // 相当于
+     *     user.setIntelligent("id", "123")
+     * </code>
+     *
      * @param column
      * @param value 字符串
      */
