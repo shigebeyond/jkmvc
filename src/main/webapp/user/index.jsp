@@ -36,7 +36,7 @@
             <tr>
               <th scope="row"><%= user.getId() %></th>
               <td><%= user.getName() %></td>
-              <td><%= user.getName() %></td>
+              <td><%= user.getAge() %></td>
               <td>
                 <a href="<%= req.absoluteUrl("user/detail/" + user.getId()) %>" class="btn btn-default">详情</a>
                 <a href="<%= req.absoluteUrl("user/edit/" + user.getId()) %>" class="btn btn-primary">编辑</a>

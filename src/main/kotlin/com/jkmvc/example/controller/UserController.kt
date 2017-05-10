@@ -25,8 +25,9 @@ class UserController: Controller()
      */
     public fun actionDetail()
     {
-        // 获得路由参数id
-        val id = req.getIntRouteParameter("id");
+        // 获得路由参数id: 2种写法
+        // val id = req.getIntRouteParameter("id"); // req.getRouteParameter["xxx"]
+        val id:Int? = req["id"] // req["xxx"]
         // 查询单个用户
         //val user = UserModel.queryBuilder().where("id", id).find<UserModel>()
         val user = UserModel(id)
@@ -49,8 +50,17 @@ class UserController: Controller()
         if(req.isPost()){ //  post请求：保存表单数据
             // 创建空的用户
             val user = UserModel()
-            user.name = "li";
-            user.age = 13;
+            // 获得请求参数：3种写法
+            /* // 1 req.getParameter("xxx");
+            user.name = req.getParameter("name");
+            user.age = req.getIntParameter("age", 0)!!; // 带默认值
+            */
+            // 2 req["xxx"]
+            user.name = req["name"];
+            user.age = req["age"];
+
+            // 3 Orm.values(req)
+            user.values(req)
             user.create();
             // 重定向到列表页
             redirect("user/index");
@@ -65,19 +75,25 @@ class UserController: Controller()
      */
     public fun actionEdit()
     {
-        // 获得路由参数id
-        val id = req.getIntRouteParameter("id");
         // 查询单个用户
-        val user = UserModel(id)
+        val user = UserModel(req["id"])
         if(!user.isLoaded()){
-            res.render("用户[$id]不存在")
+            res.render("用户[" + req["id"] + "]不存在")
             return
         }
         // 处理请求
         if(req.isPost()){ //  post请求：保存表单数据
-            user.name = "li";
-            user.age = 13;
-            user.update();
+            // 获得请求参数：3种写法
+            /* // 1 req.getParameter("xxx");
+            user.name = req.getParameter("name");
+            user.age = req.getIntParameter("age", 0)!!; // 带默认值
+            */
+            /*// 2 req["xxx"]
+            user.name = req["name"];
+            user.age = req["age"];
+            */
+            // 3 Orm.values(req)
+            user.values(req)
             // 重定向到列表页
             redirect("user/index");
         }else{ // get请求： 渲染视图
@@ -93,7 +109,8 @@ class UserController: Controller()
     public fun actionDelete()
     {
         // 获得路由参数id
-        val id = req.getIntRouteParameter("id");
+        // val id = req.getIntRouteParameter("id"); // req.getRouteParameter["xxx"]
+        val id:Int? = req["id"] // req["xxx"]
         // 查询单个用户
         val user = UserModel(id)
         if(!user.isLoaded()){

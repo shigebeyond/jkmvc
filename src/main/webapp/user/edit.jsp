@@ -12,7 +12,7 @@
 <body>
   <div class="panel panel-default">
     <!-- Default panel contents -->
-    <div class="panel-heading">新建用户</div>
+    <div class="panel-heading">编辑用户</div>
     <div class="panel-body">
       <p>...</p>
     </div>
@@ -25,8 +25,8 @@
         <input type="text" class="form-control" id="name" placeholder="name" name="name" value="<%= user.getName() %>">
       </div>
       <div class="form-group">
-        <label for="age">Password</label>
-        <input type="text" class="form-control" id="age" placeholder="Password" name="age" value="<%= user.getAge() %>">
+        <label for="age">age</label>
+        <input type="text" class="form-control" id="age" placeholder="age" name="age" value="<%= user.getAge() %>">
       </div>
       <button type="submit" class="btn btn-default">Submit</button>
     </form>

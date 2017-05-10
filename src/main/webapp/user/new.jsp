@@ -24,8 +24,8 @@
         <input type="text" class="form-control" id="name" placeholder="name" name="name">
       </div>
       <div class="form-group">
-        <label for="age">Password</label>
-        <input type="text" class="form-control" id="age" placeholder="Password" name="age">
+        <label for="age">age</label>
+        <input type="text" class="form-control" id="age" placeholder="age" name="age">
       </div>
       <button type="submit" class="btn btn-default">Submit</button>
     </form>
