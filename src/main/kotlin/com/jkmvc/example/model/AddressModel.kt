@@ -27,6 +27,8 @@ class AddressModel(id:Int? = null): Orm(id) {
         );
     }
 
+    public var id:Int by property<Int>();
+
     public var user_id:Int by property<Int>();
 
     public var addr:String by property<String>();

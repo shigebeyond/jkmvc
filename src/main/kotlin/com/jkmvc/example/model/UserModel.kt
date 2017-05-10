@@ -24,6 +24,8 @@ class UserModel(id:Int? = null): Orm(id) {
         }
     }
 
+    public var id:Int by property<Int>();
+
     public var name:String by property<String>();
 
     public var age:Int by property<Int>();
