@@ -1,10 +1,12 @@
 package com.jkmvc.http
 
 import com.jkmvc.common.getOrDefault
+import com.jkmvc.common.to
 import com.jkmvc.common.toDate
 import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
+import kotlin.reflect.KClass
 
 /**
  * 请求对象
@@ -89,7 +91,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	 * 获得cookie值
 	 *
 	 * <code>
-	 *     theme = Cookie::get("theme", "blue");
+	 *     val theme = Cookie::get("theme", "blue");
 	 * </code>
 	 *
 	 * @param  key        cookie名
@@ -103,6 +105,39 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	}
 
 	/**
+	 * 智能获得请求参数，先从路由参数中取得，如果没有，则从get/post参数中取
+	 *    注：智能获得请求参数时，需要根据返回值的类型来转换参数值的类型，因此调用时需明确返回值的类型
+	 *
+	 * <code>
+	 *     val id:Int? = req["id"]
+	 *     // 或
+	 *     val id = req["id"] as Int?
+	 *
+	 *     // 相当于
+	 *     var id:Int? = req.getIntRouteParameter["id"]
+	 *     if(id == null)
+	 *        id = req.getIntParameter["id"]
+	 * </code>
+	 *
+	 * @param column 字段名
+	 * @param defaultValue 默认值
+	 * @return
+	 */
+	operator inline fun <reified T> get(column: String, defaultValue: Any? = null): T
+	{
+		val clazz:KClass<*> = T::class
+		// 先取路由参数
+		if(params.containsKey(column))
+			return params[column]!!.to(clazz) as T
+
+		// 再取get/post参数
+		if(containsParameter(column))
+			return getParameter(column).to(clazz) as T
+
+		return defaultValue as T;
+	}
+
+	/**
 	 * 获得当前匹配路由的所有参数/单个参数
 	 *
 	 * @param key 如果是null，则返回所有参数，否则，返回该key对应的单个参数
@@ -110,11 +145,6 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	 * @param filter  参数过滤表达式, 如 "trim > htmlspecialchars"
 	 * @return
 	 */
-	/*public fun getRouteParameter(key = null, default = null, filterexp = null)
-	{
-		return Arr::filtervalue(this.params, key, default, filterexp);
-	}*/
-
 	public fun getRouteParameter(key:String, default:String? = null):String?
 	{
 		return this.params.getOrDefault(key, default)
