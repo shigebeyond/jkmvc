@@ -235,7 +235,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 		if(uri.startsWith("http"))
 			return uri;
 
-		return req.getScheme() + "://" + req.getServerName() + Router.baseUrl + uri;
+		return req.getScheme() + "://" + req.getServerName() + ':' + req.getServerPort() + Router.baseUrl + uri;
 	}
 
 }
