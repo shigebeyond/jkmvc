@@ -56,7 +56,7 @@ dependencies {
     testCompile 'junit:junit:4.11'
     testCompile 'com.h2database:h2:1.4.186'
 
-    testCompile "mysql:mysql-connector-java:5.1.6"
+    compile "mysql:mysql-connector-java:5.1.6"
     testCompile 'org.postgresql:postgresql:9.4.1208.jre7'
     testCompile 'ru.yandex.qatools.embed:postgresql-embedded:1.13'
 }
@@ -84,6 +84,6 @@ jettyRun{
     webAppSourceDirectory file("$projectDir/src/main/webapp")
     httpPort 8081
     contextPath project.name
-    scanIntervalSeconds 0
+    scanIntervalSeconds 1 // jetty 热部署，当值为0时，不扫描新class，不热部署
     reload "automatic"
 }
