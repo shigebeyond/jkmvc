@@ -94,6 +94,7 @@ class UserController: Controller()
             */
             // 3 Orm.values(req)
             user.values(req)
+            user.update()
             // 重定向到列表页
             redirect("user/index");
         }else{ // get请求： 渲染视图
