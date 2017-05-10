@@ -95,6 +95,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun compileDecoration(sql: StringBuilder): IDbQueryBuilder{
+        sql.append(' ');
         // 逐个编译修饰表达式
         travelDecorationClauses { clause: IDbQueryBuilderDecorationClauses<*> ->
             clause.compile(sql);
