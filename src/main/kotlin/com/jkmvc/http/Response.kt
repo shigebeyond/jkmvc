@@ -3,6 +3,7 @@ package com.jkmvc.http
 import com.jkmvc.common.Config
 import java.io.File
 import java.io.FileInputStream
+import java.io.PrintWriter
 import java.net.URLEncoder
 import javax.servlet.http.HttpServletResponse
 
@@ -101,10 +102,18 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	 */
 	public fun render(content:String):Unit
 	{
+		prepareWriter().print(content);
+	}
+
+	/**
+	* 获得writer
+	 */
+	public fun prepareWriter(): PrintWriter
+	{
 		// 中文编码
 		res.characterEncoding = "UTF-8";
 		res.contentType = "text/html;charset=UTF-8";
-		res.writer.print(content);
+		return res.writer
 	}
 
 	/**

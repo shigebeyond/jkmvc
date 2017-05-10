@@ -39,7 +39,7 @@ object Server:IServer {
         }  */
         catch (e: Exception) {
 //            res.render("异常 - " + e.message)
-            e.printStackTrace(res.writer)
+            e.printStackTrace(res.prepareWriter())
         }
 
     }
