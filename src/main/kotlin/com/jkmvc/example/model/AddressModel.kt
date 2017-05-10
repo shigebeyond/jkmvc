@@ -13,6 +13,9 @@ class AddressModel(id:Int? = null): Orm(id) {
             belongsTo("user", UserModel::class, "user_id")
         }
 
+        /**
+         * 每个字段的规则
+         */
         public override val rules: MutableMap<String, String> = mutableMapOf(
                 "tel" to "digit"
         );
