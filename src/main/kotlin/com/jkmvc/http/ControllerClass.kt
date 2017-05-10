@@ -17,7 +17,8 @@ class ControllerClass(public override val clazz: KClass<*> /* controller类 */):
     /**
      * 无参数的构造函数
      */
-    public override val constructer: KFunction<*> = clazz.findConstructor()!!;
+    public override val constructer: KFunction<*>
+            get() = clazz.findConstructor()!!;
 
     /**
      * 所有action方法

@@ -18,24 +18,6 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
     public constructor(dbName:String /* db名 */, table:String = "" /*表名*/):this(Db.getDb(dbName), table){
     }
 
-    companion object{
-        /**
-         * 缓存记录构造器
-         */
-        protected val recordConstructors:ConcurrentHashMap<KClass<*>, KFunction<*>?> by lazy {
-            ConcurrentHashMap<KClass<*>, KFunction<*>?>();
-        }
-
-        /**
-         * 获得记录构造器
-         */
-        public fun getRecordConstructor(clazz: KClass<*>): KFunction<*>? {
-            return recordConstructors.getOrPut(clazz){
-                clazz.findConstructor(listOf(MutableMap::class.java))
-            }
-        }
-    }
-
     /**
      * 获得记录转换器
      * @param clazz 要转换的类
@@ -50,7 +32,7 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
         }
         // 2 否则，调用其构造函数
         // 获得类的构造函数
-        val construtor = getRecordConstructor(clazz);
+        val construtor = clazz.findConstructor(listOf(MutableMap::class.java))
         if(construtor == null)
             throw RuntimeException("类${clazz}没有构造函数constructor(MutableMap)");
 
