@@ -5,6 +5,8 @@ import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
+import kotlin.reflect.KProperty1
+import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.staticFunctions
 import kotlin.reflect.jvm.javaType
@@ -80,6 +82,17 @@ public fun KClass<*>.findStaticFunction(name:String, paramTypes:List<Class<*>> =
 public fun KClass<*>.findConstructor(paramTypes:List<Class<*>> = emptyList()): KFunction<*>?{
     return constructors.find {
         it.matches("<init>", paramTypes); // 构造函数的名称为 <init>
+    }
+}
+
+/**
+ * 查找属性
+ * @param name 属性名
+ * @return
+ */
+public fun KClass<*>.findProperty(name:String): KProperty1<*, *>?{
+    return this.declaredMemberProperties.find {
+        it.name == name;
     }
 }
 
