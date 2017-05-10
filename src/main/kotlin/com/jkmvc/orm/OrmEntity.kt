@@ -1,8 +1,12 @@
 package com.jkmvc.orm
 
+import com.jkmvc.common.findProperty
+import com.jkmvc.common.to
 import com.jkmvc.db.IRecord
+import com.jkmvc.http.Request
 import java.util.*
 import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty
 
 /**
@@ -29,8 +33,6 @@ abstract class OrmEntity : IRecord, IOrm {
                 thisRef[property.name] = value
             }
         })
-
-
     }
 
     protected val data: MutableMap<String, Any?> = LinkedHashMap<String, Any?>()
@@ -77,6 +79,7 @@ abstract class OrmEntity : IRecord, IOrm {
      * 获得对象字段
      *
      * @param column 字段名
+     * @param defaultValue 默认值
      * @return
      */
     public override operator fun <T> get(column: String, defaultValue: Any?): T {
@@ -103,6 +106,53 @@ abstract class OrmEntity : IRecord, IOrm {
             this[column] = values[column];
 
         return this;
+    }
+
+    /**
+     * 设置多个字段值
+     *
+     * @param values   字段值的数组：<字段名 to 字段值>
+     * @param expected 要设置的字段名的数组
+     * @return
+     */
+    public override fun values(req: Request, expected: List<String>?): IOrm {
+        if (expected === null)
+        {
+            // 取得请求中的所有参数
+            val columns : Enumeration<String> = req.parameterNames
+            while(columns.hasMoreElements())
+            {
+                val column = columns.nextElement();
+                setIntelligent(column, req.getParameter(column))
+            }
+        }
+        else
+        {
+            // 取得请求中的指定参数
+            for (column in expected)
+                setIntelligent(column, req.getParameter(column))
+        }
+        return this;
+    }
+
+    /**
+     * 动态设置属性
+     *    在不知属性类型的情况下，将string赋值给属性
+     *    需要将string转换为属性类型
+     * @param column
+     * @param value 字符串
+     */
+    public override fun setIntelligent(column:String, value:String)
+    {
+        // 1 获得属性
+        val prop = this::class.findProperty(column) as KMutableProperty1
+        if(prop == null)
+            throw OrmException("类 ${this.javaClass} 没有属性: $column");
+
+        // 2 准备参数: 转换类型
+        val param = value.to(prop.setter.parameters[1].type)
+        // 3 调用setter方法
+        prop.setter.call(this, param);
     }
 
     /**

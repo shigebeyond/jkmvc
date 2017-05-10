@@ -1,5 +1,6 @@
 package com.jkmvc.orm
 
+import com.jkmvc.http.Request
 import kotlin.properties.ReadWriteProperty
 
 /**
@@ -33,9 +34,19 @@ interface IOrmEntity{
     operator fun set(column: String, value: Any?);
 
     /**
+     * 智能设置属性
+     *    在不知属性类型的情况下，将string赋值给属性
+     *    需要将string转换为属性类型
+     * @param column
+     * @param value 字符串
+     */
+    fun setIntelligent(column:String, value:String);
+
+    /**
      * 获得对象字段
      *
      * @param column 字段名
+     * @param defaultValue 默认值
      * @return
      */
     operator fun <T> get(column: String, defaultValue: Any? = null): T;
@@ -48,6 +59,15 @@ interface IOrmEntity{
      * @return
      */
     fun values(values: Map<String, Any?>, expected: List<String>? = null): IOrm;
+
+    /**
+     * 设置多个字段值
+     *
+     * @param values   字段值的数组：<字段名 to 字段值>
+     * @param expected 要设置的字段名的数组
+     * @return
+     */
+    fun values(req: Request, expected: List<String>? = null): IOrm;
 
     /**
      * 获得字段值
