@@ -38,9 +38,6 @@ data class ValidationUint(public override val operator:String? /* 运算符 */, 
                 stringFuncs[f.name] = f;
             */
         }
-
-
-
     }
 
     /**

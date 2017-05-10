@@ -33,6 +33,7 @@ open abstract class OrmRelated: OrmPersistent() {
      * 获得对象字段
      *
      * @param column 字段名
+     * @param defaultValue 默认值
      * @return
      */
     public override operator fun <T> get(name: String, defaultValue: Any?): T {
