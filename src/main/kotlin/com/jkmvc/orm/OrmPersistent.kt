@@ -21,7 +21,7 @@ abstract class OrmPersistent: OrmValid() {
 	 *   伴随对象就是元数据
 	 */
 	public override val metadata:IMetaData
-		get() = javaClass.kotlin.modelMetaData
+		get() = this::class.modelMetaData
 
 	/**
 	 * 获得主键值
