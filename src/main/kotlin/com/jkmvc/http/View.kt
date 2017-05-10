@@ -14,7 +14,7 @@ class View(override val req: Request /* 请求对象 */, override val res: Respo
 		/**
 		 * 全局变量
 		 */
-		protected val globalData:MutableMap<String, Any?> = ConcurrentHashMap<String, Any?>();
+		protected val globalData:ConcurrentHashMap<String, Any?> = ConcurrentHashMap<String, Any?>();
 
 		/**
 		 * 设置全局变量
