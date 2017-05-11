@@ -44,6 +44,11 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	 */
 	public lateinit var params:Map<String, String>;
 
+	/**
+	 * 上传的数据
+	 */
+	public var uploadData:Map<String, String>? = null;
+
 	init{
 		// 中文编码
 		req.characterEncoding = "UTF-8";
@@ -206,8 +211,32 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 		return params.containsKey(key)
 	}
 
+	/**
+	 * 检查是否有get/post/upload的参数
+	 *    兼容上传文件的情况
+	 */
+	public fun containsParameter(key: String): Boolean
+	{
+		if(uploadData != null)
+			return uploadData!!.containsKey(key);
+
+		return req.parameterMap.containsKey(key);
+	}
+
+	/**
+	 * 获得get/post/upload的数据
+	 *   兼容上传文件的情况
+	 */
+	public fun getParameterWithUpload(key: String): String?
+	{
+		if(uploadData != null)
+			return uploadData!![key];
+
+		return req.getParameter(key)
+	}
+
 	public fun getParameter(key: String, defaultValue: String): String? {
-		val value = req.getParameter(key);
+		val value = getParameterWithUpload(key);
 		return if(value == null)
 					defaultValue
 				else
@@ -215,7 +244,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	}
 
 	public fun getIntParameter(key: String, defaultValue: Int? = null): Int? {
-		val value = req.getParameter(key)
+		val value = getParameterWithUpload(key)
 		return if(value == null)
 			defaultValue
 		else
@@ -223,7 +252,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	}
 
 	public fun getLongParameter(key: String, defaultValue: Long? = null): Long? {
-		val value = req.getParameter(key)
+		val value = getParameterWithUpload(key)
 		return if(value == null)
 			defaultValue
 		else
@@ -231,7 +260,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	}
 
 	public fun getBooleanParameter(key: String, defaultValue: Boolean? = null): Boolean? {
-		var value: String? = req.getParameter(key)
+		var value: String? = getParameterWithUpload(key)
 		return if(value == null)
 			defaultValue
 		else
@@ -239,15 +268,11 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	}
 
 	public fun getDateParameter(key: String, defaultValue: Date? = null): Date? {
-		val value = req.getParameter(key)
+		val value = getParameterWithUpload(key)
 		return if(value == null)
 			defaultValue
 		else
 			value.toDate()
-	}
-
-	public fun containsParameter(key: String): Boolean {
-		return req.parameterMap.containsKey(key);
 	}
 
 	/**
@@ -275,12 +300,13 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	/**
 	 * 检查并处理上传文件
 	 * @param mover 文件处理函数
-	 * @return 请求数据
+	 * @return
 	 */
-	public fun checkUpload(mover: (FileItem) -> Unit): Map<String, Any>? {
+	public fun checkUpload(mover: (FileItem) -> String): Boolean
+	{
 		// 检查是否文件上传
 		if(!ServletFileUpload.isMultipartContent(req))
-			return null;
+			return false;
 
 		// 处理上传数据
 		val config = Config.instance("upload")!!
@@ -293,7 +319,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 
 		// 解析请求
 		val list:List<FileItem> = upload.parseRequest(req)
-		val data:MutableMap<String, Any> = HashMap();
+		val data:MutableMap<String, String> = HashMap();
 		for (item in list) {
 			if (item.isFormField) { // 表单字段
 				data[item.name] = item.string;
@@ -302,7 +328,10 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 			}
 		}
 
-		return data;
+		// 保存上传数据
+		uploadData = data;
+
+		return true;
 	}
 
 }
