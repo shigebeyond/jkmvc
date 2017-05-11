@@ -1,5 +1,12 @@
 package com.jkmvc.http
 
+import org.apache.commons.fileupload.FileItem
+
 /**
- * Created by shi on 5/11/17.
+ * 获得文件名
+ * @return
  */
+public fun FileItem.filename(): String
+{
+    return name.substringAfterLast("\\")
+}
