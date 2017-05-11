@@ -3,6 +3,7 @@ package com.jkmvc.example.controller
 import com.jkmvc.example.model.UserModel
 import com.jkmvc.http.Controller
 import com.jkmvc.orm.isLoaded
+import java.io.File
 
 /**
  * 用户管理
@@ -124,4 +125,32 @@ class UserController: Controller()
         redirect("user/index");
     }
 
+    public fun actionUplad()
+    {
+        // 检查并处理上传文件
+        val data = req.checkUpload {
+            it.write(File(UserModel.prepareUploadDir(), it.fieldName))
+        }
+        // 获得路由参数id
+        // val id = req.getIntRouteParameter("id"); // req.getRouteParameter["xxx"]
+        val id:Int? = req["id"] // req["xxx"]
+        // 查询单个用户
+        val user = UserModel(id)
+        if(!user.isLoaded()){
+            res.render("用户[$id]不存在")
+            return
+        }
+
+        // 处理请求
+        if(data != null){ //  post请求：保存表单数据
+            user.values(data)
+            user.update()
+            // 重定向到列表页
+            redirect("user/index");
+        }else{ // get请求： 渲染视图
+            val view = view() // 默认视图为action名： user/upload
+            view["user"] = user; // 设置视图参数
+            res.render(view)
+        }
+    }
 }
