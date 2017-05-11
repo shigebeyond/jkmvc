@@ -1,8 +1,13 @@
 package com.jkmvc.http
 
+import com.jkmvc.common.Config
 import com.jkmvc.common.getOrDefault
 import com.jkmvc.common.to
 import com.jkmvc.common.toDate
+import org.apache.commons.fileupload.FileItem
+import org.apache.commons.fileupload.disk.DiskFileItemFactory
+import org.apache.commons.fileupload.servlet.ServletFileUpload
+import java.io.File
 import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
@@ -27,7 +32,6 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 		 * 可信任的代理服务器ip
 		 */
 		public val proxyips = arrayOf("127.0.0.1", "localhost", "localhost.localdomain");
-
 	}
 
 	/**
@@ -266,6 +270,39 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 			return uri;
 
 		return req.getScheme() + "://" + req.getServerName() + ':' + req.getServerPort() + Router.baseUrl + uri;
+	}
+
+	/**
+	 * 检查并处理上传文件
+	 * @param mover 文件处理函数
+	 * @return 请求数据
+	 */
+	public fun checkUpload(mover: (FileItem) -> Unit): Map<String, Any>? {
+		// 检查是否文件上传
+		if(!ServletFileUpload.isMultipartContent(req))
+			return null;
+
+		// 处理上传数据
+		val config = Config.instance("upload")!!
+		val diskFactory = DiskFileItemFactory()
+		diskFactory.sizeThreshold = 4 * 1024 // threshold 极限、临界值，即硬盘缓存 1M
+		diskFactory.repository = File(config["tmpDir"]!!) // repository 贮藏室，即临时文件目录
+
+		val upload = ServletFileUpload(diskFactory)
+		upload.sizeMax = (4 * 1024 * 1024).toLong() // 设置允许上传的最大文件大小 4M
+
+		// 解析请求
+		val list:List<FileItem> = upload.parseRequest(req)
+		val data:MutableMap<String, Any> = HashMap();
+		for (item in list) {
+			if (item.isFormField) { // 表单字段
+				data[item.name] = item.string;
+			} else { // 文件字段
+				data[item.name] = mover(item); // 移动上传文件
+			}
+		}
+
+		return data;
 	}
 
 }
