@@ -138,7 +138,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 
 		// 再取get/post参数
 		if(containsParameter(column))
-			return getParameter(column).to(clazz) as T
+			return getParameter(column)!!.to(clazz) as T
 
 		return defaultValue as T;
 	}

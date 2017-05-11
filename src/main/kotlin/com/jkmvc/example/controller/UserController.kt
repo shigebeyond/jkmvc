@@ -127,10 +127,6 @@ class UserController: Controller()
 
     public fun actionUplad()
     {
-        // 检查并处理上传文件
-        val data = req.checkUpload {
-            it.write(File(UserModel.prepareUploadDir(), it.fieldName))
-        }
         // 获得路由参数id
         // val id = req.getIntRouteParameter("id"); // req.getRouteParameter["xxx"]
         val id:Int? = req["id"] // req["xxx"]
@@ -141,9 +137,14 @@ class UserController: Controller()
             return
         }
 
-        // 处理请求
-        if(data != null){ //  post请求：保存表单数据
-            user.values(data)
+        // 检查并处理上传文件
+        val uploaded = req.checkUpload {
+            val path = UserModel.prepareUploadDir() + it.fieldName
+            it.write(File(path))
+            path;
+        }
+        if(uploaded){ //  post请求：保存表单数据
+            user.values(req)
             user.update()
             // 重定向到列表页
             redirect("user/index");
