@@ -1,9 +1,6 @@
 package com.jkmvc.http
 
-import com.jkmvc.common.Config
-import com.jkmvc.common.getOrDefault
-import com.jkmvc.common.to
-import com.jkmvc.common.toDate
+import com.jkmvc.common.*
 import org.apache.commons.fileupload.FileItem
 import org.apache.commons.fileupload.disk.DiskFileItemFactory
 import org.apache.commons.fileupload.servlet.ServletFileUpload
@@ -214,6 +211,8 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	/**
 	 * 检查是否有get/post/upload的参数
 	 *    兼容上传文件的情况
+     * @param key
+     * @return
 	 */
 	public fun containsParameter(key: String): Boolean
 	{
@@ -223,20 +222,33 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 		return req.parameterMap.containsKey(key);
 	}
 
+    /**
+     * 获得get/post/upload的参数名的枚举
+     *    兼容上传文件的情况
+     * @return
+     */
+	public override fun getParameterNames():Enumeration<String>{
+		if(uploadData != null)
+			return uploadData!!.keys.enumeration()
+
+		return req.parameterNames;
+	}
+
 	/**
 	 * 获得get/post/upload的数据
 	 *   兼容上传文件的情况
+     * @param key
+     * @return
 	 */
-	public fun getParameterWithUpload(key: String): String?
-	{
-		if(uploadData != null)
-			return uploadData!![key];
+	public override fun getParameter(key: String): String? {
+        if(uploadData != null)
+            return uploadData!![key];
 
-		return req.getParameter(key)
+        return req.getParameter(key);
 	}
 
-	public fun getParameter(key: String, defaultValue: String): String? {
-		val value = getParameterWithUpload(key);
+	public fun getParameter(key: String, defaultValue: String?): String? {
+		var value = getParameter(key);
 		return if(value == null)
 					defaultValue
 				else
@@ -244,7 +256,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	}
 
 	public fun getIntParameter(key: String, defaultValue: Int? = null): Int? {
-		val value = getParameterWithUpload(key)
+		val value = getParameter(key)
 		return if(value == null)
 			defaultValue
 		else
@@ -252,7 +264,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	}
 
 	public fun getLongParameter(key: String, defaultValue: Long? = null): Long? {
-		val value = getParameterWithUpload(key)
+		val value = getParameter(key)
 		return if(value == null)
 			defaultValue
 		else
@@ -260,7 +272,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	}
 
 	public fun getBooleanParameter(key: String, defaultValue: Boolean? = null): Boolean? {
-		var value: String? = getParameterWithUpload(key)
+		var value: String? = getParameter(key)
 		return if(value == null)
 			defaultValue
 		else
@@ -268,7 +280,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	}
 
 	public fun getDateParameter(key: String, defaultValue: Date? = null): Date? {
-		val value = getParameterWithUpload(key)
+		val value = getParameter(key)
 		return if(value == null)
 			defaultValue
 		else
@@ -319,7 +331,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 
 		// 解析请求
 		val list:List<FileItem> = upload.parseRequest(req)
-		val data:MutableMap<String, String> = HashMap();
+		val data:HashMap<String, String> = HashMap();
 		for (item in list) {
 			if (item.isFormField) { // 表单字段
 				data[item.name] = item.string;
