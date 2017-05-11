@@ -124,4 +124,9 @@ interface IMetaData{
      */
     fun hasMany(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = "", conditions:((IDbQueryBuilder) -> Unit)? = null): IMetaData;
 
+    /**
+     * 获得上传目录
+     * @return string
+     */
+    fun prepareUploadDir(): String
 }

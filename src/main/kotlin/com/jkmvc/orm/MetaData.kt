@@ -1,5 +1,7 @@
 package com.jkmvc.orm
 
+import com.jkmvc.common.Config
+import com.jkmvc.common.format
 import com.jkmvc.db.Db
 import com.jkmvc.db.IDbQueryBuilder
 import java.util.*
@@ -48,7 +50,7 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
      * 默认外键
      */
     public override val defaultForeignKey: String
-        get() = model.modelName + '_' + primaryKey;
+        get() = table + '_' + primaryKey;
 
     /**
      * 表字段
@@ -167,6 +169,16 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
         }
 
         return this;
+    }
+
+    /**
+     * 获得上传目录
+     * @return string
+     */
+    public override fun prepareUploadDir(): String
+    {
+        val config = Config.instance("upload")!!
+        return config["uploadDir"] + table + '/' + Date().format("yyyy/MM/dd");
     }
 }
 
