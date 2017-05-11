@@ -178,7 +178,7 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
     public override fun prepareUploadDir(): String
     {
         val config = Config.instance("upload")!!
-        return config["uploadDir"] + table + '/' + Date().format("yyyy/MM/dd");
+        return config["uploadDir"] + table + '/' + Date().format("yyyy/MM/dd") + '/';
     }
 }
 
