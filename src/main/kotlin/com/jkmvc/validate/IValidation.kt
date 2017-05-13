@@ -20,5 +20,5 @@ interface IValidation
 	 * @param data 变量
 	 * @return
 	 */
-	fun execute(exp:String, value:Any, binds:Map<String, Any?> = emptyMap()): Pair<Any?, ValidationUint?>
+	fun execute(exp:String, value:Any, binds:Map<String, Any?> = emptyMap()): Triple<Any?, ValidationUint?, Any?>
 }
