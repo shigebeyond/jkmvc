@@ -10,24 +10,14 @@ class AddressModel(id:Int? = null): Orm(id) {
     // 伴随用户就是元数据
     companion object m: MetaData(AddressModel::class){
         init {
+            // 标签 + 规则
+            addRule("user_id", "用户", "notEmpty");
+            addRule("addr", "地址", "notEmpty");
+            addRule("tel", "电话", "notEmpty && digit");
+
+            // 关联关系
             belongsTo("user", UserModel::class, "user_id")
         }
-
-        /**
-         * 每个字段的规则
-         */
-        public override val rules: MutableMap<String, String> = mutableMapOf(
-                "tel" to "digit"
-        );
-
-        /**
-         * 每个字段的标签（中文名）
-         */
-        public override val labels: MutableMap<String, String>  = mutableMapOf(
-                "user_id" to "用户",
-                "addr" to "地址",
-                "tel" to "电话"
-        );
     }
 
     public var id:Int by property<Int>();

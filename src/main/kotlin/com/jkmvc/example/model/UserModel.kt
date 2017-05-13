@@ -10,13 +10,9 @@ class UserModel(id:Int? = null): Orm(id) {
     // 伴随用户就是元数据
     companion object m: MetaData(UserModel::class){
         init {
-            // 规则
-            addRule("name", "notEmpty");
-            addRule("age", "between(1,120)");
-
-            // 标签
-            addLabel("name", "姓名")
-            addLabel("age", "年龄")
+            // 标签 + 规则
+            addRule("name", "姓名", "notEmpty");
+            addRule("age", "年龄", "between(1,120)");
 
             // 关联关系
             hasOne("address", AddressModel::class)
