@@ -5,6 +5,8 @@ import kotlin.reflect.KClass
 
 /**
  * 关联类型
+ * @author shijianhang
+ * @date 2016-10-10
  */
 enum class RelationType {
     /**
@@ -28,6 +30,8 @@ enum class RelationType {
 
 /**
  * 关联关系的元数据
+ * @author shijianhang
+ * @date 2016-10-10
  */
 interface IMetaRelation{
 

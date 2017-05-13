@@ -29,15 +29,8 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
     /**
      * 每个字段的校验规则
      */
-    public override val rules: MutableMap<String, String> by lazy {
-        LinkedHashMap<String, String>()
-    };
-
-    /**
-     * 每个字段的标签（中文名）
-     */
-    public override val labels: MutableMap<String, String> by lazy {
-        LinkedHashMap<String, String>()
+    public override val rules: MutableMap<String, IMetaRule> by lazy {
+        LinkedHashMap<String, IMetaRule>()
     };
 
     /**
@@ -88,24 +81,28 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
     /**
      * 添加规则
      * @param name
+     * @param label
      * @param rule
      * @return
      */
-    public override fun addRule(name: String, rule: String): MetaData {
-        rules[name] = rule;
+    public override fun addRule(name: String, label:String, rule: String?): MetaData
+    {
+        rules[name] = MetaRule(label, rule);
         return this;
     }
 
     /**
-     * 添加标签
+     * 添加规则
      * @param name
-     * @param label
+     * @param rule
      * @return
      */
-    public override fun addLabel(name: String, label: String): MetaData {
-        labels[name] = label;
+    public override fun addRule(name: String, rule: IMetaRule): MetaData
+    {
+        rules[name] = rule;
         return this;
     }
+
 
     /**
      * 生成属性代理 + 设置关联关系(belongs to)

@@ -43,12 +43,7 @@ interface IMetaData{
     /**
      * 每个字段的规则
      */
-    val rules: MutableMap<String, String>
-
-    /**
-     * 每个字段的标签
-     */
-    val labels: MutableMap<String, String>
+    val rules: MutableMap<String, IMetaRule>
 
     /**
      * 数据库
@@ -83,18 +78,19 @@ interface IMetaData{
     /**
      * 添加规则
      * @param name
+     * @param label
      * @param rule
      * @return
      */
-    fun addRule(name: String, rule: String): MetaData;
+    fun addRule(name: String, label:String, rule: String? = null): MetaData;
 
     /**
-     * 添加标签
+     * 添加规则
      * @param name
-     * @param label
+     * @param rule
      * @return
      */
-    fun addLabel(name: String, label: String): MetaData;
+    fun addRule(name: String, rule: IMetaRule): MetaData;
 
     /**
      * 生成属性代理 + 设置关联关系(belongs to)
