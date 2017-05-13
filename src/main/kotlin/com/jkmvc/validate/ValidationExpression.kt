@@ -108,30 +108,30 @@ class ValidationExpression(override val exp:String /* 原始表达式 */):IValid
 	 *
 	 * @param Any? value 要校验的数值，该值可能被修改
 	 * @param binds 变量
-	 * @return Pair 结果+最后一个校验单元
+	 * @return Triple 结果+最后一个校验单元+最后一个值
 	 */
-	public override fun execute(v:Any?, binds:Map<String, Any?>):Pair<Any?, ValidationUint?>
+	public override fun execute(value:Any?, binds:Map<String, Any?>):Triple<Any?, ValidationUint?, Any?>
 	{
 		if(subexps.isEmpty())
-			return Pair(v, null);
+			return Triple(value, null, null);
 
 		// 逐个运算子表达式
 		var result:Any? = null;
-		var value:Any? = v;
+		var lastValue:Any? = value;
 		for (subexp in subexps)
 		{
 			val (op) = subexp;
 
 			// 短路
 			if(isShortReturn(op, result))
-				return Pair(result, subexp);
+				return Triple(result, subexp, lastValue);
 
 			// 累积结果运算: 当前结果 result 作为下一参数 value
 			if(op === ">")
-				value = result;
+				lastValue = result;
 
 			// 运算子表达式
-			val curr = subexp.execute(value, binds);
+			val curr = subexp.execute(lastValue, binds);
 
 			// 处理结果
 			when (op)
@@ -150,10 +150,10 @@ class ValidationExpression(override val exp:String /* 原始表达式 */):IValid
 
 			// 短路
 			if(isShortReturn(op, result))
-				return Pair(result, subexp);
+				return Triple(result, subexp, lastValue);
 		}
 
-		return Pair(result, subexps.last());
+		return Triple(result, subexps.last(), lastValue);
 	}
 
 	/**

@@ -17,18 +17,21 @@ abstract class OrmValid: OrmEntity() {
      */
     public override fun check(): Boolean {
         // 逐个字段校验
-        for ((column, exp) in metadata.rules) {
+        for ((column, rule) in metadata.rules) {
+            if(rule.rule == null)
+                break;
+
+            // 获得字段值
             val value: Any = this[column];
-            var last: Any = value;
+
             // 校验单个字段: 字段值可能被修改
-            val (succ, uint) = Validation.execute(exp, value, data)
+            val (succ, uint, lastValue) = Validation.execute(rule.rule!!, value, data)
             if (succ == false) {
-                val label: String = metadata.labels.getOrElse(column){ column }; // 字段标签（中文名）
-                throw OrmException(label + uint?.message());
+                throw OrmException(rule.label + uint?.message());
             }
 
             // 更新被修改的字段值
-            if (value !== last)
+            if (value !== lastValue)
                 this[column] = value;
         }
 

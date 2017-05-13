@@ -41,7 +41,7 @@ object Validation:IValidation
 	 * @param data 变量
 	 * @return
 	 */
-	public override fun execute(exp:String, value:Any, binds:Map<String, Any?>): Pair<Any?, ValidationUint?>
+	public override fun execute(exp:String, value:Any, binds:Map<String, Any?>): Triple<Any?, ValidationUint?, Any?>
 	{
 		// 编译
 		val expCompiled = expsCached.getOrPut(exp){
