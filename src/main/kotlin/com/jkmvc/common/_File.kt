@@ -6,7 +6,7 @@ import java.io.File
  * 遍历文件
  * @param action 访问者函数
  */
-public tailrec fun File.travel(action:(file: File) -> Unit): Unit {
+public /*tailrec*/ fun File.travel(action:(file: File) -> Unit): Unit {
     val files = listFiles()
     if (files == null) {
         return

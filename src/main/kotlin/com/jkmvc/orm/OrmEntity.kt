@@ -123,14 +123,14 @@ abstract class OrmEntity : IRecord, IOrm {
             while(columns.hasMoreElements())
             {
                 val column = columns.nextElement();
-                setIntelligent(column, req.getParameter(column))
+                setIntelligent(column, req.getParameter(column)!!)
             }
         }
         else
         {
             // 取得请求中的指定参数
             for (column in expected)
-                setIntelligent(column, req.getParameter(column))
+                setIntelligent(column, req.getParameter(column)!!)
         }
         return this;
     }

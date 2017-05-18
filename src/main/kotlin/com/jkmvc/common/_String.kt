@@ -108,10 +108,7 @@ public fun String.replaces(params:List<String>):String
     return this.replace(":(\\d+)".toRegex()){ matches:MatchResult ->
         val i = matches.groupValues[1]
         val value = params.get(i.toInt());
-        if(value == null)
-            ""
-        else
-            value.toString()
+        value.toString()
     };
 }
 

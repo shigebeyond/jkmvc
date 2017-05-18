@@ -1,7 +1,5 @@
 package com.jkmvc.http
 
-import com.jkmvc.common.getOrDefault
-import com.jkmvc.common.trim
 import java.util.*
 
 /**
@@ -53,25 +51,25 @@ class Route(override val regex:String /* 原始正则: <controller>(\/<action>(\
 	/**
 	 *  对参数加括号，参数也变为子正则
 	 */
-	protected lateinit var groupRegex:String;
+	protected var groupRegex:String;
 
 	/**
 	 * 编译后正则: 将 <controller>(\/<action>(\/<id>)?)? 编译为 /([^\/]+)(\/([^\/]+)\/(\d+)?)?/
 	 *   其中参数对子正则的映射关系保存在 paramGroupMapping 中
 	 */
-	protected lateinit var compileRegex:String;
+	protected var compileRegex:String;
 
 	/**
 	 * 子正则的范围
 	 */
-	protected lateinit var groupRangs:List<GroupRange>
+	protected var groupRangs:List<GroupRange>
 
 	/**
 	 * 参数对子正则的映射
 	 *   key是参数名
 	 *   value是子正则的序号
 	 */
-	protected lateinit var paramGroupMapping: MutableMap<String, Int>
+	protected var paramGroupMapping: MutableMap<String, Int>
 
 
 	init {
