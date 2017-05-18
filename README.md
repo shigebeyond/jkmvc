@@ -84,13 +84,13 @@ class WelcomeController: Controller() {
 
 ## 4 Run web server
 
-https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/runserver.png)
+![](https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/runserver.png)
 
 ## 5 Visit web page
 
 visit http://localhost:8081/jkmvc/
 
-https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/webpage.png)
+![](https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/webpage.png)
 
 # usage - view
 
@@ -120,7 +120,7 @@ class WelcomeController: Controller() {
 
 visit http://localhost:8081/jkmvc/welcome/jsp
 
-https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/webview.png)
+![](https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/webview.png)
 
 
 # usage - orm
@@ -421,16 +421,16 @@ visit url
 
 http://localhost:8081/jkmvc/user/index
 
-https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/actionindex.png)
+![](https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/actionindex.png)
 
 http://localhost:8081/jkmvc/user/detail
 
-https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/actiondetail.png)
+![](https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/actiondetail.png)
 
 http://localhost:8081/jkmvc/user/new
 
-https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/actionnew.png)
+![](https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/actionnew.png)
 
 http://localhost:8081/jkmvc/user/edit
 
-https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/actionedit.png)
+![](https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/actionedit.png)
