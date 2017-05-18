@@ -96,6 +96,8 @@ visit http://localhost:8081/jkmvc/
 
 ## 1 Render View in Controller
 
+vim 
+
 ```
 package com.jkmvc.example.controller
 
@@ -116,7 +118,29 @@ class WelcomeController: Controller() {
 
 }
 ```
-## 2 Visit web page
+
+## 2 Create jsp view
+
+I regret that we cannot write kotlin in jsp.
+
+vim src/main/webapp/index.jsp
+
+```
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>jkmvc</title>
+</head>
+<body>
+Hello <%= request.getAttribute("name") %><br/>
+</body>
+</html>
+```
+
+## 3 Visit web page
 
 visit http://localhost:8081/jkmvc/welcome/jsp
 
