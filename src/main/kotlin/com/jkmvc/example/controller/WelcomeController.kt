@@ -1,9 +1,6 @@
 package com.jkmvc.example.controller
 
 import com.jkmvc.http.Controller
-import com.jkmvc.http.Request
-import com.jkmvc.http.Response
-import com.jkmvc.http.View
 
 /**
  * 主页
@@ -19,9 +16,10 @@ class WelcomeController: Controller() {
 
     /**
      * 显示jsp视图
+     * render jsp view
      */
     public fun actionJsp(){
-        res.render(view("index", mutableMapOf("name" to "shijianhang")))
+        res.render(view("index" /* view file */, mutableMapOf("name" to "shijianhang") /* view data */))
     }
 
 }
