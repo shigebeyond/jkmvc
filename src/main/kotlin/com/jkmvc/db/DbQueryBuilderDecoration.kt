@@ -9,6 +9,12 @@ import java.util.*
  * @date 2016-10-12
  */
 abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) : DbQueryBuilderAction(db, table) {
+
+    companion object{
+        //编译修饰子句的顺序
+        val clauseOrder = arrayOf("where", "groupBy", "having", "orderBy", "limit");
+    }
+
     /**
      * 转义列
      */
@@ -38,7 +44,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     }
 
     /**
-     * where/group by/having/limit
+     * where/group by/having/order by/limit
      */
     protected val clauses:MutableMap<String, DbQueryBuilderDecorationClauses<*>> by lazy(LazyThreadSafetyMode.NONE){
         HashMap<String, DbQueryBuilderDecorationClauses<*>>();
@@ -83,9 +89,12 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
         for (j in join)
             visitor(j);
 
-        // 2 where/group by/having/limit
-        for ((k, v) in clauses)
-            visitor(v);
+        // 2 where/group by/having/ordery by/limit 按顺序编译sql，否则sql无效
+        /*for ((k, v) in clauses) // map中无序
+            visitor(v);*/
+        for(k in clauseOrder)
+            if(clauses.contains(k))
+                visitor(clauses[k]!!);
     }
 
     /**
