@@ -29,9 +29,8 @@ abstract class DbQueryBuilderDecorationClauses<T>(protected val operator: String
 
         // 逐个子表达式编译+合并
         sql.append(operator).append(' ');
-        subexps.forEach {
-            compileSubexp(it, sql);
-        }
+        for(i in 0..(subexps.size - 1))
+            compileSubexp(subexps[i], i, sql);
     }
 
     /**

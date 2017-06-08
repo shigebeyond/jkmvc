@@ -6,6 +6,7 @@ import com.jkmvc.common.to
 import com.jkmvc.example.model.UserModel
 import com.jkmvc.validate.Validation
 import org.junit.Test
+import java.math.BigDecimal
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 
@@ -21,6 +22,16 @@ fun B.echo(){
 }
 
 class MyTests{
+
+    @Test
+    fun testBig(){
+        var a= BigDecimal("100")
+        var b=BigDecimal("3")
+        var c=a/b;
+        println(c)
+        var d=a.divide(b);
+        println(d)
+    }
 
     @Test
     fun testClass(){

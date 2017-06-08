@@ -28,9 +28,10 @@ interface IDbQueryBuilderDecorationClauses<T>
     /**
      * 编译一个子表达式
      * @param subexp 子表达式
+     * @param i 索引
      * @param sql 保存编译的sql
      */
-    public fun compileSubexp(subexp:T, sql:StringBuilder):Unit;
+    public fun compileSubexp(subexp:T, i:Int, sql:StringBuilder):Unit;
 
     /**
      * 开启一个分组
