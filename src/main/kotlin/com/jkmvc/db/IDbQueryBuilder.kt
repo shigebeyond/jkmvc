@@ -68,7 +68,7 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration 
      */
     public inline fun <reified T:Any> find(): T? {
         // 1 编译
-        val (sql, params) = compile("select");
+        val (sql, params) = limit(1).compile("select");
 
         // 2 执行 select
         return db.queryRow<T>(sql, params, getRecordTranformer<T>(T::class));
