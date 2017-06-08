@@ -15,6 +15,11 @@ import kotlin.reflect.KFunction
  */
 open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQueryBuilderDecoration(db, table)
 {
+    companion object{
+        // 是否调试
+        val debug = true;
+    }
+
     public constructor(dbName:String /* db名 */, table:String = "" /*表名*/):this(Db.getDb(dbName), table){
     }
 
@@ -55,9 +60,27 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
         // 动作子句 + 修饰子句
         val sql:StringBuilder = StringBuilder();
         this.action(action).compileAction(sql).compileDecoration(sql);
-//        println(sql)
-//        println(params)
+        // 调试sql
+        if(debug)
+            debugSql(sql)
         return Pair(sql.toString(), params);
+    }
+
+    /**
+     * 调试sql：输出带实参的sql
+     * @param sql
+     */
+    protected fun debugSql(sql: StringBuilder) {
+        // 替换实参
+        var i = 0
+        val realSql = sql.replace("\\?".toRegex()) { matches: MatchResult ->
+            val param = params[i++]
+            if(param is String)
+                "\"$param\""
+            else
+                param.toString()
+        }
+        println(realSql)
     }
 
     /**
