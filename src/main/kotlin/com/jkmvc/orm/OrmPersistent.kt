@@ -70,7 +70,7 @@ abstract class OrmPersistent: OrmValid() {
 		check();
 
 		// 插入数据库
-		val pk = queryBuilder().value(buildDirtyData()).insert();
+		val pk = queryBuilder().value(buildDirtyData()).insert(true);
 
 		// 更新内部数据
 		data[metadata.primaryKey] = pk; // 主键

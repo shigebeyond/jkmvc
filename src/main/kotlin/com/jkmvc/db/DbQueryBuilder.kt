@@ -115,15 +115,16 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
      * 编译 + 执行
      *
      * @param action sql动作：select/insert/update/delete
+     * @param returnGeneratedKey
      * @return 影响行数|新增id
      */
-    protected fun execute(action:String):Int
+    protected fun execute(action:String, returnGeneratedKey:Boolean = false):Int
     {
         // 1 编译
         val (sql, params) = compile(action);
 
         // 2 执行 insert/update/delete
-        return db.execute(sql, params);
+        return db.execute(sql, params, returnGeneratedKey);
     }
 
     /**
@@ -145,11 +146,13 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
 
     /**
      * 插入：insert语句
+     *
+     *  @param returnGeneratedKey 是否返回自动生成的主键
      * @return 新增的id
      */
-    public override fun insert():Int
+    public override fun insert(returnGeneratedKey:Boolean):Int
     {
-        return execute("insert");
+        return execute("insert", returnGeneratedKey);
     }
 
     /**

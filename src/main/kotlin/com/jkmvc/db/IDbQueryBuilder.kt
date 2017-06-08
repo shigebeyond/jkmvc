@@ -82,9 +82,11 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration 
 
     /**
      * 插入：insert语句
-     * @return 新增的id
+     *
+     * @param returnGeneratedKey 是否返回自动生成的主键
+     * @return 影响行数|新增的id
      */
-    public abstract fun insert():Int;
+    public abstract fun insert(returnGeneratedKey:Boolean = false):Int;
 
     /**
      *	更新：update语句

@@ -29,9 +29,10 @@ interface IDb{
      * 执行更新
      * @param sql
      * @param paras
+     * @param returnGeneratedKey
      * @return
      */
-    fun execute(sql: String, paras: List<Any?>? = null): Int;
+    fun execute(sql: String, paras: List<Any?>? = null, returnGeneratedKey:Boolean = false): Int;
 
     /**
      * 查询多行

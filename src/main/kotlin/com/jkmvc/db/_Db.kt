@@ -12,9 +12,10 @@ import java.util.*
  *
  * @param sql
  * @param paras 参数
+ * @param returnGeneratedKey 是否返回自动生成的主键，注：只针对int的自增长主键，不能是其他类型的主键，否则报错
  * @return
  */
-public fun Connection.execute(sql: String, paras: List<Any?>? = null): Int {
+public fun Connection.execute(sql: String, paras: List<Any?>? = null, returnGeneratedKey:Boolean = false): Int {
     var pst: PreparedStatement? = null
     var rs: ResultSet? = null;
     try{
@@ -26,13 +27,13 @@ public fun Connection.execute(sql: String, paras: List<Any?>? = null): Int {
                 pst.setObject(i + 1, paras[i])
         // 执行
         val rows:Int = pst.executeUpdate()
-        // 如果是insert语句，则返回新增id
-        if("INSERT.*".toRegex(RegexOption.IGNORE_CASE).matches(sql)){
+        // insert语句，返回自动生成的主键
+        if(returnGeneratedKey /*&& "INSERT.*".toRegex(RegexOption.IGNORE_CASE).matches(sql)*/){
             rs = pst.getGeneratedKeys(); //获取新增id
             rs.next();
             return rs.getInt(1); //返回新增id
         }
-        // 非insert语句返回行数
+        // 非insert语句，返回行数
         return rows;
     }finally{
         rs?.close()

@@ -121,10 +121,11 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
      * 执行更新
      * @param sql
      * @param paras
+     * @param returnGeneratedKey
      * @return
      */
-    public override fun execute(sql: String, paras: List<Any?>?): Int {
-        return conn.execute(sql, paras);
+    public override fun execute(sql: String, paras: List<Any?>?, returnGeneratedKey:Boolean): Int {
+        return conn.execute(sql, paras, returnGeneratedKey);
     }
 
     /**
