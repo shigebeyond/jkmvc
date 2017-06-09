@@ -53,7 +53,7 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
      * @param action sql动作：select/insert/update/delete
      * @return Pair(sql, 参数)
      */
-    public override fun compile(action:String):Pair<String, List<Any?>>
+    public override fun compile(action:ActionType):Pair<String, List<Any?>>
     {
         params.clear();
 
@@ -91,7 +91,7 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
      */
     public override fun <T:Any> findAll(transform:(MutableMap<String, Any?>) -> T): List<T>{
         // 1 编译
-        val (sql, params) = compile("select");
+        val (sql, params) = compile(ActionType.SELECT);
 
         // 2 执行 select
         return db.queryRows<T>(sql, params, transform)
@@ -105,7 +105,7 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
      */
     public override fun <T:Any> find(transform:(MutableMap<String, Any?>) -> T): T?{
         // 1 编译
-        val (sql, params) = compile("select");
+        val (sql, params) = compile(ActionType.SELECT);
 
         // 2 执行 select
         return db.queryRow<T>(sql, params, transform);
@@ -118,7 +118,7 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
      * @param returnGeneratedKey
      * @return 影响行数|新增id
      */
-    protected fun execute(action:String, returnGeneratedKey:Boolean = false):Int
+    protected fun execute(action:ActionType, returnGeneratedKey:Boolean = false):Int
     {
         // 1 编译
         val (sql, params) = compile(action);
@@ -134,7 +134,7 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
     public override fun count():Long
     {
         // 1 编译
-        val (sql, params) = select(Pair("count(1)", "num")).compile("select");
+        val (sql, params) = select(Pair("count(1)", "num")).compile(ActionType.SELECT);
 
         // 2 执行 select
         val (hasNext, count) = db.queryCell(sql, params);
@@ -152,7 +152,7 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
      */
     public override fun insert(returnGeneratedKey:Boolean):Int
     {
-        return execute("insert", returnGeneratedKey);
+        return execute(ActionType.INSERT, returnGeneratedKey);
     }
 
     /**
@@ -161,7 +161,7 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
      */
     public override fun update():Boolean
     {
-        return execute("update") > 0;
+        return execute(ActionType.UPDATE) > 0;
     }
 
     /**
@@ -170,6 +170,6 @@ open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQ
      */
     public override fun delete():Boolean
     {
-        return execute("delete") > 0;
+        return execute(ActionType.DELETE) > 0;
     }
 }

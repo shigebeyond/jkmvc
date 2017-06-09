@@ -26,7 +26,7 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration 
      * @param action sql动作：select/insert/update/delete
      * @return Pair(sql, 参数)
      */
-    public abstract fun compile(action:String): Pair<String, List<Any?>>;
+    public abstract fun compile(action:ActionType): Pair<String, List<Any?>>;
 
     /**
      * 查找多个： select 语句
@@ -53,7 +53,7 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration 
      */
     public inline fun <reified T:Any> findAll(): List<T> {
         // 1 编译
-        val (sql, params) = compile("select");
+        val (sql, params) = compile(ActionType.SELECT);
 
         // 2 执行 select
         return db.queryRows<T>(sql, params, getRecordTranformer<T>(T::class))
@@ -68,7 +68,7 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration 
      */
     public inline fun <reified T:Any> find(): T? {
         // 1 编译
-        val (sql, params) = limit(1).compile("select");
+        val (sql, params) = limit(1).compile(ActionType.SELECT);
 
         // 2 执行 select
         return db.queryRow<T>(sql, params, getRecordTranformer<T>(T::class));

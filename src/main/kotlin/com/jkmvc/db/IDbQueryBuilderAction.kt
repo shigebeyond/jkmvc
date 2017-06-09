@@ -1,6 +1,18 @@
 package com.jkmvc.db
 
 /**
+ * 动作类型
+ * @author shijianhang
+ * @date 2016-10-10
+ */
+enum class ActionType {
+    SELECT,
+    INSERT,
+    UPDATE,
+    DELETE
+}
+
+/**
  * sql构建器 -- 动作子句: 由动态select/insert/update/delete来构建的子句
  *   通过字符串模板来实现
  *

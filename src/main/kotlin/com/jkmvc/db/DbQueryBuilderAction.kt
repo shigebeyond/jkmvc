@@ -72,12 +72,13 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     companion object {
         /**
          * 动作子句的sql模板
+         *  sql模板的动作顺序 = ActionType中定义的动作顺序
          */
-        protected val SqlTemplates:Map<String, String> = mapOf(
-                "select" to "SELECT :distinct :columns FROM :table",
-                "insert" to "INSERT INTO :table (:columns) VALUES :values", // quoteColumn 默认不加(), quotevalue 默认加()
-                "update" to "UPDATE :table SET :column = :value",
-                "delete" to "DELETE FROM :table"
+        protected val SqlTemplates:Array<String> = arrayOf(
+                "SELECT :distinct :columns FROM :table",
+                "INSERT INTO :table (:columns) VALUES :values", // quoteColumn 默认不加(), quotevalue 默认加()
+                "UPDATE :table SET :column = :value",
+                "DELETE FROM :table"
         );
 
         /**
@@ -93,7 +94,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     /**
      * 动作
      */
-    protected var action: String = "";
+    protected var action: ActionType? = null;
 
     /**
      * 要插入的多行: columns + values
@@ -135,10 +136,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * @param action sql动作：select/insert/update/delete
      * @return
      */
-    public fun action(action: String): IDbQueryBuilder {
-        if (action !in SqlTemplates)
-            throw IllegalArgumentException("无效sql动作: $action");
-
+    public fun action(action: ActionType): IDbQueryBuilder {
         this.action = action;
         return this;
     }
@@ -269,11 +267,11 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      */
     public override fun clear(): IDbQueryBuilder {
         when (action) {
-            "select" -> selectColumns.clear();
-            "insert" -> insertRows.clear();
-            "update" -> updateRow.clear();
+            ActionType.SELECT -> selectColumns.clear();
+            ActionType.INSERT -> insertRows.clear();
+            ActionType.UPDATE -> updateRow.clear();
         }
-        action = "";
+        action = null;
         table = "";
         distinct = false;
         params.clear();
@@ -287,14 +285,14 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * @return
      */
     public override fun compileAction(sb: StringBuilder): IDbQueryBuilder {
-        if (action !in SqlTemplates)
-            throw DbException("未设置sql动作: $action");
+        if (action == null)
+            throw DbException("未设置sql动作");
 
         // 清空sql参数
         params.clear();
 
         // 实际上是填充子句的参数，如将行参表名替换为真实表名
-        var sql: String = SqlTemplates[action]!!;
+        var sql: String = SqlTemplates[action!!.ordinal];
 
         // 1 填充表名/多个字段名/多个字段值
         // 针对 select :columns from :table / insert into :table :columns values :values / update :table
@@ -306,12 +304,12 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
 
         // 2 填充字段谓句
         // 针对 update :table set :column = :value
-        if("update" == action)
+        if(action == ActionType.UPDATE)
             sql = ":column(.+):value".toRegex().replace(sql) { result: MatchResult ->
                 fillColumnPredicate(result.groupValues[1]);
             };
         // 3 填充distinct
-        else if("select" == action)
+        else if(action == ActionType.SELECT)
             sql = sql.replace(":distinct", if (distinct) "distinct" else "");
 
         sb.append(sql);
@@ -334,7 +332,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      */
     public fun fillColumns(): String {
         // 1 select子句:  data是要查询的字段名, [alias to column]
-        if (action == "select") {
+        if (action == ActionType.SELECT) {
             if (selectColumns.isEmpty())
                 return "*";
 
