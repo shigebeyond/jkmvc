@@ -268,15 +268,15 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * @return
      */
     public override fun clear(): IDbQueryBuilder {
-        action = "";
-        table = "";
-        distinct = false;
-        params.clear();
         when (action) {
             "select" -> selectColumns.clear();
             "insert" -> insertRows.clear();
             "update" -> updateRow.clear();
         }
+        action = "";
+        table = "";
+        distinct = false;
+        params.clear();
         return this;
     }
 
