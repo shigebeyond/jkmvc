@@ -10,11 +10,6 @@ import java.util.*
  */
 abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) : DbQueryBuilderAction(db, table) {
 
-    companion object{
-        //编译修饰子句的顺序
-        val clauseOrder = arrayOf("where", "groupBy", "having", "orderBy", "limit");
-    }
-
     /**
      * 转义列
      */
@@ -46,9 +41,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * where/group by/having/order by/limit
      */
-    protected val clauses:MutableMap<String, DbQueryBuilderDecorationClauses<*>> by lazy(LazyThreadSafetyMode.NONE){
-        HashMap<String, DbQueryBuilderDecorationClauses<*>>();
-    }
+    protected val clauses: Array<DbQueryBuilderDecorationClauses<*>?> = arrayOfNulls<DbQueryBuilderDecorationClauses<*>>(5);
 
     /**
      * 联表数组，每个联表join = 表名 + 联表方式 | 每个联表条件on = 字段 + 运算符 + 字段, 都写死在DbQueryBuilderDecorationClausesJoin类
@@ -60,22 +53,31 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * 获得修饰子句
      *   主要用于首次使用的初始化，避免创建时就初始化
+     *   原来用map，但考虑到每个QueryBuild都要创建map影响性能，因此改用array
      */
-    protected fun getClause(name:String):DbQueryBuilderDecorationClauses<*>{
-        return clauses.getOrPut(name){
-            when(name) {
-                //条件数组, 每个条件 = 字段名 + 运算符 + 字段值
-                "where" -> DbQueryBuilderDecorationClausesGroup("WHERE", arrayOf<((Any?) -> String)?>(columnQuoter, null, valueQuoter));
-                //字段数组
-                "groupBy" -> DbQueryBuilderDecorationClausesSimple("GROUP BY", arrayOf<((Any?) -> String)?>(columnQuoter));
-                //条件数组, 每个条件 = 字段名 + 运算符 + 字段值
-                "having" -> DbQueryBuilderDecorationClausesGroup("HAVING", arrayOf<((Any?) -> String)?>(columnQuoter, null, valueQuoter));
-                //排序数组, 每个排序 = 字段+方向
-                "orderBy" -> DbQueryBuilderDecorationClausesSimple("ORDER BY", arrayOf<((Any?) -> String)?>(columnQuoter, orderDirection));
-                //行限数组 limit, offset
-                "limit" -> DbQueryBuilderDecorationClausesSimple("LIMIT", arrayOf<((Any?) -> String)?>(null));
-                else -> throw RuntimeException("未知修饰词[$name]");
-            }
+    protected fun getClause(type:ClauseType):DbQueryBuilderDecorationClauses<*>{
+        val i = type.ordinal;
+        if(clauses[i] == null)
+            clauses[i] = buildClause(type)
+        return clauses[i]!!;
+    }
+
+    /**
+     * 构建修饰子句
+     */
+    protected fun buildClause(type:ClauseType):DbQueryBuilderDecorationClauses<*>{
+        return when(type) {
+            //条件数组, 每个条件 = 字段名 + 运算符 + 字段值
+            ClauseType.WHERE -> DbQueryBuilderDecorationClausesGroup("WHERE", arrayOf<((Any?) -> String)?>(columnQuoter, null, valueQuoter));
+            //字段数组
+            ClauseType.GROUP_BY -> DbQueryBuilderDecorationClausesSimple("GROUP BY", arrayOf<((Any?) -> String)?>(columnQuoter));
+            //条件数组, 每个条件 = 字段名 + 运算符 + 字段值
+            ClauseType.HAVING -> DbQueryBuilderDecorationClausesGroup("HAVING", arrayOf<((Any?) -> String)?>(columnQuoter, null, valueQuoter));
+            //排序数组, 每个排序 = 字段+方向
+            ClauseType.ORDER_BY -> DbQueryBuilderDecorationClausesSimple("ORDER BY", arrayOf<((Any?) -> String)?>(columnQuoter, orderDirection));
+            //行限数组 limit, offset
+            ClauseType.LIMIT -> DbQueryBuilderDecorationClausesSimple("LIMIT", arrayOf<((Any?) -> String)?>(null));
+            else -> throw DbException("未知修饰词[$type]");
         }
     }
 
@@ -92,9 +94,9 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
         // 2 where/group by/having/ordery by/limit 按顺序编译sql，否则sql无效
         /*for ((k, v) in clauses) // map中无序
             visitor(v);*/
-        for(k in clauseOrder)
-            if(clauses.contains(k))
-                visitor(clauses[k]!!);
+        for(v in clauses) // array中有序，下标就是序号
+            if(v != null)
+                visitor(v);
     }
 
     /**
@@ -210,7 +212,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun andWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
-        getClause("where").addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "AND");
+        getClause(ClauseType.WHERE).addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "AND");
         return this;
     }
 
@@ -223,7 +225,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun orWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
-        getClause("where").addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "OR");
+        getClause(ClauseType.WHERE).addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "OR");
         return this;
 
     }
@@ -258,7 +260,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun andWhereOpen(): IDbQueryBuilder {
-        getClause("where").open("AND");
+        getClause(ClauseType.WHERE).open("AND");
         return this;
     }
 
@@ -268,7 +270,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun orwhereOpen(): IDbQueryBuilder {
-        getClause("where").open("OR");
+        getClause(ClauseType.WHERE).open("OR");
         return this;
     }
 
@@ -287,7 +289,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun andWhereclose(): IDbQueryBuilder {
-        getClause("where").close();
+        getClause(ClauseType.WHERE).close();
         return this;
     }
 
@@ -297,7 +299,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun orWhereclose(): IDbQueryBuilder {
-        getClause("where").close();
+        getClause(ClauseType.WHERE).close();
         return this;
     }
 
@@ -308,7 +310,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun groupBy(column: String): IDbQueryBuilder {
-        getClause("groupBy").addSubexp(arrayOf(column));
+        getClause(ClauseType.GROUP_BY).addSubexp(arrayOf(column));
         return this;
     }
 
@@ -333,7 +335,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun andHaving(column: String, op: String, value: Any?): IDbQueryBuilder {
-        getClause("having").addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "AND");
+        getClause(ClauseType.HAVING).addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "AND");
         return this;
     }
 
@@ -346,7 +348,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun orHaving(column: String, op: String, value: Any?): IDbQueryBuilder {
-        getClause("having").addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "OR");
+        getClause(ClauseType.HAVING).addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "OR");
         return this;
     }
 
@@ -365,7 +367,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun andHavingOpen(): IDbQueryBuilder {
-        getClause("where").open("AND");
+        getClause(ClauseType.WHERE).open("AND");
         return this;
     }
 
@@ -375,7 +377,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun orHavingOpen(): IDbQueryBuilder {
-        getClause("where").open("OR");
+        getClause(ClauseType.WHERE).open("OR");
         return this;
     }
 
@@ -394,7 +396,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun andHavingClose(): IDbQueryBuilder {
-        getClause("where").close();
+        getClause(ClauseType.WHERE).close();
         return this;
     }
 
@@ -404,7 +406,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun orHavingClose(): IDbQueryBuilder {
-        getClause("where").close();
+        getClause(ClauseType.WHERE).close();
         return this;
     }
 
@@ -416,7 +418,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun orderBy(column: String, direction: String?): IDbQueryBuilder {
-        getClause("orderBy").addSubexp(arrayOf<Any?>(column, direction));
+        getClause(ClauseType.ORDER_BY).addSubexp(arrayOf<Any?>(column, direction));
         return this;
     }
 
@@ -429,9 +431,9 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      */
     public override fun limit(limit: Int, offset: Int): IDbQueryBuilder {
         if (offset === 0)
-            getClause("limit").addSubexp(arrayOf<Any?>(limit));
+            getClause(ClauseType.LIMIT).addSubexp(arrayOf<Any?>(limit));
         else
-            getClause("limit").addSubexp(arrayOf<Any?>(offset)).addSubexp(arrayOf<Any?>(limit));
+            getClause(ClauseType.LIMIT).addSubexp(arrayOf<Any?>(offset)).addSubexp(arrayOf<Any?>(limit));
 
         return this;
     }

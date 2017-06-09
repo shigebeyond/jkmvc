@@ -1,6 +1,19 @@
 package com.jkmvc.db
 
 /**
+ * 修饰子句的类型
+ * @author shijianhang
+ * @date 2016-10-10
+ */
+enum class ClauseType {
+    WHERE,
+    GROUP_BY,
+    HAVING,
+    ORDER_BY,
+    LIMIT
+}
+
+/**
  * sql构建器 -- 修饰子句: 由修饰词where/group by/order by/limit来构建的子句
  *
  * @author shijianhang
