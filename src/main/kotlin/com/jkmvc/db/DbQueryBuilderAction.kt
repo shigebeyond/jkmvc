@@ -2,7 +2,63 @@ package com.jkmvc.db
 
 import com.jkmvc.common.deleteSuffix
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.reflect.KFunction1
+
+/**
+ * 要插入的数据
+ */
+class InsertData{
+    /**
+     * 要插入的字段
+     */
+    public var columns:List<String>? = null;
+
+    /**
+     * 要插入的多行数据，但是只有一维，需要按columns的大小，来拆分成多行
+     */
+    public val rows: ArrayList<Any?> by lazy(LazyThreadSafetyMode.NONE) {
+        ArrayList<Any?>();
+    }
+
+    /**
+     * 检查一行的大小
+     */
+    protected fun checkRowSize(rowSize:Int){
+        if(columns == null || columns!!.isEmpty())
+            throw DbException("请先调用insertColumn()来设置插入的字段名");
+
+        if(columns!!.size != rowSize)
+            throw DbException("请插入的字段值与字段名数量不匹配");
+    }
+
+    /**
+     * 添加一行
+     */
+    public fun addRow(row: Array<out Any?>): InsertData {
+        checkRowSize(row.size)
+        rows.addAll(row)
+        return this;
+    }
+
+    /**
+     * 添加一行
+     */
+    public fun addRow(row: Collection<Any?>): InsertData {
+        checkRowSize(row.size)
+        rows.addAll(row)
+        return this;
+    }
+
+    /**
+     * 清空数据
+     */
+    public fun clear() {
+        columns = null;
+        rows.clear();
+    }
+}
+
 
 /**
  * sql构建器 -- 动作子句: 由动态select/insert/update/delete来构建的子句
@@ -40,10 +96,10 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     protected var action: String = "";
 
     /**
-     * 要插入的多行: [<column to value>]
+     * 要插入的多行: columns + values
      */
-    protected val insertRows: MutableList<Map<String, Any?>> by lazy(LazyThreadSafetyMode.NONE) {
-        LinkedList<Map<String, Any?>>();
+    protected val insertRows: InsertData by lazy(LazyThreadSafetyMode.NONE) {
+        InsertData()
     };
 
     /**
@@ -119,24 +175,36 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     }
 
     /**
+     * 设置插入的列, insert时用
+     *
+     * @param column
+     * @return
+     */
+    public override fun insertColumns(vararg colums:String):IDbQueryBuilder{
+        insertRows.columns = colums.asList()
+        return this;
+    }
+
+    /**
      * 设置插入的单行, insert时用
      *
      * @param row 单行数据
      * @return
      */
-    public override fun value(row: Map<String, Any?>): IDbQueryBuilder {
-        insertRows.add(row);
+    public override fun value(vararg row:Any?): IDbQueryBuilder {
+        insertRows.addRow(row);
         return this;
     }
 
     /**
-     * 设置插入的多行, insert时用
+     * 设置插入的单行, insert时用
      *
-     * @param rows 多行数据
+     * @param row
      * @return
      */
-    public override fun values(rows: List<Map<String, Any?>>): IDbQueryBuilder {
-        insertRows.addAll(rows);
+    public override fun value(row:Map<String, Any?>):IDbQueryBuilder{
+        insertRows.columns = ArrayList(row.keys)
+        insertRows.addRow(row.values)
         return this;
     }
 
@@ -273,13 +341,8 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
             return db.quoteColumns(selectColumns);
         }
 
-        // 2 insert子句:  data是要插入的多行: [<column to value>]
-        if (insertRows.isEmpty())
-            return "";
-
-        // 取得第一行的keys
-        val columns = insertRows[0].keys
-        return db.quoteColumns(columns);
+        // 2 insert子句:  data是要插入的多行: columns + values
+        return db.quoteColumns(insertRows.columns!!);
     }
 
     /**
@@ -289,18 +352,22 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      *  @return
      */
     public fun fillValues(): String {
-        // insert子句:  data是要插入的多行: [<column to value>]
-        if (insertRows.isEmpty())
-            return "";
-
-        //对每行每值执行db.quote(value);
-        val sql = StringBuilder("(");
-        for (row in insertRows){
-            for((k, v) in row){
+        // insert子句:  data是要插入的多行: columns + values
+        val sql = StringBuilder();
+        //对每行构建()
+        var i = 0
+        val valueSize = insertRows.rows.size
+        while(i < valueSize){ //insertRows.rows是多行数据，但是只有一维，需要按columns的大小，来拆分成多行
+            sql.append("(")
+            //对每值执行db.quote(value);
+            val columnSize = insertRows.columns!!.size
+            for (j in 0..(columnSize - 1)){
+                val v = insertRows.rows[i++]
                 sql.append(quote(v)).append(", ")
             }
+            sql.deleteSuffix(", ").append("), ")
         }
-        return sql.deleteSuffix(", ").append(")").toString();
+        return sql.deleteSuffix(", ").toString();
     }
 
     /**

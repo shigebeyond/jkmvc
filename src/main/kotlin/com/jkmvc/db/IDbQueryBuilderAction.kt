@@ -38,20 +38,28 @@ interface IDbQueryBuilderAction
     fun from(tables:String):IDbQueryBuilder;
 
     /**
+     * 设置插入的列, insert时用
+     *
+     * @param column
+     * @return
+     */
+    fun insertColumns(vararg colums:String):IDbQueryBuilder;
+
+    /**
+     * 设置插入的单行, insert时用
+     *
+     * @param row
+     * @return
+     */
+    fun value(vararg row:Any?):IDbQueryBuilder;
+
+    /**
      * 设置插入的单行, insert时用
      *
      * @param row
      * @return
      */
     fun value(row:Map<String, Any?>):IDbQueryBuilder;
-
-    /**
-     * 设置插入的多行, insert时用
-     *
-     * @param rows
-     * @return
-     */
-    fun values(rows:List<Map<String, Any?>>):IDbQueryBuilder;
 
     /**
      * 设置更新的单个值, update时用
