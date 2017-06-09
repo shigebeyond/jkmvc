@@ -244,7 +244,7 @@ interface IDbQueryBuilderDecoration
      * Adds addition tables to "JOIN ...".
      *
      * @param   table  column name or array(column, alias) or object
-     * @param   type   join type (LEFT, RIGHT, INNER, etc)
+     * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
      * @return
      */
     fun join(table:Any, type:String? = null):IDbQueryBuilder;

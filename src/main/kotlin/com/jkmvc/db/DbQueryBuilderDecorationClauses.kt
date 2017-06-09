@@ -1,6 +1,7 @@
 package com.jkmvc.db
 
 import java.util.*
+import kotlin.reflect.KClass
 
 /**
  * sql修饰子句的模拟构建
@@ -11,13 +12,11 @@ import java.util.*
  * @date 2016-10-13
  */
 abstract class DbQueryBuilderDecorationClauses<T>(protected val operator: String /* 修饰符， 如where/group by */, protected val elementHandlers: Array<((Any?) -> String)?> /* 每个元素的处理器, 可视为列的处理*/)
-: IDbQueryBuilderDecorationClauses<T> {
+: IDbQueryBuilderDecorationClauses<T>, Cloneable {
     /**
      * 子表达式, 可视为行
      */
-    protected val subexps: MutableList<T> by lazy {
-        LinkedList<T>();
-    };
+    protected var subexps: LinkedList<T> = LinkedList<T>();
 
     /**
      * 编译多个子表达式
@@ -40,5 +39,15 @@ abstract class DbQueryBuilderDecorationClauses<T>(protected val operator: String
     public override fun clear(): IDbQueryBuilderDecorationClauses<T> {
         subexps.clear();
         return this;
+    }
+
+    /**
+     * 克隆对象
+     * @return o
+     */
+    public override fun clone(): Any {
+        val o = super.clone() as DbQueryBuilderDecorationClauses<T>
+        o.subexps = subexps.clone() as LinkedList<T>
+        return o;
     }
 }

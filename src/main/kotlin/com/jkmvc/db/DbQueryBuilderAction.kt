@@ -1,6 +1,8 @@
 package com.jkmvc.db
 
 import com.jkmvc.common.deleteSuffix
+import com.jkmvc.common.forceClone
+import com.jkmvc.common.getOrPut
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.reflect.KFunction1
@@ -8,7 +10,7 @@ import kotlin.reflect.KFunction1
 /**
  * 要插入的数据
  */
-class InsertData{
+class InsertData: Cloneable{
     /**
      * 要插入的字段
      */
@@ -17,34 +19,33 @@ class InsertData{
     /**
      * 要插入的多行数据，但是只有一维，需要按columns的大小，来拆分成多行
      */
-    public val rows: ArrayList<Any?> by lazy(LazyThreadSafetyMode.NONE) {
-        ArrayList<Any?>();
-    }
+    public var rows: ArrayList<Any?> = ArrayList<Any?>();
 
     /**
-     * 检查一行的大小
+     * 检查行的大小
      */
     protected fun checkRowSize(rowSize:Int){
         if(columns == null || columns!!.isEmpty())
             throw DbException("请先调用insertColumn()来设置插入的字段名");
 
-        if(columns!!.size != rowSize)
+        // 字段值数，是字段名数的整数倍
+        if(rowSize % columns!!.size == 0)
             throw DbException("请插入的字段值与字段名数量不匹配");
     }
 
     /**
-     * 添加一行
+     * 添加一行/多行
      */
-    public fun addRow(row: Array<out Any?>): InsertData {
+    public fun add(row: Array<out Any?>): InsertData {
         checkRowSize(row.size)
         rows.addAll(row)
         return this;
     }
 
     /**
-     * 添加一行
+     * 添加一行/多行
      */
-    public fun addRow(row: Collection<Any?>): InsertData {
+    public fun add(row: Collection<Any?>): InsertData {
         checkRowSize(row.size)
         rows.addAll(row)
         return this;
@@ -56,6 +57,20 @@ class InsertData{
     public fun clear() {
         columns = null;
         rows.clear();
+    }
+
+    /**
+     * 克隆对象
+     * @return o
+     */
+    override fun clone(): Any {
+        val o = super.clone() as InsertData
+        // columns是List类型，没实现Cloneable接口
+        //o.columns = columns?.clone() as List<String>?
+        if(columns != null)
+            o.columns = ArrayList(columns)
+        o.rows = rows.clone() as ArrayList<Any?>
+        return o;
     }
 }
 
@@ -72,7 +87,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     companion object {
         /**
          * 动作子句的sql模板
-         *  sql模板的动作顺序 = ActionType中定义的动作顺序
+         *   sql模板的动作顺序 = ActionType中定义的动作顺序
          */
         protected val SqlTemplates:Array<String> = arrayOf(
                 "SELECT :distinct :columns FROM :table",
@@ -97,25 +112,40 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     protected var action: ActionType? = null;
 
     /**
-     * 要插入的多行: columns + values
+     * 要操作的数据：增改查的数据（没有删）
+     *   操作数据的动作顺序 = ActionType中定义的动作顺序
      */
-    protected val insertRows: InsertData by lazy(LazyThreadSafetyMode.NONE) {
-        InsertData()
-    };
-
-    /**
-     * 要更新字段值: <column to value>
-     */
-    protected val updateRow: MutableMap<String, Any?> by lazy(LazyThreadSafetyMode.NONE) {
-        LinkedHashMap<String, Any?>();
-    }
+    protected var manipulatedData:Array<Any?> = arrayOfNulls(3)
 
     /**
      * 要查询的字段名: [alias to column]
      */
-    protected val selectColumns: MutableSet<Any> by lazy(LazyThreadSafetyMode.NONE) {
-        HashSet<Any>();
-    }
+    protected val selectColumns: HashSet<Any>
+        get(){
+            return manipulatedData.getOrPut(ActionType.SELECT.ordinal){
+                HashSet<Any>();
+            } as HashSet<Any>
+        }
+
+    /**
+     * 要插入的多行: columns + values
+     */
+    protected val insertRows: InsertData
+        get(){
+            return manipulatedData.getOrPut(ActionType.INSERT.ordinal){
+                InsertData()
+            } as InsertData
+        }
+
+    /**
+     * 要更新字段值: <column to value>
+     */
+    protected val updateRow: HashMap<String, Any?>
+        get(){
+            return manipulatedData.getOrPut(ActionType.UPDATE.ordinal){
+                HashMap<String, Any?>();
+            } as HashMap<String, Any?>
+        }
 
     /**
      * select语句中, 控制查询结果是否去重唯一
@@ -125,9 +155,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     /**
      * sql参数
      */
-    protected val params: MutableList<Any?> by lazy {
-        LinkedList<Any?>();
-    }
+    protected var params: LinkedList<Any?> = LinkedList<Any?>();
 
     /**
      * 设置动作
@@ -190,7 +218,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * @return
      */
     public override fun value(vararg row:Any?): IDbQueryBuilder {
-        insertRows.addRow(row);
+        insertRows.add(row);
         return this;
     }
 
@@ -202,7 +230,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      */
     public override fun value(row:Map<String, Any?>):IDbQueryBuilder{
         insertRows.columns = ArrayList(row.keys)
-        insertRows.addRow(row.values)
+        insertRows.add(row.values)
         return this;
     }
 
@@ -276,6 +304,21 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
         distinct = false;
         params.clear();
         return this;
+    }
+
+    /**
+     * 克隆对象
+     * @return o
+     */
+    override fun clone(): Any {
+        val o = super.clone() as DbQueryBuilderAction
+        // 复制参数
+        o.params = params.clone() as LinkedList<Any?>
+        // 复制要操作的数据
+        o.manipulatedData = arrayOfNulls(manipulatedData.size)
+        for (i in 0..(manipulatedData.size - 1))
+            o.manipulatedData[i] = manipulatedData[i]?.forceClone()
+        return o;
     }
 
     /**

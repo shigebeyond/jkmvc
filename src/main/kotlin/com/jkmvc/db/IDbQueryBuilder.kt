@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-13
  */
-abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration {
+abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration, Cloneable {
     /**
      * 获得记录转换器
      */

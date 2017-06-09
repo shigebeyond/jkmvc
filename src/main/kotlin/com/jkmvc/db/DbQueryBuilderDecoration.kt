@@ -4,7 +4,7 @@ import com.jkmvc.common.getOrPut
 import java.util.*
 
 /**
- * sql构建器 -- 修饰子句: 由修饰词where/group by/order by/limit来构建的子句
+ * sql构建器 -- 修饰子句: 由修饰词join/where/group by/order by/limit来构建的子句
  *
  * @author shijianhang
  * @date 2016-10-12
@@ -40,64 +40,70 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     }
 
     /**
-     * where/group by/having/order by/limit
+     * where/group by/having/order by/limit子句的数组
      */
-    protected val clauses: Array<DbQueryBuilderDecorationClauses<*>?> = arrayOfNulls<DbQueryBuilderDecorationClauses<*>>(5);
+    protected var clauses: Array<DbQueryBuilderDecorationClauses<*>?> = arrayOfNulls<DbQueryBuilderDecorationClauses<*>>(5);
 
     /**
-     * 联表数组，每个联表join = 表名 + 联表方式 | 每个联表条件on = 字段 + 运算符 + 字段, 都写死在DbQueryBuilderDecorationClausesJoin类
+     * join子句
+     *   联表数组，每个联表join = 表名 + 联表方式 | 每个联表条件on = 字段 + 运算符 + 字段
      */
-    protected val join: MutableList<DbQueryBuilderDecorationClausesGroup> by lazy(LazyThreadSafetyMode.NONE) {
-        LinkedList<DbQueryBuilderDecorationClausesGroup>()
-    };
+    protected var joinClause: LinkedList<DbQueryBuilderDecorationClausesGroup> = LinkedList<DbQueryBuilderDecorationClausesGroup>()
 
     /**
-     * 获得修饰子句
-     *   主要用于首次使用的初始化，避免创建时就初始化
-     *   原来用map，但考虑到每个QueryBuild都要创建map影响性能，因此改用array
+     * where子句
+     *   条件数组, 每个条件 = 字段名 + 运算符 + 字段值
      */
-    protected fun getClause(type:ClauseType):DbQueryBuilderDecorationClauses<*>{
-        return clauses.getOrPut(type.ordinal){
-            buildClause(type)
-        }!!
-    }
-
-    /**
-     * 构建修饰子句
-     */
-    protected fun buildClause(type:ClauseType):DbQueryBuilderDecorationClauses<*>{
-        return when(type) {
-            //条件数组, 每个条件 = 字段名 + 运算符 + 字段值
-            ClauseType.WHERE -> DbQueryBuilderDecorationClausesGroup("WHERE", arrayOf<((Any?) -> String)?>(columnQuoter, null, valueQuoter));
-            //字段数组
-            ClauseType.GROUP_BY -> DbQueryBuilderDecorationClausesSimple("GROUP BY", arrayOf<((Any?) -> String)?>(columnQuoter));
-            //条件数组, 每个条件 = 字段名 + 运算符 + 字段值
-            ClauseType.HAVING -> DbQueryBuilderDecorationClausesGroup("HAVING", arrayOf<((Any?) -> String)?>(columnQuoter, null, valueQuoter));
-            //排序数组, 每个排序 = 字段+方向
-            ClauseType.ORDER_BY -> DbQueryBuilderDecorationClausesSimple("ORDER BY", arrayOf<((Any?) -> String)?>(columnQuoter, orderDirection));
-            //行限数组 limit, offset
-            ClauseType.LIMIT -> DbQueryBuilderDecorationClausesSimple("LIMIT", arrayOf<((Any?) -> String)?>(null));
-            else -> throw DbException("未知修饰词[$type]");
+    protected val whereClause: DbQueryBuilderDecorationClauses<*>
+        get(){
+            return clauses.getOrPut(ClauseType.WHERE.ordinal){
+                DbQueryBuilderDecorationClausesGroup("WHERE", arrayOf<((Any?) -> String)?>(columnQuoter, null, valueQuoter));
+            } as DbQueryBuilderDecorationClauses<*>
         }
-    }
 
     /**
-     * 遍历修饰子句
-     * @param visitor 访问者函数，遍历时调用
+     * group by子句
+     *   字段数组
      */
-    protected fun travelDecorationClauses(visitor: (IDbQueryBuilderDecorationClauses<*>) -> Unit):Unit {
-        // 逐个处理修饰词及其表达式
-        // 1 join
-        for (j in join)
-            visitor(j);
+    protected val groupByClause: DbQueryBuilderDecorationClauses<*>
+        get(){
+            return clauses.getOrPut(ClauseType.GROUP_BY.ordinal){
+                DbQueryBuilderDecorationClausesSimple("GROUP BY", arrayOf<((Any?) -> String)?>(columnQuoter));
+            } as DbQueryBuilderDecorationClauses<*>
+        }
 
-        // 2 where/group by/having/ordery by/limit 按顺序编译sql，否则sql无效
-        /*for ((k, v) in clauses) // map中无序
-            visitor(v);*/
-        for(v in clauses) // array中有序，下标就是序号
-            if(v != null)
-                visitor(v);
-    }
+    /**
+     * having子句
+     *   条件数组, 每个条件 = 字段名 + 运算符 + 字段值
+     */
+    protected val havingClause: DbQueryBuilderDecorationClauses<*>
+        get(){
+            return clauses.getOrPut(ClauseType.HAVING.ordinal){
+                DbQueryBuilderDecorationClausesGroup("HAVING", arrayOf<((Any?) -> String)?>(columnQuoter, null, valueQuoter));
+            } as DbQueryBuilderDecorationClauses<*>
+        }
+
+    /**
+     * order by子句
+     *   排序数组, 每个排序 = 字段+方向
+     */
+    protected val orderByClause: DbQueryBuilderDecorationClauses<*>
+        get(){
+            return clauses.getOrPut(ClauseType.ORDER_BY.ordinal){
+                DbQueryBuilderDecorationClausesSimple("ORDER BY", arrayOf<((Any?) -> String)?>(columnQuoter, orderDirection));
+            } as DbQueryBuilderDecorationClauses<*>
+        }
+
+    /**
+     * limit子句
+     *   行限数组 limit, offset
+     */
+    protected val limitClause: DbQueryBuilderDecorationClauses<*>
+        get(){
+            return clauses.getOrPut(ClauseType.LIMIT.ordinal){
+                DbQueryBuilderDecorationClausesSimple("LIMIT", arrayOf<((Any?) -> String)?>(null));
+            } as DbQueryBuilderDecorationClauses<*>
+        }
 
     /**
      * 编译修饰子句
@@ -116,6 +122,24 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     }
 
     /**
+     * 遍历修饰子句
+     * @param visitor 访问者函数，遍历时调用
+     */
+    protected fun travelDecorationClauses(visitor: (IDbQueryBuilderDecorationClauses<*>) -> Unit):Unit {
+        // 逐个处理修饰词及其表达式
+        // 1 joinClause
+        for (j in joinClause)
+            visitor(j);
+
+        // 2 where/group by/having/ordery by/limit 按顺序编译sql，否则sql无效
+        /*for ((k, v) in clauses) // map中无序
+            visitor(v);*/
+        for(v in clauses) // array中有序，下标就是序号
+            if(v != null)
+                visitor(v);
+    }
+
+    /**
      * 清空条件
      * @return
      */
@@ -125,9 +149,24 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
             clause.clear();
         }
 
-        join.clear();
+        joinClause.clear();
 
         return super.clear();
+    }
+
+    /**
+     * 克隆对象
+     * @return o
+     */
+    override fun clone(): Any {
+        val o = super.clone() as DbQueryBuilderDecoration
+        //join子句
+        o.joinClause = joinClause.clone() as LinkedList<DbQueryBuilderDecorationClausesGroup>
+        //where/group by/having/order by/limit子句
+        o.clauses = arrayOfNulls(clauses.size)
+        for (i in 0..(clauses.size - 1))
+            o.clauses[i] = clauses[i]?.clone() as DbQueryBuilderDecorationClauses<*>?
+        return o
     }
 
     /**
@@ -212,7 +251,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun andWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
-        getClause(ClauseType.WHERE).addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "AND");
+        whereClause.addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "AND");
         return this;
     }
 
@@ -225,7 +264,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun orWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
-        getClause(ClauseType.WHERE).addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "OR");
+        whereClause.addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "OR");
         return this;
 
     }
@@ -260,7 +299,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun andWhereOpen(): IDbQueryBuilder {
-        getClause(ClauseType.WHERE).open("AND");
+        whereClause.open("AND");
         return this;
     }
 
@@ -270,7 +309,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun orwhereOpen(): IDbQueryBuilder {
-        getClause(ClauseType.WHERE).open("OR");
+        whereClause.open("OR");
         return this;
     }
 
@@ -289,7 +328,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun andWhereclose(): IDbQueryBuilder {
-        getClause(ClauseType.WHERE).close();
+        whereClause.close();
         return this;
     }
 
@@ -299,7 +338,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun orWhereclose(): IDbQueryBuilder {
-        getClause(ClauseType.WHERE).close();
+        whereClause.close();
         return this;
     }
 
@@ -310,7 +349,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun groupBy(column: String): IDbQueryBuilder {
-        getClause(ClauseType.GROUP_BY).addSubexp(arrayOf(column));
+        groupByClause.addSubexp(arrayOf(column));
         return this;
     }
 
@@ -335,7 +374,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun andHaving(column: String, op: String, value: Any?): IDbQueryBuilder {
-        getClause(ClauseType.HAVING).addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "AND");
+        havingClause.addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "AND");
         return this;
     }
 
@@ -348,7 +387,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun orHaving(column: String, op: String, value: Any?): IDbQueryBuilder {
-        getClause(ClauseType.HAVING).addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "OR");
+        havingClause.addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "OR");
         return this;
     }
 
@@ -367,7 +406,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun andHavingOpen(): IDbQueryBuilder {
-        getClause(ClauseType.WHERE).open("AND");
+        whereClause.open("AND");
         return this;
     }
 
@@ -377,7 +416,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun orHavingOpen(): IDbQueryBuilder {
-        getClause(ClauseType.WHERE).open("OR");
+        whereClause.open("OR");
         return this;
     }
 
@@ -396,7 +435,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun andHavingClose(): IDbQueryBuilder {
-        getClause(ClauseType.WHERE).close();
+        whereClause.close();
         return this;
     }
 
@@ -406,7 +445,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun orHavingClose(): IDbQueryBuilder {
-        getClause(ClauseType.WHERE).close();
+        whereClause.close();
         return this;
     }
 
@@ -418,7 +457,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun orderBy(column: String, direction: String?): IDbQueryBuilder {
-        getClause(ClauseType.ORDER_BY).addSubexp(arrayOf<Any?>(column, direction));
+        orderByClause.addSubexp(arrayOf<Any?>(column, direction));
         return this;
     }
 
@@ -431,9 +470,9 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      */
     public override fun limit(limit: Int, offset: Int): IDbQueryBuilder {
         if (offset === 0)
-            getClause(ClauseType.LIMIT).addSubexp(arrayOf<Any?>(limit));
+            limitClause.addSubexp(arrayOf<Any?>(limit));
         else
-            getClause(ClauseType.LIMIT).addSubexp(arrayOf<Any?>(offset)).addSubexp(arrayOf<Any?>(limit));
+            limitClause.addSubexp(arrayOf<Any?>(offset)).addSubexp(arrayOf<Any?>(limit));
 
         return this;
     }
@@ -442,19 +481,19 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * Adds addition tables to "JOIN ...".
      *
      * @param   table  column name or array(column, alias) or object
-     * @param   type   join type (LEFT, RIGHT, INNER, etc)
+     * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
      * @return
      */
     public override fun join(table: Any, type: String?): IDbQueryBuilder {
-        // join　子句
+        // joinClause　子句
         val j = DbQueryBuilderDecorationClausesGroup("$type JOIN", arrayOf<((Any?) -> String)?>(tableQuoter));
         j.addSubexp(arrayOf<Any?>(table));
 
         // on　子句
         val on = DbQueryBuilderDecorationClausesGroup("ON", arrayOf<((Any?) -> String)?>(columnQuoter, null, columnQuoter));
 
-        join.add(j);
-        join.add(on);
+        joinClause.add(j);
+        joinClause.add(on);
 
         return this;
     }
@@ -468,7 +507,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * @return
      */
     public override fun on(c1: String, op: String, c2: String): IDbQueryBuilder {
-        join.last().addSubexp(arrayOf(c1, op, c2), "AND");
+        joinClause.last().addSubexp(arrayOf(c1, op, c2), "AND");
         return this;
     }
 }
