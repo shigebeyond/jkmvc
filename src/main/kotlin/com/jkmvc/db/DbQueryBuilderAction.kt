@@ -29,8 +29,9 @@ class InsertData: Cloneable{
             throw DbException("请先调用insertColumn()来设置插入的字段名");
 
         // 字段值数，是字段名数的整数倍
-        if(rowSize % columns!!.size == 0)
-            throw DbException("请插入的字段值与字段名数量不匹配");
+        val columnSize = columns!!.size
+        if(rowSize % columnSize != 0)
+            throw DbException("请插入的字段值数[$rowSize]与字段名数[$columnSize]不匹配");
     }
 
     /**
