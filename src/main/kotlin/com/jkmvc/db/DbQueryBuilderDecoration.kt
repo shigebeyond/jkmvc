@@ -431,7 +431,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
         if (offset === 0)
             getClause("limit").addSubexp(arrayOf<Any?>(limit));
         else
-            getClause("limit").addSubexp(arrayOf<Any?>(offset, limit));
+            getClause("limit").addSubexp(arrayOf<Any?>(offset)).addSubexp(arrayOf<Any?>(limit));
 
         return this;
     }
