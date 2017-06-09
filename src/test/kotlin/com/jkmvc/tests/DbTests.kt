@@ -72,7 +72,7 @@ class DbTests{
 
     @Test
     fun testFindAll(){
-        val records = DbQueryBuilder(db).table("user").limit(1).findAll<Record>()
+        val records = DbQueryBuilder(db).table("user").orderBy("id").limit(1).findAll<Record>()
         println("查询user表：" + records)
     }
 
