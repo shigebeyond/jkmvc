@@ -4,6 +4,7 @@ import com.jkmvc.common.findFunction
 import com.jkmvc.common.findProperty
 import com.jkmvc.common.to
 import com.jkmvc.example.model.UserModel
+import com.jkmvc.orm.RelationType
 import com.jkmvc.validate.Validation
 import org.junit.Test
 import java.math.BigDecimal
@@ -147,6 +148,12 @@ class MyTests{
         // 获得参数类型
         println(p.getter.parameters)
         println(p.getter.parameters[0])
+    }
+
+    @Test
+    fun testEnum(){
+        for (v in RelationType.values())
+            println("$v => ${v.ordinal}")
     }
 }
 
