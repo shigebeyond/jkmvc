@@ -99,4 +99,12 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      *	@return	bool
      */
     public abstract fun delete():Boolean;
+
+    /**
+     * 克隆对象: 单纯用于改权限为public
+     * @return o
+     */
+    public override fun clone(): Any{
+        return super.clone()
+    }
 }

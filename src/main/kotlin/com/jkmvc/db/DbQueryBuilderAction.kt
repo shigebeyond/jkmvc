@@ -64,7 +64,7 @@ class InsertData: Cloneable{
      * 克隆对象
      * @return o
      */
-    override fun clone(): Any {
+    public override fun clone(): Any {
         val o = super.clone() as InsertData
         // columns是List类型，没实现Cloneable接口
         //o.columns = columns?.clone() as List<String>?
@@ -311,7 +311,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * 克隆对象
      * @return o
      */
-    override fun clone(): Any {
+    public override fun clone(): Any {
         val o = super.clone() as DbQueryBuilderAction
         // 复制参数
         o.params = params.clone() as LinkedList<Any?>

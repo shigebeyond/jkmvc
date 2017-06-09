@@ -158,7 +158,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * 克隆对象
      * @return o
      */
-    override fun clone(): Any {
+    public override fun clone(): Any {
         val o = super.clone() as DbQueryBuilderDecoration
         //join子句
         o.joinClause = joinClause.clone() as LinkedList<DbQueryBuilderDecorationClausesGroup>

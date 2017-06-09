@@ -2,6 +2,7 @@ package com.jkmvc.tests
 
 import com.jkmvc.db.Db
 import com.jkmvc.db.DbQueryBuilder
+import com.jkmvc.db.IDbQueryBuilder
 import com.jkmvc.db.Record
 import org.junit.Test
 
@@ -74,6 +75,15 @@ class DbTests{
     fun testFindAll(){
         val records = DbQueryBuilder(db).table("user").orderBy("id").limit(1).findAll<Record>()
         println("查询user表：" + records)
+    }
+
+    @Test
+    fun testFindPage(){
+        val query: IDbQueryBuilder = DbQueryBuilder(db).table("user")
+        val counter:IDbQueryBuilder = query.clone() as IDbQueryBuilder // 克隆query builder
+        val records = query.orderBy("id").limit(10).findAll<Record>() // 查分页数据
+        val count = counter.count() // 查总数
+        println("查询user表：总数: " + count + ", 分页数据：" + records)
     }
 
     @Test

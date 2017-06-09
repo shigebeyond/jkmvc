@@ -2,6 +2,7 @@ package com.jkmvc.example.controller
 
 import com.jkmvc.example.model.UserModel
 import com.jkmvc.http.Controller
+import com.jkmvc.orm.OrmQueryBuilder
 import com.jkmvc.orm.isLoaded
 import java.io.File
 
@@ -17,9 +18,10 @@ class UserController: Controller()
      */
     public fun actionIndex()
     {
-        val query = UserModel.queryBuilder()
+        val query: OrmQueryBuilder = UserModel.queryBuilder()
         // 统计用户个数 | count users
-        val count = query.count()
+        val counter:OrmQueryBuilder = query.clone() as OrmQueryBuilder // 复制query builder
+        val count = counter.count()
         // 查询所有用户 | find all users
         val users = query.findAll<UserModel>()
         // 渲染视图 | render view
