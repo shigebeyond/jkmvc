@@ -52,6 +52,19 @@ class DbTests{
     }
 
     @Test
+    fun testBatchInsert2(){
+        val query = DbQueryBuilder(db).table("user").insertColumns("id", "name", "age");
+        for(i in 0..1){
+            for (j in 1..10){
+                query.value(i * 10 + j, "shi-$j", j)
+            }
+            val id = query.insert(true);
+            println("批量插入user表, 起始id：$id, 行数：10")
+            query.clear().table("user").insertColumns("id", "name", "age");
+        }
+    }
+
+    @Test
     fun testFind(){
         val record = DbQueryBuilder(db).table("user").where("id", "=", id).find<Record>()
         println("查询user表：" + record)
