@@ -19,7 +19,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
          * 线程安全的db缓存
          */
         protected val dbs:ThreadLocal<MutableMap<String, Db>> = ThreadLocal.withInitial {
-            LinkedHashMap<String, Db>();
+            HashMap<String, Db>();
         }
 
         /**

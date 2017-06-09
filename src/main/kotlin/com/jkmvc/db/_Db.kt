@@ -126,7 +126,7 @@ public fun Connection.queryCell(sql: String, paras: List<Any?>? = null): Pair<Bo
 public inline fun ResultSet.nextRow(): MutableMap<String, Any?>? {
     if(next()) {
         // 获得一行
-        val row:MutableMap<String, Any?> = LinkedHashMap<String, Any?>();
+        val row:MutableMap<String, Any?> = HashMap<String, Any?>();
         val rsmd = metaData
         for (i in 1..rsmd.columnCount) { // 多列
             val type: Int = rsmd.getColumnType(i); // 类型
