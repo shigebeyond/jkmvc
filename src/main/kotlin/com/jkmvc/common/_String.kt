@@ -1,5 +1,6 @@
 package com.jkmvc.common
 
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
@@ -11,7 +12,7 @@ import kotlin.reflect.KType
  *
  * @return
  */
-public fun StringBuilder.clear(): StringBuilder {
+public inline fun StringBuilder.clear(): StringBuilder {
     return this.delete(0, this.length - 1)
 }
 
@@ -21,7 +22,7 @@ public fun StringBuilder.clear(): StringBuilder {
  * @param str 要删除的子字符串
  * @return
  */
-public fun StringBuilder.deleteSuffix(str:String):StringBuilder {
+public inline fun StringBuilder.deleteSuffix(str:String):StringBuilder {
     if(this.endsWith(str)) {
         val start = length - str.length;
         delete(start, length);
@@ -33,7 +34,7 @@ public fun StringBuilder.deleteSuffix(str:String):StringBuilder {
  * 首字母大写
  * @return
  */
-public fun String.ucFirst(): String {
+public inline fun String.ucFirst(): String {
     val cs = this.toCharArray()
     if(cs[0] in 'a'..'z')
         cs[0] = cs[0] - 32
@@ -44,7 +45,7 @@ public fun String.ucFirst(): String {
  * 首字母小写
  * @return
  */
-public fun String.lcFirst(): String {
+public inline fun String.lcFirst(): String {
     val cs = this.toCharArray()
     if(cs[0] in 'A'..'Z')
         cs[0] = cs[0] + 32
@@ -52,11 +53,16 @@ public fun String.lcFirst(): String {
 }
 
 /**
+ * 日期格式
+ */
+val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+
+/**
  * 转换为日期类型
  * @return
  */
 public fun String.toDate(): Date {
-    return java.text.SimpleDateFormat("yyyy-MM-dd").parse(this)
+    return dateFormat.parse(this)
 }
 
 /**
@@ -65,7 +71,7 @@ public fun String.toDate(): Date {
  * @param str 要去掉的字符串
  * @return
  */
-public fun String.trim(str:String): String {
+public inline fun String.trim(str:String): String {
     var start = 0;
     var end = length
     if(this.startsWith(str))
@@ -83,7 +89,7 @@ public fun String.trim(str:String): String {
  * @param suffix 尾部要去掉的子字符串
  * @return
  */
-public fun String.trim(preffix:String, suffix:String): String {
+public inline fun String.trim(preffix:String, suffix:String): String {
     var start = 0;
     var end = length
     if(this.startsWith(preffix))
@@ -103,7 +109,7 @@ public fun String.trim(preffix:String, suffix:String): String {
  * @param params 参数
  * @return
  */
-public fun String.replaces(params:List<String>):String
+public inline fun String.replaces(params:List<String>):String
 {
     return this.replace(":(\\d+)".toRegex()){ matches:MatchResult ->
         val i = matches.groupValues[1]
@@ -118,7 +124,7 @@ public fun String.replaces(params:List<String>):String
  * @param params 参数
  * @return
  */
-public fun String.replaces(params:Map<String, Any?>):String
+public inline fun String.replaces(params:Map<String, Any?>):String
 {
     return this.replace(":([\\w\\d]+)".toRegex()){ matches:MatchResult ->
         val i = matches.groupValues[1]
@@ -135,7 +141,7 @@ public fun String.replaces(params:Map<String, Any?>):String
  * @param class 要转换的类型
  * @return
  */
-public fun <T: Any> String.to(clazz: KClass<T>): T{
+public inline fun <T: Any> String.to(clazz: KClass<T>): T{
     var result: Any?;
     when(clazz){
         Int::class -> result = this.toInt()
@@ -152,6 +158,6 @@ public fun <T: Any> String.to(clazz: KClass<T>): T{
  * @param type
  * @return
  */
-public fun String.to(type: KType): Any{
+public inline fun String.to(type: KType): Any{
     return this.to(type.classifier as KClass<*>)
 }

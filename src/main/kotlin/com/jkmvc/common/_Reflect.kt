@@ -101,6 +101,6 @@ public fun KClass<*>.findProperty(name:String): KProperty1<*, *>?{
  * @param value
  * @return
  */
-public fun KParameter.convert(value: String): Any {
+public inline fun KParameter.convert(value: String): Any {
     return value.to(this.type)
 }

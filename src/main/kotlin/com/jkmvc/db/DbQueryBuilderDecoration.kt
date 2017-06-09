@@ -1,5 +1,6 @@
 package com.jkmvc.db
 
+import com.jkmvc.common.getOrPut
 import java.util.*
 
 /**
@@ -56,10 +57,9 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      *   原来用map，但考虑到每个QueryBuild都要创建map影响性能，因此改用array
      */
     protected fun getClause(type:ClauseType):DbQueryBuilderDecorationClauses<*>{
-        val i = type.ordinal;
-        if(clauses[i] == null)
-            clauses[i] = buildClause(type)
-        return clauses[i]!!;
+        return clauses.getOrPut(type.ordinal){
+            buildClause(type)
+        }!!
     }
 
     /**
