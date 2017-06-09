@@ -17,10 +17,13 @@ class UserController: Controller()
      */
     public fun actionIndex()
     {
+        val query = UserModel.queryBuilder()
+        // 统计用户个数 | count users
+        val count = query.count()
         // 查询所有用户 | find all users
-        val users = UserModel.queryBuilder().findAll<UserModel>()
+        val users = query.findAll<UserModel>()
         // 渲染视图 | render view
-        res.render(view("user/index", mutableMapOf("users" to users)))
+        res.render(view("user/index", mutableMapOf("count" to count, "users" to users)))
     }
 
     /**
