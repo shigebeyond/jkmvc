@@ -11,6 +11,14 @@ import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.staticFunctions
 import kotlin.reflect.jvm.javaType
 
+/**
+ * 强制调用克隆方法
+ */
+public fun Any.forceClone():Any {
+    val f:KFunction<*> = javaClass.kotlin.findFunction("clone")!!
+    return f.call(this) as Any;
+}
+
 /****************************** 反射扩展 *******************************/
 /**
  * 匹配方法的名称与参数类型
