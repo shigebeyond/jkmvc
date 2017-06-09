@@ -13,7 +13,7 @@ import kotlin.reflect.KFunction
  * @author shijianhang
  * @date 2016-10-13
  */
-open class DbQueryBuilder(db:Db = Db.getDb(), table:String = "" /*表名*/) :DbQueryBuilderDecoration(db, table)
+open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :DbQueryBuilderDecoration(db, table)
 {
     companion object{
         // 是否调试
