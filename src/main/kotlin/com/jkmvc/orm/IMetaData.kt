@@ -1,6 +1,7 @@
 package com.jkmvc.orm
 
 import com.jkmvc.db.Db
+import com.jkmvc.db.IDb
 import com.jkmvc.db.IDbQueryBuilder
 import kotlin.reflect.KClass
 
@@ -48,7 +49,7 @@ interface IMetaData{
     /**
      * 数据库
      */
-    val db:Db
+    val db: IDb
 
     /**
      * 表字段

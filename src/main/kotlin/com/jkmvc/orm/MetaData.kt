@@ -3,6 +3,7 @@ package com.jkmvc.orm
 import com.jkmvc.common.Config
 import com.jkmvc.common.format
 import com.jkmvc.db.Db
+import com.jkmvc.db.IDb
 import com.jkmvc.db.IDbQueryBuilder
 import java.util.*
 import kotlin.reflect.KClass
@@ -23,20 +24,20 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
      * 关联关系
      */
     public override val relations: MutableMap<String, IMetaRelation> by lazy {
-        LinkedHashMap<String, IMetaRelation>()
+        HashMap<String, IMetaRelation>()
     }
 
     /**
      * 每个字段的校验规则
      */
     public override val rules: MutableMap<String, IMetaRule> by lazy {
-        LinkedHashMap<String, IMetaRule>()
+        HashMap<String, IMetaRule>()
     };
 
     /**
      * 数据库
      */
-    public override val db: Db
+    public override val db: IDb
         get() = Db.getDb(dbName)
 
     /**

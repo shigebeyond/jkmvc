@@ -9,7 +9,7 @@ import java.util.*
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-class Record(protected val data: MutableMap<String, Any?> = LinkedHashMap<String, Any?>()) : IRecord {
+class Record(protected val data: MutableMap<String, Any?> = HashMap<String, Any?>()) : IRecord {
     /**
      * 设置属性
      */

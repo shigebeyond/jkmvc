@@ -35,7 +35,7 @@ abstract class OrmEntity : IRecord, IOrm {
         })
     }
 
-    protected val data: MutableMap<String, Any?> = LinkedHashMap<String, Any?>()
+    protected val data: MutableMap<String, Any?> = HashMap<String, Any?>()
 
     /**
      * 变化的字段值：<字段名 to 字段值>
