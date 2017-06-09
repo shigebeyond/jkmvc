@@ -30,10 +30,10 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
      * 编译一个子表达式
      *
      * @param subexp 子表达式
-     * @param i 索引
+     * @param j 索引
      * @param sql 保存编译的sql
      */
-    public override fun compileSubexp(subexp: Pair<Array<Any?>, String>, i:Int, sql: StringBuilder): Unit {
+    public override fun compileSubexp(subexp: Pair<Array<Any?>, String>, j:Int, sql: StringBuilder): Unit {
         val (exp, delimiter) = subexp;
         // 遍历处理器来处理对应元素, 没有处理的元素也直接拼接
         for (i in elementHandlers.indices) {
@@ -46,7 +46,7 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
             sql.append(value).append(' '); // // 用空格拼接多个元素
         }
         // 非最后一个元素要加连接符
-        if(i != subexps.size - 1)
+        if(j != subexps.size - 1)
             sql.append(delimiter).append(' ');
     }
 
