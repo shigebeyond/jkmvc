@@ -15,6 +15,9 @@ import kotlin.reflect.jvm.javaType
  * 强制调用克隆方法
  */
 public fun Any.forceClone():Any {
+    if(!(this is Cloneable))
+        throw Exception("非Cloneable对象，不能调用clone()方法")
+
     val f:KFunction<*> = javaClass.kotlin.findFunction("clone")!!
     return f.call(this) as Any;
 }
@@ -59,7 +62,7 @@ public fun KClass<*>.findFunction(name:String, paramTypes:List<Class<*>> = empty
     var pt = if(paramTypes is MutableList){
         paramTypes
     }else{
-        LinkedList<Class<*>>(paramTypes);
+        ArrayList<Class<*>>(paramTypes);
     }
 
     // 第一个参数为this
