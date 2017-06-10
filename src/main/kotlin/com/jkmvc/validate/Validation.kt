@@ -58,8 +58,8 @@ object Validation:IValidation
 	 * @param value
 	 * @return
 	 */
-	public fun notEmpty(value:String?): Boolean {
-		return value != null && !value.isEmpty();
+	public fun notEmpty(value:Any?): Boolean {
+		return value != null && !(value is String && value.isEmpty());
 	}
 
 	/**
