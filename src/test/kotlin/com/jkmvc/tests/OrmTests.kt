@@ -1,5 +1,6 @@
 package com.jkmvc.tests
 
+import com.jkmvc.db.Db
 import com.jkmvc.example.model.AddressModel
 import com.jkmvc.example.model.UserModel
 import com.jkmvc.orm.isLoaded
@@ -7,9 +8,13 @@ import org.junit.Test
 
 class OrmTests{
 
-    var id = 11;
+    val id: Int by lazy {
+        val (hasNext, minId) = Db.getDb().queryCell("select id from user order by id limit 1")
+        println("随便选个id: " + minId)
+        (minId as Long).toInt();
+    }
 
-    /*@Test
+    @Test
     fun testFind(){
 //        val user = UserModel.queryBuilder().where("id", 1).find<UserModel>()
         val user = UserModel(id)
@@ -27,7 +32,7 @@ class OrmTests{
         val user = UserModel()
         user.name = "shi";
         user.age = 12
-        id = user.create();
+        val id = user.create();
 
         println("创建用户: $user")
     }
@@ -53,7 +58,7 @@ class OrmTests{
             return
         }
         println("删除用户：$user, result: ${user.delete()}")
-    }*/
+    }
 
     @Test
     fun testRelateFind(){
@@ -74,7 +79,8 @@ class OrmTests{
         val user = UserModel(id)
         val address = AddressModel()
         address.addr = "nanning"
-        address.tel = "110a"
+//        address.tel = "110a" // wrong
+        address.tel = "110"
         address.user = user;
         address.create()
         println("创建地址: $address")

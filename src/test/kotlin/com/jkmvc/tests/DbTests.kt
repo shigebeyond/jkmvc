@@ -10,7 +10,12 @@ import org.junit.Test
 class DbTests{
 
     val db: Db = Db.getDb()
-    var id = 0;
+
+    val id: Long by lazy {
+        val (hasNext, minId) = db.queryCell("select id from user order by id limit 1")
+        println("随便选个id: " + minId)
+        minId as Long;
+    }
 
     @Test
     fun testConnection(){
@@ -32,27 +37,27 @@ class DbTests{
           PRIMARY KEY (`id`)
         ) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8 COMMENT='地址';
         """);
-        println("创建user表")
+        println("创建address表")
     }
 
     @Test
     fun testInsert(){
-//        id = DbQueryBuilder(db).table("user").value(mapOf("name" to "shi", "age" to 1)).insert(true);
-        id = DbQueryBuilder(db).table("user").insertColumns("name", "age").value("shi", 1).insert(true);
+//       var id = DbQueryBuilder(db).table("user").value(mapOf("name" to "shi", "age" to 1)).insert(true);
+        var id = DbQueryBuilder(db).table("user").insertColumns("name", "age").value("shi", 1).insert(true);
         println("插入user表：" + id)
     }
 
     @Test
     fun testBatchInsert(){
         val query = DbQueryBuilder(db).table("user").insertColumns("name", "age");
-        for (i in 0..9){
+        for (i in id..(id+10)){
             query.value("shi-$i", i)
         }
         val id = query.insert(true);
         println("批量插入user表, 起始id：$id, 行数：10")
     }
 
-    @Test
+    /*@Test
     fun testBatchInsert2(){
         val query = DbQueryBuilder(db).table("user").insertColumns("id", "name", "age");
         for(i in 0..1){
@@ -63,7 +68,7 @@ class DbTests{
             println("批量插入user表, 起始id：$id, 行数：10")
             query.clear().table("user").insertColumns("id", "name", "age");
         }
-    }
+    }*/
 
     @Test
     fun testFind(){
@@ -111,7 +116,7 @@ class DbTests{
                 .prepare(true)
                 .table("user")
                 .where("id", "=", "?" /* 被当做是参数*/)
-        for(i in 0..10){
+        for(i in id..(id+10)){
             val record = query
                     .find<Record>(i) // 仅在第一次调用时编译与缓存sql，以后多次调用不再编辑，直接使用缓存的sql
             println("查询user_" + i + "：" + record)
