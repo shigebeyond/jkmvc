@@ -28,8 +28,9 @@ interface ISqlCompiledResult {
 
     /**
      * 预览sql
-     * @param useDynParams 是否将sql中?替换为动态变量
+     *
+     * @real 实际的sql（带实参） or 编译好的sql
      * @return
      */
-    fun previewSql(useDynParams:Boolean = false): String
+    fun previewSql(real:Boolean = false): String
 }

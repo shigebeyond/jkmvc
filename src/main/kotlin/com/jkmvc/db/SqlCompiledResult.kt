@@ -6,6 +6,7 @@ import kotlin.collections.ArrayList
 
 /**
  * sql编译结果
+ *   在预编译的场景下，该sql编译结果会被缓存，其属性 sql/params/dynamicParams 方法debugSql() 有可能会被调用多次
  *
  * @author shijianhang
  * @date 2017-6-10 下午8:02:47
@@ -67,7 +68,7 @@ class SqlCompiledResult : Cloneable, ISqlCompiledResult {
     override fun clear(): SqlCompiledResult {
         sql = "";
         staticParams.clear();
-        dynamicParams = null;
+        // dynamicParams = null;
         return this;
     }
 
@@ -83,19 +84,17 @@ class SqlCompiledResult : Cloneable, ISqlCompiledResult {
 
     /**
      * 预览sql
+     *
+     * @real 实际的sql（带实参） or 编译好的sql
      * @return
      */
-    override fun previewSql(useDynParams:Boolean): String {
-        // 替换实参
-        var i = 0 // 静态变量的迭代索引
-        var j = 0 // 动态变量的迭代索引
+    override fun previewSql(real:Boolean): String {
+        val ps = if(real) params else staticParams;
+        var i = 0
         val realSql = sql.replace("\\?".toRegex()) { matches: MatchResult ->
-            val param = staticParams[i++] // 静态参数
+            val param = ps[i++]
             if(param is String){
-                if(param == "?" && dynamicParams != null)// 如果参数值是?，则认为是动态参数
-                    dynamicParams!![j++].toString()
-                else
-                    "\"$param\""
+                "\"$param\""
             } else
                 param.toString()
         }

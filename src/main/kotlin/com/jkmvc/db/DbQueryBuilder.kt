@@ -109,19 +109,28 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
     }
 
     /**
-     * 编译sql
+     * 编译sql，如果设置了预编译选项prepared，则返回缓存的编译结果
      *
      * @param action sql动作：select/insert/update/delete
      * @return Pair(sql, 参数)
      */
     public override fun compile(action:ActionType): SqlCompiledResult
     {
-        // 1 度缓存
-        // 如果是预编译sql，则直接返回上一次缓存的编译结果
-        if(prepared && !compiledResult.isEmpty())
-            return compiledResult;
+        // 如果没有设置预编译 或 没有编译过的，则重新编译
+        if(!prepared || compiledResult.isEmpty())
+            recompile(action)
 
-        // 2 编译
+        // 预览sql
+        if(debug && prepared)
+            println("实际的sql: " + compiledResult.previewSql(true))
+
+        return compiledResult;
+    }
+
+    /**
+     * 重新编译sql，不带缓存的
+     */
+    protected fun recompile(action: ActionType): SqlCompiledResult {
         // 清空编译结果
         compiledResult.clear();
 
@@ -130,7 +139,7 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
 
         // 编译动作子句 + 修饰子句
         // 其中，sql收集编译好的语句，compiledResult.staticParams收集静态参数
-        val sql:StringBuilder = StringBuilder();
+        val sql: StringBuilder = StringBuilder();
         this.compileAction(sql).compileDecoration(sql);
 
         // 收集编译好的sql
@@ -138,7 +147,7 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
 
         // 预览sql
         if(debug)
-            println(compiledResult.previewSql())
+            println("编译好的sql：" + compiledResult.previewSql())
 
         return compiledResult
     }
