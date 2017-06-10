@@ -1,6 +1,7 @@
 package com.jkmvc.db
 
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 /**
@@ -27,6 +28,13 @@ class SqlCompiledResult : Cloneable, ISqlCompiledResult {
     public var dynamicParams: Array<out Any?>? = null
 
     /**
+     * 实际参数的容器，防止每次调用params()都要创建list
+     */
+    protected val realParams: ArrayList<Any?> by lazy(LazyThreadSafetyMode.NONE) {
+        ArrayList<Any?>(staticParams.size);
+    }
+
+    /**
      *  实际参数 = 静态参数 + 动态参数
      */
     override val params:List<Any?>
@@ -34,15 +42,16 @@ class SqlCompiledResult : Cloneable, ISqlCompiledResult {
             if(dynamicParams == null)
                 return staticParams;
 
-            val param = ArrayList<Any?>(staticParams.size)
+            // 使用预先创建好的list来保存最新的实际参数，避免每次都要创建新的list
+            realParams.clear()
             var i = 0; // 动态变量的迭代索引
             for (v in staticParams){
                 if(v is String && v == "?") // 如果参数值是?，则认为是动态参数
-                    param.add(dynamicParams!![i++])
+                    realParams.add(dynamicParams!![i++])
                 else // 静态参数
-                    param.add(v)
+                    realParams.add(v)
             }
-            return param;
+            return realParams;
         }
 
     /**
