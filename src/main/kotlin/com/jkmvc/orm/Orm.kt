@@ -18,13 +18,18 @@ import kotlin.collections.HashMap
 abstract class Orm(id:Int? = null): OrmRelated() {
 
     companion object{
+        /**
+         * 缓存id查询
+         */
         protected val idQueries: ConcurrentHashMap<Class<*>, OrmQueryBuilder> = ConcurrentHashMap()
     }
 
     init{
         if(id != null){
-            idQueries.getOrPut()
-            queryBuilder().where(metadata.primaryKey, id).find(){
+            val query = idQueries.getOrPut(this.javaClass){
+                queryBuilder().prepare() /* 预编译sql */.where(metadata.primaryKey, id) as OrmQueryBuilder
+            }
+            query.find(){
                 this.original(it);
             }
         }
