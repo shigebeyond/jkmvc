@@ -3,37 +3,13 @@ package com.jkmvc.db
 import java.util.*
 
 
-interface ICompiledResult {
-    /**
-     * 编译好的sql
-     */
-    var sql: String
-    /**
-     *  实际参数 = 静态参数 + 动态参数
-     */
-    val params: List<Any?>
-
-    /**
-     * 判断是否为空
-     */
-    fun isEmpty(): Boolean
-
-    /**
-     * 清空编译结果
-     */
-    fun clear(): CompiledResult
-
-    /**
-     * 预览sql
-     * @return
-     */
-    fun previewSql(): String
-}
-
 /**
  * sql编译结果
+ *
+ * @author shijianhang
+ * @date 2017-6-10 下午8:02:47
  */
-class CompiledResult: Cloneable, ICompiledResult {
+class SqlCompiledResult : Cloneable, ISqlCompiledResult {
 
     /**
      * 编译好的sql
@@ -79,7 +55,7 @@ class CompiledResult: Cloneable, ICompiledResult {
     /**
      * 清空编译结果
      */
-    override fun clear(): CompiledResult {
+    override fun clear(): SqlCompiledResult {
         sql = "";
         staticParams.clear();
         dynamicParams = null;
@@ -91,7 +67,7 @@ class CompiledResult: Cloneable, ICompiledResult {
      * @return o
      */
     public override fun clone(): Any {
-        val o = super.clone() as CompiledResult
+        val o = super.clone() as SqlCompiledResult
         o.staticParams = staticParams.clone() as LinkedList<Any?>
         return o
     }
