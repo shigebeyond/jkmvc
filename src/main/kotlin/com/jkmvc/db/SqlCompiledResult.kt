@@ -16,47 +16,50 @@ class SqlCompiledResult : Cloneable, ISqlCompiledResult {
     /**
      * 编译好的sql
      */
-    override var sql:String = ""
+    public override var sql:String = ""
+        set(sql:String){
+            field = sql;
+
+            // 预览sql
+            if(Db.debug && sql != "")
+                println("编译好的sql：" + previewSql())
+        }
 
     /**
      * 编译后的sql参数 / 静态参数
      */
-    public var staticParams: LinkedList<Any?> = LinkedList<Any?>()
+    public override var staticParams: LinkedList<Any?> = LinkedList<Any?>()
 
     /**
-     * 动态参数
+     * 构建实际参数 = 静态参数 + 动态参数
+     *
+     * @param params 动态参数
+     * @return
      */
-    public var dynamicParams: Array<out Any?>? = null
+    public override fun buildParams(dynamicParams:Array<out Any?>):List<Any?>{
+        if(dynamicParams.isEmpty())
+            return staticParams;
 
-    /**
-     * 实际参数的容器，防止每次调用params()都要创建list
-     */
-    protected val realParams: ArrayList<Any?> by lazy(LazyThreadSafetyMode.NONE) {
-        ArrayList<Any?>(staticParams.size);
+        // 构建实际参数：将静态参数中?，替换为动态参数
+        val realParams = ArrayList<Any?>()
+        var i = 0; // 动态变量的迭代索引
+        for (v in staticParams){
+            if(v is String && v == "?") // 如果参数值是?，则认为是动态参数
+                realParams.add(dynamicParams!![i++])
+            else // 静态参数
+                realParams.add(v)
+        }
+
+        // 预览sql
+        if(Db.debug)
+            println("实际的sql：" + previewSql(dynamicParams))
+
+        return realParams;
     }
 
     /**
-     *  实际参数 = 静态参数 + 动态参数
-     */
-    override val params:List<Any?>
-        get(){
-            if(dynamicParams == null)
-                return staticParams;
-
-            // 使用预先创建好的list来保存最新的实际参数，避免每次都要创建新的list
-            realParams.clear()
-            var i = 0; // 动态变量的迭代索引
-            for (v in staticParams){
-                if(v is String && v == "?") // 如果参数值是?，则认为是动态参数
-                    realParams.add(dynamicParams!![i++])
-                else // 静态参数
-                    realParams.add(v)
-            }
-            return realParams;
-        }
-
-    /**
      * 判断是否为空
+     * @return
      */
     override fun isEmpty():Boolean{
         return sql == ""
@@ -64,6 +67,7 @@ class SqlCompiledResult : Cloneable, ISqlCompiledResult {
 
     /**
      * 清空编译结果
+     * @return
      */
     override fun clear(): SqlCompiledResult {
         sql = "";
@@ -74,7 +78,7 @@ class SqlCompiledResult : Cloneable, ISqlCompiledResult {
 
     /**
      * 克隆对象
-     * @return o
+     * @return
      */
     public override fun clone(): Any {
         val o = super.clone() as SqlCompiledResult
@@ -85,16 +89,20 @@ class SqlCompiledResult : Cloneable, ISqlCompiledResult {
     /**
      * 预览sql
      *
-     * @real 实际的sql（带实参） or 编译好的sql
+     * @param params 动态参数
      * @return
      */
-    override fun previewSql(real:Boolean): String {
-        val ps = if(real) params else staticParams;
-        var i = 0
+    public override fun previewSql(dynamicParams:Array<out Any?>?): String {
+        // 替换实参
+        var i = 0 // 静态变量的迭代索引
+        var j = 0 // 动态变量的迭代索引
         val realSql = sql.replace("\\?".toRegex()) { matches: MatchResult ->
-            val param = ps[i++]
+            val param = staticParams[i++] // 静态参数
             if(param is String){
-                "\"$param\""
+                if(param == "?" && dynamicParams != null)// 如果参数值是?，则认为是动态参数
+                    dynamicParams!![j++].toString()
+                else
+                    "\"$param\""
             } else
                 param.toString()
         }

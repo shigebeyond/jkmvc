@@ -1,5 +1,7 @@
 package com.jkmvc.db
 
+import java.util.*
+
 /**
  * sql编译结果
  *
@@ -11,26 +13,37 @@ interface ISqlCompiledResult {
      * 编译好的sql
      */
     var sql: String
+
     /**
-     *  实际参数 = 静态参数 + 动态参数
+     * 编译后的sql参数 / 静态参数
      */
-    val params: List<Any?>
+    public var staticParams: LinkedList<Any?>
+
+    /**
+     * 构建实际参数 = 静态参数 + 动态参数
+     *
+     * @param params 动态参数
+     * @return
+     */
+    fun buildParams(dynamicParams: Array<out Any?>): List<Any?>
 
     /**
      * 判断是否为空
+     * @return
      */
     fun isEmpty(): Boolean
 
     /**
      * 清空编译结果
+     * @return
      */
     fun clear(): SqlCompiledResult
 
     /**
      * 预览sql
      *
-     * @real 实际的sql（带实参） or 编译好的sql
+     * @param params 动态参数
      * @return
      */
-    fun previewSql(real:Boolean = false): String
+    fun previewSql(dynamicParams:Array<out Any?>? = null): String
 }

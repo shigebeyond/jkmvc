@@ -1,6 +1,7 @@
 package com.jkmvc.validate
 
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 校验器
@@ -31,7 +32,7 @@ object Validation:IValidation
 	/**
 	 * 缓存编译后的表达式
 	 */
-	val expsCached:ConcurrentHashMap<String, ValidationExpression> = ConcurrentHashMap<String, ValidationExpression>();
+	val expsCached: ConcurrentHashMap<String, ValidationExpression> = ConcurrentHashMap<String, ValidationExpression>();
 
 	/**
 	 * 编译与执行校验表达式

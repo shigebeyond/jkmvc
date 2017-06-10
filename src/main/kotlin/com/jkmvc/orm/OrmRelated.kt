@@ -84,17 +84,22 @@ open abstract class OrmRelated: OrmPersistent() {
             if (newed) {  // 创建新对象
                 result = relation.model.java.newInstance();
             }else{  // 根据关联关系来构建查询
-                val transform:(MutableMap<String, Any?>) -> IOrm = {
-                    val obj = relation.model.java.newInstance() as IOrm;
-                    obj.original(it)
-                }
-                when (relation.type) {
-                    RelationType.BELONGS_TO -> // belongsto: 查主表
-                        result = queryMaster(relation).select(columns).find(transform);
-                    RelationType.HAS_ONE -> // hasxxx: 查从表
-                        result = querySlave(relation).select(columns).find(transform);
-                    else -> // hasxxx: 查从表
-                        result = querySlave(relation).select(columns).findAll(transform);
+                val query:OrmQueryBuilder
+                if(relation.type == RelationType.BELONGS_TO) // 查主表
+                    query = queryMaster(relation)
+                else // 查从表
+                    query = querySlave(relation)
+                query.select(columns) // 查字段
+                if(relation.type == RelationType.HAS_MANY){ // 查多个
+                    result = query.findAll(){
+                        val obj = relation.model.java.newInstance() as IOrm;
+                        obj.original(it)
+                    }
+                }else{ // 查一个
+                    result = query.find(){
+                        val obj = relation.model.java.newInstance() as IOrm;
+                        obj.original(it)
+                    }
                 }
             }
 

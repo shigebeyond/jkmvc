@@ -29,13 +29,6 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
     public abstract fun prepare(prepared:Boolean = true):IDbQueryBuilder;
 
     /**
-     * 设置动态参数
-     * @param params 动态参数
-     * @return IDbQueryBuilder
-     */
-    public abstract fun setParameters(vararg params: Any?):IDbQueryBuilder
-
-    /**
      * 编译sql
      *
      * @param action sql动作：select/insert/update/delete
@@ -46,32 +39,35 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
     /**
      * 查找多个： select 语句
      *
+     * @param params 动态参数
      * @param fun transform 转换函数
      * @return 列表
      */
-    public abstract fun <T:Any> findAll(transform:(MutableMap<String, Any?>) -> T): List<T>;
+    public abstract fun <T:Any> findAll(vararg params: Any?, transform:(MutableMap<String, Any?>) -> T): List<T>;
 
     /**
      * 查找一个： select ... limit 1语句
      *
+     * @param params 动态参数
      * @param fun transform 转换函数
      * @return 一个数据
      */
-    public abstract fun <T:Any> find(transform:(MutableMap<String, Any?>) -> T): T?;
+    public abstract fun <T:Any> find(vararg params: Any?, transform:(MutableMap<String, Any?>) -> T): T?;
 
     /**
      * 查找多个： select 语句
      *  对 findAll(transform:(MutableMap<String, Any?>) 的精简版，直接根据泛型 T 来找到其构造函数来创建对象
      *  泛型 T 必须实现带 Map 参数的构造函数，如 constructor(data: MutableMap<String, Any?>)
      *
+     * @param params 动态参数
      * @return 列表
      */
-    public inline fun <reified T:Any> findAll(): List<T> {
+    public inline fun <reified T:Any> findAll(vararg params: Any?): List<T> {
         // 1 编译
         val result = compile(ActionType.SELECT);
 
         // 2 执行 select
-        return db.queryRows<T>(result.sql, result.params, getRecordTranformer<T>(T::class))
+        return db.queryRows<T>(result.sql, result.buildParams(params), getRecordTranformer<T>(T::class))
     }
 
     /**
@@ -79,44 +75,53 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      *  对 find(transform:(MutableMap<String, Any?>) 的精简版，直接根据泛型 T 来找到其构造函数来创建对象
      *  泛型 T 必须实现带 Map 参数的构造函数，如 constructor(data: MutableMap<String, Any?>)
      *
+     * @param params 动态参数
      * @return 一个数据
      */
-    public inline fun <reified T:Any> find(): T? {
+    public inline fun <reified T:Any> find(vararg params: Any?): T? {
         // 1 编译
         val result = limit(1).compile(ActionType.SELECT);
 
         // 2 执行 select
-        return db.queryRow<T>(result.sql, result.params, getRecordTranformer<T>(T::class));
+        return db.queryRow<T>(result.sql, result.buildParams(params), getRecordTranformer<T>(T::class));
     }
 
     /**
      * 统计行数： count语句
+     *
+     * @param params 动态参数
      * @return
      */
-    public abstract fun count():Long;
+    public abstract fun count(vararg params: Any?):Long;
 
     /**
      * 插入：insert语句
      *
      * @param returnGeneratedKey 是否返回自动生成的主键
+     * @param params 动态参数
      * @return 影响行数|新增的id
      */
-    public abstract fun insert(returnGeneratedKey:Boolean = false):Int;
+    public abstract fun insert(returnGeneratedKey:Boolean = false, vararg params: Any?):Int;
 
     /**
-     *	更新：update语句
-     *	@return
+     * 更新：update语句
+     *
+     * @param params 动态参数
+     * @return
      */
-    public abstract fun update():Boolean;
+    public abstract fun update(vararg params: Any?):Boolean;
 
     /**
-     *	删除
-     *	@return	bool
+     * 删除
+     *
+     * @param params 动态参数
+     * @return
      */
-    public abstract fun delete():Boolean;
+    public abstract fun delete(vararg params: Any?):Boolean;
 
     /**
      * 克隆对象: 单纯用于改权限为public
+     * 
      * @return o
      */
     public override fun clone(): Any{

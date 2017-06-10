@@ -113,8 +113,7 @@ class DbTests{
                 .where("id", "=", "?" /* 被当做是参数*/)
         for(i in 0..10){
             val record = query
-                    .setParameters(i) // 设置参数
-                    .find<Record>() // 仅在第一次调用时编译与缓存sql，以后多次调用不再编辑，直接使用缓存的sql
+                    .find<Record>(i) // 仅在第一次调用时编译与缓存sql，以后多次调用不再编辑，直接使用缓存的sql
             println("查询user_" + i + "：" + record)
         }
     }

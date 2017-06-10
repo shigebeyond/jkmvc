@@ -14,11 +14,6 @@ import kotlin.reflect.KClass
  */
 open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :DbQueryBuilderDecoration(db, table)
 {
-    companion object{
-        // 是否调试
-        val debug = true;
-    }
-
     /**
      * 缓存sql编译结果
      */
@@ -120,10 +115,6 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
         if(!prepared || compiledResult.isEmpty())
             recompile(action)
 
-        // 预览sql
-        if(debug && prepared)
-            println("实际的sql: " + compiledResult.previewSql(true))
-
         return compiledResult;
     }
 
@@ -145,78 +136,69 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
         // 收集编译好的sql
         compiledResult.sql = sql.toString()
 
-        // 预览sql
-        if(debug)
-            println("编译好的sql：" + compiledResult.previewSql())
-
         return compiledResult
-    }
-
-    /**
-     * 设置动态参数
-     * @param params 动态参数
-     * @return IDbQueryBuilder
-     */
-    public override fun setParameters(vararg params: Any?):IDbQueryBuilder{
-        compiledResult.dynamicParams = params;
-        return this;
     }
 
     /**
      * 查找多个： select 语句
      *
+     * @param params 动态参数
      * @param transform 转换函数
      * @return 列表
      */
-    public override fun <T:Any> findAll(transform:(MutableMap<String, Any?>) -> T): List<T>{
+    public override fun <T:Any> findAll(vararg params: Any?, transform:(MutableMap<String, Any?>) -> T): List<T>{
         // 1 编译
         val result = compile(ActionType.SELECT);
 
         // 2 执行 select
-        return db.queryRows<T>(result.sql, result.params, transform)
+        return db.queryRows<T>(result.sql, result.buildParams(params), transform)
     }
 
     /**
      * 查找一个： select ... limit 1语句
      *
+     * @param params 动态参数
      * @param transform 转换函数
      * @return 单个数据
      */
-    public override fun <T:Any> find(transform:(MutableMap<String, Any?>) -> T): T?{
+    public override fun <T:Any> find(vararg params: Any?, transform:(MutableMap<String, Any?>) -> T): T?{
         // 1 编译
         val result = compile(ActionType.SELECT);
 
         // 2 执行 select
-        return db.queryRow<T>(result.sql, result.params, transform);
+        return db.queryRow<T>(result.sql, result.buildParams(params), transform);
     }
 
     /**
      * 编译 + 执行
      *
      * @param action sql动作：select/insert/update/delete
-     * @param returnGeneratedKey
+     * @param params 动态参数
+     * @param returnGeneratedKey 是否返回自动生成的主键
      * @return 影响行数|新增id
      */
-    protected fun execute(action:ActionType, returnGeneratedKey:Boolean = false):Int
+    protected fun execute(action:ActionType, params:Array<out Any?>, returnGeneratedKey:Boolean = false):Int
     {
         // 1 编译
         val result = compile(action);
 
         // 2 执行 insert/update/delete
-        return db.execute(result.sql, result.params, returnGeneratedKey);
+        return db.execute(result.sql, result.buildParams(params), returnGeneratedKey);
     }
 
     /**
      * 统计行数： count语句
+     *
+     * @param params 动态参数
      * @return
      */
-    public override fun count():Long
+    public override fun count(vararg params: Any?):Long
     {
         // 1 编译
         val result = select(Pair("count(1)", "num")).compile(ActionType.SELECT);
 
         // 2 执行 select
-        val (hasNext, count) = db.queryCell(result.sql, result.params);
+        val (hasNext, count) = db.queryCell(result.sql, result.buildParams(params));
         return if(hasNext)
                     count as Long;
                 else
@@ -227,28 +209,33 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
      * 插入：insert语句
      *
      *  @param returnGeneratedKey 是否返回自动生成的主键
+     *  @param params 动态参数
      * @return 新增的id
      */
-    public override fun insert(returnGeneratedKey:Boolean):Int
+    public override fun insert(returnGeneratedKey:Boolean, vararg params: Any?):Int
     {
-        return execute(ActionType.INSERT, returnGeneratedKey);
+        return execute(ActionType.INSERT, params, returnGeneratedKey);
     }
 
     /**
-     *	更新：update语句
-     *	@return	bool
+     * 更新：update语句
+     *
+     * @param params 动态参数
+     * @return
      */
-    public override fun update():Boolean
+    public override fun update(vararg params: Any?):Boolean
     {
-        return execute(ActionType.UPDATE) > 0;
+        return execute(ActionType.UPDATE, params) > 0;
     }
 
     /**
-     *	删除
-     *	@return	bool
+     * 删除
+     *
+     * @param params 动态参数
+     * @return
      */
-    public override fun delete():Boolean
+    public override fun delete(vararg params: Any?):Boolean
     {
-        return execute(ActionType.DELETE) > 0;
+        return execute(ActionType.DELETE, params) > 0;
     }
 }
