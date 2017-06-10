@@ -64,7 +64,11 @@ data class ValidationUint(public override val operator:String? /* 运算符 */, 
         }
 
         // 调用函数
-        return f.call(*args)
+        try{
+            return f.call(*args)
+        }catch (e:Exception){
+            throw Exception("调用校验方法出错：" + func + "(" + args.joinToString(",") + ")", e)
+        }
     }
 
     /**
