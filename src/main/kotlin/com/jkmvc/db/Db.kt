@@ -1,5 +1,6 @@
 package com.jkmvc.db
 
+import com.jkmvc.common.Config
 import com.jkmvc.common.deleteSuffix
 import java.sql.Connection
 import java.sql.ResultSet
@@ -15,10 +16,13 @@ import java.util.*
 class Db(protected val conn: Connection /* 数据库连接 */, protected val name:String = "default" /* 标识 */):IDb{
 
     companion object {
+        /**
+         * 是否调试
+         */
+        public val debug:Boolean = Config.instance("database/default")!!.getBoolean("debug")!!;
 
         /**
          * 数据源工厂
-         * @IDataSourceFactory
          */
         public var dataSourceFactory:IDataSourceFactory = DruidDataSourceFactory;
 
