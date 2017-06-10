@@ -104,4 +104,19 @@ class DbTests{
         println("删除user表：" + f)
     }
 
+    //预编译参数化的sql
+    @Test
+    fun testPrepare(){
+        val query = DbQueryBuilder(db)
+                .prepare(true)
+                .table("user")
+                .where("id", "=", "?" /* 被当做是参数*/)
+        for(i in 0..10){
+            val record = query
+                    .setParameters(i) // 设置参数
+                    .find<Record>() // 仅在第一次调用时编译与缓存sql，以后多次调用不再编辑，直接使用缓存的sql
+            println("查询user表：" + record)
+        }
+    }
+
 }

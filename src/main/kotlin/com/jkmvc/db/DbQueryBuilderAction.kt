@@ -75,7 +75,6 @@ class InsertData: Cloneable{
     }
 }
 
-
 /**
  * sql构建器 -- 动作子句: 由动态select/insert/update/delete来构建的子句
  *   通过字符串模板来实现
@@ -152,23 +151,6 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * select语句中, 控制查询结果是否去重唯一
      */
     protected var distinct: Boolean = false;
-
-    /**
-     * sql参数
-     */
-    protected var params: LinkedList<Any?> = LinkedList<Any?>();
-
-    /**
-     * 设置动作
-     * 　　延时设置动作，此时可获得对应的数据库连接
-     *
-     * @param action sql动作：select/insert/update/delete
-     * @return
-     */
-    public fun action(action: ActionType): IDbQueryBuilder {
-        this.action = action;
-        return this;
-    }
 
     /**
      * 设置表名: 一般是单个表名
@@ -303,7 +285,6 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
         action = null;
         table = "";
         distinct = false;
-        params.clear();
         return this;
     }
 
@@ -313,8 +294,6 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      */
     public override fun clone(): Any {
         val o = super.clone() as DbQueryBuilderAction
-        // 复制参数
-        o.params = params.clone() as LinkedList<Any?>
         // 复制要操作的数据
         o.manipulatedData = arrayOfNulls(manipulatedData.size)
         for (i in 0..(manipulatedData.size - 1))
@@ -331,9 +310,6 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     public override fun compileAction(sb: StringBuilder): IDbQueryBuilder {
         if (action == null)
             throw DbException("未设置sql动作");
-
-        // 清空sql参数
-        params.clear();
 
         // 实际上是填充子句的参数，如将行参表名替换为真实表名
         var sql: String = SqlTemplates[action!!.ordinal];

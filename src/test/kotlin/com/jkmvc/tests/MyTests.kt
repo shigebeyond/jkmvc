@@ -155,6 +155,17 @@ class MyTests{
         for (v in RelationType.values())
             println("$v => ${v.ordinal}")
     }
+
+    /**
+     * 测试操作符
+     * 原来像支持如linq之类的dsl，但是在处理 where(a > b) 的时候，你是无法修改操作符 > 的语义，他本来的语义就是2个对象做对比（调用compareTo()），返回boolean，但是我却想让他做字符串拼接，返回string
+     * => 语法上就不支持，不可行
+     */
+    @Test
+    fun testOperator(){
+        println("a" < "b") // 调用compareTo()
+        println("a" in "b") // 调用contains()
+    }
 }
 
 

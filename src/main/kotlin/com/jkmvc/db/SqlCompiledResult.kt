@@ -24,14 +24,7 @@ class SqlCompiledResult : Cloneable, ISqlCompiledResult {
     /**
      * 动态参数
      */
-    public var dynamicParams: List<Any?>? = null
-
-    /**
-     * 判断是否为空
-     */
-    override fun isEmpty():Boolean{
-        return sql == ""
-    }
+    public var dynamicParams: Array<out Any?>? = null
 
     /**
      *  实际参数 = 静态参数 + 动态参数
@@ -42,15 +35,22 @@ class SqlCompiledResult : Cloneable, ISqlCompiledResult {
                 return staticParams;
 
             val param = ArrayList<Any?>(staticParams.size)
-            var i = 0;
+            var i = 0; // 动态变量的迭代索引
             for (v in staticParams){
-                if(v == "?") // 如果参数值是?，则认为是动态参数
+                if(v is String && v == "?") // 如果参数值是?，则认为是动态参数
                     param.add(dynamicParams!![i++])
                 else // 静态参数
                     param.add(v)
             }
             return param;
         }
+
+    /**
+     * 判断是否为空
+     */
+    override fun isEmpty():Boolean{
+        return sql == ""
+    }
 
     /**
      * 清空编译结果
@@ -76,14 +76,18 @@ class SqlCompiledResult : Cloneable, ISqlCompiledResult {
      * 预览sql
      * @return
      */
-    override fun previewSql(): String {
+    override fun previewSql(useDynParams:Boolean): String {
         // 替换实参
-        var i = 0
+        var i = 0 // 静态变量的迭代索引
+        var j = 0 // 动态变量的迭代索引
         val realSql = sql.replace("\\?".toRegex()) { matches: MatchResult ->
-            val param = staticParams[i++]
-            if(param is String)
-                "\"$param\""
-            else
+            val param = staticParams[i++] // 静态参数
+            if(param is String){
+                if(param == "?" && dynamicParams != null)// 如果参数值是?，则认为是动态参数
+                    dynamicParams!![j++].toString()
+                else
+                    "\"$param\""
+            } else
                 param.toString()
         }
         return realSql

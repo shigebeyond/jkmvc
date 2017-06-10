@@ -21,12 +21,27 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
     public abstract fun <T:Any> getRecordTranformer(clazz: KClass<T>): ((MutableMap<String, Any?>) -> T);
 
     /**
+     * 设置是否预编译参数化的sql
+     *
+     * @param prepared 是否预编译sql
+     * @return IDbQueryBuilder
+     */
+    public abstract fun prepare(prepared:Boolean = true):IDbQueryBuilder;
+
+    /**
+     * 设置动态参数
+     * @param params 动态参数
+     * @return IDbQueryBuilder
+     */
+    public abstract fun setParameters(vararg params: Any?):IDbQueryBuilder
+
+    /**
      * 编译sql
      *
      * @param action sql动作：select/insert/update/delete
-     * @return Pair(sql, 参数)
+     * @return 编译结果(sql+参数)
      */
-    public abstract fun compile(action:ActionType): Pair<String, List<Any?>>;
+    public abstract fun compile(action:ActionType): SqlCompiledResult;
 
     /**
      * 查找多个： select 语句
@@ -53,10 +68,10 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      */
     public inline fun <reified T:Any> findAll(): List<T> {
         // 1 编译
-        val (sql, params) = compile(ActionType.SELECT);
+        val result = compile(ActionType.SELECT);
 
         // 2 执行 select
-        return db.queryRows<T>(sql, params, getRecordTranformer<T>(T::class))
+        return db.queryRows<T>(result.sql, result.params, getRecordTranformer<T>(T::class))
     }
 
     /**
@@ -68,10 +83,10 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      */
     public inline fun <reified T:Any> find(): T? {
         // 1 编译
-        val (sql, params) = limit(1).compile(ActionType.SELECT);
+        val result = limit(1).compile(ActionType.SELECT);
 
         // 2 执行 select
-        return db.queryRow<T>(sql, params, getRecordTranformer<T>(T::class));
+        return db.queryRow<T>(result.sql, result.params, getRecordTranformer<T>(T::class));
     }
 
     /**
