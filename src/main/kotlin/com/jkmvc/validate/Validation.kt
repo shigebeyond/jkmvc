@@ -31,7 +31,7 @@ object Validation:IValidation
 	/**
 	 * 缓存编译后的表达式
 	 */
-	val expsCached:MutableMap<String, ValidationExpression> = HashMap<String, ValidationExpression>();
+	val expsCached:ConcurrentHashMap<String, ValidationExpression> = ConcurrentHashMap<String, ValidationExpression>();
 
 	/**
 	 * 编译与执行校验表达式

@@ -2,12 +2,13 @@ package com.jkmvc.common
 
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.HashMap
 
 /**
  * 缓存日期格式
  */
-val dateFormats:HashMap<String, SimpleDateFormat> = HashMap()
+val dateFormats: ConcurrentHashMap<String, SimpleDateFormat> = ConcurrentHashMap()
 
 /**
  * 日期格式化
