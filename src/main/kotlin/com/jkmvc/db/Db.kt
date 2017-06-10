@@ -15,6 +15,13 @@ import java.util.*
 class Db(protected val conn: Connection /* 数据库连接 */, protected val name:String = "default" /* 标识 */):IDb{
 
     companion object {
+
+        /**
+         * 数据源工厂
+         * @IDataSourceFactory
+         */
+        public var dataSourceFactory:IDataSourceFactory = DruidDataSourceFactory;
+
         /**
          * 线程安全的db缓存
          */
@@ -28,7 +35,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
         public fun getDb(name:String = "default"):Db{
             return dbs.get().getOrPut(name){
                 //获得数据源
-                val dataSource  = DataSourceFactory.getDruidDataSource(name);
+                val dataSource  = dataSourceFactory.getDataSource(name);
                 // 新建db
                 Db(dataSource.connection, name);
             }

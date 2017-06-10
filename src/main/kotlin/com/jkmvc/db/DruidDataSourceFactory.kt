@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-object DataSourceFactory:IDataSourceFactory {
+object DruidDataSourceFactory :IDataSourceFactory {
 
     /**
      * 缓存数据源
@@ -24,7 +24,7 @@ object DataSourceFactory:IDataSourceFactory {
      * @param name 数据源名
      * @return
      */
-    public override fun getDruidDataSource(name: String): DruidDataSource {
+    public override fun getDataSource(name: String): DruidDataSource {
         return dataSources.getOrPut(name){
             buildDruidDataSource(name)
         }

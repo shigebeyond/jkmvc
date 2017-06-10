@@ -15,7 +15,7 @@ interface IDataSourceFactory {
      * @param name 数据源名
      * @return
      */
-    fun getDruidDataSource(name: String = "default"): DruidDataSource;
+    fun getDataSource(name: String = "default"): DruidDataSource;
 
     /**
      * 关闭所有数据源
