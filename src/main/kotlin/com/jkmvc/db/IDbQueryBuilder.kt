@@ -34,7 +34,7 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      * @param action sql动作：select/insert/update/delete
      * @return 编译结果(sql+参数)
      */
-    public abstract fun compile(action:ActionType): SqlCompiledResult;
+    public abstract fun compile(action:ActionType): CompiledSql;
 
     /**
      * 查找多个： select 语句

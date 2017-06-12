@@ -15,9 +15,9 @@ import kotlin.reflect.KClass
 open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :DbQueryBuilderDecoration(db, table)
 {
     /**
-     * 缓存sql编译结果
+     * 缓存编译好的sql
      */
-    protected var compiledResult: SqlCompiledResult = SqlCompiledResult();
+    protected var compiledSql: CompiledSql = CompiledSql();
 
     /**
      * 预编译参数化的sql
@@ -38,7 +38,7 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
      * @return
      */
     public override fun clear(): IDbQueryBuilder {
-        compiledResult.clear();
+        compiledSql.clear();
         return this;
     }
 
@@ -49,7 +49,7 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
     public override fun clone(): Any {
         val o = super.clone() as DbQueryBuilder
         // 复制编译结果
-        o.compiledResult = compiledResult.clone() as SqlCompiledResult
+        o.compiledSql = compiledSql.clone() as CompiledSql
         return o;
     }
 
@@ -64,7 +64,7 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
         //return db.quote(value);
 
         // 2 sql参数化: 将参数名拼接到sql, 独立出参数值, 以便执行时绑定参数值
-        compiledResult.staticParams.add(value);
+        compiledSql.staticParams.add(value);
         return "?";
     }
 
@@ -109,34 +109,34 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
      * @param action sql动作：select/insert/update/delete
      * @return Pair(sql, 参数)
      */
-    public override fun compile(action:ActionType): SqlCompiledResult
+    public override fun compile(action:ActionType): CompiledSql
     {
         // 如果没有设置预编译 或 没有编译过的，则重新编译
-        if(!prepared || compiledResult.isEmpty())
+        if(!prepared || compiledSql.isEmpty())
             recompile(action)
 
-        return compiledResult;
+        return compiledSql;
     }
 
     /**
      * 重新编译sql，不带缓存的
      */
-    protected fun recompile(action: ActionType): SqlCompiledResult {
+    protected fun recompile(action: ActionType): CompiledSql {
         // 清空编译结果
-        compiledResult.clear();
+        compiledSql.clear();
 
         // 设置动作
         this.action = action;
 
         // 编译动作子句 + 修饰子句
-        // 其中，sql收集编译好的语句，compiledResult.staticParams收集静态参数
+        // 其中，sql收集编译好的语句，compiledSql.staticParams收集静态参数
         val sql: StringBuilder = StringBuilder();
         this.compileAction(sql).compileDecoration(sql);
 
         // 收集编译好的sql
-        compiledResult.sql = sql.toString()
+        compiledSql.sql = sql.toString()
 
-        return compiledResult
+        return compiledSql
     }
 
     /**

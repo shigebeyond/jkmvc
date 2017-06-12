@@ -5,13 +5,13 @@ import kotlin.collections.ArrayList
 
 
 /**
- * sql编译结果
- *   在预编译的场景下，该sql编译结果会被缓存，其属性 sql/params/dynamicParams 方法debugSql() 有可能会被调用多次
+ * 编译好的sql
+ *   在预编译的场景下，该编译好的sql会被缓存，其属性 sql/params/dynamicParams 方法debugSql() 有可能会被调用多次
  *
  * @author shijianhang
  * @date 2017-6-10 下午8:02:47
  */
-class SqlCompiledResult : Cloneable, ISqlCompiledResult {
+class CompiledSql : Cloneable, ICompiledSql {
 
     /**
      * 编译好的sql
@@ -69,7 +69,7 @@ class SqlCompiledResult : Cloneable, ISqlCompiledResult {
      * 清空编译结果
      * @return
      */
-    override fun clear(): SqlCompiledResult {
+    override fun clear(): CompiledSql {
         sql = "";
         staticParams.clear();
         // dynamicParams = null;
@@ -81,7 +81,7 @@ class SqlCompiledResult : Cloneable, ISqlCompiledResult {
      * @return
      */
     public override fun clone(): Any {
-        val o = super.clone() as SqlCompiledResult
+        val o = super.clone() as CompiledSql
         o.staticParams = staticParams.clone() as LinkedList<Any?>
         return o
     }

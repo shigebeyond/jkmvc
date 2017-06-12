@@ -3,12 +3,12 @@ package com.jkmvc.db
 import java.util.*
 
 /**
- * sql编译结果
+ * 编译好的sql
  *
  * @author shijianhang
  * @date 2017-6-10 下午8:02:47
  */
-interface ISqlCompiledResult {
+interface ICompiledSql {
     /**
      * 编译好的sql
      */
@@ -37,7 +37,7 @@ interface ISqlCompiledResult {
      * 清空编译结果
      * @return
      */
-    fun clear(): SqlCompiledResult
+    fun clear(): CompiledSql
 
     /**
      * 预览sql
