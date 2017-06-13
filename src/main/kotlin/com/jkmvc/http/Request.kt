@@ -29,6 +29,13 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 		 * 可信任的代理服务器ip
 		 */
 		public val proxyips = arrayOf("127.0.0.1", "localhost", "localhost.localdomain");
+
+		/**
+		 * 获得当前请求
+		 */
+		public fun current(): Request {
+			return reqs.get()!!;
+		}
 	}
 
 	/**
@@ -49,6 +56,8 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	init{
 		// 中文编码
 		req.characterEncoding = "UTF-8";
+		// 绑定当前线程
+		reqs.set(this);
 	}
 
 	/**
