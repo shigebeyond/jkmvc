@@ -87,6 +87,25 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
     }
 
     /**
+     * 批量更新有参数的sql
+     *
+     * @param action sql动作：select/insert/update/delete
+     * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
+     * @param paramSize 一次处理的参数个数
+     * @return
+     */
+    public abstract fun batchExecute(action:ActionType, paramses: List<Any?>, paramSize:Int): IntArray;
+
+    /**
+     * 批量更新 无参数的sql
+     *
+     * @param action sql动作：select/insert/update/delete
+     * @param batchNum 批处理的次数
+     * @return
+     */
+    public abstract fun batchExecute(action:ActionType, batchNum:Int): IntArray;
+
+    /**
      * 统计行数： count语句
      *
      * @param params 动态参数
