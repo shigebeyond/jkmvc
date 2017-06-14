@@ -11,20 +11,20 @@ import java.util.*
  * 执行更新
  *
  * @param sql
- * @param paras 参数
+ * @param params 参数
  * @param returnGeneratedKey 是否返回自动生成的主键，注：只针对int的自增长主键，不能是其他类型的主键，否则报错
  * @return
  */
-public fun Connection.execute(sql: String, paras: List<Any?>? = null, returnGeneratedKey:Boolean = false): Int {
+public fun Connection.execute(sql: String, params: List<Any?>? = null, returnGeneratedKey:Boolean = false): Int {
     var pst: PreparedStatement? = null
     var rs: ResultSet? = null;
     try{
         // 准备sql语句
         pst = prepareStatement(sql)
         // 设置参数
-        if(paras != null)
-            for (i in paras.indices)
-                pst.setObject(i + 1, paras[i])
+        if(params != null)
+            for (i in params.indices)
+                pst.setObject(i + 1, params[i])
         // 执行
         val rows:Int = pst.executeUpdate()
         // insert语句，返回自动生成的主键
@@ -42,23 +42,93 @@ public fun Connection.execute(sql: String, paras: List<Any?>? = null, returnGene
 }
 
 /**
+ * Connection扩展
+ * 批量更新：每次更新sql参数不一样
+ *
+ * @param sql
+ * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
+ * @param paramSize 一次处理的参数个数
+ * @return
+ */
+public fun Connection.batchExecute(sql: String, paramses: List<Any?>, paramSize:Int): IntArray {
+    // 计算批处理的次数
+    if(paramSize <= 0)
+        throw Exception("paramSize 只能为正整数");
+    if(paramses.size % paramSize > 0)
+        throw Exception("paramses 的大小必须是 paramSize 的整数倍");
+    val batchNum:Int = paramses.size / paramSize
+
+    var pst: PreparedStatement? = null
+    var rs: ResultSet? = null;
+    try{
+        // 准备sql语句
+        pst = prepareStatement(sql)
+        // 逐次处理sql
+        for(i in 0..(batchNum - 1)){
+            // 设置参数
+            for (j in 0..(paramSize - 1))
+                pst.setObject(j + 1, paramses[i * paramSize + j])
+            // 添加sql
+            pst.addBatch();
+        }
+        // 批量执行sql
+        return pst.executeBatch()
+    }finally{
+        rs?.close()
+        pst?.close()
+    }
+}
+
+/**
+ * Connection扩展
+ * 批量更新：每次更新sql参数一样，相当于多次执行同一条sql
+ *
+ * @param sql
+ * @param batchNum 批处理的次数
+ * @param params 参数
+ * @return
+ */
+public fun Connection.batchExecute(sql: String, batchNum:Int, params:List<Any?>? = null): IntArray {
+    var pst: PreparedStatement? = null
+    var rs: ResultSet? = null;
+    try{
+        // 准备sql语句
+        pst = prepareStatement(sql)
+        // 逐次处理sql
+        for(i in 0..(batchNum - 1)){
+            // 设置参数
+            if(params != null)
+                for (i in params.indices)
+                    pst.setObject(i + 1, params[i])
+            // 添加sql
+            pst.addBatch();
+        }
+        // 批量执行sql
+        return pst.executeBatch()
+    }finally{
+        rs?.close()
+        pst?.close()
+    }
+}
+
+/**
  * 查询多行
 
  * @param sql
- * @param paras 参数
+ * @param params 参数
  * @param action 结果转换函数
  * @return
  */
-public fun <T> Connection.queryResult(sql: String, paras: List<Any?>? = null, action:(ResultSet) -> T): T {
+public fun <T> Connection.queryResult(sql: String, params: List<Any?>? = null, action:(ResultSet) -> T): T {
     var pst: PreparedStatement? = null;
     var rs: ResultSet? = null;
     try {
         // 准备sql语句
         pst = prepareStatement(sql)
         // 设置参数
-        if(paras != null)
-            for (i in paras.indices)
-                pst.setObject(i + 1, paras[i])
+        if(params != null)
+            for (i in params.indices)
+                pst.setObject(i + 1, params[i])
         // 查询
         rs = pst.executeQuery()
         // 处理查询结果
@@ -72,12 +142,12 @@ public fun <T> Connection.queryResult(sql: String, paras: List<Any?>? = null, ac
 /**
  * 查询多行
  * @param sql
- * @param paras 参数
+ * @param params 参数
  * @param transform 结果转换函数
  * @return
  */
-public fun <T> Connection.queryRows(sql: String, paras: List<Any?>? = null, transform:(MutableMap<String, Any?>) -> T): List<T> {
-    return queryResult<List<T>>(sql, paras){ rs: ResultSet ->
+public fun <T> Connection.queryRows(sql: String, params: List<Any?>? = null, transform:(MutableMap<String, Any?>) -> T): List<T> {
+    return queryResult<List<T>>(sql, params){ rs: ResultSet ->
         // 处理查询结果
         val result = LinkedList<T>()
         rs.forEachRow { row:MutableMap<String, Any?> ->
@@ -90,12 +160,12 @@ public fun <T> Connection.queryRows(sql: String, paras: List<Any?>? = null, tran
 /**
  * 查询一行(多列)
  * @param sql
- * @param paras 参数
+ * @param params 参数
  * @param transform 结果转换函数
  * @return
  */
-public fun <T> Connection.queryRow(sql: String, paras: List<Any?>? = null, transform:(MutableMap<String, Any?>) -> T): T? {
-    return queryResult<T?>(sql, paras){ rs: ResultSet ->
+public fun <T> Connection.queryRow(sql: String, params: List<Any?>? = null, transform:(MutableMap<String, Any?>) -> T): T? {
+    return queryResult<T?>(sql, params){ rs: ResultSet ->
         // 处理查询结果
         val row:MutableMap<String, Any?>? = rs.nextRow()
         if(row == null)
@@ -108,11 +178,11 @@ public fun <T> Connection.queryRow(sql: String, paras: List<Any?>? = null, trans
 /**
  * 查询一行一列
  * @param sql
- * @param paras 参数
+ * @param params 参数
  * @return
  */
-public fun Connection.queryCell(sql: String, paras: List<Any?>? = null): Pair<Boolean, Any?> {
-    return queryResult<Pair<Boolean, Any?>>(sql, paras){ rs: ResultSet ->
+public fun Connection.queryCell(sql: String, params: List<Any?>? = null): Pair<Boolean, Any?> {
+    return queryResult<Pair<Boolean, Any?>>(sql, params){ rs: ResultSet ->
         // 处理查询结果
         rs.nextCell(1)
     }
