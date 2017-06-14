@@ -35,6 +35,27 @@ interface IDb{
     fun execute(sql: String, paras: List<Any?>? = null, returnGeneratedKey:Boolean = false): Int;
 
     /**
+     * 批量更新: 每次更新sql参数不一样
+     *
+     * @param sql
+     * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
+     * @param paramSize 一次处理的参数个数
+     * @return
+     */
+    fun batchExecute(sql: String, paramses: List<Any?>, paramSize:Int): IntArray;
+
+    /**
+     * Connection扩展
+     * 批量更新：每次更新sql参数一样，相当于多次执行同一条sql
+     *
+     * @param sql
+     * @param batchNum 批处理的次数
+     * @param params 参数
+     * @return
+     */
+    fun batchExecute(sql: String, batchNum:Int, params:List<Any?>? = null): IntArray;
+
+    /**
      * 查询多行
      * @param sql
      * @param paras

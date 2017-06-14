@@ -131,55 +131,79 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
     /**
      * 执行更新
      * @param sql
-     * @param paras
+     * @param params
      * @param returnGeneratedKey
      * @return
      */
-    public override fun execute(sql: String, paras: List<Any?>?, returnGeneratedKey:Boolean): Int {
-        return conn.execute(sql, paras, returnGeneratedKey);
+    public override fun execute(sql: String, params: List<Any?>?, returnGeneratedKey:Boolean): Int {
+        return conn.execute(sql, params, returnGeneratedKey);
+    }
+
+    /**
+     * 批量更新：每次更新sql参数不一样
+     *
+     * @param sql
+     * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
+     * @param paramSize 一次处理的参数个数
+     * @return
+     */
+    public override fun batchExecute(sql: String, paramses: List<Any?>, paramSize:Int): IntArray {
+        return conn.batchExecute(sql, paramses, paramSize)
+    }
+
+    /**
+     * 批量更新：每次更新sql参数一样，相当于多次执行同一条sql
+     *
+     * @param sql
+     * @param batchNum 批处理的次数
+     * @param params 参数
+     * @return
+     */
+    public override fun batchExecute(sql: String, batchNum:Int, params:List<Any?>?): IntArray {
+        return conn.batchExecute(sql, batchNum, params)
     }
 
     /**
      * 查询多行
      * @param sql
-     * @param paras
+     * @param params
      * @param action 处理结果的函数
      * @return
      */
-    public override fun <T> queryResult(sql: String, paras: List<Any?>?, action: (ResultSet) -> T): T {
-        return conn.queryResult(sql, paras, action)
+    public override fun <T> queryResult(sql: String, params: List<Any?>?, action: (ResultSet) -> T): T {
+        return conn.queryResult(sql, params, action)
     }
 
     /**
      * 查询多行
      * @param sql
-     * @param paras
+     * @param params
      * @param transform 处理结果的函数
      * @return
      */
-    public override fun <T> queryRows(sql: String, paras: List<Any?>?, transform: (MutableMap<String, Any?>) -> T): List<T> {
-        return conn.queryRows(sql, paras, transform);
+    public override fun <T> queryRows(sql: String, params: List<Any?>?, transform: (MutableMap<String, Any?>) -> T): List<T> {
+        return conn.queryRows(sql, params, transform);
     }
 
     /**
      * 查询一行(多列)
      * @param sql
-     * @param paras
+     * @param params
      * @param transform 处理结果的函数
      * @return
      */
-    public override fun <T> queryRow(sql: String, paras: List<Any?>?, transform: (MutableMap<String, Any?>) -> T): T? {
-        return conn.queryRow(sql, paras, transform);
+    public override fun <T> queryRow(sql: String, params: List<Any?>?, transform: (MutableMap<String, Any?>) -> T): T? {
+        return conn.queryRow(sql, params, transform);
     }
 
     /**
      * 查询一行一列
      * @param sql
-     * @param paras
+     * @param params
      * @return
      */
-    public override fun queryCell(sql: String, paras: List<Any?>?): Pair<Boolean, Any?> {
-        return conn.queryCell(sql, paras);
+    public override fun queryCell(sql: String, params: List<Any?>?): Pair<Boolean, Any?> {
+        return conn.queryCell(sql, params);
     }
 
     /**
