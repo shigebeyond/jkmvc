@@ -131,9 +131,9 @@ class CompiledSql : Cloneable, ICompiledSql {
 
         // 计算批处理的次数
         if(paramSize <= 0)
-            throw Exception("paramSize 只能为正整数");
+            throw DbException("参数个数只能为正整数，但实际为 $paramSize");
         if(dynamicParamses.size % paramSize > 0)
-            throw Exception("paramses 的大小必须是 paramSize 的整数倍");
+            throw Exception("paramses 的大小必须是指定参数个数 $paramSize 的整数倍");
         val batchNum:Int = dynamicParamses.size / paramSize
 
         // 构建实际参数：将静态参数中?，替换为动态参数

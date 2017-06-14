@@ -177,7 +177,7 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
      * @param returnGeneratedKey 是否返回自动生成的主键
      * @return 影响行数|新增id
      */
-    protected fun execute(action:ActionType, params:Array<out Any?>, returnGeneratedKey:Boolean = false):Int
+    public override fun execute(action:ActionType, params:Array<out Any?>, returnGeneratedKey:Boolean):Int
     {
         // 1 编译
         val result = compile(action);

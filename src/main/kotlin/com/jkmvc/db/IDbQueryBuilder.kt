@@ -87,6 +87,16 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
     }
 
     /**
+     * 编译 + 执行
+     *
+     * @param action sql动作：select/insert/update/delete
+     * @param params 动态参数
+     * @param returnGeneratedKey 是否返回自动生成的主键
+     * @return 影响行数|新增id
+     */
+    public abstract fun execute(action:ActionType, params:Array<out Any?>, returnGeneratedKey:Boolean = false):Int;
+
+    /**
      * 批量更新有参数的sql
      *
      * @param action sql动作：select/insert/update/delete
