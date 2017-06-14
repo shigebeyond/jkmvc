@@ -192,7 +192,11 @@ class StatTests{
         // 插入所有用户的统计结果
         println("插入所有用户的统计结果: " + stat.size + "行")
         var i = 0;
-        val query = DbQueryBuilder(db).table("sk_buyer_join_stat").insertColumns("uid", "join_num_day", "max_join_num", "join_price_day", "max_join_price", "report_num_day", "max_report_num");
+        val initQuery:((DbQueryBuilder) -> DbQueryBuilder)  = { query: DbQueryBuilder ->
+            query.clear().table("sk_buyer_join_stat").insertColumns("uid", "join_num_day", "max_join_num", "join_price_day", "max_join_price", "report_num_day", "max_report_num") as DbQueryBuilder;
+        }
+        val query = initQuery(DbQueryBuilder(db)) // 初始化查询
+
         for ((k, v) in stat) {
             v.finish()
             query.value(k, v.joinNum.max.day, v.joinNum.max.num, v.joinPrice.max.day, v.joinPrice.max.num, v.reportNum.max.day, v.reportNum.max.num)
@@ -200,7 +204,7 @@ class StatTests{
                 println(" 逢1k批量插入")
                 i = 0
                 query.insert();
-                query.clear().table("sk_buyer_join_stat").insertColumns("uid", "join_num_day", "max_join_num", "join_price_day", "max_join_price", "report_num_day", "max_report_num");
+                initQuery(query) // 初始化查询
             }
         }
         if(i > 0)

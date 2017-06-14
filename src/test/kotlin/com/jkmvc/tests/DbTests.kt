@@ -1,9 +1,6 @@
 package com.jkmvc.tests
 
-import com.jkmvc.db.Db
-import com.jkmvc.db.DbQueryBuilder
-import com.jkmvc.db.IDbQueryBuilder
-import com.jkmvc.db.Record
+import com.jkmvc.db.*
 import org.junit.Test
 
 
@@ -57,18 +54,37 @@ class DbTests{
         println("批量插入user表, 起始id：$id, 行数：10")
     }
 
-    /*@Test
+    @Test
     fun testBatchInsert2(){
-        val query = DbQueryBuilder(db).table("user").insertColumns("id", "name", "age");
+        // 初始化查询
+        val initQuery:(DbQueryBuilder)->DbQueryBuilder = { query:DbQueryBuilder ->
+            query.clear().table("user").insertColumns("name", "age") as DbQueryBuilder;
+        }
+        val query = initQuery(DbQueryBuilder(db))
         for(i in 0..1){
             for (j in 1..10){
-                query.value(i * 10 + j, "shi-$j", j)
+                query.value("shi-$j", j)
             }
             val id = query.insert(true);
             println("批量插入user表, 起始id：$id, 行数：10")
-            query.clear().table("user").insertColumns("id", "name", "age");
+            initQuery(query) // 重新初始化插入
         }
-    }*/
+    }
+
+    @Test
+    fun testBatchInsert3(){
+        // 构建参数
+        val params:ArrayList<Any?> = ArrayList()
+        for(i in 0..1){
+            for (j in 1..10){
+                params.add("shi-$j")
+                params.add(j)
+            }
+        }
+
+        // 批量插入
+        DbQueryBuilder(db).table("user").insertColumns("name", "age").value("?", "?").batchExecute(ActionType.INSERT, params, 2)// 每次只处理2个参数
+    }
 
     @Test
     fun testFind(){
@@ -104,9 +120,42 @@ class DbTests{
     }
 
     @Test
+    fun testBatchUpdate(){
+        var myid:Long = 10
+        // 构建参数
+        val params:ArrayList<Any?> = ArrayList()
+        for(i in 0..1){
+            for (j in 1..10){
+                params.add("shi-$j")
+                params.add(j)
+                params.add(myid ++)
+            }
+        }
+
+        // 批量插入
+        DbQueryBuilder(db).table("user").set("name", "?").set("age", "?").where("id", "=", "?").batchExecute(ActionType.UPDATE, params, 3)// 每次只处理3个参数
+    }
+
+    @Test
     fun testDelete(){
         val f = DbQueryBuilder(db).table("user").where("id", "=", id).delete();
         println("删除user表：" + f)
+    }
+
+
+    @Test
+    fun testBatchDelete(){
+        var myid:Long = 10
+        // 构建参数
+        val params:ArrayList<Any?> = ArrayList()
+        for(i in 0..1){
+            for (j in 1..10){
+                params.add(myid ++)
+            }
+        }
+
+        // 批量插入
+        DbQueryBuilder(db).table("user").where("id", "=", "?").batchExecute(ActionType.DELETE, params, 1)// 每次只处理1个参数
     }
 
     //预编译参数化的sql
