@@ -59,7 +59,6 @@ public fun Connection.batchExecute(sql: String, paramses: List<Any?>, paramSize:
     val batchNum:Int = paramses.size / paramSize
 
     var pst: PreparedStatement? = null
-    var rs: ResultSet? = null;
     try{
         // 准备sql语句
         pst = prepareStatement(sql)
@@ -74,7 +73,6 @@ public fun Connection.batchExecute(sql: String, paramses: List<Any?>, paramSize:
         // 批量执行sql
         return pst.executeBatch()
     }finally{
-        rs?.close()
         pst?.close()
     }
 }
@@ -90,7 +88,6 @@ public fun Connection.batchExecute(sql: String, paramses: List<Any?>, paramSize:
  */
 public fun Connection.batchExecute(sql: String, batchNum:Int, params:List<Any?>? = null): IntArray {
     var pst: PreparedStatement? = null
-    var rs: ResultSet? = null;
     try{
         // 准备sql语句
         pst = prepareStatement(sql)
@@ -106,7 +103,6 @@ public fun Connection.batchExecute(sql: String, batchNum:Int, params:List<Any?>?
         // 批量执行sql
         return pst.executeBatch()
     }finally{
-        rs?.close()
         pst?.close()
     }
 }
