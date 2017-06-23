@@ -60,35 +60,22 @@ class MultipartRequest(req: HttpServletRequest, val module:String /* 模块名�
     /**
      * 上传文件的请求
      */
-    val mulReq:MultipartRequest = MultipartRequest(req, prepareUploadDirectory(module), maxPostSize, uploadConfig["encoding"], policy)
+    protected val mulReq:com.oreilly.servlet.MultipartRequest = com.oreilly.servlet.MultipartRequest(req, prepareUploadDirectory(module), maxPostSize, uploadConfig["encoding"], policy)
 
+    /************************ 获得请求参数 *************************/
     /**
-     * 检查是否有get/post/upload的参数
-     *    兼容上传文件的情况
+     * 检查是否有get/post的参数
+     *
      * @param key
      * @return
      */
-    public fun containsParameter(key: String): Boolean
-    {
-        return req.parameterMap.containsKey(key);
-    }
-
-
-
-    /**
-     * 检查是否有get/post/upload的参数
-     *    兼容上传文件的情况
-     * @param key
-     * @return
-     */
-    public fun containsParameter(key: String): Boolean
-    {
-        return mulReq.
+    public override fun containsParameter(key: String): Boolean {
+        return mulReq.getParameterMap().containsKey(key)
     }
 
     /**
-     * 获得get/post/upload的参数名的枚举
-     *    兼容上传文件的情况
+     * 获得get/post的参数名的枚举
+     *
      * @return
      */
     public override fun getParameterNames():Enumeration<String>{
@@ -96,8 +83,8 @@ class MultipartRequest(req: HttpServletRequest, val module:String /* 模块名�
     }
 
     /**
-     * 获得get/post/upload的参数值
-     *   兼容上传文件的情况
+     * 获得get/post的参数值
+     *
      * @param key
      * @return
      */
@@ -105,15 +92,59 @@ class MultipartRequest(req: HttpServletRequest, val module:String /* 模块名�
         return mulReq.getParameter(key);
     }
 
-
     /**
-     * 获得get/post/upload的参数值
-     *    兼容上传文件的情况
+     * 获得get/post的参数值
+     *
      * @param key
      * @return
      */
     public override fun getParameterValues(key: String): Array<String>? {
         return mulReq.getParameterValues(key)
+    }
+
+    /**
+     * 获得上传参数
+     * @return
+     */
+    public override fun getParameterMap(): Map<String, Array<String>>{
+        return mulReq.getParameterMap()
+    }
+
+    /************************ 获得上传文件 *************************/
+    /**
+     * 检查是否有上传文件
+     *
+     * @param key
+     * @return
+     */
+    public fun containsFile(key: String): Boolean {
+        return mulReq.getFilesystemName(key) != null
+    }
+
+    /**
+     * 获得文件名的枚举
+     * @return
+     */
+    public fun getFileNames(): Enumeration<String>{
+        return mulReq.fileNames as Enumeration<String>
+    }
+
+    /**
+     * 获得某个上传文件
+     *
+     * @param name
+     * @return
+     */
+    public fun getFile(name: String): File{
+        return mulReq.getFile(name);
+    }
+
+    /**
+     * 获得上传文件
+     * @return
+     */
+    public fun getFileMap(): Map<String, File>{
+        return mulReq.getFileMap()
     }
 
 }
