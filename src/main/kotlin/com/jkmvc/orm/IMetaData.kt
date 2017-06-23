@@ -3,6 +3,7 @@ package com.jkmvc.orm
 import com.jkmvc.db.Db
 import com.jkmvc.db.IDb
 import com.jkmvc.db.IDbQueryBuilder
+import java.io.File
 import kotlin.reflect.KClass
 
 /**
@@ -120,10 +121,4 @@ interface IMetaData{
      * @param conditions 关联查询条件
      */
     fun hasMany(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = "", conditions:((IDbQueryBuilder) -> Unit)? = null): IMetaData;
-
-    /**
-     * 获得上传目录
-     * @return string
-     */
-    fun prepareUploadDir(): String
 }

@@ -5,6 +5,7 @@ import com.jkmvc.common.format
 import com.jkmvc.db.Db
 import com.jkmvc.db.IDb
 import com.jkmvc.db.IDbQueryBuilder
+import java.io.File
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -167,16 +168,6 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
         }
 
         return this;
-    }
-
-    /**
-     * 获得上传目录
-     * @return string
-     */
-    public override fun prepareUploadDir(): String
-    {
-        val config = Config.instance("upload")!!
-        return config["uploadDir"] + table + '/' + Date().format("yyyy/MM/dd") + '/';
     }
 }
 

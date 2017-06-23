@@ -5,6 +5,11 @@ import com.jkmvc.http.Controller
 import com.jkmvc.orm.OrmQueryBuilder
 import com.jkmvc.orm.isLoaded
 import java.io.File
+import com.oreilly.servlet.multipart.DefaultFileRenamePolicy
+import com.sun.corba.se.spi.presentation.rmi.StubAdapter.request
+import com.oreilly.servlet.MultipartRequest
+
+
 
 /**
  * 用户管理
@@ -147,12 +152,7 @@ class UserController: Controller()
         }
 
         // 检查并处理上传文件
-        val uploaded = req.checkUpload {
-            val path = UserModel.prepareUploadDir() + it.fieldName
-            it.write(File(path))
-            path;
-        }
-        if(uploaded){ //  post请求：保存表单数据
+        if(true){ //  post请求：保存表单数据
             user.values(req)
             user.update()
             // 重定向到列表页
@@ -162,5 +162,7 @@ class UserController: Controller()
             view["user"] = user; // 设置视图参数
             res.render(view)
         }
+
     }
+
 }

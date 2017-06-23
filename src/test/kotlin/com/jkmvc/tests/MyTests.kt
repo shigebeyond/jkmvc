@@ -1,5 +1,6 @@
 package com.jkmvc.tests
 
+import com.jkmvc.common.convertBytes
 import com.jkmvc.common.findFunction
 import com.jkmvc.common.findProperty
 import com.jkmvc.common.to
@@ -7,6 +8,7 @@ import com.jkmvc.example.model.UserModel
 import com.jkmvc.orm.RelationType
 import com.jkmvc.validate.Validation
 import org.junit.Test
+import java.io.File
 import java.math.BigDecimal
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
@@ -166,7 +168,30 @@ class MyTests{
         println("a" < "b") // 调用compareTo()
         println("a" in "b") // 调用contains()
     }
+
+    @Test
+    fun testFileSizeUnit(){
+        println('K'.convertBytes())
+        println('M'.convertBytes())
+        println('G'.convertBytes())
+        println('T'.convertBytes())
+    }
+
+    @Test
+    fun testDir(){
+        val dir = File("upload")
+        println(dir.absolutePath)  // /oldhome/shi/code/java/jkmvc/upload
+
+        // 创建不存在的目录
+        if(!dir.exists())
+            dir.mkdirs();
+
+        val f = File(dir, "test.txt")
+        f.writeText("hello")
+    }
+
 }
+
 
 
 

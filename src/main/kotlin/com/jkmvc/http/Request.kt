@@ -1,9 +1,8 @@
 package com.jkmvc.http
 
 import com.jkmvc.common.*
-import org.apache.commons.fileupload.FileItem
-import org.apache.commons.fileupload.disk.DiskFileItemFactory
-import org.apache.commons.fileupload.servlet.ServletFileUpload
+import com.oreilly.servlet.MultipartRequest
+import com.oreilly.servlet.multipart.DefaultFileRenamePolicy
 import java.io.File
 import java.util.*
 import javax.servlet.http.Cookie
@@ -47,11 +46,6 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	 * 当前匹配的路由参数
 	 */
 	public lateinit var params:Map<String, String>;
-
-	/**
-	 * 上传的数据
-	 */
-	public var uploadData:Map<String, String>? = null;
 
 	init{
 		// 中文编码
@@ -225,9 +219,6 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	 */
 	public fun containsParameter(key: String): Boolean
 	{
-		if(uploadData != null)
-			return uploadData!!.containsKey(key);
-
 		return req.parameterMap.containsKey(key);
 	}
 
@@ -237,9 +228,6 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
      * @return
      */
 	public override fun getParameterNames():Enumeration<String>{
-		if(uploadData != null)
-			return uploadData!!.keys.enumeration()
-
 		return req.parameterNames;
 	}
 
@@ -250,9 +238,6 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
      * @return
 	 */
 	public override fun getParameter(key: String): String? {
-        if(uploadData != null)
-            return uploadData!![key];
-
         return req.getParameter(key);
 	}
 
@@ -315,43 +300,6 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 			return uri;
 
 		return req.getScheme() + "://" + req.getServerName() + ':' + req.getServerPort() + Router.baseUrl + uri;
-	}
-
-	/**
-	 * 检查并处理上传文件
-	 * @param mover 文件处理函数
-	 * @return
-	 */
-	public fun checkUpload(mover: (FileItem) -> String): Boolean
-	{
-		// 检查是否文件上传
-		if(!ServletFileUpload.isMultipartContent(req))
-			return false;
-
-		// 处理上传数据
-		val config = Config.instance("upload")!!
-		val diskFactory = DiskFileItemFactory()
-		diskFactory.sizeThreshold = 4 * 1024 // threshold 极限、临界值，即硬盘缓存 1M
-		diskFactory.repository = File(config["tmpDir"]!!) // repository 贮藏室，即临时文件目录
-
-		val upload = ServletFileUpload(diskFactory)
-		upload.sizeMax = (4 * 1024 * 1024).toLong() // 设置允许上传的最大文件大小 4M
-
-		// 解析请求
-		val list:List<FileItem> = upload.parseRequest(req)
-		val data:HashMap<String, String> = HashMap();
-		for (item in list) {
-			if (item.isFormField) { // 表单字段
-				data[item.name] = item.string;
-			} else { // 文件字段
-				data[item.name] = mover(item); // 移动上传文件
-			}
-		}
-
-		// 保存上传数据
-		uploadData = data;
-
-		return true;
 	}
 
 }
