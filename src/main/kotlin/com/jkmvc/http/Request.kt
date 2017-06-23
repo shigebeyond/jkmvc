@@ -217,7 +217,7 @@ open class Request(protected val req:HttpServletRequest /* 请求对象 */):Http
      * @param key
      * @return
 	 */
-	public fun containsParameter(key: String): Boolean
+	public open fun containsParameter(key: String): Boolean
 	{
 		return req.parameterMap.containsKey(key);
 	}
