@@ -9,12 +9,17 @@ import com.jkmvc.orm.RelationType
 import com.jkmvc.validate.Validation
 import org.junit.Test
 import java.io.File
+import java.lang.reflect.Field
 import java.math.BigDecimal
+import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KProperty1
 
 open class A() {}
-class B():A() {}
+class B():A() {
+    protected val name:String = "test";
+}
 
 fun A.echo(){
     println("hi, I'm A")
@@ -188,6 +193,27 @@ class MyTests{
 
         val f = File(dir, "test.txt")
         f.writeText("hello")
+    }
+
+    @Test
+    fun testProp(){
+        // 不能修改属性的访问权限
+//        val prop: KProperty1<B, *> = B::class.findProperty("name") as KProperty1<B, *>
+//        println(prop.get(B()))
+
+        // kotlin类
+        val field:Field = B::class.java.getDeclaredField("name").apply { isAccessible = true } // 修改属性的访问权限
+        println(field.get(B()))
+
+        // 试试java原生类
+//        for(f in LinkedList::class.java.declaredFields)
+//            println(f)
+
+//        val field:Field = LinkedList::class.java.getDeclaredField("size").apply { isAccessible = true } // 修改属性的访问权限
+//        val o:LinkedList<String> = LinkedList()
+//        println(field.get(o))
+
+
     }
 
 }
