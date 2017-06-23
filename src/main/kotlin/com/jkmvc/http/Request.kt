@@ -16,7 +16,7 @@ import kotlin.reflect.KClass
  * @date 2016-10-6 上午9:27:56
  *
  */
-class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServletRequest by req
+open class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServletRequest by req
 {
 	companion object{
 		/**
@@ -212,7 +212,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	}
 
 	/**
-	 * 检查是否有get/post/upload的参数
+	 * 检查是否有get/post的参数
 	 *    兼容上传文件的情况
      * @param key
      * @return
@@ -220,25 +220,6 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServl
 	public fun containsParameter(key: String): Boolean
 	{
 		return req.parameterMap.containsKey(key);
-	}
-
-    /**
-     * 获得get/post/upload的参数名的枚举
-     *    兼容上传文件的情况
-     * @return
-     */
-	public override fun getParameterNames():Enumeration<String>{
-		return req.parameterNames;
-	}
-
-	/**
-	 * 获得get/post/upload的数据
-	 *   兼容上传文件的情况
-     * @param key
-     * @return
-	 */
-	public override fun getParameter(key: String): String? {
-        return req.getParameter(key);
 	}
 
 	public fun getParameter(key: String, defaultValue: String?): String? {
