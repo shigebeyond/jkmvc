@@ -3,10 +3,50 @@ package com.jkmvc.http
 import com.oreilly.servlet.MultipartRequest
 import java.io.File
 import java.lang.reflect.Field
-import java.util.Enumeration
-import java.util.HashMap
+import java.util.*
+import javax.servlet.http.HttpServletRequest
 
 
+/**
+ * 是否post请求
+ * @return
+ */
+public fun HttpServletRequest.isPost(): Boolean {
+    return method === "POST";
+}
+
+/**
+ * 是否get请求
+ * @return
+ */
+public fun HttpServletRequest.isGet(): Boolean {
+    return method === "GET";
+}
+
+/**
+ * 是否 multipart 请求
+ * @return
+ */
+public fun HttpServletRequest.isMultipartContent(): Boolean{
+    return contentType.toLowerCase() == "multipart/form-data"
+}
+
+/**
+ * 是否上传文件的请求
+ * @return
+ */
+public fun HttpServletRequest.isUpload(): Boolean{
+    return isPost() && isMultipartContent()
+}
+
+/**
+ * 是否ajax请求
+ * @return
+ */
+public fun HttpServletRequest.isAjax(): Boolean {
+    return "XMLHttpRequest".equals(getHeader("x-requested-with")) // // 通过XMLHttpRequest发送请求
+            && "text/javascript, application/javascript, */*".equals(getHeader("Accept")); // 通过jsonp来发送请求
+}
 
 /****************************** com.oreilly.servlet.MultipartRequest扩展 *******************************/
 /**

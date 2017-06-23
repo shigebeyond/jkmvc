@@ -72,31 +72,6 @@ open class Request(protected val req:HttpServletRequest /* 请求对象 */):Http
 	}
 
 	/**
-	 * 是否post请求
-	 * @return
-	 */
-	public fun isPost(): Boolean {
-		return this.method === "POST";
-	}
-
-	/**
-	 * 是否get请求
-	 * @return
-	 */
-	public fun isGet(): Boolean {
-		return this.method === "GET";
-	}
-
-	/**
-	 * 是否ajax请求
-	 * @return
-	 */
-	public fun isajax(): Boolean {
-		return "XMLHttpRequest".equals(req.getHeader("x-requested-with")) // // 通过XMLHttpRequest发送请求
-				&& "text/javascript, application/javascript, */*".equals(req.getHeader("Accept")); // 通过jsonp来发送请求
-	}
-
-	/**
 	 * 获得cookie值
 	 *
 	 * <code>
