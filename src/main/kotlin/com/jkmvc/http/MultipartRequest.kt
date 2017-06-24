@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest
  * @author shijianhang<772910474@qq.com>
  * @date 6/23/17 7:58 PM
  */
-class MultipartRequest(req: HttpServletRequest): Request(req) {
+abstract class MultipartRequest(req: HttpServletRequest) {
 
     companion object{
         /**
@@ -40,11 +40,25 @@ class MultipartRequest(req: HttpServletRequest): Request(req) {
     }
 
     /**
+     * 是否是上传文件的请求
+     */
+    protected val uploaded:Boolean = req.isUpload()
+
+    /**
+     *  上传子目录，用在子类 MultipartRequest 中
+     *      如果你需要设置上传子目录，必须在第一次调用 this.mulReq 之前设置，否则无法生效
+     */
+    public var uploadSubdir:String = ""
+
+    /**
      * 上传文件的请求
      *    递延执行，以便能获得在 controller#action 动态设置的 uploadSubdir，用以构建上传目录
      *    第一次调用 this.mulReq 时，会解析请求中的字段与文件，并将文件保存到指定的目录 = 根目录/子目录
      */
     protected val mulReq:com.oreilly.servlet.MultipartRequest by lazy{
+        if(!uploaded)
+            throw Exception("当前请求不是上传文件的请求")
+
         com.oreilly.servlet.MultipartRequest(req, prepareUploadDirectory(), maxPostSize, uploadConfig["encoding"], uploadPolicy)
     }
 
@@ -53,11 +67,11 @@ class MultipartRequest(req: HttpServletRequest): Request(req) {
      *
      * @return
      */
-    public fun prepareUploadDirectory(): String {
+    protected fun prepareUploadDirectory(): String {
         // 上传目录 = 根目录/子目录
-        var path:String = uploadConfig["uploadDirectory"]!!
+        var path:String = uploadConfig["uploadDirectory"]!! + '/'
         if(uploadSubdir != "")
-            path = path + '/' + uploadSubdir + '/'
+            path = path + uploadSubdir + '/'
         val dir = File(path);
         // 如果目录不存在，则创建
         if(!dir.exists())
@@ -65,55 +79,6 @@ class MultipartRequest(req: HttpServletRequest): Request(req) {
         return path
     }
 
-    /************************ 获得请求参数 *************************/
-    /**
-     * 检查是否有get/post的参数
-     *
-     * @param key
-     * @return
-     */
-    public override fun containsParameter(key: String): Boolean {
-        return mulReq.getParameterMap().containsKey(key)
-    }
-
-    /**
-     * 获得get/post的参数名的枚举
-     *
-     * @return
-     */
-    public override fun getParameterNames():Enumeration<String>{
-        return mulReq.parameterNames as Enumeration<String>;
-    }
-
-    /**
-     * 获得get/post的参数值
-     *
-     * @param key
-     * @return
-     */
-    public override fun getParameter(key: String): String? {
-        return mulReq.getParameter(key);
-    }
-
-    /**
-     * 获得get/post的参数值
-     *
-     * @param key
-     * @return
-     */
-    public override fun getParameterValues(key: String): Array<String>? {
-        return mulReq.getParameterValues(key)
-    }
-
-    /**
-     * 获得上传参数
-     * @return
-     */
-    public override fun getParameterMap(): Map<String, Array<String>>{
-        return mulReq.getParameterMap()
-    }
-
-    /************************ 获得上传文件 *************************/
     /**
      * 检查是否有上传文件
      *
@@ -148,6 +113,17 @@ class MultipartRequest(req: HttpServletRequest): Request(req) {
      */
     public fun getFileMap(): Map<String, File>{
         return mulReq.getFileMap()
+    }
+
+    /**
+     * 获得某个上传文件的相对路径
+     *
+     * @param name
+     * @return
+     */
+    public fun getFileRelativePath(name: String): String{
+        val file = mulReq.getFile(name);
+        return file.path.substring(uploadConfig["uploadDirectory"]!!.length)
     }
 
 }

@@ -21,10 +21,7 @@ object Server:IServer {
      */
     public override fun run(request: HttpServletRequest, response: HttpServletResponse) {
         // 构建请求与响应对象
-        val req:Request = if(request.isUpload()) // 上传文件的请求
-                    MultipartRequest(request)
-                else // 普通请求
-                    Request(request);
+        val req:Request = Request(request);
         val res:Response = Response(response);
 
         try {

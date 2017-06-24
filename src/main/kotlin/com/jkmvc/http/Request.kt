@@ -15,7 +15,7 @@ import kotlin.reflect.KClass
  * @date 2016-10-6 上午9:27:56
  *
  */
-open class Request(protected val req:HttpServletRequest /* 请求对象 */):HttpServletRequest by req
+class Request(protected val req:HttpServletRequest /* 请求对象 */):MultipartRequest(req), HttpServletRequest by req
 {
 	companion object{
 		/**
@@ -45,12 +45,6 @@ open class Request(protected val req:HttpServletRequest /* 请求对象 */):Http
 	 * 当前匹配的路由参数
 	 */
 	public lateinit var params:Map<String, String>;
-
-	/**
-	 *  上传子目录，用在子类 MultipartRequest 中
-	 *      如果你需要设置上传子目录，必须在第一次调用 this.mulReq 之前设置，否则无法生效
-	 */
-	public var uploadSubdir:String = ""
 
 	init{
 		// 中文编码
@@ -105,7 +99,7 @@ open class Request(protected val req:HttpServletRequest /* 请求对象 */):Http
 	 * @return
 	 */
 	public fun isUpload(): Boolean{
-		return req.isUpload()
+		return uploaded
 	}
 
 	/**
@@ -232,14 +226,67 @@ open class Request(protected val req:HttpServletRequest /* 请求对象 */):Http
 	}
 
 	/**
-	 * 检查是否有get/post的参数
+	 * 检查是否有get/post/upload的参数
 	 *    兼容上传文件的情况
      * @param key
      * @return
 	 */
-	public open fun containsParameter(key: String): Boolean
+	public fun containsParameter(key: String): Boolean
 	{
+		if(isUpload())
+			return mulReq.getParameterMap().containsKey(key)
+
 		return req.parameterMap.containsKey(key);
+	}
+
+	/**
+	 * 获得get/post/upload的参数名的枚举
+	 *    兼容上传文件的情况
+	 * @return
+	 */
+	public override fun getParameterNames():Enumeration<String>{
+		if(isUpload())
+			return mulReq.parameterNames as Enumeration<String>;
+
+		return req.parameterNames;
+	}
+
+	/**
+	 * 获得get/post/upload的参数值
+	 *    兼容上传文件的情况
+	 * @param key
+	 * @return
+	 */
+	public override fun getParameter(key: String): String? {
+		if(isUpload())
+			return mulReq.getParameter(key);
+
+		return req.getParameter(key)
+	}
+
+	/**
+	 * 获得get/post/upload的参数值
+	 *    兼容上传文件的情况
+	 * @param key
+	 * @return
+	 */
+	public override fun getParameterValues(key: String): Array<String>? {
+		if(isUpload())
+			return mulReq.getParameterValues(key)
+
+		return req.getParameterValues(key)
+	}
+
+	/**
+	 * 获得get/post/upload参数
+	 *    兼容上传文件的情况
+	 * @return
+	 */
+	public override fun getParameterMap(): Map<String, Array<String>>{
+		if(isUpload())
+			return mulReq.getParameterMap()
+
+		return req.parameterMap
 	}
 
 	public fun getParameter(key: String, defaultValue: String?): String? {
@@ -301,20 +348,5 @@ open class Request(protected val req:HttpServletRequest /* 请求对象 */):Http
 			return uri;
 
 		return req.getScheme() + "://" + req.getServerName() + ':' + req.getServerPort() + Router.baseUrl + uri;
-	}
-
-	/**
-	 * 转成上传文件的请求
-	 *
-	 * @param uploadSubdir 上传子目录
-	 * @return MultipartRequest
-	 */
-	public fun asMultipartRequest(uploadSubdir:String = ""):  MultipartRequest{
-		var mulreq:MultipartRequest = if(this is MultipartRequest)
-										this
-									else
-										MultipartRequest(req)
-		mulreq.uploadSubdir = uploadSubdir
-		return mulreq;
 	}
 }
