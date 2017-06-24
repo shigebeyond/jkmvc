@@ -53,7 +53,7 @@ public fun HttpServletRequest.isAjax(): Boolean {
 /**
  * 上传参数的属性
  */
-val parametersField: Field = MultipartRequest::class.java.getField("parameters").apply { this.isAccessible = true }
+val parametersField: Field = MultipartRequest::class.java.getDeclaredField("parameters").apply { this.isAccessible = true }
 
 /**
  * 获得上传参数
