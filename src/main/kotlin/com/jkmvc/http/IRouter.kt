@@ -14,7 +14,7 @@ interface IRouter
 	/**
 	* 根url，不作为路由解析
 	 */
-	public var baseUrl:String
+	public var baseUri:String
 
 	/**
 	 * 添加路由

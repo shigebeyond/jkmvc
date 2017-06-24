@@ -44,7 +44,7 @@ vim src/main/webapp/WEB-INF/web.xml
 		<filter-name>jkmvc</filter-name>
 		<filter-class>com.jkmvc.example.MyFilter</filter-class>
 		<init-param>
-			<param-name>baseUrl</param-name>
+			<param-name>baseUri</param-name>
 			<param-value>/jkmvc/</param-value>
 		</init-param>
 	</filter>

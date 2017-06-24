@@ -10,7 +10,7 @@ open class JkFilter : Filter {
 
     override fun init(filterConfig: FilterConfig) {
         // 获得根url
-        Router.baseUrl = filterConfig.getInitParameter("baseUrl");
+        Router.baseUri = filterConfig.getInitParameter("baseUri");
     }
 
     override fun doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) {

@@ -347,6 +347,6 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):Multipart
 		if(uri.startsWith("http"))
 			return uri;
 
-		return req.getScheme() + "://" + req.getServerName() + ':' + req.getServerPort() + Router.baseUrl + uri;
+		return req.getScheme() + "://" + req.getServerName() + ':' + req.getServerPort() + Router.baseUri + uri;
 	}
 }
