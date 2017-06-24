@@ -6,6 +6,7 @@ import java.lang.reflect.Field
 import java.util.*
 import javax.servlet.http.HttpServletRequest
 
+/****************************** HttpServletRequest扩展 *******************************/
 
 /**
  * 是否post请求

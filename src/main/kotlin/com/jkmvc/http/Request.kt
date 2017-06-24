@@ -1,9 +1,8 @@
 package com.jkmvc.http
 
-import com.jkmvc.common.*
-import com.oreilly.servlet.MultipartRequest
-import com.oreilly.servlet.multipart.DefaultFileRenamePolicy
-import java.io.File
+import com.jkmvc.common.getOrDefault
+import com.jkmvc.common.to
+import com.jkmvc.common.toDate
 import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
@@ -47,6 +46,12 @@ open class Request(protected val req:HttpServletRequest /* 请求对象 */):Http
 	 */
 	public lateinit var params:Map<String, String>;
 
+	/**
+	 *  上传子目录，用在子类 MultipartRequest 中
+	 *      如果你需要设置上传子目录，必须在第一次调用 this.mulReq 之前设置，否则无法生效
+	 */
+	public var uploadSubdir:String = ""
+
 	init{
 		// 中文编码
 		req.characterEncoding = "UTF-8";
@@ -69,6 +74,46 @@ open class Request(protected val req:HttpServletRequest /* 请求对象 */):Http
 		}
 
 		return false;
+	}
+
+	/**
+	 * 是否post请求
+	 * @return
+	 */
+	public fun isPost(): Boolean {
+		return method === "POST";
+	}
+
+	/**
+	 * 是否get请求
+	 * @return
+	 */
+	public fun isGet(): Boolean {
+		return req.isGet()
+	}
+
+	/**
+	 * 是否 multipart 请求
+	 * @return
+	 */
+	public fun isMultipartContent(): Boolean{
+		return req.isMultipartContent()
+	}
+
+	/**
+	 * 是否上传文件的请求
+	 * @return
+	 */
+	public fun isUpload(): Boolean{
+		return req.isUpload()
+	}
+
+	/**
+	 * 是否ajax请求
+	 * @return
+	 */
+	public fun isAjax(): Boolean {
+		return req.isAjax()
 	}
 
 	/**
@@ -258,4 +303,18 @@ open class Request(protected val req:HttpServletRequest /* 请求对象 */):Http
 		return req.getScheme() + "://" + req.getServerName() + ':' + req.getServerPort() + Router.baseUrl + uri;
 	}
 
+	/**
+	 * 转成上传文件的请求
+	 *
+	 * @param uploadSubdir 上传子目录
+	 * @return MultipartRequest
+	 */
+	public fun asMultipartRequest(uploadSubdir:String = ""):  MultipartRequest{
+		var mulreq:MultipartRequest = if(this is MultipartRequest)
+										this
+									else
+										MultipartRequest(req)
+		mulreq.uploadSubdir = uploadSubdir
+		return mulreq;
+	}
 }

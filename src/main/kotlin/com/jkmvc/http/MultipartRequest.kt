@@ -2,8 +2,6 @@ package com.jkmvc.http
 
 import com.jkmvc.common.Config
 import com.jkmvc.common.convertBytes
-import com.jkmvc.common.format
-import com.oreilly.servlet.MultipartRequest
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy
 import com.oreilly.servlet.multipart.FileRenamePolicy
 import java.io.File
@@ -16,7 +14,7 @@ import javax.servlet.http.HttpServletRequest
  * @author shijianhang<772910474@qq.com>
  * @date 6/23/17 7:58 PM
  */
-class MultipartRequest(req: HttpServletRequest, val module:String /* 模块名，用作上传目录下的子目录 */): Request(req) {
+class MultipartRequest(req: HttpServletRequest): Request(req) {
 
     companion object{
         /**
@@ -38,29 +36,34 @@ class MultipartRequest(req: HttpServletRequest, val module:String /* 模块名�
         /**
          * 上传文件重命名的策略
          */
-        protected val policy: FileRenamePolicy = DefaultFileRenamePolicy()
-
-        /**
-         * 准备好上传目录
-         *
-         * @param module 子目录
-         * @return
-         */
-        public fun prepareUploadDirectory(module: String): String {
-            // 目录：根目录+子目录+日期
-            val path = uploadConfig["uploadDirectory"] + module + '/' + Date().format("yyyy/MM/dd") + '/';
-            val dir = File(path);
-            // 如果目录不存在，则创建
-            if(!dir.exists())
-                dir.mkdirs();
-            return path;
-        }
+        protected val uploadPolicy: FileRenamePolicy = DefaultFileRenamePolicy()
     }
 
     /**
      * 上传文件的请求
+     *    递延执行，以便能获得在 controller#action 动态设置的 uploadSubdir，用以构建上传目录
+     *    第一次调用 this.mulReq 时，会解析请求中的字段与文件，并将文件保存到指定的目录 = 根目录/子目录
      */
-    protected val mulReq:com.oreilly.servlet.MultipartRequest = com.oreilly.servlet.MultipartRequest(req, prepareUploadDirectory(module), maxPostSize, uploadConfig["encoding"], policy)
+    protected val mulReq:com.oreilly.servlet.MultipartRequest by lazy{
+        com.oreilly.servlet.MultipartRequest(req, prepareUploadDirectory(), maxPostSize, uploadConfig["encoding"], uploadPolicy)
+    }
+
+    /**
+     * 准备好上传目录 = 根目录/子目录
+     *
+     * @return
+     */
+    public fun prepareUploadDirectory(): String {
+        // 上传目录 = 根目录/子目录
+        var path:String = uploadConfig["uploadDirectory"]!!
+        if(uploadSubdir != "")
+            path = path + '/' + uploadSubdir + '/'
+        val dir = File(path);
+        // 如果目录不存在，则创建
+        if(!dir.exists())
+            dir.mkdirs();
+        return path
+    }
 
     /************************ 获得请求参数 *************************/
     /**

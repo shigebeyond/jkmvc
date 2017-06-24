@@ -1,14 +1,11 @@
 package com.jkmvc.example.controller
 
+import com.jkmvc.common.format
 import com.jkmvc.example.model.UserModel
 import com.jkmvc.http.Controller
 import com.jkmvc.orm.OrmQueryBuilder
 import com.jkmvc.orm.isLoaded
-import java.io.File
-import com.oreilly.servlet.multipart.DefaultFileRenamePolicy
-import com.sun.corba.se.spi.presentation.rmi.StubAdapter.request
-import com.oreilly.servlet.MultipartRequest
-
+import java.util.*
 
 
 /**
@@ -139,27 +136,28 @@ class UserController: Controller()
         redirect("user/index");
     }
 
-    public fun actionUplad()
+    /**
+     * 上传头像
+     * upload avatar
+     */
+    public fun actionUploadAvatar()
     {
-        // 获得路由参数id
-        // val id = req.getIntRouteParameter("id"); // req.getRouteParameter["xxx"]
-        val id:Int? = req["id"] // req["xxx"]
-        // 查询单个用户
-        val user = UserModel(id)
+        // 设置上传的子目录，必须要在调用 req 的其他api之前调用，否则无法生效（无法将上传文件保存到指定的子目录）
+        req.uploadSubdir = "" + Date().format("yyyy/MM/dd")
+
+        // 查询单个用户 | find a user
+        val user = UserModel(req["id"])
         if(!user.isLoaded()){
-            res.render("用户[$id]不存在")
+            res.render("用户[" + req["id"] + "]不存在")
             return
         }
 
         // 检查并处理上传文件
-        if(true){ //  post请求：保存表单数据
-            user.values(req)
-            user.update()
-            // 重定向到列表页
-            redirect("user/index");
-        }else{ // get请求： 渲染视图
-            val view = view() // 默认视图为action名： user/upload
-            view["user"] = user; // 设置视图参数
+        if(req.isUpload()){ // upload请求
+
+        }else{ // get请求： 渲染视图 | get request: render view
+            val view = view() // 默认视图为action名： user/edit | default view's name = action：　user/edit
+            view["user"] = user; // 设置视图参数 |  set view data
             res.render(view)
         }
 
