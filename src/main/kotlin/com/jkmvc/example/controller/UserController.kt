@@ -89,7 +89,8 @@ class UserController: Controller()
     public fun actionEdit()
     {
         // 查询单个用户 | find a user
-        val user = UserModel(req["id"])
+        val id: Int = req["id"]
+        val user = UserModel(id)
         if(!user.isLoaded()){
             res.render("用户[" + req["id"] + "]不存在")
             return
@@ -108,8 +109,8 @@ class UserController: Controller()
             // 3 Orm.values(req)
             user.values(req)
             user.update() // update user
-            // 重定向到列表页 | redirect to list page
-            redirect("user/index");
+            // 重定向到详情页 | redirect to detail page
+            redirect("user/detail/$id");
         }else{ // get请求： 渲染视图 | get request: render view
             val view = view() // 默认视图为action名： user/edit | default view's name = action：　user/edit
             view["user"] = user; // 设置视图参数 |  set view data
@@ -143,10 +144,11 @@ class UserController: Controller()
     public fun actionUploadAvatar()
     {
         // 设置上传的子目录，必须要在调用 req 的其他api之前调用，否则无法生效（无法将上传文件保存到指定的子目录）
-        req.uploadSubdir = "" + Date().format("yyyy/MM/dd")
+        req.uploadSubdir = "avatar" + Date().format("yyyy/MM/dd")
 
         // 查询单个用户 | find a user
-        val user = UserModel(req["id"])
+        val id: Int = req["id"]
+        val user = UserModel(id)
         if(!user.isLoaded()){
             res.render("用户[" + req["id"] + "]不存在")
             return
@@ -154,7 +156,10 @@ class UserController: Controller()
 
         // 检查并处理上传文件
         if(req.isUpload()){ // upload请求
-
+            user.avatar = req.getFileRelativePath("avatar")
+            user.update()
+            // 重定向到详情页 | redirect to detail page
+            redirect("user/detail/$id");
         }else{ // get请求： 渲染视图 | get request: render view
             val view = view() // 默认视图为action名： user/edit | default view's name = action：　user/edit
             view["user"] = user; // 设置视图参数 |  set view data

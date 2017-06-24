@@ -29,8 +29,12 @@
         <span><%= user.getName() %></span>
       </div>
       <div class="form-group">
-        <label for="age">Password</label>
+        <label for="age">Age</label>
         <span><%= user.getAge() %></span>
+      </div>
+      <div class="form-group">
+        <label for="avatar">Avatar</label>
+        <span><%=  request.getScheme()+"://"+ request.getServerName() + "/upload/" + user.getAvatar() %></span>
       </div>
     </div>
 

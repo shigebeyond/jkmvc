@@ -21,6 +21,7 @@ class DbTests{
           `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '用户编号',
           `name` varchar(50) NOT NULL DEFAULT '' COMMENT '用户名',
           `age` tinyint(4) unsigned NOT NULL DEFAULT '0' COMMENT '年龄',
+          `avatar` varchar(250) DEFAULT NULL COMMENT '头像',
           PRIMARY KEY (`id`)
         )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户';
         """);
