@@ -1,4 +1,5 @@
-<%@ page language="java" import="com.jkmvc.example.model.UserModel" pageEncoding="UTF-8"%>
+<%@ page language="java" import="com.jkmvc.http.Request,com.jkmvc.example.model.UserModel" pageEncoding="UTF-8"%>
+<% Request req = Request.current(); %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,7 +19,7 @@
     </div>
 
     <!-- Form -->
-    <% UserModel user = (UserModel) request.getAttribute("user"); %>
+    <% UserModel user = (UserModel) req.getAttribute("user"); %>
     <div>
       <div class="form-group">
         <label for="id">id</label>
@@ -32,10 +33,19 @@
         <label for="age">Age</label>
         <span><%= user.getAge() %></span>
       </div>
-      <div class="form-group">
-        <label for="avatar">Avatar</label>
-        <span><%=  request.getScheme()+"://"+ request.getServerName() + "/upload/" + user.getAvatar() %></span>
-      </div>
+      <% if(user.getAvatar() != null){ %>
+          <div class="form-group">
+             <label for="avatar">Avatar</label>
+             <img src="//home/shi/code/java/jkmvc/upload/avatar/2017/06/24/c6ee275c22b84037ba455fed3126392e_th1.jpg" width="150px" height="200px" >
+           </div>
+      <% } %>
+      <form action="<%= req.absoluteUrl("user/uploadAvatar/" + user.getId()) %>" method="post" enctype="multipart/form-data">
+         <div class="form-group">
+           <label for="avatar">avatar</label>
+           <input type="file" class="form-control" id="avatar" placeholder="avatar" name="avatar" value="<%= user.getAvatar() %>">
+         </div>
+         <button type="submit" class="btn btn-default">Upload</button>
+       </form>
     </div>
 
   </div>
