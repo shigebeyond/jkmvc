@@ -1,5 +1,5 @@
 <%@ page language="java" import="java.util.*,com.jkmvc.http.Request,com.jkmvc.example.model.UserModel" pageEncoding="UTF-8"%>
-<% Request req = Request.current(); %>
+<% Request req = (Request) request; %>
 
 <!DOCTYPE html>
 <html lang="en">
