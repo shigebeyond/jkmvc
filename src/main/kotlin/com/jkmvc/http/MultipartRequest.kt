@@ -55,7 +55,7 @@ abstract class MultipartRequest(req: HttpServletRequest) {
      *    递延执行，以便能获得在 controller#action 动态设置的 uploadSubdir，用以构建上传目录
      *    第一次调用 this.mulReq 时，会解析请求中的字段与文件，并将文件保存到指定的目录 = 根目录/子目录
      */
-    protected val mulReq:com.oreilly.servlet.MultipartRequest by lazy{
+    protected val mulReq:com.oreilly.servlet.MultipartRequest by lazy(LazyThreadSafetyMode.NONE){
         if(!uploaded)
             throw Exception("当前请求不是上传文件的请求")
 
@@ -123,7 +123,8 @@ abstract class MultipartRequest(req: HttpServletRequest) {
      */
     public fun getFileRelativePath(name: String): String{
         val file = mulReq.getFile(name);
-        return file.path.substring(uploadConfig["uploadDirectory"]!!.length)
+        val uploadDirLen = uploadConfig["uploadDirectory"]!!.length + 1 // 如 upload/
+        return file.path.substring(uploadDirLen)
     }
 
 }

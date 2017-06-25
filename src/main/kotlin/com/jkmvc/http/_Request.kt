@@ -29,7 +29,7 @@ public fun HttpServletRequest.isGet(): Boolean {
  * @return
  */
 public fun HttpServletRequest.isMultipartContent(): Boolean{
-    return contentType.toLowerCase() == "multipart/form-data"
+    return contentType.toLowerCase().startsWith("multipart/form-data")
 }
 
 /**
