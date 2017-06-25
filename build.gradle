@@ -15,6 +15,7 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'org.akhikhl.gretty:gretty:+'
     }
 }
 
@@ -31,7 +32,7 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'kotlin'
 apply plugin: 'war'
-apply plugin:"jetty"
+apply plugin: 'org.akhikhl.gretty'
 
 sourceCompatibility = 1.5
 
@@ -44,19 +45,27 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile 'org.slf4j:slf4j-api:1.7.12'
     compile 'com.alibaba:druid:1.0.25'
-    compile 'com.h2database:h2:1.4.186'
+    // upload
     compile 'servlets.com:cos:05Nov2002'
 
+    // servlet
     providedCompile "javax.servlet:javax.servlet-api:3.1.0"
     providedCompile "javax.servlet.jsp:jsp-api:2.2.1-b03"
     providedCompile "javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1"
 
-    testCompile 'org.eclipse.jetty:jetty-server:9.4.6.v20170531'
+    // test
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testCompile 'org.slf4j:slf4j-log4j12:1.7.12'
     testCompile 'log4j:log4j:1.2.17'
     testCompile 'junit:junit:4.11'
 
+    // server
+//    testCompile "org.eclipse.jetty.aggregate:jetty-all:$jetty_version"
+    testCompile "org.eclipse.jetty:jetty-webapp:$jetty_version"
+    testRuntime "org.eclipse.jetty:jetty-jsp:$jetty_version"
+    testRuntime "org.eclipse.jetty:jetty-servlet:$jetty_version"
+
+    // db
     providedRuntime "mysql:mysql-connector-java:5.1.6"
 //    providedRuntime 'com.h2database:h2:1.4.186'
 //    providedRuntime 'org.postgresql:postgresql:9.4.1208.jre7'
@@ -82,11 +91,8 @@ dependencies {
     }
 }*/
 
-jettyRun{
-    webAppSourceDirectory file("$projectDir/src/main/webapp")
-    httpPort 8081
-    contextPath project.name
-    contextHandlers []
-    scanIntervalSeconds 1 // jetty 热部署，当值为0时，不扫描新class，不热部署
-    reload "automatic"
+gretty {
+//    port = 8081
+    contextPath = project.name
+    scanInterval = 1 // jetty 热部署，当值为0时，不扫描新class，不热部署
 }
