@@ -156,7 +156,7 @@ class UserController: Controller()
 
         // 检查并处理上传文件
         if(req.isUpload()){ // upload请求
-            user.avatar = req.getFileRelativePath("avatar")
+            user.avatar = req.uploadRelativePath("avatar")
             user.update()
             // 重定向到详情页 | redirect to detail page
             redirect("user/detail/$id");
