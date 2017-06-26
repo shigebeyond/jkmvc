@@ -36,7 +36,7 @@
       <% if(user.getAvatar() != null){ %>
           <div class="form-group">
              <label for="avatar">Avatar</label>
-             <img src="//home/shi/code/java/jkmvc/upload/avatar/2017/06/24/c6ee275c22b84037ba455fed3126392e_th1.jpg" width="150px" height="200px" >
+             <img src="<%= req.uploadUrl(user.getAvatar())%>" width="150px" height="200px" >
            </div>
       <% } %>
       <form class="form-inline" action="<%= req.absoluteUrl("user/uploadAvatar/" + user.getId()) %>" method="post" enctype="multipart/form-data">
