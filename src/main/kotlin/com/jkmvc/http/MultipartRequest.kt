@@ -14,13 +14,13 @@ import javax.servlet.http.HttpServletRequest
  * @author shijianhang<772910474@qq.com>
  * @date 6/23/17 7:58 PM
  */
-abstract class MultipartRequest(req: HttpServletRequest) {
+abstract class MultipartRequest(protected val req:HttpServletRequest /* 请求对象 */): HttpServletRequest by req{
 
     companion object{
         /**
          * 上传配置
          */
-        protected val uploadConfig = Config.instance("upload")!!
+        public val uploadConfig = Config.instance("upload")!!
 
         /**
          * 上传文件的最大size
@@ -38,6 +38,12 @@ abstract class MultipartRequest(req: HttpServletRequest) {
          */
         protected val uploadPolicy: FileRenamePolicy = DefaultFileRenamePolicy()
     }
+
+    /**
+     * 服务器的url
+     */
+    public val serverUrl:String
+        get() = req.getScheme() + "://" + req.getServerName() + ':' + req.getServerPort()
 
     /**
      * 是否是上传文件的请求
@@ -121,10 +127,18 @@ abstract class MultipartRequest(req: HttpServletRequest) {
      * @param name
      * @return
      */
-    public fun getFileRelativePath(name: String): String{
+    public fun uploadRelativePath(name: String): String{
         val file = mulReq.getFile(name);
         val uploadDirLen = uploadConfig["uploadDirectory"]!!.length + 1 // 如 upload/
         return file.path.substring(uploadDirLen)
     }
 
+    /**
+     * 获得上传文件的url
+     * @param relativePath 相对路径
+     * @return
+     */
+    public fun uploadUrl(relativePath:String):String {
+        return serverUrl + contextPath + '/' + uploadConfig["uploadDirectory"] + '/' + relativePath;
+    }
 }
