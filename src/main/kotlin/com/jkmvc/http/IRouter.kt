@@ -12,10 +12,9 @@ package com.jkmvc.http
 interface IRouter
 {
 	/**
-	 * 要跳过的目录
-	 * 　　对指定目录下的uri不进行路由解析，主要用于处理静态文件或上传文件
+	 * 静态文件uri的正则
 	 */
-	var skipedDirectories: Array<String>?
+	var staticFileRegex: String
 
 	/**
 	 * 添加路由
@@ -23,13 +22,6 @@ interface IRouter
 	 * @parma route 路由对象
 	 */
 	fun addRoute(name:String, route:Route): Router
-
-	/**
-	 * 是否跳过解析该url
-	 * 　　对属性 skipedDirectories 指定目录下的uri不进行路由解析，主要用于处理静态文件或上传文件
-	 * @return
-	 */
-	fun isSkip(uri:String): Boolean
 
 	/**
 	 * 解析路由：匹配规则

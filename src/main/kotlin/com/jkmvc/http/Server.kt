@@ -18,14 +18,14 @@ object Server:IServer {
      *
      * @param req
      * @param res
-     * @return 是否处理，如果没有处理，则交给下一个filter/默认servlet来处理，如处理静态文件请求
+     * @return 是否处理，如果没有处理（如静态文件请求），则交给下一个filter/默认servlet来处理
      */
     public override fun run(request: HttpServletRequest, response: HttpServletResponse):Boolean{
         //　构建请求对象
         val req:Request = Request(request);
 
-        //　跳过路由解析: 对指定目录下的uri不进行路由解析，主要用于处理静态文件或上传文件
-        if(req.isSkipRoute())
+        //　如果是静态文件请求，则跳过路由解析
+        if(req.isStaticFile())
             return false;
 
         // 构建响应对象

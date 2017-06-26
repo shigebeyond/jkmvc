@@ -21,9 +21,6 @@ class MyFilter: JkFilter() {
                 Route("<controller>(\\/<action>(\\/<id>)?)?", // url正则 | url pattern
                     mapOf("id" to "\\d+"), // 参数子正则 | param pattern
                     mapOf("controller" to "welcome", "action" to "index"))); // default param
-        //　跳过解析以下目录，一般针对静态文件或上传文件的目录
-        // skip route for those diretories，eg static files and uploaded files
-        Router.skipedDirectories = arrayOf("upload")
         // 添加扫描controller的包
         // add package path to scan Controller
         ControllerLoader.addPackage("com.jkmvc.example.controller");

@@ -13,7 +13,7 @@ import kotlin.reflect.KClass
  * @date 2016-10-6 上午9:27:56
  *
  */
-class Request(protected val req:HttpServletRequest /* 请求对象 */):MultipartRequest(req), HttpServletRequest by req
+class Request(req:HttpServletRequest):MultipartRequest(req)
 {
 	companion object{
 		/**
@@ -58,12 +58,11 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):Multipart
 	}
 
 	/**
-	 * 是否要跳过路由解析
-	 * 　　对属性 skipedDirectories 指定目录下的uri不进行路由解析，主要用于处理静态文件或上传文件
+	 * 是否是静态文件请求，如果是则不进行路由解析
 	 * @return
 	 */
-	public fun isSkipRoute(): Boolean {
-		return Router.isSkip(routeUri)
+	public fun isStaticFile(): Boolean {
+		return Router.staticFileRegex.toRegex().matches(routeUri)
 	}
 
 	/**
@@ -360,14 +359,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):Multipart
 		if(uri.startsWith("http"))
 			return uri;
 
-		return serverUrl() + contextPath + '/' + uri;
+		return serverUrl + contextPath + '/' + uri;
 	}
 
-	/**
-	 * 服务器的url
-	 * @return
-	 */
-	public fun serverUrl(): String {
-		return req.getScheme() + "://" + req.getServerName() + ':' + req.getServerPort()
-	}
 }
