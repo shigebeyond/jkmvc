@@ -18,13 +18,20 @@ object Server:IServer {
      *
      * @param req
      * @param res
+     * @return 是否处理，如果没有处理，则交给下一个filter/默认servlet来处理，如处理静态文件请求
      */
     public override fun run(request: HttpServletRequest, response: HttpServletResponse):Boolean{
-        // 构建请求与响应对象
+        //　构建请求对象
         val req:Request = Request(request);
+
+        //　跳过路由解析: 对指定目录下的uri不进行路由解析，主要用于处理静态文件或上传文件
+        if(req.isSkipRoute())
+            return false;
+
+        // 构建响应对象
         val res:Response = Response(response);
 
-        try {
+        try{
             // 解析路由
             if (!req.parseRoute())
                 throw RouteException("当前uri没有匹配路由：" + req.requestURI);

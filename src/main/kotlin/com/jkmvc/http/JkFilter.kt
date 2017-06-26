@@ -15,7 +15,8 @@ open class JkFilter : Filter {
         // 处理请求
         val handled = Server.run(req as HttpServletRequest, res as HttpServletResponse)
 
-        //　后续处理，暂时没有
+        //　如果没有处理，则交给下一个filter来使用默认servlet来处理，如处理静态文件/上传文件
+        // if not handled, we delegate to next filter to use the default servlets, to serve static files　/ uploaded files
         if(!handled)
             chain.doFilter(req, res)
     }

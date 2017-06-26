@@ -1,9 +1,6 @@
 package com.jkmvc.http
 
-import com.jkmvc.common.getOrDefault
-import com.jkmvc.common.to
-import com.jkmvc.common.toDate
-import com.jkmvc.common.trim
+import com.jkmvc.common.*
 import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
@@ -39,6 +36,12 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):Multipart
 	}
 
 	/**
+	 * 获得要解析的uri
+	 *   1 去掉头部的contextPath
+	 *   2 去掉末尾的/
+	 */
+	public val routeUri:String = requestURI.trim(contextPath + '/', "/")
+	/**
 	 * 当前匹配的路由规则
 	 */
 	public lateinit var route:Route;
@@ -55,15 +58,21 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):Multipart
 	}
 
 	/**
+	 * 是否要跳过路由解析
+	 * 　　对属性 skipedDirectories 指定目录下的uri不进行路由解析，主要用于处理静态文件或上传文件
+	 * @return
+	 */
+	public fun isSkipRoute(): Boolean {
+		return Router.isSkip(routeUri)
+	}
+
+	/**
 	 * 解析路由
 	 * @return
 	 */
 	public fun parseRoute(): Boolean {
-		// 获得要解析的uri: contextPath不作为路由解析
-		//val uri = requestURI.trim(contextPath + '/')
-		val uri = requestURI.substring(contextPath.length + 1)
 		// 解析路由
-		val result = Router.parse(uri);
+		val result = Router.parse(routeUri);
 
 		if(result != null){
 			this.params = result.component1();
@@ -351,7 +360,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):Multipart
 		if(uri.startsWith("http"))
 			return uri;
 
-		return serverUrl() + contextPath + uri;
+		return serverUrl() + contextPath + '/' + uri;
 	}
 
 	/**

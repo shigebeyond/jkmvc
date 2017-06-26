@@ -19,12 +19,33 @@ object Router:IRouter
 	val routes:MutableMap<String, Route> = HashMap<String, Route>();
 
 	/**
+	 * 要跳过的目录
+	 * 　　对指定目录下的uri不进行路由解析，主要用于处理静态文件或上传文件
+	 */
+	public override var skipedDirectories: Array<String>? = null
+
+	/**
 	 * 添加路由
 	 * @param name 路由名
 	 * @parma route 路由对象
 	 */
-	public override fun addRoute(name:String, route:Route):Unit{
+	public override fun addRoute(name:String, route:Route): Router {
 		routes[name] = route;
+		return this
+	}
+
+	/**
+	 * 是否跳过对该url的路由解析
+	 * 　　对属性 skipedDirectories 指定目录下的uri不进行路由解析，主要用于处理静态文件或上传文件
+	 * @return
+	 */
+	public override fun isSkip(uri:String): Boolean {
+		if(skipedDirectories != null)
+			for(dir in skipedDirectories!!)
+				if(uri.startsWith(dir))
+					return true
+
+		return false
 	}
 
 	/**

@@ -17,6 +17,7 @@ interface IServer {
      *
      * @param HttpServletRequest req
      * @param HttpServletResponse res
+     * @return 是否处理，如果没有处理，则交给下一个filter/默认servlet来处理，如处理静态文件请求
      */
     public fun run(request: HttpServletRequest, response: HttpServletResponse): Boolean
 
