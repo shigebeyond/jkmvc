@@ -21,6 +21,18 @@ fun Char.convertBytes():Int{
 }
 
 /**
+ * 判断是否是绝对路径
+ * @param path
+ * @return
+ */
+fun String.isAbsolutePath(): Boolean {
+    if (startsWith("/") || indexOf(":") > 0) {
+        return true
+    }
+    return false
+}
+
+/**
  * 遍历文件
  * @param action 访问者函数
  */
