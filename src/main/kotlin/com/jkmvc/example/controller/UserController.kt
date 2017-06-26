@@ -109,8 +109,8 @@ class UserController: Controller()
             // 3 Orm.values(req)
             user.values(req)
             user.update() // update user
-            // 重定向到详情页 | redirect to detail page
-            redirect("user/detail/$id");
+            // 重定向到列表页 | redirect to list page
+            redirect("user/index");
         }else{ // get请求： 渲染视图 | get request: render view
             val view = view() // 默认视图为action名： user/edit | default view's name = action：　user/edit
             view["user"] = user; // 设置视图参数 |  set view data

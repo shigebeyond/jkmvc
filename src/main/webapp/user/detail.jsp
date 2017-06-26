@@ -39,7 +39,7 @@
              <img src="//home/shi/code/java/jkmvc/upload/avatar/2017/06/24/c6ee275c22b84037ba455fed3126392e_th1.jpg" width="150px" height="200px" >
            </div>
       <% } %>
-      <form action="<%= req.absoluteUrl("user/uploadAvatar/" + user.getId()) %>" method="post" enctype="multipart/form-data">
+      <form class="form-inline" action="<%= req.absoluteUrl("user/uploadAvatar/" + user.getId()) %>" method="post" enctype="multipart/form-data">
          <div class="form-group">
            <label for="avatar">avatar</label>
            <input type="file" class="form-control" id="avatar" placeholder="avatar" name="avatar" value="<%= user.getAvatar() %>">
