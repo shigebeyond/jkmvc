@@ -3,6 +3,7 @@ package com.jkmvc.http
 import com.jkmvc.common.getOrDefault
 import com.jkmvc.common.to
 import com.jkmvc.common.toDate
+import com.jkmvc.common.trim
 import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
@@ -58,8 +59,11 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):Multipart
 	 * @return
 	 */
 	public fun parseRoute(): Boolean {
+		// 获得要解析的uri: contextPath不作为路由解析
+		//val uri = requestURI.trim(contextPath + '/')
+		val uri = requestURI.substring(contextPath.length + 1)
 		// 解析路由
-		val result = Router.parse(requestURI);
+		val result = Router.parse(uri);
 
 		if(result != null){
 			this.params = result.component1();
@@ -347,7 +351,7 @@ class Request(protected val req:HttpServletRequest /* 请求对象 */):Multipart
 		if(uri.startsWith("http"))
 			return uri;
 
-		return serverUrl() + Router.baseUri + uri;
+		return serverUrl() + contextPath + uri;
 	}
 
 	/**

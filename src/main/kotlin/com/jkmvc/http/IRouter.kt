@@ -12,11 +12,6 @@ package com.jkmvc.http
 interface IRouter
 {
 	/**
-	* 根url，不作为路由解析
-	 */
-	public var baseUri:String
-
-	/**
 	 * 添加路由
 	 * @param name 路由名
 	 * @parma route 路由对象

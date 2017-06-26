@@ -19,7 +19,7 @@ object Server:IServer {
      * @param req
      * @param res
      */
-    public override fun run(request: HttpServletRequest, response: HttpServletResponse) {
+    public override fun run(request: HttpServletRequest, response: HttpServletResponse):Boolean{
         // 构建请求与响应对象
         val req:Request = Request(request);
         val res:Response = Response(response);
@@ -31,6 +31,7 @@ object Server:IServer {
 
             // 调用路由对应的controller与action
             callController(req, res);
+            return true;
         }
         /* catch (e：RouteException)
         {
@@ -40,6 +41,7 @@ object Server:IServer {
         catch (e: Exception) {
 //            res.render("异常 - " + e.message)
             e.printStackTrace(res.prepareWriter())
+            return true
         }
 
     }

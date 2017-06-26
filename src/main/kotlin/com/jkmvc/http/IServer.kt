@@ -18,6 +18,6 @@ interface IServer {
      * @param HttpServletRequest req
      * @param HttpServletResponse res
      */
-    public fun run(request: HttpServletRequest, response: HttpServletResponse)
+    public fun run(request: HttpServletRequest, response: HttpServletResponse): Boolean
 
 }

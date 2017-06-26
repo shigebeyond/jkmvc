@@ -43,10 +43,6 @@ vim src/main/webapp/WEB-INF/web.xml
 	<filter>
 		<filter-name>jkmvc</filter-name>
 		<filter-class>com.jkmvc.example.MyFilter</filter-class>
-		<init-param>
-			<param-name>baseUri</param-name>
-			<param-value>/jkmvc/</param-value>
-		</init-param>
 	</filter>
 	
 	<filter-mapping>
