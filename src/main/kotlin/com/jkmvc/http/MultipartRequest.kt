@@ -139,6 +139,9 @@ abstract class MultipartRequest(protected val req:HttpServletRequest /* 请求�
      * @return
      */
     public fun uploadUrl(relativePath:String):String {
-        return serverUrl + contextPath + '/' + uploadConfig["uploadDirectory"] + '/' + relativePath;
+        if(uploadConfig["uploadDomain"] == null)
+            return serverUrl + contextPath + '/' + uploadConfig["uploadDirectory"] + '/' + relativePath;
+        else
+            return uploadConfig["uploadDomain"] + '/' + relativePath;
     }
 }
