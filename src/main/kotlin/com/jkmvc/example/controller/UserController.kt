@@ -143,7 +143,8 @@ class UserController: Controller()
      */
     public fun actionUploadAvatar()
     {
-        // 设置上传的子目录，必须要在调用 req 的其他api之前调用，否则无法生效（无法将上传文件保存到指定的子目录）
+        // 设置上传的子目录（将上传文件保存到指定的子目录），必须要在调用 req 的其他api之前调用，否则无法生效
+        // set uploadSubdir which uploaded file is saved, you must set it before calling req's other api, or it's useless
         req.uploadSubdir = "avatar/" + Date().format("yyyy/MM/dd")
 
         // 查询单个用户 | find a user
@@ -154,16 +155,14 @@ class UserController: Controller()
             return
         }
 
-        // 检查并处理上传文件
-        if(req.isUpload()){ // upload请求
-            user.avatar = req.uploadRelativePath("avatar")
+        // 检查并处理上传文件 | check and handle upload request
+        if(req.isUpload()){ // 检查上传请求 | check upload request
+            user.avatar = req.getUploadRelativePath("avatar")
             user.update()
-            // 重定向到详情页 | redirect to detail page
-            redirect("user/detail/$id");
-        }else{ // get请求： 跳转到详情页
-            redirect("user/detail/$id");
         }
 
+        // 重定向到详情页 | redirect to detail page
+        redirect("user/detail/$id");
     }
 
 }

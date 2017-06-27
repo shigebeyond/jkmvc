@@ -127,7 +127,7 @@ abstract class MultipartRequest(protected val req:HttpServletRequest /* 请求�
      * @param name
      * @return
      */
-    public fun uploadRelativePath(name: String): String{
+    public fun getUploadRelativePath(name: String): String{
         val file = mulReq.getFile(name);
         val uploadDirLen = uploadConfig["uploadDirectory"]!!.length + 1 // 如 upload/
         return file.path.substring(uploadDirLen)
