@@ -182,6 +182,7 @@ CREATE TABLE `user` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '用户编号',
   `name` varchar(50) NOT NULL DEFAULT '' COMMENT '用户名',
   `age` tinyint(4) unsigned NOT NULL DEFAULT '0' COMMENT '年龄',
+  `avatar` varchar(250) DEFAULT NULL COMMENT '头像',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8 COMMENT='用户'
 ```
@@ -237,6 +238,8 @@ class UserModel(id:Int? = null): Orm(id) {
     public var name:String by property<String>();
 
     public var age:Int by property<Int>();
+
+    public var avatar:String? by property<String?>();
 
     // 关联地址：一个用户有一个地址
     // relate to AddressModel: user has an address
@@ -423,6 +426,34 @@ class UserController: Controller()
         user.delete();
         // 重定向到列表页 | redirect to list page
         redirect("user/index");
+    }
+
+    /**
+     * 上传头像
+     * upload avatar
+     */
+    public fun actionUploadAvatar()
+    {
+        // 设置上传的子目录（将上传文件保存到指定的子目录），必须要在调用 req 的其他api之前调用，否则无法生效
+        // set uploadSubdir which uploaded file is saved, you must set it before calling req's other api, or it's useless
+        req.uploadSubdir = "avatar/" + Date().format("yyyy/MM/dd")
+
+        // 查询单个用户 | find a user
+        val id: Int = req["id"]
+        val user = UserModel(id)
+        if(!user.isLoaded()){
+            res.render("用户[" + req["id"] + "]不存在")
+            return
+        }
+
+        // 检查并处理上传文件 | check and handle upload request
+        if(req.isUpload()){ // 检查上传请求 | check upload request
+            user.avatar = req.getUploadRelativePath("avatar")
+            user.update()
+        }
+
+        // 重定向到详情页 | redirect to detail page
+        redirect("user/detail/$id");
     }
 }
 ```
