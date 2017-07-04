@@ -13,7 +13,7 @@ import java.util.*
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-class Db(protected val conn: Connection /* 数据库连接 */, protected val name:String = "default" /* 标识 */):IDb{
+class Db(protected val conn: Connection /* 数据库连接 */, public val name:String = "default" /* 标识 */):IDb{
 
     companion object {
         /**
@@ -149,18 +149,6 @@ class Db(protected val conn: Connection /* 数据库连接 */, protected val nam
      */
     public override fun batchExecute(sql: String, paramses: List<Any?>, paramSize:Int): IntArray {
         return conn.batchExecute(sql, paramses, paramSize)
-    }
-
-    /**
-     * 批量更新：每次更新sql参数一样，相当于多次执行同一条sql
-     *
-     * @param sql
-     * @param batchNum 批处理的次数
-     * @param params 参数
-     * @return
-     */
-    public override fun batchExecute(sql: String, batchNum:Int, params:List<Any?>?): IntArray {
-        return conn.batchExecute(sql, batchNum, params)
     }
 
     /**
