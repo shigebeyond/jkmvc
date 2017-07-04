@@ -45,17 +45,6 @@ interface IDb{
     fun batchExecute(sql: String, paramses: List<Any?>, paramSize:Int): IntArray;
 
     /**
-     * Connection扩展
-     * 批量更新：每次更新sql参数一样，相当于多次执行同一条sql
-     *
-     * @param sql
-     * @param batchNum 批处理的次数
-     * @param params 参数
-     * @return
-     */
-    fun batchExecute(sql: String, batchNum:Int, params:List<Any?>? = null): IntArray;
-
-    /**
      * 查询多行
      * @param sql
      * @param paras

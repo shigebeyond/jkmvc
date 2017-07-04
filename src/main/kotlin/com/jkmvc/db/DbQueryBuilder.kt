@@ -203,21 +203,6 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
     }
 
     /**
-     * 批量更新 无参数的sql
-     *
-     * @param action sql动作：select/insert/update/delete
-     * @param batchNum 批处理的次数
-     * @return
-     */
-    public override fun batchExecute(action:ActionType, batchNum:Int): IntArray {
-        // 1 编译
-        val result = compile(action);
-
-        // 2 批量执行有参数sql
-        return db.batchExecute(result.sql, batchNum, result.staticParams);
-    }
-
-    /**
      * 统计行数： count语句
      *
      * @param params 动态参数

@@ -78,36 +78,6 @@ public fun Connection.batchExecute(sql: String, paramses: List<Any?>, paramSize:
 }
 
 /**
- * Connection扩展
- * 批量更新：每次更新sql参数一样，相当于多次执行同一条sql
- *
- * @param sql
- * @param batchNum 批处理的次数
- * @param params 参数
- * @return
- */
-public fun Connection.batchExecute(sql: String, batchNum:Int, params:List<Any?>? = null): IntArray {
-    var pst: PreparedStatement? = null
-    try{
-        // 准备sql语句
-        pst = prepareStatement(sql)
-        // 逐次处理sql
-        for(i in 0..(batchNum - 1)){
-            // 设置参数
-            if(params != null)
-                for (i in params.indices)
-                    pst.setObject(i + 1, params[i])
-            // 添加sql
-            pst.addBatch();
-        }
-        // 批量执行sql
-        return pst.executeBatch()
-    }finally{
-        pst?.close()
-    }
-}
-
-/**
  * 查询多行
 
  * @param sql

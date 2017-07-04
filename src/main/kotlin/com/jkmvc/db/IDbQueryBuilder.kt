@@ -107,15 +107,6 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
     public abstract fun batchExecute(action:ActionType, paramses: List<Any?>, paramSize:Int): IntArray;
 
     /**
-     * 批量更新 无参数的sql
-     *
-     * @param action sql动作：select/insert/update/delete
-     * @param batchNum 批处理的次数
-     * @return
-     */
-    public abstract fun batchExecute(action:ActionType, batchNum:Int): IntArray;
-
-    /**
      * 统计行数： count语句
      *
      * @param params 动态参数
