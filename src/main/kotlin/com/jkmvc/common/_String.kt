@@ -53,19 +53,6 @@ public inline fun String.lcFirst(): String {
 }
 
 /**
- * 日期格式
- */
-val dateFormat = SimpleDateFormat("yyyy-MM-dd")
-
-/**
- * 转换为日期类型
- * @return
- */
-public fun String.toDate(): Date {
-    return dateFormat.parse(this)
-}
-
-/**
  * 去掉两头的字符
  *
  * @param str 要去掉的字符串
@@ -136,6 +123,20 @@ public inline fun String.replaces(params:Map<String, Any?>):String
     };
 }
 
+/****************************** 字符串转化其他类型 *******************************/
+/**
+ * 日期格式
+ */
+val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+
+/**
+ * 转换为日期类型
+ * @return
+ */
+public fun String.toDate(): Date {
+    return dateFormat.parse(this)
+}
+
 /**
  * 将字符串转换为指定类型的可空值
  * @param class 要转换的类型
@@ -159,13 +160,15 @@ public inline fun <T: Any> String?.toNullable(clazz: KClass<T>, defaultValue: T?
 public inline fun <T: Any> String.to(clazz: KClass<T>): T{
     var result: Any?;
     when(clazz){
+        String::class -> result = this
         Int::class -> result = this.toInt()
         Float::class -> result = this.toFloat()
         Double::class -> result = this.toDouble()
         Boolean::class -> result = this.toBoolean()
         Short::class -> result = this.toShort()
         Byte::class -> result = this.toByte()
-        else -> result = this;
+        Date::class -> result = this.toDate()
+        else -> throw IllegalArgumentException("字符串不能自动转换为未识别的类型: " + clazz)
     }
     return result as T;
 }
