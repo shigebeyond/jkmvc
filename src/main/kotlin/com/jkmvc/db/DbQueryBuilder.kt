@@ -63,22 +63,7 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
      * @return 转换的匿名函数
      */
     public override fun <T:Any> getRecordTranformer(clazz: KClass<T>): ((MutableMap<String, Any?>) -> T) {
-        // 1 如果是map类，则直接返回
-        if(Map::class.java.isAssignableFrom(clazz.java)){
-            return {
-                it as T;
-            }
-        }
-        // 2 否则，调用其构造函数
-        // 获得类的构造函数
-        val construtor = clazz.findConstructor(listOf(MutableMap::class.java))
-        if(construtor == null)
-            throw UnsupportedOperationException("类${clazz}没有构造函数constructor(MutableMap)");
-
-        // 调用构造函数
-        return {
-            construtor.call(it) as T; // 转换一行数据: 直接调用构造函数
-        }
+        return clazz.recordTranformer
     }
 
     /**

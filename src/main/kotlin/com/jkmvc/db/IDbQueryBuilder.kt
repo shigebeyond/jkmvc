@@ -84,8 +84,11 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
 
     /**
      * 查找多个： select 语句
-     *  对 findAll(transform:(MutableMap<String, Any?>) 的精简版，直接根据泛型 T 来找到其构造函数来创建对象
-     *  泛型 T 必须实现带 Map 参数的构造函数，如 constructor(data: MutableMap<String, Any?>)
+     *  对 findAll(transform:(MutableMap<String, Any?>) 的精简版，直接根据泛型 T 来找到对应的记录转换器
+     *  泛型 T 有3类情况，会生成不同的记录转换器
+     *  1 Orm类：实例化并调用original()
+     *  2 Map类: 直接返回记录数据，不用转换
+     *  3 其他类：如果实现带 Map 参数的构造函数，如 constructor(data: MutableMap<String, Any?>)，就调用
      *
      * @param params 动态参数
      * @return 列表
@@ -100,8 +103,11 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
 
     /**
      * 查找一个： select ... limit 1语句
-     *  对 find(transform:(MutableMap<String, Any?>) 的精简版，直接根据泛型 T 来找到其构造函数来创建对象
-     *  泛型 T 必须实现带 Map 参数的构造函数，如 constructor(data: MutableMap<String, Any?>)
+     *  对 find(transform:(MutableMap<String, Any?>) 的精简版，直接根据泛型 T 来找到对应的记录转换器
+     *  泛型 T 有3类情况，会生成不同的记录转换器
+     *  1 Orm类：实例化并调用original()
+     *  2 Map类: 直接返回记录数据，不用转换
+     *  3 其他类：如果实现带 Map 参数的构造函数，如 constructor(data: MutableMap<String, Any?>)，就调用
      *
      * @param params 动态参数
      * @return 一个数据

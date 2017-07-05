@@ -1,9 +1,12 @@
 package com.jkmvc.db
 
+import com.jkmvc.common.findConstructor
+import com.jkmvc.orm.IOrm
 import java.io.InputStream
 import java.io.Reader
 import java.sql.*
 import java.util.*
+import kotlin.reflect.KClass
 
 /****************************** Connection直接提供查询与更新数据的方法 *******************************/
 /**
@@ -284,3 +287,43 @@ public fun Clob?.toString(): String? {
         reader?.close()
     }
 }
+
+/****************************** 记录转换器 *******************************/
+/**
+ * 获得类的记录转换器
+ *   不同的目标类型，有不同的记录转换器
+ *   1 Orm类：实例化并调用original()
+ *   2 Map类: 直接返回记录数据，不用转换
+ *   3 其他类：如果实现带 Map 参数的构造函数，如 constructor(data: MutableMap<String, Any?>)，就调用
+ *
+ * @param clazz 要转换的类
+ * @return 转换的匿名函数
+ */
+public val <T:Any> KClass<T>.recordTranformer: ((MutableMap<String, Any?>) -> T)
+    get(){
+        // 1 如果是orm类，则实例化并调用original()
+        if(IOrm::class.java.isAssignableFrom(java)){
+            return {
+                val obj = java.newInstance() as IOrm;
+                obj.original(it) as T
+            }
+        }
+
+        // 2 如果是map类，则直接返回，不用转换
+        if(Map::class.java.isAssignableFrom(java)){
+            return {
+                it as T;
+            }
+        }
+
+        // 3 否则，调用该类的构造函数（假定该类有接收map参数的构建函数）
+        // 获得类的构造函数
+        val construtor = this.findConstructor(listOf(MutableMap::class.java))
+        if(construtor == null)
+            throw UnsupportedOperationException("类${this}没有构造函数constructor(MutableMap)");
+
+        // 调用构造函数
+        return {
+            construtor.call(it) as T; // 转换一行数据: 直接调用构造函数
+        }
+    }
