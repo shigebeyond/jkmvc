@@ -147,7 +147,7 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	 */
 	public override fun setStatus(status: Int):Unit {
 		if(!messages.containsKey(status))
-			throw Exception("无效响应状态码");
+			throw IllegalArgumentException("无效响应状态码");
 
 		res.setStatus(status)
 	}

@@ -96,7 +96,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
         // 检查动态参数个数
         val size = dynamicParamsSize;
         if(dynamicParams.size != size)
-            throw DbException("动态参数个数不对：需要 $size 个，传递 ${dynamicParams.size} ");
+            throw IllegalArgumentException("动态参数个数不对：需要 $size 个，传递 ${dynamicParams.size} ");
 
         // 构建实际参数：将静态参数中?，替换为动态参数
         return collectParams(ArrayList<Any?>(staticParams.size), dynamicParams)
@@ -138,11 +138,11 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
         // 检查动态参数个数
         val size = dynamicParamsSize;
         if(paramSize != size)
-            throw DbException("动态参数个数不对：需要 $size 个，传递 $paramSize ");
+            throw IllegalArgumentException("动态参数个数不对：需要 $size 个，传递 $paramSize ");
 
         // 计算批处理的次数
         if(paramSize <= 0)
-            throw DbException("参数个数只能为正整数，但实际为 $paramSize");
+            throw IllegalArgumentException("参数个数只能为正整数，但实际为 $paramSize");
         if(dynamicParamses.size % paramSize > 0)
             throw Exception("paramses 的大小必须是指定参数个数 $paramSize 的整数倍");
         val batchNum:Int = dynamicParamses.size / paramSize

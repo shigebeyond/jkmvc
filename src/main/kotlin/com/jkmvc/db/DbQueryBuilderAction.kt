@@ -31,7 +31,7 @@ class InsertData: Cloneable{
         // 字段值数，是字段名数的整数倍
         val columnSize = columns!!.size
         if(rowSize % columnSize != 0)
-            throw DbException("请插入的字段值数[$rowSize]与字段名数[$columnSize]不匹配");
+            throw IllegalArgumentException("请插入的字段值数[$rowSize]与字段名数[$columnSize]不匹配");
     }
 
     /**

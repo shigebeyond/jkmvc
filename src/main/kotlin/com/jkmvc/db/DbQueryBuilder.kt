@@ -73,7 +73,7 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
         // 获得类的构造函数
         val construtor = clazz.findConstructor(listOf(MutableMap::class.java))
         if(construtor == null)
-            throw RuntimeException("类${clazz}没有构造函数constructor(MutableMap)");
+            throw UnsupportedOperationException("类${clazz}没有构造函数constructor(MutableMap)");
 
         // 调用构造函数
         return {

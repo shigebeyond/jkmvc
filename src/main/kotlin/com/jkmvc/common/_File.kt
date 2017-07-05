@@ -15,7 +15,7 @@ val fileSizeUnits: String = "BKMGT";
 fun Char.convertBytes():Int{
     val i:Int = fileSizeUnits.indexOf(this);
     if(i == -1)
-        throw Exception("无效文件大小单位: $this");
+        throw IllegalArgumentException("无效文件大小单位: $this");
 
     return Math.pow(1024.toDouble(), i.toDouble()).toInt()
 }

@@ -53,9 +53,9 @@ public fun Connection.execute(sql: String, params: List<Any?>? = null, returnGen
 public fun Connection.batchExecute(sql: String, paramses: List<Any?>, paramSize:Int): IntArray {
     // 计算批处理的次数
     if(paramSize <= 0)
-        throw DbException("参数个数只能为正整数，但实际为 $paramSize");
+        throw IllegalArgumentException("参数个数只能为正整数，但实际为 $paramSize");
     if(paramses.size % paramSize > 0)
-        throw Exception("paramses 的大小必须是指定参数个数 $paramSize 的整数倍");
+        throw IllegalArgumentException("paramses 的大小必须是指定参数个数 $paramSize 的整数倍");
     val batchNum:Int = paramses.size / paramSize
 
     var pst: PreparedStatement? = null

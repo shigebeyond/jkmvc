@@ -63,7 +63,7 @@ abstract class MultipartRequest(protected val req:HttpServletRequest /* 请求�
      */
     protected val mulReq:com.oreilly.servlet.MultipartRequest by lazy(LazyThreadSafetyMode.NONE){
         if(!uploaded)
-            throw Exception("当前请求不是上传文件的请求")
+            throw UnsupportedOperationException("当前请求不是上传文件的请求")
 
         com.oreilly.servlet.MultipartRequest(req, prepareUploadDirectory(), maxPostSize, uploadConfig["encoding"], uploadPolicy)
     }

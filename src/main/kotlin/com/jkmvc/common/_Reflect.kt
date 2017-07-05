@@ -16,7 +16,7 @@ import kotlin.reflect.jvm.javaType
  */
 public fun Any.forceClone():Any {
     if(!(this is Cloneable))
-        throw Exception("非Cloneable对象，不能调用clone()方法")
+        throw IllegalArgumentException("非Cloneable对象，不能调用clone()方法")
 
     val f:KFunction<*> = javaClass.kotlin.findFunction("clone")!!
     return f.call(this) as Any;
