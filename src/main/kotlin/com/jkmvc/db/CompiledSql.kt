@@ -14,7 +14,7 @@ import kotlin.collections.ArrayList
  * @author shijianhang
  * @date 2017-6-10 下午8:02:47
  */
-class CompiledSql(public override val dbName: String = "default" /* 数据库名 */) : Cloneable, ICompiledSql {
+class CompiledSql(public override val dbName: String = "default" /* 数据库名 */) : Cloneable, ICompiledSql() {
 
     /****************************** 构建参数/sql *******************************/
     /**
