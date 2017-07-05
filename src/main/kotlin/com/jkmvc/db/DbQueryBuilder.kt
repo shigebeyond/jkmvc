@@ -19,17 +19,6 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
      */
     protected var compiledSql: CompiledSql = CompiledSql();
 
-    /**
-     * 预编译参数化的sql
-     *
-     * 控制是否构建参数化的查询，如果是，则这个带参数的查询会预编译并缓存sql，下次构建同一个查询时，直接使用缓存的sql，不用重复编译
-     * controlls whether to build a parameterized query, if true it will compile and cache sql, so next time when you build the same query, it will use the cached sql, no need to compile again
-     *
-     * 查询中需要进行转义的值，如果是?占位符的话，会被当成是参数，在sql只执行时赋以实参
-     * value in query which is quote, if value is '?', it will be treat as parameters, and assign a actual value when executing sql
-     */
-    protected var prepared:Boolean = false;
-
     public constructor(dbName:String /* db名 */, table:String = "" /*表名*/):this(Db.getDb(dbName), table){
     }
 
@@ -93,35 +82,13 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
     }
 
     /**
-     * 设置是否预编译参数化的sql
-     *
-     * @param prepared 是否预编译sql
-     * @return IDbQueryBuilder
-     */
-    public override fun prepare(prepared:Boolean):IDbQueryBuilder{
-        this.prepared = prepared
-        return this;
-    }
-
-    /**
-     * 编译sql，如果设置了预编译选项prepared，则返回缓存的编译结果
+     * 编译sql
      *
      * @param action sql动作：select/insert/update/delete
-     * @return Pair(sql, 参数)
+     * @return 编译好的sql
      */
     public override fun compile(action:ActionType): CompiledSql
     {
-        // 如果没有设置预编译 或 没有编译过的，则重新编译
-        if(!prepared || compiledSql.isEmpty())
-            recompile(action)
-
-        return compiledSql;
-    }
-
-    /**
-     * 重新编译sql，不带缓存的
-     */
-    protected fun recompile(action: ActionType): CompiledSql {
         // 清空编译结果
         compiledSql.clear();
 
@@ -137,6 +104,54 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
         compiledSql.sql = sql.toString()
 
         return compiledSql
+    }
+
+    /**
+     * 编译select语句
+     * @return 编译好的sql
+     */
+    public override fun compileSelect(): CompiledSql{
+        return compile(ActionType.SELECT)
+    }
+
+    /**
+     * 编译select ... limit 1语句
+     * @return 编译好的sql
+     */
+    public override fun compileSelectOne(): CompiledSql{
+        return limit(1).compile(ActionType.SELECT)
+    }
+
+    /**
+     * 编译select count() 语句
+     * @return 编译好的sql
+     */
+    public override fun compileCount(): CompiledSql{
+        return select(Pair("count(1)", "num")).compile(ActionType.SELECT);
+    }
+
+    /**
+     * 编译insert语句
+     * @return 编译好的sql
+     */
+    public override fun compileInsert(): CompiledSql{
+        return compile(ActionType.INSERT)
+    }
+
+    /**
+     * 编译update语句
+     * @return 编译好的sql
+     */
+    public override fun compileUpdate(): CompiledSql{
+        return compile(ActionType.UPDATE)
+    }
+
+    /**
+     * 编译delete语句
+     * @return 编译好的sql
+     */
+    public override fun compileDelete(): CompiledSql{
+        return compile(ActionType.DELETE)
     }
 
     /**
@@ -163,10 +178,29 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
      */
     public override fun <T:Any> find(vararg params: Any?, transform:(MutableMap<String, Any?>) -> T): T?{
         // 1 编译
-        val result = compile(ActionType.SELECT);
+        val result = limit(1).compile(ActionType.SELECT);
 
         // 2 执行 select
         return db.queryRow<T>(result.sql, result.buildParams(params), transform);
+    }
+
+    /**
+     * 统计行数： count语句
+     *
+     * @param params 动态参数
+     * @return
+     */
+    public override fun count(vararg params: Any?):Long
+    {
+        // 1 编译
+        val result = select(Pair("count(1)", "num")).compile(ActionType.SELECT);
+
+        // 2 执行 select
+        val (hasNext, count) = db.queryCell(result.sql, result.buildParams(params));
+        return if(hasNext)
+            count as Long;
+        else
+            0
     }
 
     /**
@@ -200,25 +234,6 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
 
         // 2 批量执行有参数sql
         return db.batchExecute(result.sql, result.buildBatchParamses(paramses, paramSize), result.staticParams.size);
-    }
-
-    /**
-     * 统计行数： count语句
-     *
-     * @param params 动态参数
-     * @return
-     */
-    public override fun count(vararg params: Any?):Long
-    {
-        // 1 编译
-        val result = select(Pair("count(1)", "num")).compile(ActionType.SELECT);
-
-        // 2 执行 select
-        val (hasNext, count) = db.queryCell(result.sql, result.buildParams(params));
-        return if(hasNext)
-                    count as Long;
-                else
-                    0
     }
 
     /**

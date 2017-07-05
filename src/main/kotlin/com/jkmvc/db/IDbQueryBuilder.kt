@@ -21,20 +21,48 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
     public abstract fun <T:Any> getRecordTranformer(clazz: KClass<T>): ((MutableMap<String, Any?>) -> T);
 
     /**
-     * 设置是否预编译参数化的sql
-     *
-     * @param prepared 是否预编译sql
-     * @return IDbQueryBuilder
-     */
-    public abstract fun prepare(prepared:Boolean = true):IDbQueryBuilder;
-
-    /**
      * 编译sql
      *
      * @param action sql动作：select/insert/update/delete
-     * @return 编译结果(sql+参数)
+     * @return 编译好的sql
      */
     public abstract fun compile(action:ActionType): CompiledSql;
+
+    /**
+     * 编译select语句
+     * @return 编译好的sql
+     */
+    public abstract fun compileSelect(): CompiledSql
+
+    /**
+     * 编译select ... limit 1语句
+     * @return 编译好的sql
+     */
+    public abstract fun compileSelectOne(): CompiledSql
+
+    /**
+     * 编译select count() 语句
+     * @return 编译好的sql
+     */
+    public abstract fun compileCount(): CompiledSql
+
+    /**
+     * 编译insert语句
+     * @return 编译好的sql
+     */
+    public abstract fun compileInsert(): CompiledSql
+
+    /**
+     * 编译update语句
+     * @return 编译好的sql
+     */
+    public abstract fun compileUpdate(): CompiledSql
+
+    /**
+     * 编译delete语句
+     * @return 编译好的sql
+     */
+    public abstract fun compileDelete(): CompiledSql
 
     /**
      * 查找多个： select 语句
@@ -87,6 +115,14 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
     }
 
     /**
+     * 统计行数： count语句
+     *
+     * @param params 动态参数
+     * @return
+     */
+    public abstract fun count(vararg params: Any?):Long;
+
+    /**
      * 编译 + 执行
      *
      * @param action sql动作：select/insert/update/delete
@@ -105,14 +141,6 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      * @return
      */
     public abstract fun batchExecute(action:ActionType, paramses: List<Any?>, paramSize:Int): IntArray;
-
-    /**
-     * 统计行数： count语句
-     *
-     * @param params 动态参数
-     * @return
-     */
-    public abstract fun count(vararg params: Any?):Long;
 
     /**
      * 插入：insert语句

@@ -159,18 +159,4 @@ class DbTests{
         DbQueryBuilder(db).table("user").where("id", "=", "?").batchExecute(ActionType.DELETE, params, 1)// 每次只处理1个参数
     }
 
-    //预编译参数化的sql
-    @Test
-    fun testPrepare(){
-        val query = DbQueryBuilder(db)
-                .prepare(true)
-                .table("user")
-                .where("id", "=", "?" /* 被当做是参数*/)
-        for(i in id..(id+10)){
-            val record = query
-                    .find<Record>(i) // 仅在第一次调用时编译与缓存sql，以后多次调用不再编辑，直接使用缓存的sql
-            println("查询user_" + i + "：" + record)
-        }
-    }
-
 }
