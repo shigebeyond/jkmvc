@@ -43,7 +43,7 @@ object DruidDataSourceFactory :IDataSourceFactory {
         ds.setUrl(config["url"])
         ds.setUsername(config["username"])
         ds.setPassword(config["password"])
-        if (config["driverClass"] != null) //  若为 null 让 druid 自动探测 driverClass 值
+        if (config.containsKey("driverClass")) //  若为 null 让 druid 自动探测 driverClass 值
             ds.setDriverClassName(config["driverClass"])
 
         // 连接池大小
