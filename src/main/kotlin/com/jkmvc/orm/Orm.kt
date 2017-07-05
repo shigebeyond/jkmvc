@@ -1,36 +1,32 @@
 package com.jkmvc.orm
 
-import java.util.*
+import com.jkmvc.db.CompiledSql
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.HashMap
 
 /**
  * ORM
 
  * @Package package_name
- * *
  * @category
- * *
  * @author shijianhang
- * *
  * @date 2016-10-10 上午12:52:34
  */
 abstract class Orm(id:Int? = null): OrmRelated() {
 
     companion object{
         /**
-         * 缓存id查询
+         * 缓存根据主键查询的sql
          */
-        protected val idQueries: ConcurrentHashMap<Class<*>, OrmQueryBuilder> = ConcurrentHashMap()
+        protected val pkSqls: ConcurrentHashMap<Class<*>, CompiledSql> = ConcurrentHashMap()
     }
 
     init{
         if(id != null){
-            val query = idQueries.getOrPut(this.javaClass){
-                queryBuilder().prepare() /* 预编译sql */.where(metadata.primaryKey, id) as OrmQueryBuilder
+            val csql = pkSqls.getOrPut(this.javaClass){
+                queryBuilder().where(metadata.primaryKey, id).compileSelectOne() // 构建根据主键来查询的sql
             }
-            query.find(){
-                this.original(it);
+            csql.find(){ // 查询
+                this.original(it); // 读取查询数据
             }
         }
     }
