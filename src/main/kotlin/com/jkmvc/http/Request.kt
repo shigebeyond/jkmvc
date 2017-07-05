@@ -158,7 +158,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 * @param defaultValue 默认值
 	 * @return
 	 */
-	operator inline fun <reified T:Any> get(key: String, defaultValue: T? = null): T?
+	public operator inline fun <reified T:Any> get(key: String, defaultValue: T? = null): T?
 	{
 		val clazz:KClass<T> = T::class
 		// 先取路由参数
