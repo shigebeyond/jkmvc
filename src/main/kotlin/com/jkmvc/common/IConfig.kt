@@ -24,7 +24,7 @@ abstract class IConfig {
     public abstract fun load(inputStream: InputStream?, encoding: String = "UTF-8");
 
     /**
-     * 获得配置项
+     * 获得配置项的值，自动转换为指定类型
      */
     public operator inline fun <reified T:Any> get(key: String, defaultValue: T? = null): T?{
         return props.getAndConvert(key, defaultValue)
@@ -66,6 +66,10 @@ abstract class IConfig {
      */
     public abstract fun getShort(key: String, defaultValue: Short? = null): Short?;
 
+    /**
+     * 获得Date类型的配置项
+     */
+    public abstract fun getDate(key: String, defaultValue: Date?): Date?;
     /**
      * 判断是否含有配置项
      */

@@ -160,6 +160,13 @@ class Config:IConfig {
     }
 
     /**
+     * 获得Date类型的配置项
+     */
+    public override fun getDate(key: String, defaultValue: Date?): Date?{
+        return props.getAndConvert(key, defaultValue)
+    }
+
+    /**
      * 判断是否含有配置项
      */
     public override fun containsKey(key: String): Boolean {
