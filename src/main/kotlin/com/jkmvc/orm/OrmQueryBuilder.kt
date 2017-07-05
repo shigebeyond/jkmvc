@@ -19,13 +19,10 @@ class OrmQueryBuilder(protected val metadata: IMetaData) : DbQueryBuilder(metada
      * @return 转换函数
      */
     public override fun <T:Any> getRecordTranformer(clazz: KClass<T>): ((MutableMap<String, Any?>) -> T) {
-        // 如果是orm类，则直接返回
-        if(clazz.java.isAssignableFrom(metadata.model.java)){ // 只要是要转换的类型，是当前model类的父类，都转换为当前model类
-            return {
-                val obj = clazz.java.newInstance() as IOrm;
-                obj.original(it) as T
-            }
-        }
+        // 只能是当前model类及其父类，不能是其他model类
+        if(IOrm::class.java.isAssignableFrom(clazz.java) // 是model类
+            && !clazz.java.isAssignableFrom(metadata.model.java)) // 不是当前model类及其父类
+            throw UnsupportedOperationException("sql构建器将记录转为指定类型：只能指定 ${metadata.model} 类及其父类，实际指定 ${clazz}");
 
         return super.getRecordTranformer(clazz)
     }
