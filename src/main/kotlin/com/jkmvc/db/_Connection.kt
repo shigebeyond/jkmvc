@@ -290,6 +290,11 @@ public fun Clob?.toString(): String? {
 
 /****************************** 记录转换器 *******************************/
 /**
+ * 在查找对应带 Map 参数的构造函数时，所需要的参数类型列表
+ */
+val tranformingConstructorParamTypes = listOf(MutableMap::class.java)
+
+/**
  * 获得类的记录转换器
  *   不同的目标类型，有不同的记录转换器
  *   1 Orm类：实例化并调用original()
@@ -318,7 +323,7 @@ public val <T:Any> KClass<T>.recordTranformer: ((MutableMap<String, Any?>) -> T)
 
         // 3 否则，调用该类的构造函数（假定该类有接收map参数的构建函数）
         // 获得类的构造函数
-        val construtor = this.findConstructor(listOf(MutableMap::class.java))
+        val construtor = this.findConstructor(tranformingConstructorParamTypes)
         if(construtor == null)
             throw UnsupportedOperationException("类${this}没有构造函数constructor(MutableMap)");
 
