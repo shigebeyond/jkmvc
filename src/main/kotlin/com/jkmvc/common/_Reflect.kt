@@ -22,6 +22,24 @@ public fun Any.forceClone():Any {
     return f.call(this) as Any;
 }
 
+/**
+ * 获得指定类型的默认值
+ * @return
+ */
+public inline val <T: Any> KClass<T>.defaultValue:T
+    get(){
+        return when (this) {
+            Int::class -> 0
+            Long::class -> 0L
+            Float::class -> 0.0
+            Double::class -> 0.0
+            Boolean::class -> false
+            Short::class -> 0
+            Byte::class -> 0
+            else -> null
+        } as T
+    }
+
 /****************************** 反射扩展 *******************************/
 /**
  * 匹配方法的名称与参数类型
