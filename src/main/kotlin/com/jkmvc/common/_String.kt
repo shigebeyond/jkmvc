@@ -128,13 +128,18 @@ public inline fun String.replaces(params:Map<String, Any?>):String
  * 日期格式
  */
 val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+/**
+ * 日期-时间格式
+ */
+val datetimeFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
 /**
  * 转换为日期类型
  * @return
  */
 public fun String.toDate(): Date {
-    return dateFormat.parse(this)
+    val format: SimpleDateFormat = if(contains(':')) datetimeFormat else dateFormat;
+    return format.parse(this)
 }
 
 /**

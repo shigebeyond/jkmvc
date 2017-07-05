@@ -19,7 +19,7 @@ val dateFormats: ConcurrentHashMap<String, SimpleDateFormat> = ConcurrentHashMap
 public fun Date.format(pattern: String): String
 {
     return dateFormats.getOrPut(pattern){
-        SimpleDateFormat(pattern)
-    }
-    .format(this)
+                SimpleDateFormat(pattern)
+            }
+            .format(this)
 }
