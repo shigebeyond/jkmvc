@@ -153,6 +153,13 @@ class Config:IConfig {
     }
 
     /**
+     * 获得short类型的配置项
+     */
+    public override fun getShort(key: String, defaultValue: Short?): Short?{
+        return props.getAndConvert(key, defaultValue)
+    }
+
+    /**
      * 判断是否含有配置项
      */
     public override fun containsKey(key: String): Boolean {
