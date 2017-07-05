@@ -143,7 +143,6 @@ class DbTests{
         println("删除user表：" + f)
     }
 
-
     @Test
     fun testBatchDelete(){
         var myid:Long = 10
@@ -159,4 +158,12 @@ class DbTests{
         DbQueryBuilder(db).table("user").where("id", "=", "?").batchExecute(ActionType.DELETE, params, 1)// 每次只处理1个参数
     }
 
+    @Test
+    fun testCompiledSql(){
+        println("使用编译过的sql来重复查询")
+        val csql = DbQueryBuilder(db).table("user").where("id", "=", "?").compileSelectOne()
+        for(i in 0..10){
+            println(csql.find<Record>(i))
+        }
+    }
 }

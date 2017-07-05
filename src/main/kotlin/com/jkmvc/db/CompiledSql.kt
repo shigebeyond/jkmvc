@@ -7,7 +7,7 @@ import kotlin.collections.ArrayList
 
 /**
  * 编译好的sql
- *   为了避免多次编译，可以缓存该编译好的sql，其属性 sql/staticParams/dynamicParams 方法debugSql() 有可能会被调用多次
+ *   为了避免多次编译，可以缓存该编译好的sql，其属性 sql/staticParams/dynamicParams 方法 previewSql() 有可能会被调用多次
  *   动态参数，是指静态参数中为?的参数
  *   如果你的实际参数指就是?，请使用静态参数，不要使用动态参数（就是buildParams()中参数为空），因为这样动态参数的个数是对不上的
  *
