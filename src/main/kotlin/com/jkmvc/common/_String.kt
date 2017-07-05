@@ -163,9 +163,13 @@ public inline fun <T: Any> String?.toNullable(clazz: KClass<T>, defaultValue: T?
  * @return
  */
 public inline fun <T: Any> String.to(clazz: KClass<T>): T{
+    // 1 如果要转换为 String类及其父类，则直接返回，不用转换
+    if(clazz.java.isAssignableFrom(String::class.java))
+        return this as T
+
+    // 2 转换为其他类型
     var result: Any?;
     when(clazz){
-        String::class -> result = this
         Int::class -> result = this.toInt()
         Float::class -> result = this.toFloat()
         Double::class -> result = this.toDouble()
