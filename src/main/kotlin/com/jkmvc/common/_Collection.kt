@@ -34,7 +34,7 @@ public inline fun <K, V> Map<K, V>?.getOrDefault(key:K, default:V? = null): V? {
  * @param default 默认值
  * @return
  */
-public inline fun <reified T:Any>  Map<Any, String?>.getAndConvert(key:String, defaultValue:T?): T? {
+public inline fun <reified T:Any>  Map<out Any, String?>.getAndConvert(key:String, defaultValue:T?): T? {
     return get(key).toNullable(T::class, defaultValue)
 }
 
