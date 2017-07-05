@@ -24,6 +24,11 @@ abstract class IConfig {
     public abstract fun load(inputStream: InputStream?, encoding: String = "UTF-8");
 
     /**
+     * 判断是否含有配置项
+     */
+    public abstract fun containsKey(key: String): Boolean;
+
+    /**
      * 获得配置项的值，自动转换为指定类型
      */
     public operator inline fun <reified T:Any> get(key: String, defaultValue: T? = null): T?{
@@ -70,8 +75,4 @@ abstract class IConfig {
      * 获得Date类型的配置项
      */
     public abstract fun getDate(key: String, defaultValue: Date? = null): Date?;
-    /**
-     * 判断是否含有配置项
-     */
-    public abstract fun containsKey(key: String): Boolean;
 }
