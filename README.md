@@ -356,12 +356,12 @@ class UserController: Controller()
             val user = UserModel()
             // 获得请求参数：3种写法 | 3 ways to get request parameter
             /* // 1 req.getParameter("xxx");
-            user.name = req.getParameter("name");
+            user.name = req.getParameter("name")!!;
             user.age = req.getIntParameter("age", 0)!!; // 带默认值 | default value
             */
             // 2 req["xxx"]
-            user.name = req["name"];
-            user.age = req["age"];
+            user.name = req["name"]!!;
+            user.age = req["age"]!!;
 
             // 3 Orm.values(req)
             user.values(req)
@@ -390,12 +390,12 @@ class UserController: Controller()
         if(req.isPost()){ //  post请求：保存表单数据 | post request: save form data
             // 获得请求参数：3种写法 | 3 way to get request parameter
             /* // 1 req.getParameter("xxx");
-            user.name = req.getParameter("name");
+            user.name = req.getParameter("name")!!;
             user.age = req.getIntParameter("age", 0)!!; // 带默认值 | default value
             */
             /*// 2 req["xxx"]
-            user.name = req["name"];
-            user.age = req["age"];
+            user.name = req["name"]!!;
+            user.age = req["age"]!!;
             */
             // 3 Orm.values(req)
             user.values(req)
@@ -439,7 +439,7 @@ class UserController: Controller()
         req.uploadSubdir = "avatar/" + Date().format("yyyy/MM/dd")
 
         // 查询单个用户 | find a user
-        val id: Int = req["id"]
+        val id: Int = req["id"]!!
         val user = UserModel(id)
         if(!user.isLoaded()){
             res.render("用户[" + req["id"] + "]不存在")
