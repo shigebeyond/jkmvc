@@ -7,8 +7,10 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import com.jkmvc.common.getOrDefault
 
 /**
+ * 配置数据，用于加载配置文件，并读取配置数据
  * Config data, can load properties file from CLASSPATH or File object.
  *
  * @author shijianhang
@@ -47,8 +49,6 @@ class Config:IConfig {
             }
         }
     }
-
-    protected lateinit var props: Properties;
 
     /**
      * Config constructor
@@ -106,43 +106,50 @@ class Config:IConfig {
     }
 
     /**
-     * 获得配置项
+     * 获得string类型的配置项
      */
-    public override operator fun get(key: String, defaultValue: String?): String? {
-        return props.getProperty(key, defaultValue)
+    public override fun getString(key: String, defaultValue: String?): String? {
+        val value = props.getProperty(key)
+        return if(value == null)
+                    defaultValue
+                else
+                    value
     }
 
     /**
      * 获得int类型的配置项
      */
     public override fun getInt(key: String, defaultValue: Int?): Int? {
-        val value = props.getProperty(key)
-        return if(value == null)
-                    defaultValue
-                else
-                    value.toInt();
+        return props.getAndConvert(key, defaultValue)
     }
 
     /**
      * 获得long类型的配置项
      */
     public override fun getLong(key: String, defaultValue: Long?): Long? {
-        val value = props.getProperty(key)
-        return if(value == null)
-                    defaultValue
-                else
-                    value.toLong();
+        return props.getAndConvert(key, defaultValue)
+    }
+
+
+    /**
+     * 获得float类型的配置项
+     */
+    public override fun getFloat(key: String, defaultValue: Float?): Float? {
+        return props.getAndConvert(key, defaultValue)
+    }
+
+    /**
+     * 获得double类型的配置项
+     */
+    public override fun getDouble(key: String, defaultValue: Double?): Double? {
+        return props.getAndConvert(key, defaultValue)
     }
 
     /**
      * 获得bool类型的配置项
      */
     public override fun getBoolean(key: String, defaultValue: Boolean?): Boolean? {
-        var value: String? = props.getProperty(key)
-        return if(value == null)
-                    defaultValue
-                else
-                    value.toBoolean();
+        return props.getAndConvert(key, defaultValue)
     }
 
     /**

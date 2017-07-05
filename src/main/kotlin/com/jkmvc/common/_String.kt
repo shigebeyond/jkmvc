@@ -137,7 +137,22 @@ public inline fun String.replaces(params:Map<String, Any?>):String
 }
 
 /**
- * 将字符串转换为指定类型
+ * 将字符串转换为指定类型的可空值
+ * @param class 要转换的类型
+ * @param defaultValue 默认值
+ * @return
+ */
+public inline fun <T: Any> String?.toNullable(clazz: KClass<T>, defaultValue: T? = null): T?{
+    // 默认值
+    if(this == null)
+        return defaultValue
+
+    // 转换
+    return to(clazz)
+}
+
+/**
+ * 将字符串转换为指定类型的非空值
  * @param class 要转换的类型
  * @return
  */
@@ -154,7 +169,7 @@ public inline fun <T: Any> String.to(clazz: KClass<T>): T{
 }
 
 /**
- * 将字符串转换为指定类型
+ * 将字符串转换为指定类型的非空值
  * @param type
  * @return
  */

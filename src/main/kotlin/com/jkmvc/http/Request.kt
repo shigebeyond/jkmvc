@@ -154,22 +154,22 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 *        id = req.getIntParameter["id"]
 	 * </code>
 	 *
-	 * @param column 字段名
+	 * @param key 参数名
 	 * @param defaultValue 默认值
 	 * @return
 	 */
-	operator inline fun <reified T> get(column: String, defaultValue: Any? = null): T
+	operator inline fun <reified T:Any> get(key: String, defaultValue: T? = null): T?
 	{
-		val clazz:KClass<*> = T::class
+		val clazz:KClass<T> = T::class
 		// 先取路由参数
-		if(params.containsKey(column))
-			return params[column]!!.to(clazz) as T
+		if(params.containsKey(key))
+			return params[key]!!.to(clazz) as T
 
 		// 再取get/post参数
-		if(containsParameter(column))
-			return getParameter(column)!!.to(clazz) as T
+		if(containsParameter(key))
+			return getParameter(key)!!.to(clazz) as T
 
-		return defaultValue as T;
+		return defaultValue;
 	}
 
 	/**
