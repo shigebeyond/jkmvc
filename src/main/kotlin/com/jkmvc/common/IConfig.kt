@@ -33,7 +33,7 @@ abstract class IConfig {
     /**
      * 获得string类型的配置项
      */
-    public abstract fun getString(key: String, defaultValue: String?): String?;
+    public abstract fun getString(key: String, defaultValue: String? = null): String?;
     
     /**
      * 获得int类型的配置项
@@ -69,7 +69,7 @@ abstract class IConfig {
     /**
      * 获得Date类型的配置项
      */
-    public abstract fun getDate(key: String, defaultValue: Date?): Date?;
+    public abstract fun getDate(key: String, defaultValue: Date? = null): Date?;
     /**
      * 判断是否含有配置项
      */

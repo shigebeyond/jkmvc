@@ -75,7 +75,7 @@ abstract class MultipartRequest(protected val req:HttpServletRequest /* 请求�
      */
     protected fun prepareUploadDirectory(): String {
         // 上传目录 = 根目录/子目录
-        var path:String = uploadConfig["uploadDirectory"]!! + '/'
+        var path:String = uploadConfig.getString("uploadDirectory") + '/'
         if(uploadSubdir != "")
             path = path + uploadSubdir + '/'
         val dir = File(path);
@@ -129,7 +129,7 @@ abstract class MultipartRequest(protected val req:HttpServletRequest /* 请求�
      */
     public fun getUploadRelativePath(name: String): String{
         val file = mulReq.getFile(name);
-        val uploadDirLen = uploadConfig["uploadDirectory"]!!.length + 1 // 如 upload/
+        val uploadDirLen = uploadConfig.getString("uploadDirectory")!!.length + 1 // 如 upload/
         return file.path.substring(uploadDirLen)
     }
 
@@ -139,9 +139,9 @@ abstract class MultipartRequest(protected val req:HttpServletRequest /* 请求�
      * @return
      */
     public fun uploadUrl(relativePath:String):String {
-        if(uploadConfig["uploadDomain"] == null)
-            return serverUrl + contextPath + '/' + uploadConfig["uploadDirectory"] + '/' + relativePath;
+        if(uploadConfig.containsKey("uploadDomain"))
+            return uploadConfig.getString("uploadDomain") + '/' + relativePath;
         else
-            return uploadConfig["uploadDomain"] + '/' + relativePath;
+            return serverUrl + contextPath + '/' + uploadConfig["uploadDirectory"] + '/' + relativePath;
     }
 }
