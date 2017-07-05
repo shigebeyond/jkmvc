@@ -57,6 +57,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 		reqs.set(this);
 	}
 
+	/*************************** 路由解析 *****************************/
 	/**
 	 * 是否是静态文件请求，如果是则不进行路由解析
 	 * @return
@@ -82,6 +83,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 		return false;
 	}
 
+	/*************************** 各种判断 *****************************/
 	/**
 	 * 是否post请求
 	 * @return
@@ -123,23 +125,6 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	}
 
 	/**
-	 * 获得cookie值
-	 *
-	 * <code>
-	 *     val theme = Cookie::get("theme", "blue");
-	 * </code>
-	 *
-	 * @param  key        cookie名
-	 * @param  default    默认值
-	 * @return
-	 */
-	public fun getCookie(name:String): Cookie {
-		return this.cookies.first(){
-			it.name == name
-		}
-	}
-
-	/**
 	 * 智能获得请求参数，先从路由参数中取得，如果没有，则从get/post参数中取
 	 *    注：智能获得请求参数时，需要根据返回值的类型来转换参数值的类型，因此调用时需明确返回值的类型
 	 *
@@ -172,17 +157,26 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 		return defaultValue;
 	}
 
+	/*************************** 路由参数 *****************************/
+	/**
+	 * 检查是否包含指定路由参数
+	 * @param key 路由参数名
+	 * @return
+	 */
+	public fun containsRouteParameter(key: String): Boolean {
+		return params.containsKey(key)
+	}
+
 	/**
 	 * 获得当前匹配路由的所有参数/单个参数
 	 *
 	 * @param key 如果是null，则返回所有参数，否则，返回该key对应的单个参数
-	 * @param default 单个参数的默认值
+	 * @param defaultValue 单个参数的默认值
 	 * @param filter  参数过滤表达式, 如 "trim > htmlspecialchars"
 	 * @return
 	 */
-	public fun getRouteParameter(key:String, default:String? = null):String?
-	{
-		return this.params.getOrDefault(key, default)
+	public inline fun <reified T:Any> getRouteParameter(key:String, defaultValue:T? = null):T? {
+		return params.getAndConvert(key, defaultValue)
 	}
 
 	/**
@@ -190,7 +184,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 * @return
 	 */
 	public fun directory(): String {
-		return this.getRouteParameter("directory", "")!!
+		return getRouteParameter("directory", "")!!
 	}
 
 	/**
@@ -198,7 +192,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 * @return
 	 */
 	public fun controller(): String {
-		return this.getRouteParameter("controller")!!;
+		return getRouteParameter("controller")!!;
 	}
 
 	/**
@@ -206,37 +200,60 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 * @return
 	 */
 	public fun action(): String {
-		return this.getRouteParameter("action")!!;
+		return getRouteParameter("action")!!;
 	}
 
+	/**
+	 * 获得int类型的路由参数
+	 */
 	public fun getIntRouteParameter(key: String, defaultValue: Int? = null): Int? {
-		val value = params.get(key)
-		return if(value == null)
-			defaultValue
-		else
-			value.toInt();
+		return getRouteParameter(key, defaultValue)
 	}
 
+	/**
+	 * 获得long类型的路由参数
+	 */
 	public fun getLongRouteParameter(key: String, defaultValue: Long? = null): Long? {
-		val value = params.get(key)
-		return if(value == null)
-			defaultValue
-		else
-			value.toLong();
+		return getRouteParameter(key, defaultValue)
 	}
 
+	/**
+	 * 获得boolean类型的路由参数
+	 */
 	public fun getBooleanRouteParameter(key: String, defaultValue: Boolean? = null): Boolean? {
-		var value: String? = params.get(key)
-		return if(value == null)
-			defaultValue
-		else
-			value.toBoolean();
+		return getRouteParameter(key, defaultValue)
 	}
 
-	public fun containsRouteParameter(key: String): Boolean {
-		return params.containsKey(key)
+
+	/**
+	 * 获得float类型的路由参数
+	 */
+	public fun getFloatRouteParameter(key: String, defaultValue: Float? = null): Float? {
+		return getRouteParameter(key, defaultValue)
 	}
 
+	/**
+	 * 获得double类型的路由参数
+	 */
+	public fun getDoubleRouteParameter(key: String, defaultValue: Double? = null): Double? {
+		return getRouteParameter(key, defaultValue)
+	}
+
+	/**
+	 * 获得short类型的路由参数
+	 */
+	public fun getShortRouteParameter(key: String, defaultValue: Short? = null): Short? {
+		return getRouteParameter(key, defaultValue)
+	}
+
+	/**
+	 * 获得Date类型的路由参数
+	 */
+	public fun getDateRouteParameter(key: String, defaultValue: Date? = null): Date? {
+		return getRouteParameter(key, defaultValue)
+	}
+
+	/*************************** get/post/upload参数 *****************************/
 	/**
 	 * 检查是否有get/post/upload的参数
 	 *    兼容上传文件的情况
@@ -301,44 +318,78 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 		return req.parameterMap
 	}
 
-	public fun getParameter(key: String, defaultValue: String?): String? {
-		var value = getParameter(key);
-		return if(value == null)
-					defaultValue
-				else
-					value;
+	/**
+	 * 获得参数值，自动转换为指定类型
+	 */
+	public inline fun <reified T:Any> getParameter(key: String, defaultValue: T?): T? {
+		return getParameter(key).toNullable(T::class, defaultValue)
 	}
 
+	/**
+	 * 获得int类型的参数值
+	 */
 	public fun getIntParameter(key: String, defaultValue: Int? = null): Int? {
-		val value = getParameter(key)
-		return if(value == null)
-			defaultValue
-		else
-			value.toInt();
+		return getParameter(key, defaultValue)
 	}
 
+	/**
+	 * 获得long类型的参数值
+	 */
 	public fun getLongParameter(key: String, defaultValue: Long? = null): Long? {
-		val value = getParameter(key)
-		return if(value == null)
-			defaultValue
-		else
-			value.toLong();
+		return getParameter(key, defaultValue)
 	}
 
+	/**
+	 * 获得boolean类型的参数值
+	 */
 	public fun getBooleanParameter(key: String, defaultValue: Boolean? = null): Boolean? {
-		var value: String? = getParameter(key)
-		return if(value == null)
-			defaultValue
-		else
-			value.toBoolean();
+		return getParameter(key, defaultValue)
 	}
 
+	/**
+	 * 获得Date类型的参数值
+	 */
 	public fun getDateParameter(key: String, defaultValue: Date? = null): Date? {
-		val value = getParameter(key)
-		return if(value == null)
-			defaultValue
-		else
-			value.toDate()
+		return getParameter(key, defaultValue)
+	}
+
+	/**
+	 * 获得float类型的参数值
+	 */
+	public fun getFloatParameter(key: String, defaultValue: Float? = null): Float? {
+		return getParameter(key, defaultValue)
+	}
+
+	/**
+	 * 获得double类型的参数值
+	 */
+	public fun getDoubleParameter(key: String, defaultValue: Double? = null): Double? {
+		return getParameter(key, defaultValue)
+	}
+
+	/**
+	 * 获得short类型的参数值
+	 */
+	public fun getShortParameter(key: String, defaultValue: Short? = null): Short? {
+		return getParameter(key, defaultValue)
+	}
+
+	/*************************** 其他 *****************************/
+	/**
+	 * 获得cookie值
+	 *
+	 * <code>
+	 *     val theme = Cookie::get("theme", "blue");
+	 * </code>
+	 *
+	 * @param  key        cookie名
+	 * @param  default    默认值
+	 * @return
+	 */
+	public fun getCookie(name:String): Cookie {
+		return this.cookies.first(){
+			it.name == name
+		}
 	}
 
 	/**
