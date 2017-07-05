@@ -41,6 +41,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 *   2 去掉末尾的/
 	 */
 	public val routeUri:String = requestURI.trim(contextPath + '/', "/")
+
 	/**
 	 * 当前匹配的路由规则
 	 */
@@ -63,7 +64,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 * @return
 	 */
 	public fun isStaticFile(): Boolean {
-		return Router.staticFileRegex.toRegex().matches(routeUri)
+		return Router.staticFileRegex.toRegex(RegexOption.IGNORE_CASE).matches(routeUri)
 	}
 
 	/**
