@@ -158,6 +158,28 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	}
 
 	/*************************** 路由参数 *****************************/
+
+	/**
+	 * 获得当前目录
+	 * @return
+	 */
+	public val directory: String
+		get() = getRouteParameter("directory", "")!!
+
+	/**
+	 * 获得当前controller
+	 * @return
+	 */
+	public val controller: String
+		get() = getRouteParameter("controller")!!
+
+	/**
+	 * 获得当前action
+	 * @return
+	 */
+	public val action: String
+		get() = getRouteParameter("action")!!
+
 	/**
 	 * 检查是否包含指定路由参数
 	 * @param key 路由参数名
@@ -177,30 +199,6 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 */
 	public inline fun <reified T:Any> getRouteParameter(key:String, defaultValue:T? = null):T? {
 		return params.getAndConvert(key, defaultValue)
-	}
-
-	/**
-	 * 获得当前目录
-	 * @return
-	 */
-	public fun directory(): String {
-		return getRouteParameter("directory", "")!!
-	}
-
-	/**
-	 * 获得当前controller
-	 * @return
-	 */
-	public fun controller(): String {
-		return getRouteParameter("controller")!!;
-	}
-
-	/**
-	 * 获得当前action
-	 * @return
-	 */
-	public fun action(): String {
-		return getRouteParameter("action")!!;
 	}
 
 	/**

@@ -37,7 +37,7 @@ abstract class Controller :IController {
      */
     public override fun view(data:MutableMap<String, Any?>):View
     {
-        return view(req.controller() + "/" + req.action(), data)
+        return view(req.controller + "/" + req.action, data)
     }
 
     /**

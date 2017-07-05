@@ -61,14 +61,14 @@ object Server:IServer {
      */
     fun callController(req: Request, res: Response) {
         // 获得controller类
-        val clazz:ControllerClass? = ControllerLoader.getControllerClass(req.controller());
+        val clazz:ControllerClass? = ControllerLoader.getControllerClass(req.controller);
         if (clazz == null)
-            throw RouteException ("Controller类不存在：" + req.controller());
+            throw RouteException ("Controller类不存在：" + req.controller);
 
         // 获得action方法
-        val action: KFunction<*>? = clazz.getActionMethod(req.action());
+        val action: KFunction<*>? = clazz.getActionMethod(req.action);
         if (action == null)
-            throw RouteException ("控制器${req.controller()}不存在方法：${req.action()}");
+            throw RouteException ("控制器${req.controller}不存在方法：${req.action}");
 
         // 创建controller
         val controller:Controller = clazz.constructer.call() as Controller;
