@@ -59,7 +59,7 @@ object Server:IServer {
      * @param req
      * @param res
      */
-    fun callController(req: Request, res: Response) {
+    private fun callController(req: Request, res: Response) {
         // 获得controller类
         val clazz:ControllerClass? = ControllerLoader.getControllerClass(req.controller);
         if (clazz == null)

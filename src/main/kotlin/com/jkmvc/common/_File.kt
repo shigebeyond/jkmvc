@@ -6,13 +6,13 @@ import java.io.File
  * 文件大小单位
  *   相邻单位相差1024倍
  */
-val fileSizeUnits: String = "BKMGT";
+private val fileSizeUnits: String = "BKMGT";
 
 /**
  * 其他大小单位换算为字节数
  * @return Int
  */
-fun Char.convertBytes():Int{
+public fun Char.convertBytes():Int{
     val i:Int = fileSizeUnits.indexOf(this);
     if(i == -1)
         throw IllegalArgumentException("无效文件大小单位: $this");
@@ -25,7 +25,7 @@ fun Char.convertBytes():Int{
  * @param path
  * @return
  */
-fun String.isAbsolutePath(): Boolean {
+public fun String.isAbsolutePath(): Boolean {
     if (startsWith("/") || indexOf(":") > 0) {
         return true
     }

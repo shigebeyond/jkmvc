@@ -292,7 +292,7 @@ public fun Clob?.toString(): String? {
 /**
  * 在查找对应带 Map 参数的构造函数时，所需要的参数类型列表
  */
-val tranformingConstructorParamTypes = listOf(MutableMap::class.java)
+private val tranformingConstructorParamTypes = listOf(MutableMap::class.java)
 
 /**
  * 获得类的记录转换器

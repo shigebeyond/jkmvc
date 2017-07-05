@@ -15,7 +15,7 @@ object DruidDataSourceFactory :IDataSourceFactory {
     /**
      * 缓存数据源
      */
-    val dataSources:ConcurrentHashMap<String, DruidDataSource> by lazy {
+    private val dataSources:ConcurrentHashMap<String, DruidDataSource> by lazy {
         ConcurrentHashMap<String, DruidDataSource>();
     }
 
@@ -35,7 +35,7 @@ object DruidDataSourceFactory :IDataSourceFactory {
      * @param name 数据源名
      * @return
      */
-    fun buildDruidDataSource(name:String): DruidDataSource {
+    private fun buildDruidDataSource(name:String): DruidDataSource {
         val config: Config = Config.instance("database/$name")!!;
         val ds: DruidDataSource = DruidDataSource()
 

@@ -8,7 +8,7 @@ import kotlin.collections.HashMap
 /**
  * 缓存日期格式
  */
-val dateFormats: ConcurrentHashMap<String, SimpleDateFormat> = ConcurrentHashMap()
+private val dateFormats: ConcurrentHashMap<String, SimpleDateFormat> = ConcurrentHashMap()
 
 /**
  * 日期格式化

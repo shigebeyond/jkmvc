@@ -17,14 +17,14 @@ object ControllerLoader:IControllerLoader{
     /**
      * 自动扫描的包
      */
-    val packages:MutableList<String> = LinkedList<String>();
+    private val packages:MutableList<String> = LinkedList<String>();
 
     /**
      * controller类缓存
      *   key为相对路径
      *   value为类
      */
-    val controllers:MutableMap<String, ControllerClass> by lazy {
+    private val controllers:MutableMap<String, ControllerClass> by lazy {
         scan()
     };
 
@@ -50,7 +50,7 @@ object ControllerLoader:IControllerLoader{
      * 扫描指定包下的Controller类
      * @return
      */
-    override fun scan(): MutableMap<String, ControllerClass> {
+    public override fun scan(): MutableMap<String, ControllerClass> {
 
         // 获得类加载器
         val cld = Thread.currentThread().contextClassLoader ?: throw ClassNotFoundException("Can't get class loader.")
