@@ -163,6 +163,8 @@ public inline fun <T: Any> String.to(clazz: KClass<T>): T{
         Float::class -> result = this.toFloat()
         Double::class -> result = this.toDouble()
         Boolean::class -> result = this.toBoolean()
+        Short::class -> result = this.toShort()
+        Byte::class -> result = this.toByte()
         else -> result = this;
     }
     return result as T;
