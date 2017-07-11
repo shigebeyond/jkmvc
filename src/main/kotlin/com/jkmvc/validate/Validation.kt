@@ -16,7 +16,7 @@ object Validation:IValidation
 	/**
 	 * 校验方法对应的错误消息
 	 */
-	private val messages:Map<String, String> = mapOf(
+	public val messages:Map<String, String> = mapOf(
 			"notempty" to "不能为空",
 			"length" to "的长度必须在:0到:1之间",
 			"range" to "的数值必须是:0到:1之间的整数",
@@ -50,6 +50,18 @@ object Validation:IValidation
 		}
 		// 执行
 		return expCompiled.execute(value, binds);
+	}
+
+	/**
+	 * 获得消息
+	 * @param key
+	 * @return
+	 */
+	public override fun getMessage(key:String):String?{
+		if(messages.containsKey(key))
+			return messages[key];
+
+		return null;
 	}
 
 	/**

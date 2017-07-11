@@ -88,7 +88,7 @@ data class ValidationUint(public override val operator:String? /* 运算符 */, 
      */
     public override fun message():String
     {
-        val msg = Validation.messages[func];
+        val msg = Validation.getMessage(func);
         return if (msg == null)
                     "校验[$func]规则失败";
                 else

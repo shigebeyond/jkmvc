@@ -21,4 +21,11 @@ interface IValidation
 	 * @return
 	 */
 	fun execute(exp:String, value:Any, binds:Map<String, Any?> = emptyMap()): Triple<Any?, ValidationUint?, Any?>
+
+	/**
+	 * 获得消息
+	 * @param key
+	 * @return
+	 */
+	fun getMessage(key:String):String?
 }
