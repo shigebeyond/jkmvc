@@ -1,6 +1,7 @@
 package com.jkmvc.common
 
 import java.io.File
+import java.util.*
 
 /**
  * 文件大小单位
@@ -26,26 +27,31 @@ public fun Char.convertBytes():Int{
  * @return
  */
 public fun String.isAbsolutePath(): Boolean {
-    if (startsWith("/") || indexOf(":") > 0) {
-        return true
-    }
-    return false
+    return startsWith("/") || indexOf(":") > 0;
 }
 
 /**
  * 遍历文件
  * @param action 访问者函数
  */
-public /*tailrec*/ fun File.travel(action:(file: File) -> Unit): Unit {
-    val files = listFiles()
-    if (files == null) {
-        return
-    }
+public fun File.travel(action:(file: File) -> Unit): Unit {
+    val files: Stack<File> = Stack()
+    files.push(this)
+    travelFiles(files, action)
+}
 
-    for (file in files) {
-        if(file.isFile)
-            action(file)
+/**
+ * 遍历文件
+ * @param files 文件栈
+ * @param action 访问者函数
+ */
+public fun travelFiles(files: Stack<File>, action:(file: File) -> Unit): Unit {
+    while (!files.isEmpty()){
+        val file = files.pop();
+        if(file.isDirectory)
+            files.addAll(file.listFiles())
         else
-            file.travel(action)
+            action(file)
+
     }
 }
