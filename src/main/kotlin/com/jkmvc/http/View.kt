@@ -1,5 +1,7 @@
 package com.jkmvc.http
 
+import java.util.concurrent.ConcurrentHashMap
+
 /**
  * 视图
  *   放在web根目录下的jsp文件
@@ -13,7 +15,7 @@ open class View(override val req: Request /* 请求对象 */, override val res: 
 		/**
 		 * 全局变量
 		 */
-		public val globalData:ConcurrentHashMap<String, Any?> = ConcurrentHashMap<String, Any?>();
+		public val globalData: ConcurrentHashMap<String, Any?> = ConcurrentHashMap<String, Any?>();
 
 		/**
 		 * 设置全局变量
@@ -53,5 +55,3 @@ open class View(override val req: Request /* 请求对象 */, override val res: 
 	}
 
 }
-
-import java.util.concurrent.ConcurrentHashMap
