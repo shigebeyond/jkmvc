@@ -46,6 +46,8 @@ dependencies {
     compile 'com.alibaba:druid:1.0.25'
     // upload
     compile 'servlets.com:cos:05Nov2002'
+    // velocity
+    compile 'org.apache.velocity:velocity:1.7'
 
     // servlet
     providedCompile "javax.servlet:javax.servlet-api:3.1.0"
@@ -92,7 +94,7 @@ dependencies {
 
 jettyRun{
     webAppSourceDirectory file("$projectDir/src/main/webapp")
-    httpPort 8081
+    httpPort 8082
     contextPath project.name
     scanIntervalSeconds 1 // jetty 热部署，当值为0时，不扫描新class，不热部署
     reload "automatic"

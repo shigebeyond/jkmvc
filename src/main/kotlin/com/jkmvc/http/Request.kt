@@ -412,4 +412,13 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 		return serverUrl + contextPath + '/' + uri;
 	}
 
+	/**
+	 * 获得web根目录的路径
+	 * @return
+	 */
+	public fun getWebPath(): String
+	{
+		return session.servletContext.getRealPath("/");
+	}
+
 }
