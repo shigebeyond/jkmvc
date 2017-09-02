@@ -2,7 +2,7 @@ apply plugin: 'war'
 
 dependencies{
     // other project
-    compile project(':jkmvc-common')
+    compile project(':jkmvc-orm')
 
     // upload
     compile 'servlets.com:cos:05Nov2002'

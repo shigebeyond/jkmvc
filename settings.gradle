@@ -1,7 +1,7 @@
-rootProject.name = 'jkmvc'
-
 include 'jkmvc-common', 'jkmvc-orm', 'jkmvc-http', 'jkmvc-example'
 
-project.children.each {
-    it.buildFileName = it.name + '.gradle' - 'jkmvc'
+rootProject.name = 'jkmvc'
+
+rootProject.children.each {
+    it.buildFileName = it.name + '.gradle' - 'jkmvc-'
 }

@@ -5,12 +5,8 @@ dependencies{
     compile project(':jkmvc-orm')
     compile project(':jkmvc-http')
 
-    // db
-    compile 'com.alibaba:druid:1.0.25'
+    // jdbc
     providedRuntime "mysql:mysql-connector-java:5.1.6"
-//    providedRuntime 'com.h2database:h2:1.4.186'
-//    providedRuntime 'org.postgresql:postgresql:9.4.1208.jre7'
-//    providedRuntime 'ru.yandex.qatools.embed:postgresql-embedded:1.13'
 }
 
 // 启动jetty

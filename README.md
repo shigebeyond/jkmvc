@@ -465,7 +465,7 @@ download source and run web server
 ```
 git clone https://github.com/shigebeyond/kotlin-jkmvc.git
 cd kotlin-jkmvc
-gradle jettyRun
+gradle :jkmvc-example:jettyRun
 ```
 
 visit url
@@ -485,3 +485,12 @@ http://localhost:8081/jkmvc/user/new
 http://localhost:8081/jkmvc/user/edit
 
 ![](https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/actionedit.png)
+
+# gradle command for build
+
+```
+gradle :jkmvc-common:build -x test
+gradle :jkmvc-orm:build -x test
+gradle :jkmvc-http:build -x test
+gradle :jkmvc-example:build -x test
+```
