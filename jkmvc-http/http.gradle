@@ -1,0 +1,17 @@
+apply plugin: 'war'
+
+dependencies{
+    // other project
+    compile project(':jkmvc-common')
+
+    // upload
+    compile 'servlets.com:cos:05Nov2002'
+
+    // velocity
+    compile 'org.apache.velocity:velocity:1.7'
+
+    // servlet
+    providedCompile "javax.servlet:javax.servlet-api:3.1.0"
+    runtime "javax.servlet.jsp:jsp-api:2.2.1-b03"
+    runtime "javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1"
+}

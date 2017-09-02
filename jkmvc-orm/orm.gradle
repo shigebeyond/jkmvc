@@ -1,0 +1,4 @@
+dependencies{
+    // other project
+    compile project(':jkmvc-common')
+}
