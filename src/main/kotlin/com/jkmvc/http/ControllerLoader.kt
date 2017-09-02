@@ -26,7 +26,7 @@ object ControllerLoader:IControllerLoader{
      */
     private val controllers:MutableMap<String, ControllerClass> by lazy {
         scan()
-    };
+    }
 
     /**
      * 添加单个包
@@ -51,41 +51,60 @@ object ControllerLoader:IControllerLoader{
      * @return
      */
     public override fun scan(): MutableMap<String, ControllerClass> {
+        val result:MutableMap<String, ControllerClass> = HashMap<String, ControllerClass>()
 
         // 获得类加载器
-        val cld = Thread.currentThread().contextClassLoader ?: throw ClassNotFoundException("Can't get class loader.")
-        val controllers:MutableMap<String, ControllerClass> = HashMap<String, ControllerClass>()
+        val cld = Thread.currentThread().contextClassLoader
 
         // 遍历包来扫描
         for (pck in packages){
-            // 获得该路径的资源
+            // 获得该包的所有资源
             val path = pck.replace('.', '/')
-            val resource = cld.getResource(path) ?: throw ClassNotFoundException("No resource for " + path)
-
-            // 获得指定包的目录
-            val dir = File(resource.file)
-            val dirPath = dir.absolutePath + "/"
-
-            // 获得包下的类
-            dir.travel { file:File ->
-                // 过滤Controller的类文件
-                if(file.name.endsWith("Controller.class")){
-                    // 去掉 .class 后缀
-                    var name = file.absolutePath.trim(dirPath, "Controller.class")
-                    // 获得类
-                    val className = pck + '.' + name.replace('/', '.') + "Controller"
-                    val clazz = Class.forName(className)
-                    // 过滤Controller子类
-                    val ctrl = Controller::class.java
-                    if(ctrl != clazz && ctrl.isAssignableFrom(clazz)){
-                        // 收集controller的构造函数+所有action方法
-                        controllers.put(name.lcFirst() /* 首字母小写 */, ControllerClass(clazz.kotlin))
-                    }
+            val urls = cld.getResources(path)
+            // 遍历资源
+            for(url in urls){
+                // 遍历某个资源下的文件
+                url.travel { relativePath, isDir ->
+                    // 收集controller类
+                    collectControllerClass(relativePath, isDir, result)
                 }
             }
         }
 
-        return controllers;
+        return result
+    }
+
+    /**
+     * 收集controller类
+     *
+     * @param relativePath
+     * @param isDir
+     * @return
+     */
+    fun collectControllerClass(relativePath: String, isDir: Boolean, result: MutableMap<String, ControllerClass>){
+        // 过滤Controller的类文件
+        if(!relativePath.endsWith("Controller.class"))
+            return
+
+        // 获得类名
+        val className = relativePath.substringBefore(".class").replace(File.separatorChar, '.')
+        // 获得类
+        val clazz = Class.forName(className)
+        // 过滤Controller子类
+        val ctrl = Controller::class.java
+        if(ctrl != clazz && ctrl.isAssignableFrom(clazz)){
+            // 收集controller的构造函数+所有action方法
+            result.put(getControllerName(className), ControllerClass(clazz.kotlin))
+        }
+    }
+
+    /**
+     * 根据类名获得controller名
+     */
+    fun getControllerName(clazz:String): String {
+        val start = clazz.lastIndexOf('.') + 1
+        val end = clazz.length - 10
+        return clazz.substring(start, end).lcFirst() /* 首字母小写 */
     }
 
     /**

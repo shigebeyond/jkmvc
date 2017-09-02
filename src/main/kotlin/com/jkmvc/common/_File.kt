@@ -1,8 +1,13 @@
 package com.jkmvc.common
 
 import java.io.File
+import java.net.JarURLConnection
+import java.net.URL
 import java.util.*
+import java.util.jar.JarEntry
+import java.util.jar.JarFile
 
+/****************************** 文件大小 *******************************/
 /**
  * 文件大小单位
  *   相邻单位相差1024倍
@@ -21,6 +26,7 @@ public fun Char.convertBytes():Int{
     return Math.pow(1024.toDouble(), i.toDouble()).toInt()
 }
 
+/****************************** 文件路径 *******************************/
 /**
  * 判断是否是绝对路径
  * @param path
@@ -30,8 +36,10 @@ public fun String.isAbsolutePath(): Boolean {
     return startsWith("/") || indexOf(":") > 0;
 }
 
+/****************************** 文件遍历 *******************************/
 /**
  * 遍历文件
+ *   使用栈来优化
  * @param action 访问者函数
  */
 public fun File.travel(action:(file: File) -> Unit): Unit {
@@ -52,6 +60,36 @@ public fun travelFiles(files: Stack<File>, action:(file: File) -> Unit): Unit {
             files.addAll(file.listFiles())
         else
             action(file)
+    }
+}
 
+/****************************** URL遍历 *******************************/
+// jar url协议的正则
+private val jarUrlProtocol = "jar|zip|wsjar|code-source".toRegex()
+
+/**
+ * url是否是jar包
+ */
+public fun URL.isJar(): Boolean {
+    return jarUrlProtocol.matches(protocol)
+}
+
+/**
+ * 遍历url中的资源
+ * @param action 访问者函数
+ */
+public fun URL.travel(action:(relativePath:String, isDir:Boolean) -> Unit):Unit{
+    if(isJar()){ // 遍历jar
+        val conn = openConnection() as JarURLConnection
+        val jarFile = conn.jarFile
+        for (entry in jarFile.entries()){
+            val isDir = entry.name.endsWith(File.separatorChar)
+            action(entry.name, isDir);
+        }
+    }else{ // 遍历目录
+        val root = this.javaClass.getResource("/").path
+        File(path).travel {
+            action(it.path.substring(root.length), it.isDirectory)
+        }
     }
 }
