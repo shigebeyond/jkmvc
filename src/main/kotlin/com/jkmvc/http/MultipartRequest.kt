@@ -75,9 +75,9 @@ abstract class MultipartRequest(protected val req:HttpServletRequest /* 请求�
      */
     protected fun prepareUploadDirectory(): String {
         // 上传目录 = 根目录/子目录
-        var path:String = uploadConfig.getString("uploadDirectory") + '/'
+        var path:String = uploadConfig.getString("uploadDirectory") + File.separatorChar
         if(uploadSubdir != "")
-            path = path + uploadSubdir + '/'
+            path = path + uploadSubdir + File.separatorChar
         val dir = File(path);
         // 如果目录不存在，则创建
         if(!dir.exists())
