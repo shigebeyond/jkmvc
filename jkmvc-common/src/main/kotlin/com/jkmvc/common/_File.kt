@@ -87,7 +87,7 @@ public fun URL.travel(action:(relativePath:String, isDir:Boolean) -> Unit):Unit{
             action(entry.name, isDir);
         }
     }else{ // 遍历目录
-        val root = this.javaClass.getResource("/").path
+        val root = Thread.currentThread().contextClassLoader.getResource("/").path
         File(path).travel {
             action(it.path.substring(root.length), it.isDirectory)
         }
