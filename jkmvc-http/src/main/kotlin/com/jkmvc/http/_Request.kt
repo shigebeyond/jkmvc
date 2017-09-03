@@ -3,10 +3,14 @@ package com.jkmvc.http
 import com.jkmvc.orm.IOrm
 import com.jkmvc.orm.Orm
 import com.oreilly.servlet.MultipartRequest
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.lang.reflect.Field
 import java.util.*
 import javax.servlet.http.HttpServletRequest
+
+// http的日志
+val httpLogger = LoggerFactory.getLogger("com.jkmvc.db")
 
 /****************************** HttpServletRequest扩展 *******************************/
 

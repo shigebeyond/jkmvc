@@ -2,11 +2,15 @@ package com.jkmvc.db
 
 import com.jkmvc.common.findConstructor
 import com.jkmvc.orm.IOrm
+import org.slf4j.LoggerFactory
 import java.io.InputStream
 import java.io.Reader
 import java.sql.*
 import java.util.*
 import kotlin.reflect.KClass
+
+// db的日志
+val dbLogger = LoggerFactory.getLogger("com.jkmvc.db")
 
 /****************************** Connection直接提供查询与更新数据的方法 *******************************/
 /**

@@ -26,7 +26,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
 
             // 预览sql
             if(Db.debug && sql != "")
-                println("编译好的sql：" + previewSql())
+                dbLogger.debug("编译好的sql：" + previewSql())
         }
 
     /**
@@ -122,7 +122,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
 
         // 预览sql
         if(Db.debug)
-            println("实际的sql：" + previewSql(dynamicParams, fromIndex))
+            dbLogger.debug("实际的sql：" + previewSql(dynamicParams, fromIndex))
 
         return result;
     }

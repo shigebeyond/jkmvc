@@ -1,5 +1,6 @@
 package com.jkmvc.http
 
+import com.jkmvc.common.Config
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import kotlin.reflect.KFunction
@@ -14,6 +15,11 @@ import kotlin.reflect.KFunction
 object Server:IServer {
 
     /**
+     * 是否调试
+     */
+    public val debug:Boolean = Config.instance("jkmvc")!!.getBoolean("debug.http")!!;
+
+    /**
      * 处理请求
      *
      * @param req
@@ -23,6 +29,8 @@ object Server:IServer {
     public override fun run(request: HttpServletRequest, response: HttpServletResponse):Boolean{
         //　构建请求对象
         val req:Request = Request(request);
+        if(debug)
+            httpLogger.debug("请求uri: ${req.routeUri}")
 
         //　如果是静态文件请求，则跳过路由解析
         if(req.isStaticFile())
@@ -48,6 +56,7 @@ object Server:IServer {
         catch (e: Exception) {
 //            res.render("异常 - " + e.message)
             e.printStackTrace(res.prepareWriter())
+            httpLogger.debug("处理uri[${req.routeUri}]出错", e)
             return true
         }
 

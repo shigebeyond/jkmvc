@@ -45,6 +45,13 @@ class MyTests{
     }
 
     @Test
+    fun testLog(){
+        testLogger.info("打信息日志")
+        testLogger.debug("打调试日志")
+        testLogger.error("打错误日志")
+    }
+
+    @Test
     fun testClass(){
 //        println(MyTests::class)
 //        println(this.javaClass)
