@@ -126,6 +126,32 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	}
 
 	/**
+	 * 判断请求参数是否为空
+	 *
+	 * @param key 参数名
+	 * @return
+	 */
+	public fun isEmpty(key:String):Boolean{
+		// 先取路由参数
+		if(params.containsKey(key) && params[key].isNullOrEmpty())
+			return true;
+
+		// 再取get/post参数
+		return !containsParameter(key) || getParameter(key).isNullOrEmpty();
+	}
+
+	/**
+	 * 判断请求是否包含指定参数
+	 *
+	 * @param key 参数名
+	 * @return
+	 */
+	public fun contain(key:String):Boolean{
+		return params.containsKey(key) // 先取路由参数
+			 && containsParameter(key); // 再取get/post参数
+	}
+
+	/**
 	 * 智能获得请求参数，先从路由参数中取得，如果没有，则从get/post参数中取
 	 *    注：智能获得请求参数时，需要根据返回值的类型来转换参数值的类型，因此调用时需明确返回值的类型
 	 *
