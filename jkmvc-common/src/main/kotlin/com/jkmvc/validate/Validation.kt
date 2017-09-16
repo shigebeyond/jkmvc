@@ -17,7 +17,7 @@ object Validation:IValidation
 	 * 校验方法对应的错误消息
 	 */
 	public val messages:Map<String, String> = mapOf(
-			"notempty" to "不能为空",
+			"notEmpty" to "不能为空",
 			"length" to "的长度必须在:0到:1之间",
 			"range" to "的数值必须是:0到:1之间的整数",
 			"min" to "的数值必须不少于:0",
