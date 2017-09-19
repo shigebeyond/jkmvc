@@ -1,0 +1,10 @@
+apply plugin: 'jetty'
+
+dependencies{
+    // other project
+    compile project(':jkmvc-orm')
+    compile project(':jkmvc-http')
+
+    // 加密解密
+    compile 'commons-codec:commons-codec:1.10'
+}

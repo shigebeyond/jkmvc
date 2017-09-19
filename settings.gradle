@@ -1,4 +1,4 @@
-include 'jkmvc-common', 'jkmvc-orm', 'jkmvc-http', 'jkmvc-example'
+include 'jkmvc-common', 'jkmvc-orm', 'jkmvc-http', 'jkmvc-example', 'jkmvc-session'
 
 rootProject.name = 'jkmvc'
 

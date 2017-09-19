@@ -37,6 +37,9 @@ subprojects{
         maven {
             url "http://dl.bintray.com/kotlin/kotlin"
         }
+        maven {
+            url "https://repository.apache.org/content/repositories/releases"
+        }
     }
 
     sourceSets {

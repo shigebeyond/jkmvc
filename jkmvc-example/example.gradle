@@ -2,8 +2,7 @@ apply plugin: 'jetty'
 
 dependencies{
     // other project
-    compile project(':jkmvc-orm')
-    compile project(':jkmvc-http')
+    compile project(':jkmvc-session')
 
     // jdbc
     providedRuntime "mysql:mysql-connector-java:5.1.6"
