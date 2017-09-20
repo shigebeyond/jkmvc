@@ -17,7 +17,7 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @create 2017-09-19 下午11:35
  **/
-object Auth {
+object Auth:IAuth {
 
     /**
      * 会话配置
