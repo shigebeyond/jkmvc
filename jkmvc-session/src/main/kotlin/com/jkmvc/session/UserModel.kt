@@ -4,7 +4,9 @@ import com.jkmvc.orm.MetaData
 import com.jkmvc.orm.Orm
 
 /**
- * 用户模型
+ * 会话相关的用户模型
+ *    该类是默认实现
+ *    可自己实现，需修改 session.properties 指定 userModelClass
  *
  * @author shijianhang
  * @create 2017-09-19 下午11:35

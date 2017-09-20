@@ -9,11 +9,7 @@ import javax.servlet.http.HttpSession
 import kotlin.reflect.KClass
 
 /**
- * 认证用户
- *   1 登录
- *   2 注销
- *   3 密码加密
- *
+ * dd
  * @author shijianhang
  * @create 2017-09-19 下午11:35
  **/
@@ -25,12 +21,17 @@ object Auth {
     val sessionConfig:Config = Config.instance("session")!!;
 
     /**
+     * 用户模型的类
+     */
+    val userModelClass: KClass<Orm> = Class.forName(sessionConfig["userModelClass"]).kotlin as KClass<Orm>;
+
+    /**
      * 获得当前会话
      *
      * @param create 是否创建新的会话
      * @return
      */
-    public fun getSession(create:Boolean = true): HttpSession {
+    private fun getSession(create:Boolean = true): HttpSession {
         return Request.current().getSession(create);
     }
 
@@ -48,20 +49,22 @@ object Auth {
      *
      * @param username  用户名
      * @param password  密码
-     * @param usernameField  用户名的字段名
-     * @param passwordField  密码的字段名
-     * @return  boolean
+     * @return Orm?
      */
-    public inline fun <reified T:Orm> login(username:String, password:String, usernameField:String = "username", passwordField:String = "password"): T? {
+    public fun login(username:String, password:String): Orm? {
         // 动态获得queryBuilder，即UserModel.queryBuilder()
-        val query = T::class.modelMetaData.queryBuilder()
+        val query = userModelClass.modelMetaData.queryBuilder()
+
         // 根据用户名查找用户
-        val user:T? = query.where(usernameField, "=", username).find<T>();
+        val user:Orm = query.find(){
+            val obj = userModelClass.java.newInstance()
+            obj.original(it)
+        } as Orm;
         if(user == null)
             return null;
 
         //　检查密码
-        if(hash(password) != user.getString(passwordField))
+        if(hash(password) != user.getString("password"))
             return null;
 
         // 保存登录用户到session中
