@@ -1,12 +1,6 @@
 package com.jkmvc.session
 
-import com.jkmvc.common.Config
-import com.jkmvc.http.Request
 import com.jkmvc.orm.Orm
-import com.jkmvc.orm.modelMetaData
-import org.apache.commons.codec.digest.DigestUtils
-import javax.servlet.http.HttpSession
-import kotlin.reflect.KClass
 
 /**
  * 认证用户

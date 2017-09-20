@@ -43,8 +43,7 @@ object Auth:IAuth {
      * 获得当前登录用户
      * @return
      */
-    @JvmStatic
-    public fun getUser(): Orm?{
+    public override fun getUser(): Orm?{
         // 从session中读取登录用户
         return getSession(false).getAttribute("user") as Orm?;
     }
@@ -56,8 +55,7 @@ object Auth:IAuth {
      * @param password  密码
      * @return Orm?
      */
-    @JvmStatic
-    public fun login(username:String, password:String): Orm? {
+    public override fun login(username:String, password:String): Orm? {
         // 动态获得queryBuilder，即UserModel.queryBuilder()
         val query = userModelClass.modelMetaData.queryBuilder()
 
@@ -81,8 +79,7 @@ object Auth:IAuth {
     /**
      * 注销登录
      */
-    @JvmStatic
-    public fun logout(){
+    public override fun logout(){
         getSession().invalidate();
     }
 
@@ -92,7 +89,7 @@ object Auth:IAuth {
      * @param str
      * @return
      */
-    public fun hash(str: String): String {
+    public override fun hash(str: String): String {
         return DigestUtils.md5Hex(str + sessionConfig["salt"]);
     }
 

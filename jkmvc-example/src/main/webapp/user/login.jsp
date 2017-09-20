@@ -1,7 +1,7 @@
 <%@ page language="java" import="com.jkmvc.http.Request,com.jkmvc.example.model.UserModel,com.jkmvc.session.Auth" pageEncoding="UTF-8"%>
 <%
     Request req = (Request) request;
-    UserModel user = (UserModel)Auth.getUser();
+    UserModel user = (UserModel)Auth.INSTANCE.getUser();
     String username = user == null ? "" : user.getUsername();
 %>
 <!DOCTYPE html>
