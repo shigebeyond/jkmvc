@@ -24,6 +24,8 @@
       <thead>
         <tr>
           <th>id</th>
+          <th>username</th>
+          <th>password</th>
           <th>name</th>
           <th>age</th>
           <th>操作:</th>
@@ -35,6 +37,8 @@
              UserModel user = it.next(); %>
             <tr>
               <th scope="row"><%= user.getId() %></th>
+              <td><%= user.getUsername() %></td>
+              <td><%= user.getPassword() %></td>
               <td><%= user.getName() %></td>
               <td><%= user.getAge() %></td>
               <td>

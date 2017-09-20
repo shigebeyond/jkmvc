@@ -26,6 +26,14 @@
         <span><%= user.getId() %></span>
       </div>
       <div class="form-group">
+        <label for="username">username</label>
+        <span><%= user.getUsername() %></span>
+      </div>
+      <div class="form-group">
+        <label for="password">password</label>
+        <span><%= user.getPassword() %></span>
+      </div>
+      <div class="form-group">
         <label for="name">name</label>
         <span><%= user.getName() %></span>
       </div>

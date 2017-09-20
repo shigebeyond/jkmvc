@@ -6,6 +6,7 @@ import com.jkmvc.http.Controller
 import com.jkmvc.http.values
 import com.jkmvc.orm.OrmQueryBuilder
 import com.jkmvc.orm.isLoaded
+import com.jkmvc.session.Auth
 import java.util.*
 
 
@@ -166,4 +167,18 @@ class UserController: Controller()
         redirect("user/detail/$id");
     }
 
+    /**
+     * 登录
+     */
+    public fun actionLogin(){
+        if(req.isPost()){ // post请求
+            val user = Auth.login(req["username"]!!, req["password"]!!);
+            if(user == null)
+                res.render("登录失败")
+            else
+                res.render("用户[" + user["username"] + "]登录成功")
+        }else{ // get请求
+            res.render(view())
+        }
+    }
 }

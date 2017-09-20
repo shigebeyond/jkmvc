@@ -21,6 +21,14 @@
     <!-- Form -->
     <form action="<%= req.absoluteUrl("user/new") %>" method="post">
       <div class="form-group">
+        <label for="username">username</label>
+        <input type="text" class="form-control" id="username" placeholder="username" name="username">
+      </div>
+      <div class="form-group">
+        <label for="password">password</label>
+        <input type="text" class="form-control" id="password" placeholder="password" name="password">
+      </div>
+      <div class="form-group">
         <label for="name">name</label>
         <input type="text" class="form-control" id="name" placeholder="name" name="name">
       </div>

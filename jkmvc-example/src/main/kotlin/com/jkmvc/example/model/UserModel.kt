@@ -2,6 +2,7 @@ package com.jkmvc.example.model
 
 import com.jkmvc.orm.MetaData
 import com.jkmvc.orm.Orm
+import com.jkmvc.session.Auth
 
 /**
  * 用户模型
@@ -14,6 +15,8 @@ class UserModel(id:Int? = null): Orm(id) {
         init {
             // 添加标签 + 规则
             // add label and rule for field
+            addRule("username", "用户名", "notEmpty");
+            addRule("password", "密码", "notEmpty");
             addRule("name", "姓名", "notEmpty");
             addRule("age", "年龄", "between(1,120)");
 
@@ -28,6 +31,10 @@ class UserModel(id:Int? = null): Orm(id) {
     // delegate property
     public var id:Int by property<Int>();
 
+    public var username:String by property<String>();
+
+    public var password:String by property<String>();
+
     public var name:String by property<String>();
 
     public var age:Int by property<Int>();
@@ -41,4 +48,12 @@ class UserModel(id:Int? = null): Orm(id) {
     // 关联地址：一个用户有多个地址
     // relate to AddressModel: user has many addresses
     public var addresses:List<AddressModel> by property<List<AddressModel>>();
+
+    /**
+     * create前置处理
+     */
+    public fun beforeCreate(){
+        // 加密密码
+        this["password"] = Auth.hash(this["password"])
+    }
 }

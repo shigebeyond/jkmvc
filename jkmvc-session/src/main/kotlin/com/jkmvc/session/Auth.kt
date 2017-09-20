@@ -9,7 +9,11 @@ import javax.servlet.http.HttpSession
 import kotlin.reflect.KClass
 
 /**
- * dd
+ * 认证用户
+ *   1 登录
+ *   2 注销
+ *   3 密码加密
+ *
  * @author shijianhang
  * @create 2017-09-19 下午11:35
  **/
@@ -39,6 +43,7 @@ object Auth {
      * 获得当前登录用户
      * @return
      */
+    @JvmStatic
     public fun getUser(): Orm?{
         // 从session中读取登录用户
         return getSession(false).getAttribute("user") as Orm?;
@@ -51,6 +56,7 @@ object Auth {
      * @param password  密码
      * @return Orm?
      */
+    @JvmStatic
     public fun login(username:String, password:String): Orm? {
         // 动态获得queryBuilder，即UserModel.queryBuilder()
         val query = userModelClass.modelMetaData.queryBuilder()
@@ -75,6 +81,7 @@ object Auth {
     /**
      * 注销登录
      */
+    @JvmStatic
     public fun logout(){
         getSession().invalidate();
     }

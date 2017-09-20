@@ -1,5 +1,9 @@
-<%@ page language="java" import="com.jkmvc.http.Request,com.jkmvc.example.model.UserModel" pageEncoding="UTF-8"%>
-<% Request req = (Request) request; %>
+<%@ page language="java" import="com.jkmvc.http.Request,com.jkmvc.example.model.UserModel,com.jkmvc.session.Auth" pageEncoding="UTF-8"%>
+<%
+    Request req = (Request) request;
+    UserModel user = (UserModel)Auth.getUser();
+    String username = user == null ? "" : user.getUsername();
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,13 +17,14 @@
 <body>
   <div class="panel panel-default">
     <!-- Default panel contents -->
-    <div class="panel-heading">新建用户</div>
+    <div class="panel-heading">登录</div>
     <div class="panel-body">
-      <p>...</p>
+
+      <p>当前登录用户是 <%= username %></p>
     </div>
 
     <!-- Form -->
-    <form action="<%= req.absoluteUrl("user/new") %>" method="post">
+    <form action="<%= req.absoluteUrl("user/login") %>" method="post">
       <div class="form-group">
         <label for="username">username</label>
         <input type="text" class="form-control" id="username" placeholder="username" name="username">
@@ -27,14 +32,6 @@
       <div class="form-group">
         <label for="password">password</label>
         <input type="text" class="form-control" id="password" placeholder="password" name="password">
-      </div>
-      <div class="form-group">
-        <label for="name">name</label>
-        <input type="text" class="form-control" id="name" placeholder="name" name="name">
-      </div>
-      <div class="form-group">
-        <label for="age">age</label>
-        <input type="text" class="form-control" id="age" placeholder="age" name="age">
       </div>
       <button type="submit" class="btn btn-default">Submit</button>
     </form>
