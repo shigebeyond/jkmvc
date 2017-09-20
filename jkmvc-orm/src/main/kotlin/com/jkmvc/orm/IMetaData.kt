@@ -5,6 +5,7 @@ import com.jkmvc.db.IDb
 import com.jkmvc.db.IDbQueryBuilder
 import java.io.File
 import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
 
 /**
  * orm的元数据
@@ -58,6 +59,11 @@ interface IMetaData{
     val columns:List<String>
 
     /**
+     * 事件处理器
+     */
+    val eventHandlers:Map<String, KFunction<Unit>?>
+
+    /**
      * 是否有某个关联关系
      * @param name
      * @return
@@ -93,6 +99,13 @@ interface IMetaData{
      * @return
      */
     fun addRule(name: String, rule: IMetaRule): MetaData;
+
+    /**
+     * 获得事件处理器
+     * @param event 事件名
+     * @return
+     */
+    fun getEventHandler(event:String): KFunction<Unit>?;
 
     /**
      * 生成属性代理 + 设置关联关系(belongs to)

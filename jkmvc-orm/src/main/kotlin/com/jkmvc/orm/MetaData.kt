@@ -1,6 +1,7 @@
 package com.jkmvc.orm
 
 import com.jkmvc.common.Config
+import com.jkmvc.common.findFunction
 import com.jkmvc.common.format
 import com.jkmvc.db.Db
 import com.jkmvc.db.IDb
@@ -8,6 +9,7 @@ import com.jkmvc.db.IDbQueryBuilder
 import java.io.File
 import java.util.*
 import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
 
 /**
  * orm的元数据
@@ -20,6 +22,13 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
                     public override var table: String = model.modelName /* 表名，假定model类名, 都是以"Model"作为后缀 */,
                     public override var primaryKey: String = "id" /* 主键 */
 ) : IMetaData {
+
+    companion object{
+        /**
+         * 事件
+         */
+        val events:Array<String> = arrayOf("beforeCreate", "afterCreate", "beforeUpdate", "afterUpdate", "beforeSave", "afterSave", "beforeDelete", "afterDelete");
+    }
 
     /**
      * 关联关系
@@ -34,6 +43,20 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
     public override val rules: MutableMap<String, IMetaRule> by lazy {
         HashMap<String, IMetaRule>()
     };
+
+    /**
+     * 事件处理器
+     */
+    public override val eventHandlers:Map<String, KFunction<Unit>?> by lazy {
+        val handlers = HashMap<String, KFunction<Unit>?>()
+        // 遍历每个事件填充
+        for (event in events){
+            val handler = model.findFunction(event)  as KFunction<Unit>?
+            if(handler != null)
+                handlers[event] = handler
+        }
+        handlers
+    }
 
     /**
      * 数据库
@@ -105,6 +128,14 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
         return this;
     }
 
+    /**
+     * 获得事件处理器
+     * @param event 事件名
+     * @return
+     */
+    public override fun getEventHandler(event:String): KFunction<Unit>? {
+        return eventHandlers.getOrDefault(event, null)
+    }
 
     /**
      * 生成属性代理 + 设置关联关系(belongs to)

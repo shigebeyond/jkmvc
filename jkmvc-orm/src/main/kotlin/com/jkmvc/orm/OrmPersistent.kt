@@ -69,6 +69,10 @@ abstract class OrmPersistent: OrmValid() {
 		// 校验
 		check();
 
+		// 触发前置事件
+		fireEvent("beforeCreate")
+		fireEvent("beforeSave")
+
 		// 插入数据库
 		val pk = queryBuilder().value(buildDirtyData()).insert(true);
 
@@ -76,6 +80,10 @@ abstract class OrmPersistent: OrmValid() {
 		data[metadata.primaryKey] = pk; // 主键
 		dirty.clear(); // 变化的字段值
 		loaded = true;
+
+		// 触发后置事件
+		fireEvent("afterCreate")
+		fireEvent("afterSave")
 		
 		return pk;
 	}
@@ -113,11 +121,19 @@ abstract class OrmPersistent: OrmValid() {
 		// 校验
 		check();
 
+		// 触发前置事件
+		fireEvent("beforeUpdate")
+		fireEvent("beforeSave")
+
 		// 更新数据库
 		val result = queryBuilder().sets(buildDirtyData()).where(metadata.primaryKey, pk).update();
 
 		// 更新内部数据
 		dirty.clear()
+
+		// 触发后置事件
+		fireEvent("afterUpdate")
+		fireEvent("afterSave")
 
 		return result;
 	}
@@ -136,8 +152,8 @@ abstract class OrmPersistent: OrmValid() {
 		if(!loaded)
 			throw OrmException("删除对象[$this]前先检查是否存在");
 
-		//　校验
-		check();
+		// 触发前置事件
+		fireEvent("beforeDelete")
 
 		// 删除数据
 		val result = queryBuilder().where(metadata.primaryKey, pk).delete();
@@ -146,6 +162,20 @@ abstract class OrmPersistent: OrmValid() {
 		data.clear()
 		dirty.clear()
 
+		// 触发后置事件
+		fireEvent("afterDelete")
+
 		return result;
+	}
+
+	/**
+	 * 触发事件
+	 *   通过反射来调用事件处理函数，纯属装逼
+	 *   其实可以显式调用，但是需要在Orm类中事先声明各个事件的处理函数
+	 *
+	 * @param event 事件名
+	 */
+	public override fun fireEvent(event:String){
+		metadata.getEventHandler(event)?.call(this)
 	}
 }

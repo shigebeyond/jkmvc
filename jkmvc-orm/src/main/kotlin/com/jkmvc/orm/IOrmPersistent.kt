@@ -71,4 +71,11 @@ interface IOrmPersistent :IOrmValid {
 	 * @return 影响行数
 	 */
 	fun delete(): Boolean;
+
+	/**
+	 * 触发事件
+	 *
+	 * @param event 事件名
+	 */
+	fun fireEvent(event:String)
 }
