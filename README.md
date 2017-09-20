@@ -84,7 +84,7 @@ class WelcomeController: Controller() {
 
 ## 5 Visit web page
 
-visit http://localhost:8081/jkmvc/
+visit http://localhost:8081/jkmvc-example/
 
 ![](https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/webpage.png)
 
