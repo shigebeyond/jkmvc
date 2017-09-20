@@ -16,7 +16,10 @@
     <!-- Default panel contents -->
     <div class="panel-heading">用户列表</div>
     <div class="panel-body">
-      <p><a href="<%= req.absoluteUrl("user/new/") %>" class="btn btn-warning">新建</a></p>
+      <p>
+        <a href="<%= req.absoluteUrl("user/new/") %>" class="btn btn-warning">新建</a>
+        <a href="<%= req.absoluteUrl("user/login/") %>" class="btn btn-danger">登录</a>
+      </p>
     </div>
 
     <!-- Table -->

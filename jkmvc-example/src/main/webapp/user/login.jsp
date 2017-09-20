@@ -19,8 +19,13 @@
     <!-- Default panel contents -->
     <div class="panel-heading">登录</div>
     <div class="panel-body">
-
-      <p>当前登录用户是 <%= username %></p>
+      <p>
+      <% if(user != null) { %>
+            当前登录用户是 <%= username %>, <a href="<%= req.absoluteUrl("user/logout/") %>" class="btn btn-warning">注销</a>
+      <% }else{ %>
+            未登录
+      <% } %>
+      </p>
     </div>
 
     <!-- Form -->

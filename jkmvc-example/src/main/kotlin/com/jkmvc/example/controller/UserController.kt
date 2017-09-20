@@ -176,9 +176,17 @@ class UserController: Controller()
             if(user == null)
                 res.render("登录失败")
             else
-                res.render("用户[" + user["username"] + "]登录成功")
+                redirect("user/login")
         }else{ // get请求
             res.render(view())
         }
+    }
+
+    /**
+     * 登录
+     */
+    public fun actionLogout(){
+        Auth.logout()
+        redirect("user/login")
     }
 }
