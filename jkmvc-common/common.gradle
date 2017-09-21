@@ -3,7 +3,10 @@ dependencies {
     // kotlin
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    
+
+    // yaml
+    compile 'org.yaml:snakeyaml:1.18'
+
     // log
     compile 'org.slf4j:slf4j-api:1.7.12'
     compile 'org.slf4j:slf4j-log4j12:1.7.12' // SLF4J重复绑定，与gradle-core包引用slf4j-log4j12实现冲突，但是依然可以使用
