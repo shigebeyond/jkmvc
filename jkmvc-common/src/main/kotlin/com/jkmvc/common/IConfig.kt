@@ -19,11 +19,6 @@ abstract class IConfig {
     protected lateinit var props: Properties;
 
     /**
-     * 加载配置文件
-     */
-    public abstract fun load(inputStream: InputStream?, encoding: String = "UTF-8");
-
-    /**
      * 判断是否含有配置项
      */
     public abstract fun containsKey(key: String): Boolean;

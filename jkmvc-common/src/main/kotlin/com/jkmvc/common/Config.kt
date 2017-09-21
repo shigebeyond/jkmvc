@@ -8,6 +8,7 @@ import java.io.InputStreamReader
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import com.jkmvc.common.getOrDefault
+import org.yaml.snakeyaml.Yaml
 
 /**
  * 配置数据，用于加载配置文件，并读取配置数据
@@ -16,7 +17,7 @@ import com.jkmvc.common.getOrDefault
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-class Config:IConfig {
+class Config: IConfig{
 
     companion object{
         /**
@@ -40,66 +41,67 @@ class Config:IConfig {
          * Config.instance("com/jfinal/config_in_sub_directory_of_classpath.txt");
          *
          * @param fileName the properties file's name in classpath or the sub directory of classpath
-         * @param encoding the encoding
+         * @param type properties | yaml
          */
-        public fun instance(fileName: String, encoding: String = "UTF-8"): Config? {
-            val fullName = "$fileName.properties";
-            return configs.getOrPut(fullName){
-                Config(fullName, encoding)
+        public fun instance(fileName: String, type: String = "properties"): Config? {
+            return configs.getOrPut(fileName){
+                Config("$fileName.$type", type)
             }
         }
     }
 
     /**
-     * Config constructor
-     *
-     *
      * Example:
-     * val config = Config("my_config.txt", "UTF-8");
+     * val connfig = Config(new FileInputStream("/var/config/my_config.properties"), "properties");
+     * val connfig = Config(new FileInputStream("/var/config/my_config.yaml"), "yaml");
      * val userName = config.get("userName");
-
+     *
      * @param fileName the properties file's name in classpath or the sub directory of classpath
-     * @param encoding the encoding
+     * @param type properties | yaml
      */
-    constructor(fileName: String, encoding: String = "UTF-8") {
-        var inputStream: InputStream? = Thread.currentThread().contextClassLoader.getResourceAsStream(fileName)        // properties.load(Prop.class.getResourceAsStream(fileName));
-        if (inputStream == null)
-            throw IllegalArgumentException("Properties file not found in classpath: " + fileName)
-
-        load(inputStream, encoding);
+    constructor(inputStream: InputStream, type: String = "properties"){
+        when(type){
+            "properties" -> loadProperties(inputStream)
+            "yaml" -> loadYaml(inputStream)
+            else -> throw IllegalArgumentException("Unknow porperty file type")
+        }
     }
 
     /**
-     * Prop constructor
-     *
-     *
      * Example:
-     * val prop = Prop(new File("/var/config/my_config.txt"), "UTF-8");
-     * val userName = prop.get("userName");
-
-     * @param file the properties File object
-     * @param encoding the encoding
+     * val config = Config("my_config.properties");
+     * val config = Config("my_config.properties", "properties");
+     * val config = Config("my_config.properties", "yaml");
+     * val userName = config.get("userName");
+     *
+     * @param fileName the properties file's name in classpath or the sub directory of classpath
+     * @param type properties | yaml
      */
-    constructor(file: File?, encoding: String = "UTF-8") {
-        if (file == null)
-            throw IllegalArgumentException("File can not be null.")
-
-        if (file.isFile == false)
-            throw IllegalArgumentException("File not found : " + file.name)
-
-        load(FileInputStream(file), encoding);
+    public constructor(fileName: String, type: String = "properties"):this(Thread.currentThread().contextClassLoader.getResourceAsStream(fileName), type){
     }
 
     /**
-     * 加载配置文件
+     * 加载 properties 文件
      */
-    public override fun load(inputStream: InputStream?, encoding: String) {
+    protected fun loadProperties(inputStream: InputStream){
         if(inputStream == null)
             throw IllegalArgumentException("InputStream is null")
-
         try {
             props = Properties()
-            props.load(InputStreamReader(inputStream, encoding))
+            props.load(InputStreamReader(inputStream, "UTF-8"))
+        } finally {
+            inputStream.close()
+        }
+    }
+
+    /**
+     * 加载 yaml 文件
+     */
+    protected fun loadYaml(inputStream: InputStream){
+        if(inputStream == null)
+            throw IllegalArgumentException("InputStream is null")
+        try {
+            props = Yaml().loadAs(inputStream, Properties::class.java);
         } finally {
             inputStream.close()
         }
@@ -118,9 +120,9 @@ class Config:IConfig {
     public override fun getString(key: String, defaultValue: String?): String? {
         val value = props.getProperty(key)
         return if(value == null)
-                    defaultValue
-                else
-                    value
+            defaultValue
+        else
+            value
     }
 
     /**
