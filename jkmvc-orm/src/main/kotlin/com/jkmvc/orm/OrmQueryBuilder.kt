@@ -53,6 +53,19 @@ class OrmQueryBuilder(protected val metadata: IMetaData) : DbQueryBuilder(metada
         return selectRelated(relation.metadata, name, columns);
     }
 
+
+    /**
+     * 联查多表
+     *
+     * @param names 关联关系名的数组
+     * @return
+     */
+    public fun withs(names: List<String>): OrmQueryBuilder {
+        for(name in names)
+            with(name)
+        return this
+    }
+
     /**
      * 联查从表
      *     从表.外键 = 主表.主键
