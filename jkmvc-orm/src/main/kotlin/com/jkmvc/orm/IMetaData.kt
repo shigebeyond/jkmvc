@@ -19,6 +19,11 @@ interface IMetaData{
     val model: KClass<out IOrm>
 
     /**
+     * 模型中文名
+     */
+    val label:String
+
+    /**
      * 数据库名
      */
     val dbName:String
