@@ -38,13 +38,6 @@ interface IDbQueryBuilderDecoration
     fun quote(value:Any?):String;
 
     /**
-     * 多个where条件
-     * @param conditions
-     * @return
-     */
-    fun wheres(conditions:Map<String, Any?>):IDbQueryBuilder;
-
-    /**
      * 多个on条件
      * @param conditions:Map<String, String>
      * @return
@@ -78,6 +71,18 @@ interface IDbQueryBuilderDecoration
      */
     fun where(column:String, value:Any?):IDbQueryBuilder{
         return where(column, "=", value);
+    }
+
+    /**
+     * Multiple Where
+     *
+     * @param   conditions
+     * @return
+     */
+    fun wheres(conditions:Map<String, Any?>):IDbQueryBuilder{
+        for((column, value) in conditions)
+            where(column, value)
+        return this as IDbQueryBuilder
     }
 
     /**

@@ -180,18 +180,6 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     }
 
     /**
-     * 多个where条件
-     * @param conditions
-     * @return
-     */
-    public override fun wheres(conditions: Map<String, Any?>): IDbQueryBuilder {
-        for ((column, value) in conditions)
-            where(column, "=", value);
-
-        return this;
-    }
-
-    /**
      * 多个on条件
      * @param conditions
      * @return
