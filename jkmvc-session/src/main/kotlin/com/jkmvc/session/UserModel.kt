@@ -6,7 +6,7 @@ import com.jkmvc.orm.Orm
 /**
  * 会话相关的用户模型
  *    该类是默认实现
- *    可自己实现，需修改 session.properties 指定 userModelClass
+ *    可自己实现，需修改 session.properties 指定 userModel
  *
  * @author shijianhang
  * @create 2017-09-19 下午11:35

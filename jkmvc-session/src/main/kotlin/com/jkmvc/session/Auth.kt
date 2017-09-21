@@ -27,7 +27,7 @@ object Auth:IAuth {
     /**
      * 用户模型的类
      */
-    val userModelClass: KClass<Orm> = Class.forName(sessionConfig["userModelClass"]).kotlin as KClass<Orm>;
+    val userModel: KClass<out Orm> = Class.forName(sessionConfig["userModel"]).kotlin as KClass<out Orm>;
 
     /**
      * 获得当前会话
@@ -57,18 +57,17 @@ object Auth:IAuth {
      */
     public override fun login(username:String, password:String): Orm? {
         // 动态获得queryBuilder，即UserModel.queryBuilder()
-        val query = userModelClass.modelMetaData.queryBuilder()
+        val query = userModel.modelMetaData.queryBuilder()
 
         // 根据用户名查找用户
-        val user:Orm = query.find(){
-            val obj = userModelClass.java.newInstance()
-            obj.original(it)
+        val user:Orm = query.where(sessionConfig["usernameField"]!!, "=", username).find(){
+            userModel.java.newInstance().original(it)
         } as Orm;
         if(user == null)
             return null;
 
         //　检查密码
-        if(hash(password) != user.getString("password"))
+        if(hash(password) != user.getString(sessionConfig["passwordField"]!!))
             return null;
 
         // 保存登录用户到session中
