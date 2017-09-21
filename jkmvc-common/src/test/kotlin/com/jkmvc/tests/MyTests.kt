@@ -52,6 +52,15 @@ class MyTests{
     }
 
     @Test
+    fun testResource(){
+        val f = File("jkmvc.properties")
+        println(f.absolutePath + " : " +  f.exists()) // /home/shi/code/java/jkmvc/jkmvc-common/jkmvc.properties : false
+        // 不能识别正则，如 jkmvc.*
+        val res = Thread.currentThread().contextClassLoader.getResource("jkmvc.properties")
+        println(res)
+    }
+
+    @Test
     fun testClass(){
 //        println(MyTests::class)
 //        println(this.javaClass)
