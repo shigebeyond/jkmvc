@@ -3,12 +3,13 @@ package com.jkmvc.example.model
 import com.jkmvc.orm.MetaData
 import com.jkmvc.orm.Orm
 import com.jkmvc.session.Auth
+import com.jkmvc.session.IAuthUserModel
 
 /**
  * 用户模型
  * User　model
  */
-class UserModel(id:Int? = null): Orm(id) {
+class UserModel(id:Int? = null): Orm(id), IAuthUserModel {
     // 伴随对象就是元数据
     // company object is meta data for model
     companion object m: MetaData(UserModel::class){
@@ -48,12 +49,4 @@ class UserModel(id:Int? = null): Orm(id) {
     // 关联地址：一个用户有多个地址
     // relate to AddressModel: user has many addresses
     public var addresses:List<AddressModel> by property<List<AddressModel>>();
-
-    /**
-     * create前置处理
-     */
-    public fun beforeCreate(){
-        // 加密密码
-        this["password"] = Auth.hash(this["password"])
-    }
 }
