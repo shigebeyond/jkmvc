@@ -202,23 +202,23 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	public fun setCookie(name:String, value:String, expiry:Int? = null): Response {
 		val cookie: javax.servlet.http.Cookie = javax.servlet.http.Cookie(name, value);
 		// expiry
-		val maxAage:Int? = cookieConfig?.getInt("expiry", expiry);
+		val maxAage:Int? = cookieConfig.getInt("expiry", expiry);
 		if(maxAage != null)
 			cookie.maxAge = maxAage
 		// path
-		val path:String? = cookieConfig?.get("path");
+		val path:String? = cookieConfig.get("path");
 		if(path != null)
 			cookie.path = path
 		// domain
-		val domain:String? = cookieConfig?.get("domain");
+		val domain:String? = cookieConfig.get("domain");
 		if(domain != null)
 			cookie.domain = domain
 		// secure
-		val secure:Boolean? = cookieConfig?.getBoolean("secure");
+		val secure:Boolean? = cookieConfig.getBoolean("secure");
 		if(secure != null)
 			cookie.secure = secure
 		// httponly
-		val httponly:Boolean? = cookieConfig?.getBoolean("httponly");
+		val httponly:Boolean? = cookieConfig.getBoolean("httponly");
 		if(httponly != null)
 			cookie.isHttpOnly = httponly
 		addCookie(cookie);

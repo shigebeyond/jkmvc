@@ -17,7 +17,7 @@ object Server:IServer {
     /**
      * 是否调试
      */
-    public val debug:Boolean = Config.instance("jkmvc")!!.getBoolean("debug.http")!!;
+    public val debug:Boolean = Config.instance("jkmvc").getBoolean("debug.http")!!;
 
     /**
      * 处理请求

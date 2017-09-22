@@ -19,7 +19,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
         /**
          * 是否调试
          */
-        public val debug:Boolean = Config.instance("jkmvc")!!.getBoolean("debug.db")!!;
+        public val debug:Boolean = Config.instance("jkmvc").getBoolean("debug.db")!!;
 
         /**
          * 数据源工厂

@@ -16,7 +16,7 @@ abstract class IConfig {
     /**
      * 配置项
      */
-    protected lateinit var props: Properties;
+    public lateinit var props: Properties;
 
     /**
      * 判断是否含有配置项

@@ -27,7 +27,7 @@ object Auth:IAuth {
     /**
      * 会话配置
      */
-    val sessionConfig:Config = Config.instance("session")!!;
+    val sessionConfig:Config = Config.instance("session")
 
     /**
      * 用户模型的类

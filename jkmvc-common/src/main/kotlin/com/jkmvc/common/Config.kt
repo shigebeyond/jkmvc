@@ -43,10 +43,10 @@ class Config: IConfig{
          * @param fileName the properties file's name in classpath or the sub directory of classpath
          * @param type properties | yaml
          */
-        public fun instance(fileName: String, type: String = "properties"): Config? {
+        public fun instance(fileName: String, type: String = "properties"): Config {
             return configs.getOrPut(fileName){
                 Config("$fileName.$type", type)
-            }
+            }!!
         }
     }
 

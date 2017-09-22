@@ -18,7 +18,7 @@ interface IAuthUserModel : IOrm {
         /**
          * 会话配置
          */
-        protected val sessionConfig: Config = Config.instance("session")!!;
+        protected val sessionConfig: Config = Config.instance("session");
     }
 
     /**

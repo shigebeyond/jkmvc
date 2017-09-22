@@ -20,7 +20,7 @@ abstract class MultipartRequest(protected val req:HttpServletRequest /* 请求�
         /**
          * 上传配置
          */
-        public val uploadConfig = Config.instance("upload")!!
+        public val uploadConfig = Config.instance("upload")
 
         /**
          * 上传文件的最大size
