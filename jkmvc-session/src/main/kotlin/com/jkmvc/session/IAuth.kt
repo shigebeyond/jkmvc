@@ -17,7 +17,7 @@ interface IAuth {
      * 获得当前登录用户
      * @return
      */
-    public fun getUser(): Orm?
+    public fun getUser(): IAuthUserModel?
 
     /**
      * 登录验证
