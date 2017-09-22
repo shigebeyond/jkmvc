@@ -2,8 +2,6 @@ package com.jkmvc.session
 
 import com.jkmvc.common.Config
 import com.jkmvc.orm.IOrm
-import com.jkmvc.orm.MetaData
-import com.jkmvc.orm.Orm
 
 /**
  * 会话相关的用户模型接口

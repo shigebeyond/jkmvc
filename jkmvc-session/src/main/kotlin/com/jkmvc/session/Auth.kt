@@ -3,7 +3,6 @@ package com.jkmvc.session
 import com.jkmvc.common.Config
 import com.jkmvc.http.Request
 import com.jkmvc.orm.Orm
-import com.jkmvc.orm.SessionException
 import com.jkmvc.orm.modelMetaData
 import org.apache.commons.codec.digest.DigestUtils
 import org.slf4j.LoggerFactory
@@ -34,10 +33,11 @@ object Auth:IAuth {
      */
     val userModel: KClass<out Orm> by lazy {
         // 获得配置的用户模型类
-        val clazz = Class.forName(sessionConfig["userModel"]).kotlin as KClass<out Orm>
+        val className: String = sessionConfig["userModel"]!!
+        val clazz = Class.forName(className).kotlin as KClass<out Orm>
         // 检查是否实现了 IAuthUserModel 接口
         if(IAuthUserModel::class.java.isAssignableFrom(clazz.java))
-            throw SessionException("");
+            throw IllegalArgumentException("无效用户模型的类[$className]，必须是实现[com.jkmvc.session.IAuthUserModel]接口");
         clazz
     }
 
