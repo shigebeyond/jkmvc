@@ -1,9 +1,6 @@
 package com.jkmvc.tests
 
-import com.jkmvc.common.convertBytes
-import com.jkmvc.common.findProperty
-import com.jkmvc.common.to
-import com.jkmvc.common.travel
+import com.jkmvc.common.*
 import com.jkmvc.validate.Validation
 import org.junit.Test
 import java.io.File
@@ -58,6 +55,13 @@ class MyTests{
         // 不能识别正则，如 jkmvc.*
         val res = Thread.currentThread().contextClassLoader.getResource("jkmvc.properties")
         println(res)
+    }
+
+    @Test
+    fun testYaml(){
+        val config = Config.instance("test", "yaml")
+        println(config.props)
+        println(config.props["age"] is Int)
     }
 
     @Test
