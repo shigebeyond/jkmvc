@@ -1,5 +1,6 @@
 package com.jkmvc.orm
 
+import com.jkmvc.db.IRecord
 import kotlin.properties.ReadWriteProperty
 
 /**
@@ -9,7 +10,7 @@ import kotlin.properties.ReadWriteProperty
  * @date 2016-10-10 上午12:52:34
  *
  */
-interface IOrmEntity{
+interface IOrmEntity: IRecord {
 
     /**
      * 获得属性代理
@@ -30,7 +31,7 @@ interface IOrmEntity{
      * @param column 字段名
      * @param  value  字段值
      */
-    operator fun set(column: String, value: Any?);
+    override operator fun set(column: String, value: Any?);
 
     /**
      * 智能设置属性
@@ -62,7 +63,7 @@ interface IOrmEntity{
      * @param defaultValue 默认值
      * @return
      */
-    operator fun <T> get(column: String, defaultValue: Any? = null): T;
+    override operator fun <T> get(column: String, defaultValue: Any?): T;
 
     /**
      * 设置多个字段值

@@ -3,7 +3,6 @@ package com.jkmvc.orm
 import com.jkmvc.common.findProperty
 import com.jkmvc.common.isNullOrEmpty
 import com.jkmvc.common.to
-import com.jkmvc.db.IRecord
 import java.util.*
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KMutableProperty1
@@ -16,7 +15,7 @@ import kotlin.reflect.KProperty
  * @date 2016-10-10 上午12:52:34
  *
  */
-abstract class OrmEntity : IRecord, IOrm {
+abstract class OrmEntity : IOrm {
 
     companion object{
         /**
