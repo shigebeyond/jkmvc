@@ -5,6 +5,7 @@ import com.jkmvc.http.Request
 import com.jkmvc.orm.Orm
 import com.jkmvc.orm.modelMetaData
 import org.apache.commons.codec.digest.DigestUtils
+import org.slf4j.LoggerFactory
 import javax.servlet.http.HttpSession
 import kotlin.reflect.KClass
 
@@ -19,6 +20,9 @@ import kotlin.reflect.KClass
  **/
 object Auth:IAuth {
 
+    // 日志
+    val logger = LoggerFactory.getLogger(Auth::class.java)
+
     /**
      * 会话配置
      */
@@ -27,7 +31,13 @@ object Auth:IAuth {
     /**
      * 用户模型的类
      */
-    val userModel: KClass<out Orm> = Class.forName(sessionConfig["userModel"]).kotlin as KClass<out Orm>;
+    val userModel: KClass<out Orm> by lazy {
+        Class.forName(sessionConfig["userModel"]).kotlin as KClass<out Orm>;
+    }
+
+    init{
+        logger.error(sessionConfig.getString("userModel"))
+    }
 
     /**
      * 获得当前会话
