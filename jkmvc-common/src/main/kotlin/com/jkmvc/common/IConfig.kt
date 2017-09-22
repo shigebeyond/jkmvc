@@ -16,7 +16,7 @@ abstract class IConfig {
     /**
      * 配置项
      */
-    public lateinit var props: Properties;
+    public abstract val props: Map<String, *>;
 
     /**
      * 判断是否含有配置项
@@ -70,4 +70,9 @@ abstract class IConfig {
      * 获得Date类型的配置项
      */
     public abstract fun getDate(key: String, defaultValue: Date? = null): Date?;
+
+    /**
+     * 获得Config类型的子配置项
+     */
+    public abstract fun getConfig(path: String): Config;
 }

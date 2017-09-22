@@ -1,14 +1,11 @@
 package com.jkmvc.common
 
 
-import java.io.File
-import java.io.FileInputStream
+import org.yaml.snakeyaml.Yaml
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import com.jkmvc.common.getOrDefault
-import org.yaml.snakeyaml.Yaml
 
 /**
  * 配置数据，用于加载配置文件，并读取配置数据
@@ -17,7 +14,7 @@ import org.yaml.snakeyaml.Yaml
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-class Config: IConfig{
+class Config(public override val props: Map<String, *>): IConfig(){
 
     companion object{
         /**
@@ -32,38 +29,70 @@ class Config: IConfig{
          * <p>
          * Example:<br>
          * val config = Config.instance("config.txt", "UTF-8");<br>
-         * String userName = config.get("userName");<br>
+         * String username = config.get("username");<br>
          * String password = config.get("password");<br><br>
          *
-         * userName = Config.instance("other_config.txt").get("userName");<br>
+         * username = Config.instance("other_config.txt").get("username");<br>
          * password = Config.instance("other_config.txt").get("password");<br><br>
          *
          * Config.instance("com/jfinal/config_in_sub_directory_of_classpath.txt");
          *
-         * @param fileName the properties file's name in classpath or the sub directory of classpath
+         * @param file the properties file's name in classpath or the sub directory of classpath
          * @param type properties | yaml
          */
-        public fun instance(fileName: String, type: String = "properties"): Config {
-            return configs.getOrPut(fileName){
-                Config("$fileName.$type", type)
+        public fun instance(file: String, type: String = "properties"): Config {
+            // 解析出文件名 + 子项路径
+            var filename:String = file
+            var path:String? = null
+            val i = file.indexOf('.')
+            if(i > -1){
+                filename = file.substring(0, i)
+                path = file.substring(i + 1)
+            }
+            // 获得文件的配置项
+            val config = configs.getOrPut(filename){
+                Config("$filename.$type", type)
             }!!
+            // 无子项
+            if(path == null)
+                return config
+            // 有子项
+            return config.getConfig(path)
         }
-    }
 
-    /**
-     * Example:
-     * val connfig = Config(new FileInputStream("/var/config/my_config.properties"), "properties");
-     * val connfig = Config(new FileInputStream("/var/config/my_config.yaml"), "yaml");
-     * val userName = config.get("userName");
-     *
-     * @param fileName the properties file's name in classpath or the sub directory of classpath
-     * @param type properties | yaml
-     */
-    constructor(inputStream: InputStream, type: String = "properties"){
-        when(type){
-            "properties" -> loadProperties(inputStream)
-            "yaml" -> loadYaml(inputStream)
-            else -> throw IllegalArgumentException("Unknow porperty file type")
+        /**
+         * 构建配置项
+         *
+         * @param file the properties file's name in classpath or the sub directory of classpath
+         * @param type properties | yaml
+         * @return
+         */
+        public fun buildProperties(file:String, type: String = "properties"): Properties {
+            val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(file)
+            if(inputStream == null)
+                throw IllegalArgumentException("配置文件[$file]不存在")
+            return buildProperties(inputStream, type)
+        }
+
+        /**
+         * 构建配置项
+         *
+         * @param inputStream
+         * @param type properties | yaml
+         * @return
+         */
+        public fun buildProperties(inputStream: InputStream, type: String = "properties"): Properties {
+            if(inputStream == null)
+                throw IllegalArgumentException("配置输入流为空")
+            try{
+                when(type){
+                    "properties" -> return Properties().apply { load(InputStreamReader(inputStream, "UTF-8")) } // 加载 properties 文件
+                    "yaml" -> return Yaml().loadAs(inputStream, Properties::class.java) // 加载 yaml 文件
+                    else -> throw IllegalArgumentException("未知配置文件类型")
+                }
+            } finally {
+                inputStream.close()
+            }
         }
     }
 
@@ -72,39 +101,12 @@ class Config: IConfig{
      * val config = Config("my_config.properties");
      * val config = Config("my_config.properties", "properties");
      * val config = Config("my_config.properties", "yaml");
-     * val userName = config.get("userName");
+     * val username = config.get("username");
      *
-     * @param fileName the properties file's name in classpath or the sub directory of classpath
+     * @param file the properties file's name in classpath or the sub directory of classpath
      * @param type properties | yaml
      */
-    public constructor(fileName: String, type: String = "properties"):this(Thread.currentThread().contextClassLoader.getResourceAsStream(fileName), type){
-    }
-
-    /**
-     * 加载 properties 文件
-     */
-    protected fun loadProperties(inputStream: InputStream){
-        if(inputStream == null)
-            throw IllegalArgumentException("InputStream is null")
-        try {
-            props = Properties()
-            props.load(InputStreamReader(inputStream, "UTF-8"))
-        } finally {
-            inputStream.close()
-        }
-    }
-
-    /**
-     * 加载 yaml 文件
-     */
-    protected fun loadYaml(inputStream: InputStream){
-        if(inputStream == null)
-            throw IllegalArgumentException("InputStream is null")
-        try {
-            props = Yaml().loadAs(inputStream, Properties::class.java);
-        } finally {
-            inputStream.close()
-        }
+    public constructor(file: String, type: String = "properties"):this(buildProperties(file, type) as Map<String, *>){
     }
 
     /**
@@ -118,11 +120,11 @@ class Config: IConfig{
      * 获得string类型的配置项
      */
     public override fun getString(key: String, defaultValue: String?): String? {
-        val value = props.getProperty(key)
+        val value = props.get(key)
         return if(value == null)
             defaultValue
         else
-            value
+            value.toString()
     }
 
     /**
@@ -173,6 +175,27 @@ class Config: IConfig{
      */
     public override fun getDate(key: String, defaultValue: Date?): Date?{
         return props.getAndConvert(key, defaultValue)
+    }
+
+    /**
+     * 获得Config类型的子配置项
+     */
+    public override fun getConfig(path: String): Config{
+        try{
+            // 单层
+            if(!path.contains('.'))
+                return Config(props[path] as Map<String, *>)
+
+            // 多层
+            val keys:List<String> = path.split('.')
+            var data:Map<String, *> = props
+            for (key in keys){
+                data = data[key] as Map<String, *>
+            }
+            return Config(data)
+        }catch (e:ClassCastException){
+            throw IllegalArgumentException("构建配置子项失败：路径[$path]的值不是Map")
+        }
     }
 
 }
