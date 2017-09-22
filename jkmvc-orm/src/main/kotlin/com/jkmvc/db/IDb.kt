@@ -72,6 +72,15 @@ interface IDb{
     fun <T> queryRow(sql: String, paras: List<Any?>? = null, transform: (MutableMap<String, Any?>) -> T): T?;
 
     /**
+     * 查询一列(多行)
+     * @param sql
+     * @param params
+     * @param transform 处理结果的函数
+     * @return
+     */
+    fun queryColumn(sql: String, params: List<Any?>?): List<Any?>
+
+    /**
      * 查询一行一列
      * @param sql
      * @param paras

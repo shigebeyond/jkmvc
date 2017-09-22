@@ -131,6 +131,24 @@ public fun <T> Connection.queryRows(sql: String, params: List<Any?>? = null, tra
 }
 
 /**
+ * 查询一列(多行)
+ * @param sql
+ * @param params 参数
+ * @param transform 结果转换函数
+ * @return
+ */
+public fun Connection.queryColumn(sql: String, params: List<Any?>? = null): List<Any?> {
+    return queryResult<List<Any?>>(sql, params){ rs: ResultSet ->
+        // 处理查询结果
+        val result = LinkedList<Any?>()
+        rs.forEachCell(1) { cell: Any? ->
+            result.add(cell);
+        }
+        result;
+    }
+}
+
+/**
  * 查询一行(多列)
  * @param sql
  * @param params 参数
@@ -237,10 +255,11 @@ public inline fun ResultSet.forEachCell(i:Int, action: (Any?) -> Unit): Unit {
     while(true){
         // 获得一行某列
         val (hasNext, value) = nextCell(i)
+        if(!hasNext)
+            break;
 
         // 处理一行某列
-        if(hasNext)
-            action(value)
+        action(value)
     }
 }
 

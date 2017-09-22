@@ -186,6 +186,17 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
     }
 
     /**
+     * 查询一列(多行)
+     * @param sql
+     * @param params
+     * @param transform 处理结果的函数
+     * @return
+     */
+    public override fun queryColumn(sql: String, params: List<Any?>?): List<Any?> {
+        return conn.queryColumn(sql, params);
+    }
+
+    /**
      * 查询一行一列
      * @param sql
      * @param params
