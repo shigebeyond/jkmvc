@@ -3,6 +3,13 @@ package com.jkmvc.common
 import java.util.*
 
 /**
+ * 检查集合是否为空
+ */
+public fun <T> Collection<T>?.isNullOrEmpty(): Boolean {
+    return this === null || this.isEmpty()
+}
+
+/**
  * 获得数组的某个元素值，如果值为空，则给该元素赋值
  * @param index 元素索引
  * @param default 赋值回调

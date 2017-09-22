@@ -1,6 +1,7 @@
 package com.jkmvc.orm
 
 import com.jkmvc.common.findProperty
+import com.jkmvc.common.isNullOrEmpty
 import com.jkmvc.common.to
 import com.jkmvc.db.IRecord
 import java.util.*
@@ -96,10 +97,13 @@ abstract class OrmEntity : IRecord, IOrm {
      * @return
      */
     public override fun values(values: Map<String, Any?>, expected: List<String>?): IOrm {
-        val columns = if (expected === null)
+        if(values.isEmpty())
+            return this
+
+        val columns = if (expected.isNullOrEmpty())
             values.keys
         else
-            expected;
+            expected!!;
 
         for (column in columns)
             this[column] = values[column];
