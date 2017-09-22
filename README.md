@@ -365,8 +365,8 @@ class UserController: Controller()
             user.name = req["name"]!!;
             user.age = req["age"]!!;
 
-            // 3 Orm.values(req)
-            user.values(req)
+            // 3 Orm.requestValues(req)
+            user.requestValues(req)
             user.create(); // create user
             // 重定向到列表页 | redirect to list page
             redirect("user/index");
@@ -399,8 +399,8 @@ class UserController: Controller()
             user.name = req["name"]!!;
             user.age = req["age"]!!;
             */
-            // 3 Orm.values(req)
-            user.values(req)
+            // 3 Orm.requestValues(req)
+            user.requestValues(req)
             user.update() // update user
             // 重定向到列表页 | redirect to list page
             redirect("user/index");

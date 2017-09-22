@@ -1,5 +1,6 @@
 package com.jkmvc.http
 
+import com.jkmvc.common.isNullOrEmpty
 import com.jkmvc.orm.IOrm
 import com.jkmvc.orm.Orm
 import com.oreilly.servlet.MultipartRequest
@@ -124,8 +125,8 @@ public inline fun isSafeUploadFile(uploadFile: File): Boolean {
  * @param expected 要设置的字段名的数组
  * @return
  */
-public fun Orm.values(req: Request, expected: List<String>? = null): Orm {
-    if (expected === null)
+public fun Orm.requestValues(req: Request, expected: List<String>? = null): Orm {
+    if (expected.isNullOrEmpty())
     {
         // 取得请求中的所有参数
         val columns : Enumeration<String> = req.parameterNames
@@ -138,7 +139,7 @@ public fun Orm.values(req: Request, expected: List<String>? = null): Orm {
     else
     {
         // 取得请求中的指定参数
-        for (column in expected)
+        for (column in expected!!)
             setIntelligent(column, req.getParameter(column)!!)
     }
     return this;
