@@ -2,6 +2,7 @@ package com.jkmvc.session
 
 import com.jkmvc.common.Config
 import com.jkmvc.orm.IOrm
+import org.apache.commons.codec.digest.DigestUtils
 
 /**
  * 会话相关的用户模型接口
@@ -20,11 +21,21 @@ interface IAuthUserModel : IOrm {
     }
 
     /**
+     * 加密字符串，用于加密密码
+     *
+     * @param str
+     * @return
+     */
+    fun hash(str: String): String {
+        return DigestUtils.md5Hex(str + sessionConfig["salt"]);
+    }
+
+    /**
      * create前置处理
      */
     fun beforeCreate(){
         // 加密密码
         val field:String = sessionConfig["passwordField"]!!
-        this[field] = Auth.hash(this[field])
+        this[field] = hash(this[field])
     }
 }

@@ -26,18 +26,10 @@ interface IAuth {
      * @param password  密码
      * @return Orm?
      */
-    public fun login(username:String, password:String): Orm? 
+    public fun login(username:String, password:String): IAuthUserModel?
 
     /**
      * 注销登录
      */
     public fun logout()
-
-    /**
-     * 加密字符串，用于加密密码
-     *
-     * @param str
-     * @return
-     */
-    public fun hash(str: String): String
 }

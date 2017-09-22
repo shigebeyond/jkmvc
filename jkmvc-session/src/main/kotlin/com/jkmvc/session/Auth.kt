@@ -71,19 +71,19 @@ object Auth:IAuth {
      * @param password  密码
      * @return Orm?
      */
-    public override fun login(username:String, password:String): Orm? {
+    public override fun login(username:String, password:String): IAuthUserModel? {
         // 动态获得queryBuilder，即UserModel.queryBuilder()
         val query = userModel.modelMetaData.queryBuilder()
 
         // 根据用户名查找用户
-        val user:Orm = query.where(sessionConfig["usernameField"]!!, "=", username).find(){
+        val user = query.where(sessionConfig["usernameField"]!!, "=", username).find(){
             userModel.java.newInstance().original(it)
-        } as Orm;
+        } as IAuthUserModel?;
         if(user == null)
             return null;
 
         //　检查密码
-        if(hash(password) != user.getString(sessionConfig["passwordField"]!!))
+        if(user.hash(password) != user.getString(sessionConfig["passwordField"]!!))
             return null;
 
         // 保存登录用户到session中
@@ -96,16 +96,6 @@ object Auth:IAuth {
      */
     public override fun logout(){
         getSession().invalidate();
-    }
-
-    /**
-     * 加密字符串，用于加密密码
-     *
-     * @param str
-     * @return
-     */
-    public override fun hash(str: String): String {
-        return DigestUtils.md5Hex(str + sessionConfig["salt"]);
     }
 
 }
