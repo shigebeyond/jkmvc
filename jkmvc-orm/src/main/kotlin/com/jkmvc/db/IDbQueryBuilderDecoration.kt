@@ -237,6 +237,18 @@ interface IDbQueryBuilderDecoration
     fun orderBy(column:String, direction:String? = null):IDbQueryBuilder;
 
     /**
+     * Multiple OrderBy
+     *
+     * @param orders
+     * @return
+     */
+    fun orderBys(orders:Map<String, String?>):IDbQueryBuilder{
+        for ((column, direction) in orders)
+            orderBy(column, direction)
+        return this as IDbQueryBuilder
+    }
+
+    /**
      * Return up to "LIMIT ..." results
      *
      * @param  limit
