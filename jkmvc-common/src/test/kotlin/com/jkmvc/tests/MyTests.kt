@@ -42,6 +42,12 @@ class MyTests{
     }
 
     @Test
+    fun testString(){
+        println("my_favorite_food".underline2Camel())
+        println("myFavoriteFood".camel2Underline())
+    }
+
+    @Test
     fun testLog(){
         testLogger.info("打信息日志")
         testLogger.debug("打调试日志")

@@ -123,6 +123,32 @@ public inline fun String.replaces(params:Map<String, Any?>):String
     };
 }
 
+/**
+ * 下划线转驼峰
+ * @return
+ */
+public fun String.underline2Camel(): String {
+    return "_\\w".toRegex().replace(this){ result: MatchResult ->
+        // 获得下划线后的字母
+        val ch = result.value[1]
+        // 转为大写
+        Character.toUpperCase(ch).toString()
+    }
+}
+
+/**
+ * 驼峰转下划线
+ * @return
+ */
+public fun String.camel2Underline(): String {
+    return "[A-Z]".toRegex().replace(this){ result: MatchResult ->
+        // 获得大写字母
+        val ch = result.value
+        // 转为下划线+小写
+        "_" + ch.toLowerCase()
+    }
+}
+
 /****************************** 字符串转化其他类型 *******************************/
 /**
  * 日期格式
