@@ -331,6 +331,7 @@ public val <T:Any> KClass<T>.recordTranformer: ((MutableMap<String, Any?>) -> T)
     get(){
         // 1 如果是orm类，则实例化并调用original()
         if(IOrm::class.java.isAssignableFrom(java)){
+            // TODO: 优化性能，缓存结果
             return {
                 val obj = java.newInstance() as IOrm;
                 obj.original(it) as T
