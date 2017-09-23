@@ -94,11 +94,7 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      * @return 列表
      */
     public inline fun <reified T:Any> findAll(vararg params: Any?): List<T> {
-        // 1 编译
-        val result = compile(ActionType.SELECT);
-
-        // 2 执行 select
-        return db.queryRows<T>(result.sql, result.buildParams(params), getRecordTranformer<T>(T::class))
+        return findAll(*params, transform = getRecordTranformer<T>(T::class))
     }
 
     /**
@@ -113,11 +109,7 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      * @return 一个数据
      */
     public inline fun <reified T:Any> find(vararg params: Any?): T? {
-        // 1 编译
-        val result = limit(1).compile(ActionType.SELECT);
-
-        // 2 执行 select
-        return db.queryRow<T>(result.sql, result.buildParams(params), getRecordTranformer<T>(T::class));
+        return find(*params, transform = getRecordTranformer<T>(T::class));
     }
 
     /**
