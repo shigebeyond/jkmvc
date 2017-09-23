@@ -1,6 +1,7 @@
 package com.jkmvc.session
 
 import com.jkmvc.common.Config
+import com.jkmvc.db.recordTranformer
 import com.jkmvc.http.Request
 import com.jkmvc.orm.Orm
 import com.jkmvc.orm.modelMetaData
@@ -76,9 +77,7 @@ object Auth:IAuth {
         val query = userModel.modelMetaData.queryBuilder()
 
         // 根据用户名查找用户
-        val user = query.where(sessionConfig["usernameField"]!!, "=", username).find(){
-            userModel.java.newInstance().original(it)
-        } as IAuthUserModel?;
+        val user = query.where(sessionConfig["usernameField"]!!, "=", username).find(transform = userModel.recordTranformer) as IAuthUserModel?;
         if(user == null)
             return null;
 

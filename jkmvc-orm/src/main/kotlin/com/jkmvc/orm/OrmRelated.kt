@@ -1,5 +1,7 @@
 package com.jkmvc.orm
 
+import com.jkmvc.db.recordTranformer
+
 /**
  * ORM之关联对象操作
  *
@@ -82,7 +84,7 @@ abstract class OrmRelated: OrmPersistent() {
 
             var result: Any?;
             if (newed) {  // 创建新对象
-                result = relation.model.java.newInstance();
+                result = relation.newModelInstance();
             }else{  // 根据关联关系来构建查询
                 val query:OrmQueryBuilder
                 if(relation.type == RelationType.BELONGS_TO) // 查主表
@@ -91,15 +93,9 @@ abstract class OrmRelated: OrmPersistent() {
                     query = querySlave(relation)
                 query.select(columns) // 查字段
                 if(relation.type == RelationType.HAS_MANY){ // 查多个
-                    result = query.findAll(){
-                        val obj = relation.model.java.newInstance() as IOrm;
-                        obj.original(it)
-                    }
+                    result = query.findAll(transform = relation.recordTranformer)
                 }else{ // 查一个
-                    result = query.find(){
-                        val obj = relation.model.java.newInstance() as IOrm;
-                        obj.original(it)
-                    }
+                    result = query.find(transform = relation.recordTranformer)
                 }
             }
 

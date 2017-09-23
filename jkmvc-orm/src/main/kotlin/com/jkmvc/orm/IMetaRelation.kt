@@ -1,6 +1,7 @@
 package com.jkmvc.orm
 
 import com.jkmvc.db.IDbQueryBuilder
+import com.jkmvc.db.recordTranformer
 import kotlin.reflect.KClass
 
 /**
@@ -59,11 +60,32 @@ interface IMetaRelation{
      * 获得关联模型的元数据
      *  伴随对象就是元数据
      */
-    val metadata:IMetaData;
+    val metadata:IMetaData
+        get() = model.modelMetaData
+
+    /**
+     * 记录转换器
+     */
+    val recordTranformer: (MutableMap<String, Any?>) -> IOrm
+        get()= model.recordTranformer
 
     /**
      * 获得关联模型的查询器
      */
-    fun queryBuilder():OrmQueryBuilder;
+    fun queryBuilder():OrmQueryBuilder {
+        // 关联表的查询器
+        val qb = metadata.queryBuilder();
+        // 添加查询条件
+        conditions?.invoke(qb);
+        return qb;
+    }
+
+    /**
+     * 创建模型实例
+     * @return
+     */
+    fun newModelInstance(): IOrm {
+        return model.java.newInstance();
+    }
 
 }
