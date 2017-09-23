@@ -61,7 +61,7 @@ object Auth:IAuth {
      */
     public override fun getUser(): IAuthUserModel?{
         // 从session中读取登录用户
-        return getSession(false).getAttribute("user") as Orm?;
+        return getSession(false).getAttribute("user") as IAuthUserModel?
     }
 
     /**
