@@ -90,13 +90,18 @@ abstract class OrmPersistent: OrmValid() {
 
 	/**
 	* 构建要改变的数据
+	 *   在往db中写数据时调用，将本对象的变化属性值保存到db中
+	 *   要做字段转换：对象属性名 -> db字段名
+	 *
 	 * @return
 	 */
 	protected fun buildDirtyData(): MutableMap<String, Any?> {
 		val result:MutableMap<String, Any?> = HashMap<String, Any?>();
 		// 挑出变化的属性
-		for(column in dirty)
-			result[column] = data[column];
+		for(prop in dirty) {
+			val column = metadata.prop2Column(prop)
+			result[column] = data[prop];
+		}
 		return result;
 	}
 
