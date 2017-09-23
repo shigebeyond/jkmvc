@@ -48,6 +48,8 @@ abstract class OrmRelated: OrmPersistent() {
 
     /**
      * 设置原始的字段值
+     *    在从db中读数据时调用，来赋值给本对象属性
+     *    要做字段转换：db字段名 -> 对象属性名
      *
      * @param data
      * @return
@@ -56,11 +58,13 @@ abstract class OrmRelated: OrmPersistent() {
         for ((column, value) in orgn) {
             // 关联查询时，会设置关联表字段的列别名（列别名 = 表别名 : 列名），可以据此来设置关联对象的字段值
             if (!column.contains(":")){ // 自身字段
-                data[column] = value;
+                val prop = metadata.column2Prop(column)
+                data[prop] = value;
             } else if (value !== null) {// 关联对象字段: 不处理null的值, 因为left join查询时, 关联对象可能没有匹配的行
                 val (name, column) = column.split(":");
                 val obj:OrmRelated = related(name, true) as OrmRelated; // 创建关联对象
-                obj.data[column] = value;
+                val prop = metadata.column2Prop(column)
+                obj.data[prop] = value;
             }
         }
 
