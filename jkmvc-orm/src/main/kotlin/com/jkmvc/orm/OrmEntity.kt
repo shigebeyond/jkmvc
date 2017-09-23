@@ -148,7 +148,7 @@ abstract class OrmEntity : IOrm {
      * 获得字段值
      * @return
      */
-    public override fun asArray(): Map<String, Any?> {
+    public override fun asMap(): Map<String, Any?> {
         return data;
     }
 

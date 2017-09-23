@@ -78,5 +78,5 @@ interface IOrmEntity: IRecord {
      * 获得字段值
      * @return
      */
-    fun asArray(): Map<String, Any?>;
+    fun asMap(): Map<String, Any?>;
 }
