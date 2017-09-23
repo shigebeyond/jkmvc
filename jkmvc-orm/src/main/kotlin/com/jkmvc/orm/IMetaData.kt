@@ -1,5 +1,6 @@
 package com.jkmvc.orm
 
+import com.jkmvc.common.camel2Underline
 import com.jkmvc.db.Db
 import com.jkmvc.db.IDb
 import com.jkmvc.db.IDbQueryBuilder
@@ -64,6 +65,16 @@ interface IMetaData{
     val columns:List<String>
 
     /**
+     * 字段名是下划线命名
+     */
+    val columnUnderline: Boolean
+
+    /**
+     * 字段名是全大写
+     */
+    val columnUpperCase: Boolean
+
+    /**
      * 事件处理器
      */
     val eventHandlers:Map<String, KFunction<Unit>?>
@@ -104,6 +115,22 @@ interface IMetaData{
      * @return
      */
     fun addRule(name: String, rule: IMetaRule): MetaData;
+
+    /**
+     * 根据对象属性名，获得db字段名
+     *    可根据实际需要在 model 类中重写
+     *
+     * @param prop 对象属性名
+     * @return db字段名
+     */
+    fun getColumn(prop:String): String {
+        var column = prop
+        if(columnUnderline)
+            column = column.camel2Underline()
+        if(columnUpperCase)
+            column = column.toUpperCase()
+        return column
+    }
 
     /**
      * 获得事件处理器

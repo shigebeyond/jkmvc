@@ -19,9 +19,11 @@ import kotlin.reflect.KFunction
  */
 open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
                     public override val label: String = model.modelName /* 模型中文名 */,
-                    public override val dbName: String = "default" /* 数据库名 */,
                     public override var table: String = model.modelName /* 表名，假定model类名, 都是以"Model"作为后缀 */,
-                    public override var primaryKey: String = "id" /* 主键 */
+                    public override var primaryKey: String = "id" /* 主键 */,
+                    public override val dbName: String = "default" /* 数据库名 */,
+                    public override val columnUnderline: Boolean = true /* 字段名是下划线命名 */,
+                    public override val columnUpperCase: Boolean = false /* 字段名是全大写 */
 ) : IMetaData {
 
     companion object{
