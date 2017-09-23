@@ -1,6 +1,8 @@
 package com.jkmvc.orm
 
+import com.jkmvc.common.Config
 import com.jkmvc.common.camel2Underline
+import com.jkmvc.common.underline2Camel
 import com.jkmvc.db.Db
 import com.jkmvc.db.IDb
 import com.jkmvc.db.IDbQueryBuilder
@@ -65,16 +67,6 @@ interface IMetaData{
     val columns:List<String>
 
     /**
-     * 字段名是下划线命名
-     */
-    val columnUnderline: Boolean
-
-    /**
-     * 字段名是全大写
-     */
-    val columnUpperCase: Boolean
-
-    /**
      * 事件处理器
      */
     val eventHandlers:Map<String, KFunction<Unit>?>
@@ -123,13 +115,31 @@ interface IMetaData{
      * @param prop 对象属性名
      * @return db字段名
      */
-    fun getColumn(prop:String): String {
+    fun prop2Column(prop:String): String {
+        val config: Config = Config.instance("database.$dbName", "yaml")
         var column = prop
-        if(columnUnderline)
+        if(config["columnUnderline"]!!) // 字段有下划线
             column = column.camel2Underline()
-        if(columnUpperCase)
-            column = column.toUpperCase()
+        if(config["columnUpperCase"]!!)// 字段全大写
+            column = column.toUpperCase() // 转大写
         return column
+    }
+
+    /**
+     * 根据db字段名，获得对象属性名
+     *    可根据实际需要在 model 类中重写
+     *
+     * @param column db字段名
+     * @return 对象属性名
+     */
+    fun column2Prop(column:String): String {
+        val config: Config = Config.instance("database.$dbName", "yaml")
+        var prop = column
+        if(config["columnUpperCase"]!!)// 字段全大写
+            prop = prop.toLowerCase() // 转小写
+        if(config["columnUnderline"]!!) // 字段有下划线
+            prop = prop.underline2Camel()
+        return prop
     }
 
     /**
