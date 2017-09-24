@@ -5,7 +5,6 @@ import com.jkmvc.db.recordTranformer
 import com.jkmvc.http.Request
 import com.jkmvc.orm.Orm
 import com.jkmvc.orm.modelMetaData
-import org.apache.commons.codec.digest.DigestUtils
 import org.slf4j.LoggerFactory
 import javax.servlet.http.HttpSession
 import kotlin.reflect.KClass
