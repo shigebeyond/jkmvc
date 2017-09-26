@@ -61,7 +61,7 @@ object DruidDataSourceFactory : IDataSourceFactory {
          * DB2 - "select 1 from sysibm.sysdummy1"
          * mysql - "select 1"
          */
-        ds.setValidationQuery(config.get("validationQuery", "select 1"))
+        ds.setValidationQuery(config.get("validationQuery", "select 1 from dual"))
         ds.setTestWhileIdle(config.getBoolean("testWhileIdle", true)!!)
         ds.setTestOnBorrow(config.getBoolean("testOnBorrow", true)!!)
         ds.setTestOnReturn(config.getBoolean("testOnReturn", true)!!)

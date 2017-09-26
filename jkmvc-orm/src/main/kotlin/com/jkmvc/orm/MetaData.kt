@@ -1,8 +1,6 @@
 package com.jkmvc.orm
 
-import com.jkmvc.common.Config
-import com.jkmvc.common.findFunction
-import com.jkmvc.common.format
+import com.jkmvc.common.*
 import com.jkmvc.db.Db
 import com.jkmvc.db.IDb
 import com.jkmvc.db.IDbQueryBuilder
@@ -10,6 +8,7 @@ import java.io.File
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import kotlin.reflect.KMutableProperty1
 
 /**
  * orm的元数据
@@ -200,6 +199,26 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
         }
 
         return this;
+    }
+
+    /**
+     * 转换字段值
+     *    在不知字段类型的情况下，将string赋值给属性
+     *    => 需要将string转换为属性类型
+     *    => 需要显式声明属性
+     *
+     * @param column
+     * @param value 字符串
+     */
+    public override fun convertValue(column:String, value:String):Any?
+    {
+        // 1 获得属性
+        val prop = model::class.findProperty(column) as KMutableProperty1
+        if(prop == null)
+            throw OrmException("类 ${model} 没有属性: $column");
+
+        // 2 转换类型
+        return value.to(prop.setter.parameters[1].type)
     }
 }
 
