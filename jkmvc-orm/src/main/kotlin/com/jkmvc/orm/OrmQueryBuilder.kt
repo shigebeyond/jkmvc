@@ -1,6 +1,7 @@
 package com.jkmvc.orm
 
 import com.jkmvc.db.DbQueryBuilder
+import com.jkmvc.db.IDbQueryBuilder
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -130,4 +131,7 @@ class OrmQueryBuilder(protected val metadata: IMetaData) : DbQueryBuilder(metada
         return this.select(select) as OrmQueryBuilder;
     }
 
+    public override fun andWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
+        return super.andWhere(metadata.prop2Column(column), op, value)
+    }
 }
