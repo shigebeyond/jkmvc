@@ -173,7 +173,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
                 if(param == "?" && dynamicParams.isNotEmpty())// 如果参数值是?，则认为是动态参数
                     dynamicParams[j++].toString()
                 else
-                    "\"$param\""
+                    "'$param'" // oracle字符串必须是''包含
             } else
                 param.toString()
         }

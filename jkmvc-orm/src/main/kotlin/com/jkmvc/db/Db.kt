@@ -68,7 +68,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * 转移字符
      */
     protected val identityQuoteString by lazy(LazyThreadSafetyMode.NONE) {
-        conn.metaData.identifierQuoteString
+            conn.metaData.identifierQuoteString
     }
 
     /**
@@ -303,10 +303,11 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      */
     public override fun quoteTable(table:String, alias:String?):String
     {
+        val s = ""
         return if(alias == null)
-            "`$table`";
+            "$s$table$s";
         else
-            "`$table`  AS `$alias`"
+            "$s$table$s  AS `$alias`"
     }
 
     /**
@@ -358,6 +359,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
     {
         var table = "";
         var col = column;
+        val s = ""
 
         // 非函数表达式
         if ("^\\w[\\w\\d_\\.]*".toRegex().matches(column))
@@ -365,20 +367,20 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
             // 表名
             if(column.contains('.')){
                 var arr = column.split('.');
-                table = "`${arr[0]}`.";
+                table = "$s${arr[0]}$s.";
                 col = arr[1]
             }
 
             // 字段名
             if(column != "*") // 非*
-                col = "`$col`"; // 转义
+                col = "$s$col$s"; // 转义
         }
 
         // 字段别名
         if(alias == null)
             return table + col;
 
-        return table + col + " AS `$alias`"; // 转义
+        return table + col + " AS $s$alias$s"; // 转义
     }
 
     /**
