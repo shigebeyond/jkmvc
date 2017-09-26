@@ -36,7 +36,7 @@ object Auth:IAuth {
         val className: String = sessionConfig["userModel"]!!
         val clazz = Class.forName(className).kotlin as KClass<out Orm>
         // 检查是否实现了 IAuthUserModel 接口
-        if(IAuthUserModel::class.java.isAssignableFrom(clazz.java))
+        if(!IAuthUserModel::class.java.isAssignableFrom(clazz.java))
             throw IllegalArgumentException("无效用户模型的类[$className]，必须是实现[com.jkmvc.session.IAuthUserModel]接口");
         clazz
     }
