@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @author shijianhang
  * @date 2016-10-10 上午12:52:34
  */
-abstract class Orm(id:Int? = null): OrmRelated() {
+abstract class Orm(id:Any? = null): OrmRelated() {
 
     companion object{
         /**
