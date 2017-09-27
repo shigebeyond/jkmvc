@@ -104,7 +104,12 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
      * @return 编译好的sql
      */
     public override fun compileSelectOne(): CompiledSql{
-        return limit(1).compile(ActionType.SELECT)
+        if(db.dbType == DbType.Oracle) { // oracle
+            select("rownum").where("rownum", "<=", 1)
+        }else{
+            limit(1)
+        }
+        return compile(ActionType.SELECT)
     }
 
     /**
@@ -163,7 +168,7 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
      */
     public override fun <T:Any> find(vararg params: Any?, transform:(MutableMap<String, Any?>) -> T): T?{
         // 1 编译
-        val result = limit(1).compile(ActionType.SELECT);
+        val result = compileSelectOne()
 
         // 2 执行 select
         return db.queryRow<T>(result.sql, result.buildParams(params), transform);
