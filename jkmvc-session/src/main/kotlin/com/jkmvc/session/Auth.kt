@@ -81,7 +81,9 @@ object Auth:IAuth {
             return null;
 
         //　检查密码
-        if(user.hash(password) != user.getString(sessionConfig["passwordField"]!!))
+        val p1 = user.hash(password)
+        val p2 = user.getString(sessionConfig["passwordField"]!!)
+        if(p1 != p2)
             return null;
 
         // 保存登录用户到session中
