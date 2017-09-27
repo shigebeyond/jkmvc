@@ -42,7 +42,7 @@ object Auth:IAuth {
     }
 
     init{
-        logger.error(sessionConfig.getString("userModel"))
+        logger.error("会话相关的用户模型为：" + sessionConfig.getString("userModel"))
     }
 
     /**
