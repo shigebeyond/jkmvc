@@ -1,6 +1,7 @@
 package com.jkmvc.orm
 
 import com.jkmvc.db.DbQueryBuilder
+import com.jkmvc.db.DbType
 import com.jkmvc.db.IDbQueryBuilder
 import java.util.*
 import kotlin.reflect.KClass
@@ -12,7 +13,7 @@ import kotlin.reflect.KClass
  * @date 2016-10-16 下午8:02:28
  *
  */
-class OrmQueryBuilder(protected val metadata: IMetaData) : DbQueryBuilder(metadata.db, metadata.table) {
+class OrmQueryBuilder(protected val metadata: IMetaData /* orm元数据 */, protected val intelligent: Boolean = false /* 查询时是否智能转换字段值 */) : DbQueryBuilder(metadata.db, metadata.table) {
 
     /**
      * 获得记录转换器
@@ -132,6 +133,29 @@ class OrmQueryBuilder(protected val metadata: IMetaData) : DbQueryBuilder(metada
     }
 
     public override fun andWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
-        return super.andWhere(metadata.prop2Column(column), op, value)
+        // 智能转换字段值
+        val realValue = if(intelligent && value is String)
+                            metadata.convertIntelligent(column, value)
+                        else
+                            value
+        // 转换字段名
+        val realColumn = prop2Column(column)
+        return super.andWhere(realColumn, op, value)
+    }
+
+    /**
+     * 根据对象属性名，获得db字段名
+     *    可根据实际需要在 model 类中重写
+     *
+     * @param prop 对象属性名
+     * @return db字段名
+     */
+    public fun prop2Column(prop:String): String{
+        // 处理关键字
+        if(db.dbType == DbType.Oracle && prop == "rownum"){
+            return prop
+        }
+
+        return metadata.prop2Column(prop)
     }
 }
