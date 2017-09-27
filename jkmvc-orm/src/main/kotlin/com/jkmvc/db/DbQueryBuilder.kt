@@ -105,7 +105,7 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :Db
      */
     public override fun compileSelectOne(): CompiledSql{
         if(db.dbType == DbType.Oracle) { // oracle
-            select("rownum").where("rownum", "<=", 1)
+            where("rownum", "<=", 1)
         }else{
             limit(1)
         }
