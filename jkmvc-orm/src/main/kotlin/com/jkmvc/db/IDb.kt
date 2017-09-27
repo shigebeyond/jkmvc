@@ -3,12 +3,26 @@ package com.jkmvc.db
 import java.sql.ResultSet
 
 /**
+ * 数据库类型
+ */
+enum class DbType {
+    Mysql,
+    Oracle,
+    SqlServer
+}
+
+/**
  * 封装db操作
  *
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
 interface IDb{
+
+    /**
+     * 获得数据库类型
+     */
+    val dbType:DbType
 
     /**
      * 执行事务

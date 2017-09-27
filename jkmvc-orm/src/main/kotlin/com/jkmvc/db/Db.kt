@@ -6,7 +6,6 @@ import java.sql.Connection
 import java.sql.ResultSet
 import java.util.*
 
-
 /**
  * 封装db操作
  *
@@ -62,6 +61,22 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
             }
             dbs.get().clear();
         }
+    }
+
+    /**
+     * 获得数据库类型
+     */
+    public override val dbType:DbType by lazy{
+        //通过driverName是否包含关键字判断
+        val driver = conn.metaData.driverName.toUpperCase()
+        if (driver.contains("MYSQL"))
+            DbType.Mysql
+        else if (driver.contains("ORACLE"))
+            DbType.Oracle
+        else if (driver.contains("SQL SERVER") || driver.contains("SQLSERVER"))//sqljdbc有空格，sqljdbc4无空格
+            DbType.SqlServer
+        else
+            throw RuntimeException("未知数据库类型")
     }
 
     /**

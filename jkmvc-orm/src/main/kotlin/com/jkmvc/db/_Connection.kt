@@ -8,6 +8,9 @@ import java.io.Reader
 import java.sql.*
 import java.util.*
 import kotlin.reflect.KClass
+import java.sql.SQLException
+
+
 
 // db的日志
 val dbLogger = LoggerFactory.getLogger("com.jkmvc.db")
