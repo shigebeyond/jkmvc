@@ -87,9 +87,11 @@ interface IMetaData{
 
     /**
      * 获得orm查询构建器
+     *
+     * @param intelligent 查询时是否智能转换字段值
      * @return
      */
-    fun queryBuilder(): OrmQueryBuilder;
+    fun queryBuilder(intelligent: Boolean = false): OrmQueryBuilder;
 
     /**
      * 添加规则
@@ -176,4 +178,15 @@ interface IMetaData{
      * @param conditions 关联查询条件
      */
     fun hasMany(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = "", conditions:((IDbQueryBuilder) -> Unit)? = null): IMetaData;
+
+    /**
+     * 智能转换字段值
+     *    在不知字段类型的情况下，将string赋值给属性
+     *    => 需要将string转换为属性类型
+     *    => 需要显式声明属性
+     *
+     * @param column
+     * @param value 字符串
+     */
+    fun convertIntelligent(column:String, value:String):Any?
 }

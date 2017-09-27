@@ -97,10 +97,12 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
 
     /**
      * 获得orm查询构建器
+     *
+     * @param intelligent 查询时是否智能转换字段值
      * @return
      */
-    public override fun queryBuilder(): OrmQueryBuilder {
-        return OrmQueryBuilder(this);
+    public override fun queryBuilder(intelligent: Boolean): OrmQueryBuilder {
+        return OrmQueryBuilder(this, intelligent);
     }
 
     /**
@@ -202,7 +204,7 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
     }
 
     /**
-     * 转换字段值
+     * 智能转换字段值
      *    在不知字段类型的情况下，将string赋值给属性
      *    => 需要将string转换为属性类型
      *    => 需要显式声明属性
@@ -210,10 +212,10 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param column
      * @param value 字符串
      */
-    public override fun convertValue(column:String, value:String):Any?
+    public override fun convertIntelligent(column:String, value:String):Any?
     {
         // 1 获得属性
-        val prop = model::class.findProperty(column) as KMutableProperty1
+        val prop = model::class.findProperty(column) as KMutableProperty1?
         if(prop == null)
             throw OrmException("类 ${model} 没有属性: $column");
 
