@@ -413,9 +413,9 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
 
         // 字段别名
         if(alias == null)
-            return table + col;
+            return "$table$col";
 
-        return table + col + " AS $tableColumnQuoteString$alias$tableColumnQuoteString"; // 转义
+        return "$table$col AS $tableColumnQuoteString$alias$tableColumnQuoteString"; // 转义
     }
 
     /**
