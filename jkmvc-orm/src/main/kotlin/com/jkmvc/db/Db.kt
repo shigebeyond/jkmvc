@@ -80,10 +80,23 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
     }
 
     /**
-     * 转移字符
+     * 值的转义字符
      */
     protected val identityQuoteString by lazy(LazyThreadSafetyMode.NONE) {
-            conn.metaData.identifierQuoteString
+        conn.metaData.identifierQuoteString
+    }
+
+    /**
+     * 表/字段的转义字符
+     *   mysql为 `table`.`column`
+     *   oracle为 "table"."column"
+     *   sql server为 "table"."column" 或 [table].[column]
+     */
+    protected val tableColumnQuoteString by lazy(LazyThreadSafetyMode.NONE) {
+        if(dbType == DbType.Mysql)
+            "`"
+        else
+            "\""
     }
 
     /**
@@ -311,6 +324,9 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
 
     /**
      * 转义表名
+     *   mysql为`table`
+     *   oracle为"table"
+     *   sql server为"table" [table]
      *
      * @param table
      * @param alias 表别名
@@ -318,11 +334,10 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      */
     public override fun quoteTable(table:String, alias:String?):String
     {
-        val s = ""
         return if(alias == null)
-            "$s$table$s";
+            "$tableColumnQuoteString$table$tableColumnQuoteString";
         else
-            "$s$table$s  AS `$alias`"
+            "$tableColumnQuoteString$table$tableColumnQuoteString  AS $tableColumnQuoteString$alias$tableColumnQuoteString"
     }
 
     /**
@@ -364,6 +379,9 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
 
     /**
      * 转义字段名
+     *   mysql为`column`
+     *   oracle为"column"
+     *   sql server为"column" [column]
      *
      * @param column 字段名, 可以是字段数组
      * @param alias 字段别名
@@ -374,7 +392,6 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
     {
         var table = "";
         var col = column;
-        val s = ""
 
         // 非函数表达式
         if ("^\\w[\\w\\d_\\.]*".toRegex().matches(column))
@@ -382,20 +399,23 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
             // 表名
             if(column.contains('.')){
                 var arr = column.split('.');
-                table = "$s${arr[0]}$s.";
+                table = "$tableColumnQuoteString${arr[0]}$tableColumnQuoteString.";
                 col = arr[1]
             }
 
             // 字段名
-            if(column != "*") // 非*
-                col = "$s$col$s"; // 转义
+            if(column == "*" || (dbType == DbType.Oracle && column == "rownum")) { // * 或 oracle的rownum 字段不转义
+                //...
+            }else{ // 其他字段转义
+                col = "$tableColumnQuoteString$col$tableColumnQuoteString";
+            }
         }
 
         // 字段别名
         if(alias == null)
             return table + col;
 
-        return table + col + " AS $s$alias$s"; // 转义
+        return table + col + " AS $tableColumnQuoteString$alias$tableColumnQuoteString"; // 转义
     }
 
     /**
