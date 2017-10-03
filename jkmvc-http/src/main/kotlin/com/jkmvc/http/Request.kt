@@ -90,7 +90,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 * @return
 	 */
 	public fun isPost(): Boolean {
-		return method === "POST";
+		return req.isPost()
 	}
 
 	/**

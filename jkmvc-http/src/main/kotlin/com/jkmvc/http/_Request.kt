@@ -36,7 +36,10 @@ public fun HttpServletRequest.isGet(): Boolean {
  * @return
  */
 public fun HttpServletRequest.isMultipartContent(): Boolean{
-    return contentType.toLowerCase().startsWith("multipart/form-data")
+    if(contentType.isNullOrEmpty())
+        return false
+
+    return contentType.startsWith("multipart/form-data", true)
 }
 
 /**
@@ -113,8 +116,8 @@ public inline fun MultipartRequest.getFileMap(): Map<String, File> {
  * @return boolean
  */
 public inline fun isSafeUploadFile(uploadFile: File): Boolean {
-    val ext = uploadFile.extension.toLowerCase()
-    return ext != "jsp" && ext != "jspx"
+    val ext = uploadFile.extension
+    return !ext.equals("jsp", true) && ext.equals("jspx", true)
 }
 
 /****************************** Orm扩展 *******************************/
