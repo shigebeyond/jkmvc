@@ -7,6 +7,23 @@ import kotlin.reflect.KType
 
 /****************************** 字符串扩展 *******************************/
 /**
+ * 根据Unicode编码完美的判断中文汉字和符号
+ */
+public fun Char.isChinese(): Boolean {
+    // 根据字节码判断
+    // return this >= 0x4E00 &&  this <= 0x9FA5;
+    // 根据UnicodeBlock来判断
+    val ub = Character.UnicodeBlock.of(this)
+    return ub === Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+            || ub === Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
+            || ub === Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
+            || ub === Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B
+            || ub === Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
+            || ub === Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS
+            || ub === Character.UnicodeBlock.GENERAL_PUNCTUATION
+}
+
+/**
  * StringBuilder扩展
  * 清空
  *

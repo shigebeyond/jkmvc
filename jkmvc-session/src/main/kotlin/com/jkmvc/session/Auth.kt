@@ -87,7 +87,7 @@ object Auth:IAuth {
             return null;
 
         // 保存登录用户到session中
-        getSession(false).setAttribute("user", user);
+        getSession(true).setAttribute("user", user);
         return user;
     }
 
