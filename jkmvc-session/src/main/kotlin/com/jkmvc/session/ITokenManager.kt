@@ -10,32 +10,26 @@ package com.jkmvc.session
  */
 interface ITokenManager {
     /**
-     * 创建一个token关联上指定用户
+     * 为指定用户创建一个token
+     *
      * @param userId 指定用户的id
-     * *
      * @return 生成的token
      */
     fun createToken(userId: String): String
 
     /**
      * 检查token是否有效
-     * @param model token
-     * *
-     * @return 是否有效
-     */
-    fun checkToken(model: String): Boolean
-
-    /**
-     * 从字符串中解析token
-     * @param authentication 加密后的字符串
-     * *
+     *
+     * @param token
+     * @param overtime 是否延长过期时间
      * @return
      */
-    fun getToken(authentication: String): String
+    fun checkToken(token: String, overtime:Boolean = true): Boolean
 
     /**
      * 清除token
-     * @param userId 登录用户的唯一标识
+     *
+     * @param token
      */
-    fun deleteToken(userId: String)
+    fun deleteToken(token: String)
 }
