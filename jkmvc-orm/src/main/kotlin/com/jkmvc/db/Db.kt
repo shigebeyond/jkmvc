@@ -65,6 +65,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
 
     /**
      * 获得数据库类型
+     *   根据driverClass来获得
      */
     public override val dbType:DbType by lazy{
         //通过driverName是否包含关键字判断
