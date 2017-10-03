@@ -1,5 +1,8 @@
 package com.jkmvc.session
 
+import redis.clients.jedis.Jedis
+import com.jkmvc.session.instance
+
 /**
  * @ClassName: RedisTokenManager
  * @Description:
@@ -7,5 +10,9 @@ package com.jkmvc.session
  * @date 2017-10-03 11:23 AM
  */
 class RedisTokenManager {
-    //val jedis = Jedis("192.168.83.60", 6379);
+
+    fun test(){
+        val jedis = Jedis.instance()
+    }
+
 }
