@@ -68,15 +68,16 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      */
     public override val dbType:DbType by lazy{
         //通过driverName是否包含关键字判断
-        val driver = conn.metaData.driverName.toUpperCase()
-        if (driver.contains("MYSQL"))
-            DbType.Mysql
-        else if (driver.contains("ORACLE"))
-            DbType.Oracle
-        else if (driver.contains("SQL SERVER") || driver.contains("SQLSERVER"))//sqljdbc有空格，sqljdbc4无空格
-            DbType.SqlServer
-        else
+        val driver: String = conn.metaData.driverName
+        var result: DbType? = null
+        for(type in DbType.values()){
+            if (driver.contains(type.toString(), false))
+                result = type
+        }
+        if(result == null)
             throw RuntimeException("未知数据库类型")
+        else
+            result
     }
 
     /**

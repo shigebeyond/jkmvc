@@ -43,8 +43,8 @@ object DruidDataSourceFactory : IDataSourceFactory {
         ds.setUrl(config["url"])
         ds.setUsername(config["username"])
         ds.setPassword(config["password"])
-        if (config.containsKey("driverClass")) //  若为 null 让 druid 自动探测 driverClass 值
-            ds.setDriverClassName(config["driverClass"])
+        val driverClass: String = config["driverClass"]!!
+        ds.setDriverClassName(driverClass)
 
         // 连接池大小
         ds.setInitialSize(config.getInt("initialSize", 1)!!) // 初始连接池大小
@@ -55,13 +55,8 @@ object DruidDataSourceFactory : IDataSourceFactory {
         ds.setTimeBetweenEvictionRunsMillis(config.getLong("timeBetweenEvictionRunsMillis", DruidDataSource.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS)!!) // 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
         ds.setMinEvictableIdleTimeMillis(config.getLong("minEvictableIdleTimeMillis", DruidDataSource.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS)!!) // 配置连接在池中最小生存的时间
 
-        /**
-         * hsqldb - "select 1 from INFORMATION_SCHEMA.SYSTEM_USERS"
-         * Oracle - "select 1 from dual"
-         * DB2 - "select 1 from sysibm.sysdummy1"
-         * mysql - "select 1"
-         */
-        ds.setValidationQuery(config.get("validationQuery", "select 1 from dual"))
+        // 校验的sql
+        ds.setValidationQuery(config.get("validationQuery", getValidatioQuery(driverClass)))
         ds.setTestWhileIdle(config.getBoolean("testWhileIdle", true)!!)
         ds.setTestOnBorrow(config.getBoolean("testOnBorrow", true)!!)
         ds.setTestOnReturn(config.getBoolean("testOnReturn", true)!!)
@@ -90,6 +85,17 @@ object DruidDataSourceFactory : IDataSourceFactory {
             dataSource.close()
         }
         dataSources.clear();
+    }
+
+    /**
+     * 获得校验sql
+     *
+     * @param driverClass
+     * @return
+     */
+    public fun getValidatioQuery(driverClass:String):String{
+        val config = Config.instance("validation-query")
+        return config[driverClass]!!
     }
 
 }

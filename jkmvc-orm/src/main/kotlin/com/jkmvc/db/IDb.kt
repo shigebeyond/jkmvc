@@ -8,7 +8,10 @@ import java.sql.ResultSet
 enum class DbType {
     Mysql,
     Oracle,
-    SqlServer
+    SqlServer,
+    DB2,
+    Hsqldb,
+    Postgresql
 }
 
 /**
