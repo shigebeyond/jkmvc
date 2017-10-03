@@ -12,8 +12,22 @@ package com.jkmvc.common;
  * 12位序列，毫秒内的计数，12位的计数顺序号支持每个节点每毫秒(同一机器，同一时间截)产生4096个ID序号<br>
  * 加起来刚好64位，为一个Long型。<br>
  * SnowFlake的优点是，整体上按照时间自增排序，并且整个分布式系统内不会产生ID碰撞(由数据中心ID和机器ID作区分)，并且效率较高，经测试，SnowFlake每秒能够产生26万ID左右。
+ *
+ * @author shijianhang
+ * @date 2017-10-8 下午8:02:47
  */
-public class SnowflakeIdWorker {
+public class SnowflakeIdWorker implements ISnowflakeIdWorker {
+
+    // ==============================单例===========================================
+    private static SnowflakeIdWorker _inst;
+
+    public static synchronized SnowflakeIdWorker instance(){
+        if(_inst == null){
+            Config config = Config.instance("jkmvc", "properties");
+            _inst = new SnowflakeIdWorker(config);
+        }
+        return _inst;
+    }
 
     // ==============================Fields===========================================
     /** 开始时间截 (2015-01-01) */
@@ -140,16 +154,5 @@ public class SnowflakeIdWorker {
      */
     protected long time() {
         return System.currentTimeMillis();
-    }
-
-    //==============================Test=============================================
-    /** 测试 */
-    public static void main(String[] args) {
-        SnowflakeIdWorker idWorker = new SnowflakeIdWorker(0, 0);
-        for (int i = 0; i < 1000; i++) {
-            long id = idWorker.nextId();
-            System.out.println(Long.toBinaryString(id));
-            System.out.println(id);
-        }
     }
 }

@@ -40,6 +40,7 @@ class Config(public override val props: Map<String, *>): IConfig(){
          * @param file the properties file's name in classpath or the sub directory of classpath
          * @param type properties | yaml
          */
+        @JvmStatic
         public fun instance(file: String, type: String = "properties"): Config {
             // 解析出文件名 + 子项路径
             var filename:String = file
