@@ -52,7 +52,8 @@ class AuthToken: Auth() {
      */
     protected override fun afterLogin(user: IAuthUserModel) {
         //生成登录token
-        user["token"] = RedisTokenManager.createToken(user)
+        val token = RedisTokenManager.createToken(user)
+        Request.current().setAttribute("token", token);
     }
 
     /**
