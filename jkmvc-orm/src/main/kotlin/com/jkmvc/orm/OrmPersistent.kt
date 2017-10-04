@@ -28,7 +28,7 @@ abstract class OrmPersistent: OrmValid() {
 	 * @return|string
 	 */
 	public override val pk:Any?
-		get() = this[metadata.primaryKey];
+		get() = this[metadata.primaryProp];
 
 	/**
 	 * 获得sql构建器

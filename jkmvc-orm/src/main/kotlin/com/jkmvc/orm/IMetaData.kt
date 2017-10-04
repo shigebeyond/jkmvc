@@ -40,6 +40,11 @@ interface IMetaData{
     val primaryKey:String
 
     /**
+     * 主键属性
+     */
+    val primaryProp:String
+
+    /**
      * 默认外键
      */
     val defaultForeignKey:String

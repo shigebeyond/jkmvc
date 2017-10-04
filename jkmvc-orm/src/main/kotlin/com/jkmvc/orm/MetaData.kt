@@ -30,6 +30,11 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
     }
 
     /**
+     * 主键属性
+     */
+    public override val primaryProp:String = column2Prop(primaryKey)
+
+    /**
      * 关联关系
      */
     public override val relations: MutableMap<String, IMetaRelation> by lazy {
