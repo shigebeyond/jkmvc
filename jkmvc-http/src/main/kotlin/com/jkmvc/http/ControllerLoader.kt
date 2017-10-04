@@ -1,9 +1,9 @@
 package com.jkmvc.http
 
 import com.jkmvc.common.Config
-import com.jkmvc.common.isNullOrEmpty
 import com.jkmvc.common.lcFirst
 import com.jkmvc.common.travel
+import com.jkmvc.common.trim
 import java.io.File
 import java.util.*
 
@@ -23,13 +23,7 @@ object ControllerLoader:IControllerLoader{
     /**
      * 自动扫描的包
      */
-    private val packages:MutableList<String> by lazy{
-        val result = LinkedList<String>();
-        val pcks:List<String>? = config["controllerPackage"]
-        if(pcks != null)
-            addPackages(pcks)
-        result
-    }
+    private val packages:MutableList<String> = LinkedList<String>();
 
     /**
      * controller类缓存
@@ -38,6 +32,13 @@ object ControllerLoader:IControllerLoader{
      */
     private val controllers:MutableMap<String, ControllerClass> by lazy {
         scan()
+    }
+
+    init{
+        // 加载配置的包路径
+        val pcks:List<String>? = config["controllerPackage"]
+        if(pcks != null)
+            addPackages(pcks)
     }
 
     /**
