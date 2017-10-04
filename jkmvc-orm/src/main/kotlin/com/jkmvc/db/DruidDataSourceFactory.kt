@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-object DruidDataSourceFactory : IDataSourceFactory {
+class DruidDataSourceFactory : IDataSourceFactory {
 
     /**
      * 缓存数据源

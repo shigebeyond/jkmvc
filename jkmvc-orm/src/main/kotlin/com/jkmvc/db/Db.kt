@@ -15,15 +15,24 @@ import java.util.*
 class Db(protected val conn: Connection /* 数据库连接 */, public val name:String = "default" /* 标识 */):IDb{
 
     companion object {
+
+        /**
+         * 数据库配置
+         */
+        public val config: Config = Config.instance("orm")
+
         /**
          * 是否调试
          */
-        public val debug:Boolean = Config.instance("jkmvc").getBoolean("debug.db")!!;
+        public val debug:Boolean = config.getBoolean("debug", false)!!;
 
         /**
          * 数据源工厂
          */
-        public var dataSourceFactory:IDataSourceFactory = DruidDataSourceFactory;
+        public val dataSourceFactory:IDataSourceFactory by lazy{
+            val clazz:String = config["dataSourceFactory"]!!
+            Class.forName(clazz).newInstance() as IDataSourceFactory
+        }
 
         /**
          * 线程安全的db缓存
