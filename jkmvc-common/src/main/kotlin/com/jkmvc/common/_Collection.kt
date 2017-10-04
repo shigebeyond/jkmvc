@@ -41,7 +41,7 @@ public inline fun <K, V> Map<K, V>?.getOrDefault(key:K, default:V? = null): V? {
  * @param default 默认值
  * @return
  */
-public inline fun <reified T:Any>  Map<*, *>.getAndConvert(key:String, defaultValue:T?): T? {
+public inline fun <reified T:Any>  Map<*, *>.getAndConvert(key:String, defaultValue:T? = null): T? {
     val value = get(key)
     // 默认值
     if(value === null)

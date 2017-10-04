@@ -18,7 +18,7 @@ object ControllerLoader:IControllerLoader{
     /**
      * http配置
      */
-    public val config = Config.instance("http")
+    public val config = Config.instance("http", "yaml")
 
     /**
      * 自动扫描的包
@@ -36,7 +36,7 @@ object ControllerLoader:IControllerLoader{
 
     init{
         // 加载配置的包路径
-        val pcks:List<String>? = config["controllerPackage"]
+        val pcks:List<String>? = config["controllerPackages"]
         if(pcks != null)
             addPackages(pcks)
     }
@@ -47,6 +47,7 @@ object ControllerLoader:IControllerLoader{
      * @return
      */
     public override fun addPackage(pck:String): IControllerLoader {
+        httpLogger.info("添加controller包: $pck")
         packages.add(pck)
         return this;
     }
@@ -55,6 +56,7 @@ object ControllerLoader:IControllerLoader{
      * 添加多个包
      */
     public override fun addPackages(pcks:Collection<String>): IControllerLoader {
+        httpLogger.info("添加controller包: $pcks")
         packages.addAll(pcks)
         return this;
     }

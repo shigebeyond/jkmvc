@@ -1,6 +1,5 @@
 # 是否调试
 debug: true
-
 # controller类所在的包路径
-controllerPackage:
-    - com.jkmvc.szpower.controller
+controllerPackages:
+    - com.jkmvc.test.controller

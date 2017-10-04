@@ -17,7 +17,7 @@ object Server:IServer {
     /**
      * http配置
      */
-    public val config = Config.instance("http")
+    public val config = Config.instance("http", "yaml")
 
     /**
      * 是否调试
