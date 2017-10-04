@@ -87,11 +87,6 @@ object Server:IServer {
         // 创建controller
         val controller:Controller = clazz.constructer.call() as Controller;
 
-        // 允许跨域
-        if(config.getBoolean("allowCrossDomain", false)!!){
-            res.setHeader("Access-Control-Allow-Origin", "*");
-        }
-
         // 设置req/res属性
         controller.req = req;
         controller.res = res;
