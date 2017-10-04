@@ -13,7 +13,10 @@ import kotlin.reflect.KClass
  * @date 2016-10-16 下午8:02:28
  *
  */
-class OrmQueryBuilder(protected val metadata: IMetaData /* orm元数据 */, protected val intelligent: Boolean = false /* 查询时是否智能转换字段值 */) : DbQueryBuilder(metadata.db, metadata.table) {
+class OrmQueryBuilder(protected val metadata: IMetaData /* orm元数据 */,
+                      protected val convertValue: Boolean = false /* 查询时是否智能转换字段值 */,
+                      protected val convertColumn: Boolean = false /* 查询时是否智能转换字段名 */
+    ) : DbQueryBuilder(metadata.db, metadata.table) {
 
     /**
      * 获得记录转换器
@@ -134,12 +137,15 @@ class OrmQueryBuilder(protected val metadata: IMetaData /* orm元数据 */, prot
 
     public override fun andWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
         // 智能转换字段值
-        val realValue = if(intelligent && value is String)
+        val realValue = if(convertValue && value is String)
                             metadata.convertIntelligent(column, value)
                         else
                             value
         // 转换字段名
-        val realColumn = prop2Column(column)
+        val realColumn = if(convertColumn)
+                            prop2Column(column)
+                        else
+                            column;
         return super.andWhere(realColumn, op, value)
     }
 

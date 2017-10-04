@@ -3,10 +3,8 @@ package com.jkmvc.orm
 import com.jkmvc.common.Config
 import com.jkmvc.common.camel2Underline
 import com.jkmvc.common.underline2Camel
-import com.jkmvc.db.Db
 import com.jkmvc.db.IDb
 import com.jkmvc.db.IDbQueryBuilder
-import java.io.File
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 
@@ -88,10 +86,11 @@ interface IMetaData{
     /**
      * 获得orm查询构建器
      *
-     * @param intelligent 查询时是否智能转换字段值
+     * @param convertValue 查询时是否智能转换字段值
+     * @param convertColumn 查询时是否智能转换字段名
      * @return
      */
-    fun queryBuilder(intelligent: Boolean = false): OrmQueryBuilder;
+    fun queryBuilder(convertValue: Boolean = false, convertColumn: Boolean = false): OrmQueryBuilder;
 
     /**
      * 添加规则

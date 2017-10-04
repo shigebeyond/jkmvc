@@ -4,7 +4,6 @@ import com.jkmvc.common.*
 import com.jkmvc.db.Db
 import com.jkmvc.db.IDb
 import com.jkmvc.db.IDbQueryBuilder
-import java.io.File
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -98,11 +97,12 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
     /**
      * 获得orm查询构建器
      *
-     * @param intelligent 查询时是否智能转换字段值
+     * @param convertValue 查询时是否智能转换字段值
+     * @param convertColumn 查询时是否智能转换字段名
      * @return
      */
-    public override fun queryBuilder(intelligent: Boolean): OrmQueryBuilder {
-        return OrmQueryBuilder(this, intelligent);
+    public override fun queryBuilder(convertValue: Boolean, convertColumn: Boolean): OrmQueryBuilder {
+        return OrmQueryBuilder(this, convertValue, convertColumn);
     }
 
     /**
