@@ -1,5 +1,6 @@
 package com.jkmvc.db
 
+import com.jkmvc.common.camel2Underline
 import java.sql.ResultSet
 
 /**
@@ -188,4 +189,22 @@ interface IDb{
      * @return
      */
     fun quote(value:Any?):Any?;
+
+    /**
+     * 根据对象属性名，获得db字段名
+     *    可根据实际需要在 model 类中重写
+     *
+     * @param prop 对象属性名
+     * @return db字段名
+     */
+    fun prop2Column(prop:String): String
+
+    /**
+     * 根据db字段名，获得对象属性名
+     *    可根据实际需要在 model 类中重写
+     *
+     * @param column db字段名
+     * @return 对象属性名
+     */
+    fun column2Prop(column:String): String
 }

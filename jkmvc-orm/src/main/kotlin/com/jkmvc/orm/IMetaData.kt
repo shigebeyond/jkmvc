@@ -122,13 +122,7 @@ interface IMetaData{
      * @return db字段名
      */
     fun prop2Column(prop:String): String {
-        val config: Config = Config.instance("database.$dbName", "yaml")
-        var column = prop
-        if(config["columnUnderline"]!!) // 字段有下划线
-            column = column.camel2Underline()
-        if(config["columnUpperCase"]!!)// 字段全大写
-            column = column.toUpperCase() // 转大写
-        return column
+        return db.prop2Column(prop)
     }
 
     /**
@@ -139,13 +133,7 @@ interface IMetaData{
      * @return 对象属性名
      */
     fun column2Prop(column:String): String {
-        val config: Config = Config.instance("database.$dbName", "yaml")
-        var prop = column
-        if(config["columnUpperCase"]!!)// 字段全大写
-            prop = prop.toLowerCase() // 转小写
-        if(config["columnUnderline"]!!) // 字段有下划线
-            prop = prop.underline2Camel()
-        return prop
+       return db.column2Prop(column)
     }
 
     /**

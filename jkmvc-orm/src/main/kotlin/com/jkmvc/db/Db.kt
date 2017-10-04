@@ -1,7 +1,9 @@
 package com.jkmvc.db
 
 import com.jkmvc.common.Config
+import com.jkmvc.common.camel2Underline
 import com.jkmvc.common.deleteSuffix
+import com.jkmvc.common.underline2Camel
 import java.sql.Connection
 import java.sql.ResultSet
 import java.util.*
@@ -17,20 +19,20 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
     companion object {
 
         /**
-         * 数据库配置
+         * orm配置
          */
-        public val config: Config = Config.instance("orm")
+        public val ormConfig: Config = Config.instance("orm")
 
         /**
          * 是否调试
          */
-        public val debug:Boolean = config.getBoolean("debug", false)!!;
+        public val debug:Boolean = ormConfig.getBoolean("debug", false)!!;
 
         /**
          * 数据源工厂
          */
         public val dataSourceFactory:IDataSourceFactory by lazy{
-            val clazz:String = config["dataSourceFactory"]!!
+            val clazz:String = ormConfig["dataSourceFactory"]!!
             Class.forName(clazz).newInstance() as IDataSourceFactory
         }
 
@@ -71,6 +73,11 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
             dbs.get().clear();
         }
     }
+
+    /**
+     * 数据库配置
+     */
+    val dbConfig: Config = Config.instance("database.$name", "yaml")
 
     /**
      * 获得数据库类型
@@ -465,5 +472,37 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
 
         // 非string => string
         return "$identityQuoteString$value$identityQuoteString";
+    }
+
+    /**
+     * 根据对象属性名，获得db字段名
+     *    可根据实际需要在 model 类中重写
+     *
+     * @param prop 对象属性名
+     * @return db字段名
+     */
+    public override fun prop2Column(prop:String): String {
+        var column = prop
+        if(dbConfig["columnUnderline"]!!) // 字段有下划线
+            column = column.camel2Underline()
+        if(dbConfig["columnUpperCase"]!!)// 字段全大写
+            column = column.toUpperCase() // 转大写
+        return column
+    }
+
+    /**
+     * 根据db字段名，获得对象属性名
+     *    可根据实际需要在 model 类中重写
+     *
+     * @param column db字段名
+     * @return 对象属性名
+     */
+    public override fun column2Prop(column:String): String {
+        var prop = column
+        if(dbConfig["columnUpperCase"]!!)// 字段全大写
+            prop = prop.toLowerCase() // 转小写
+        if(dbConfig["columnUnderline"]!!) // 字段有下划线
+            prop = prop.underline2Camel()
+        return prop
     }
 }
