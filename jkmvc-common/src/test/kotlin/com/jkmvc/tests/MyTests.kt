@@ -68,6 +68,10 @@ class MyTests{
         val config = Config.instance("test", "yaml")
         println(config.props)
         println(config.props["age"] is Int)
+        // 数组字段的类型是： ArrayList
+        val books = config.props["favoriteBooks"]
+        println(books)
+        println(books is List<*>)
     }
 
     @Test
