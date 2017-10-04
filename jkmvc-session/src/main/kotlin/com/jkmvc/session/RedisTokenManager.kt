@@ -48,11 +48,13 @@ object RedisTokenManager:ITokenManager {
             return false
 
         // 验证token
-        val (userId, tokenId) = token.split(',')
-        val result = checkToken(userId, tokenId)
+        val result = checkToken(token)
+        if(result == null)
+            return false;
 
         //如果验证成功，说明此用户进行了一次有效操作，延长token的过期时间
-        if(result && overtime)
+        val (userId, tokenId) = result
+        if(overtime)
             jedis.expire("tokenId-$tokenId", TOKEN_EXPIRES);
 
         return true;
@@ -61,13 +63,24 @@ object RedisTokenManager:ITokenManager {
     /**
      * 检查token是否有效
      *
-     * @param userId
-     * @param tokenId
+     * @param token
      * @return
      */
-    private fun checkToken(userId: String, tokenId: String): Boolean {
+    private fun checkToken(token: String): Pair<String, String>? {
+        // 解析token
+        //val (userId, tokenId) = token.split(',')
+        val i = token.lastIndexOf('.')
+        val userId = token.substring(0, i)
+        val tokenId = token.substring(i + 1)
+
+        // 获得缓存的token
         val userId2 = jedis.get("tokenId-$tokenId")
-        return userId == userId2
+
+        // 校验
+        if(userId != userId2)
+            return null
+
+        return Pair(userId, tokenId)
     }
 
     /**
@@ -77,13 +90,13 @@ object RedisTokenManager:ITokenManager {
      */
     public override fun deleteToken(token: String) {
         // 验证token
-        val (userId, tokenId) = token.split(',')
-        val result = checkToken(userId, tokenId)
+        val result = checkToken(token)
+        if(result == null)
+            return;
 
         // 删除token
-        if(result)
-            jedis.del("tokenId-$tokenId")
+        val (userId, tokenId) = result
+        jedis.del("tokenId-$tokenId")
     }
-
 
 }
