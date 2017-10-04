@@ -73,7 +73,7 @@ object Auth:IAuth {
      */
     public override fun login(username:String, password:String): IAuthUserModel? {
         // 动态获得queryBuilder，即UserModel.queryBuilder()
-        val query = userModel.modelMetaData.queryBuilder()
+        val query = userModel.modelMetaData.queryBuilder(false, true)
 
         // 根据用户名查找用户
         val user = query.where(sessionConfig["usernameField"]!!, "=", username).find(transform = userModel.recordTranformer) as IAuthUserModel?;
