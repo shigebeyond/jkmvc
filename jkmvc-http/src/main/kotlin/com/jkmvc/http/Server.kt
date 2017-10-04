@@ -15,9 +15,14 @@ import kotlin.reflect.KFunction
 object Server:IServer {
 
     /**
+     * http配置
+     */
+    public val config = Config.instance("http")
+
+    /**
      * 是否调试
      */
-    public val debug:Boolean = Config.instance("jkmvc").getBoolean("debug.http")!!;
+    public val debug:Boolean = config.getBoolean("debug", false)!!;
 
     /**
      * 处理请求
