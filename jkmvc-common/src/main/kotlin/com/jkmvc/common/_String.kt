@@ -214,6 +214,7 @@ public inline fun <T: Any> String.to(clazz: KClass<T>): T{
     var result: Any?;
     when(clazz){
         Int::class -> result = this.toInt()
+        Long::class -> result = this.toLong()
         Float::class -> result = this.toFloat()
         Double::class -> result = this.toDouble()
         Boolean::class -> result = this.toBoolean()
