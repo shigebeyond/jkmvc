@@ -72,7 +72,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
         val driver: String = conn.metaData.driverName
         var result: DbType? = null
         for(type in DbType.values()){
-            if (driver.contains(type.toString(), false))
+            if (driver.contains(type.toString(), true))
                 result = type
         }
         if(result == null)
