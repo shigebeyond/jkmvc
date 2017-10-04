@@ -3,7 +3,7 @@
 	<!--动态请求 -->
 	<filter>
 		<filter-name>jkmvc</filter-name>
-		<filter-class>com.jkmvc.example.MyFilter</filter-class>
+		<filter-class>com.jkmvc.http.JkFilter</filter-class>
 	</filter>
 	
 	<filter-mapping>

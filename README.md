@@ -4,38 +4,10 @@ Jkmvc is an elegant, powerful and lightweight MVC web framework built using kotl
 Inspired by 2 php frameworks: [kohana](https://github.com/kohana/kohana) and [jkmvc](https://github.com/shigebeyond/skmvc)
 
 # usage - web
-## 1 Create Filter
 
-JkFilter is a Filter for your web application, you can configure your route rules and other initial options.
+## 1 Configure JkFilter in web.xml
 
-```
-package com.jkmvc.example
-
-import com.jkmvc.http.ControllerLoader
-import com.jkmvc.http.JkFilter
-import com.jkmvc.http.Route
-import com.jkmvc.http.Router
-import javax.servlet.FilterConfig
-
-class MyFilter: JkFilter() {
-
-    override fun init(filterConfig: FilterConfig) {
-        super.init(filterConfig);
-        // 添加路由规则
-        // add route rule
-        Router.addRoute("default",
-                Route("<controller>(\\/<action>(\\/<id>)?)?", // url正则 | url pattern
-                    mapOf("id" to "\\d+"), // 参数子正则 | param pattern
-                    mapOf("controller" to "welcome", "action" to "index"))); // default param
-        // 添加扫描controller的包
-        // add package path to scan Controller
-        ControllerLoader.addPackage("com.jkmvc.example.controller");
-    }
-}
-
-```
-
-## 2 Configure your Filter in web.xml
+JkFilter is a Filter for your web application
 
 vim src/main/webapp/WEB-INF/web.xml
 
@@ -44,7 +16,7 @@ vim src/main/webapp/WEB-INF/web.xml
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
 	<filter>
 		<filter-name>jkmvc</filter-name>
-		<filter-class>com.jkmvc.example.MyFilter</filter-class>
+		<filter-class>com.jkmvc.http.JkFilter</filter-class>
 	</filter>
 	
 	<filter-mapping>
@@ -54,7 +26,7 @@ vim src/main/webapp/WEB-INF/web.xml
 </web-app>
 ```
 
-## 3 Create Controller
+## 2 Create Controller
 
 Controller handles request, and render data to response.
 
@@ -78,6 +50,19 @@ class WelcomeController: Controller() {
     }
 
 }
+```
+
+## 3 Register Controller
+
+configure controller classes's package paths
+
+vim src/main/resources/http.yaml
+
+```
+# controller类所在的包路径
+# controller classes's package paths
+controllerPackages:
+    - com.jkmvc.example.controller
 ```
 
 ## 4 Run web server

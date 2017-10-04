@@ -11,7 +11,7 @@ dependencies{
 // 启动jetty
 jettyRun{
     webAppSourceDirectory file("$projectDir/src/main/webapp")
-    httpPort 8082
+    httpPort 8080
     contextPath project.name
     scanIntervalSeconds 1 // jetty 热部署，当值为0时，不扫描新class，不热部署
     reload "automatic"
