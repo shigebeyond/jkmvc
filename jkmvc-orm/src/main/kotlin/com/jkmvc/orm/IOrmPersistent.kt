@@ -18,7 +18,7 @@ interface IOrmPersistent :IOrmValid {
 	 * 获得主键值
 	 * @return|string
 	 */
-	val pk: Int;
+	val pk: Any?;
 
 	/**
 	 * 获得sql构建器

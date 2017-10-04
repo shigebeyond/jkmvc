@@ -27,7 +27,7 @@ abstract class OrmPersistent: OrmValid() {
 	 * 获得主键值
 	 * @return|string
 	 */
-	public override val pk:Int
+	public override val pk:Any?
 		get() = this[metadata.primaryKey];
 
 	/**
