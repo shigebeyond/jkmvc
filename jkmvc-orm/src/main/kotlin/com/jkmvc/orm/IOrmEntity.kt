@@ -79,4 +79,17 @@ interface IOrmEntity: IRecord {
      * @return
      */
     fun asMap(): Map<String, Any?>;
+
+    /**
+     * 序列化
+     * @return
+     */
+    fun serialize(): ByteArray?
+
+    /**
+     * 序列化
+     *
+     * @param bytes
+     */
+    fun unserialize(bytes: ByteArray): Unit
 }

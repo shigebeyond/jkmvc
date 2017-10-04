@@ -47,9 +47,9 @@ class DruidDataSourceFactory : IDataSourceFactory {
         ds.setDriverClassName(driverClass)
 
         // 连接池大小
-        ds.setInitialSize(config.getInt("initialSize", 1)!!) // 初始连接池大小
-        ds.setMinIdle(config.getInt("minIdle", 1)!!) // 最小空闲连接数
-        ds.setMaxActive(config.getInt("maxActive", 1)!!) // 最大活跃连接数
+        ds.setInitialSize(config.getInt("initialSize", 10)!!) // 初始连接池大小
+        ds.setMinIdle(config.getInt("minIdle", 10)!!) // 最小空闲连接数
+        ds.setMaxActive(config.getInt("maxActive", 100)!!) // 最大活跃连接数
         ds.setMaxWait(config.getLong("maxWait", DruidDataSource.DEFAULT_MAX_WAIT.toLong())!!) // 配置获取连接等待超时的时间
         ds.setTimeBetweenConnectErrorMillis(config.getLong("timeBetweenConnectErrorMillis", DruidDataSource.DEFAULT_TIME_BETWEEN_CONNECT_ERROR_MILLIS)!!) // 配置发生错误时多久重连
         ds.setTimeBetweenEvictionRunsMillis(config.getLong("timeBetweenEvictionRunsMillis", DruidDataSource.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS)!!) // 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒

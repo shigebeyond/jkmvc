@@ -1,5 +1,6 @@
 package com.jkmvc.orm
 
+import com.jkmvc.common.Serializer
 import com.jkmvc.common.findProperty
 import com.jkmvc.common.isNullOrEmpty
 import com.jkmvc.common.to
@@ -150,6 +151,23 @@ abstract class OrmEntity : IOrm {
      */
     public override fun asMap(): Map<String, Any?> {
         return data;
+    }
+
+    /**
+     * 序列化
+     * @return
+     */
+    public override fun serialize(): ByteArray? {
+        return Serializer.serialize(data)
+    }
+
+    /**
+     * 序列化
+     *
+     * @param bytes
+     */
+    public override fun unserialize(bytes: ByteArray): Unit {
+        data.putAll(Serializer.unserizlize(bytes) as Map<String, Any?>)
     }
 
 }

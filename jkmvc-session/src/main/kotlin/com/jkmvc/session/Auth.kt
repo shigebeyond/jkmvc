@@ -20,17 +20,17 @@ abstract class Auth:IAuth {
     companion object{
 
         // 日志
-        protected val logger = LoggerFactory.getLogger(Auth::class.java)
+        public val logger = LoggerFactory.getLogger(Auth::class.java)
 
         /**
          * 会话配置
          */
-        protected val sessionConfig:Config = Config.instance("session")
+        public val sessionConfig:Config = Config.instance("session")
 
         /**
          * 用户模型的类
          */
-        protected val userModel: KClass<out Orm> by lazy {
+        public val userModel: KClass<out Orm> by lazy {
             // 获得配置的用户模型类
             val className: String = sessionConfig["userModel"]!!
             val clazz = Class.forName(className).kotlin as KClass<out Orm>

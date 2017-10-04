@@ -21,7 +21,14 @@ class AuthToken: Auth() {
      * 获得当前会话的token
      */
     public fun getToken(): String? {
-        return Request.current().getHeader("token")
+        val req = Request.current()
+        // 先找请求参数
+        val token = req.getParameter("token")
+        if(!token.isNullOrEmpty())
+            return token
+
+        // 后找请求头
+        return req.getHeader("token")
     }
 
     /**

@@ -34,7 +34,8 @@ object RedisTokenManager:ITokenManager {
 
         //存储token，key为tokenId, value是user, 并设置过期时间
         //jedis.set("token-$tokenId", user.pk.toString(), "NX", "EX", TOKEN_EXPIRES)
-        jedis.set("token-$tokenId".toByteArray(), Serializer.serialize(user), "NX".toByteArray(), "EX".toByteArray(), TOKEN_EXPIRES)
+        // 序列化user
+        jedis.set("token-$tokenId".toByteArray(), user.serialize(), "NX".toByteArray(), "EX".toByteArray(), TOKEN_EXPIRES)
 
         // token = userId + tokenId
         return "${user.pk}.$tokenId"
@@ -83,8 +84,11 @@ object RedisTokenManager:ITokenManager {
         if(data == null)
             return null
 
+        // 反序列化user
+        val user = Auth.userModel.java.newInstance() as IAuthUserModel
+        user.unserialize(data)
+
         // 校验
-        val user = Serializer.unserizlize(data) as IAuthUserModel
         if(userId != user.pk.toString())
             return null
 
