@@ -1,0 +1,11 @@
+#路由规则
+default:
+  #  url正则 | url pattern
+  regex: <controller>(/<action>(/<id>)?)?
+  #  参数子正则 | param pattern
+  paramRegex:
+    id: \d+
+  # 默认参数值 | default param
+  defaults:
+    controller: welcome
+    action: index

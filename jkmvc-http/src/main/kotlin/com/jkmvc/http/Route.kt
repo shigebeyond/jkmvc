@@ -39,7 +39,10 @@ data class GroupRange(var start:Int, var end:Int){
  *     route.mathes('welcome/index');
  * </code>
  */
-class Route(override val regex:String /* 原始正则: <controller>(\/<action>(\/<id>)?)? */, override val paramRegex:Map<String, String> = emptyMap() /* 参数的子正则 */, override val defaults:Map<String, String>? /* 参数的默认值 */ = null): IRoute{
+class Route(override val regex:String /* 原始正则: <controller>(\/<action>(\/<id>)?)? */,
+			override val paramRegex:Map<String, String> = emptyMap() /* 参数的子正则 */,
+			override val defaults:Map<String, String>? /* 参数的默认值 */ = null)
+	: IRoute{
 
 	companion object{
 		/**
@@ -162,5 +165,9 @@ class Route(override val regex:String /* 原始正则: <controller>(\/<action>(\
 				params[name] = value;
 		}
 		return params;
+	}
+
+	public override fun toString():String{
+		return "regex=$regex, paramRegex=$paramRegex, defaults=$defaults"
 	}
 }
