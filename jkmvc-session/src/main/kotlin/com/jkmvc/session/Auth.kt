@@ -2,66 +2,61 @@ package com.jkmvc.session
 
 import com.jkmvc.common.Config
 import com.jkmvc.db.recordTranformer
-import com.jkmvc.http.Request
 import com.jkmvc.orm.Orm
 import com.jkmvc.orm.modelMetaData
 import org.slf4j.LoggerFactory
-import javax.servlet.http.HttpSession
 import kotlin.reflect.KClass
 
 /**
  * 认证用户
  *   1 登录
  *   2 注销
- *   3 密码加密
  *
  * @author shijianhang
  * @create 2017-09-19 下午11:35
  **/
-object Auth:IAuth {
+abstract class Auth:IAuth {
 
-    // 日志
-    val logger = LoggerFactory.getLogger(Auth::class.java)
+    companion object{
 
-    /**
-     * 会话配置
-     */
-    val sessionConfig:Config = Config.instance("session")
+        // 日志
+        protected val logger = LoggerFactory.getLogger(Auth::class.java)
 
-    /**
-     * 用户模型的类
-     */
-    val userModel: KClass<out Orm> by lazy {
-        // 获得配置的用户模型类
-        val className: String = sessionConfig["userModel"]!!
-        val clazz = Class.forName(className).kotlin as KClass<out Orm>
-        // 检查是否实现了 IAuthUserModel 接口
-        if(!IAuthUserModel::class.java.isAssignableFrom(clazz.java))
-            throw IllegalArgumentException("无效用户模型的类[$className]，必须是实现[com.jkmvc.session.IAuthUserModel]接口");
-        clazz
-    }
+        /**
+         * 会话配置
+         */
+        protected val sessionConfig:Config = Config.instance("session")
 
-    init{
-        logger.error("会话相关的用户模型为：" + sessionConfig.getString("userModel"))
-    }
+        /**
+         * 用户模型的类
+         */
+        protected val userModel: KClass<out Orm> by lazy {
+            // 获得配置的用户模型类
+            val className: String = sessionConfig["userModel"]!!
+            val clazz = Class.forName(className).kotlin as KClass<out Orm>
+            // 检查是否实现了 IAuthUserModel 接口
+            if(!IAuthUserModel::class.java.isAssignableFrom(clazz.java))
+                throw IllegalArgumentException("无效用户模型的类[$className]，必须是实现[com.jkmvc.session.IAuthUserModel]接口");
+            clazz
+        }
 
-    /**
-     * 获得当前会话
-     *
-     * @param create 是否创建新的会话
-     * @return
-     */
-    private fun getSession(create:Boolean = true): HttpSession {
-        return Request.current().getSession(create);
-    }
+        init{
+            logger.error("会话相关的用户模型为：" + sessionConfig.getString("userModel"))
+        }
 
-    /**
-     * 获得当前登录用户
-     * @return
-     */
-    public override fun getUser(): IAuthUserModel?{
-        // 从session中读取登录用户
-        return getSession(false).getAttribute("user") as IAuthUserModel?
+        private var _inst:Auth? = null
+
+        /**
+         * 获得单例
+         */
+        public fun instance():Auth{
+            if(_inst == null) {
+                val authType = sessionConfig.getString("authType", "Session")!!
+                val clazz = "com.jkmvc.session.Auth$authType" // AuthSession 或 AuthToken
+                _inst = Class.forName(clazz).newInstance() as Auth
+            }
+            return _inst!!
+        }
     }
 
     /**
@@ -86,16 +81,14 @@ object Auth:IAuth {
         if(p1 != p2)
             return null;
 
-        // 保存登录用户到session中
-        getSession(true).setAttribute("user", user);
+        afterLogin(user)
         return user;
     }
 
     /**
-     * 注销登录
+     * 登录后的处理
+     * @param user
      */
-    public override fun logout(){
-        getSession().invalidate();
-    }
+    protected abstract fun afterLogin(user: IAuthUserModel)
 
 }
