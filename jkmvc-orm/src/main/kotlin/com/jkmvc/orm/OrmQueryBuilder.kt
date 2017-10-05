@@ -179,15 +179,29 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @return
      */
     protected fun convertIntelligent(prop: String, value: String): Any? {
+        // 解析出：表名 + 字段名
+        var table:String
+        var column:String
         if(prop.contains('.')){
-            val (table, column) = prop.split('.')
-            // 获得关联关系
-            val relation = ormMeta.getRelation(table)!!
-            // 由关联模型来转
-            return relation.ormMeta.convertIntelligent(column, value)
+            val arr = prop.split('.')
+            table = arr[0]
+            column = arr[1]
+        }else{
+            table = ormMeta.name
+            column = prop
         }
-        // 由当前模型来转
-        return ormMeta.convertIntelligent(prop, value)
+
+        // 当前表
+        if(table == ormMeta.name){
+            // 由当前模型来转
+            return ormMeta.convertIntelligent(column, value)
+        }
+
+        // 关联表
+        // 获得关联关系
+        val relation = ormMeta.getRelation(table)!!
+        // 由关联模型来转
+        return relation.ormMeta.convertIntelligent(column, value)
     }
 
     /**
