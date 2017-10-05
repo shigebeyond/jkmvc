@@ -1,10 +1,6 @@
 package com.jkmvc.orm
 
-import com.jkmvc.common.Config
-import com.jkmvc.common.camel2Underline
-import com.jkmvc.common.underline2Camel
 import com.jkmvc.db.IDb
-import com.jkmvc.db.IDbQueryBuilder
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 
@@ -52,7 +48,7 @@ interface IMetaData{
     /**
      * 关联关系
      */
-    val relations: MutableMap<String, IMetaRelation>
+    val relations: MutableMap<String, IRelationMeta>
 
     /**
      * 每个字段的规则
@@ -86,7 +82,7 @@ interface IMetaData{
      * @param name
      * @return
      */
-    fun getRelation(name:String):IMetaRelation?;
+    fun getRelation(name:String): IRelationMeta?;
 
     /**
      * 获得orm查询构建器
@@ -104,7 +100,7 @@ interface IMetaData{
      * @param rule
      * @return
      */
-    fun addRule(name: String, label:String, rule: String? = null): MetaData;
+    fun addRule(name: String, label:String, rule: String? = null): OrmMeta;
 
     /**
      * 添加规则
@@ -112,7 +108,7 @@ interface IMetaData{
      * @param rule
      * @return
      */
-    fun addRule(name: String, rule: IMetaRule): MetaData;
+    fun addRule(name: String, rule: IMetaRule): OrmMeta;
 
     /**
      * 根据对象属性名，获得db字段名

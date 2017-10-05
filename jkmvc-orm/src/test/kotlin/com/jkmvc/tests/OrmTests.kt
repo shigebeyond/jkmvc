@@ -11,8 +11,8 @@ import kotlin.reflect.jvm.jvmName
  */
 class UserModel(id:Int? = null): Orm(id) {
     // 伴随对象就是元数据
-    // company object is meta data for model
-    companion object m: MetaData(UserModel::class){
+    // company object is ormMeta data for model
+    companion object m: OrmMeta(UserModel::class){
         init {
             // 添加标签 + 规则
             // add label and rule for field
@@ -50,8 +50,8 @@ class UserModel(id:Int? = null): Orm(id) {
  */
 class AddressModel(id:Int? = null): Orm(id) {
     // 伴随对象就是元数据
-    // company object is meta data for model
-    companion object m: MetaData(AddressModel::class){
+    // company object is ormMeta data for model
+    companion object m: OrmMeta(AddressModel::class){
         init {
             // 添加标签 + 规则
             // add label and rule for field

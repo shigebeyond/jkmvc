@@ -1,6 +1,5 @@
 package com.jkmvc.orm
 
-import com.jkmvc.db.IDbQueryBuilder
 import com.jkmvc.db.recordTranformer
 import kotlin.reflect.KClass
 
@@ -34,7 +33,7 @@ enum class RelationType {
  * @author shijianhang
  * @date 2016-10-10
  */
-interface IMetaRelation{
+interface IRelationMeta {
 
     /**
      *  关联关系
@@ -61,7 +60,7 @@ interface IMetaRelation{
      *  伴随对象就是元数据
      */
     val metadata:IMetaData
-        get() = model.modelMetaData
+        get() = model.modelOrmMeta
 
     /**
      * 记录转换器

@@ -3,7 +3,6 @@ package com.jkmvc.orm
 import com.jkmvc.common.*
 import com.jkmvc.db.Db
 import com.jkmvc.db.IDb
-import com.jkmvc.db.IDbQueryBuilder
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -15,11 +14,11 @@ import kotlin.reflect.KMutableProperty1
  *  1 模型映射表的映射元数据，如模型类/数据库/表名
  *  2 代理模型的属性读写
  */
-open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
-                    public override val label: String = model.modelName /* 模型中文名 */,
-                    public override var table: String = model.modelName /* 表名，假定model类名, 都是以"Model"作为后缀 */,
-                    public override var primaryKey: String = "id" /* 主键 */,
-                    public override val dbName: String = "default" /* 数据库名 */
+open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
+                   public override val label: String = model.modelName /* 模型中文名 */,
+                   public override var table: String = model.modelName /* 表名，假定model类名, 都是以"Model"作为后缀 */,
+                   public override var primaryKey: String = "id" /* 主键 */,
+                   public override val dbName: String = "default" /* 数据库名 */
 ) : IMetaData {
 
     companion object{
@@ -37,8 +36,8 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
     /**
      * 关联关系
      */
-    public override val relations: MutableMap<String, IMetaRelation> by lazy {
-        HashMap<String, IMetaRelation>()
+    public override val relations: MutableMap<String, IRelationMeta> by lazy {
+        HashMap<String, IRelationMeta>()
     }
 
     /**
@@ -95,7 +94,7 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param name
      * @return
      */
-    public override fun getRelation(name: String): IMetaRelation? {
+    public override fun getRelation(name: String): IRelationMeta? {
         return relations.get(name);
     }
 
@@ -117,7 +116,7 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param rule
      * @return
      */
-    public override fun addRule(name: String, label:String, rule: String?): MetaData
+    public override fun addRule(name: String, label:String, rule: String?): OrmMeta
     {
         rules[name] = MetaRule(label, rule);
         return this;
@@ -129,7 +128,7 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param rule
      * @return
      */
-    public override fun addRule(name: String, rule: IMetaRule): MetaData
+    public override fun addRule(name: String, rule: IMetaRule): OrmMeta
     {
         rules[name] = rule;
         return this;
@@ -155,11 +154,11 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
         // 获得外键
         var fk = foreignKey;
         if (fk == "")
-            fk = relatedModel.modelMetaData.defaultForeignKey
+            fk = relatedModel.modelOrmMeta.defaultForeignKey
 
         // 设置关联关系
         relations.getOrPut(name) {
-            MetaRelation(RelationType.BELONGS_TO, relatedModel, fk, conditions)
+            RelationMeta(RelationType.BELONGS_TO, relatedModel, fk, conditions)
         }
 
         return this;
@@ -181,7 +180,7 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
 
         // 设置关联关系
         relations.getOrPut(name) {
-            MetaRelation(RelationType.HAS_ONE, relatedModel, fk, conditions)
+            RelationMeta(RelationType.HAS_ONE, relatedModel, fk, conditions)
         }
 
         return this;
@@ -202,7 +201,7 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
 
         // 设置关联关系
         relations.getOrPut(name) {
-            MetaRelation(RelationType.HAS_MANY, relatedModel, fk, conditions)
+            RelationMeta(RelationType.HAS_MANY, relatedModel, fk, conditions)
         }
 
         return this;

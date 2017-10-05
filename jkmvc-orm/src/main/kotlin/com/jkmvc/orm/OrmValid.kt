@@ -1,7 +1,6 @@
 package com.jkmvc.orm
 
 import com.jkmvc.validate.Validation
-import java.util.*
 
 /**
  * ORM之数据校验
@@ -17,7 +16,7 @@ abstract class OrmValid: OrmEntity() {
      */
     public override fun check(): Boolean {
         // 逐个字段校验
-        for ((column, rule) in metadata.rules) {
+        for ((column, rule) in ormMeta.rules) {
             if(rule.rule == null)
                 break;
 

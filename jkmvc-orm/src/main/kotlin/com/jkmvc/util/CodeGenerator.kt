@@ -22,7 +22,7 @@ class CodeGenerator(val srcDir:String){
     /**
      * 元数据查询的配置
      */
-    private val config = Config.instance("meta-query.${db.dbType}", "yaml")
+    private val config = Config.instance("ormMeta-query.${db.dbType}", "yaml")
 
     /**
      * 获得查询字段的sql
@@ -94,12 +94,12 @@ class CodeGenerator(val srcDir:String){
         // 1 注释与包
         val code = StringBuilder()
         code.append("package $pck \n\n")
-        code.append("import com.jkmvc.orm.MetaData \nimport com.jkmvc.orm.Orm \n\n")
+        code.append("import com.jkmvc.orm.OrmMeta \nimport com.jkmvc.orm.Orm \n\n")
         code.append("/**\n * $label\n *\n * @ClassName: $model\n * @Description:\n * @author shijianhang<772910474@qq.com>\n * @date 2017-09-29 6:56 PM\n */\n")
         // 2 类
         code.append("class $model(id:$pkType? = null): Orm(id) {\n")
         // 3 元数据
-        code.append("\t// 伴随对象就是元数据\n \tcompanion object m: MetaData($model::class, \"$label\", \"$table\", \"$pk\"){}\n\n")
+        code.append("\t// 伴随对象就是元数据\n \tcompanion object m: OrmMeta($model::class, \"$label\", \"$table\", \"$pk\"){}\n\n")
         // 4 属性
         code.append("\t// 代理属性读写")
         // 遍历字段来生成属性

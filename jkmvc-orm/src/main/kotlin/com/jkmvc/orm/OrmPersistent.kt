@@ -20,22 +20,22 @@ abstract class OrmPersistent: OrmValid() {
 	 * 元数据
 	 *   伴随对象就是元数据
 	 */
-	public override val metadata:IMetaData
-		get() = this::class.modelMetaData
+	public override val ormMeta:IMetaData
+		get() = this::class.modelOrmMeta
 
 	/**
 	 * 获得主键值
 	 * @return|string
 	 */
 	public override val pk:Any?
-		get() = this[metadata.primaryProp];
+		get() = this[ormMeta.primaryProp];
 
 	/**
 	 * 获得sql构建器
 	 * @return
 	 */
 	public override fun queryBuilder(): OrmQueryBuilder {
-		return metadata.queryBuilder();
+		return ormMeta.queryBuilder();
 	}
 
 	/**
@@ -77,7 +77,7 @@ abstract class OrmPersistent: OrmValid() {
 		val pk = queryBuilder().value(buildDirtyData()).insert(true);
 
 		// 更新内部数据
-		data[metadata.primaryProp] = pk; // 主键
+		data[ormMeta.primaryProp] = pk; // 主键
 		dirty.clear(); // 变化的字段值
 		loaded = true;
 
@@ -99,7 +99,7 @@ abstract class OrmPersistent: OrmValid() {
 		val result:MutableMap<String, Any?> = HashMap<String, Any?>();
 		// 挑出变化的属性
 		for(prop in dirty) {
-			val column = metadata.prop2Column(prop)
+			val column = ormMeta.prop2Column(prop)
 			result[column] = data[prop];
 		}
 		return result;
@@ -131,7 +131,7 @@ abstract class OrmPersistent: OrmValid() {
 		fireEvent("beforeSave")
 
 		// 更新数据库
-		val result = queryBuilder().sets(buildDirtyData()).where(metadata.primaryKey, pk).update();
+		val result = queryBuilder().sets(buildDirtyData()).where(ormMeta.primaryKey, pk).update();
 
 		// 更新内部数据
 		dirty.clear()
@@ -161,7 +161,7 @@ abstract class OrmPersistent: OrmValid() {
 		fireEvent("beforeDelete")
 
 		// 删除数据
-		val result = queryBuilder().where(metadata.primaryKey, pk).delete();
+		val result = queryBuilder().where(ormMeta.primaryKey, pk).delete();
 
 		// 更新内部数据
 		data.clear()
@@ -181,6 +181,6 @@ abstract class OrmPersistent: OrmValid() {
 	 * @param event 事件名
 	 */
 	public override fun fireEvent(event:String){
-		metadata.getEventHandler(event)?.call(this)
+		ormMeta.getEventHandler(event)?.call(this)
 	}
 }

@@ -79,7 +79,7 @@ class OrmQueryBuilder(protected val metadata: IMetaData /* orm元数据 */,
      * @param tableAlias 表别名
      * @return
      */
-    protected fun joinSlave(relation: IMetaRelation, tableAlias: String): OrmQueryBuilder {
+    protected fun joinSlave(relation: IRelationMeta, tableAlias: String): OrmQueryBuilder {
         // 准备条件
         val slave = relation.metadata
         val slaveFk = tableAlias + "." + relation.foreignKey; // 从表.外键
@@ -99,7 +99,7 @@ class OrmQueryBuilder(protected val metadata: IMetaData /* orm元数据 */,
      * @param tableAlias 表别名
      * @return
      */
-    protected fun joinMaster(relation: IMetaRelation, tableAlias: String): OrmQueryBuilder {
+    protected fun joinMaster(relation: IRelationMeta, tableAlias: String): OrmQueryBuilder {
         // 准备条件
         val master: IMetaData = relation.metadata;
         val masterPk = tableAlias + "." + master.primaryKey; // 主表.主键

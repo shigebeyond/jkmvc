@@ -3,7 +3,7 @@ package com.jkmvc.session
 import com.jkmvc.common.Config
 import com.jkmvc.db.recordTranformer
 import com.jkmvc.orm.Orm
-import com.jkmvc.orm.modelMetaData
+import com.jkmvc.orm.modelOrmMeta
 import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
 
@@ -68,7 +68,7 @@ abstract class Auth:IAuth {
      */
     public override fun login(username:String, password:String): IAuthUserModel? {
         // 动态获得queryBuilder，即UserModel.queryBuilder()
-        val query = userModel.modelMetaData.queryBuilder(false, true)
+        val query = userModel.modelOrmMeta.queryBuilder(false, true)
 
         // 根据用户名查找用户
         val user = query.where(sessionConfig["usernameField"]!!, "=", username).find(transform = userModel.recordTranformer) as IAuthUserModel?;

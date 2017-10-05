@@ -12,7 +12,7 @@ interface IOrmPersistent :IOrmValid {
 	/**
 	 * 元数据
 	 */
-	val metadata: IMetaData;
+	val ormMeta: IMetaData;
 
 	/**
 	 * 获得主键值

@@ -1,7 +1,5 @@
 package com.jkmvc.orm
 
-import com.jkmvc.db.recordTranformer
-
 /**
  * ORM之关联对象操作
  *
@@ -18,11 +16,11 @@ abstract class OrmRelated: OrmPersistent() {
      */
     public override operator fun set(column: String, value: Any?) {
         // 设置关联对象
-        val relation = metadata.getRelation(column);
+        val relation = ormMeta.getRelation(column);
         if (relation != null) {
             data[column] = value;
             // 如果关联的是主表，则更新从表的外键
-            val (type, model, foreignKey) = relation as MetaRelation;
+            val (type, model, foreignKey) = relation as RelationMeta;
             if (type == RelationType.BELONGS_TO)
                 this[foreignKey] = (value as Orm).pk; // 更新字段 super.set(foreignKey, value.pk);
             return;
@@ -40,7 +38,7 @@ abstract class OrmRelated: OrmPersistent() {
      */
     public override operator fun <T> get(name: String, defaultValue: Any?): T {
         // 获得关联对象
-        if (metadata.hasRelation(name))
+        if (ormMeta.hasRelation(name))
             return related(name, false) as T;
 
         return super.get(name, defaultValue);
@@ -58,12 +56,12 @@ abstract class OrmRelated: OrmPersistent() {
         for ((column, value) in orgn) {
             // 关联查询时，会设置关联表字段的列别名（列别名 = 表别名 : 列名），可以据此来设置关联对象的字段值
             if (!column.contains(":")){ // 自身字段
-                val prop = metadata.column2Prop(column)
+                val prop = ormMeta.column2Prop(column)
                 data[prop] = value;
             } else if (value !== null) {// 关联对象字段: 不处理null的值, 因为left join查询时, 关联对象可能没有匹配的行
                 val (name, column) = column.split(":");
                 val obj:OrmRelated = related(name, true) as OrmRelated; // 创建关联对象
-                val prop = metadata.column2Prop(column)
+                val prop = ormMeta.column2Prop(column)
                 obj.data[prop] = value;
             }
         }
@@ -84,7 +82,7 @@ abstract class OrmRelated: OrmPersistent() {
     public override fun related(name: String, newed: Boolean, vararg columns: String): Any? {
         if (name !in data){
             // 获得关联关系
-            val relation = metadata.getRelation(name)!!;
+            val relation = ormMeta.getRelation(name)!!;
 
             var result: Any?;
             if (newed) {  // 创建新对象
@@ -115,7 +113,7 @@ abstract class OrmRelated: OrmPersistent() {
      * @param relation 从表关系
      * @return
      */
-    protected fun querySlave(relation:IMetaRelation): OrmQueryBuilder {
+    protected fun querySlave(relation: IRelationMeta): OrmQueryBuilder {
         return relation.queryBuilder().where(relation.foreignKey, pk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
     }
 
@@ -125,7 +123,7 @@ abstract class OrmRelated: OrmPersistent() {
      * @param relation 主表关系
      * @return
      */
-    protected fun queryMaster(relation:IMetaRelation): OrmQueryBuilder {
+    protected fun queryMaster(relation: IRelationMeta): OrmQueryBuilder {
         return relation.queryBuilder().where(relation.metadata.primaryKey, this[relation.foreignKey]) as OrmQueryBuilder; // 主表.主键 = 从表.外键
     }
 }
