@@ -150,6 +150,10 @@ abstract class OrmEntity : IOrm {
      * @return
      */
     public override fun asMap(): Map<String, Any?> {
+        for((name, relation) in ormMeta.relations){
+            if(data.containsKey(name))
+                data[name] = (data[name] as Orm).asMap()
+        }
         return data;
     }
 
