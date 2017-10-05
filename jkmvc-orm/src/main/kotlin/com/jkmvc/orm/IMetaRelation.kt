@@ -54,7 +54,7 @@ interface IMetaRelation{
     /**
      *  查询条件
      */
-    val conditions:((IDbQueryBuilder) -> Unit)?;
+    val conditions:Map<String, Any?>
 
     /**
      * 获得关联模型的元数据
@@ -73,11 +73,8 @@ interface IMetaRelation{
      * 获得关联模型的查询器
      */
     fun queryBuilder():OrmQueryBuilder {
-        // 关联表的查询器
-        val qb = metadata.queryBuilder();
-        // 添加查询条件
-        conditions?.invoke(qb);
-        return qb;
+        // 关联查询 + 条件
+        return metadata.queryBuilder().wheres(conditions) as OrmQueryBuilder
     }
 
     /**

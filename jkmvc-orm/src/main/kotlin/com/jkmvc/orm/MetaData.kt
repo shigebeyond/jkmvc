@@ -151,7 +151,7 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param foreignKey 外键
      * @param conditions 关联查询条件
      */
-    public override fun belongsTo(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, conditions: ((IDbQueryBuilder) -> Unit)?): IMetaData {
+    public override fun belongsTo(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, conditions: Map<String, Any?>): IMetaData {
         // 获得外键
         var fk = foreignKey;
         if (fk == "")
@@ -172,7 +172,7 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param foreignKey 外键
      * @param conditions 关联查询条件
      */
-    public override fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, conditions: ((IDbQueryBuilder) -> Unit)?): IMetaData {
+    public override fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, conditions: Map<String, Any?>): IMetaData {
         // 获得外键
         var fk = foreignKey;
         if (fk == "")
@@ -194,7 +194,7 @@ open class MetaData(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param foreignKey 外键
      * @param conditions 关联查询条件
      */
-    public override fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, conditions: ((IDbQueryBuilder) -> Unit)?): IMetaData {
+    public override fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, conditions:Map<String, Any?>): IMetaData {
         // 获得外键
         var fk = foreignKey;
         if (fk == "")
