@@ -183,19 +183,10 @@ class Config(public override val props: Map<String, *>): IConfig(){
      */
     public override fun getConfig(path: String): Config{
         try{
-            // 单层
-            if(!path.contains('.'))
-                return Config(props[path] as Map<String, *>)
-
-            // 多层
-            val keys:List<String> = path.split('.')
-            var data:Map<String, *> = props
-            for (key in keys){
-                data = data[key] as Map<String, *>
-            }
-            return Config(data)
+            val subprops = props.path(path) as Map<String, *>
+            return Config(subprops)
         }catch (e:ClassCastException){
-            throw IllegalArgumentException("构建配置子项失败：路径[$path]的值不是Map")
+            throw NoSuchElementException("构建配置子项失败：路径[$path]的值不是Map")
         }
     }
 
