@@ -5,6 +5,7 @@ import com.jkmvc.validate.Validation
 import org.junit.Test
 import java.io.File
 import java.math.BigDecimal
+import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.jvm.jvmName
@@ -43,8 +44,9 @@ class MyTests{
 
     @Test
     fun testString(){
-        println("my_favorite_food".underline2Camel())
-        println("myFavoriteFood".camel2Underline())
+//        println("my_favorite_food".underline2Camel())
+//        println("myFavoriteFood".camel2Underline())
+        println("2017-09-27 08:47:04".to(Date::class))
     }
 
     @Test
