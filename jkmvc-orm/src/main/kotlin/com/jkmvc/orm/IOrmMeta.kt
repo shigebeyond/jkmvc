@@ -16,6 +16,11 @@ interface IOrmMeta {
     val model: KClass<out IOrm>
 
     /**
+     * 模型名
+     */
+    val name:String
+
+    /**
      * 模型中文名
      */
     val label:String

@@ -31,6 +31,11 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     }
 
     /**
+     * 模型名
+     */
+    public override val name:String = model.modelName
+
+    /**
      * 主键属性
      */
     public override val primaryProp:String = column2Prop(primaryKey)
