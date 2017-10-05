@@ -1,7 +1,5 @@
 package com.jkmvc.db
 
-import com.jkmvc.common.findConstructor
-import com.jkmvc.common.forceClone
 import kotlin.reflect.KClass
 
 /**
@@ -12,14 +10,27 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-13
  */
-open class DbQueryBuilder(db:IDb = Db.getDb(), table:String = "" /*表名*/) :DbQueryBuilderDecoration(db, table)
+open class DbQueryBuilder(db:IDb = Db.getDb(), table:Pair<String, String?> /*表名*/) :DbQueryBuilderDecoration(db, table)
 {
     /**
      * 缓存编译好的sql
      */
     protected var compiledSql: CompiledSql = CompiledSql();
 
-    public constructor(dbName:String /* db名 */, table:String = "" /*表名*/):this(Db.getDb(dbName), table){
+    /**
+     * 构造函数
+     * @param db 数据库连接
+     * @param table 表名
+     */
+    public constructor(db: IDb, table: String = ""):this(db, if(table == "") emptyTable else Pair(table, null)){
+    }
+
+    /**
+     * 构造函数
+     * @param dbName 数据库名
+     * @param table 表名
+     */
+    public constructor(dbName:String, table:String = ""):this(Db.getDb(dbName), table){
     }
 
     /**

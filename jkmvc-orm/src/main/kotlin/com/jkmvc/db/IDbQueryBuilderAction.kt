@@ -35,19 +35,21 @@ interface IDbQueryBuilderAction
 
     /**
      * 设置表名: 一般是单个表名
-     * @param tables 表名数组: array(table1, table2, alias to table3),
-     * 								  如 array("user", "contact", "addr" to "useraddress"), 其中 user 与 contact 表不带别名, 而 useraddress 表带别名 addr
+     * @param table 表名
+     * @param alias 别名
      * @return
      */
-    fun table(tables:String):IDbQueryBuilder;
+    fun table(table:String, alias:String? = null):IDbQueryBuilder{
+        return from(table, alias)
+    }
 
     /**
      * 设置表名: 可能有多个表名
-     * @param tables 表名数组: array(table1, table2, alias to table3),
-     * 								  如 array("user", "contact", "addr" to "useraddress"), 其中 user 与 contact 表不带别名, 而 useraddress 表带别名 addr
+     * @param table 表名
+     * @param alias 别名
      * @return
      */
-    fun from(tables:String):IDbQueryBuilder;
+    fun from(table:String, alias:String? = null):IDbQueryBuilder;
 
     /**
      * 设置插入的列, insert时用

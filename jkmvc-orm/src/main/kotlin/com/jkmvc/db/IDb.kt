@@ -163,7 +163,7 @@ interface IDb{
      * @param table
      * @return
      */
-    fun quoteTable(table:Pair<String, String>):String;
+    fun quoteTable(table:Pair<String, String?>):String;
 
     /**
      * 转义表名
@@ -173,7 +173,7 @@ interface IDb{
      */
     fun quoteTable(table:Any):String{
         return if(table is Pair<*, *>)
-                    quoteTable(table as Pair<String, String>);
+                    quoteTable(table as Pair<String, String?>);
                 else
                     quoteTable(table as String);
     }

@@ -349,7 +349,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @param table
      * @return
      */
-    public override fun quoteTable(table:Pair<String, String>):String
+    public override fun quoteTable(table:Pair<String, String?>):String
     {
         return quoteTable(table.component1(), table.component2())
     }

@@ -76,15 +76,21 @@ class InsertData: Cloneable{
 }
 
 /**
+ * 空表
+ */
+public val emptyTable = Pair<String, String?>("", null)
+
+/**
  * sql构建器 -- 动作子句: 由动态select/insert/update/delete来构建的子句
  *   通过字符串模板来实现
  *
  * @author shijianhang
  * @date 2016-10-12
  */
-abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, var table: String = "" /*表名*/) : IDbQueryBuilder() {
+abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, var table: Pair<String, String?> /*表名*/) : IDbQueryBuilder() {
 
     companion object {
+
         /**
          * 动作子句的sql模板
          *   sql模板的动作顺序 = ActionType中定义的动作顺序
@@ -153,34 +159,14 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     protected var distinct: Boolean = false;
 
     /**
-     * 设置表名: 一般是单个表名
-     * @param tables 表名数组: array(table1, table2, alias to table3),
-     * 								  如 array("user", "contact", "addr" to "useraddress"), 其中 user 与 contact 表不带别名, 而 useraddress 表带别名 addr
-     * @return
-     */
-    public override fun table(tables: String): IDbQueryBuilder {
-        return this.tables(tables);
-    }
-
-    /**
      * 设置表名: 可能有多个表名
-     * @param tables 表名数组: array(table1, table2, alias to table3),
-     * 								  如 array("user", "contact", "addr" to "useraddress"), 其中 user 与 contact 表不带别名, 而 useraddress 表带别名 addr
+     * @param table 表名
+     * @param alias 别名
      * @return
      */
-    public override fun from(tables: String): IDbQueryBuilder {
-        return tables(tables);
-    }
-
-    /**
-     * 处理多个表名的设置
-     * @param tables 表名数组: array(table1, table2, alias to table3),
-     * 								  如 array("user", "contact", "addr" to "useraddress"), 其中 user 与 contact 表不带别名, 而 useraddress 表带别名 addr
-     * @return
-     */
-    protected fun tables(tables: String): IDbQueryBuilder {
-        table = tables;
-        return this;
+    public override fun from(table: String, alias:String?): IDbQueryBuilder {
+        this.table = Pair(table, alias)
+        return this
     }
 
     /**
@@ -283,7 +269,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
             ActionType.UPDATE -> updateRow.clear();
         }
         action = null;
-        table = "";
+        table = emptyTable;
         distinct = false;
         return this;
     }
