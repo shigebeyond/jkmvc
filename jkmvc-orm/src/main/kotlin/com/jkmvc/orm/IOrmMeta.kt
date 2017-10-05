@@ -8,7 +8,7 @@ import kotlin.reflect.KFunction
  * orm的元数据
  * 　模型映射表的映射元数据，如模型类/数据库/表名
  */
-interface IMetaData{
+interface IOrmMeta {
 
     /**
      * 模型类
@@ -147,7 +147,7 @@ interface IMetaData{
      * @param conditions 关联查询条件
      * @return
      */
-    fun belongsTo(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = "", conditions:Map<String, Any?> = emptyMap()): IMetaData;
+    fun belongsTo(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = "", conditions:Map<String, Any?> = emptyMap()): IOrmMeta;
 
     /**
      * 设置关联关系(has one)
@@ -156,7 +156,7 @@ interface IMetaData{
      * @param foreignKey 外键
      * @param conditions 关联查询条件
      */
-    fun hasOne(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = "", conditions:Map<String, Any?> = emptyMap()): IMetaData;
+    fun hasOne(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = "", conditions:Map<String, Any?> = emptyMap()): IOrmMeta;
 
     /**
      * 设置关联关系(has many)
@@ -165,7 +165,7 @@ interface IMetaData{
      * @param foreignKey 外键
      * @param conditions 关联查询条件
      */
-    fun hasMany(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = "", conditions:Map<String, Any?> = emptyMap()): IMetaData;
+    fun hasMany(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = "", conditions:Map<String, Any?> = emptyMap()): IOrmMeta;
 
     /**
      * 智能转换字段值

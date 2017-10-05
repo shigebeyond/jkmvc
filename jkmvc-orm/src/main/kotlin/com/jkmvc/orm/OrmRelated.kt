@@ -124,6 +124,6 @@ abstract class OrmRelated: OrmPersistent() {
      * @return
      */
     protected fun queryMaster(relation: IRelationMeta): OrmQueryBuilder {
-        return relation.queryBuilder().where(relation.metadata.primaryKey, this[relation.foreignKey]) as OrmQueryBuilder; // 主表.主键 = 从表.外键
+        return relation.queryBuilder().where(relation.ormMeta.primaryKey, this[relation.foreignKey]) as OrmQueryBuilder; // 主表.主键 = 从表.外键
     }
 }

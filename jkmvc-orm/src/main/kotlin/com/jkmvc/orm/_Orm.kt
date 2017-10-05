@@ -22,5 +22,5 @@ public val KClass<out IOrm>.modelName:String
  * 根据模型类来获得模型元数据
  *   随对象就是元数据
  */
-public val KClass<out IOrm>.modelOrmMeta:IMetaData
-    get() = companionObjectInstance as IMetaData
+public val KClass<out IOrm>.modelOrmMeta: IOrmMeta
+    get() = companionObjectInstance as IOrmMeta

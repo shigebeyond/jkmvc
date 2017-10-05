@@ -59,7 +59,7 @@ interface IRelationMeta {
      * 获得关联模型的元数据
      *  伴随对象就是元数据
      */
-    val metadata:IMetaData
+    val ormMeta: IOrmMeta
         get() = model.modelOrmMeta
 
     /**
@@ -73,7 +73,7 @@ interface IRelationMeta {
      */
     fun queryBuilder():OrmQueryBuilder {
         // 关联查询 + 条件
-        return metadata.queryBuilder().wheres(conditions) as OrmQueryBuilder
+        return ormMeta.queryBuilder().wheres(conditions) as OrmQueryBuilder
     }
 
     /**

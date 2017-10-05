@@ -20,7 +20,7 @@ abstract class OrmPersistent: OrmValid() {
 	 * 元数据
 	 *   伴随对象就是元数据
 	 */
-	public override val ormMeta:IMetaData
+	public override val ormMeta: IOrmMeta
 		get() = this::class.modelOrmMeta
 
 	/**

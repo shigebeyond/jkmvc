@@ -13,7 +13,7 @@ import kotlin.reflect.KClass
  * @date 2016-10-16 下午8:02:28
  *
  */
-class OrmQueryBuilder(protected val metadata: IMetaData /* orm元数据 */,
+class OrmQueryBuilder(protected val metadata: IOrmMeta /* orm元数据 */,
                       protected val convertValue: Boolean = false /* 查询时是否智能转换字段值 */,
                       protected val convertColumn: Boolean = false /* 查询时是否智能转换字段名 */
     ) : DbQueryBuilder(metadata.db, metadata.table) {
@@ -55,7 +55,7 @@ class OrmQueryBuilder(protected val metadata: IMetaData /* orm元数据 */,
             else -> joinSlave(relation, name);
         }
         // select关联表字段
-        return selectRelated(relation.metadata, name, columns);
+        return selectRelated(relation.ormMeta, name, columns);
     }
 
 
@@ -81,10 +81,10 @@ class OrmQueryBuilder(protected val metadata: IMetaData /* orm元数据 */,
      */
     protected fun joinSlave(relation: IRelationMeta, tableAlias: String): OrmQueryBuilder {
         // 准备条件
-        val slave = relation.metadata
+        val slave = relation.ormMeta
         val slaveFk = tableAlias + "." + relation.foreignKey; // 从表.外键
 
-        val master: IMetaData = metadata;
+        val master: IOrmMeta = metadata;
         val masterPk = master.table + "." + master.primaryKey; // 主表.主键o
 
         // 查从表
@@ -101,10 +101,10 @@ class OrmQueryBuilder(protected val metadata: IMetaData /* orm元数据 */,
      */
     protected fun joinMaster(relation: IRelationMeta, tableAlias: String): OrmQueryBuilder {
         // 准备条件
-        val master: IMetaData = relation.metadata;
+        val master: IOrmMeta = relation.ormMeta;
         val masterPk = tableAlias + "." + master.primaryKey; // 主表.主键
 
-        val slave: IMetaData = metadata;
+        val slave: IOrmMeta = metadata;
         val slaveFk = slave.table + "." + relation.foreignKey; // 从表.外键
 
         // 查主表
@@ -118,7 +118,7 @@ class OrmQueryBuilder(protected val metadata: IMetaData /* orm元数据 */,
      * @param tableAlias 表别名
      * @param columns 查询的列
      */
-    protected fun selectRelated(related: IMetaData, tableAlias: String, columns: List<String>? = null): OrmQueryBuilder {
+    protected fun selectRelated(related: IOrmMeta, tableAlias: String, columns: List<String>? = null): OrmQueryBuilder {
         // 默认查询全部列
         var cols = columns
         if (cols === null)
