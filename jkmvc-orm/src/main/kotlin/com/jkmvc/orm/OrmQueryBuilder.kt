@@ -16,7 +16,7 @@ import kotlin.reflect.KClass
 class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                       protected val convertValue: Boolean = false /* 查询时是否智能转换字段值 */,
                       protected val convertColumn: Boolean = false /* 查询时是否智能转换字段名 */
-    ) : DbQueryBuilder(ormMeta.db, ormMeta.table) {
+    ) : DbQueryBuilder(ormMeta.db, Pair(ormMeta.table, ormMeta.name)) {
 
     /**
      * 获得记录转换器
