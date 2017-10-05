@@ -24,3 +24,12 @@ public val KClass<out IOrm>.modelName:String
  */
 public val KClass<out IOrm>.modelOrmMeta: IOrmMeta
     get() = companionObjectInstance as IOrmMeta
+
+/**
+ * orm列表获得字段值
+ */
+fun List<out IOrm>.asMap(): List<Map<String, Any?>> {
+    return this.map {
+        it.asMap()
+    }
+}
