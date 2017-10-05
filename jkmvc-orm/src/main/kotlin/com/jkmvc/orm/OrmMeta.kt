@@ -1,6 +1,8 @@
 package com.jkmvc.orm
 
-import com.jkmvc.common.*
+import com.jkmvc.common.findFunction
+import com.jkmvc.common.findProperty
+import com.jkmvc.common.to
 import com.jkmvc.db.Db
 import com.jkmvc.db.IDb
 import java.util.*
