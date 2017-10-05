@@ -22,7 +22,7 @@ class CodeGenerator(val srcDir:String){
     /**
      * 元数据查询的配置
      */
-    private val config = Config.instance("ormMeta-query.${db.dbType}", "yaml")
+    private val config = Config.instance("meta-query.${db.dbType}", "yaml")
 
     /**
      * 获得查询字段的sql
