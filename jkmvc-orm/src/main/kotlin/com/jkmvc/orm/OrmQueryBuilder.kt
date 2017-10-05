@@ -13,10 +13,10 @@ import kotlin.reflect.KClass
  * @date 2016-10-16 下午8:02:28
  *
  */
-class OrmQueryBuilder(protected val metadata: IOrmMeta /* orm元数据 */,
+class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                       protected val convertValue: Boolean = false /* 查询时是否智能转换字段值 */,
                       protected val convertColumn: Boolean = false /* 查询时是否智能转换字段名 */
-    ) : DbQueryBuilder(metadata.db, metadata.table) {
+    ) : DbQueryBuilder(ormMeta.db, ormMeta.table) {
 
     /**
      * 获得记录转换器
@@ -26,8 +26,8 @@ class OrmQueryBuilder(protected val metadata: IOrmMeta /* orm元数据 */,
     public override fun <T:Any> getRecordTranformer(clazz: KClass<T>): ((MutableMap<String, Any?>) -> T) {
         // 只能是当前model类及其父类，不能是其他model类
         if(IOrm::class.java.isAssignableFrom(clazz.java) // 是model类
-            && !clazz.java.isAssignableFrom(metadata.model.java)) // 不是当前model类及其父类
-            throw UnsupportedOperationException("sql构建器将记录转为指定类型：只能指定 ${metadata.model} 类及其父类，实际指定 ${clazz}");
+            && !clazz.java.isAssignableFrom(ormMeta.model.java)) // 不是当前model类及其父类
+            throw UnsupportedOperationException("sql构建器将记录转为指定类型：只能指定 ${ormMeta.model} 类及其父类，实际指定 ${clazz}");
 
         return super.getRecordTranformer(clazz)
     }
@@ -43,10 +43,10 @@ class OrmQueryBuilder(protected val metadata: IOrmMeta /* orm元数据 */,
     public fun with(name: String, columns: List<String>? = null): OrmQueryBuilder {
         // select当前表字段
         if (selectColumns.isEmpty())
-            select(metadata.table + ".*");
+            select(ormMeta.table + ".*");
 
         // 获得关联关系
-        val relation = metadata.getRelation(name)!!;
+        val relation = ormMeta.getRelation(name)!!;
         // 根据关联关系联查表
         when (relation.type) {
             // belongsto: 查主表
@@ -96,7 +96,7 @@ class OrmQueryBuilder(protected val metadata: IOrmMeta /* orm元数据 */,
         val slave = relation.ormMeta
         val slaveFk = tableAlias + "." + relation.foreignKey; // 从表.外键
 
-        val master: IOrmMeta = metadata;
+        val master: IOrmMeta = ormMeta;
         val masterPk = master.table + "." + master.primaryKey; // 主表.主键o
 
         // 查从表
@@ -116,7 +116,7 @@ class OrmQueryBuilder(protected val metadata: IOrmMeta /* orm元数据 */,
         val master: IOrmMeta = relation.ormMeta;
         val masterPk = tableAlias + "." + master.primaryKey; // 主表.主键
 
-        val slave: IOrmMeta = metadata;
+        val slave: IOrmMeta = ormMeta;
         val slaveFk = slave.table + "." + relation.foreignKey; // 从表.外键
 
         // 查主表
@@ -150,22 +150,41 @@ class OrmQueryBuilder(protected val metadata: IOrmMeta /* orm元数据 */,
     /**
      * 改写where，支持自动转换字段名与字段值
      *
-     * @param column
+     * @param prop
      * @param op
      * @param value
      */
-    public override fun andWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
+    public override fun andWhere(prop: String, op: String, value: Any?): IDbQueryBuilder {
         // 智能转换字段值
         val realValue = if(convertValue && value is String)
-                            metadata.convertIntelligent(column, value)
+                            convertIntelligent(prop, value)
                         else
                             value
         // 转换字段名
         val realColumn = if(convertColumn)
-                            prop2Column(column)
+                            prop2Column(prop)
                         else
-                            column;
+                            prop
         return super.andWhere(realColumn, op, value)
+    }
+
+    /**
+     * 智能转换字段值
+     *
+     * @param prop
+     * @param value
+     * @return
+     */
+    protected fun convertIntelligent(prop: String, value: String): Any? {
+        if(prop.contains('.')){
+            val (table, column) = prop.split('.')
+            // 获得关联关系
+            val relation = ormMeta.getRelation(table)!!
+            // 由关联模型来转
+            return relation.ormMeta.convertIntelligent(column, value)
+        }
+        // 由当前模型来转
+        return ormMeta.convertIntelligent(prop, value)
     }
 
     /**
@@ -175,7 +194,7 @@ class OrmQueryBuilder(protected val metadata: IOrmMeta /* orm元数据 */,
      * @param prop 对象属性名
      * @return db字段名
      */
-    public fun prop2Column(prop:String): String{
+    protected fun prop2Column(prop:String): String{
         // 处理关键字
         if(db.dbType == DbType.Oracle && prop == "rownum"){
             return prop
@@ -184,10 +203,10 @@ class OrmQueryBuilder(protected val metadata: IOrmMeta /* orm元数据 */,
         // 表+属性
         if(prop.contains('.')){
             val (table, prop2) = prop.split('.')
-            return table + '.' + metadata.prop2Column(prop2)
+            return table + '.' + ormMeta.prop2Column(prop2)
         }
 
         // 纯属性
-        return metadata.prop2Column(prop)
+        return ormMeta.prop2Column(prop)
     }
 }

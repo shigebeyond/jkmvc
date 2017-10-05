@@ -88,12 +88,12 @@ interface IDbQueryBuilderDecoration
     /**
      * Creates a new "AND WHERE" condition for the query.
      *
-     * @param   column  column name or array(column, alias) or object
+     * @param   prop  column name or array(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
      */
-    fun andWhere(column:String, op:String, value:Any?):IDbQueryBuilder;
+    fun andWhere(prop:String, op:String, value:Any?):IDbQueryBuilder;
 
     /**
      * Creates a new "OR WHERE" condition for the query.
