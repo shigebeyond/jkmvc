@@ -15,10 +15,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * 转义列
      */
     protected val columnQuoter: (Any?) -> String = { column: Any? ->
-        if(column is Pair<*, *>)
-            db.quoteColumn(column as Pair<String, String>);
-        else
-            db.quoteColumn(column as String);
+        db.quoteColumn(column!!);
     }
 
     /**
@@ -32,10 +29,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
      * 转义表
      */
     protected val tableQuoter: (Any?) -> String = { table: Any? ->
-        if(table is Pair<*, *>)
-            db.quoteTable(table as Pair<String, String>);
-        else
-            db.quoteTable(table as String);
+        db.quoteTable(table!!)
     }
 
     protected val orderDirection: (Any?) -> String = { value: Any? ->
@@ -224,13 +218,13 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * Creates a new "AND WHERE" condition for the query.
      *
-     * @param   column  column name or array(column, alias) or object
+     * @param   prop  column name or array(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
      */
-    public override fun andWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
-        whereClause.addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "AND");
+    public override fun andWhere(prop: String, op: String, value: Any?): IDbQueryBuilder {
+        whereClause.addSubexp(arrayOf<Any?>(prop, prepareOperator(value, op), value), "AND");
         return this;
     }
 

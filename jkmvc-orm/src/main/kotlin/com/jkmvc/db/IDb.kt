@@ -166,6 +166,19 @@ interface IDb{
     fun quoteTable(table:Pair<String, String>):String;
 
     /**
+     * 转义表名
+     *
+     * @param table
+     * @return
+     */
+    fun quoteTable(table:Any):String{
+        return if(table is Pair<*, *>)
+                    quoteTable(table as Pair<String, String>);
+                else
+                    quoteTable(table as String);
+    }
+
+    /**
      * 转义字段名
      *   mysql为`column`
      *   oracle为"column"
@@ -186,6 +199,19 @@ interface IDb{
      * @return
      */
     fun quoteColumn(column:String, alias:String? = null, with_brackets:Boolean = false):String;
+
+    /**
+     * 转义字段名
+     *
+     * @param column 字段名, 可以是字段数组
+     * @return
+     */
+    fun quoteColumn(column:Any):String{
+        return if(column is Pair<*, *>)
+                    quoteColumn(column as Pair<String, String>);
+                else
+                    quoteColumn(column as String);
+    }
 
     /**
      * 转义值
