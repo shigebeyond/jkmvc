@@ -89,9 +89,12 @@ class OrmTests{
 
     @Test
     fun testMeta(){
-        println(UserModel.m::class.jvmName) // com.jkmvc.tests.MyTests$m
-        println(UserModel.m::class.qualifiedName) // com.jkmvc.tests.UserModel.m -- dot
-        println(UserModel.m::class.simpleName) // m
+//        println(UserModel.m::class.jvmName) // com.jkmvc.tests.MyTests$m
+//        println(UserModel.m::class.qualifiedName) // com.jkmvc.tests.UserModel.m -- dot
+//        println(UserModel.m::class.simpleName) // m
+        println(UserModel.m::name) // m
+        println(UserModel.m.name) // user
+        println(UserModel::class.modelOrmMeta.name) // user
 //        println(UserModel.m::class.java.name) // com.jkmvc.tests.MyTests$m
 //        println(UserModel.m::class.java.typeName) // com.jkmvc.tests.MyTests$m
 //        println(UserModel.m::class.java.canonicalName) // com.jkmvc.tests.UserModel.m -- dot

@@ -8,6 +8,9 @@ import kotlin.reflect.KClass
 
 /**
  * 面向orm对象的sql构建器
+ *    当前表与关联表都带别名
+ *    当前表的别名=ormMeta.name
+ *    关联表的别名=关联关系名
  *
  * @author shijianhang
  * @date 2016-10-16 下午8:02:28
@@ -43,7 +46,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     public fun with(name: String, columns: List<String>? = null): OrmQueryBuilder {
         // select当前表字段
         if (selectColumns.isEmpty())
-            select(ormMeta.table + ".*");
+            select(ormMeta.name + ".*");
 
         // 获得关联关系
         val relation = ormMeta.getRelation(name)!!;
@@ -97,7 +100,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         val slaveFk = tableAlias + "." + relation.foreignKey; // 从表.外键
 
         val master: IOrmMeta = ormMeta;
-        val masterPk = master.table + "." + master.primaryKey; // 主表.主键o
+        val masterPk = master.name + "." + master.primaryKey; // 主表.主键o
 
         // 查从表
         return join(slave.table to tableAlias, "LEFT").on(slaveFk, "=", masterPk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
@@ -117,7 +120,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         val masterPk = tableAlias + "." + master.primaryKey; // 主表.主键
 
         val slave: IOrmMeta = ormMeta;
-        val slaveFk = slave.table + "." + relation.foreignKey; // 从表.外键
+        val slaveFk = slave.name + "." + relation.foreignKey; // 从表.外键
 
         // 查主表
         return join(master.table to tableAlias, "LEFT").on(masterPk, "=", slaveFk) as OrmQueryBuilder; // 主表.主键 = 从表.外键
