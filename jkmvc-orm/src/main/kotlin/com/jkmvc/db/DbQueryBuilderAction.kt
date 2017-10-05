@@ -252,7 +252,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
             for(column in columns){
                 when(column){
                     is Array<*> -> selectColumns.addAll(column as Array<Any>)
-                    is Collection<*> -> selectColumns.addAll(columns);
+                    is Collection<*> -> selectColumns.addAll(column as Collection<Any>);
                     else -> selectColumns.add(column);
                 }
             }
