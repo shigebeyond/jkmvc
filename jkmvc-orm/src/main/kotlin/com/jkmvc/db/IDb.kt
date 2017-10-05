@@ -152,17 +152,30 @@ interface IDb{
      * 转义表名
      *
      * @param table
+     * @param alias
      * @return
      */
     fun quoteTable(table:String, alias:String? = null):String;
 
     /**
-     * 转义多个字段名
+     * 转义表名
      *
-     * @param columns 表名集合，其元素可以是String, 也可以是Pair<字段名, 别名>
-     * @param with_brackets 当拼接数组时, 是否用()包裹
-     * @return 
+     * @param table
+     * @return
      */
+    fun quoteTable(table:Pair<String, String>):String;
+
+    /**
+     * 转义字段名
+     *   mysql为`column`
+     *   oracle为"column"
+     *   sql server为"column" [column]
+     *
+     * @param column 字段名 + 别名
+     * @param with_brackets 当拼接数组时, 是否用()包裹
+     * @return
+     */
+    fun quoteColumn(column:Pair<String, String>, with_brackets:Boolean = false):String
 
     /**
      * 转义字段名

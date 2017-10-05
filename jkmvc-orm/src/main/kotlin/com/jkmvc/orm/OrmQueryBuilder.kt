@@ -72,6 +72,18 @@ class OrmQueryBuilder(protected val metadata: IOrmMeta /* orm元数据 */,
     }
 
     /**
+     * 联查多表
+     *
+     * @param names 关联关系名的数组
+     * @return
+     */
+    public fun withs(vararg names: String): OrmQueryBuilder {
+        for(name in names)
+            with(name)
+        return this
+    }
+
+    /**
      * 联查从表
      *     从表.外键 = 主表.主键
      *
@@ -135,6 +147,13 @@ class OrmQueryBuilder(protected val metadata: IOrmMeta /* orm元数据 */,
         return this.select(select) as OrmQueryBuilder;
     }
 
+    /**
+     * 改写where，支持自动转换字段名与字段值
+     *
+     * @param column
+     * @param op
+     * @param value
+     */
     public override fun andWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
         // 智能转换字段值
         val realValue = if(convertValue && value is String)
@@ -162,6 +181,13 @@ class OrmQueryBuilder(protected val metadata: IOrmMeta /* orm元数据 */,
             return prop
         }
 
+        // 表+属性
+        if(prop.contains('.')){
+            val (table, prop2) = prop.split('.')
+            return table + '.' + metadata.prop2Column(prop2)
+        }
+
+        // 纯属性
         return metadata.prop2Column(prop)
     }
 }

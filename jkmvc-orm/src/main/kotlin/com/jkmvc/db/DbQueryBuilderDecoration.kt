@@ -14,8 +14,11 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * 转义列
      */
-    protected val columnQuoter: (Any?) -> String = { value: Any? ->
-        db.quoteColumn(value as String);
+    protected val columnQuoter: (Any?) -> String = { column: Any? ->
+        if(column is Pair<*, *>)
+            db.quoteColumn(column as Pair<String, String>);
+        else
+            db.quoteColumn(column as String);
     }
 
     /**
@@ -28,8 +31,11 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: String = "" /*表名*/) 
     /**
      * 转义表
      */
-    protected val tableQuoter: (Any?) -> String = { value: Any? ->
-        db.quoteTable(value as String);
+    protected val tableQuoter: (Any?) -> String = { table: Any? ->
+        if(table is Pair<*, *>)
+            db.quoteTable(table as Pair<String, String>);
+        else
+            db.quoteTable(table as String);
     }
 
     protected val orderDirection: (Any?) -> String = { value: Any? ->

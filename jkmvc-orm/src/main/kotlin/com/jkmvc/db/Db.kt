@@ -347,6 +347,20 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      *   sql server为"table" [table]
      *
      * @param table
+     * @return
+     */
+    public override fun quoteTable(table:Pair<String, String>):String
+    {
+        return quoteTable(table.component1(), table.component2())
+    }
+
+    /**
+     * 转义表名
+     *   mysql为`table`
+     *   oracle为"table"
+     *   sql server为"table" [table]
+     *
+     * @param table
      * @param alias 表别名
      * @return
      */
@@ -371,18 +385,14 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
         val str:StringBuilder = StringBuilder();
         for (item in columns)
         {
-            var column:String;
-            var alias:String?;
+            // 单个字段转义
             if(item is Pair<*, *>){ // 有别名
-                column = item.component1() as String;
-                alias = item .component2() as String;
+                str.append(quoteColumn(item as Pair<String, String>))
             }else{ // 无别名
-                column = item as String;
-                alias = null;
+                str.append(quoteColumn(item as String))
             }
 
-            // 单个字段转义
-            str.append(quoteColumn(column, alias)).append(", ");
+            str.append(", ");
         }
 
         // 删最后逗号
@@ -393,6 +403,21 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
             str.insert(0, '(').append(')');
 
         return str.toString();
+    }
+
+    /**
+     * 转义字段名
+     *   mysql为`column`
+     *   oracle为"column"
+     *   sql server为"column" [column]
+     *
+     * @param column 字段名 + 别名
+     * @param with_brackets 当拼接数组时, 是否用()包裹
+     * @return
+     */
+    public override fun quoteColumn(column:Pair<String, String>, with_brackets:Boolean):String
+    {
+        return quoteColumn(column.component1(), column.component2(), with_brackets)
     }
 
     /**
