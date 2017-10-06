@@ -155,17 +155,13 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param name 字段名
      * @param relatedModel 关联模型
      * @param foreignKey 外键
+     * @param primaryKey 主键
      * @param conditions 关联查询条件
      */
-    public override fun belongsTo(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, conditions: Map<String, Any?>): IOrmMeta {
-        // 获得外键
-        var fk = foreignKey;
-        if (fk == "")
-            fk = relatedModel.modelOrmMeta.defaultForeignKey
-
+    public override fun belongsTo(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, primaryKey:String, conditions: Map<String, Any?>): IOrmMeta {
         // 设置关联关系
         relations.getOrPut(name) {
-            RelationMeta(RelationType.BELONGS_TO, relatedModel, fk, conditions)
+            RelationMeta(this, RelationType.BELONGS_TO, relatedModel, foreignKey, primaryKey, conditions)
         }
 
         return this;
@@ -176,18 +172,13 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param name 字段名
      * @param relatedModel 关联模型
      * @param foreignKey 外键
+     * @param primaryKey 主键
      * @param conditions 关联查询条件
      */
-    public override fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, conditions: Map<String, Any?>): IOrmMeta {
-        // 获得外键
-        var fk = foreignKey;
-        if (fk == "")
-            fk = this.defaultForeignKey
-
-
+    public override fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, primaryKey:String, conditions: Map<String, Any?>): IOrmMeta {
         // 设置关联关系
         relations.getOrPut(name) {
-            RelationMeta(RelationType.HAS_ONE, relatedModel, fk, conditions)
+            RelationMeta(this, RelationType.HAS_ONE, relatedModel, foreignKey, primaryKey, conditions)
         }
 
         return this;
@@ -198,17 +189,13 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param name 字段名
      * @param relatedModel 关联模型
      * @param foreignKey 外键
+     * @param primaryKey 主键
      * @param conditions 关联查询条件
      */
-    public override fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, conditions:Map<String, Any?>): IOrmMeta {
-        // 获得外键
-        var fk = foreignKey;
-        if (fk == "")
-            fk = this.defaultForeignKey
-
+    public override fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, primaryKey:String, conditions:Map<String, Any?>): IOrmMeta {
         // 设置关联关系
         relations.getOrPut(name) {
-            RelationMeta(RelationType.HAS_MANY, relatedModel, fk, conditions)
+            RelationMeta(this, RelationType.HAS_MANY, relatedModel, foreignKey, primaryKey, conditions)
         }
 
         return this;

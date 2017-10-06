@@ -120,7 +120,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         }
 
         // 准备条件
-        val masterPk = master.name + "." + master.primaryKey; // 主表.主键
+        val masterPk = master.name + "." + relation.primaryKey; // 主表.主键
 
         val slave = relation.ormMeta
         val slaveFk = relationName + "." + relation.foreignKey; // 从表.外键
@@ -148,7 +148,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         val slaveFk = slave.name + "." + relation.foreignKey; // 从表.外键
 
         val master: IOrmMeta = relation.ormMeta;
-        val masterPk = relationName + "." + master.primaryKey; // 主表.主键
+        val masterPk = relationName + "." + relation.primaryKey; // 主表.主键
 
         // 查主表
         return join(master.table to relationName, "LEFT").on(masterPk, "=", slaveFk) as OrmQueryBuilder; // 主表.主键 = 从表.外键

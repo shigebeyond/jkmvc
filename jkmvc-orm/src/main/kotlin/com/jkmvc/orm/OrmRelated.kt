@@ -20,7 +20,7 @@ abstract class OrmRelated: OrmPersistent() {
         if (relation != null) {
             data[column] = value;
             // 如果关联的是主表，则更新从表的外键
-            val (type, model, foreignKey) = relation as RelationMeta;
+            val (sourceMeta, type, model, foreignKey) = relation as RelationMeta;
             if (type == RelationType.BELONGS_TO)
                 this[foreignKey] = (value as Orm).pk; // 更新字段 super.set(foreignKey, value.pk);
             return;
@@ -114,7 +114,7 @@ abstract class OrmRelated: OrmPersistent() {
      * @return
      */
     protected fun querySlave(relation: IRelationMeta): OrmQueryBuilder {
-        return relation.queryBuilder().where(relation.foreignKey, pk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
+        return relation.queryBuilder().where(relation.foreignKey, this[relation.primaryProp]) as OrmQueryBuilder; // 从表.外键 = 主表.主键
     }
 
     /**
@@ -124,6 +124,6 @@ abstract class OrmRelated: OrmPersistent() {
      * @return
      */
     protected fun queryMaster(relation: IRelationMeta): OrmQueryBuilder {
-        return relation.queryBuilder().where(relation.ormMeta.primaryKey, this[relation.foreignKey]) as OrmQueryBuilder; // 主表.主键 = 从表.外键
+        return relation.queryBuilder().where(relation.ormMeta.primaryKey, this[relation.foreignProp]) as OrmQueryBuilder; // 主表.主键 = 从表.外键
     }
 }

@@ -36,6 +36,11 @@ enum class RelationType {
 interface IRelationMeta {
 
     /**
+     * 源模型元数据
+     */
+    val sourceMeta:IOrmMeta;
+
+    /**
      *  关联关系
      */
     val type:RelationType;
@@ -46,14 +51,31 @@ interface IRelationMeta {
     val model: KClass<out IOrm>;
 
     /**
+     *  主键
+     *    一般情况下，是源模型中的主键（sourceMeta.primaryKey），不需要指定
+     *    但是某些情况下，是源模型的业务主键，需要手动指定
+     */
+    val primaryKey:String;
+
+    /**
      *  外键
      */
-    var foreignKey:String;
+    val foreignKey:String;
 
     /**
      *  查询条件
      */
     val conditions:Map<String, Any?>
+
+    /**
+     * 主键属性
+     */
+    val primaryProp:String
+
+    /**
+     *  外键属性
+     */
+    val foreignProp:String;
 
     /**
      * 获得关联模型的元数据

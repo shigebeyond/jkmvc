@@ -152,25 +152,83 @@ interface IOrmMeta {
      * @param conditions 关联查询条件
      * @return
      */
-    fun belongsTo(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = "", conditions:Map<String, Any?> = emptyMap()): IOrmMeta;
+    fun belongsTo(name:String, relatedModel: KClass<out IOrm>, foreignKey:String, primaryKey: String, conditions:Map<String, Any?> = emptyMap()): IOrmMeta;
+
+    /**
+     * 生成属性代理 + 设置关联关系(belongs to)
+     *
+     *    公式：从表.外键 = 主表.主键
+     *         外键默认值 = 主表_主键 （= 关联表_主键）
+     *         主键默认值 = 主表的主键 （= 关联表的主键）
+     *
+     *    其中本表从属于关联表，因此 本表是从表，关联表是主表
+     *
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param foreignKey 外键
+     * @param conditions 关联查询条件
+     * @return
+     */
+    fun belongsTo(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = relatedModel.modelOrmMeta.defaultForeignKey /* 主表_主键 = 关联表_主键 */, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
+        return belongsTo(name, relatedModel, foreignKey, relatedModel.modelOrmMeta.primaryKey /* 关联表的主键 */, conditions)
+    }
 
     /**
      * 设置关联关系(has one)
+     *
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param foreignKey 外键
+     * @param primaryKey 主键
+     * @param conditions 关联查询条件
+     */
+    fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, primaryKey: String, conditions: Map<String, Any?> = emptyMap()): IOrmMeta
+
+    /**
+     * 设置关联关系(has one)
+     *
+     * 公式：从表.外键 = 主表.主键
+     *         外键默认值 = 主表_主键（= 本表_主键）
+     *         主键默认值 = 主表的主键（= 本表的主键）
+     *
+     *    其中本表有一个关联表，因此 本表是主表，关联表是从表
+     *
      * @param name 字段名
      * @param relatedModel 关联模型
      * @param foreignKey 外键
      * @param conditions 关联查询条件
      */
-    fun hasOne(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = "", conditions:Map<String, Any?> = emptyMap()): IOrmMeta;
+    fun hasOne(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = this.defaultForeignKey /* 主表_主键 = 本表_主键 */, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
+        return hasOne(name, relatedModel, foreignKey, this.primaryKey /* 本表的主键 */, conditions)
+    }
 
     /**
      * 设置关联关系(has many)
      * @param name 字段名
      * @param relatedModel 关联模型
      * @param foreignKey 外键
+     * @param primaryKey 主键
      * @param conditions 关联查询条件
      */
-    fun hasMany(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = "", conditions:Map<String, Any?> = emptyMap()): IOrmMeta;
+    fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, primaryKey: String, conditions: Map<String, Any?> = emptyMap()): IOrmMeta
+
+    /**
+     * 设置关联关系(has many)
+     *
+     * 公式：从表.外键 = 主表.主键
+     *         外键默认值 = 主表_主键（= 本表_主键）
+     *         主键默认值 = 主表的主键（= 本表的主键）
+     *
+     *    其中本表有一个关联表，因此 本表是主表，关联表是从表
+     *
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param foreignKey 外键
+     * @param conditions 关联查询条件
+     */
+    fun hasMany(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = this.defaultForeignKey /* 主表_主键 = 本表_主键 */, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
+        return hasMany(name, relatedModel, foreignKey, this.primaryKey /* 本表的主键 */, conditions)
+    }
 
     /**
      * 智能转换字段值
