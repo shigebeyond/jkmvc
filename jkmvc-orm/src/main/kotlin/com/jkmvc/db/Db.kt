@@ -2,7 +2,6 @@ package com.jkmvc.db
 
 import com.jkmvc.common.Config
 import com.jkmvc.common.camel2Underline
-import com.jkmvc.common.deleteSuffix
 import com.jkmvc.common.underline2Camel
 import java.sql.Connection
 import java.sql.ResultSet
@@ -321,23 +320,20 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
     public override fun quoteTables(tables:Collection<Any>, with_brackets:Boolean):String
     {
         // 遍历多个表转义
-        val str:StringBuilder = StringBuilder();
-        for (item in tables)
-        {
+        return tables.joinToString(", ", if(with_brackets) "(" else "", if(with_brackets) ")" else ""){
+            // 单个表转义
             var table:String;
             var alias:String?;
-            if(item is Pair<*, *>){ // 有别名
-                table = item.component1() as String;
-                alias = item .component2() as String;
+            if(it is Pair<*, *>){ // 有别名
+                table = it.component1() as String;
+                alias = it .component2() as String;
             }else{ // 无别名
-                table = item as String;
+                table = it as String;
                 alias = null;
             }
             // 单个表转义
-            str.append(quoteTable(table, alias)).append(", ");
+            quoteTable(table, alias)
         }
-        str.deleteSuffix(", ");
-        return if(with_brackets)  "($str)" else str.toString();
     }
 
     /**
@@ -382,27 +378,14 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
     public override fun quoteColumns(columns:Collection<Any>, with_brackets:Boolean):String
     {
         // 遍历多个字段转义
-        val str:StringBuilder = StringBuilder();
-        for (item in columns)
-        {
+        return columns.joinToString(", ", if(with_brackets) "(" else "", if(with_brackets) ")" else "") {
             // 单个字段转义
-            if(item is Pair<*, *>){ // 有别名
-                str.append(quoteColumn(item as Pair<String, String>))
+            if(it is Pair<*, *>){ // 有别名
+                quoteColumn(it as Pair<String, String>)
             }else{ // 无别名
-                str.append(quoteColumn(item as String))
+                quoteColumn(it as String)
             }
-
-            str.append(", ");
         }
-
-        // 删最后逗号
-        str.deleteSuffix(", ");
-
-        // 加括号
-        if(with_brackets)
-            str.insert(0, '(').append(')');
-
-        return str.toString();
     }
 
     /**
@@ -483,6 +466,14 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      */
     public override fun quote(value:Any?):Any?
     {
+        // 1 多值
+        if(value is Array<*>){
+            return value.joinToString(", ", "(", ")") {
+                quote(it).toString()
+            }
+        }
+
+        // 2 单值
         // null => "null"
         if(value == null)
             return "null";

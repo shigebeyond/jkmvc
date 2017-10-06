@@ -46,7 +46,11 @@ class MyTests{
     fun testString(){
 //        println("my_favorite_food".underline2Camel())
 //        println("myFavoriteFood".camel2Underline())
-        println("2017-09-27 08:47:04".to(Date::class))
+//        println("2017-09-27 08:47:04".to(Date::class))
+        println(arrayOf("a", "b").joinToString(", ", "(", ")") {
+            "[$it]"
+        })
+
     }
 
     @Test
