@@ -269,11 +269,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
         }
 
         // select关联表字段
-        val cols = if(columns == null)
-                        relation.ormMeta.columns
-                    else
-                        columns
-        query.selectRelated(name, cols);
+        query.selectRelated(relation, name, columns);
 
         return relation;
     }

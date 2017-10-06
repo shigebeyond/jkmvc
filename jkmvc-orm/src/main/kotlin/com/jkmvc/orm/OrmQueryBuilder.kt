@@ -27,6 +27,11 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     protected val joins:MutableList<String> = LinkedList()
 
     /**
+     * 关联查询hasMany的关系，需单独处理，不在一个sql中联查，而是单独查询
+     */
+    protected val joinMany:MutableList<String> = LinkedList()
+
+    /**
      * 清空条件
      * @return
      */
@@ -108,6 +113,12 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
 
         joins.add(relationName)
 
+        // 单独处理hasMany关系，不在一个sql中联查，而是单独查询
+        if(relation.type == RelationType.HAS_MANY){
+            joinMany.add(relationName)
+            return this;
+        }
+
         // 准备条件
         val masterPk = master.name + "." + master.primaryKey; // 主表.主键
 
@@ -144,15 +155,45 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     }
 
     /**
+     * 查找一个： select ... limit 1语句
+     *
+     * @param params 动态参数
+     * @param transform 转换函数
+     * @return 单个数据
+     */
+    public override fun <T:Any> find(vararg params: Any?, transform:(MutableMap<String, Any?>) -> T): T?{
+        val result = super.find(*params, transform = transform);
+        // 联查hasMany
+        if(result is Orm){
+            for(name in joinMany){
+                result.related(name, false)
+            }
+        }
+        return result
+    }
+
+    /**
      * select关联表的字段
      *
+     * @param relation 关联关系
      * @param relationName 表别名
      * @param columns 查询的列
      */
-    public fun selectRelated(relationName: String, columns: List<String>): OrmQueryBuilder {
+    public fun selectRelated(relation: IRelationMeta, relationName: String, columns: List<String>? = null): OrmQueryBuilder {
+        // 单独处理hasMany关系，不在一个sql中联查，而是单独查询
+        if(relation.type == RelationType.HAS_MANY){
+            return this;
+        }
+
+        // 默认查全部列
+        val cols = if(columns == null)
+                        relation.ormMeta.columns
+                    else
+                        columns
+
         // 构建列别名
         val select: MutableList<Pair<String, String>> = LinkedList<Pair<String, String>>();
-        for (column in columns) {
+        for (column in cols) {
             val columnAlias = relationName + ":" + column; // 列别名 = 表别名 : 列名，以便在设置orm对象字段值时，可以逐层设置关联对象的字段值
             val column = relationName + "." + column;
             select.add(column to columnAlias);
