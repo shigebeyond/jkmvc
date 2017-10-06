@@ -22,6 +22,20 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     ) : DbQueryBuilder(ormMeta.db, Pair(ormMeta.table, ormMeta.name)) {
 
     /**
+     * 关联查询的记录，用于防止重复join同一个表
+     */
+    protected val joins:MutableList<String> = LinkedList()
+
+    /**
+     * 清空条件
+     * @return
+     */
+    public override fun clear(): IDbQueryBuilder {
+        joins.clear()
+        return super.clear()
+    }
+
+    /**
      * 获得记录转换器
      * @param clazz 要转换的类型
      * @return 转换函数
@@ -34,33 +48,6 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
 
         return super.getRecordTranformer(clazz)
     }
-
-    /**
-     * 联查表
-     *
-     * @param name 关联关系名
-     * @param columns 字段名数组: Array(column1, column2, alias to column3),
-     * 													如 Array("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
-     * @return
-     */
-    public fun with(name: String, columns: List<String>? = null): OrmQueryBuilder {
-        // select当前表字段
-        if (selectColumns.isEmpty())
-            select(ormMeta.name + ".*");
-
-        // 获得关联关系
-        val relation = ormMeta.getRelation(name)!!;
-        // 根据关联关系联查表
-        when (relation.type) {
-            // belongsto: 查主表
-            RelationType.BELONGS_TO -> joinMaster(relation, name);
-            // hasxxx: 查从表
-            else -> joinSlave(relation, name);
-        }
-        // select关联表字段
-        return selectRelated(relation.ormMeta, name, columns);
-    }
-
 
     /**
      * 联查多表
@@ -87,23 +74,48 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     }
 
     /**
+     * 联查表
+     *
+     * @param name 关联关系名
+     * @param columns 字段名数组: Array(column1, column2, alias to column3),
+     * 						如 Array("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
+     * @return
+     */
+    public fun with(name: String, columns: List<String>? = null): OrmQueryBuilder {
+        // select当前表字段
+        if (selectColumns.isEmpty())
+            select(ormMeta.name + ".*");
+
+        // join关联表
+        ormMeta.joinRelated(this, name, columns)
+
+        return this
+    }
+
+    /**
      * 联查从表
      *     从表.外键 = 主表.主键
      *
+     * @param master 主类的元数据
      * @param relation 从类的关联关系
-     * @param tableAlias 表别名
+     * @param relationName 表别名
      * @return
      */
-    protected fun joinSlave(relation: IRelationMeta, tableAlias: String): OrmQueryBuilder {
-        // 准备条件
-        val slave = relation.ormMeta
-        val slaveFk = tableAlias + "." + relation.foreignKey; // 从表.外键
+    public fun joinSlave(master: IOrmMeta, relation: IRelationMeta, relationName: String): OrmQueryBuilder {
+        // 检查并添加关联查询记录
+        if(joins.contains(relationName))
+            return this;
 
-        val master: IOrmMeta = ormMeta;
-        val masterPk = master.name + "." + master.primaryKey; // 主表.主键o
+        joins.add(relationName)
+
+        // 准备条件
+        val masterPk = master.name + "." + master.primaryKey; // 主表.主键
+
+        val slave = relation.ormMeta
+        val slaveFk = relationName + "." + relation.foreignKey; // 从表.外键
 
         // 查从表
-        return join(slave.table to tableAlias, "LEFT").on(slaveFk, "=", masterPk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
+        return join(slave.table to relationName, "LEFT").on(slaveFk, "=", masterPk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
     }
 
     /**
@@ -111,39 +123,38 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      *     主表.主键 = 从表.外键
      *
      * @param relation 从表关系
-     * @param tableAlias 表别名
+     * @param relationName 表别名
      * @return
      */
-    protected fun joinMaster(relation: IRelationMeta, tableAlias: String): OrmQueryBuilder {
-        // 准备条件
-        val master: IOrmMeta = relation.ormMeta;
-        val masterPk = tableAlias + "." + master.primaryKey; // 主表.主键
+    public fun joinMaster(slave: IOrmMeta, relation: IRelationMeta, relationName: String): OrmQueryBuilder {
+        // 检查并添加关联查询记录
+        if(joins.contains(relationName))
+            return this;
 
-        val slave: IOrmMeta = ormMeta;
+        joins.add(relationName)
+
+        // 准备条件
         val slaveFk = slave.name + "." + relation.foreignKey; // 从表.外键
 
+        val master: IOrmMeta = relation.ormMeta;
+        val masterPk = relationName + "." + master.primaryKey; // 主表.主键
+
         // 查主表
-        return join(master.table to tableAlias, "LEFT").on(masterPk, "=", slaveFk) as OrmQueryBuilder; // 主表.主键 = 从表.外键
+        return join(master.table to relationName, "LEFT").on(masterPk, "=", slaveFk) as OrmQueryBuilder; // 主表.主键 = 从表.外键
     }
 
     /**
      * select关联表的字段
      *
-     * @param related 主表关系
-     * @param tableAlias 表别名
+     * @param relationName 表别名
      * @param columns 查询的列
      */
-    protected fun selectRelated(related: IOrmMeta, tableAlias: String, columns: List<String>? = null): OrmQueryBuilder {
-        // 默认查询全部列
-        var cols = columns
-        if (cols === null)
-            cols = related.columns;
-
+    public fun selectRelated(relationName: String, columns: List<String>): OrmQueryBuilder {
         // 构建列别名
         val select: MutableList<Pair<String, String>> = LinkedList<Pair<String, String>>();
-        for (column in cols) {
-            val columnAlias = tableAlias + ":" + column; // 列别名 = 表别名 : 列名，以便在设置orm对象字段值时，可以逐层设置关联对象的字段值
-            val column = tableAlias + "." + column;
+        for (column in columns) {
+            val columnAlias = relationName + ":" + column; // 列别名 = 表别名 : 列名，以便在设置orm对象字段值时，可以逐层设置关联对象的字段值
+            val column = relationName + "." + column;
             select.add(column to columnAlias);
         }
 

@@ -233,5 +233,50 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
         // 2 转换类型
         return value.to(prop.setter.parameters[1].type)
     }
+
+    /**
+     * 联查关联表
+     *
+     * @param query 查询构建器
+     * @param name 关联关系名
+     * @param columns 关联字段名
+     * @return 关联关系
+     */
+    public override fun joinRelated(query: OrmQueryBuilder, name: String, columns: List<String>?): IRelationMeta {
+        // 1 多层关联关系
+        if(name.contains('.')){
+            val keys = name.split('.')
+            var target:IOrmMeta = this
+            var relation:IRelationMeta? = null
+            for(key in keys){
+                // 逐层联查
+                relation = target.joinRelated(query, key, columns)!!
+                target = relation.ormMeta
+            }
+            return relation!!
+        }
+
+        // 2 单层关联关系
+        // 获得关联关系
+        val relation = getRelation(name)!!;
+
+        // join关联表
+        when (relation.type) {
+            // belongsto: join 主表
+            RelationType.BELONGS_TO -> query.joinMaster(this, relation, name);
+            // hasxxx: join 从表
+            else -> query.joinSlave(this, relation, name);
+        }
+
+        // select关联表字段
+        val cols = if(columns == null)
+                        relation.ormMeta.columns
+                    else
+                        columns
+        query.selectRelated(name, cols);
+
+        return relation;
+    }
+
 }
 

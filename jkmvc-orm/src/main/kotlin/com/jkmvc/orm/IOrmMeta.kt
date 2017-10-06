@@ -182,4 +182,14 @@ interface IOrmMeta {
      * @param value 字符串
      */
     fun convertIntelligent(column:String, value:String):Any?
+
+    /**
+     * 联查关联表
+     *
+     * @param query 查询构建器
+     * @param name 关联关系名
+     * @param columns 关联字段名
+     * @return 关联关系
+     */
+    fun joinRelated(query: OrmQueryBuilder, name: String, columns: List<String>?): IRelationMeta
 }
