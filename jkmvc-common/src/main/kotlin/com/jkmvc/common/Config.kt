@@ -186,7 +186,7 @@ class Config(public override val props: Map<String, *>): IConfig(){
             val subprops = props.path(path) as Map<String, *>
             return Config(subprops)
         }catch (e:ClassCastException){
-            throw NoSuchElementException("构建配置子项失败：路径[$path]的值不是Map")
+            throw NoSuchElementException("构建配置子项失败：配置数据为$props, 但路径[$path]的子项不是Map")
         }
     }
 

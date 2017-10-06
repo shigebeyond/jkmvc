@@ -56,29 +56,36 @@ public inline fun <reified T:Any>  Map<*, *>.getAndConvert(key:String, defaultVa
 }
 
 /**
- * 获得'.'分割的路径下的值
+ * 获得'.'分割的路径下的子项值
+ *
  * @param path '.'分割的路径
+ * @param withException 当不存在子项时，是否抛出异常，否则返回null
  * @return
  */
-public fun Map<String, *>.path(path:String): Any? {
+public fun Map<String, *>.path(path:String, withException: Boolean = true): Any? {
     // 单层
     if(!path.contains('.'))
         return this[path]
 
     // 多层
+    val empty = emptyMap<String, Any?>()
     val keys:List<String> = path.split('.')
     var data:Map<String, Any?> = this
     var value:Any? = null
     for (key in keys){
-        if(data == emptyMap<String, Any?>())
-            throw NoSuchElementException("哈希不存在路径：$path")
+        // 当不存在子项时，抛异常 or 返回null
+        if(data == empty){
+            if(withException)
+                throw NoSuchElementException("获得Map子项失败：Map数据为$this, 但路径[$path]的子项不存在")
+            return null
+        }
 
         // 一层层往下走
         value =  data[key]
         if(value is Map<*, *>)
             data = value as Map<String, Any?>
         else
-            data = emptyMap()
+            data = empty
     }
     return value
 }
