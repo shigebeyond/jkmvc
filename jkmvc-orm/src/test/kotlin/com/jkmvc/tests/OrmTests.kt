@@ -110,8 +110,9 @@ class OrmTests{
 
     @Test
     fun testFindAll(){
-        val users = UserModel.queryBuilder().where("id", "IN", ).findAll<UserModel>()
-        //val users = UserModel.queryBuilder().findAll<UserModel>()
+//        val users = UserModel.queryBuilder().findAll<UserModel>()
+//        val users = UserModel.queryBuilder().where("id", "=", 6).findAll<UserModel>()
+        val users = UserModel.queryBuilder().where("id", "IN", arrayOf(6, 7)).findAll<UserModel>()
         println("查找所有用户: $users" )
     }
 

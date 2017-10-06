@@ -150,6 +150,9 @@ interface IDb{
 
     /**
      * 转义表名
+     *   mysql为`table`
+     *   oracle为"table"
+     *   sql server为"table" [table]
      *
      * @param table
      * @param alias
@@ -159,11 +162,16 @@ interface IDb{
 
     /**
      * 转义表名
+     *   mysql为`table`
+     *   oracle为"table"
+     *   sql server为"table" [table]
      *
      * @param table
      * @return
      */
-    fun quoteTable(table:Pair<String, String?>):String;
+    fun quoteTable(table:Pair<String, String?>):String{
+        return quoteTable(table.component1(), table.component2())
+    }
 
     /**
      * 转义表名
@@ -188,7 +196,9 @@ interface IDb{
      * @param with_brackets 当拼接数组时, 是否用()包裹
      * @return
      */
-    fun quoteColumn(column:Pair<String, String>, with_brackets:Boolean = false):String
+    fun quoteColumn(column:Pair<String, String>, with_brackets:Boolean = false):String{
+        return quoteColumn(column.component1(), column.component2(), with_brackets)
+    }
 
     /**
      * 转义字段名
@@ -212,14 +222,6 @@ interface IDb{
                 else
                     quoteColumn(column as String);
     }
-
-    /**
-     * 转义值
-     *
-     * @param value 字段值, 可以是值数组
-     * @return
-     */
-    fun quote(values:Collection<Any?>):String;
 
     /**
      * 转义值

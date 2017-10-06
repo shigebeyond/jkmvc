@@ -343,20 +343,6 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      *   sql server为"table" [table]
      *
      * @param table
-     * @return
-     */
-    public override fun quoteTable(table:Pair<String, String?>):String
-    {
-        return quoteTable(table.component1(), table.component2())
-    }
-
-    /**
-     * 转义表名
-     *   mysql为`table`
-     *   oracle为"table"
-     *   sql server为"table" [table]
-     *
-     * @param table
      * @param alias 表别名
      * @return
      */
@@ -380,27 +366,8 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
         // 遍历多个字段转义
         return columns.joinToString(", ", if(with_brackets) "(" else "", if(with_brackets) ")" else "") {
             // 单个字段转义
-            if(it is Pair<*, *>){ // 有别名
-                quoteColumn(it as Pair<String, String>)
-            }else{ // 无别名
-                quoteColumn(it as String)
-            }
+            quoteColumn(it)
         }
-    }
-
-    /**
-     * 转义字段名
-     *   mysql为`column`
-     *   oracle为"column"
-     *   sql server为"column" [column]
-     *
-     * @param column 字段名 + 别名
-     * @param with_brackets 当拼接数组时, 是否用()包裹
-     * @return
-     */
-    public override fun quoteColumn(column:Pair<String, String>, with_brackets:Boolean):String
-    {
-        return quoteColumn(column.component1(), column.component2(), with_brackets)
     }
 
     /**
@@ -442,20 +409,6 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
             return "$table$col";
 
         return "$table$col AS $tableColumnQuoteString$alias$tableColumnQuoteString"; // 转义
-    }
-
-    /**
-     * 转义值
-     *
-     * @param value 字段值, 可以是值数组
-     * @return
-     */
-    public override fun quote(values:Collection<Any?>):String
-    {
-        val str:StringBuffer = StringBuffer();
-        return values.map {
-            quote(it);
-        }.joinToString(", ", "(", ")").toString() // 头部 + 连接符拼接多值 + 尾部
     }
 
     /**
