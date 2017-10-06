@@ -151,8 +151,13 @@ abstract class OrmEntity : IOrm {
      */
     public override fun asMap(): Map<String, Any?> {
         for((name, relation) in ormMeta.relations){
-            if(data.containsKey(name))
-                data[name] = (data[name] as Orm).asMap()
+            val value = data[name]
+            if(value != null){
+                if(value is List<*>) // 有多个
+                    data[name] = (value as List<IOrm>).asMap()
+                else // 有一个
+                    data[name] = (value as Orm).asMap()
+            }
         }
         return data;
     }
