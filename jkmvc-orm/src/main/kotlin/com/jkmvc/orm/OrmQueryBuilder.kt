@@ -205,55 +205,78 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * 改写where，支持自动转换字段名与字段值
      *
-     * @param prop
+     * @param prop 多级属性
      * @param op
      * @param value
      */
     public override fun andWhere(prop: String, op: String, value: Any?): IDbQueryBuilder {
+        // 转换字段名
+        val realColumn = if(convertColumn)
+            prop2Column(prop)
+        else
+            prop
+
         // 智能转换字段值
-        val realValue = if(convertValue && value is String)
+        val realValue = if(convertValue && (value is String || value is Array<*>))
                             convertIntelligent(prop, value)
                         else
                             value
-        // 转换字段名
-        val realColumn = if(convertColumn)
-                            prop2Column(prop)
-                        else
-                            prop
         return super.andWhere(realColumn, op, value)
     }
 
     /**
      * 智能转换字段值
      *
-     * @param prop
+     * @param prop 多级属性
      * @param value
      * @return
      */
-    protected fun convertIntelligent(prop: String, value: String): Any? {
+    protected fun convertIntelligent(prop: String, value: Any): Any? {
+        // 1 解析出：关联模型 + 字段名
+        val (model, column) = getModelAndColumn(prop)
+
+        // 2 由关联模型来转
+        // 2.1 多值
+        if(value is Array<*>){
+            return value.map {
+                model.convertIntelligent(column, it as String)
+            }
+        }
+
+        // 2.2 单值
+        return model.convertIntelligent(column, value as String)
+    }
+
+    /**
+     * 根据属性获得最后一层的关联模型与字段
+     *
+     * @param prop 多级属性
+     * @return
+     */
+    protected fun getModelAndColumn(prop: String): Pair<IOrmMeta, String> {
         // 解析出：表名 + 字段名
-        var table:String
-        var column:String
-        if(prop.contains('.')){
+        var table: String
+        var column: String
+        if (prop.contains('.')) {
             val arr = prop.split('.')
             table = arr[0]
             column = arr[1]
-        }else{
+        } else {
             table = ormMeta.name
             column = prop
         }
 
         // 当前表
-        if(table == ormMeta.name){
+        if (table == ormMeta.name) {
             // 由当前模型来转
-            return ormMeta.convertIntelligent(column, value)
+            return Pair(ormMeta, column)
         }
 
         // 关联表
         // 获得关联关系
         val relation = ormMeta.getRelation(table)!!
         // 由关联模型来转
-        return relation.ormMeta.convertIntelligent(column, value)
+        return Pair(relation.ormMeta, column)
     }
 
     /**
