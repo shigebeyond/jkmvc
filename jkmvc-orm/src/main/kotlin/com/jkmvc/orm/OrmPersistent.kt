@@ -79,12 +79,14 @@ abstract class OrmPersistent: OrmValid() {
 		// 更新内部数据
 		data[ormMeta.primaryProp] = pk; // 主键
 		dirty.clear(); // 变化的字段值
-		loaded = true;
 
 		// 触发后置事件
 		fireEvent("afterCreate")
 		fireEvent("afterSave")
-		
+
+		// beforeSave 与 afterCreate 事件根据这个来判定是新增与修改
+		loaded = true;
+
 		return pk;
 	}
 
