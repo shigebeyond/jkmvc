@@ -234,6 +234,19 @@ class MyTests{
     }
 
     @Test
+    fun testGetFileContent(){
+        val dir = File("/home/shi/Downloads/电网项目/source/szdl/0103_Code/NNDYPT/src/main/java")
+        dir.travel {
+            //println(it)
+            it.forEachLine {
+                if(it.contains("ID_SEQ")){
+                    println(it)
+                }
+            }
+        }
+    }
+
+    @Test
     fun testProp(){
         // 获得不了getter/setter方法
 //        println(MyTests::class.findFunction("getId")) // null
