@@ -4,6 +4,7 @@ import com.jkmvc.db.DbQueryBuilder
 import com.jkmvc.db.DbType
 import com.jkmvc.db.IDbQueryBuilder
 import java.util.*
+import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 
 /**
@@ -28,8 +29,9 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
 
     /**
      * 关联查询hasMany的关系，需单独处理，不在一个sql中联查，而是单独查询
+     * <hasMany关系名, [子关系名+子关系字段]>
      */
-    protected val joinMany:MutableList<String> = LinkedList()
+    protected val joinMany:MutableMap<String, MutableList<Pair<String, List<String>?>>> = HashMap()
 
     /**
      * 清空条件
@@ -98,6 +100,28 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     }
 
     /**
+     * 联查joinMany关系的子关系
+     *
+     * @param name joinMany关系名
+     * @param subname 子关系名
+     * @param subcolumns 子关系字段名数组: Array(column1, column2, alias to column3),
+     * 						如 Array("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
+     * @return
+     */
+    public fun withMany(name: String, subname: String? = null, subcolumns: List<String>? = null): OrmQueryBuilder {
+        //数据结构：<hasMany关系名, [子关系名+子关系字段]>
+        val subwiths = joinMany.getOrPut(name){
+            LinkedList<Pair<String, List<String>?>>()
+        }
+
+        // 添加子关系
+        if(subname != null)
+            subwiths.add(Pair(subname, subcolumns))
+
+        return this
+    }
+
+    /**
      * 联查从表
      *     从表.外键 = 主表.主键
      *
@@ -112,12 +136,6 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
             return this;
 
         joins.add(relationName)
-
-        // 单独处理hasMany关系，不在一个sql中联查，而是单独查询
-        if(relation.type == RelationType.HAS_MANY){
-            joinMany.add(relationName)
-            return this;
-        }
 
         // 准备条件
         val masterPk = master.name + "." + relation.primaryKey; // 主表.主键
@@ -165,8 +183,18 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         val result = super.find(*params, transform = transform);
         // 联查hasMany
         if(result is Orm){
-            for(name in joinMany){
-                result.related(name, false)
+            for((name, subwiths) in joinMany){
+                // 联查hasMany的关系
+                // 1 只联查一层 -- wrong
+                //result.related(name, false)
+
+                // 2 递归联查多层
+                val relation = ormMeta.getRelation(name)!! // 获得关联关系
+                val query = result.queryRelated(relation) // 构造关联查询
+                for ((subname, subcolumns) in subwiths){ // 联查子关系
+                    query.with(subname, subcolumns)
+                }
+                result[name] = query.findAll(transform = relation.recordTranformer)
             }
         }
         return result
@@ -178,8 +206,9 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @param relation 关联关系
      * @param relationName 表别名
      * @param columns 查询的列
+     * @param path 之前的路径
      */
-    public fun selectRelated(relation: IRelationMeta, relationName: String, columns: List<String>? = null): OrmQueryBuilder {
+    public fun selectRelated(relation: IRelationMeta, relationName: String, columns: List<String>? = null, path: String = ""): OrmQueryBuilder {
         // 单独处理hasMany关系，不在一个sql中联查，而是单独查询
         if(relation.type == RelationType.HAS_MANY){
             return this;
@@ -194,7 +223,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         // 构建列别名
         val select: MutableList<Pair<String, String>> = LinkedList<Pair<String, String>>();
         for (column in cols) {
-            val columnAlias = relationName + ":" + column; // 列别名 = 表别名 : 列名，以便在设置orm对象字段值时，可以逐层设置关联对象的字段值
+            val columnAlias = path + ":" + column; // 列别名 = 表别名 : 列名，以便在设置orm对象字段值时，可以逐层设置关联对象的字段值
             val column = relationName + "." + column;
             select.add(column to columnAlias);
         }

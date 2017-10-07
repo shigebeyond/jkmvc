@@ -247,7 +247,8 @@ interface IOrmMeta {
      * @param query 查询构建器
      * @param name 关联关系名
      * @param columns 关联字段名
+     * @param path 之前的路径
      * @return 关联关系
      */
-    fun joinRelated(query: OrmQueryBuilder, name: String, columns: List<String>?): IRelationMeta
+    fun joinRelated(query: OrmQueryBuilder, name: String, columns: List<String>?, path:String = ""): IRelationMeta
 }

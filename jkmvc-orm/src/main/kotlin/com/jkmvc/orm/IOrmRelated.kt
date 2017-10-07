@@ -15,7 +15,7 @@ interface IOrmRelated : IOrmPersistent
 	 * @param data
 	 * @return
 	 */
-	public fun original(data: Map<String, Any?>): IOrm;
+	fun original(data: Map<String, Any?>): IOrm;
 
 	/**
 	 * 获得关联对象
@@ -26,5 +26,23 @@ interface IOrmRelated : IOrmPersistent
 	 * 													如 Array("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
 	 * @return
 	 */
-	public fun related(name:String, newed:Boolean = false, vararg columns:String): Any?;
+	fun related(name:String, newed:Boolean = false, vararg columns:String): Any?;
+
+	/**
+	 * 查询关联表
+	 *
+	 * @param relation 关联关系
+	 * @return
+	 */
+	fun queryRelated(relation: IRelationMeta): OrmQueryBuilder;
+
+	/**
+	 * 查询关联表
+	 *
+	 * @param name 关联关系名
+	 * @return
+	 */
+	fun queryRelated(name: String): OrmQueryBuilder{
+		return queryRelated(ormMeta.getRelation(name)!!)
+	}
 }

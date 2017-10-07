@@ -59,9 +59,15 @@ abstract class OrmRelated: OrmPersistent() {
                 val prop = ormMeta.column2Prop(column)
                 data[prop] = value;
             } else if (value !== null) {// 关联对象字段: 不处理null的值, 因为left join查询时, 关联对象可能没有匹配的行
-                val (name, column) = column.split(":");
-                val obj:OrmRelated = related(name, true) as OrmRelated; // 创建关联对象
-                val prop = ormMeta.column2Prop(column)
+                // 多层:
+                val cols = column.split(":")
+                // 获得最后一层的关联对象
+                var obj:OrmRelated = this
+                for (i in 0..cols.size - 2){
+                    obj = obj.related(cols[i], true) as OrmRelated; // 创建关联对象
+                }
+                // 设置最底层的属性值
+                val prop = ormMeta.column2Prop(cols.last())
                 obj.data[prop] = value;
             }
         }
@@ -105,6 +111,19 @@ abstract class OrmRelated: OrmPersistent() {
         }
 
         return data[name];
+    }
+
+    /**
+     * 查询关联表
+     *
+     * @param relation 关联关系
+     * @return
+     */
+    public override fun queryRelated(relation: IRelationMeta): OrmQueryBuilder {
+        return if(relation.type == RelationType.BELONGS_TO) // 查主表
+                    queryMaster(relation)
+                else // 查从表
+                    querySlave(relation)
     }
 
     /**

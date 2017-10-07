@@ -227,37 +227,49 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param query 查询构建器
      * @param name 关联关系名
      * @param columns 关联字段名
+     * @param path 之前的路径
      * @return 关联关系
      */
-    public override fun joinRelated(query: OrmQueryBuilder, name: String, columns: List<String>?): IRelationMeta {
-        // 1 多层关联关系
-        if(name.contains('.')){
-            val keys = name.split('.')
-            var target:IOrmMeta = this
-            var relation:IRelationMeta? = null
-            for(key in keys){
-                // 逐层联查
-                relation = target.joinRelated(query, key, columns)!!
-                target = relation.ormMeta
-            }
-            return relation!!
+    public override fun joinRelated(query: OrmQueryBuilder, name: String, columns: List<String>?, path:String): IRelationMeta {
+        val i = name.indexOf('.')
+        var key: String = name
+        var other: String? = null
+        if(i > -1){
+            key = name.substring(0, i)
+            other = name.substring(i + 1)
         }
 
-        // 2 单层关联关系
         // 获得关联关系
-        val relation = getRelation(name)!!;
+        val relation = getRelation(key)!!;
+        // 1 非hasMany关系：只处理一层
+        if(relation.type == RelationType.HAS_MANY){
+            // 单独处理hasMany关系，不在一个sql中联查，而是单独查询
+            query.withMany(key, other, columns)
+            return relation;
+        }
 
+        // 2 非hasMany关系
         // join关联表
         when (relation.type) {
             // belongsto: join 主表
-            RelationType.BELONGS_TO -> query.joinMaster(this, relation, name);
+            RelationType.BELONGS_TO -> query.joinMaster(this, relation, key);
             // hasxxx: join 从表
-            else -> query.joinSlave(this, relation, name);
+            else -> query.joinSlave(this, relation, key);
         }
 
-        // select关联表字段
-        query.selectRelated(relation, name, columns);
+        //完整的列名
+        val fullkey = if(path == "")
+                        key
+                      else
+                        path + ":" + key
 
+        // 2.1 多层关联关系: 逐层递归调用
+        if(other != null)
+            return relation.ormMeta.joinRelated(query, other, columns, fullkey)
+
+        // 2.2 单层关联关系
+        // select关联表字段
+        query.selectRelated(relation, key, columns, fullkey);
         return relation;
     }
 
