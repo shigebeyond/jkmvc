@@ -218,13 +218,13 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
     /**
      * Creates a new "AND WHERE" condition for the query.
      *
-     * @param   prop  column name or array(column, alias) or object
+     * @param   column  column name or array(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
      */
-    public override fun andWhere(prop: String, op: String, value: Any?): IDbQueryBuilder {
-        whereClause.addSubexp(arrayOf<Any?>(prop, prepareOperator(value, op), value), "AND");
+    public override fun andWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
+        whereClause.addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "AND");
         return this;
     }
 

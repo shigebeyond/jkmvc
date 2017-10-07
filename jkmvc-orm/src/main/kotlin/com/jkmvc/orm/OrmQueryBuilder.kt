@@ -56,6 +56,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         return super.getRecordTranformer(clazz)
     }
 
+    /********************************* with系列方法，用于实现关联对象查询 **************************************/
     /**
      * 联查多表
      *
@@ -231,26 +232,131 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         return this.select(select) as OrmQueryBuilder;
     }
 
+    /********************************* 改写父类的方法：支持自动转换字段名（多级属性名 => 字段名）与字段值（字符串类型的字段值 => 准确类型的字段值），不改写join()，请使用with()来代替 **************************************/
     /**
-     * 改写where，支持自动转换字段名与字段值
+     * Creates a new "AND WHERE" condition for the query.
      *
-     * @param prop 多级属性
-     * @param op
-     * @param value
+     * @param   prop  column name or array(column, alias) or object
+     * @param   op      logic operator
+     * @param   value   column value
+     * @return
      */
     public override fun andWhere(prop: String, op: String, value: Any?): IDbQueryBuilder {
-        // 转换字段名
-        val realColumn = if(convertColumn)
-            prop2Column(prop)
-        else
-            prop
+        // 转换字段名：数据库中的字段名
+        val column = if(convertColumn)
+                        prop2Column(prop)
+                    else
+                        prop
 
-        // 智能转换字段值
-        val realValue = if(convertValue && (value is String || value is Array<*> || value is List<*>))
+        // 智能转换字段值: 准确类型的值
+        val accurateValue = if(convertValue && (value is String || value is Array<*> || value is List<*>))
                             convertIntelligent(prop, value)
                         else
                             value
-        return super.andWhere(realColumn, op, value)
+        return super.andWhere(column, op, accurateValue)
+    }
+
+    /**
+     * Creates a new "OR WHERE" condition for the query.
+     *
+     * @param   prop  column name or array(column, alias) or object
+     * @param   op      logic operator
+     * @param   value   column value
+     * @return
+     */
+    public override fun orWhere(prop: String, op: String, value: Any?): IDbQueryBuilder {
+        // 转换字段名：数据库中的字段名
+        val column = if(convertColumn)
+                        prop2Column(prop)
+                    else
+                        prop
+
+        // 智能转换字段值: 准确类型的值
+        val accurateValue = if(convertValue && (value is String || value is Array<*> || value is List<*>))
+                                convertIntelligent(prop, value)
+                            else
+                                value
+
+        return orWhere(column, op, accurateValue)
+    }
+
+    /**
+     * Applies sorting with "ORDER BY ..."
+     *
+     * @param   prop     column name or array(column, alias) or object
+     * @param   direction  direction of sorting
+     * @return
+     */
+    public override fun orderBy(prop: String, direction: String?): IDbQueryBuilder {
+        // 转换字段名：数据库中的字段名
+        val column = if(convertColumn)
+                        prop2Column(prop)
+                    else
+                        prop
+        return super.orderBy(column, direction);
+    }
+
+    /**
+     * Creates a "GROUP BY ..." filter.
+     *
+     * @param   prop  column name or array(column, alias) or object
+     * @return
+     */
+    public override fun groupBy(prop: String): IDbQueryBuilder {
+        // 转换字段名：数据库中的字段名
+        val column = if(convertColumn)
+                        prop2Column(prop)
+                    else
+                        prop
+        return super.groupBy(column)
+    }
+
+    /**
+     * Creates a new "AND HAVING" condition for the query.
+     *
+     * @param   prop  column name or array(column, alias) or object
+     * @param   op      logic operator
+     * @param   value   column value
+     * @return
+     */
+    public override fun andHaving(prop: String, op: String, value: Any?): IDbQueryBuilder {
+        // 转换字段名：数据库中的字段名
+        val column = if(convertColumn)
+                        prop2Column(prop)
+                    else
+                        prop
+
+        // 智能转换字段值: 准确类型的值
+        val accurateValue = if(convertValue && (value is String || value is Array<*> || value is List<*>))
+                                convertIntelligent(prop, value)
+                            else
+                                value
+
+        return super.andHaving(column, op, accurateValue)
+    }
+
+    /**
+     * Creates a new "OR HAVING" condition for the query.
+     *
+     * @param   prop  column name or array(column, alias) or object
+     * @param   op      logic operator
+     * @param   value   column value
+     * @return
+     */
+    public override fun orHaving(prop: String, op: String, value: Any?): IDbQueryBuilder {
+        // 转换字段名：数据库中的字段名
+        val column = if(convertColumn)
+                        prop2Column(prop)
+                    else
+                        prop
+
+        // 智能转换字段值: 准确类型的值
+        val accurateValue = if(convertValue && (value is String || value is Array<*> || value is List<*>))
+                                convertIntelligent(prop, value)
+                            else
+                                value
+
+        return super.orHaving(column, op, accurateValue)
     }
 
     /**
