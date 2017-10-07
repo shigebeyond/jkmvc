@@ -53,8 +53,9 @@ interface IOrmEntity: IRecord {
      *
      * @param column
      * @param value 字符串
+     * @return
      */
-    fun setIntelligent(column:String, value:String);
+    fun setIntelligent(column:String, value:String):Boolean
 
     /**
      * 获得对象字段

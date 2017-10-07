@@ -113,9 +113,14 @@ abstract class OrmEntity : IOrm {
 
     /**
      * 智能设置属性
+     *    1 智能化
      *    在不知属性类型的情况下，将string赋值给属性
      *    => 需要将string转换为属性类型
      *    => 需要显式声明属性
+     *
+     *    2 不确定性
+     *    一般用于从Request对象中批量获得属性，即获得与请求参数同名的属性值
+     *    但是请求中可能带其他参数，不一定能对应到该对象的属性名，因此不抛出异常，只返回bool
      *
      * <code>
      *     class UserModel(id:Int? = null): Orm(id) {
@@ -131,18 +136,22 @@ abstract class OrmEntity : IOrm {
      *
      * @param column
      * @param value 字符串
+     * @return
      */
-    public override fun setIntelligent(column:String, value:String)
-    {
+    public override fun setIntelligent(column:String, value:String): Boolean {
+        if (!hasColumn(column))
+            return false;
+
         // 1 获得属性
-        val prop = this::class.findProperty(column) as KMutableProperty1
+        val prop = this::class.findProperty(column) as KMutableProperty1?
         if(prop == null)
-            throw OrmException("类 ${this.javaClass} 没有属性: $column");
+            return false
 
         // 2 准备参数: 转换类型
         val param = value.to(prop.setter.parameters[1].type)
         // 3 调用setter方法
         prop.setter.call(this, param);
+        return true
     }
 
     /**
