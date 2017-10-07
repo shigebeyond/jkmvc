@@ -217,7 +217,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
             prop
 
         // 智能转换字段值
-        val realValue = if(convertValue && (value is String || value is Array<*>))
+        val realValue = if(convertValue && (value is String || value is Array<*> || value is List<*>))
                             convertIntelligent(prop, value)
                         else
                             value
@@ -243,6 +243,13 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                 arr[i] = model.convertIntelligent(column, value[i] as String)
             }
             return arr
+        }
+        if(value is List<*>){
+            val list = value as MutableList<Any?>
+            for(i in 0..(value.size - 1)){
+                list[i] = model.convertIntelligent(column, value[i] as String)
+            }
+            return list
         }
 
         // 2.2 单值

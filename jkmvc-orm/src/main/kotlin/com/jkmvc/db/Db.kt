@@ -425,6 +425,11 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
                 quote(it).toString()
             }
         }
+        if(value is Collection<*>){
+            return value.joinToString(", ", "(", ")") {
+                quote(it).toString()
+            }
+        }
 
         // 2 单值
         // null => "null"

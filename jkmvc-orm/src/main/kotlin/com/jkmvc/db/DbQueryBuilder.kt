@@ -64,7 +64,14 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:Pair<String, String?> /*表
         //return db.quote(value);
 
         // 2 sql参数化: 将参数名拼接到sql, 独立出参数值, 以便执行时绑定参数值
-        if(value is Array<*>){ // 2.1 多值
+        // 2.1 多值
+        if(value is Array<*>){
+            return value.joinToString(", ", "(", ")") {
+                // 单值
+                quote(it)
+            }
+        }
+        if(value is Collection<*>){
             return value.joinToString(", ", "(", ")") {
                 // 单值
                 quote(it)
