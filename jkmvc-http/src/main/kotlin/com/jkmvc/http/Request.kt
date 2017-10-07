@@ -1,6 +1,9 @@
 package com.jkmvc.http
 
-import com.jkmvc.common.*
+import com.jkmvc.common.getAndConvert
+import com.jkmvc.common.to
+import com.jkmvc.common.toNullable
+import com.jkmvc.common.trim
 import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
@@ -344,6 +347,16 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	}
 
 	/**
+	 * 获得参数字符串
+	 * @return
+	 */
+	public fun getParameterString(): String{
+		return parameterMap.entries.joinToString {
+			"${it.key}=${it.value.firstOrNull()}"
+		}
+	}
+
+	/**
 	 * 获得参数值，自动转换为指定类型
 	 */
 	public inline fun <reified T:Any> getParameter(key: String, defaultValue: T?): T? {
@@ -446,5 +459,4 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	{
 		return session.servletContext.getRealPath("/");
 	}
-
 }

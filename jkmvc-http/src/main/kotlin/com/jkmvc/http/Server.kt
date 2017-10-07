@@ -35,7 +35,7 @@ object Server:IServer {
         //　构建请求对象
         val req:Request = Request(request);
         if(debug)
-            httpLogger.debug("请求uri: ${req.routeUri}")
+            httpLogger.debug("请求uri: ${req.routeUri}, 参数：${req.getParameterString()}")
 
         //　如果是静态文件请求，则跳过路由解析
         if(req.isStaticFile())
