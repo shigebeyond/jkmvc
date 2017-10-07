@@ -24,6 +24,14 @@ public fun HttpServletRequest.isPost(): Boolean {
 }
 
 /**
+ * 是否option请求
+ * @return
+ */
+public fun HttpServletRequest.isOptions(): Boolean {
+    return method === "OPTIONS";
+}
+
+/**
  * 是否get请求
  * @return
  */

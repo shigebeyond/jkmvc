@@ -90,6 +90,10 @@ object Server:IServer {
         // 允许跨域
         if(config.getBoolean("allowCrossDomain", false)!!){
             res.setHeader("Access-Control-Allow-Origin", "*");
+            res.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS,PUT,DELETE,HEAD");
+            res.setHeader("Access-Control-Allow-Headers", "origin,cache-control,content-type,accept,hash-referer,x-requested-with,token");// 跨域验证登录用户，要用到请求头中的token
+            if(req.isOptions())
+                return;
         }
 
         // 设置req/res属性
