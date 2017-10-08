@@ -150,10 +150,22 @@ interface IDbQueryBuilderDecoration
     /**
      * Creates a "GROUP BY ..." filter.
      *
-     * @param   columns  column name or array(column, alias) or object
+     * @param   column  column name
      * @return
      */
-    fun groupBy(columns:String):IDbQueryBuilder;
+    fun groupBy(column:String):IDbQueryBuilder;
+
+    /**
+     * Creates a "GROUP BY ..." filter.
+     *
+     * @param   columns  column name
+     * @return
+     */
+    fun groupBys(vararg columns:String):IDbQueryBuilder{
+        for (col in columns)
+            groupBy(col)
+        return this as IDbQueryBuilder
+    }
 
     /**
      * Alias of andHaving()
@@ -245,6 +257,18 @@ interface IDbQueryBuilderDecoration
     fun orderBys(orders:Map<String, String?>):IDbQueryBuilder{
         for ((column, direction) in orders)
             orderBy(column, direction)
+        return this as IDbQueryBuilder
+    }
+
+    /**
+     * Multiple OrderBy
+     *
+     * @param columns
+     * @return
+     */
+    fun orderBys(vararg columns:String):IDbQueryBuilder{
+        for (col in columns)
+            orderBy(col)
         return this as IDbQueryBuilder
     }
 

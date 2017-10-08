@@ -318,7 +318,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
     /**
      * Creates a "GROUP BY ..." filter.
      *
-     * @param   columns  column name or array(column, alias) or object
+     * @param   column  column name
      * @return
      */
     public override fun groupBy(column: String): IDbQueryBuilder {

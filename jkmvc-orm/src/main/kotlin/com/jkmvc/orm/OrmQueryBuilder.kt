@@ -299,7 +299,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * Creates a "GROUP BY ..." filter.
      *
-     * @param   prop  column name or array(column, alias) or object
+     * @param   prop  column name
      * @return
      */
     public override fun groupBy(prop: String): IDbQueryBuilder {
