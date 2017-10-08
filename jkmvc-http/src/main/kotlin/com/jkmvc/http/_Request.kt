@@ -151,7 +151,8 @@ public fun Orm.requestValues(req: Request, expected: List<String>? = null): Orm 
     {
         // 取得请求中的指定参数
         for (column in expected!!)
-            setIntelligent(column, req.getParameter(column)!!)
+            if(!req.isEmpty(column)) // 只取非空值
+                setIntelligent(column, req.getParameter(column)!!)
     }
     return this;
 }
