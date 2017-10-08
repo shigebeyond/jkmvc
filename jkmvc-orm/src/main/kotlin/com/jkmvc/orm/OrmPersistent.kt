@@ -1,5 +1,6 @@
 package com.jkmvc.orm
 
+import com.jkmvc.db.dbLogger
 import java.util.*
 
 /**
@@ -122,8 +123,12 @@ abstract class OrmPersistent: OrmValid() {
 		if(!loaded)
 			throw OrmException("更新对象[$this]前先检查是否存在");
 
-		if (dirty.isEmpty())
-			throw OrmException("没有要更新的数据");
+		// 如果没有修改，则不执行sql，不抛异常，直接返回true
+		if (dirty.isEmpty()){
+			//throw OrmException("没有要更新的数据");
+			dbLogger.debug("执行${javaClass}.update()成功：没有要更新的数据")
+			return true;
+		}
 
 		// 校验
 		check();
