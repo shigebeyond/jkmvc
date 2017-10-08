@@ -1,6 +1,7 @@
 package com.jkmvc.http
 
 import com.jkmvc.common.Config
+import com.jkmvc.common.ucFirst
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import kotlin.reflect.KFunction
@@ -81,8 +82,10 @@ object Server:IServer {
 
         // 获得action方法
         val action: KFunction<*>? = clazz.getActionMethod(req.action);
-        if (action == null)
-            throw RouteException ("控制器${req.controller}不存在方法：${req.action}");
+        if (action == null){
+            val method = "action" + req.action.ucFirst()
+            throw RouteException ("控制器${req.controller}不存在方法：${method}()");
+        }
 
         // 创建controller
         val controller:Controller = clazz.constructer.call() as Controller;
