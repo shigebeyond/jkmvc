@@ -126,51 +126,54 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * 联查从表
      *     从表.外键 = 主表.主键
      *
-     * @param master 主类的元数据
-     * @param relation 从类的关联关系
-     * @param relationName 表别名
+     * @param master 主表模型
+     * @param masterName 主表别名
+     * @param slaveRelation 从表关系
+     * @param slaveName 从表别名
      * @return
      */
-    public fun joinSlave(master: IOrmMeta, relation: IRelationMeta, relationName: String): OrmQueryBuilder {
+    public fun joinSlave(master: IOrmMeta, masterName:String, slaveRelation: IRelationMeta, slaveName: String): OrmQueryBuilder {
         // 检查并添加关联查询记录
-        if(joins.contains(relationName))
+        if(joins.contains(slaveName))
             return this;
 
-        joins.add(relationName)
+        joins.add(slaveName)
 
         // 准备条件
-        val masterPk = master.name + "." + relation.primaryKey; // 主表.主键
+        val masterPk = masterName + "." + slaveRelation.primaryKey; // 主表.主键
 
-        val slave = relation.ormMeta
-        val slaveFk = relationName + "." + relation.foreignKey; // 从表.外键
+        val slave = slaveRelation.ormMeta
+        val slaveFk = slaveName + "." + slaveRelation.foreignKey; // 从表.外键
 
         // 查从表
-        return join(slave.table to relationName, "LEFT").on(slaveFk, "=", masterPk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
+        return join(slave.table to slaveName, "LEFT").on(slaveFk, "=", masterPk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
     }
 
     /**
      * 联查主表
      *     主表.主键 = 从表.外键
      *
-     * @param relation 从表关系
-     * @param relationName 表别名
+     * @param slave 从表模型
+     * @param slaveName 从表别名
+     * @param masterRelation 主表关系
+     * @param masterName 主表别名
      * @return
      */
-    public fun joinMaster(slave: IOrmMeta, relation: IRelationMeta, relationName: String): OrmQueryBuilder {
+    public fun joinMaster(slave: IOrmMeta, slaveName:String, masterRelation: IRelationMeta, masterName: String): OrmQueryBuilder {
         // 检查并添加关联查询记录
-        if(joins.contains(relationName))
+        if(joins.contains(masterName))
             return this;
 
-        joins.add(relationName)
+        joins.add(masterName)
 
         // 准备条件
-        val slaveFk = slave.name + "." + relation.foreignKey; // 从表.外键
+        val slaveFk = slaveName + "." + masterRelation.foreignKey; // 从表.外键
 
-        val master: IOrmMeta = relation.ormMeta;
-        val masterPk = relationName + "." + relation.primaryKey; // 主表.主键
+        val master: IOrmMeta = masterRelation.ormMeta;
+        val masterPk = masterName + "." + masterRelation.primaryKey; // 主表.主键
 
         // 查主表
-        return join(master.table to relationName, "LEFT").on(masterPk, "=", slaveFk) as OrmQueryBuilder; // 主表.主键 = 从表.外键
+        return join(master.table to masterName, "LEFT").on(masterPk, "=", slaveFk) as OrmQueryBuilder; // 主表.主键 = 从表.外键
     }
 
     /**
