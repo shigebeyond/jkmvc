@@ -163,7 +163,7 @@ abstract class OrmEntity : IOrm {
             val value = data[name]
             if(value != null){
                 if(value is List<*>) // 有多个
-                    data[name] = (value as List<IOrm>).asMap()
+                    data[name] = (value as List<IOrm>).itemAsMap()
                 else // 有一个
                     data[name] = (value as Orm).asMap()
             }

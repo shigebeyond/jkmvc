@@ -28,7 +28,7 @@ public val KClass<out IOrm>.modelOrmMeta: IOrmMeta
 /**
  * orm列表获得字段值
  */
-fun List<out IOrm>.asMap(): List<Map<String, Any?>> {
+fun List<out IOrm>.itemAsMap(): List<Map<String, Any?>> {
     return this.map {
         it.asMap()
     }
