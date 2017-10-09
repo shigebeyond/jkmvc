@@ -91,6 +91,45 @@ public fun Map<String, *>.path(path:String, withException: Boolean = true): Any?
 }
 
 /**
+ * 设置'.'分割的路径下的子项值
+ *
+ * @param path '.'分割的路径
+ * @param value 目标值
+ */
+public fun MutableMap<String, Any?>.setPath(path:String, value:Any?): Unit {
+// 单层
+    if(!path.contains('.')){
+        this[path] = value
+        return
+    }
+
+    // 多层
+    val keys:List<String> = path.split('.')
+    var data:MutableMap<String, Any?> = this
+    for (i in 0..(keys.size - 2)){
+        val key = keys[i]
+        // 一层层往下走
+        if(data[key] is MutableMap<*, *>)
+            data =  data[key] as MutableMap<String, Any?>
+        else // 当不存在子项时，抛异常
+            throw NoSuchElementException("获得Map子项失败：Map数据为$this, 但路径[$path]的父项不存在")
+    }
+    data[keys.last()] = value
+}
+
+/**
+ * 收集某列的值
+ *
+ * @param key
+ * @return
+ */
+public fun <K, V> Collection<Map<K, V>>.collectColumn(key:K):Collection<V>{
+    return this.map {
+        it[key]
+    } as Collection<V>
+}
+
+/**
  * Iterator转Enumeration
  */
 class ItEnumeration<T>(val it: Iterator<T>) : Enumeration<T> {
