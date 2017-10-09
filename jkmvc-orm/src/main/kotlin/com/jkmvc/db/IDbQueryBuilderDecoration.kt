@@ -70,6 +70,9 @@ interface IDbQueryBuilderDecoration
      * @return
      */
     fun where(column:String, value:Any?):IDbQueryBuilder{
+        if(value is Array<*> || value is Collection<*>)
+            return where(column, "IN", value)
+
         return where(column, "=", value);
     }
 
