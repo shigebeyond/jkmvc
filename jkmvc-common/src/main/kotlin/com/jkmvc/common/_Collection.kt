@@ -59,10 +59,33 @@ public inline fun <reified T:Any>  Map<*, *>.getAndConvert(key:String, defaultVa
  * 获得'.'分割的路径下的子项值
  *
  * @param path '.'分割的路径
- * @param withException 当不存在子项时，是否抛出异常，否则返回null
  * @return
  */
-public fun Map<String, *>.path(path:String, withException: Boolean = true): Any? {
+public fun Map<String, *>.path(path:String): Any? {
+    return path(path, true)
+}
+
+/**
+ * 获得'.'分割的路径下的子项值
+ *
+ * @param path '.'分割的路径
+ * @param withException 当不存在子项时，是否抛出异常，否则返回default默认值
+ * @param default 默认值，当 withException 为false时有效
+ * @return
+ */
+public fun Map<String, *>.path(path:String, default: Any?): Any? {
+    return path(path, false, default)
+}
+
+/**
+ * 获得'.'分割的路径下的子项值
+ *
+ * @param path '.'分割的路径
+ * @param withException 当不存在子项时，是否抛出异常，否则返回default默认值
+ * @param default 默认值，当 withException 为false时有效
+ * @return
+ */
+public fun Map<String, *>.path(path:String, withException: Boolean = true, default: Any? = null): Any? {
     // 单层
     if(!path.contains('.'))
         return this[path]
@@ -77,7 +100,7 @@ public fun Map<String, *>.path(path:String, withException: Boolean = true): Any?
         if(data == empty){
             if(withException)
                 throw NoSuchElementException("获得Map子项失败：Map数据为$this, 但路径[$path]的子项不存在")
-            return null
+            return default
         }
 
         // 一层层往下走
