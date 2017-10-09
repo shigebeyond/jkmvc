@@ -27,22 +27,4 @@ interface IOrmRelated : IOrmPersistent
 	 * @return
 	 */
 	fun related(name:String, newed:Boolean = false, vararg columns:String): Any?;
-
-	/**
-	 * 查询关联表
-	 *
-	 * @param relation 关联关系
-	 * @return
-	 */
-	fun queryRelated(relation: IRelationMeta): OrmQueryBuilder;
-
-	/**
-	 * 查询关联表
-	 *
-	 * @param name 关联关系名
-	 * @return
-	 */
-	fun queryRelated(name: String): OrmQueryBuilder{
-		return queryRelated(ormMeta.getRelation(name)!!)
-	}
 }

@@ -33,4 +33,39 @@ data class RelationMeta(public override val sourceMeta:IOrmMeta, /* 源模型元
      */
     /*public constructor(sourceMeta:IOrmMeta, type:RelationType, model: KClass<out IOrm>, foreignKey:String, conditions:Map<String, Any?> = emptyMap()):this(sourceMeta, type, model, foreignKey, sourceMeta.primaryKey, conditions){
     }*/
+
+    /**
+     * 查询关联表
+     *     自动根据关联关系，来构建查询条件
+     *
+     * @param item Orm对象
+     * @return
+     */
+    public override fun queryRelated(item: IOrm): OrmQueryBuilder {
+        val query = queryBuilder()
+        if(type == RelationType.BELONGS_TO) { // 查主表
+            query.where(primaryKey, "=", item[foreignProp]) // 主表.主键 = 从表.外键
+        } else { // 查从表
+            query.where(foreignKey, "=", item[primaryProp]) // 从表.外键 = 主表.主键
+        }
+        return query
+    }
+
+    /**
+     * 查询关联表
+     *     自动根据关联关系，来构建查询条件
+     *
+     * @param items Orm列表
+     * @return
+     */
+    public override fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder {
+        val query = queryBuilder()
+        if(type == RelationType.BELONGS_TO) { // 查主表
+            query.where(primaryKey, "IN", items.collectColumn(foreignProp)) // 主表.主键 = 从表.外键
+        } else { // 查从表
+            query.where(foreignKey, "IN", items.collectColumn(primaryProp)) // 从表.外键 = 主表.主键
+        }
+        return query
+    }
+
 }

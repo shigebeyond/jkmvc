@@ -159,9 +159,19 @@ class OrmTests{
 
     @Test
     fun testRelateFindMany(){
-        val user = UserModel(id)
-        val addresses = user.addresses
-        println(addresses)
+        // 一个user，联查多个address
+//        val user = UserModel(id)
+//        val addresses = user.addresses
+//        println(addresses)
+
+        // 多个user，联查多个address
+        var users = UserModel.queryBuilder().with("addresses").limit(100).findAll<UserModel>()
+        for (user in users){
+            println("user[${user.id}]: ${user.name}")
+            for(address in user.addresses){
+                println(" ---- address[${address.id}] : ${address.addr}")
+            }
+        }
     }
 
     @Test

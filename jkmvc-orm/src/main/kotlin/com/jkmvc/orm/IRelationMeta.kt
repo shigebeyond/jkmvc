@@ -106,4 +106,37 @@ interface IRelationMeta {
         return model.java.newInstance();
     }
 
+    /**
+     * 查询关联表
+     *    自动根据关联关系，来构建查询条件
+     *
+     * @param orm Orm对象或列表
+     * @return
+     */
+    fun queryRelated(orm: Any): OrmQueryBuilder{
+        return when(orm){
+            is IOrm -> queryRelated(orm)
+            is Collection<*> -> queryRelated(orm as Collection<out IOrm>)
+            else -> throw IllegalArgumentException("对relation.queryRelated(参数)方法，其参数必须是Orm对象或Orm列表")
+        }
+    }
+
+    /**
+     * 查询关联表
+     *    自动根据关联关系，来构建查询条件
+     *
+     * @param item Orm对象
+     * @return
+     */
+    fun queryRelated(item: IOrm): OrmQueryBuilder
+
+    /**
+     * 查询关联表
+     *    自动根据关联关系，来构建查询条件
+     *
+     * @param items Orm列表
+     * @return
+     */
+    fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder
+
 }

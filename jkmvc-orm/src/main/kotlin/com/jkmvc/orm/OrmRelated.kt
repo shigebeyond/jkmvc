@@ -94,11 +94,7 @@ abstract class OrmRelated: OrmPersistent() {
             if (newed) {  // 创建新对象
                 result = relation.newModelInstance();
             }else{  // 根据关联关系来构建查询
-                val query:OrmQueryBuilder
-                if(relation.type == RelationType.BELONGS_TO) // 查主表
-                    query = queryMaster(relation)
-                else // 查从表
-                    query = querySlave(relation)
+                val query:OrmQueryBuilder = relation.queryRelated(this) // 自动构建查询条件
                 query.select(columns) // 查字段
                 if(relation.type == RelationType.HAS_MANY){ // 查多个
                     result = query.findAll(transform = relation.recordTranformer)
@@ -113,36 +109,4 @@ abstract class OrmRelated: OrmPersistent() {
         return data[name];
     }
 
-    /**
-     * 查询关联表
-     *
-     * @param relation 关联关系
-     * @return
-     */
-    public override fun queryRelated(relation: IRelationMeta): OrmQueryBuilder {
-        return if(relation.type == RelationType.BELONGS_TO) // 查主表
-                    queryMaster(relation)
-                else // 查从表
-                    querySlave(relation)
-    }
-
-    /**
-     * 查询关联的从表
-     *
-     * @param relation 从表关系
-     * @return
-     */
-    protected fun querySlave(relation: IRelationMeta): OrmQueryBuilder {
-        return relation.queryBuilder().where(relation.foreignKey, this[relation.primaryProp]) as OrmQueryBuilder; // 从表.外键 = 主表.主键
-    }
-
-    /**
-     * 查询关联的主表
-     *
-     * @param relation 主表关系
-     * @return
-     */
-    protected fun queryMaster(relation: IRelationMeta): OrmQueryBuilder {
-        return relation.queryBuilder().where(relation.ormMeta.primaryKey, this[relation.foreignProp]) as OrmQueryBuilder; // 主表.主键 = 从表.外键
-    }
 }

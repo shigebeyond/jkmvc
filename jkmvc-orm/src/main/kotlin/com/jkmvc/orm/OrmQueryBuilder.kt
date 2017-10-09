@@ -184,21 +184,78 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         val result = super.find(*params, transform = transform);
         // 联查hasMany
         if(result is Orm){
-            for((name, subwiths) in joinMany){
-                // 联查hasMany的关系
-                // 1 只联查一层 -- wrong
-                //result.related(name, false)
-
-                // 2 递归联查多层
-                val relation = ormMeta.getRelation(name)!! // 获得关联关系
-                val query = result.queryRelated(relation) // 构造关联查询
-                for ((subname, subcolumns) in subwiths){ // 联查子关系
-                    query.with(subname, subcolumns)
-                }
-                result[name] = query.findAll(transform = relation.recordTranformer)
+            // 遍历每个hasMany关系的查询结果
+            forEachManyQuery(result){ name:String, relation:IRelationMeta, relatedItems:List<IOrm> ->
+                // 设置关联属性
+                result[name] = relatedItems
             }
         }
         return result
+    }
+
+    /**
+     * 查找多个： select 语句
+     *
+     * @param params 动态参数
+     * @param transform 转换函数
+     * @return 列表
+     */
+    public override fun <T:Any> findAll(vararg params: Any?, transform:(MutableMap<String, Any?>) -> T): List<T>{
+        val result = super.findAll(*params, transform = transform);
+        if(result.isEmpty())
+            return result
+
+        // 联查hasMany
+        if(result.first() is Orm){
+            val items = result as List<IOrm>
+
+            // 遍历每个hasMany关系的查询结果
+            forEachManyQuery(result){ name:String, relation:IRelationMeta, relatedItems:List<IOrm> ->
+                // 设置关联属性 -- 双循环匹配
+                for (item in items){ // 遍历每个源对象，收集关联对象
+                    val myRelated = LinkedList<IOrm>()
+                    for(relatedItem in relatedItems){ // 遍历每个关联对象，进行匹配
+                        // hasMany关系的匹配：主表.主键 = 从表.外键
+                        val pk:Any = item[relation.primaryProp]
+                        val fk:Any = relatedItem[relation.foreignProp]
+                        if(pk == fk)
+                            myRelated.add(relatedItem)
+                    }
+                    item[name] = myRelated
+                }
+
+                // 清空列表
+                (relatedItems as MutableList).clear()
+            }
+        }
+        return result
+    }
+
+    /**
+     * 遍历每个hasMany关系的查询结果
+     *
+     * @param orm Orm对象或列表
+     * @param action 处理关联查询结果的lambda，有2个参数: 1 name 关联关系名 2 查询结果
+     */
+    protected fun forEachManyQuery(orm:Any, action: ((name:String, relation:IRelationMeta, relatedItems:List<IOrm>)-> Unit)){
+        for((name, subwiths) in joinMany){
+            // 联查hasMany的关系
+            // 1 只联查一层 -- wrong
+            //result.related(name, false)
+
+            // 2 递归联查多层
+            val relation = ormMeta.getRelation(name)!! // 获得关联关系
+            val query = relation.queryRelated(orm) // 关联查询：自动构建查询条件
+            for ((subname, subcolumns) in subwiths){ // 联查子关系
+                query.with(subname, subcolumns)
+            }
+
+            // 得结果
+            val relatedItems = query.findAll(transform = relation.recordTranformer)
+
+            // 处理查询结果
+            action(name, relation, relatedItems)
+        }
     }
 
     /**

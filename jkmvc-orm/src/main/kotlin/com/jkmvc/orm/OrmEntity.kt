@@ -162,8 +162,8 @@ abstract class OrmEntity : IOrm {
         for((name, relation) in ormMeta.relations){
             val value = data[name]
             if(value != null){
-                if(value is List<*>) // 有多个
-                    data[name] = (value as List<IOrm>).itemAsMap()
+                if(value is Collection<*>) // 有多个
+                    data[name] = (value as Collection<IOrm>).itemAsMap()
                 else // 有一个
                     data[name] = (value as Orm).asMap()
             }
