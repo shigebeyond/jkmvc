@@ -85,7 +85,7 @@ public fun Map<String, *>.path(path:String, default: Any?): Any? {
  * @param default 默认值，当 withException 为false时有效
  * @return
  */
-public fun Map<String, *>.path(path:String, withException: Boolean = true, default: Any? = null): Any? {
+public fun Map<String, *>.path(path:String, withException: Boolean, default: Any?): Any? {
     // 单层
     if(!path.contains('.'))
         return this[path]

@@ -213,12 +213,12 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     public override fun convertIntelligent(column:String, value:String):Any?
     {
         // 1 获得属性
-        val prop = model.findProperty(column) as KMutableProperty1?
+        val prop = model.findProperty(column)
         if(prop == null)
             throw OrmException("类 ${model} 没有属性: $column");
 
         // 2 转换类型
-        return value.to(prop.setter.parameters[1].type)
+        return value.to(prop.getter.returnType)
     }
 
     /**

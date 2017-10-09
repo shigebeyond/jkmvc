@@ -1,11 +1,13 @@
 package com.jkmvc.orm
 
+import com.jkmvc.common.findProperty
 import com.jkmvc.db.DbQueryBuilder
 import com.jkmvc.db.DbType
 import com.jkmvc.db.IDbQueryBuilder
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
 
 /**
  * 面向orm对象的sql构建器
@@ -25,7 +27,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * 关联查询的记录，用于防止重复join同一个表
      */
-    protected val joins:MutableList<String> = LinkedList()
+    protected val joins:MutableMap<String, IRelationMeta> = HashMap()
 
     /**
      * 关联查询hasMany的关系，需单独处理，不在一个sql中联查，而是单独查询
@@ -134,10 +136,10 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      */
     public fun joinSlave(master: IOrmMeta, masterName:String, slaveRelation: IRelationMeta, slaveName: String): OrmQueryBuilder {
         // 检查并添加关联查询记录
-        if(joins.contains(slaveName))
+        if(joins.containsKey(slaveName))
             return this;
 
-        joins.add(slaveName)
+        joins[slaveName] = slaveRelation
 
         // 准备条件
         val masterPk = masterName + "." + slaveRelation.primaryKey; // 主表.主键
@@ -161,10 +163,10 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      */
     public fun joinMaster(slave: IOrmMeta, slaveName:String, masterRelation: IRelationMeta, masterName: String): OrmQueryBuilder {
         // 检查并添加关联查询记录
-        if(joins.contains(masterName))
+        if(joins.containsKey(masterName))
             return this;
 
-        joins.add(masterName)
+        joins[masterName] = masterRelation
 
         // 准备条件
         val slaveFk = slaveName + "." + masterRelation.foreignKey; // 从表.外键
@@ -214,13 +216,19 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
 
             // 遍历每个hasMany关系的查询结果
             forEachManyQuery(result){ name:String, relation:IRelationMeta, relatedItems:List<IOrm> ->
+                val pkProp = ormMeta.model.findProperty(relation.primaryProp) as KProperty1<IOrm, Any>
+                val fkProp = relation.model.findProperty(relation.foreignProp) as KProperty1<IOrm, Any>
                 // 设置关联属性 -- 双循环匹配
                 for (item in items){ // 遍历每个源对象，收集关联对象
                     val myRelated = LinkedList<IOrm>()
                     for(relatedItem in relatedItems){ // 遍历每个关联对象，进行匹配
                         // hasMany关系的匹配：主表.主键 = 从表.外键
-                        val pk:Any = item[relation.primaryProp]
-                        val fk:Any = relatedItem[relation.foreignProp]
+                        // bug: 使用数据库的原生值，但2个字段值可能类型不同，无法匹配（数据库类型不同）
+                        //val pk:Any = item[relation.primaryProp]
+                        //val fk:Any = relatedItem[relation.foreignProp]
+                        // fix bug: 使用对象的getter来智能获得与匹配值（对象类型相同）
+                        val pk:Any = pkProp.get(item)!!
+                        val fk:Any = fkProp.get(relatedItem)!!
                         if(pk == fk)
                             myRelated.add(relatedItem)
                     }
@@ -452,7 +460,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     }
 
     /**
-     * 根据属性获得最后一层的关联模型与字段
+     * 根据（最多2层的）属性获得关联模型与字段
      *
      * @param prop 多级属性
      * @return
@@ -478,7 +486,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
 
         // 关联表
         // 获得关联关系
-        val relation = ormMeta.getRelation(table)!!
+        val relation = joins[table]!!
         // 由关联模型来转
         return Pair(relation.ormMeta, column)
     }

@@ -47,6 +47,8 @@ class MyTests{
 //        println("my_favorite_food".underline2Camel())
 //        println("myFavoriteFood".camel2Underline())
 //        println("2017-09-27 08:47:04".to(Date::class))
+        val str:Any? = null
+        println(str.toString())//null
         println(arrayOf("a", "b").joinToString(", ", "(", ")") {
             "[$it]"
         })
