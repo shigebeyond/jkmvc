@@ -8,14 +8,43 @@ import java.io.Reader
 import java.sql.*
 import java.util.*
 import kotlin.reflect.KClass
-import java.sql.SQLException
-
 
 
 // db的日志
 val dbLogger = LoggerFactory.getLogger("com.jkmvc.db")
 
 /****************************** Connection直接提供查询与更新数据的方法 *******************************/
+/**
+ * PreparedStatement扩展
+ * 设置参数
+ *
+ * @param params 全部参数的列表
+ * @param start 要设置的参数的开始序号
+ * @param length 要设置的参数的个数
+ * @param
+ */
+public fun PreparedStatement.setParameters(params: List<Any?>?, start:Int = 0, length:Int = if(params == null) 0 else params.size): PreparedStatement {
+    if(params != null){
+        if(length < 0 || length > params.size)
+            throw ArrayIndexOutOfBoundsException("预编译sql中设置参数错误：需要的参数个数为 $length, 实际参数个数为 ${params.size}")
+
+        // 设置参数
+        for (i in 0..(length - 1)) {
+            var value = params[start + i] /* 实际参数从start开始 */
+            /**
+             * fix bug: oracle执行sql报错： 无效的列类型
+             * 原因：oracle的 DATE 类型字段，不能接受 java.util.Date 的值，只能接受 java.sql.Date 的值
+             * 解决：转日期参数 java.util.Date -> java.sql.Date
+             * 注意：我们还要兼顾oracle的2个类型 DATE|TIMESTAMP，mysql的4个类型 date|datetime|timestamp|time，为保证精度不丢失，统一使用 java.sql.Timestamp
+             */
+            if(value is java.util.Date && value !is java.sql.Date && value !is java.sql.Timestamp && value !is java.sql.Time)
+                value =  java.sql.Timestamp(value.time)
+            setObject(1 + i /* sql参数从1开始 */, value)
+        }
+    }
+    return this
+}
+
 /**
  * Connection扩展
  * 执行更新
@@ -32,9 +61,7 @@ public fun Connection.execute(sql: String, params: List<Any?>? = null, returnGen
         // 准备sql语句
         pst = prepareStatement(sql)
         // 设置参数
-        if(params != null)
-            for (i in params.indices)
-                pst.setObject(i + 1, params[i])
+        pst.setParameters(params)
         // 执行
         val rows:Int = pst.executeUpdate()
         // insert语句，返回自动生成的主键
@@ -56,17 +83,16 @@ public fun Connection.execute(sql: String, params: List<Any?>? = null, returnGen
  * 批量更新：每次更新sql参数不一样
  *
  * @param sql
- * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
- * @param paramSize 一次处理的参数个数
+ * @param params 多次处理的参数的汇总，一次处理取 lengthPerExec 个参数，必须保证他的大小是 lengthPerExec 的整数倍
+ * @param lengthPerExec 一次处理的参数个数
  * @return
  */
-public fun Connection.batchExecute(sql: String, paramses: List<Any?>, paramSize:Int): IntArray {
+public fun Connection.batchExecute(sql: String, params: List<Any?>, lengthPerExec:Int): IntArray {
     // 计算批处理的次数
-    if(paramSize <= 0)
-        throw IllegalArgumentException("参数个数只能为正整数，但实际为 $paramSize");
-    if(paramses.size % paramSize > 0)
-        throw IllegalArgumentException("paramses 的大小必须是指定参数个数 $paramSize 的整数倍");
-    val batchNum:Int = paramses.size / paramSize
+    if(lengthPerExec <= 0 || params.size % lengthPerExec > 0)
+        throw IllegalArgumentException("批处理sql中设置参数错误：一次处理需要的参数个数为$lengthPerExec, 全部参数个数为${params.size}, 后者必须是前者的整数倍");
+
+    val batchNum:Int = params.size / lengthPerExec
 
     var pst: PreparedStatement? = null
     try{
@@ -75,8 +101,7 @@ public fun Connection.batchExecute(sql: String, paramses: List<Any?>, paramSize:
         // 逐次处理sql
         for(i in 0..(batchNum - 1)){
             // 设置参数
-            for (j in 0..(paramSize - 1))
-                pst.setObject(j + 1, paramses[i * paramSize + j])
+            pst.setParameters(params, i * lengthPerExec, lengthPerExec)
             // 添加sql
             pst.addBatch();
         }
@@ -102,9 +127,7 @@ public fun <T> Connection.queryResult(sql: String, params: List<Any?>? = null, a
         // 准备sql语句
         pst = prepareStatement(sql)
         // 设置参数
-        if(params != null)
-            for (i in params.indices)
-                pst.setObject(i + 1, params[i])
+        pst.setParameters(params)
         // 查询
         rs = pst.executeQuery()
         // 处理查询结果

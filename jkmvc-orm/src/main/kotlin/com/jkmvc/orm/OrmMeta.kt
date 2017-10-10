@@ -8,7 +8,6 @@ import com.jkmvc.db.IDb
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
-import kotlin.reflect.KMutableProperty1
 
 /**
  * orm的元数据
