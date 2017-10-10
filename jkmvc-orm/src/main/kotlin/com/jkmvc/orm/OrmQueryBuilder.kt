@@ -87,8 +87,8 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * 联查表
      *
      * @param name 关联关系名
-     * @param columns 字段名数组: Array(column1, column2, alias to column3),
-     * 						如 Array("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
+     * @param columns 字段名数组: listOf(column1, column2, alias to column3),
+     * 						如 listOf("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
      * @return
      */
     public fun with(name: String, columns: List<String>? = null): OrmQueryBuilder {
