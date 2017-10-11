@@ -1,22 +1,6 @@
 package com.jkmvc.db
 
-import com.jkmvc.common.camel2Underline
 import java.sql.ResultSet
-
-/**
- * 数据库类型
- */
-enum class DbType {
-    // 名字长的放前面，以便根据driverClass来获得db类型时，能更好的匹配
-    Postgresql,
-    SqlServer,
-    Oracle,
-    Hsqldb,
-    Ingres,
-    Mysql,
-    DB2,
-    H2
-}
 
 /**
  * 封装db操作
