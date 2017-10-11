@@ -58,7 +58,7 @@ interface IOrmMeta {
     /**
      * 每个字段的规则
      */
-    val rules: MutableMap<String, IMetaRule>
+    val rules: MutableMap<String, IRuleMeta>
 
     /**
      * 数据库
@@ -113,7 +113,7 @@ interface IOrmMeta {
      * @param rule
      * @return
      */
-    fun addRule(name: String, rule: IMetaRule): OrmMeta;
+    fun addRule(name: String, rule: IRuleMeta): OrmMeta;
 
     /**
      * 根据对象属性名，获得db字段名

@@ -49,8 +49,8 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     /**
      * 每个字段的校验规则
      */
-    public override val rules: MutableMap<String, IMetaRule> by lazy {
-        HashMap<String, IMetaRule>()
+    public override val rules: MutableMap<String, IRuleMeta> by lazy {
+        HashMap<String, IRuleMeta>()
     };
 
     /**
@@ -124,7 +124,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      */
     public override fun addRule(name: String, label:String, rule: String?): OrmMeta
     {
-        rules[name] = MetaRule(label, rule);
+        rules[name] = RuleMeta(label, rule);
         return this;
     }
 
@@ -134,7 +134,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param rule
      * @return
      */
-    public override fun addRule(name: String, rule: IMetaRule): OrmMeta
+    public override fun addRule(name: String, rule: IRuleMeta): OrmMeta
     {
         rules[name] = rule;
         return this;
