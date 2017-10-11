@@ -5,13 +5,14 @@ import kotlin.reflect.KClass
 /**
  * 关联关系的元数据
  */
-data class RelationMeta(public override val sourceMeta:IOrmMeta, /* 源模型元数据 */
-                        public override val type:RelationType /* 关联关系 */,
-                        public override val model: KClass<out IOrm> /* 关联模型类型 */,
-                        public override val foreignKey:String /* 外键 */,
-                        public override val primaryKey:String/* 主键 */,
-                        public override val conditions:Map<String, Any?> = emptyMap() /* 查询条件 */
-    ): IRelationMeta {
+data class RelationMeta(
+        public override val sourceMeta:IOrmMeta, /* 源模型元数据 */
+        public override val type:RelationType /* 关联关系 */,
+        public override val model: KClass<out IOrm> /* 关联模型类型 */,
+        public override val foreignKey:String /* 外键 */,
+        public override val primaryKey:String/* 主键 */,
+        public override val conditions:Map<String, Any?> = emptyMap() /* 查询条件 */
+): IRelationMeta {
 
     /**
      * 主键属性

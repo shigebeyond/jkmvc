@@ -10,5 +10,8 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-10
  */
-data class MetaRule(override val label:String /* 字段标签（中文名） */, override val rule: String? /* 字段的校验规则 */): IMetaRule{
+data class MetaRule(
+        override val label:String /* 字段标签（中文名） */,
+        override val rule: String? /* 字段的校验规则 */
+): IMetaRule{
 }

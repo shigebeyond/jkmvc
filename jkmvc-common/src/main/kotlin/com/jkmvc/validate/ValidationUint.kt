@@ -14,7 +14,11 @@ import kotlin.reflect.full.memberFunctions
  * @date 2016-10-19 下午3:40:55
  *
  */
-data class ValidationUint(public override val operator:String? /* 运算符 */, public override val func:String /* 函数名 */, public override val params:List<String> /* 函数参数 */) :IValidationUint{
+data class ValidationUint(
+        public override val operator:String? /* 运算符 */,
+        public override val func:String /* 函数名 */,
+        public override val params:List<String> /* 函数参数 */
+) :IValidationUint{
 
     companion object{
 
