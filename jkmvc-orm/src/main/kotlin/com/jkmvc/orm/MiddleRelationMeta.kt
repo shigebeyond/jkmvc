@@ -41,7 +41,9 @@ class MiddleRelationMeta(
     protected fun queryMiddleRelated(): OrmQueryBuilder {
         // 通过join中间表 查从表
         return queryBuilder()
-                .select(model.modelName + ".*", middleTable + '.' + foreignKey) // 查字段：中间表.外键 = 主表.主键，以便在查询后绑定主对象
+                // 查字段：中间表.外键 = 主表.主键，以便在查询后绑定主对象
+                // fix bug: 不能查中间表.外键，应该查主表.主键，因为可能字段类型不一样，导致查询后绑定主对象时，匹配主对象主键失败，从而绑定失败
+                .select(model.modelName + ".*", middleTable + '.' + foreignKey)
                 .join(middleTable).on(middleTable + '.' + farForeignKey, "=", model.modelName + '.' + farPrimaryKey) as OrmQueryBuilder // 中间表.远端外键 = 从表.远端主键
     }
 
