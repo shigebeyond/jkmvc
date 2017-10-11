@@ -4,6 +4,6 @@ default:
     username: root
     password: root
     # 字段名是下划线命名
-    columnUnderline: true
+    columnUnderline: false
     # 字段名全大写
     columnUpperCase: false
