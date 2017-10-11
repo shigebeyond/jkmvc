@@ -8,9 +8,9 @@ import java.util.*
  * @author shijianhang
  * @date 2017-10-10
  */
-data class SelectFields(
+data class SelectFieldList(
         val myFields: List<String> /* 本模型的字段 */,
-        val relatedFields: List<Pair<String, SelectFields?>> = emptyList() /* 多个 关系名 + 关联模型的字段列表 */
+        val relatedFields: List<Pair<String, SelectFieldList?>> = emptyList() /* 多个 关系名 + 关联模型的字段列表 */
 ){
     companion object{
 
@@ -22,9 +22,9 @@ data class SelectFields(
          * @param relationPredicate 关系检查lambda，检查某字段是否是关系
          * @return
          */
-        public fun parseSelectFields(fields:Iterator<Any>, relationPredicate: (Any) -> Boolean): SelectFields {
+        public fun parseSelectFields(fields:Iterator<Any>, relationPredicate: (Any) -> Boolean): SelectFieldList {
             val myFields = LinkedList<String>() // 本模型字段
-            val relatedFields = LinkedList<Pair<String, SelectFields?>>() // 关系名 + 关联模型的字段
+            val relatedFields = LinkedList<Pair<String, SelectFieldList?>>() // 关系名 + 关联模型的字段
             for (field in fields){
                 // 1 本模型字段
                 if(!relationPredicate(field)){
@@ -41,7 +41,7 @@ data class SelectFields(
                     relatedFields.add(field to null)
                 }
             }
-            return SelectFields(myFields, relatedFields)
+            return SelectFieldList(myFields, relatedFields)
         }
 
         /**
@@ -52,7 +52,7 @@ data class SelectFields(
          * @param relationPredicate 关系检查lambda，检查某字段是否是关系
          * @return
          */
-        public fun parseSelectFields(fields:Array<out Any>, relationPredicate: (Any) -> Boolean): SelectFields {
+        public fun parseSelectFields(fields:Array<out Any>, relationPredicate: (Any) -> Boolean): SelectFieldList {
             return parseSelectFields(fields.iterator(), relationPredicate)
         }
     }
