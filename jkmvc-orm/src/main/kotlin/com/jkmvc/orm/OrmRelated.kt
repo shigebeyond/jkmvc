@@ -20,9 +20,8 @@ abstract class OrmRelated: OrmPersistent() {
         if (relation != null) {
             data[column] = value;
             // 如果关联的是主表，则更新从表的外键
-            val (sourceMeta, type, model, foreignKey) = relation as RelationMeta;
-            if (type == RelationType.BELONGS_TO)
-                this[foreignKey] = (value as Orm).pk; // 更新字段 super.set(foreignKey, value.pk);
+            if (relation.type == RelationType.BELONGS_TO)
+                this[relation.foreignKey] = (value as Orm).pk; // 更新字段 super.set(foreignKey, value.pk);
             return;
         }
 

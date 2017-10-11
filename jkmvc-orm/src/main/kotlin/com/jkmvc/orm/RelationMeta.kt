@@ -4,8 +4,14 @@ import kotlin.reflect.KClass
 
 /**
  * 关联关系的元数据
+ *
+ * 涉及到2类查询
+ *    1 通过join语句来联查 A/B 两表
+ *      如 A/B 表是一对一的关系，在查询 A 表记录时，可以通过 join B 表来联查，具体实现参考 OrmQueryBuilder.joinSlave() / joinMaster()
+ *    2 根据 A 表记录来查 B 表记录
+ *      如 A 表先查出来，再根据 A 表来查 B 表，一般用在 OrmRelated.related() 与 hasMany关系的联查（不能使用join在同一条sql中查询），具体实现参考 RelationMeta.queryRelated()
  */
-data class RelationMeta(
+open class RelationMeta(
         public override val sourceMeta:IOrmMeta, /* 源模型元数据 */
         public override val type:RelationType /* 关联关系 */,
         public override val model: KClass<out IOrm> /* 关联模型类型 */,
