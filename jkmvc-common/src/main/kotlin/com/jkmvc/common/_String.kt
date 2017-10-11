@@ -234,3 +234,32 @@ public inline fun <T: Any> String.to(clazz: KClass<T>): T{
 public inline fun String.to(type: KType): Any{
     return this.to(type.classifier as KClass<*>)
 }
+
+/**
+ * 将当前值强制类型转换为指定类型的非空值
+ * @param class 要转换的类型
+ * @return
+ */
+public inline fun Any.castTo(clazz: KClass<*>): Any{
+    // 强制类型转换
+    return when(clazz){
+        Int::class -> this as Int
+        Long::class -> this as Long
+        Float::class -> this as Float
+        Double::class -> this as Double
+        Boolean::class -> this as Boolean
+        Short::class -> this as Short
+        Byte::class -> this as Byte
+        Date::class -> this as Date
+        else -> throw IllegalArgumentException("当前值不能自动转换为未识别的类型: " + clazz)
+    }
+}
+
+/**
+ * 将字符串转换为指定类型的非空值
+ * @param type
+ * @return
+ */
+public inline fun Any.castTo(type: KType): Any{
+    return this.castTo(type.classifier as KClass<*>)
+}

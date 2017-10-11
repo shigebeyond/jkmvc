@@ -156,6 +156,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param foreignKey 外键
      * @param primaryKey 主键
      * @param conditions 关联查询条件
+     * @return
      */
     public override fun belongsTo(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, primaryKey:String, conditions: Map<String, Any?>): IOrmMeta {
         // 设置关联关系
@@ -173,6 +174,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param foreignKey 外键
      * @param primaryKey 主键
      * @param conditions 关联查询条件
+     * @return
      */
     public override fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, primaryKey:String, conditions: Map<String, Any?>): IOrmMeta {
         // 设置关联关系
@@ -190,11 +192,32 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param foreignKey 外键
      * @param primaryKey 主键
      * @param conditions 关联查询条件
+     * @return
      */
     public override fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, primaryKey:String, conditions:Map<String, Any?>): IOrmMeta {
         // 设置关联关系
         relations.getOrPut(name) {
             RelationMeta(this, RelationType.HAS_MANY, relatedModel, foreignKey, primaryKey, conditions)
+        }
+
+        return this;
+    }
+
+    /**
+     * 设置关联关系(has many)
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param foreignKey 外键
+     * @param primaryKey 主键
+     * @param middleTable 中间表
+     * @param farForeignKey 远端外键
+     * @param farPrimaryKey 远端主键
+     * @return
+     */
+    public override fun hasManyThrough(name: String, relatedModel: KClass<out IOrm>, foreignKey: String,  primaryKey: String,  middleTable:String,  farForeignKey:String,  farPrimaryKey:String): IOrmMeta {
+        // 设置关联关系
+        relations.getOrPut(name) {
+            MiddleRelationMeta(this, RelationType.HAS_MANY, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey)
         }
 
         return this;
@@ -208,6 +231,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      *
      * @param column
      * @param value 字符串
+     * @return
      */
     public override fun convertIntelligent(column:String, value:String):Any?
     {

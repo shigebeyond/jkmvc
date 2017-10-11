@@ -22,7 +22,7 @@ abstract class OrmEntity : IOrm {
         /**
          * 缓存属性代理
          */
-        protected val prop = (object : ReadWriteProperty<IOrm, Any?> {
+        public val prop = (object : ReadWriteProperty<IOrm, Any?> {
             // 获得属性
             public override operator fun getValue(thisRef: IOrm, property: KProperty<*>): Any? {
                 return thisRef[property.name]

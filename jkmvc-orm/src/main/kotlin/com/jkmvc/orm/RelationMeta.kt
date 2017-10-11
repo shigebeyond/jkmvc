@@ -68,9 +68,9 @@ open class RelationMeta(
     public override fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder {
         val query = queryBuilder()
         if(type == RelationType.BELONGS_TO) { // 查主表
-            query.where(primaryKey, "IN", items.collectColumn(foreignProp)) // 主表.主键 = 从表.外键
+            query.where(model.modelName + '.' + primaryKey, "IN", items.collectColumn(foreignProp)) // 主表.主键 = 从表.外键
         } else { // 查从表
-            query.where(foreignKey, "IN", items.collectColumn(primaryProp)) // 从表.外键 = 主表.主键
+            query.where(model.modelName + '.' + foreignKey, "IN", items.collectColumn(primaryProp)) // 从表.外键 = 主表.主键
         }
         return query
     }

@@ -146,6 +146,13 @@ interface IOrmMeta {
 
     /**
      * 生成属性代理 + 设置关联关系(belongs to)
+     *
+     *    公式：从表.外键 = 主表.主键
+     *             外键默认值 = 主表_主键 （= 关联表_主键）
+     *             主键默认值 = 主表的主键 （= 关联表的主键）
+     *
+     *    其中本表从属于关联表，因此 本表是从表，关联表是主表
+     *
      * @param name 字段名
      * @param relatedModel 关联模型
      * @param foreignKey 外键
@@ -158,8 +165,8 @@ interface IOrmMeta {
      * 生成属性代理 + 设置关联关系(belongs to)
      *
      *    公式：从表.外键 = 主表.主键
-     *         外键默认值 = 主表_主键 （= 关联表_主键）
-     *         主键默认值 = 主表的主键 （= 关联表的主键）
+     *             外键默认值 = 主表_主键 （= 关联表_主键）
+     *             主键默认值 = 主表的主键 （= 关联表的主键）
      *
      *    其中本表从属于关联表，因此 本表是从表，关联表是主表
      *
@@ -176,11 +183,18 @@ interface IOrmMeta {
     /**
      * 设置关联关系(has one)
      *
+     * 公式：从表.外键 = 主表.主键
+     *          外键默认值 = 主表_主键（= 本表_主键）
+     *          主键默认值 = 主表的主键（= 本表的主键）
+     *
+     *    其中本表有一个关联表，因此 本表是主表，关联表是从表
+     *
      * @param name 字段名
      * @param relatedModel 关联模型
      * @param foreignKey 外键
      * @param primaryKey 主键
      * @param conditions 关联查询条件
+     * @return
      */
     fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, primaryKey: String, conditions: Map<String, Any?> = emptyMap()): IOrmMeta
 
@@ -188,8 +202,8 @@ interface IOrmMeta {
      * 设置关联关系(has one)
      *
      * 公式：从表.外键 = 主表.主键
-     *         外键默认值 = 主表_主键（= 本表_主键）
-     *         主键默认值 = 主表的主键（= 本表的主键）
+     *          外键默认值 = 主表_主键（= 本表_主键）
+     *          主键默认值 = 主表的主键（= 本表的主键）
      *
      *    其中本表有一个关联表，因此 本表是主表，关联表是从表
      *
@@ -197,6 +211,7 @@ interface IOrmMeta {
      * @param relatedModel 关联模型
      * @param foreignKey 外键
      * @param conditions 关联查询条件
+     * @return
      */
     fun hasOne(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = this.defaultForeignKey /* 主表_主键 = 本表_主键 */, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
         return hasOne(name, relatedModel, foreignKey, this.primaryKey /* 本表的主键 */, conditions)
@@ -204,11 +219,19 @@ interface IOrmMeta {
 
     /**
      * 设置关联关系(has many)
+     *
+     * 公式：从表.外键 = 主表.主键
+     *          外键默认值 = 主表_主键（= 本表_主键）
+     *          主键默认值 = 主表的主键（= 本表的主键）
+     *
+     *    其中本表有一个关联表，因此 本表是主表，关联表是从表
+     *
      * @param name 字段名
      * @param relatedModel 关联模型
      * @param foreignKey 外键
      * @param primaryKey 主键
      * @param conditions 关联查询条件
+     * @return
      */
     fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, primaryKey: String, conditions: Map<String, Any?> = emptyMap()): IOrmMeta
 
@@ -216,8 +239,8 @@ interface IOrmMeta {
      * 设置关联关系(has many)
      *
      * 公式：从表.外键 = 主表.主键
-     *         外键默认值 = 主表_主键（= 本表_主键）
-     *         主键默认值 = 主表的主键（= 本表的主键）
+     *          外键默认值 = 主表_主键（= 本表_主键）
+     *          主键默认值 = 主表的主键（= 本表的主键）
      *
      *    其中本表有一个关联表，因此 本表是主表，关联表是从表
      *
@@ -225,10 +248,41 @@ interface IOrmMeta {
      * @param relatedModel 关联模型
      * @param foreignKey 外键
      * @param conditions 关联查询条件
+     * @return
      */
     fun hasMany(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = this.defaultForeignKey /* 主表_主键 = 本表_主键 */, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
         return hasMany(name, relatedModel, foreignKey, this.primaryKey /* 本表的主键 */, conditions)
     }
+
+    /**
+     * 设置关联关系(has many)
+     *
+     * 公式：中间表.外键 = 主表.主键
+     *      中间表.远端外键 = 远端主表.远端主键
+     *           外键默认值 = 主表_主键（= 本表_主键）
+     *           主键默认值 = 主表的主键（= 本表的主键）
+     *           中间表默认值 = 主表_从表
+     *           远端外键默认值 = 远端主表_主键（= 从表_主键）
+     *           远端主键默认值 = 远端主表的主键（= 从表的主键）
+     *
+     *
+     *    其中本表有一个关联表，因此 本表是主表，中间表与关联表是从表
+     *
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param foreignKey 外键
+     * @param primaryKey 主键
+     * @param middleTable 中间表
+     * @param farForeignKey 远端外键
+     * @param farPrimaryKey 远端主键
+     * @return
+     */
+    fun hasManyThrough(name: String, relatedModel: KClass<out IOrm>,
+                       foreignKey: String = this.defaultForeignKey /* 主表_主键 = 本表_主键 */,
+                       primaryKey: String = this.primaryKey /* 本表的主键 */,
+                       middleTable:String = table + '_' + relatedModel.modelOrmMeta.table /* 主表_从表 */,
+                       farForeignKey:String = relatedModel.modelOrmMeta.defaultForeignKey /* 远端主表_主键 = 从表_主键 */,
+                       farPrimaryKey:String = relatedModel.modelOrmMeta.primaryKey): IOrmMeta /* 从表的主键 */
 
     /**
      * 智能转换字段值

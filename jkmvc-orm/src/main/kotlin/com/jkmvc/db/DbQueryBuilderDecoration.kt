@@ -457,7 +457,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
      * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
      * @return
      */
-    public override fun join(table: Any, type: String?): IDbQueryBuilder {
+    public override fun join(table: Any, type: String): IDbQueryBuilder {
         // joinClause　子句
         val j = DbQueryBuilderDecorationClausesGroup("$type JOIN", arrayOf<((Any?) -> String)?>(tableQuoter));
         j.addSubexp(arrayOf<Any?>(table));

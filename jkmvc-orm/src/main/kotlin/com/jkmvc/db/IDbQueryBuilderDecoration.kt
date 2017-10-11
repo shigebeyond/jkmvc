@@ -291,7 +291,7 @@ interface IDbQueryBuilderDecoration
      * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
      * @return
      */
-    fun join(table:Any, type:String? = null):IDbQueryBuilder;
+    fun join(table:Any, type:String = "INNER"):IDbQueryBuilder;
 
     /**
      * Adds "ON ..." conditions for the last created JOIN statement.

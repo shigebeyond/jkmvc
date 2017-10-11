@@ -1,5 +1,6 @@
 package com.jkmvc.orm
 
+import com.jkmvc.common.castTo
 import com.jkmvc.common.findProperty
 import com.jkmvc.common.isNullOrEmpty
 import com.jkmvc.db.DbQueryBuilder
@@ -9,6 +10,7 @@ import java.util.*
 import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
+import kotlin.reflect.full.cast
 
 /**
  * 面向orm对象的sql构建器
@@ -231,20 +233,32 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
 
             // 遍历每个hasMany关系的查询结果
             forEachManyQuery(result){ name:String, relation:IRelationMeta, relatedItems:List<IOrm> ->
-                val pkProp = ormMeta.model.findProperty(relation.primaryProp) as KProperty1<IOrm, Any>
-                val fkProp = relation.model.findProperty(relation.foreignProp) as KProperty1<IOrm, Any>
                 // 设置关联属性 -- 双循环匹配
                 for (item in items){ // 遍历每个源对象，收集关联对象
                     val myRelated = LinkedList<IOrm>()
                     for(relatedItem in relatedItems){ // 遍历每个关联对象，进行匹配
                         // hasMany关系的匹配：主表.主键 = 从表.外键
                         // bug: 使用数据库的原生值，但2个字段值可能类型不同，无法匹配（数据库类型不同）
-                        //val pk:Any = item[relation.primaryProp]
-                        //val fk:Any = relatedItem[relation.foreignProp]
+                        /*
+                        val pk:Any = item[relation.primaryProp] // 主表.主键
+                        val fk:Any = relatedItem[relation.foreignProp] // 从表.外键
+                        */
+
                         // fix bug: 使用对象的getter来智能获得与匹配值（对象类型相同）
-                        val pk:Any = pkProp.get(item)!!
-                        val fk:Any = fkProp.get(relatedItem)!!
-                        if(pk == fk)
+                        // bug: 在有中间表的从对象联查时，虽然也查出来外键值，但是从对象没有外键对应的属性，因此无法通过属性访问
+                        /*
+                        val pkProp = ormMeta.model.findProperty(relation.primaryProp) as KProperty1<IOrm, Any>
+                        val fkProp = relation.model.findProperty(relation.foreignProp) as KProperty1<IOrm, Any>
+                        val pk:Any = pkProp.get(item)!! // 主表.主键
+                        val fk:Any = fkProp.get(relatedItem)!! // 从表.外键
+                        */
+
+                        // fix bug: 主对象的主键属性是肯定有的，获得该属性的类型，直接对要比较的值统一转换类型
+                        val pkProp = ormMeta.model.findProperty(relation.primaryProp) as KProperty1<IOrm, Any>
+                        val type = pkProp.getter.returnType
+                        val pk:Any = item[relation.primaryProp] // 主表.主键
+                        val fk:Any = relatedItem[relation.foreignProp] // 从表.外键
+                        if(pk.castTo(type) == fk.castTo(type))
                             myRelated.add(relatedItem)
                     }
                     item[name] = myRelated
