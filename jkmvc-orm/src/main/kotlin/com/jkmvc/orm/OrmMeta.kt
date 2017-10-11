@@ -225,26 +225,18 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      *
      * @param query 查询构建器
      * @param name 关联关系名
-     * @param columns 关联字段名
+     * @param columns 关联字段列表
      * @param lastName 上一级关系名
      * @param path 列名父路径
      * @return 关联关系
      */
-    public override fun joinRelated(query: OrmQueryBuilder, name: String, columns: List<String>?, lastName:String, path:String): IRelationMeta {
-        val i = name.indexOf('.')
-        var currName: String = name // 当前关系名
-        var otherName: String? = null // 剩下的关系名
-        if(i > -1){
-            currName = name.substring(0, i)
-            otherName = name.substring(i + 1)
-        }
-
+    public override fun joinRelated(query: OrmQueryBuilder, name: String, columns: SelectColumnList?, lastName:String, path:String): IRelationMeta {
         // 获得当前关联关系
-        val relation = getRelation(currName)!!;
+        val relation = getRelation(name)!!;
         // 1 非hasMany关系：只处理一层
         if(relation.type == RelationType.HAS_MANY){
             // 单独处理hasMany关系，不在一个sql中联查，而是单独查询
-            query.withMany(currName, otherName, columns)
+            query.withMany(name, columns)
             return relation;
         }
 
@@ -252,24 +244,25 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
         // join关联表
         when (relation.type) {
             // belongsto: join 主表
-            RelationType.BELONGS_TO -> query.joinMaster(this, lastName, relation, currName);
+            RelationType.BELONGS_TO -> query.joinMaster(this, lastName, relation, name);
             // hasxxx: join 从表
-            else -> query.joinSlave(this, lastName, relation, currName);
+            else -> query.joinSlave(this, lastName, relation, name);
         }
 
         //列名父路径
         val path2 = if(path == "")
-                        currName
+                        name
                       else
-                        path + ":" + currName
+                        path + ":" + name
 
-        // 2.1 多层关联关系，处理剩下的关系：逐层递归调用
-        if(otherName != null)
-            return relation.ormMeta.joinRelated(query, otherName, columns, currName, path2)
+        // 递归联查子关系
+        columns?.forEachRelatedColumns { subname: String, subcolumns: SelectColumnList? ->
+            relation.ormMeta.joinRelated(query, subname, subcolumns, name, path2)
+        }
 
-        // 2.2 单层关联关系
-        // select关联表字段
-        query.selectRelated(relation, currName, columns, path2);
+        // 查询当前关系字段
+        query.selectRelated(relation, name, columns?.myColumns /* 若字段为空，则查全部字段 */, path2);
+
         return relation;
     }
 

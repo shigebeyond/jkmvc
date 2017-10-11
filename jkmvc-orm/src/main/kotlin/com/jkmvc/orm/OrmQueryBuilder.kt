@@ -1,6 +1,7 @@
 package com.jkmvc.orm
 
 import com.jkmvc.common.findProperty
+import com.jkmvc.common.isNullOrEmpty
 import com.jkmvc.db.DbQueryBuilder
 import com.jkmvc.db.DbType
 import com.jkmvc.db.IDbQueryBuilder
@@ -33,7 +34,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * 关联查询hasMany的关系，需单独处理，不在一个sql中联查，而是单独查询
      * <hasMany关系名, [子关系名+子关系字段]>
      */
-    protected val joinMany:MutableMap<String, MutableList<Pair<String, List<String>?>>> = HashMap()
+    protected val joinMany:MutableMap<String, SelectColumnList?> = HashMap()
 
     /**
      * 清空条件
@@ -41,6 +42,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      */
     public override fun clear(): IDbQueryBuilder {
         joins.clear()
+        joinMany.clear()
         return super.clear()
     }
 
@@ -65,18 +67,6 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @param names 关联关系名的数组
      * @return
      */
-    public fun withs(names: List<String>): OrmQueryBuilder {
-        for(name in names)
-            with(name)
-        return this
-    }
-
-    /**
-     * 联查多表
-     *
-     * @param names 关联关系名的数组
-     * @return
-     */
     public fun withs(vararg names: String): OrmQueryBuilder {
         for(name in names)
             with(name)
@@ -84,14 +74,13 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     }
 
     /**
-     * 联查表
+     * 联查单表
      *
      * @param name 关联关系名
-     * @param columns 字段名数组: listOf(column1, column2, alias to column3),
-     * 						如 listOf("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
+     * @param columns 关联模型的字段列表
      * @return
      */
-    public fun with(name: String, columns: List<String>? = null): OrmQueryBuilder {
+    public fun with(name: String, columns: SelectColumnList? = null): OrmQueryBuilder {
         // select当前表字段
         if (selectColumns.isEmpty())
             select(ormMeta.name + ".*");
@@ -103,24 +92,50 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     }
 
     /**
+     * 可select具体字段的 withs()
+     *     设置查询字段，如果是关联字段，则联查
+     *
+     * @param columns 字段列表，其元素类型可以是 1 String 本模型字段名 2 Pair<String, List<String>> 关系名 + 关联模型的字段列表
+     *               如("id", "name", "dept" to listOf("id", "title")), 其中本模型要显示id与name字段，dept是关联模型，要显示id与title字段
+     * @return
+     */
+    public fun selectWiths(vararg columns: Any): OrmQueryBuilder {
+        val selects = SelectColumnList.parse(ormMeta, columns)
+        return selectWiths(selects)
+    }
+
+    /**
+     * 可select具体字段的 withs()
+     *     设置查询字段，如果是关联字段，则联查
+     *
+     * @param columns 字段列表
+     * @return
+     */
+    public fun selectWiths(columns: SelectColumnList): OrmQueryBuilder {
+        if (columns != null) {
+            // 联查关联模型
+            columns.forEachRelatedColumns { name, columns ->
+                with(name, columns)
+            }
+
+            // 查询本模型字段
+            columns.forEachMyColumns {
+                select(ormMeta.name + '.' + it);
+            }
+        }
+        return this
+    }
+
+    /**
      * 联查joinMany关系的子关系
      *
      * @param name joinMany关系名
-     * @param subname 子关系名
-     * @param subcolumns 子关系字段名数组: Array(column1, column2, alias to column3),
-     * 						如 Array("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
+     *
      * @return
      */
-    public fun withMany(name: String, subname: String? = null, subcolumns: List<String>? = null): OrmQueryBuilder {
-        //数据结构：<hasMany关系名, [子关系名+子关系字段]>
-        val subwiths = joinMany.getOrPut(name){
-            LinkedList<Pair<String, List<String>?>>()
-        }
-
-        // 添加子关系
-        if(subname != null)
-            subwiths.add(Pair(subname, subcolumns))
-
+    public fun withMany(name: String, columns: SelectColumnList? = null): OrmQueryBuilder {
+        //数据结构：<hasMany关系名, 查询字段>
+        joinMany[name] = columns
         return this
     }
 
@@ -249,17 +264,17 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @param action 处理关联查询结果的lambda，有2个参数: 1 name 关联关系名 2 查询结果
      */
     protected fun forEachManyQuery(orm:Any, action: ((name:String, relation:IRelationMeta, relatedItems:List<IOrm>)-> Unit)){
-        for((name, subwiths) in joinMany){
-            // 联查hasMany的关系
-            // 1 只联查一层 -- wrong
-            //result.related(name, false)
+        // 联查hasMany的关系
+        for((name, columns) in joinMany){
+            // 获得hasMany的关系
+            val relation = ormMeta.getRelation(name)!!
 
-            // 2 递归联查多层
-            val relation = ormMeta.getRelation(name)!! // 获得关联关系
-            val query = relation.queryRelated(orm) // 关联查询：自动构建查询条件
-            for ((subname, subcolumns) in subwiths){ // 联查子关系
-                query.with(subname, subcolumns)
-            }
+            // 关联查询hasMany：自动构建查询条件
+            val query = relation.queryRelated(orm)
+
+            // 设置查询字段 + 递归联查子关系
+            if(columns != null)
+                query.selectWiths(columns)
 
             // 得结果
             val relatedItems = query.findAll(transform = relation.recordTranformer)
@@ -284,10 +299,10 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         }
 
         // 默认查全部列
-        val cols = if(columns == null)
+        val cols = if(columns.isNullOrEmpty())
                         relation.ormMeta.columns
                     else
-                        columns
+                        columns!!
 
         // 构建列别名
         val select: MutableList<Pair<String, String>> = LinkedList<Pair<String, String>>();
