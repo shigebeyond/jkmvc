@@ -233,32 +233,18 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
 
             // 遍历每个hasMany关系的查询结果
             forEachManyQuery(result){ name:String, relation:IRelationMeta, relatedItems:List<IOrm> ->
-                // 设置关联属性 -- 双循环匹配
+                // 检查主外键的类型: 数据库中主外键字段类型可能不同，则无法匹配
+                if(!isSameType(items.first()[relation.primaryProp], relatedItems.first()[relation.foreignProp]))
+                    throw OrmException("模型[${ormMeta.name}]联查[${name}]的hasMany类型的关联对象失败: 主键[${ormMeta.table}.${relation.primaryKey}]与外键[${relation.model.modelOrmMeta.table}.${relation.foreignKey}]字段类型不一致")
+
+                // 设置关联属性 -- 双循环匹配主外键
                 for (item in items){ // 遍历每个源对象，收集关联对象
                     val myRelated = LinkedList<IOrm>()
                     for(relatedItem in relatedItems){ // 遍历每个关联对象，进行匹配
                         // hasMany关系的匹配：主表.主键 = 从表.外键
-                        // bug: 使用数据库的原生值，但2个字段值可能类型不同，无法匹配（数据库类型不同）
-                        /*
                         val pk:Any = item[relation.primaryProp] // 主表.主键
                         val fk:Any = relatedItem[relation.foreignProp] // 从表.外键
-                        */
-
-                        // fix bug: 使用对象的getter来智能获得与匹配值（对象类型相同）
-                        // bug: 在有中间表的从对象联查时，虽然也查出来外键值，但是从对象没有外键对应的属性，因此无法通过属性访问
-                        /*
-                        val pkProp = ormMeta.model.findProperty(relation.primaryProp) as KProperty1<IOrm, Any>
-                        val fkProp = relation.model.findProperty(relation.foreignProp) as KProperty1<IOrm, Any>
-                        val pk:Any = pkProp.get(item)!! // 主表.主键
-                        val fk:Any = fkProp.get(relatedItem)!! // 从表.外键
-                        */
-
-                        // fix bug: 主对象的主键属性是肯定有的，获得该属性的类型，直接对要比较的值统一转换类型
-                        val pkProp = ormMeta.model.findProperty(relation.primaryProp) as KProperty1<IOrm, Any>
-                        val type = pkProp.getter.returnType
-                        val pk:Any = item[relation.primaryProp] // 主表.主键
-                        val fk:Any = relatedItem[relation.foreignProp] // 从表.外键
-                        if(pk.castTo(type) == fk.castTo(type))
+                        if(pk == fk)
                             myRelated.add(relatedItem)
                     }
                     item[name] = myRelated
@@ -269,6 +255,17 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
             }
         }
         return result
+    }
+
+    /**
+     * 检查两值类型是否相同
+     *
+     * @param value1
+     * @param value2
+     * @return
+     */
+    protected fun isSameType(value1: Any, value2: Any):Boolean{
+        return value1::class == value2::class
     }
 
     /**

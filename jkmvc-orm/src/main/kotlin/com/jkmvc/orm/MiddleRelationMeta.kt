@@ -35,15 +35,12 @@ class MiddleRelationMeta(
     public val farForeignProp:String = sourceMeta.column2Prop(farForeignKey)
 
     /**
-     * 通过中间表来查询从表
+     * 构建查询：通过join中间表来查询从表
      * @return
      */
-    protected fun queryMiddleRelated(): OrmQueryBuilder {
-        // 通过join中间表 查从表
+    protected fun buildQuery(): OrmQueryBuilder {
         return queryBuilder()
-                // 查字段：中间表.外键 = 主表.主键，以便在查询后绑定主对象
-                // fix bug: 不能查中间表.外键，应该查主表.主键，因为可能字段类型不一样，导致查询后绑定主对象时，匹配主对象主键失败，从而绑定失败
-                .select(model.modelName + ".*", middleTable + '.' + foreignKey)
+                .select(model.modelName + ".*", middleTable + '.' + foreignKey) // 查关联字段：中间表.外键 = 主表.主键，以便在查询后绑定主对象
                 .join(middleTable).on(middleTable + '.' + farForeignKey, "=", model.modelName + '.' + farPrimaryKey) as OrmQueryBuilder // 中间表.远端外键 = 从表.远端主键
     }
 
@@ -56,7 +53,7 @@ class MiddleRelationMeta(
      */
     public override fun queryRelated(item: IOrm): OrmQueryBuilder {
         // 通过join中间表 查从表
-        return queryMiddleRelated()
+        return buildQuery() // 中间表.远端外键 = 从表.远端主键
                 .where(middleTable + '.' + foreignKey, "=", item[primaryProp]) as OrmQueryBuilder // 中间表.外键 = 主表.主键
     }
 
@@ -69,7 +66,7 @@ class MiddleRelationMeta(
      */
     public override fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder {
         // 通过join中间表 查从表
-        return queryMiddleRelated()
+        return buildQuery() // 中间表.远端外键 = 从表.远端主键
                 .where(middleTable + '.' + foreignKey,  "IN", items.collectColumn(primaryProp)) as OrmQueryBuilder // 中间表.外键 = 主表.主键
     }
 }
