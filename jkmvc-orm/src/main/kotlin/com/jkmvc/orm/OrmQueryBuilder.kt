@@ -234,8 +234,11 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
             // 遍历每个hasMany关系的查询结果
             forEachManyQuery(result){ name:String, relation:IRelationMeta, relatedItems:List<IOrm> ->
                 // 检查主外键的类型: 数据库中主外键字段类型可能不同，则无法匹配
-                if(!isSameType(items.first()[relation.primaryProp], relatedItems.first()[relation.foreignProp]))
-                    throw OrmException("模型[${ormMeta.name}]联查[${name}]的hasMany类型的关联对象失败: 主键[${ormMeta.table}.${relation.primaryKey}]与外键[${relation.model.modelOrmMeta.table}.${relation.foreignKey}]字段类型不一致，请改成一样的")
+                val firstPk: Any = items.first()[relation.primaryProp]
+                val firstFk: Any = relatedItems.first()[relation.foreignProp]
+                if(firstPk::class != firstFk::class){
+                    throw OrmException("模型[${ormMeta.name}]联查[${name}]的hasMany类型的关联对象失败: 主键[${ormMeta.table}.${relation.primaryKey}]字段类型[${firstPk::class}]与外键[${relation.model.modelOrmMeta.table}.${relation.foreignKey}]字段类型[${firstFk::class}]不一致，请改成一样的")
+                }
 
                 // 设置关联属性 -- 双循环匹配主外键
                 for (item in items){ // 遍历每个源对象，收集关联对象
@@ -255,17 +258,6 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
             }
         }
         return result
-    }
-
-    /**
-     * 检查两值类型是否相同
-     *
-     * @param value1
-     * @param value2
-     * @return
-     */
-    protected fun isSameType(value1: Any, value2: Any):Boolean{
-        return value1::class == value2::class
     }
 
     /**
