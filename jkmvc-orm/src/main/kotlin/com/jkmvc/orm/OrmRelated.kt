@@ -1,5 +1,7 @@
 package com.jkmvc.orm
 
+import com.jkmvc.db.DbQueryBuilder
+
 /**
  * ORM之关联对象操作
  *
@@ -108,4 +110,60 @@ abstract class OrmRelated: OrmPersistent() {
         return data[name];
     }
 
+    /**
+     * 统计关联对象个数
+     *    一般只用于一对多 hasMany 的关系
+     *    一对一关系，你还统计个数干啥？
+     *
+     * @param name 关联对象名
+     * @return
+     */
+    public override fun countRelated(name:String): Long {
+        // 获得关联关系
+        val relation = ormMeta.getRelation(name)!!;
+        // 构建查询：自动构建查询条件
+        return relation.queryRelated(this).count()
+    }
+
+    /**
+     * 删除关联对象
+     *    一般用于删除 hasOne/hasMany 关系的从对象
+     *    你敢删除 belongsTo 关系的主对象？
+     *
+     * @param name 关系名
+     * @return
+     */
+    public override fun deleteRelated(name: String): Boolean {
+        // 获得关联关系
+        val relation = ormMeta.getRelation(name)!!;
+        // 构建查询：自动构建查询条件
+        return relation.queryRelated(this).delete()
+    }
+
+    /**
+     * 删除关系，不删除关联对象，只是将关联的外键给清空
+     *     一般用于清空 hasOne/hasMany 关系的从对象的外键值
+     *     至于 belongsTo 关系的主对象中只要主键，没有外键，你只能清空本对象的外键咯
+     *
+     * @param name 关系名
+     * @param nullValue 外键的空值
+     * @return
+     */
+    public override fun removeRelations(name:String, nullValue: Any?): Boolean {
+        // 获得关联关系
+        val relation = ormMeta.getRelation(name)!!;
+        // 1 belongsTo：清空本对象的外键
+        if(relation.type == RelationType.BELONGS_TO){
+            this[relation.foreignProp] = nullValue
+            return this.update()
+        }
+
+        // 2 hasOne/hasMany
+        // 2.1 有中间表：删除中间表
+        if(relation is MiddleRelationMeta)
+            return DbQueryBuilder(ormMeta.db, relation.middleTable).where(relation.foreignKey, "=", this[relation.primaryProp]).delete();
+
+        // 2.2 无中间表：清空关联对象的外键
+        return relation.queryRelated(this).set(relation.foreignKey, nullValue).update()
+    }
 }
