@@ -328,7 +328,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * @return
      */
     public fun fillTable(): String {
-        if(action == ActionType.INSERT) // mysql的insert语句, 不支持表带别名
+        if(action == ActionType.INSERT || action == ActionType.DELETE) // mysql的insert/delete语句, 不支持表带别名
             return db.quoteTable(table.component1())
 
         return db.quoteTable(table);
