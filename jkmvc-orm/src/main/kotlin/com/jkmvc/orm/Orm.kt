@@ -13,19 +13,10 @@ import java.util.concurrent.ConcurrentHashMap
  */
 abstract class Orm(id:Any? = null): OrmRelated() {
 
-    companion object{
-        /**
-         * 缓存根据主键查询的sql
-         */
-        protected val pkSqls: ConcurrentHashMap<Class<*>, CompiledSql> = ConcurrentHashMap()
-    }
-
     init{
         if(id != null){
-            val csql = pkSqls.getOrPut(this.javaClass){
-                queryBuilder().where(ormMeta.primaryKey, id).compileSelectOne() // 构建根据主键来查询的sql
-            }
-            csql.find(){ // 查询
+            // 构建根据主键来查询的sql
+            queryBuilder().where(ormMeta.primaryKey, id).compileSelectOne().find(){
                 this.original(it); // 读取查询数据
             }
         }
