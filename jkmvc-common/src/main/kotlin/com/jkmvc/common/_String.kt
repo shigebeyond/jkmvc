@@ -109,13 +109,16 @@ public inline fun String.trim(preffix:String, suffix:String): String {
 
 /**
  * 替换字符串
+ *   参数名是int
  *
- * @param params 参数
+ * @param params 参数值
+ * @param prefix 参数名前缀正则
+ * @param postfix 参数名后缀正则
  * @return
  */
-public inline fun String.replaces(params:List<String>):String
+public inline fun String.replaces(params:List<String>, prefix:String = ":", postfix:String = ""):String
 {
-    return this.replace(":(\\d+)".toRegex()){ matches:MatchResult ->
+    return this.replace("$prefix(\\d+)$postfix".toRegex()){ matches:MatchResult ->
         val i = matches.groupValues[1]
         val value = params.get(i.toInt());
         value.toString()
@@ -124,13 +127,16 @@ public inline fun String.replaces(params:List<String>):String
 
 /**
  * 替换字符串
+ *   参数名是字符串
  *
- * @param params 参数
+ * @param params 参数值
+ * @param prefix 参数名前缀正则
+ * @param postfix 参数名后缀正则
  * @return
  */
-public inline fun String.replaces(params:Map<String, Any?>):String
+public inline fun String.replaces(params:Map<String, Any?>, prefix:String = ":", postfix:String = ""):String
 {
-    return this.replace(":([\\w\\d]+)".toRegex()){ matches:MatchResult ->
+    return this.replace("$prefix([\\w\\d@_]+)$postfix".toRegex()){ matches:MatchResult ->
         val i = matches.groupValues[1]
         val value = params.get(i);
         if(value == null)
