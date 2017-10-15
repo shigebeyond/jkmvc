@@ -310,7 +310,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
      *
      * @return
      */
-    public override fun orWhereclose(): IDbQueryBuilder {
+    public override fun orWhereClose(): IDbQueryBuilder {
         whereClause.close();
         return this;
     }

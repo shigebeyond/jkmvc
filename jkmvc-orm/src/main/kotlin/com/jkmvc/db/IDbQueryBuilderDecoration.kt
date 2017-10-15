@@ -65,7 +65,6 @@ interface IDbQueryBuilderDecoration
      * Alias of andWhere()
      *
      * @param   column  column name or array(column, alias) or object
-     * @param   op      logic operator
      * @param   value   column value
      * @return
      */
@@ -74,6 +73,20 @@ interface IDbQueryBuilderDecoration
             return where(column, "IN", value)
 
         return where(column, "=", value);
+    }
+
+    /**
+     * Creates a new "OR WHERE" condition for the query.
+     *
+     * @param   column  column name or array(column, alias) or object
+     * @param   value   column value
+     * @return
+     */
+    fun orWhere(column:String, value:Any?):IDbQueryBuilder{
+        if(value is Array<*> || value is Collection<*>)
+            return orWhere(column, "IN", value)
+
+        return orWhere(column, "=", value);
     }
 
     /**
@@ -148,7 +161,7 @@ interface IDbQueryBuilderDecoration
      *
      * @return
      */
-    fun orWhereclose():IDbQueryBuilder;
+    fun orWhereClose():IDbQueryBuilder;
 
     /**
      * Creates a "GROUP BY ..." filter.

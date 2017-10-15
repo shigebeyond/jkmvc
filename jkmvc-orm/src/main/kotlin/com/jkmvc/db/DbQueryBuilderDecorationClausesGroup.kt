@@ -22,7 +22,11 @@ class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如w
      */
     public override fun open(delimiter: String): IDbQueryBuilderDecorationClauses<Any> {
         // 将连接符也记录到子表达式中, 忽略第一个子表达式
-        subexps.add("(")
+        val exp = if(subexps.isEmpty())
+                    "("
+                  else
+                    " $delimiter ("
+        subexps.add(exp)
         return this;
     }
 
