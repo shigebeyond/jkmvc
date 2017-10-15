@@ -363,7 +363,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                             else
                                 value
 
-        return orWhere(column, op, accurateValue)
+        return super.orWhere(column, op, accurateValue)
     }
 
     /**
