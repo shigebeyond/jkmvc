@@ -79,14 +79,14 @@ abstract class OrmPersistent: OrmValid() {
 
 		// 更新内部数据
 		data[ormMeta.primaryProp] = pk; // 主键
-		dirty.clear(); // 变化的字段值
 
 		// 触发后置事件
 		fireEvent("afterCreate")
 		fireEvent("afterSave")
 
-		// beforeSave 与 afterCreate 事件根据这个来判定是新增与修改
+		// beforeSave 与 afterCreate 事件根据这个来判定是新增与修改 + 变化的字段
 		loaded = true;
+		dirty.clear();
 
 		return pk;
 	}
@@ -101,7 +101,7 @@ abstract class OrmPersistent: OrmValid() {
 	protected fun buildDirtyData(): MutableMap<String, Any?> {
 		val result:MutableMap<String, Any?> = HashMap<String, Any?>();
 		// 挑出变化的属性
-		for(prop in dirty) {
+		for((prop, oldValue) in dirty) {
 			val column = ormMeta.prop2Column(prop)
 			result[column] = data[prop];
 		}
@@ -140,13 +140,12 @@ abstract class OrmPersistent: OrmValid() {
 		// 更新数据库
 		val result = queryBuilder().sets(buildDirtyData()).where(ormMeta.primaryKey, pk).update();
 
-		// 更新内部数据
-		dirty.clear()
-
 		// 触发后置事件
 		fireEvent("afterUpdate")
 		fireEvent("afterSave")
 
+		// beforeSave 与 afterCreate 事件根据这个来判定变化的字段
+		dirty.clear()
 		return result;
 	}
 

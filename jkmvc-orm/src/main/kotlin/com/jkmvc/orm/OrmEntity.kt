@@ -38,10 +38,10 @@ abstract class OrmEntity : IOrm {
     protected val data: MutableMap<String, Any?> = HashMap<String, Any?>()
 
     /**
-     * 变化的字段值：<字段名 to 字段值>
+     * 变化的字段值：<字段名 to 原始字段值>
      */
-    protected val dirty: MutableSet<String> by lazy {
-        HashSet<String>()
+    protected val dirty: MutableMap<String, Any?> by lazy {
+        HashMap<String, Any?>()
     };
 
     /**
@@ -71,7 +71,10 @@ abstract class OrmEntity : IOrm {
         if (!hasColumn(column))
             throw OrmException("类 ${this.javaClass} 没有字段 $column");
 
-        dirty.add(column);
+        // 记录变化的字段名 + 原始值
+        if(!dirty.containsKey(column))
+            dirty[column] = data[column];
+
         data[column] = value;
     }
 
