@@ -46,14 +46,19 @@ open class RelationMeta(
      *     自动根据关联关系，来构建查询条件
      *
      * @param item Orm对象
+     * @param withTableAlias 是否带表前缀
      * @return
      */
-    public override fun queryRelated(item: IOrm): OrmQueryBuilder {
+    public override fun queryRelated(item: IOrm, withTableAlias:Boolean): OrmQueryBuilder {
         val query = queryBuilder()
+        val tableAlias = if(withTableAlias)
+                            model.modelName + '.'
+                        else
+                            ""
         if(type == RelationType.BELONGS_TO) { // 查主表
-            query.where(model.modelName + '.' + primaryKey, "=", item[foreignProp]) // 主表.主键 = 从表.外键
+            query.where(tableAlias + primaryKey, "=", item[foreignProp]) // 主表.主键 = 从表.外键
         } else { // 查从表
-            query.where(model.modelName + '.' + foreignKey, "=", item[primaryProp]) // 从表.外键 = 主表.主键
+            query.where(tableAlias + foreignKey, "=", item[primaryProp]) // 从表.外键 = 主表.主键
         }
         return query
     }

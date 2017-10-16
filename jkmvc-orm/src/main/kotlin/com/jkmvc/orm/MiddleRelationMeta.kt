@@ -49,12 +49,14 @@ class MiddleRelationMeta(
      *     根据hasMany的关联关系，来构建查询条件
      *
      * @param item Orm对象
+     * @param withTableAlias 是否带表前缀
      * @return
      */
-    public override fun queryRelated(item: IOrm): OrmQueryBuilder {
+    public override fun queryRelated(item: IOrm, withTableAlias:Boolean): OrmQueryBuilder {
         // 通过join中间表 查从表
+        val tableAlias = middleTable + '.'
         return buildQuery() // 中间表.远端外键 = 从表.远端主键
-                .where(middleTable + '.' + foreignKey, "=", item[primaryProp]) as OrmQueryBuilder // 中间表.外键 = 主表.主键
+                .where(tableAlias + foreignKey, "=", item[primaryProp]) as OrmQueryBuilder // 中间表.外键 = 主表.主键
     }
 
     /**

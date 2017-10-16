@@ -137,7 +137,7 @@ abstract class OrmRelated: OrmPersistent() {
         // 获得关联关系
         val relation = ormMeta.getRelation(name)!!;
         // 构建查询：自动构建查询条件
-        return relation.queryRelated(this).delete()
+        return relation.queryRelated(this, false).delete()
     }
 
     /**
