@@ -72,7 +72,7 @@ abstract class OrmEntity : IOrm {
             throw OrmException("类 ${this.javaClass} 没有字段 $column");
 
         // 记录变化的字段名 + 原始值
-        if(!dirty.containsKey(column))
+        if(value != data[column] && !dirty.containsKey(column))
             dirty[column] = data[column];
 
         data[column] = value;
