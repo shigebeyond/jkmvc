@@ -24,6 +24,34 @@ public fun Date.format(pattern: String): String
 }
 
 /**
+ * 时间运算
+ *    参考 java.util.GregorianCalendar.add
+ *
+ * @param field the calendar field.
+ * @param amount the amount of date or time to be added to the field.
+ * @return
+ */
+public fun Date.add(field:Int, amount:Int): Date {
+    val calendar = GregorianCalendar()
+    calendar.time = this
+    calendar.add(field, amount)
+    return calendar.time
+}
+
+/**
+ * 获得日历字段
+ *   参考 java.util.Calendar.get
+ *
+ * @param field the calendar field.
+ * @return
+ */
+public fun Date.get(field:Int): Int {
+    val calendar = GregorianCalendar()
+    calendar.setTime(this)
+    return calendar.get(field)
+}
+
+/**
  * 获得一天的开始时间: 0:00:00
  * @return
  */
