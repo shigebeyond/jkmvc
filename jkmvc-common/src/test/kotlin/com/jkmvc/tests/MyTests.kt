@@ -56,6 +56,29 @@ class MyTests{
     }
 
     @Test
+    fun testDate(){
+        val c = GregorianCalendar()
+        c.time.print()
+        // 一日的时间
+//        c.dayStartTime.print()
+//        c.dayEndTime.print()
+        // 一周的时间
+//        c.weekStartTime.print()
+//        c.weekEndTime.print()
+//        c.weekStartTime2.print()
+//        c.weekEndTime2.print()
+        // 一月的时间
+//        c.monthStartTime.print()
+//        c.monthEndTime.print()
+        // 一季度的时间
+//        c.quarterStartTime.print()
+//        c.quarterEndTime.print()
+        // 一年的时间
+        c.yearStartTime.print()
+        c.yearEndTime.print()
+    }
+
+    @Test
     fun testLog(){
         testLogger.info("打信息日志")
         testLogger.debug("打调试日志")
