@@ -237,13 +237,51 @@ class MyTests{
 
     @Test
     fun testGetFileContent(){
-        val dir = File("/home/shi/Downloads/电网项目/source/szdl/0103_Code/NNDYPT/src/main/java")
+        // 扫描出id自增的代码
+        /*val dir = File("/home/shi/Downloads/电网项目/source/szdl/0103_Code/NNDYPT/src/main/java")
         dir.travel {
             //println(it)
             it.forEachLine {
                 if(it.contains("ID_SEQ")){
                     println(it)
                 }
+            }
+        }*/
+
+        // 扫描出分析模型的字段与注释
+        val dir = File("/home/shi/下载/电网项目/source/021RecoverPowerFast_AlarmAnalyse/src/com/yingkai/lpam/pojo")
+        var i = 0;
+        var clazz = ""
+        dir.travel {
+            //println(it)
+            it.forEachLine {
+                // 获得类注释
+                val matches = "^\\s+\\*\\s+([^@]+)$".toRegex().find(it)
+                if(matches != null){
+                    i++
+                    clazz = matches.groupValues[1]
+                }else{
+                    // 获得表名
+                    val matches = "^@Table\\(name=\"(.+)\"\\)$".toRegex().find(it)
+                    if(matches != null){
+                        println("\n-------------------------------------------------\n")
+                        println(i.toString() + matches.groupValues[1] + "\t" + clazz)
+                        println("-- 字段")
+                    }else{
+                        // 获得字段
+                        val matches = "^\\s+private\\s+(.+)$".toRegex().find(it)
+                        if(matches != null){
+                            val field = matches.groupValues[1]
+                            val arr = field.split("\\s+".toRegex())
+                            var (type, name) = arr
+                            name = name.trim(";")
+                            var comment = if(arr.size > 2) arr[2] else ""
+                            comment = comment.trim("//")
+                            println("$name\t$type\t$comment")
+                        }
+                    }
+                }
+
             }
         }
     }
