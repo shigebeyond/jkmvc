@@ -52,13 +52,24 @@ class MyTests{
         println(arrayOf("a", "b").joinToString(", ", "(", ")") {
             "[$it]"
         })*/
-        println("01".toInt())
+        //println("01".toInt())
+        // 长文本
+        val str = """
+        hello
+        world
+        """
+        println(str)
     }
 
     @Test
     fun testDate(){
+        // 字符串转date
+        "2016-12-21".toDate().print()
+        "2016-12-21 12:00:06".toDate().print()
+
+        // 获得一日/一周/一月/一年的开始与结束时间
         val c = GregorianCalendar()
-        c.time.print()
+        c.time.print() // 当前时间
         // 一日的时间
 //        c.dayStartTime.print()
 //        c.dayEndTime.print()
@@ -74,8 +85,9 @@ class MyTests{
 //        c.quarterStartTime.print()
 //        c.quarterEndTime.print()
         // 一年的时间
-        c.yearStartTime.print()
-        c.yearEndTime.print()
+//        c.yearStartTime.print()
+//        c.yearEndTime.print()
+
     }
 
     @Test

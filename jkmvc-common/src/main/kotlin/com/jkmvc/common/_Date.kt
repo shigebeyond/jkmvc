@@ -76,6 +76,19 @@ public fun Date.add(field:Int, amount:Int): Date {
 }
 
 /**
+ *  对时间应用Calendar的操作，并返回新的时间
+ *
+ *  @param block Calendar对象的操作
+ *  @return
+ */
+public fun Date.applyCalendar(block: Calendar.() -> Unit): Date? {
+    val calendar = GregorianCalendar()
+    calendar.time = this
+    calendar.block()
+    return calendar.time
+}
+
+/**
  * 获得日历字段
  *   参考 java.util.Calendar.get
  *

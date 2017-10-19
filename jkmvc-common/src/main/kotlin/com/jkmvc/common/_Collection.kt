@@ -173,3 +173,20 @@ class ItEnumeration<T>(val it: Iterator<T>) : Enumeration<T> {
 public fun <T> Iterable<T>.enumeration(): ItEnumeration<T> {
     return ItEnumeration(iterator())
 }
+
+/**
+ * map列表转哈希
+ *
+ * @param keyField 子项字段名，其值作为结果哈希的key
+ * @param valueField 子项字段名，其值作为结果哈希的value，如果为null，则用子项作为结果哈希的value
+ * @return
+ */
+fun Collection<out Map<*, *>>.asMap(keyField:String, valueField:String?): Map<*, *> {
+    val result = HashMap<Any, Any?>()
+    this.forEach {
+        val key:Any = it[keyField]!!
+        val value:Any? = if(valueField == null) it else it[valueField]
+        result[key] = value
+    }
+    return result
+}
