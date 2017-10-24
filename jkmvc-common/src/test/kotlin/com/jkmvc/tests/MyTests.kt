@@ -283,8 +283,17 @@ class MyTests{
             }
         }*/
 
+        // controller的action方法改名
+        // 由actionIndex, 改为indexAction
+        val dir = File("/oldhome/shi/code/java/szpower/szpower")
+        dir.travel {
+            if(it.name.indexOf("Controller.kt") > 0){
+                it.forEachLine {  }
+            }
+        }
+
         // 扫描出分析模型的字段与注释
-        val dir = File("/home/shi/下载/电网项目/source/021RecoverPowerFast_AlarmAnalyse/src/com/yingkai/lpam/pojo")
+        /*val dir = File("/home/shi/下载/电网项目/source/021RecoverPowerFast_AlarmAnalyse/src/com/yingkai/lpam/pojo")
         var i = 0;
         var clazz = ""
         dir.travel {
@@ -318,7 +327,7 @@ class MyTests{
                 }
 
             }
-        }
+        }*/
     }
 
     @Test

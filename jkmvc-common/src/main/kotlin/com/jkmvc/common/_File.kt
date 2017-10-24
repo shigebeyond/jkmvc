@@ -36,6 +36,17 @@ public fun String.isAbsolutePath(): Boolean {
     return startsWith("/") || indexOf(":") > 0;
 }
 
+/****************************** 文本处理 *******************************/
+
+/**
+ *
+ */
+public fun File.replaceText(transform:(txt: String) -> String){
+    val txt = this.readText()
+    transform(txt)
+    this.writeText(txt)
+}
+
 /****************************** 文件遍历 *******************************/
 /**
  * 遍历文件
