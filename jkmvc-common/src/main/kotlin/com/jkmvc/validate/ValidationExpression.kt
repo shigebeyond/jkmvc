@@ -49,7 +49,7 @@ class ValidationExpression(override val exp:String /* 原始表达式 */):IValid
 		 *     表达式是由多个(函数调用的)子表达式组成, 子表达式之间用运算符连接, 运算符有 & && | || . >
 		 *
 		 * <code>
-		 *     list(ops, subexps) = ValidationExpression::compile("trim > notempty && email");
+		 *     list(ops, subexps) = ValidationExpression::compile("trim > notEmpty && email");
 		 * </code>
 		 *
 		 * @param exp
