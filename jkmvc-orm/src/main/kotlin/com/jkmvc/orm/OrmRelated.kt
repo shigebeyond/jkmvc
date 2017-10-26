@@ -37,12 +37,12 @@ abstract class OrmRelated: OrmPersistent() {
      * @param defaultValue 默认值
      * @return
      */
-    public override operator fun <T> get(name: String, defaultValue: Any?): T {
+    public override operator fun <T> get(column: String, defaultValue: Any?): T {
         // 获得关联对象
-        if (ormMeta.hasRelation(name))
-            return related(name, false) as T;
+        if (ormMeta.hasRelation(column))
+            return related(column, false) as T;
 
-        return super.get(name, defaultValue);
+        return super.get(column, defaultValue);
     }
 
     /**
@@ -91,16 +91,18 @@ abstract class OrmRelated: OrmPersistent() {
             // 获得关联关系
             val relation = ormMeta.getRelation(name)!!;
 
-            var result: Any?;
+            var result: Any? = null;
             if (newed) {  // 创建新对象
                 result = relation.newModelInstance();
             }else{  // 根据关联关系来构建查询
-                val query:OrmQueryBuilder = relation.queryRelated(this) // 自动构建查询条件
-                query.select(columns) // 查字段
-                if(relation.type == RelationType.HAS_MANY){ // 查多个
-                    result = query.findAll(transform = relation.recordTranformer)
-                }else{ // 查一个
-                    result = query.find(transform = relation.recordTranformer)
+                val query:OrmQueryBuilder? = relation.queryRelated(this) // 自动构建查询条件
+                if(query != null){
+                    query.select(columns) // 查字段
+                    if (relation.type == RelationType.HAS_MANY) { // 查多个
+                        result = query.findAll(transform = relation.recordTranformer)
+                    } else { // 查一个
+                        result = query.find(transform = relation.recordTranformer)
+                    }
                 }
             }
 
@@ -122,7 +124,8 @@ abstract class OrmRelated: OrmPersistent() {
         // 获得关联关系
         val relation = ormMeta.getRelation(name)!!;
         // 构建查询：自动构建查询条件
-        return relation.queryRelated(this).count()
+        val query = relation.queryRelated(this)
+        return if(query == null) 0 else query.count()
     }
 
     /**
@@ -137,7 +140,8 @@ abstract class OrmRelated: OrmPersistent() {
         // 获得关联关系
         val relation = ormMeta.getRelation(name)!!;
         // 构建查询：自动构建查询条件
-        return relation.queryRelated(this, false).delete()
+        val query = relation.queryRelated(this, false)
+        return if(query == null) true else query.delete()
     }
 
     /**
@@ -164,6 +168,6 @@ abstract class OrmRelated: OrmPersistent() {
             return DbQueryBuilder(ormMeta.db, relation.middleTable).where(relation.foreignKey, "=", this[relation.primaryProp]).delete();
 
         // 2.2 无中间表：清空关联对象的外键
-        return relation.queryRelated(this).set(relation.foreignKey, nullValue).update()
+        return relation.queryRelated(this)!!.set(relation.foreignKey, nullValue).update()
     }
 }

@@ -44,23 +44,26 @@ open class RelationMeta(
     /**
      * 查询关联表
      *     自动根据关联关系，来构建查询条件
+     *     对belongs_to关系，如果外键为空，则联查为空
      *
      * @param item Orm对象
      * @param withTableAlias 是否带表前缀
      * @return
      */
-    public override fun queryRelated(item: IOrm, withTableAlias:Boolean): OrmQueryBuilder {
-        val query = queryBuilder()
+    public override fun queryRelated(item: IOrm, withTableAlias:Boolean): OrmQueryBuilder? {
         val tableAlias = if(withTableAlias)
                             model.modelName + '.'
                         else
                             ""
         if(type == RelationType.BELONGS_TO) { // 查主表
-            query.where(tableAlias + primaryKey, "=", item[foreignProp]) // 主表.主键 = 从表.外键
-        } else { // 查从表
-            query.where(tableAlias + foreignKey, "=", item[primaryProp]) // 从表.外键 = 主表.主键
+            val fk: Any? = item[foreignProp]
+            if(fk == null) // 外键为空，则联查为空
+                return null
+            return queryBuilder().where(tableAlias + primaryKey, "=", fk) as OrmQueryBuilder // 主表.主键 = 从表.外键
         }
-        return query
+
+        // 查从表
+        return queryBuilder().where(tableAlias + foreignKey, "=", item[primaryProp]) as OrmQueryBuilder// 从表.外键 = 主表.主键
     }
 
     /**

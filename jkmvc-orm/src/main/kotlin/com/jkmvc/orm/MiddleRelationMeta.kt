@@ -52,7 +52,7 @@ class MiddleRelationMeta(
      * @param withTableAlias 是否带表前缀
      * @return
      */
-    public override fun queryRelated(item: IOrm, withTableAlias:Boolean): OrmQueryBuilder {
+    public override fun queryRelated(item: IOrm, withTableAlias:Boolean): OrmQueryBuilder? {
         // 通过join中间表 查从表
         val tableAlias = middleTable + '.'
         return buildQuery() // 中间表.远端外键 = 从表.远端主键

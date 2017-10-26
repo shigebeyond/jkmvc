@@ -88,7 +88,7 @@ interface IRelationMeta {
      * @param orm Orm对象或列表
      * @return
      */
-    fun queryRelated(orm: Any): OrmQueryBuilder{
+    fun queryRelated(orm: Any): OrmQueryBuilder?{
         return when(orm){
             is IOrm -> queryRelated(orm)
             is Collection<*> -> queryRelated(orm as Collection<out IOrm>)
@@ -104,7 +104,7 @@ interface IRelationMeta {
      * @param withTableAlias 是否带表前缀
      * @return
      */
-    fun queryRelated(item: IOrm, withTableAlias:Boolean = true): OrmQueryBuilder
+    fun queryRelated(item: IOrm, withTableAlias:Boolean = true): OrmQueryBuilder?
 
     /**
      * 查询关联表

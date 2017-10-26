@@ -114,16 +114,14 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @return
      */
     public fun selectWiths(columns: SelectColumnList): OrmQueryBuilder {
-        if (columns != null) {
-            // 联查关联模型
-            columns.forEachRelatedColumns { name, columns ->
-                with(name, columns)
-            }
+        // 联查关联模型
+        columns.forEachRelatedColumns { name, columns ->
+            with(name, columns)
+        }
 
-            // 查询本模型字段
-            columns.forEachMyColumns {
-                select(ormMeta.name + '.' + it);
-            }
+        // 查询本模型字段
+        columns.forEachMyColumns {
+            select(ormMeta.name + '.' + it);
         }
         return this
     }
@@ -274,6 +272,8 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
 
             // 关联查询hasMany：自动构建查询条件
             val query = relation.queryRelated(orm)
+            if(query == null)
+                continue
 
             // 设置查询字段 + 递归联查子关系
             if(columns != null)
