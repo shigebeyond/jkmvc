@@ -335,7 +335,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                         prop
 
         // 智能转换字段值: 准确类型的值
-        val accurateValue = if(convertValue && (value is String || value is Array<*> || value is List<*>))
+        val accurateValue = if(convertValue && (value is String || value is Array<*> || value is Collection<*>))
                             convertIntelligent(prop, value)
                         else
                             value
@@ -358,7 +358,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                         prop
 
         // 智能转换字段值: 准确类型的值
-        val accurateValue = if(convertValue && (value is String || value is Array<*> || value is List<*>))
+        val accurateValue = if(convertValue && (value is String || value is Array<*> || value is Collection<*>))
                                 convertIntelligent(prop, value)
                             else
                                 value
@@ -413,7 +413,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                         prop
 
         // 智能转换字段值: 准确类型的值
-        val accurateValue = if(convertValue && (value is String || value is Array<*> || value is List<*>))
+        val accurateValue = if(convertValue && (value is String || value is Array<*> || value is Collection<*>))
                                 convertIntelligent(prop, value)
                             else
                                 value
@@ -437,7 +437,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                         prop
 
         // 智能转换字段值: 准确类型的值
-        val accurateValue = if(convertValue && (value is String || value is Array<*> || value is List<*>))
+        val accurateValue = if(convertValue && (value is String || value is Array<*> || value is Collection<*>))
                                 convertIntelligent(prop, value)
                             else
                                 value
@@ -465,7 +465,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
             }
             return arr
         }
-        if(value is List<*>){
+        if(value is Collection<*>){
             val list = value as MutableList<Any?>
             for(i in 0..(value.size - 1)){
                 list[i] = model.convertIntelligent(column, value[i] as String)
