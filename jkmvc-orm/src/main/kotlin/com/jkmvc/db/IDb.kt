@@ -34,11 +34,11 @@ interface IDb{
     /**
      * 执行更新
      * @param sql
-     * @param paras
+     * @param params
      * @param returnGeneratedKey
      * @return
      */
-    fun execute(sql: String, paras: List<Any?>? = null, returnGeneratedKey:Boolean = false): Int;
+    fun execute(sql: String, params: List<Any?>? = null, returnGeneratedKey:Boolean = false): Int;
 
     /**
      * 批量更新: 每次更新sql参数不一样
@@ -53,29 +53,29 @@ interface IDb{
     /**
      * 查询多行
      * @param sql
-     * @param paras
+     * @param params
      * @param action 处理结果的函数
      * @return
      */
-    fun <T> queryResult(sql: String, paras: List<Any?>? = null, action: (ResultSet) -> T): T;
+    fun <T> queryResult(sql: String, params: List<Any?>? = null, action: (ResultSet) -> T): T;
 
     /**
      * 查询多行
      * @param sql
-     * @param paras
+     * @param params
      * @param transform 处理结果的函数
      * @return
      */
-    fun <T> queryRows(sql: String, paras: List<Any?>? = null, transform: (MutableMap<String, Any?>) -> T): List<T>;
+    fun <T> queryRows(sql: String, params: List<Any?>? = null, transform: (MutableMap<String, Any?>) -> T): List<T>;
 
     /**
      * 查询一行(多列)
      * @param sql
-     * @param paras
+     * @param params
      * @param transform 处理结果的函数
      * @return
      */
-    fun <T> queryRow(sql: String, paras: List<Any?>? = null, transform: (MutableMap<String, Any?>) -> T): T?;
+    fun <T> queryRow(sql: String, params: List<Any?>? = null, transform: (MutableMap<String, Any?>) -> T): T?;
 
     /**
      * 查询一列(多行)
@@ -89,10 +89,10 @@ interface IDb{
     /**
      * 查询一行一列
      * @param sql
-     * @param paras
+     * @param params
      * @return
      */
-    fun queryCell(sql: String, paras: List<Any?>? = null): Pair<Boolean, Any?>;
+    fun queryCell(sql: String, params: List<Any?>? = null): Pair<Boolean, Any?>;
     
     /**
      * 开启事务

@@ -52,7 +52,7 @@ class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如w
             subexps.add(last);
         }
 
-        return last as DbQueryBuilderDecorationClausesSimple;
+        return last;
     }
 
     /**

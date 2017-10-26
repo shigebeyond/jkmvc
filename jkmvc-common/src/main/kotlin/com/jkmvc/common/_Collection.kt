@@ -120,7 +120,7 @@ public fun Map<String, *>.path(path:String, withException: Boolean, default: Any
  * @param value 目标值
  */
 public fun MutableMap<String, Any?>.setPath(path:String, value:Any?): Unit {
-// 单层
+    // 单层
     if(!path.contains('.')){
         this[path] = value
         return

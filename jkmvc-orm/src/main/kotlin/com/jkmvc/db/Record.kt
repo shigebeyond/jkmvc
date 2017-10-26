@@ -21,8 +21,8 @@ class Record(protected val data: MutableMap<String, Any?> = HashMap<String, Any?
     /**
      * 读取属性
      */
-    public override operator fun <T> get(name: String, defaultValue: Any?): T {
-        return (data.get(name) ?: defaultValue) as T
+    public override operator fun <T> get(column: String, defaultValue: Any?): T {
+        return (data.get(column) ?: defaultValue) as T
     }
 
     public override fun toString(): String {

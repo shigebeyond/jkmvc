@@ -23,15 +23,15 @@ interface IDbQueryBuilderDecorationClauses<T>
      * @param delimiter 当前子表达式的连接符
      * @return
      */
-    public fun addSubexp(subexp:Array<Any?>, delimite:String = ", "):IDbQueryBuilderDecorationClauses<T>;
+    public fun addSubexp(subexp:Array<Any?>, delimiter:String = ", "):IDbQueryBuilderDecorationClauses<T>;
 
     /**
      * 编译一个子表达式
      * @param subexp 子表达式
-     * @param i 索引
+     * @param j 索引
      * @param sql 保存编译的sql
      */
-    public fun compileSubexp(subexp:T, i:Int, sql:StringBuilder):Unit;
+    public fun compileSubexp(subexp:T, j:Int, sql:StringBuilder):Unit;
 
     /**
      * 开启一个分组

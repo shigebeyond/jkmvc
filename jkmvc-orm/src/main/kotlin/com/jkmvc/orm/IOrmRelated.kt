@@ -12,10 +12,10 @@ interface IOrmRelated : IOrmPersistent
 	/**
 	 * 设置原始的字段值
 	 *
-	 * @param data
+	 * @param orgn
 	 * @return
 	 */
-	fun original(data: Map<String, Any?>): IOrm;
+	fun original(orgn: Map<String, Any?>): IOrm;
 
 	/**
 	 * 获得关联对象

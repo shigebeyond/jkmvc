@@ -81,7 +81,7 @@ object ControllerLoader:IControllerLoader{
                 // 遍历某个资源下的文件
                 url.travel { relativePath, isDir ->
                     // 收集controller类
-                    collectControllerClass(relativePath, isDir, result)
+                    collectControllerClass(relativePath, result)
                 }
             }
         }
@@ -96,7 +96,7 @@ object ControllerLoader:IControllerLoader{
      * @param isDir
      * @return
      */
-    fun collectControllerClass(relativePath: String, isDir: Boolean, result: MutableMap<String, ControllerClass>){
+    fun collectControllerClass(relativePath: String, result: MutableMap<String, ControllerClass>){
         // 过滤Controller的类文件
         if(!relativePath.endsWith("Controller.class"))
             return

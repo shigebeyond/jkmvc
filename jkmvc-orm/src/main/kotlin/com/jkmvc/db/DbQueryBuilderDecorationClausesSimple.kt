@@ -41,7 +41,7 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
             // 处理某个元素的值
             var value: Any? = exp[i];
             if (exp.size > i && handler != null) {
-                value = handler?.invoke(exp[i]); // 调用元素处理函数
+                value = handler.invoke(exp[i]); // 调用元素处理函数
             }
             sql.append(value).append(' '); // // 用空格拼接多个元素
         }

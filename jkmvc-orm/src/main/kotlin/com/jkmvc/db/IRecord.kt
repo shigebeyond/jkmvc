@@ -17,7 +17,7 @@ interface IRecord {
     /**
      * 读取属性
      */
-    operator fun <T> get(name: String, defaultValue: Any? = null): T ;
+    operator fun <T> get(column: String, defaultValue: Any? = null): T ;
 
     /********************** 各种转为对应类型的getter，必须在接口中实现，以便同时被 Record/OrmEntity 继承，复用代码 *********************/
     /**
