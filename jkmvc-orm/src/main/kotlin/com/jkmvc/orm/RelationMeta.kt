@@ -21,6 +21,12 @@ open class RelationMeta(
 ): IRelationMeta {
 
     /**
+     * 约定int类型的外键必须是正整数
+     * TODO: 可配置
+     */
+    public val intForeighKeyMustPositive:Boolean = true
+
+    /**
      * 主键属性
      */
     public override val primaryProp:String = sourceMeta.column2Prop(primaryKey)
@@ -57,7 +63,7 @@ open class RelationMeta(
                             ""
         if(type == RelationType.BELONGS_TO) { // 查主表
             val fk: Any? = item[foreignProp]
-            if(fk == null) // 外键为空，则联查为空
+            if(fk == null || (fk is Int && intForeighKeyMustPositive && fk == 0)) // 如果外键为空，则联查为空
                 return null
             return queryBuilder().where(tableAlias + primaryKey, "=", fk) as OrmQueryBuilder // 主表.主键 = 从表.外键
         }
