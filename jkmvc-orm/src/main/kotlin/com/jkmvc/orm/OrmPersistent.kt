@@ -75,10 +75,12 @@ abstract class OrmPersistent: OrmValid() {
 		fireEvent("beforeSave")
 
 		// 插入数据库
-		val pk = queryBuilder().value(buildDirtyData()).insert(true);
+		val needPk = !data.containsKey(ormMeta.primaryProp) // 是否需要生成主键
+		val pk = queryBuilder().value(buildDirtyData()).insert(needPk);
 
 		// 更新内部数据
-		data[ormMeta.primaryProp] = pk; // 主键
+		if(needPk)
+			data[ormMeta.primaryProp] = pk; // 主键
 
 		// 触发后置事件
 		fireEvent("afterCreate")
