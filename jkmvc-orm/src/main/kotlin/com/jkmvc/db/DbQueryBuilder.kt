@@ -10,7 +10,7 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-13
  */
-open class DbQueryBuilder(db:IDb = Db.getDb(), table:Pair<String, String?> /*表名*/) :DbQueryBuilderDecoration(db, table)
+open class DbQueryBuilder(db:IDb = Db.getDb(), table:Pair<String, String?> /*表名*/ = emptyTable) :DbQueryBuilderDecoration(db, table)
 {
     /**
      * 缓存编译好的sql
@@ -22,7 +22,7 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:Pair<String, String?> /*表
      * @param db 数据库连接
      * @param table 表名
      */
-    public constructor(db: IDb, table: String = ""):this(db, if(table == "") emptyTable else Pair(table, null)){
+    public constructor(db: IDb, table: String):this(db, if(table == "") emptyTable else Pair(table, null)){
     }
 
     /**
@@ -201,6 +201,20 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:Pair<String, String?> /*表
     }
 
     /**
+     * 查询一列（多行）
+     *
+     * @param params 动态参数
+     * @return
+     */
+    public override fun findColumn(vararg params: Any?): List<Any?>{
+        // 1 编译
+        val result = compile(ActionType.SELECT);
+
+        // 2 执行 select
+        return db.queryColumn(result.sql, result.buildParams(params))
+    }
+
+    /**
      * 统计行数： count语句
      *
      * @param params 动态参数
@@ -250,6 +264,17 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:Pair<String, String?> /*表
 
         // 2 批量执行有参数sql
         return db.batchExecute(result.sql, result.buildBatchParamses(paramses, paramSize), result.staticParams.size);
+    }
+
+    /**
+     * 批量插入
+     *
+     * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
+     * @param paramSize 一次处理的参数个数
+     * @return
+     */
+    public override fun batchInsert(paramses: List<Any?>, paramSize:Int): IntArray {
+        return batchExecute(ActionType.INSERT, paramses, paramSize)
     }
 
     /**

@@ -48,11 +48,13 @@ class DbTests{
     @Test
     fun testBatchInsert(){
         val query = DbQueryBuilder(db).table("user").insertColumns("name", "age");
+        val ids = ArrayList<Int>()
         for (i in id..(id+10)){
             query.value("shi-$i", i)
+            val id = query.insert(true);
+            ids.add(id)
         }
-        val id = query.insert(true);
-        println("批量插入user表, 起始id：$id, 行数：10")
+        println("批量插入user表, 起始id：${ids.first()}, 行数：10")
     }
 
     @Test
@@ -84,7 +86,8 @@ class DbTests{
         }
 
         // 批量插入
-        DbQueryBuilder(db).table("user").insertColumns("name", "age").value("?", "?").batchExecute(ActionType.INSERT, params, 2)// 每次只处理2个参数
+        //DbQueryBuilder(db).table("user").insertColumns("name", "age").value("?", "?").batchExecute(ActionType.INSERT, params, 2)// 每次只处理2个参数
+        DbQueryBuilder(db).table("user").insertColumns("name", "age").value("?", "?").batchInsert(params, 2)// 每次只处理2个参数
     }
 
     @Test

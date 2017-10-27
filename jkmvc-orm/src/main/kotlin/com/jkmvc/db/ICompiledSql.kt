@@ -138,6 +138,14 @@ abstract class ICompiledSql {
     public abstract fun <T:Any> find(vararg params: Any?, transform:(MutableMap<String, Any?>) -> T): T?;
 
     /**
+     * 查询一列（多行）
+     *
+     * @param params 动态参数
+     * @return
+     */
+    public abstract fun findColumn(params: Array<out Any?>): List<Any?>;
+
+    /**
      * 查询一个值（单行单列）
      *
      * @param params 动态参数

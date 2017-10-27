@@ -113,6 +113,14 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
     }
 
     /**
+     * 查询一列（多行）
+     *
+     * @param params 动态参数
+     * @return
+     */
+    public abstract fun findColumn(vararg params: Any?): List<Any?>;
+
+    /**
      * 统计行数： count语句
      *
      * @param params 动态参数
@@ -139,6 +147,15 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      * @return
      */
     public abstract fun batchExecute(action:ActionType, paramses: List<Any?>, paramSize:Int): IntArray;
+
+    /**
+     * 批量插入
+     *
+     * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
+     * @param paramSize 一次处理的参数个数
+     * @return
+     */
+    public abstract fun batchInsert(paramses: List<Any?>, paramSize:Int): IntArray;
 
     /**
      * 插入：insert语句

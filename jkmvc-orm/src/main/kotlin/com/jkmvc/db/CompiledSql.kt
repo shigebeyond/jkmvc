@@ -209,6 +209,17 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
     }
 
     /**
+     * 查询一列（多行）
+     *
+     * @param params 动态参数
+     * @return
+     */
+    public override fun findColumn(params: Array<out Any?>): List<Any?> {
+        // 执行 select
+        return db.queryColumn(sql, buildParams(params))
+    }
+
+    /**
      * 查询一个值（单行单列）
      *
      * @param params 动态参数
