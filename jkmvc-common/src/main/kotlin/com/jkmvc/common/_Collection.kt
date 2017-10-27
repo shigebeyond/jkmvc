@@ -56,6 +56,17 @@ public inline fun <reified T:Any>  Map<*, *>.getAndConvert(key:String, defaultVa
 }
 
 /**
+ * map删除多个key
+ * @param keys
+ * @return
+ */
+public fun  <K, V> MutableMap<K, V>.removeAll(keys: Collection<K>): MutableMap<K, V> {
+    for (key in keys)
+        remove(key)
+    return this
+}
+
+/**
  * 获得'.'分割的路径下的子项值
  *
  * @param path '.'分割的路径
