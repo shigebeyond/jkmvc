@@ -35,15 +35,6 @@ fun Collection<out IOrm>.itemAsMap(): List<Map<String, Any?>> {
 }
 
 /**
- * orm列表获得字段值
- */
-fun Collection<out IOrm>.asMap(): List<Map<String, Any?>> {
-    return this.map {
-        it.asMap()
-    }
-}
-
-/**
  * orm列表转哈希
  *
  * @param keyField 子项字段名，其值作为结果哈希的key
@@ -76,7 +67,7 @@ fun <K, V:IOrm> Collection<V>.asMap(keyField:String): Map<K, V> {
  * @param key
  * @return
  */
-public fun Collection<out IOrm>.collectColumn(key:String):Collection<Any?>{
+public fun Collection<out IOrm>.collectColumn(key:String):List<Any?>{
     return this.map {
         val v: Any? = it[key]
         v
