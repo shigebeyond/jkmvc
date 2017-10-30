@@ -212,12 +212,13 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param middleTable 中间表
      * @param farForeignKey 远端外键
      * @param farPrimaryKey 远端主键
+     * @param conditions 关联查询条件
      * @return
      */
-    public override fun hasOneThrough(name: String, relatedModel: KClass<out IOrm>, foreignKey: String,  primaryKey: String,  middleTable:String,  farForeignKey:String,  farPrimaryKey:String): IOrmMeta {
+    public override fun hasOneThrough(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, primaryKey: String, middleTable:String, farForeignKey:String, farPrimaryKey:String, conditions:Map<String, Any?>): IOrmMeta {
         // 设置关联关系
         relations.getOrPut(name) {
-            MiddleRelationMeta(this, RelationType.HAS_ONE, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey)
+            MiddleRelationMeta(this, RelationType.HAS_ONE, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey, conditions)
         }
 
         return this;
@@ -232,9 +233,10 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param middleTable 中间表
      * @param farForeignKey 远端外键
      * @param farPrimaryKey 远端主键
+     * @param conditions 关联查询条件
      * @return
      */
-    public override fun hasManyThrough(name: String, relatedModel: KClass<out IOrm>, foreignKey: String,  primaryKey: String,  middleTable:String,  farForeignKey:String,  farPrimaryKey:String): IOrmMeta {
+    public override fun hasManyThrough(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, primaryKey: String, middleTable:String, farForeignKey:String, farPrimaryKey:String, conditions:Map<String, Any?>): IOrmMeta {
         // 设置关联关系
         relations.getOrPut(name) {
             MiddleRelationMeta(this, RelationType.HAS_MANY, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey)

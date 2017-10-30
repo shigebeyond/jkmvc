@@ -7,11 +7,11 @@ import kotlin.reflect.KClass
  *
  * 特征
  *   1 用中间表来存储两表的关联关系
- *   2 两表对彼此都是hasMany的关联关系
+ *   2 两表对彼此都是hasMany/hasOne的关联关系
  *
- * 只涉及到1类查询
- *   hasMany关系的关联查询
- *   => 不用考虑一对一关系(belongsTo / hasOne)
+ * 只涉及到2类的关联查询
+ *   只针对hasMany/hasOne
+ *   不考虑belongsTo
  */
 class MiddleRelationMeta(
         sourceMeta:IOrmMeta, /* 源模型元数据 */
@@ -21,8 +21,9 @@ class MiddleRelationMeta(
         primaryKey:String/* 主键 */,
         public val middleTable:String/* 中间表 */,
         public val farForeignKey:String /* 远端外键 */,
-        public val farPrimaryKey:String/* 远端主键 */
-) : RelationMeta(sourceMeta, type, model, foreignKey, primaryKey) {
+        public val farPrimaryKey:String/* 远端主键 */,
+        conditions:Map<String, Any?> = emptyMap() /* 查询条件 */
+) : RelationMeta(sourceMeta, type, model, foreignKey, primaryKey, conditions) {
 
     /**
      * 远端主键属性
@@ -46,7 +47,7 @@ class MiddleRelationMeta(
 
     /**
      * 查询从表
-     *     根据hasMany的关联关系，来构建查询条件
+     *     根据hasMany/hasOne的关联关系，来构建查询条件
      *
      * @param item Orm对象
      * @param withTableAlias 是否带表前缀
@@ -61,7 +62,7 @@ class MiddleRelationMeta(
 
     /**
      * 查询从表
-     *     根据hasMany的关联关系，来构建查询条件
+     *     根据hasMany/hasOne的关联关系，来构建查询条件
      *
      * @param items Orm列表
      * @return

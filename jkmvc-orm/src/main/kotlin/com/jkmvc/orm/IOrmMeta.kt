@@ -282,7 +282,9 @@ interface IOrmMeta {
                        primaryKey: String = this.primaryKey /* 本表的主键 */,
                        middleTable:String = table + '_' + relatedModel.modelOrmMeta.table /* 主表_从表 */,
                        farForeignKey:String = relatedModel.modelOrmMeta.defaultForeignKey /* 远端主表_主键 = 从表_主键 */,
-                       farPrimaryKey:String = relatedModel.modelOrmMeta.primaryKey): IOrmMeta /* 从表的主键 */
+                       farPrimaryKey:String = relatedModel.modelOrmMeta.primaryKey, /* 从表的主键 */
+                      conditions: Map<String, Any?> = emptyMap()
+    ): IOrmMeta
 
     /**
      * 设置关联关系(has many)
@@ -312,7 +314,9 @@ interface IOrmMeta {
                        primaryKey: String = this.primaryKey /* 本表的主键 */,
                        middleTable:String = table + '_' + relatedModel.modelOrmMeta.table /* 主表_从表 */,
                        farForeignKey:String = relatedModel.modelOrmMeta.defaultForeignKey /* 远端主表_主键 = 从表_主键 */,
-                       farPrimaryKey:String = relatedModel.modelOrmMeta.primaryKey): IOrmMeta /* 从表的主键 */
+                       farPrimaryKey:String = relatedModel.modelOrmMeta.primaryKey,/* 从表的主键 */
+                       conditions: Map<String, Any?> = emptyMap()
+    ): IOrmMeta
 
     /**
      * 智能转换字段值
