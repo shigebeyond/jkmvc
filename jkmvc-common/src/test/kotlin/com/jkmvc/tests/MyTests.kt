@@ -63,13 +63,20 @@ class MyTests{
 
     @Test
     fun testDate(){
+        // 日期比较
+        val a = Date()
+        val b = a.add(Calendar.MINUTE, 1)
+        val c = a.add(Calendar.DATE, -1)
+        println(a > b)
+        println(a > c)
+
         // 字符串转date
-        "2016-12-21".toDate().print()
-        "2016-12-21 12:00:06".toDate().print()
+//        "2016-12-21".toDate().print()
+//        "2016-12-21 12:00:06".toDate().print()
 
         // 获得一日/一周/一月/一年的开始与结束时间
-        val c = GregorianCalendar()
-        c.time.print() // 当前时间
+//        val c = GregorianCalendar()
+//        c.time.print() // 当前时间
         // 一日的时间
 //        c.dayStartTime.print()
 //        c.dayEndTime.print()

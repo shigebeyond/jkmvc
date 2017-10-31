@@ -23,8 +23,8 @@ import kotlin.reflect.full.cast
  *
  */
 class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
-                      protected val convertValue: Boolean = false /* 查询时是否智能转换字段值 */,
-                      protected val convertColumn: Boolean = false /* 查询时是否智能转换字段名 */
+                      protected var convertValue: Boolean = false /* 查询时是否智能转换字段值 */,
+                      protected var convertColumn: Boolean = false /* 查询时是否智能转换字段名 */
     ) : DbQueryBuilder(ormMeta.db, Pair(ormMeta.table, ormMeta.name)) {
 
     /**
@@ -60,6 +60,19 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
             throw UnsupportedOperationException("sql构建器将记录转为指定类型：只能指定 ${ormMeta.model} 类及其父类，实际指定 ${clazz}");
 
         return super.getRecordTranformer(clazz)
+    }
+
+    /**
+     * 切换智能转换的模式
+     *
+     * @param convertValue 查询时是否智能转换字段值
+     * @param convertColumn 查询时是否智能转换字段名
+     * @return
+     */
+    public fun toggleConvertPattern(convertValue: Boolean, convertColumn: Boolean): OrmQueryBuilder{
+        this.convertColumn = convertColumn
+        this.convertValue = convertValue
+        return this
     }
 
     /********************************* with系列方法，用于实现关联对象查询 **************************************/
