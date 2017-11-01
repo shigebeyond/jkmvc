@@ -11,7 +11,7 @@ package com.jkmvc.db
  * @author shijianhang
  * @date 2016-10-13
  */
-class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如where/group by */, elementHandlers: Array<((Any?) -> String)?> /* 每个元素的处理器, 可视为列的处理*/)
+class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如where/group by */, elementHandlers: Array<((Any?) -> String)?> /* 每个元素的处理器, 可视为列的处理*/, protected val afterGroup:Boolean = false /* 跟在分组 DbQueryBuilderDecorationClausesGroup 后面 */)
 : DbQueryBuilderDecorationClauses<Pair<Array<Any?>, String>>/* subexps 是子表达式+连接符 */(operator, elementHandlers) {
     /**
      * 添加一个子表达式+连接符
@@ -35,6 +35,11 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
      */
     public override fun compileSubexp(subexp: Pair<Array<Any?>, String>, j:Int, sql: StringBuilder): Unit {
         val (exp, delimiter) = subexp;
+
+        // 跟在分组后面的第一个元素要在前面插入连接符
+        if(afterGroup && j == 0)
+            sql.append(delimiter).append(' ');
+
         // 遍历处理器来处理对应元素, 没有处理的元素也直接拼接
         for (i in elementHandlers.indices) {
             val handler: ((Any?) -> String)? = elementHandlers[i];
@@ -45,7 +50,8 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
             }
             sql.append(value).append(' '); // // 用空格拼接多个元素
         }
-        // 非最后一个元素要加连接符
+
+        // 非最后一个元素要在后面追加连接符
         if(j != subexps.size - 1)
             sql.append(delimiter).append(' ');
     }

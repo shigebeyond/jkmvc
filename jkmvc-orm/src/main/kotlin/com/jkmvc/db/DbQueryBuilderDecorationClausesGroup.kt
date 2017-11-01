@@ -46,9 +46,13 @@ class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如w
      * @return
      */
     protected fun endSubexp(): DbQueryBuilderDecorationClausesSimple {
+        // 最后一个
         var last:Any? = if(subexps.isEmpty()) null else subexps.last()
+        // 倒数第二个
+        val last2:Any? = if(subexps.size < 2) null else subexps[subexps.size - 2]
         if (last !is DbQueryBuilderDecorationClausesSimple) {
-            last = DbQueryBuilderDecorationClausesSimple("", elementHandlers);
+            val afterGroup = last2 == ")" // 跟在分组后面
+            last = DbQueryBuilderDecorationClausesSimple("", elementHandlers, afterGroup);
             subexps.add(last);
         }
 
