@@ -94,9 +94,10 @@ interface IOrmMeta {
      *
      * @param convertValue 查询时是否智能转换字段值
      * @param convertColumn 查询时是否智能转换字段名
+     * @param withSelect with()联查时自动select关联表的字段
      * @return
      */
-    fun queryBuilder(convertValue: Boolean = false, convertColumn: Boolean = false): OrmQueryBuilder;
+    fun queryBuilder(convertValue: Boolean = false, convertColumn: Boolean = false, withSelect: Boolean = true): OrmQueryBuilder;
 
     /**
      * 添加规则

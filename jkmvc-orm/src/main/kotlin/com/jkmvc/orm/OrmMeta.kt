@@ -109,10 +109,11 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      *
      * @param convertValue 查询时是否智能转换字段值
      * @param convertColumn 查询时是否智能转换字段名
+     * @param withSelect with()联查时自动select关联表的字段
      * @return
      */
-    public override fun queryBuilder(convertValue: Boolean, convertColumn: Boolean): OrmQueryBuilder {
-        return OrmQueryBuilder(this, convertValue, convertColumn);
+    public override fun queryBuilder(convertValue: Boolean, convertColumn: Boolean, withSelect: Boolean): OrmQueryBuilder {
+        return OrmQueryBuilder(this, convertValue, convertColumn, withSelect);
     }
 
     /**
@@ -307,7 +308,8 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
         }
 
         // 查询当前关系字段
-        query.selectRelated(relation, name, columns?.myColumns /* 若字段为空，则查全部字段 */, path2);
+        if(query.withSelect)
+            query.selectRelated(relation, name, columns?.myColumns /* 若字段为空，则查全部字段 */, path2);
 
         return relation;
     }
