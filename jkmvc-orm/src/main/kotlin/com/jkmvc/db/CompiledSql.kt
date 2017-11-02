@@ -1,6 +1,7 @@
 package com.jkmvc.db
 
 import com.jkmvc.common.defaultValue
+import com.jkmvc.common.format
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -174,7 +175,9 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
                     dynamicParams[j++].toString()
                 else
                     "'$param'" // oracle字符串必须是''包含
-            } else
+            } else if(param is Date)
+                "'${param.format()}'"
+            else
                 param.toString()
         }
         return realSql
