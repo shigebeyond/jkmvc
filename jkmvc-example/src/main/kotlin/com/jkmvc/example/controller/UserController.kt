@@ -172,7 +172,7 @@ class UserController: Controller()
      */
     public fun actionLogin(){
         if(req.isPost()){ // post请求
-            val user = Auth.login(req["username"]!!, req["password"]!!);
+            val user = Auth.instance().login(req["username"]!!, req["password"]!!);
             if(user == null)
                 res.render("登录失败")
             else
@@ -186,7 +186,7 @@ class UserController: Controller()
      * 登录
      */
     public fun actionLogout(){
-        Auth.logout()
+        Auth.instance().logout()
         redirect("user/login")
     }
 }

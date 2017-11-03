@@ -1,6 +1,6 @@
 package com.jkmvc.example.model
 
-import com.jkmvc.orm.MetaData
+import com.jkmvc.orm.OrmMeta
 import com.jkmvc.orm.Orm
 import com.jkmvc.session.Auth
 import com.jkmvc.session.IAuthUserModel
@@ -12,7 +12,7 @@ import com.jkmvc.session.IAuthUserModel
 class UserModel(id:Int? = null): Orm(id), IAuthUserModel {
     // 伴随对象就是元数据
     // company object is meta data for model
-    companion object m: MetaData(UserModel::class){
+    companion object m: OrmMeta(UserModel::class){
         init {
             // 添加标签 + 规则
             // add label and rule for field
