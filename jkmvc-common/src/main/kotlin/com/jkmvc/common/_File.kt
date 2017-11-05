@@ -98,9 +98,26 @@ public fun URL.travel(action:(relativePath:String, isDir:Boolean) -> Unit):Unit{
             action(entry.name, isDir);
         }
     }else{ // 遍历目录
+        /**
+         * fix bug: window下获得资源的相对路径错误
+         * 根路径：/C:/WebServer/tomcat0/webapps/ROOT/WEB-INF/classes/
+         * 文件绝对路径：C:\WebServer\tomcat0\webapps\ROOT\WEB-INF\classes\com\jkmvc\szpower\controller\WorkInstructionController.class
+         * 文件相对路径=文件绝对路径-跟路径：om\jkmvc\szpower\controller\WorkInstructionController.class
+         * => com变为om，少了一个c，导致根据文件相对路径来加载对应的class错误
+         */
         val root = Thread.currentThread().contextClassLoader.getResource("/").path
+        println("遍历资源")
+        val os = System.getProperty("os.name")
+        println("操作系统：" + os)
+        println("根路径：" + root)
         File(path).travel {
-            action(it.path.substring(root.length), it.isDirectory)
+            println("文件绝对路径：" + it.path)
+            val relativePath = if(os.startsWith("Windows", true))
+                                    it.path.substring(root.length - 1)
+                                else
+                                    it.path.substring(root.length)
+            println("文件相对路径：" + relativePath)
+            action(relativePath, it.isDirectory)
         }
     }
 }
