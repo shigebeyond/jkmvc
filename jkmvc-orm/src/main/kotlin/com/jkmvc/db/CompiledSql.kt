@@ -168,19 +168,12 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
         // 替换实参
         var i = 0 // 静态变量的迭代索引
         var j = fromIndex // 动态变量的迭代索引
-        val realSql = sql.replace("\\?".toRegex()) { matches: MatchResult ->
-            val param = staticParams[i++] // 静态参数
-            if(param is String){
-                if(param == "?" && dynamicParams.isNotEmpty())// 如果参数值是?，则认为是动态参数
-                    dynamicParams[j++].toString()
-                else
-                    "'$param'" // oracle字符串必须是''包含
-            } else if(param is Date)
-                "'${param.format()}'"
-            else
-                param.toString()
+        return sql.replace("\\?".toRegex()) { matches: MatchResult ->
+            var param = staticParams[i++] // 静态参数
+            if(param == "?" && dynamicParams.isNotEmpty())// 如果参数值是?，则认为是动态参数
+                param = dynamicParams[j++]
+            db.quote(param)
         }
-        return realSql
     }
 
     /****************************** 执行与查询sql *******************************/

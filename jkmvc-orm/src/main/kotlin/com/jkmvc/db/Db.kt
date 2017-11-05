@@ -2,6 +2,7 @@ package com.jkmvc.db
 
 import com.jkmvc.common.Config
 import com.jkmvc.common.camel2Underline
+import com.jkmvc.common.format
 import com.jkmvc.common.underline2Camel
 import java.sql.Connection
 import java.sql.ResultSet
@@ -97,23 +98,13 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
     }
 
     /**
-     * 值的转义字符
-     */
-    protected val identityQuoteString by lazy(LazyThreadSafetyMode.NONE) {
-        conn.metaData.identifierQuoteString
-    }
-
-    /**
-     * 表/字段的转义字符
+     * sql标示符（表/字段）的转义字符
      *   mysql为 `table`.`column`
      *   oracle为 "table"."column"
      *   sql server为 "table"."column" 或 [table].[column]
      */
-    protected val tableColumnQuoteString by lazy(LazyThreadSafetyMode.NONE) {
-        if(dbType == DbType.Mysql)
-            "`"
-        else
-            "\""
+    public val identifierQuoteString by lazy(LazyThreadSafetyMode.NONE) {
+        conn.metaData.identifierQuoteString
     }
 
     /**
@@ -349,9 +340,9 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
     public override fun quoteTable(table:String, alias:String?):String
     {
         return if(alias == null)
-            "$tableColumnQuoteString$table$tableColumnQuoteString";
+            "$identifierQuoteString$table$identifierQuoteString";
         else // 表与别名之间不加 as，虽然mysql可识别，但oracle不能识别
-            "$tableColumnQuoteString$table$tableColumnQuoteString $tableColumnQuoteString$alias$tableColumnQuoteString"
+            "$identifierQuoteString$table$identifierQuoteString $identifierQuoteString$alias$identifierQuoteString"
     }
 
     /**
@@ -392,7 +383,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
             // 表名
             if(column.contains('.')){
                 var arr = column.split('.');
-                table = "$tableColumnQuoteString${arr[0]}$tableColumnQuoteString.";
+                table = "$identifierQuoteString${arr[0]}$identifierQuoteString.";
                 col = arr[1]
             }
 
@@ -400,7 +391,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
             if(column == "*" || (dbType == DbType.Oracle && column == "rownum")) { // * 或 oracle的rownum 字段不转义
                 //...
             }else{ // 其他字段转义
-                col = "$tableColumnQuoteString$col$tableColumnQuoteString";
+                col = "$identifierQuoteString$col$identifierQuoteString";
             }
         }
 
@@ -408,7 +399,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
         if(alias == null)
             return "$table$col";
 
-        return "$table$col AS $tableColumnQuoteString$alias$tableColumnQuoteString"; // 转义
+        return "$table$col AS $identifierQuoteString$alias$identifierQuoteString"; // 转义
     }
 
     /**
@@ -417,7 +408,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @param value 字段值, 可以是值数组
      * @return
      */
-    public override fun quote(value:Any?):Any?
+    public override fun quote(value:Any?):String
     {
         // 1 多值
         if(value is Array<*>){
@@ -438,14 +429,34 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
 
         // bool => int
         if(value is Boolean)
-            return if(value) 1 else 0;
+            return if(value) "1" else "0";
 
         // int/float
         if(value is Number)
-            return value;
+            return value.toString();
 
-        // 非string => string
-        return "$identityQuoteString$value$identityQuoteString";
+        // string
+        if(value is String)
+            return "'$value'" // oracle字符串必须是''包含
+
+        // date
+        if(value is Date)
+            return quoteDate(value)
+
+        return value.toString()
+    }
+
+    /**
+     * 转移日期值
+     * @value value 参数
+     * @return
+     */
+    public fun quoteDate(value: Date): String {
+        val value = "'${value.format()}'"
+        return if(dbType == DbType.Oracle)
+                    "to_date($value,'yyyy-mm-dd hh24:mi:ss')"
+                else
+                    value
     }
 
     /**
@@ -478,5 +489,18 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
         if(dbConfig["columnUnderline"]!!) // 字段有下划线
             prop = prop.underline2Camel()
         return prop
+    }
+
+    /**
+     * 预览sql
+     * @param sql
+     * @param params sql参数
+     * @return
+     */
+    public override fun previewSql(sql: String, params: List<Any?>): String {
+        var i = 0 // 迭代索引
+        return sql.replace("\\?".toRegex()) { matches: MatchResult ->
+            quote(params[i++]) // 转义参数值
+        }
     }
 }

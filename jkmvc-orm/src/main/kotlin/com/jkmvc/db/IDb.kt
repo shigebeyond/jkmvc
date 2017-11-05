@@ -213,7 +213,7 @@ interface IDb{
      * @param value 字段值, 可以是值数组
      * @return
      */
-    fun quote(value:Any?):Any?;
+    fun quote(value:Any?):String;
 
     /**
      * 根据对象属性名，获得db字段名
@@ -232,4 +232,12 @@ interface IDb{
      * @return 对象属性名
      */
     fun column2Prop(column:String): String
+
+    /**
+     * 预览sql
+     * @param sql
+     * @param params sql参数
+     * @return
+     */
+    fun previewSql(sql: String, params: List<Any?>): String
 }
