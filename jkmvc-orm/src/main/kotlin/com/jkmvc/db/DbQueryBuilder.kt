@@ -1,5 +1,6 @@
 package com.jkmvc.db
 
+import java.math.BigDecimal
 import kotlin.reflect.KClass
 
 /**
@@ -227,10 +228,15 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:Pair<String, String?> /*表
 
         // 2 执行 select
         val (hasNext, count) = db.queryCell(result.sql, result.buildParams(params));
-        return if(hasNext)
-            count as Long;
-        else
-            0
+        if(!hasNext)
+            return 0
+
+        // oracle 是 BigDecimal
+        if(count is BigDecimal)
+            return count.toLong()
+
+        // mysql
+        return count as Long;
     }
 
     /**
