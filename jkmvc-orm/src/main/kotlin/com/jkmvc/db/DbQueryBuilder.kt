@@ -144,7 +144,7 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:Pair<String, String?> /*表
      * @return 编译好的sql
      */
     public override fun compileCount(): CompiledSql{
-        return select(Pair("count(1)", "num")).compile(ActionType.SELECT);
+        return select(Pair("count(1)", "NUM" /* oracle会自动转为全大写 */)).compile(ActionType.SELECT);
     }
 
     /**
@@ -224,7 +224,7 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:Pair<String, String?> /*表
     public override fun count(vararg params: Any?):Long
     {
         // 1 编译
-        val result = select(Pair("count(1)", "num")).compile(ActionType.SELECT);
+        val result = select(Pair("count(1)", "NUM" /* oracle会自动转为全大写 */)).compile(ActionType.SELECT);
 
         // 2 执行 select
         val (hasNext, count) = db.queryCell(result.sql, result.buildParams(params));
