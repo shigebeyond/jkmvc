@@ -4,6 +4,7 @@ import com.jkmvc.common.Config
 import com.jkmvc.common.camel2Underline
 import com.jkmvc.common.format
 import com.jkmvc.common.underline2Camel
+import java.math.BigDecimal
 import java.sql.Connection
 import java.sql.ResultSet
 import java.util.*
@@ -502,5 +503,19 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
         return sql.replace("\\?".toRegex()) { matches: MatchResult ->
             quote(params[i++]) // 转义参数值
         }
+    }
+
+    /**
+     * 转化为计数
+     * @param value
+     * @return
+     */
+    public override fun toCount(value:Any?):Long{
+        // oracle 是 BigDecimal
+        if(value is BigDecimal)
+            return value.toLong()
+
+        // mysql
+        return value as Long;
     }
 }

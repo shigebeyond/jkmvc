@@ -240,4 +240,11 @@ interface IDb{
      * @return
      */
     fun previewSql(sql: String, params: List<Any?>): String
+
+    /**
+     * 转化为计数
+     * @param value
+     * @return
+     */
+    fun toCount(value:Any?):Long
 }
