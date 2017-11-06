@@ -379,7 +379,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
         var col = column;
 
         // 非函数表达式
-        if ("^\\w[\\w\\d_\\.]*".toRegex().matches(column))
+        if ("^\\w[\\w\\d_\\.\\*]*".toRegex().matches(column))
         {
             // 表名
             if(column.contains('.')){
