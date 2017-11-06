@@ -239,7 +239,7 @@ interface IDb{
      * @param params sql参数
      * @return
      */
-    fun previewSql(sql: String, params: List<Any?>): String
+    fun previewSql(sql: String, params: List<Any?>? = null): String
 
     /**
      * 转化为计数

@@ -178,7 +178,12 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @return
      */
     public override fun execute(sql: String, params: List<Any?>?, returnGeneratedKey:Boolean): Int {
-        return conn.execute(sql, params, returnGeneratedKey);
+        try{
+            return conn.execute(sql, params, returnGeneratedKey);
+        }catch (e:Exception){
+            dbLogger.error("出错[${e.message}] sql: " + previewSql(sql, params))
+            throw  e
+        }
     }
 
     /**
@@ -190,7 +195,12 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @return
      */
     public override fun batchExecute(sql: String, paramses: List<Any?>, paramSize:Int): IntArray {
-        return conn.batchExecute(sql, paramses, paramSize)
+        try{
+            return conn.batchExecute(sql, paramses, paramSize)
+        }catch (e:Exception){
+            dbLogger.error("出错[${e.message}], sql=$sql, params=$paramses ")
+            throw  e
+        }
     }
 
     /**
@@ -201,7 +211,12 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @return
      */
     public override fun <T> queryResult(sql: String, params: List<Any?>?, action: (ResultSet) -> T): T {
-        return conn.queryResult(sql, params, action)
+        try{
+            return conn.queryResult(sql, params, action)
+        }catch (e:Exception){
+            dbLogger.error("出错[${e.message}] sql: " + previewSql(sql, params))
+            throw  e
+        }
     }
 
     /**
@@ -212,7 +227,12 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @return
      */
     public override fun <T> queryRows(sql: String, params: List<Any?>?, transform: (MutableMap<String, Any?>) -> T): List<T> {
-        return conn.queryRows(sql, params, transform);
+        try{
+            return conn.queryRows(sql, params, transform);
+        }catch (e:Exception){
+            dbLogger.error("出错[${e.message}] sql: " + previewSql(sql, params))
+            throw  e
+        }
     }
 
     /**
@@ -223,7 +243,12 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @return
      */
     public override fun <T> queryRow(sql: String, params: List<Any?>?, transform: (MutableMap<String, Any?>) -> T): T? {
-        return conn.queryRow(sql, params, transform);
+        try{
+            return conn.queryRow(sql, params, transform);
+        }catch (e:Exception){
+            dbLogger.error("出错[${e.message}] sql: " + previewSql(sql, params))
+            throw  e
+        }
     }
 
     /**
@@ -234,7 +259,12 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @return
      */
     public override fun queryColumn(sql: String, params: List<Any?>?): List<Any?> {
-        return conn.queryColumn(sql, params);
+        try{
+            return conn.queryColumn(sql, params);
+        }catch (e:Exception){
+            dbLogger.error("出错[${e.message}] sql: " + previewSql(sql, params))
+            throw  e
+        }
     }
 
     /**
@@ -244,7 +274,12 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @return
      */
     public override fun queryCell(sql: String, params: List<Any?>?): Pair<Boolean, Any?> {
-        return conn.queryCell(sql, params);
+        try{
+            return conn.queryCell(sql, params);
+        }catch (e:Exception){
+            dbLogger.error("出错[${e.message}] sql: " + previewSql(sql, params))
+            throw  e
+        }
     }
 
     /**
@@ -503,7 +538,12 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @param params sql参数
      * @return
      */
-    public override fun previewSql(sql: String, params: List<Any?>): String {
+    public override fun previewSql(sql: String, params: List<Any?>?): String {
+        // 1 无参数
+        if(params == null || params.isEmpty())
+            return sql
+
+        // 2 有参数：替换参数
         var i = 0 // 迭代索引
         return sql.replace("\\?".toRegex()) { matches: MatchResult ->
             quote(params[i++]) // 转义参数值
