@@ -27,7 +27,7 @@ object Router:IRouter
 	/**
 	 * 静态文件uri的正则
 	 */
-	public override var staticFileRegex: String = ".*\\.(gif|jpg|jpeg|png|bmp|swf|js|css|eot|ttf|woff)$"
+	public override var staticFileRegex: String = ".*\\.(gif|jpg|jpeg|png|bmp|ico|swf|js|css|eot|ttf|woff)$"
 
 	init {
 	    // 加载配置的路由
