@@ -28,12 +28,13 @@ object JedisFactory {
     @Synchronized
     public fun instance(name: String = "default"): Jedis {
         // 获得已有连接
-        val jedis = jedises.getOrPut(name){
-            buildJedis(name)
-        }
-        // 如果断开连接，则重连
-        if(!jedis.isConnected)
+        var jedis = jedises[name]
+        if(jedis == null){ // 新建连接
+            jedis = buildJedis(name)
+            jedises[name] = jedis
+        }else{ // 如果断开连接，则重连
             jedis.connect()
+        }
         return jedis
     }
 
