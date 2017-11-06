@@ -27,9 +27,14 @@ object JedisFactory {
      */
     @Synchronized
     public fun instance(name: String = "default"): Jedis {
-        return jedises.getOrPut(name){
+        // 获得已有连接
+        val jedis = jedises.getOrPut(name){
             buildJedis(name)
         }
+        // 如果断开连接，则重连
+        if(!jedis.isConnected)
+            jedis.connect()
+        return jedis
     }
 
     /**
