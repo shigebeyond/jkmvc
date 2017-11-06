@@ -117,9 +117,9 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
         /**
          * fix bug:
          * mysql中查询，conn.catalog = 数据库名
-         * oracle中查询，conn.catalog = null，必须指定 dbConfig["schema"] 来过滤表，否则查出来多个库的表，会出现同名表，查出来的表字段有误
+         * oracle中查询，conn.catalog = null，必须指定 schema 来过滤表，否则查出来多个库的表，会出现同名表，查出来的表字段有误
          */
-        val rs = conn.metaData.getColumns(conn.catalog, dbConfig["schema"], null, null)
+        val rs = conn.metaData.getColumns(conn.catalog, schema, null, null)
         while (rs.next()) { // 逐个处理每一列
             val table = rs.getString("TABLE_NAME")!! // 表名
             val column = rs.getString("COLUMN_NAME")!! // 列名
@@ -130,6 +130,20 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
         }
         tables
     }
+
+    /**
+     * schema
+     *    oracle的概念，代表一组数据库对象
+     *    在 Db.tableColumns 中延迟加载表字段时，用来过滤 DYPT 库的表
+     *    可省略，默认值=username
+     */
+    protected val schema:String?
+        get(){
+            if(dbType == DbType.Oracle)
+                return dbConfig.getString("schema", dbConfig["username"])
+
+            return null
+        }
 
     /**
      * 当前事务的嵌套层级
