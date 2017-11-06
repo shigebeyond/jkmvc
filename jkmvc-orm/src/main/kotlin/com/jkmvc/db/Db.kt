@@ -114,7 +114,12 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
     protected val tableColumns: Map<String, List<String>> by lazy {
         val tables = HashMap<String, MutableList<String>>()
         // 查询所有表的所有列
-        val rs = conn.metaData.getColumns(conn.catalog, null, null, null)
+        /**
+         * fix bug:
+         * mysql中查询，conn.catalog = 数据库名
+         * oracle中查询，conn.catalog = null，必须指定 dbConfig["schema"] 来过滤表，否则查出来多个库的表，会出现同名表，查出来的表字段有误
+         */
+        val rs = conn.metaData.getColumns(conn.catalog, dbConfig["schema"], null, null)
         while (rs.next()) { // 逐个处理每一列
             val table = rs.getString("TABLE_NAME")!! // 表名
             val column = rs.getString("COLUMN_NAME")!! // 列名
