@@ -181,6 +181,39 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     }
 
     /**
+     * 通过中间表联查从表
+     *     中间表.外键 = 主表.主键
+     *     中间表.远端外键 = 从表.远端主键
+     *
+     * @param master 主表模型
+     * @param masterName 主表别名
+     * @param slaveRelation 从表关系
+     * @param slaveName 从表别名
+     * @return
+     */
+    public fun joinSlaveThrough(master: IOrmMeta, masterName:String, slaveRelation: MiddleRelationMeta, slaveName: String): OrmQueryBuilder {
+        // 检查并添加关联查询记录
+        if(joins.containsKey(slaveName))
+            return this;
+
+        joins[slaveName] = slaveRelation
+
+        // 准备条件
+        val masterPk = masterName + "." + slaveRelation.primaryKey; // 主表.主键
+        val middleFk = slaveRelation.middleTable + '.' + slaveRelation.foreignKey // 中间表.外键
+
+        val slave = slaveRelation.ormMeta
+        val slavePk2 = slaveName + "." + slaveRelation.farPrimaryKey; // 从表.远端主键
+        val middleFk2 = slaveRelation.middleTable + '.' + slaveRelation.farForeignKey // 中间表.远端外键
+
+        // 查中间表
+        join(slaveRelation.middleTable).on(masterPk, "=", middleFk) // 中间表.外键 = 主表.主键
+
+        // 查从表
+        return join(slave.table to slaveName, "LEFT").on(slavePk2, "=", middleFk2) as OrmQueryBuilder; // 中间表.远端外键 = 从表.远端主键
+    }
+
+    /**
      * 联查主表
      *     主表.主键 = 从表.外键
      *

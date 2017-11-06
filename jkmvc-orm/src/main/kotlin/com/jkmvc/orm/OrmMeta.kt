@@ -289,11 +289,13 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
 
         // 2 非hasMany关系
         // join关联表
-        when (relation.type) {
-            // belongsto: join 主表
-            RelationType.BELONGS_TO -> query.joinMaster(this, lastName, relation, name);
-            // hasxxx: join 从表
-            else -> query.joinSlave(this, lastName, relation, name);
+        if (relation.type == RelationType.BELONGS_TO) { // belongsto: join 主表
+            query.joinMaster(this, lastName, relation, name);
+        }else{ // hasxxx: join 从表
+            if(relation is MiddleRelationMeta) // 有中间表
+                query.joinSlaveThrough(this, lastName, relation, name);
+            else // 无中间表
+                query.joinSlave(this, lastName, relation, name);
         }
 
         //列名父路径
