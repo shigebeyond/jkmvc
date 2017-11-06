@@ -291,8 +291,8 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
      *
      * @return
      */
-    public override fun whereclose(): IDbQueryBuilder {
-        return andWhereclose();
+    public override fun whereClose(): IDbQueryBuilder {
+        return andWhereClose();
     }
 
     /**
@@ -300,7 +300,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
      *
      * @return
      */
-    public override fun andWhereclose(): IDbQueryBuilder {
+    public override fun andWhereClose(): IDbQueryBuilder {
         whereClause.close();
         return this;
     }

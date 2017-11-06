@@ -147,14 +147,14 @@ interface IDbQueryBuilderDecoration
      *
      * @return
      */
-    fun whereclose():IDbQueryBuilder;
+    fun whereClose():IDbQueryBuilder;
 
     /**
      * Closes an open "WHERE (...)" grouping.
      *
      * @return
      */
-    fun andWhereclose():IDbQueryBuilder;
+    fun andWhereClose():IDbQueryBuilder;
 
     /**
      * Closes an open "WHERE (...)" grouping.
