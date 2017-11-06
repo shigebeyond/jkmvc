@@ -92,12 +92,12 @@ interface IOrmMeta {
     /**
      * 获得orm查询构建器
      *
-     * @param convertValue 查询时是否智能转换字段值
-     * @param convertColumn 查询时是否智能转换字段名
+     * @param convertingValue 查询时是否智能转换字段值
+     * @param convertingColumn 查询时是否智能转换字段名
      * @param withSelect with()联查时自动select关联表的字段
      * @return
      */
-    fun queryBuilder(convertValue: Boolean = false, convertColumn: Boolean = false, withSelect: Boolean = true): OrmQueryBuilder;
+    fun queryBuilder(convertingValue: Boolean = false, convertingColumn: Boolean = false, withSelect: Boolean = true): OrmQueryBuilder;
 
     /**
      * 添加规则

@@ -23,8 +23,8 @@ import kotlin.reflect.full.cast
  *
  */
 class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
-                      protected var convertValue: Boolean = false /* 查询时是否智能转换字段值 */,
-                      protected var convertColumn: Boolean = false /* 查询时是否智能转换字段名 */,
+                      protected var convertingValue: Boolean = false /* 查询时是否智能转换字段值 */,
+                      protected var convertingColumn: Boolean = false /* 查询时是否智能转换字段名 */,
                       public var withSelect: Boolean = true /* with()联查时自动select关联表的字段 */
     ) : DbQueryBuilder(ormMeta.db, Pair(ormMeta.table, ormMeta.name)) {
 
@@ -66,13 +66,13 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * 切换智能转换的模式
      *
-     * @param convertValue 查询时是否智能转换字段值
-     * @param convertColumn 查询时是否智能转换字段名
+     * @param convertingValue 查询时是否智能转换字段值
+     * @param convertingColumn 查询时是否智能转换字段名
      * @return
      */
-    public fun toggleConvertPattern(convertValue: Boolean, convertColumn: Boolean): OrmQueryBuilder{
-        this.convertColumn = convertColumn
-        this.convertValue = convertValue
+    public fun toggleConvertPattern(convertingValue: Boolean, convertingColumn: Boolean): OrmQueryBuilder{
+        this.convertingColumn = convertingColumn
+        this.convertingValue = convertingValue
         return this
     }
 
@@ -342,18 +342,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @return
      */
     public override fun andWhere(prop: String, op: String, value: Any?): IDbQueryBuilder {
-        // 转换字段名：数据库中的字段名
-        val column = if(convertColumn)
-                        prop2Column(prop)
-                    else
-                        prop
-
-        // 智能转换字段值: 准确类型的值
-        val accurateValue = if(convertValue && (value is String || value is Array<*> || value is Collection<*>))
-                            convertIntelligent(prop, value)
-                        else
-                            value
-        return super.andWhere(column, op, accurateValue)
+        return super.andWhere(convertColumn(prop), op, convertValue(prop, value))
     }
 
     /**
@@ -365,19 +354,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @return
      */
     public override fun orWhere(prop: String, op: String, value: Any?): IDbQueryBuilder {
-        // 转换字段名：数据库中的字段名
-        val column = if(convertColumn)
-                        prop2Column(prop)
-                    else
-                        prop
-
-        // 智能转换字段值: 准确类型的值
-        val accurateValue = if(convertValue && (value is String || value is Array<*> || value is Collection<*>))
-                                convertIntelligent(prop, value)
-                            else
-                                value
-
-        return super.orWhere(column, op, accurateValue)
+        return super.orWhere(convertColumn(prop), op, convertValue(prop, value))
     }
 
     /**
@@ -388,12 +365,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @return
      */
     public override fun orderBy(prop: String, direction: String?): IDbQueryBuilder {
-        // 转换字段名：数据库中的字段名
-        val column = if(convertColumn)
-                        prop2Column(prop)
-                    else
-                        prop
-        return super.orderBy(column, direction);
+        return super.orderBy(convertColumn(prop), direction);
     }
 
     /**
@@ -403,12 +375,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @return
      */
     public override fun groupBy(prop: String): IDbQueryBuilder {
-        // 转换字段名：数据库中的字段名
-        val column = if(convertColumn)
-                        prop2Column(prop)
-                    else
-                        prop
-        return super.groupBy(column)
+        return super.groupBy(convertColumn(prop))
     }
 
     /**
@@ -420,19 +387,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @return
      */
     public override fun andHaving(prop: String, op: String, value: Any?): IDbQueryBuilder {
-        // 转换字段名：数据库中的字段名
-        val column = if(convertColumn)
-                        prop2Column(prop)
-                    else
-                        prop
-
-        // 智能转换字段值: 准确类型的值
-        val accurateValue = if(convertValue && (value is String || value is Array<*> || value is Collection<*>))
-                                convertIntelligent(prop, value)
-                            else
-                                value
-
-        return super.andHaving(column, op, accurateValue)
+        return super.andHaving(convertColumn(prop), op, convertValue(prop, value))
     }
 
     /**
@@ -444,19 +399,34 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @return
      */
     public override fun orHaving(prop: String, op: String, value: Any?): IDbQueryBuilder {
-        // 转换字段名：数据库中的字段名
-        val column = if(convertColumn)
-                        prop2Column(prop)
-                    else
-                        prop
+        return super.orHaving(convertColumn(prop), op, convertValue(prop, value))
+    }
 
-        // 智能转换字段值: 准确类型的值
-        val accurateValue = if(convertValue && (value is String || value is Array<*> || value is Collection<*>))
-                                convertIntelligent(prop, value)
-                            else
-                                value
+    /**
+     * 转换字段名：数据库中的字段名
+     *
+     * @param prop 属性名
+     * @return 字段名
+     */
+    public fun convertColumn(prop: String): String {
+        return if (convertingColumn)
+                    prop2Column(prop)
+                else
+                    prop
+    }
 
-        return super.orHaving(column, op, accurateValue)
+    /**
+     * 智能转换属性值: 准确类型的值
+     *
+     * @param prop 属性名
+     * @param value 属性值
+     * @return 准确类型的属性值
+     */
+    public fun convertValue(prop: String, value: Any?): Any? {
+        return if (convertingValue && (value is String || value is Array<*> || value is Collection<*>))
+                    convertIntelligent(prop, value)
+                else
+                    value
     }
 
     /**
