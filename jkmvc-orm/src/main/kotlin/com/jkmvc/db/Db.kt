@@ -73,6 +73,34 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
             }
             dbs.get().clear();
         }
+
+        /**
+         * 转化为Long
+         * @param value
+         * @return
+         */
+        public fun toLong(value:Any?):Long{
+            // oracle 是 BigDecimal
+            if(value is BigDecimal)
+                return value.toLong()
+
+            // mysql
+            return value as Long;
+        }
+
+        /**
+         * 转化为Int
+         * @param value
+         * @return
+         */
+        public fun toInt(value:Any?):Int{
+            // oracle 是 BigDecimal
+            if(value is BigDecimal)
+                return value.toInt()
+
+            // mysql
+            return value as Int;
+        }
     }
 
     /**
@@ -562,19 +590,5 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
         return sql.replace("\\?".toRegex()) { matches: MatchResult ->
             quote(params[i++]) // 转义参数值
         }
-    }
-
-    /**
-     * 转化为计数
-     * @param value
-     * @return
-     */
-    public override fun toCount(value:Any?):Long{
-        // oracle 是 BigDecimal
-        if(value is BigDecimal)
-            return value.toLong()
-
-        // mysql
-        return value as Long;
     }
 }

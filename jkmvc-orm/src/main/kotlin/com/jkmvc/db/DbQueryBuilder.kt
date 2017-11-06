@@ -231,7 +231,7 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:Pair<String, String?> /*表
         if(!hasNext)
             return 0
 
-        return db.toCount(count)
+        return Db.toLong(count)
     }
 
     /**
