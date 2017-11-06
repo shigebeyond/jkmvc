@@ -135,7 +135,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
 
         // 查询本模型字段
         columns.forEachMyColumns {
-            select(ormMeta.name + '.' + it);
+            select(ormMeta.name + '.' + convertColumn(it)); // 在每个select()处，智能转换字段名
         }
         return this
     }
@@ -315,17 +315,22 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
             return this;
         }
 
-        // 默认查全部列
-        val cols = if(columns.isNullOrEmpty())
-                        relation.ormMeta.columns
-                    else
-                        columns!!
+        var cols = columns // 查询列
+        var convertingColumn = this.convertingColumn // 是否转换字段名
+        if(columns.isNullOrEmpty()){
+            // 默认查全部列
+            cols = relation.ormMeta.columns
+            // 默认列，不转换字段名
+            convertingColumn = false
+        }
 
         // 构建列别名
         val select: MutableList<Pair<String, String>> = LinkedList<Pair<String, String>>();
-        for (column in cols) {
-            val columnAlias = path + ":" + column; // 列别名 = 表别名 : 列名，以便在设置orm对象字段值时，可以逐层设置关联对象的字段值
-            val column = relationName + "." + column;
+        for (it in cols!!) {
+            // 在每个select()处，智能转换字段名
+            val col = if(convertingColumn) convertColumn(it) else it
+            val columnAlias = path + ":" + col; // 列别名 = 表别名 : 列名，以便在设置orm对象字段值时，可以逐层设置关联对象的字段值
+            val column = relationName + "." + col;
             select.add(column to columnAlias);
         }
 
