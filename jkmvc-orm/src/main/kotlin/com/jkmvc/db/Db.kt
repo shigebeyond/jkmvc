@@ -389,7 +389,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
             }
 
             // 字段名
-            if(column == "*" || (dbType == DbType.Oracle && column == "rownum")) { // * 或 oracle的rownum 字段不转义
+            if(col == "*" || (dbType == DbType.Oracle && col == "rownum")) { // * 或 oracle的rownum 字段不转义
                 //...
             }else{ // 其他字段转义
                 col = "$identifierQuoteString$col$identifierQuoteString";
