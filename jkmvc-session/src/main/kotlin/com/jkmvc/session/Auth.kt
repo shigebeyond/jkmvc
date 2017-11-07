@@ -1,10 +1,10 @@
 package com.jkmvc.session
 
 import com.jkmvc.common.Config
+import com.jkmvc.db.dbLogger
 import com.jkmvc.db.recordTranformer
 import com.jkmvc.orm.Orm
 import com.jkmvc.orm.modelOrmMeta
-import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
 
 /**
@@ -18,9 +18,6 @@ import kotlin.reflect.KClass
 abstract class Auth:IAuth {
 
     companion object{
-
-        // 日志
-        public val logger = LoggerFactory.getLogger(Auth::class.java)
 
         /**
          * 会话配置
@@ -41,7 +38,7 @@ abstract class Auth:IAuth {
         }
 
         init{
-            logger.error("会话相关的用户模型为：" + sessionConfig.getString("userModel"))
+            dbLogger.error("会话相关的用户模型为：" + sessionConfig.getString("userModel"))
         }
 
         private var _inst:Auth? = null
