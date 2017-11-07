@@ -93,4 +93,12 @@ interface IOrmEntity: IRecord {
      * @param bytes
      */
     fun unserialize(bytes: ByteArray): Unit
+
+    /**
+     * 编译字符串模板
+     *
+     * @param template 字符串模板，格式 "name=:name, age=:age"，用:来修饰字段名
+     * @return 将模板中的字段名替换为字段值
+     */
+    fun compileTemplate(template:String):String
 }

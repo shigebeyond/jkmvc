@@ -1,9 +1,6 @@
 package com.jkmvc.orm
 
-import com.jkmvc.common.Serializer
-import com.jkmvc.common.findProperty
-import com.jkmvc.common.isNullOrEmpty
-import com.jkmvc.common.to
+import com.jkmvc.common.*
 import java.util.*
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KMutableProperty1
@@ -190,6 +187,21 @@ abstract class OrmEntity : IOrm {
      */
     public override fun unserialize(bytes: ByteArray): Unit {
         data.putAll(Serializer.unserizlize(bytes) as Map<String, Any?>)
+    }
+
+    /**
+     * 编译字符串模板
+     *
+     * @param template 字符串模板，格式 "name=:name, age=:age"，用:来修饰字段名
+     * @return 将模板中的字段名替换为字段值
+     */
+    public override fun compileTemplate(template:String):String{
+        // 1 编译模板
+        if(template.contains(':'))
+            return template.replaces(data);
+
+        // 2 输出单个字段
+        return data[template].toString()
     }
 
 }
