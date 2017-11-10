@@ -95,15 +95,37 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
         }
 
     /**
-     * limit子句
-     *   行限数组 limit, offset
+     * limit参数: limit + offset
+     *    为了兼容不同db的特殊的limit语法，不使用 DbQueryBuilderDecorationClausesSimple("LIMIT", arrayOf<((Any?) -> String)?>(null));
+     *    直接硬编码
      */
-    protected val limitClause: DbQueryBuilderDecorationClauses<*>
-        get(){
-            return clauses.getOrPut(ClauseType.LIMIT.ordinal){
-                DbQueryBuilderDecorationClausesSimple("LIMIT", arrayOf<((Any?) -> String)?>(null));
-            } as DbQueryBuilderDecorationClauses<*>
+    protected var limitParams:Pair<Int, Int>? = null
+
+    /**
+     * 编译limit表达式
+     *
+     * @param sql 保存编译的sql
+     */
+    public fun compileLimit(sql: StringBuilder){
+        if(limitParams == null)
+            return
+
+        val (limit, offset) = limitParams!!
+        if(db.dbType == DbType.Oracle) { // oracle
+            // select * from ( select t1_.*, rownum rownum_ from ( select * from USER ) t1_ where rownum <=  $end ) t2_ where t2_.rownum_ >=  $start
+            sql.insert(0, "SELECT * FROM ( SELECT t1_.*, rownum rownum_ FROM ( ").append(") t1_ WHERE rownum <=  ").append(offset + limit).append(" ) t2_ WHERE t2_.rownum_ >=  ").append(offset)
+            return
         }
+
+        if(db.dbType == DbType.Postgresql) { // psql
+            // select * from user limit $limit  offset $offset;
+            sql.append(" LIMIT ").append(limit).append(" OFFSET ").append(offset)
+            return
+        }
+
+        // 其他：mysql / sqlite
+        sql.append(" LIMIT ").append(offset).append(", ").append(limit)
+    }
 
     /**
      * 编译修饰子句
@@ -118,6 +140,10 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
             clause.compile(sql);
             sql.append(' ');
         }
+
+        // 单独编译limit表达式
+        compileLimit(sql)
+
         return this;
     }
 
@@ -442,11 +468,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
      * @return
      */
     public override fun limit(limit: Int, offset: Int): IDbQueryBuilder {
-        if (offset === 0)
-            limitClause.addSubexp(arrayOf<Any?>(limit));
-        else
-            limitClause.addSubexp(arrayOf<Any?>(offset)).addSubexp(arrayOf<Any?>(limit));
-
+        limitParams = Pair(limit, offset)
         return this;
     }
 

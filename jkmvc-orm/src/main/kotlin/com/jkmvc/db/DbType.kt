@@ -12,6 +12,7 @@ public enum class DbType {
     SqlServer,
     Oracle,
     Hsqldb,
+    Sqlite,
     Ingres,
     Mysql,
     DB2,

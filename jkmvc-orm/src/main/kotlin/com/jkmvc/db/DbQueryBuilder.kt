@@ -131,12 +131,7 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:Pair<String, String?> /*表
      * @return 编译好的sql
      */
     public override fun compileSelectOne(): CompiledSql{
-        if(db.dbType == DbType.Oracle) { // oracle
-            where("rownum", "<=", 1)
-        }else{
-            limit(1)
-        }
-        return compile(ActionType.SELECT)
+        return limit(1).compile(ActionType.SELECT)
     }
 
     /**
