@@ -124,6 +124,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
         }
 
         // 其他：mysql / sqlite
+        // select * from user limit $offset, $limit;
         sql.append(" LIMIT ").append(offset).append(", ").append(limit)
     }
 
