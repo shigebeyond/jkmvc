@@ -1,4 +1,4 @@
-package com.jkmvc.session
+package com.jkmvc.cache
 
 import com.jkmvc.common.Config
 import redis.clients.jedis.Jedis;

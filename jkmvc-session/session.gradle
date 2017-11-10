@@ -7,8 +7,4 @@ dependencies{
 
     // 加密解密
     compile 'commons-codec:commons-codec:1.10'
-
-    // redis
-    compile 'redis.clients:jedis:2.9.0'
-
 }
