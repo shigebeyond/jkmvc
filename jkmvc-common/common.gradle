@@ -11,6 +11,12 @@ dependencies {
     compile 'org.slf4j:slf4j-api:1.7.12'
     compile 'org.slf4j:slf4j-log4j12:1.7.12' // SLF4J重复绑定，与gradle-core包引用slf4j-log4j12实现冲突，但是依然可以使用
 
+    // redis
+    compile 'redis.clients:jedis:2.9.0'
+
+    // 序列化
+    compile "de.ruedigermoeller:fst:2.55"
+
     // test
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testCompile 'junit:junit:4.11'

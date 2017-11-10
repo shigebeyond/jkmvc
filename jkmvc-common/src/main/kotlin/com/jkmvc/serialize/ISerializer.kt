@@ -1,4 +1,6 @@
-package com.jkmvc.common
+package com.jkmvc.serialize
+
+import java.io.InputStream
 
 /**
  * 序列化
@@ -22,4 +24,12 @@ interface ISerializer {
      * @return
      */
     fun unserizlize(bytes: ByteArray): Any?
+
+    /**
+     * 反序列化
+     *
+     * @param input
+     * @return
+     */
+    fun unserizlize(input: InputStream): Any?
 }

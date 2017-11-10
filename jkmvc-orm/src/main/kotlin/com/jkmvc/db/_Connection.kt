@@ -298,18 +298,18 @@ public fun Blob?.toByteArray(): ByteArray? {
     if (this == null)
         return null
 
-    var `is`: InputStream? = null
+    var input: InputStream? = null
     try {
-        `is` = this.binaryStream
-        if (`is` == null)
+        input = this.binaryStream
+        if (input == null)
             return null
         val data = ByteArray(this.length().toInt())        // byte[] data = new byte[is.available()];
         if (data.size == 0)
             return null
-        `is`.read(data)
+        input.read(data)
         return data
     } finally {
-        `is`?.close()
+        input?.close()
 
     }
 }

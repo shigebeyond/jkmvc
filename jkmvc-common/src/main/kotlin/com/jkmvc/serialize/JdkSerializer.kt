@@ -1,14 +1,15 @@
-package com.jkmvc.common
+package com.jkmvc.serialize
 
 import java.io.*
 
 /**
- * 序列化
+ * 基于jdk的序列化
  *
  * @author shijianhang
  * @create 2017-10-04 下午3:29
  **/
-object Serializer : ISerializer {
+object JdkSerializer : ISerializer {
+
     /**
      * 序列化
      *
@@ -34,9 +35,18 @@ object Serializer : ISerializer {
      * @return
      */
     public override fun unserizlize(bytes: ByteArray): Any? {
+        return unserizlize(ByteArrayInputStream(bytes))
+    }
+
+    /**
+     * 反序列化
+     *
+     * @param input
+     * @return
+     */
+    public override fun unserizlize(input: InputStream): Any? {
         try {
-            val bi = ByteArrayInputStream(bytes)
-            val oi = ObjectInputStream(bi)
+            val oi = ObjectInputStream(input)
             return oi.readObject()
         } catch (e: Exception) {
             e.printStackTrace()
