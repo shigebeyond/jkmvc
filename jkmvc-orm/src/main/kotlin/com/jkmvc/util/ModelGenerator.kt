@@ -7,12 +7,12 @@ import java.io.File
 
 
 /**
- * 代码生成器
+ * 模型代码生成器
  *
  * @author shijianhang
  * @date 2017-10-10
  */
-class CodeGenerator(val srcDir:String){
+class ModelGenerator(val srcDir:String){
 
     /**
      * 数据库
