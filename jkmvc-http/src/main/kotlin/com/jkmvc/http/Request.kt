@@ -339,10 +339,12 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 *    兼容上传文件的情况
 	 * @return
 	 */
-	public override fun getParameterMap(): Map<String, Array<String>>{
+	public fun getParameterMap2(): Map<String, Any>{
+		// 上传请求的参数类型：Map<String, Vector<String>>
 		if(isUpload())
 			return mulReq.getParameterMap()
 
+		// 非上传请求的参数类型：Map<String, Array<String>>
 		return req.parameterMap
 	}
 
@@ -352,7 +354,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 */
 	public fun getParameterString(): String{
 		return parameterMap.entries.joinToString {
-			"${it.key}=${it.value.firstOrNull()}"
+			"${it.key}=${it.value}"
 		}
 	}
 

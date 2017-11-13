@@ -77,8 +77,8 @@ val parametersField: Field = MultipartRequest::class.java.getDeclaredField("para
  * 获得上传参数
  * @return
  */
-public inline fun MultipartRequest.getParameterMap(): Map<String, Array<String>> {
-    return parametersField.get(this) as Map<String, Array<String>>
+public inline fun MultipartRequest.getParameterMap(): Map<String, Vector<String>> {
+    return parametersField.get(this) as Map<String, Vector<String>>
 }
 
 /**

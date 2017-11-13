@@ -35,8 +35,13 @@ object Server:IServer {
     public override fun run(request: HttpServletRequest, response: HttpServletResponse):Boolean{
         //　构建请求对象
         val req:Request = Request(request);
-        if(debug)
-            httpLogger.debug("请求uri: ${req.routeUri}, 参数：${req.getParameterString()}")
+        if(debug){
+            // 对上传请求，要等到设置了上传子目录，才能访问请求参数
+            if(req.isUpload())
+                httpLogger.debug("上传请求uri: ${req.routeUri}")
+            else
+                httpLogger.debug("请求uri: ${req.routeUri}, 参数：${req.getParameterString()}")
+        }
 
         //　如果是静态文件请求，则跳过路由解析
         if(req.isStaticFile())
