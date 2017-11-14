@@ -9,9 +9,13 @@ buildscript {
         maven {
             url "http://dl.bintray.com/kotlin/kotlin"
         }
+        maven {
+            url 'https://dl.bintray.com/kotlin/kotlin-eap'
+        }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokka_version}"
     }
 }
 
@@ -27,6 +31,19 @@ subprojects{
     apply plugin: 'kotlin'
     apply plugin: 'maven'
 
+    // kotlin文档生成
+    apply plugin: 'org.jetbrains.dokka'
+
+    dokka {
+        outputFormat = 'html'
+        outputDirectory = "$buildDir/javadoc"
+    }
+
+    task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
+        outputFormat = "javadoc"
+        outputDirectory = "$buildDir/dokkaJavadoc"
+    }
+
     sourceCompatibility = 1.5
 
     repositories {
@@ -39,6 +56,9 @@ subprojects{
         }
         maven {
             url "https://repository.apache.org/content/repositories/releases"
+        }
+        maven {
+            url 'https://dl.bintray.com/kotlin/kotlin-eap'
         }
     }
 
