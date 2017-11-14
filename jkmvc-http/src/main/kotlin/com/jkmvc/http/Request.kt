@@ -214,9 +214,8 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	/**
 	 * 获得当前匹配路由的所有参数/单个参数
 	 *
-	 * @param key 如果是null，则返回所有参数，否则，返回该key对应的单个参数
+	 * @param key 参数名
 	 * @param defaultValue 单个参数的默认值
-	 * @param filter  参数过滤表达式, 如 "trim > htmlspecialchars"
 	 * @return
 	 */
 	public inline fun <reified T:Any> getRouteParameter(key:String, defaultValue:T? = null):T? {
@@ -225,6 +224,10 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 
 	/**
 	 * 获得int类型的路由参数
+	 *
+	 * @param key 参数名
+	 * @param defaultValue 单个参数的默认值
+	 * @return
 	 */
 	public fun getIntRouteParameter(key: String, defaultValue: Int? = null): Int? {
 		return getRouteParameter(key, defaultValue)
@@ -232,6 +235,10 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 
 	/**
 	 * 获得long类型的路由参数
+	 *
+	 * @param key 参数名
+	 * @param defaultValue 单个参数的默认值
+	 * @return
 	 */
 	public fun getLongRouteParameter(key: String, defaultValue: Long? = null): Long? {
 		return getRouteParameter(key, defaultValue)
@@ -239,6 +246,10 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 
 	/**
 	 * 获得boolean类型的路由参数
+	 *
+	 * @param key 参数名
+	 * @param defaultValue 单个参数的默认值
+	 * @return
 	 */
 	public fun getBooleanRouteParameter(key: String, defaultValue: Boolean? = null): Boolean? {
 		return getRouteParameter(key, defaultValue)
@@ -247,6 +258,10 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 
 	/**
 	 * 获得float类型的路由参数
+	 *
+	 * @param key 参数名
+	 * @param defaultValue 单个参数的默认值
+	 * @return
 	 */
 	public fun getFloatRouteParameter(key: String, defaultValue: Float? = null): Float? {
 		return getRouteParameter(key, defaultValue)
@@ -261,6 +276,10 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 
 	/**
 	 * 获得short类型的路由参数
+	 *
+	 * @param key 参数名
+	 * @param defaultValue 单个参数的默认值
+	 * @return
 	 */
 	public fun getShortRouteParameter(key: String, defaultValue: Short? = null): Short? {
 		return getRouteParameter(key, defaultValue)
@@ -268,6 +287,10 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 
 	/**
 	 * 获得Date类型的路由参数
+	 *
+	 * @param key 参数名
+	 * @param defaultValue 单个参数的默认值
+	 * @return
 	 */
 	public fun getDateRouteParameter(key: String, defaultValue: Date? = null): Date? {
 		return getRouteParameter(key, defaultValue)
@@ -352,6 +375,10 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 
 	/**
 	 * 获得参数值，自动转换为指定类型
+	 *
+	 * @param key 参数名
+	 * @param defaultValue 单个参数的默认值
+	 * @return
 	 */
 	public inline fun <reified T:Any> getParameter(key: String, defaultValue: T?): T? {
 		return getParameter(key).toNullable(T::class, defaultValue)
@@ -359,6 +386,10 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 
 	/**
 	 * 获得int类型的参数值
+	 *
+	 * @param key 参数名
+	 * @param defaultValue 单个参数的默认值
+	 * @return
 	 */
 	public fun getIntParameter(key: String, defaultValue: Int? = null): Int? {
 		return getParameter(key, defaultValue)
@@ -366,6 +397,10 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 
 	/**
 	 * 获得long类型的参数值
+	 *
+	 * @param key 参数名
+	 * @param defaultValue 单个参数的默认值
+	 * @return
 	 */
 	public fun getLongParameter(key: String, defaultValue: Long? = null): Long? {
 		return getParameter(key, defaultValue)
@@ -373,6 +408,10 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 
 	/**
 	 * 获得boolean类型的参数值
+	 *
+	 * @param key 参数名
+	 * @param defaultValue 单个参数的默认值
+	 * @return
 	 */
 	public fun getBooleanParameter(key: String, defaultValue: Boolean? = null): Boolean? {
 		return getParameter(key, defaultValue)
@@ -380,6 +419,10 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 
 	/**
 	 * 获得Date类型的参数值
+	 *
+	 * @param key 参数名
+	 * @param defaultValue 单个参数的默认值
+	 * @return
 	 */
 	public fun getDateParameter(key: String, defaultValue: Date? = null): Date? {
 		return getParameter(key, defaultValue)
@@ -387,6 +430,10 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 
 	/**
 	 * 获得float类型的参数值
+	 *
+	 * @param key 参数名
+	 * @param defaultValue 单个参数的默认值
+	 * @return
 	 */
 	public fun getFloatParameter(key: String, defaultValue: Float? = null): Float? {
 		return getParameter(key, defaultValue)
@@ -394,6 +441,10 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 
 	/**
 	 * 获得double类型的参数值
+	 *
+	 * @param key 参数名
+	 * @param defaultValue 单个参数的默认值
+	 * @return
 	 */
 	public fun getDoubleParameter(key: String, defaultValue: Double? = null): Double? {
 		return getParameter(key, defaultValue)
@@ -401,6 +452,10 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 
 	/**
 	 * 获得short类型的参数值
+	 *
+	 * @param key 参数名
+	 * @param defaultValue 单个参数的默认值
+	 * @return
 	 */
 	public fun getShortParameter(key: String, defaultValue: Short? = null): Short? {
 		return getParameter(key, defaultValue)
