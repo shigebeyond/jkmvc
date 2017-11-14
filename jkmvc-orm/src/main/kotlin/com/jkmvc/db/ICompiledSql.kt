@@ -205,10 +205,10 @@ abstract class ICompiledSql {
      * 编译 + 执行
      *
      * @param params 动态参数
-     * @param returnGeneratedKey 是否返回自动生成的主键
+     * @param generatedColumn 返回的自动生成的主键名
      * @return 影响行数|新增id
      */
-    public abstract fun execute(params:Array<out Any?>, returnGeneratedKey:Boolean = false):Int;
+    public abstract fun execute(params:Array<out Any?>, generatedColumn:String? = null):Int;
 
     /**
      * 批量更新有参数的sql

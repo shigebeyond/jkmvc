@@ -51,21 +51,26 @@ public fun PreparedStatement.setParameters(params: List<Any?>?, start:Int = 0, l
  *
  * @param sql
  * @param params 参数
- * @param returnGeneratedKey 是否返回自动生成的主键，注：只针对int的自增长主键，不能是其他类型的主键，否则报错
+ * @param generatedColumn 返回的自动生成的主键名
+ *       注：只针对int的自增长主键，不能是其他类型的主键，否则报错
+ *       注：mysql可以不指定自增主键名，但oracle必须指定，否则调用pst.getGeneratedKeys()报错：不允许的操作
  * @return
  */
-public fun Connection.execute(sql: String, params: List<Any?>? = null, returnGeneratedKey:Boolean = false): Int {
+public fun Connection.execute(sql: String, params: List<Any?>? = null, generatedColumn:String? = null): Int {
     var pst: PreparedStatement? = null
     var rs: ResultSet? = null;
     try{
         // 准备sql语句
-        pst = prepareStatement(sql)
+        pst = if(generatedColumn == null)
+                prepareStatement(sql)
+              else
+                prepareStatement(sql, arrayOf(generatedColumn)) // fix bug: oracle必须指定第二个参数，否则调用pst.getGeneratedKeys()报错：不允许的操作
         // 设置参数
         pst.setParameters(params)
         // 执行
         val rows:Int = pst.executeUpdate()
         // insert语句，返回自动生成的主键
-        if(returnGeneratedKey /*&& "INSERT.*".toRegex(RegexOption.IGNORE_CASE).matches(sql)*/){
+        if(generatedColumn != null /*&& "INSERT.*".toRegex(RegexOption.IGNORE_CASE).matches(sql)*/){
             rs = pst.getGeneratedKeys(); //获取新增id
             rs.next();
             return rs.getInt(1); //返回新增id

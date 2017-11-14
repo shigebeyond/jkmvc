@@ -35,10 +35,10 @@ interface IDb{
      * 执行更新
      * @param sql
      * @param params
-     * @param returnGeneratedKey
+     * @param generatedColumn 返回的自动生成的主键名
      * @return
      */
-    fun execute(sql: String, params: List<Any?>? = null, returnGeneratedKey:Boolean = false): Int;
+    fun execute(sql: String, params: List<Any?>? = null, generatedColumn:String? = null): Int;
 
     /**
      * 批量更新: 每次更新sql参数不一样

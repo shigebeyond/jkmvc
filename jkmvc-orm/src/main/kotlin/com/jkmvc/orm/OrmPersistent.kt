@@ -75,8 +75,9 @@ abstract class OrmPersistent: OrmValid() {
 		fireEvent("beforeSave")
 
 		// 插入数据库
-		val needPk = !data.containsKey(ormMeta.primaryProp) // 是否需要生成主键
-		val pk = queryBuilder().value(buildDirtyData()).insert(needPk);
+		val needPk = ormMeta.primaryProp.isNotEmpty() && !data.containsKey(ormMeta.primaryProp) // 是否需要生成主键
+		val generatedColumn = if(needPk) ormMeta.primaryKey else null // 主键名
+		val pk = queryBuilder().value(buildDirtyData()).insert(generatedColumn);
 
 		// 更新内部数据
 		if(needPk)

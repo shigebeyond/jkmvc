@@ -234,16 +234,16 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:Pair<String, String?> /*表
      *
      * @param action sql动作：select/insert/update/delete
      * @param params 动态参数
-     * @param returnGeneratedKey 是否返回自动生成的主键
+     * @param generatedColumn 返回的自动生成的主键名
      * @return 影响行数|新增id
      */
-    public override fun execute(action:ActionType, params:Array<out Any?>, returnGeneratedKey:Boolean):Int
+    public override fun execute(action:ActionType, params:Array<out Any?>, generatedColumn:String?):Int
     {
         // 1 编译
         val result = compile(action);
 
         // 2 执行sql
-        return db.execute(result.sql, result.buildParams(params), returnGeneratedKey);
+        return db.execute(result.sql, result.buildParams(params), generatedColumn);
     }
 
     /**
@@ -276,13 +276,13 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:Pair<String, String?> /*表
     /**
      * 插入：insert语句
      *
-     *  @param returnGeneratedKey 是否返回自动生成的主键
+     *  @param generatedColumn 返回的自动生成的主键名
      *  @param params 动态参数
      * @return 新增的id
      */
-    public override fun insert(returnGeneratedKey:Boolean, vararg params: Any?):Int
+    public override fun insert(generatedColumn:String?, vararg params: Any?):Int
     {
-        return execute(ActionType.INSERT, params, returnGeneratedKey);
+        return execute(ActionType.INSERT, params, generatedColumn);
     }
 
     /**

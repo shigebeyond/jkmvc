@@ -226,12 +226,12 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * 执行更新
      * @param sql
      * @param params
-     * @param returnGeneratedKey
+     * @param generatedColumn 返回的自动生成的主键名
      * @return
      */
-    public override fun execute(sql: String, params: List<Any?>?, returnGeneratedKey:Boolean): Int {
+    public override fun execute(sql: String, params: List<Any?>?, generatedColumn:String?): Int {
         try{
-            return conn.execute(sql, params, returnGeneratedKey);
+            return conn.execute(sql, params, generatedColumn);
         }catch (e:Exception){
             dbLogger.error("出错[${e.message}] sql: " + previewSql(sql, params))
             throw  e

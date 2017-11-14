@@ -133,10 +133,10 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      *
      * @param action sql动作：select/insert/update/delete
      * @param params 动态参数
-     * @param returnGeneratedKey 是否返回自动生成的主键
+     * @param generatedColumn 返回自动生成的主键名
      * @return 影响行数|新增id
      */
-    public abstract fun execute(action:ActionType, params:Array<out Any?>, returnGeneratedKey:Boolean = false):Int;
+    public abstract fun execute(action:ActionType, params:Array<out Any?>, generatedColumn:String? = null):Int;
 
     /**
      * 批量更新有参数的sql
@@ -160,11 +160,11 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
     /**
      * 插入：insert语句
      *
-     * @param returnGeneratedKey 是否返回自动生成的主键
+     * @param generatedColumn 返回的自动生成的主键名
      * @param params 动态参数
      * @return 影响行数|新增的id
      */
-    public abstract fun insert(returnGeneratedKey:Boolean = false, vararg params: Any?):Int;
+    public abstract fun insert(generatedColumn:String? = null, vararg params: Any?):Int;
 
     /**
      * 更新：update语句

@@ -305,13 +305,13 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
      * 编译 + 执行
      *
      * @param params 动态参数
-     * @param returnGeneratedKey 是否返回自动生成的主键
+     * @param generatedColumn 返回的自动生成的主键名
      * @return 影响行数|新增id
      */
-    public override fun execute(params:Array<out Any?>, returnGeneratedKey:Boolean):Int
+    public override fun execute(params:Array<out Any?>, generatedColumn:String?):Int
     {
         // 2 执行sql
-        return db.execute(sql, buildParams(params), returnGeneratedKey);
+        return db.execute(sql, buildParams(params), generatedColumn);
     }
 
     /**
