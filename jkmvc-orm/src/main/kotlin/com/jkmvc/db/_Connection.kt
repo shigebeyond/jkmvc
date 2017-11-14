@@ -225,8 +225,8 @@ public inline fun ResultSet.nextRow(): MutableMap<String, Any?>? {
             val label: String = rsmd.getColumnLabel(i); // 字段名
             val value: Any? // 字段值
             when (type) {
-                Types.CLOB -> value = getClob(i).toString()
-                Types.NCLOB -> value = getNClob(i).toString()
+                Types.CLOB -> value = getClob(i).toString2()
+                Types.NCLOB -> value = getNClob(i).toString2()
                 Types.BLOB -> value = getBlob(i).toByteArray()
                 else -> value = getObject(i)
             }
@@ -266,8 +266,8 @@ public inline fun ResultSet.nextCell(i:Int): Pair<Boolean, Any?> {
         val rsmd = metaData
         val type: Int = rsmd.getColumnType(i); // 类型
         when (type) { // 字段值
-            Types.CLOB -> value = getClob(i).toString()
-            Types.NCLOB -> value = getNClob(i).toString()
+            Types.CLOB -> value = getClob(i).toString2()
+            Types.NCLOB -> value = getNClob(i).toString2()
             Types.BLOB -> value = getBlob(i).toByteArray()
             else -> value = getObject(i)
         }
@@ -323,7 +323,7 @@ public fun Blob?.toByteArray(): ByteArray? {
  * Clob转String
  * @return
  */
-public fun Clob?.toString(): String? {
+public fun Clob?.toString2(): String? {
     if (this == null)
         return null
 
