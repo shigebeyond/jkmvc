@@ -6,10 +6,8 @@ jkmvc的请求类是 com.jkmvc.http.Request
 
 因此，你可以使用从 HttpServletRequest 继承的方法
 
-下面仅列出请求类特有的方法
+下面仅列出请求类特有的属性与方法
 
-dog | bird | cat
-----|------|----
-foo | foo  | foo
-bar | bar  | bar
-baz | baz  | baz
+属性/方法 | 作用
+--- | ---
+
