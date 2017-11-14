@@ -149,7 +149,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 * @param key 参数名
 	 * @return
 	 */
-	public fun contain(key:String):Boolean{
+	public fun contains(key:String):Boolean{
 		return params.containsKey(key) // 先取路由参数
 			 && containsParameter(key); // 再取get/post参数
 	}
@@ -188,14 +188,6 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	}
 
 	/*************************** 路由参数 *****************************/
-
-	/**
-	 * 获得当前目录
-	 * @return
-	 */
-	public val directory: String
-		get() = getRouteParameter("directory", "")!!
-
 	/**
 	 * 获得当前controller
 	 * @return

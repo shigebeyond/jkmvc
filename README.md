@@ -1,7 +1,7 @@
-# kotlin-jkmvc
+# jkmvc
 Jkmvc is an elegant, powerful and lightweight MVC web framework built using kotlin. It aims to be swift, secure, and small. It will turn java's heavy development into kotlin's simple pleasure.
 
-Inspired by 2 php frameworks: [kohana](https://github.com/kohana/kohana) and [jkmvc](https://github.com/shigebeyond/skmvc)
+Inspired by 2 php frameworks: [kohana](https://github.com/kohana/kohana) and [skmvc](https://github.com/shigebeyond/skmvc)
 
 # usage - web
 
@@ -18,7 +18,7 @@ vim src/main/webapp/WEB-INF/web.xml
 		<filter-name>jkmvc</filter-name>
 		<filter-class>com.jkmvc.http.JkFilter</filter-class>
 	</filter>
-	
+
 	<filter-mapping>
 		<filter-name>jkmvc</filter-name>
 		<url-pattern>/*</url-pattern>
@@ -79,7 +79,7 @@ visit http://localhost:8081/jkmvc-example/
 
 ## 1 Render View in Controller
 
-vim 
+vim
 
 ```
 package com.jkmvc.example.controller
@@ -402,7 +402,7 @@ class UserController: Controller()
      */
     public fun actionDelete()
     {
-        val id:Int? = req["id"] 
+        val id:Int? = req["id"]
         // 查询单个用户 | find a user
         val user = UserModel(id)
         if(!user.isLoaded()){

@@ -37,9 +37,10 @@ public fun String.isAbsolutePath(): Boolean {
 }
 
 /****************************** 文本处理 *******************************/
-
 /**
+ * 整个文件替换文本内容
  *
+ * @param transform 文本转换lambda
  */
 public fun File.replaceText(transform:(txt: String) -> String){
     val txt = this.readText()

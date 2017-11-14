@@ -295,7 +295,7 @@ class MyTests{
         val dir = File("/oldhome/shi/code/java/szpower/szpower")
         dir.travel {
             if(it.name.indexOf("Controller.kt") > 0){
-                it.forEachLine {  }
+                it.replaceText {  }
             }
         }
 
