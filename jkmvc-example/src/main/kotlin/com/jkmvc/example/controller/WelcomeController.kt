@@ -10,7 +10,7 @@ class WelcomeController: Controller() {
     /**
      * 主页
      */
-    public fun actionIndex() {
+    public fun indexAction() {
         res.render("hello world");
     }
 
@@ -18,7 +18,7 @@ class WelcomeController: Controller() {
      * 显示jsp视图
      * render jsp view
      */
-    public fun actionJsp(){
+    public fun jspAction(){
         res.render(view("index" /* view file */, mutableMapOf("name" to "shijianhang") /* view data */))
     }
 

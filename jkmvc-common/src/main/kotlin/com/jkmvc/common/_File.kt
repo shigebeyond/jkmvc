@@ -44,8 +44,8 @@ public fun String.isAbsolutePath(): Boolean {
  */
 public fun File.replaceText(transform:(txt: String) -> String){
     val txt = this.readText()
-    transform(txt)
-    this.writeText(txt)
+    val newTxt = transform(txt)
+    this.writeText(newTxt)
 }
 
 /****************************** 文件遍历 *******************************/

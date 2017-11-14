@@ -28,8 +28,9 @@ class ControllerClass(public override val clazz: KClass<*> /* controller类 */):
     init{
         // 获得所有action方法
         for (func in clazz.memberFunctions) {
-            if(func.name.startsWith("action") || func.parameters.isEmpty()) { // 以action开头 + 无参数
-                val name = func.name.substring(6).lcFirst() // 首字母小写
+            val funname = func.name
+            if(funname.endsWith("Action") || func.parameters.isEmpty()) { // 以Action结尾 + 无参数
+                val name = funname.substring(0, funname.length - 6) // 去掉Action结尾
                 actions[name] = func;
             }
         }

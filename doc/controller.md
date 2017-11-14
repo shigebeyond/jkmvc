@@ -25,7 +25,7 @@ class WelcomeController: Controller() {
     /**
      * action，response to uri "welcome/index"
      */
-    public fun actionIndex() {
+    public fun indexAction() {
         res.render("hello world");
     }
 }

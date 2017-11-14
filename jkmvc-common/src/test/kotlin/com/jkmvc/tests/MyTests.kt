@@ -44,6 +44,9 @@ class MyTests{
 
     @Test
     fun testString(){
+        val funname = "indexAction"
+        val name = funname.substring(0, funname.length - 6) // 去掉Action结尾
+        println(name)
 //        println("my_favorite_food".underline2Camel())
 //        println("myFavoriteFood".camel2Underline())
 //        println("2017-09-27 08:47:04".to(Date::class))
@@ -54,11 +57,11 @@ class MyTests{
         })*/
         //println("01".toInt())
         // 长文本
-        val str = """
+        /*val str = """
         hello
         world
         """
-        println(str)
+        println(str)*/
     }
 
     @Test
@@ -292,10 +295,15 @@ class MyTests{
 
         // controller的action方法改名
         // 由actionIndex, 改为indexAction
-        val dir = File("/oldhome/shi/code/java/szpower/szpower")
+        val dir = File("/oldhome/shi/code/java/jkmvc/jkmvc-example/src/main/kotlin/com/jkmvc/example")
         dir.travel {
             if(it.name.indexOf("Controller.kt") > 0){
-                it.replaceText {  }
+                it.replaceText {
+                    "fun\\s+action([\\w\\d]+)".toRegex().replace(it){ result: MatchResult ->
+                        "fun " + result.groupValues[1].decapitalize() + "Action"
+                    }
+                }
+                println("处理文件: " + it.name)
             }
         }
 

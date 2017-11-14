@@ -20,7 +20,7 @@ class UserController: Controller()
      * 列表页
      * list page
      */
-    public fun actionIndex()
+    public fun indexAction()
     {
         val query: OrmQueryBuilder = UserModel.queryBuilder()
         // 统计用户个数 | count users
@@ -36,7 +36,7 @@ class UserController: Controller()
      * 详情页
      * detail page
      */
-    public fun actionDetail()
+    public fun detailAction()
     {
         // 获得路由参数id: 2种写法 | 2 ways to get route parameter: "id"
         // val id = req.getIntRouteParameter("id"); // req.getRouteParameter["xxx"]
@@ -58,7 +58,7 @@ class UserController: Controller()
      * 新建页
      * new page
      */
-    public fun actionNew()
+    public fun newAction()
     {
         // 处理请求 | handle request
         if(req.isPost()){ //  post请求：保存表单数据 | post request: save form data
@@ -88,7 +88,7 @@ class UserController: Controller()
      * 编辑页
      * edit page
      */
-    public fun actionEdit()
+    public fun editAction()
     {
         // 查询单个用户 | find a user
         val id: Int = req["id"]!!
@@ -124,7 +124,7 @@ class UserController: Controller()
      * 删除
      * delete action
      */
-    public fun actionDelete()
+    public fun deleteAction()
     {
         val id:Int? = req["id"]
         // 查询单个用户 | find a user
@@ -143,7 +143,7 @@ class UserController: Controller()
      * 上传头像
      * upload avatar
      */
-    public fun actionUploadAvatar()
+    public fun uploadAvatarAction()
     {
         // 设置上传的子目录（将上传文件保存到指定的子目录），必须要在调用 req 的其他api之前调用，否则无法生效
         // set uploadSubdir which uploaded file is saved, you must set it before calling req's other api, or it's useless
@@ -170,7 +170,7 @@ class UserController: Controller()
     /**
      * 登录
      */
-    public fun actionLogin(){
+    public fun loginAction(){
         if(req.isPost()){ // post请求
             val user = Auth.instance().login(req["username"]!!, req["password"]!!);
             if(user == null)
@@ -185,7 +185,7 @@ class UserController: Controller()
     /**
      * 登录
      */
-    public fun actionLogout(){
+    public fun logoutAction(){
         Auth.instance().logout()
         redirect("user/login")
     }

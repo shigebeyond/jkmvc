@@ -45,7 +45,7 @@ class WelcomeController: Controller() {
     /**
      * 主页
      */
-    public fun actionIndex() {
+    public fun indexAction() {
         res.render("hello world");
     }
 
@@ -95,7 +95,7 @@ class WelcomeController: Controller() {
      * 显示jsp视图
      * render jsp view
      */
-    public fun actionJsp(){
+    public fun jspAction(){
         res.render(view("index" /* view file */, mutableMapOf("name" to "shijianhang") /* view data */))
     }
 
@@ -301,7 +301,7 @@ class UserController: Controller()
      * 列表页
      * list page
      */
-    public fun actionIndex()
+    public fun indexAction()
     {
         // 查询所有用户 | find all users
         val users = UserModel.queryBuilder().findAll<UserModel>()
@@ -313,7 +313,7 @@ class UserController: Controller()
      * 详情页
      * detail page
      */
-    public fun actionDetail()
+    public fun detailAction()
     {
         // 获得路由参数id: 2种写法 | 2 ways to get route parameter: "id"
         // val id = req.getIntRouteParameter("id"); // req.getRouteParameter["xxx"]
@@ -335,7 +335,7 @@ class UserController: Controller()
      * 新建页
      * new page
      */
-    public fun actionNew()
+    public fun newAction()
     {
         // 处理请求 | handle request
         if(req.isPost()){ //  post请求：保存表单数据 | post request: save form data
@@ -365,7 +365,7 @@ class UserController: Controller()
      * 编辑页
      * edit page
      */
-    public fun actionEdit()
+    public fun editAction()
     {
         // 查询单个用户 | find a user
         val user = UserModel(req["id"])
@@ -400,7 +400,7 @@ class UserController: Controller()
      * 删除
      * delete action
      */
-    public fun actionDelete()
+    public fun deleteAction()
     {
         val id:Int? = req["id"]
         // 查询单个用户 | find a user
@@ -419,7 +419,7 @@ class UserController: Controller()
      * 上传头像
      * upload avatar
      */
-    public fun actionUploadAvatar()
+    public fun uploadAvatarAction()
     {
         // 设置上传的子目录（将上传文件保存到指定的子目录），必须要在调用 req 的其他api之前调用，否则无法生效
         // set uploadSubdir which uploaded file is saved, you must set it before calling req's other api, or it's useless
