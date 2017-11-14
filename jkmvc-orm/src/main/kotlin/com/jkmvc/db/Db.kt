@@ -160,6 +160,16 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
     }
 
     /**
+     * 属性名到字段名的映射
+     */
+    protected val prop2ColumnMapping: MutableMap<String, String> = HashMap()
+
+    /**
+     * 字段名到属性名的映射
+     */
+    protected val column2PropMapping: MutableMap<String, String> = HashMap()
+
+    /**
      * schema
      *    oracle的概念，代表一组数据库对象
      *    在 Db.tableColumns 中延迟加载表字段时，用来过滤 DYPT 库的表
@@ -550,12 +560,14 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @return db字段名
      */
     public override fun prop2Column(prop:String): String {
-        var column = prop
-        if(dbConfig["columnUnderline"]!!) // 字段有下划线
-            column = column.camel2Underline()
-        if(dbConfig["columnUpperCase"]!!)// 字段全大写
-            column = column.toUpperCase() // 转大写
-        return column
+        return prop2ColumnMapping.getOrPut(prop){
+            var column = prop
+            if(dbConfig["columnUnderline"]!!) // 字段有下划线
+                column = column.camel2Underline()
+            if(dbConfig["columnUpperCase"]!!)// 字段全大写
+                column = column.toUpperCase() // 转大写
+            column
+        }
     }
 
     /**
@@ -566,12 +578,14 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @return 对象属性名
      */
     public override fun column2Prop(column:String): String {
-        var prop = column
-        if(dbConfig["columnUpperCase"]!!)// 字段全大写
-            prop = prop.toLowerCase() // 转小写
-        if(dbConfig["columnUnderline"]!!) // 字段有下划线
-            prop = prop.underline2Camel()
-        return prop
+        return column2PropMapping.getOrPut(column){
+            var prop = column
+            if(dbConfig["columnUpperCase"]!!)// 字段全大写
+                prop = prop.toLowerCase() // 转小写
+            if(dbConfig["columnUnderline"]!!) // 字段有下划线
+                prop = prop.underline2Camel()
+            prop
+        }
     }
 
     /**
