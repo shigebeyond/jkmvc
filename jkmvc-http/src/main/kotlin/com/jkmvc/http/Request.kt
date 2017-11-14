@@ -53,7 +53,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	/**
 	 * 当前匹配的路由参数
 	 */
-	public lateinit var params:Map<String, String>;
+	public lateinit var routeParams:Map<String, String>;
 
 	init{
 		// 中文编码
@@ -79,7 +79,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 		val result = Router.parse(routeUri);
 
 		if(result != null){
-			this.params = result.component1();
+			this.routeParams = result.component1();
 			this.route = result.component2();
 			return true;
 		}
@@ -136,7 +136,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 */
 	public fun isEmpty(key:String):Boolean{
 		// 先取路由参数
-		if(params.containsKey(key) && params[key].isNullOrEmpty())
+		if(routeParams.containsKey(key) && routeParams[key].isNullOrEmpty())
 			return true;
 
 		// 再取get/post参数
@@ -150,7 +150,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 * @return
 	 */
 	public fun contains(key:String):Boolean{
-		return params.containsKey(key) // 先取路由参数
+		return routeParams.containsKey(key) // 先取路由参数
 			 && containsParameter(key); // 再取get/post参数
 	}
 
@@ -177,8 +177,8 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	{
 		val clazz:KClass<T> = T::class
 		// 先取路由参数
-		if(params.containsKey(key))
-			return params[key]!!.to(clazz) as T
+		if(routeParams.containsKey(key))
+			return routeParams[key]!!.to(clazz) as T
 
 		// 再取get/post参数
 		if(containsParameter(key))
@@ -208,7 +208,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 * @return
 	 */
 	public fun containsRouteParameter(key: String): Boolean {
-		return params.containsKey(key)
+		return routeParams.containsKey(key)
 	}
 
 	/**
@@ -220,7 +220,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 * @return
 	 */
 	public inline fun <reified T:Any> getRouteParameter(key:String, defaultValue:T? = null):T? {
-		return params.getAndConvert(key, defaultValue)
+		return routeParams.getAndConvert(key, defaultValue)
 	}
 
 	/**

@@ -1,0 +1,144 @@
+# 控制器
+
+控制器 Controller 是介于模型 Model 和视图 View 之间的负责协调的类。 他将请求数据传递给模型，以便由模型来读写数据。 然后把模型返回的数据，传递给视图来渲染，最终的输出到浏览器。 控制器负责控制web应用的流程。
+
+控制器在 `com.jkmvc.http.Server#callController` 中调用，只调用匹配路由的控制器。详情请阅读[routing](routing)。
+
+## 1 创建控制器
+
+创建一个继承 `com.jkmvc.http.Controller` 的子类
+
+请看我们的第一个控制器类
+
+```
+package com.jkmvc.example.controller
+
+import com.jkmvc.http.Controller
+
+/**
+ * 主页控制器
+ */
+class WelcomeController: Controller() {
+
+    /**
+     * 动作方法，用于响应uri "welcome/index"
+     */
+    public fun actionIndex() {
+        res.render("hello world");
+    }
+}
+```
+
+## 2 注册控制器
+
+你要先配置控制器所在的包路径，这样 jkmvc 会收集该包下的所有控制器类，并在请求进来时调用
+
+vim src/main/resources/http.yaml
+
+```
+# controller类所在的包路径
+controllerPackages:
+    - com.jkmvc.example.controller
+```
+
+## 3 `req` 属性
+
+每个控制器都有一个 `req` 属性，他是 [Request](request) 对象，代表当前请求。
+
+当然，在控制器之外，你也可以通过 `Request.current()` 来获得当前请求。
+
+以下列出常用 `req` 的属性与方法。详情请参考 [Request](request)
+
+属性/方法 | 作用
+--- | ---
+[req.route](route) | 匹配当前url的路由对象
+req.controller, <br /> req.action | 当前匹配路由的 controller / action
+req.routeParams | 匹配路由的所有参数，包含 controller / action
+
+## 4 `res` 属性
+
+每个控制器都有一个 `res` 属性，他是 [Response](response) 对象。
+
+属性/方法 | 作用
+--- | ---
+req.setStatus(status:Int)| 设置响应的状态码
+res.render(content:String) | 设置响应内容为文本
+res.render(file: File) | 设置响应内容为文件
+res.render(view:View) | 设置响应内容为视图
+res.setHeader(name:String, value:String) | 设置响应头
+
+## 5 Action 动作
+
+Action 动作，其实就是控制器的一个方法，但定义必须满足以下条件
+1. public方法
+2. 以 `Action` 作为后缀
+
+动作是真正处理请求的方法，包含所有逻辑代码。
+
+每个动作方法都应该 `res.render(sth)` 来给浏览器响应内容，除非请求被重定向。
+
+我们来看看一个简单的动作方法，如加载 [view](view) 视图文件
+
+```
+	public function indexAction()
+	{
+		res.render(view("user/detail")); // This will load webapps/user/detail.jsp
+	}
+```
+
+## 6 路由参数
+
+你可以通过 `req.getRouteParameter('name')` 来访问路由参数，其中 `name` 是定义在路由规则中的参数名
+
+### 6.1 定义路由规则
+
+```
+# 路由规则
+default:
+  #  url正则
+  regex: <controller>(/<action>(/<id>)?)?
+  #  参数子正则
+  paramRegex:
+    id: \d+
+  # 默认参数值
+  defaults:
+    controller: welcome
+    action: index
+```
+
+### 6.2 在控制器中获得路由参数
+
+```
+	public function detailAction()
+	{
+		val id:Int = req.getRouteParameter('id');
+		val action:String = req.getRouteParameter('action');
+		val username:String = req.getRouteParameter('username', null); // 第二个参数设置默认值
+```
+
+## 7 例子
+
+显示用户详情的动作方法
+
+```
+    /**
+     * 用户详情页
+     */
+    public fun detailAction()
+    {
+        // 获得路由参数id: 2种写法
+        // val id = req.getIntRouteParameter("id"); // req.getRouteParameter["xxx"]
+        val id:Int? = req["id"] // req["xxx"]
+        // 查询单个用户
+        //val user = UserModel.queryBuilder().where("id", id).find<UserModel>()
+        val user = UserModel(id)
+        if(!user.isLoaded()){
+            res.render("用户[$id]不存在")
+            return
+        }
+        // 渲染视图
+        val view = view("user/detail")
+        view["user"] = user; // 设置视图参数
+        res.render(view)
+    }
+```
