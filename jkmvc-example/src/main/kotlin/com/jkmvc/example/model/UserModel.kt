@@ -1,52 +1,31 @@
-package com.jkmvc.example.model
+package com.jkmvc.example.model 
 
-import com.jkmvc.orm.OrmMeta
-import com.jkmvc.orm.Orm
-import com.jkmvc.session.Auth
-import com.jkmvc.session.IAuthUserModel
+import com.jkmvc.orm.OrmMeta 
+import com.jkmvc.orm.Orm 
 
 /**
  * 用户模型
- * User　model
+ *
+ * @ClassName: UserModel
+ * @Description:
+ * @author shijianhang<772910474@qq.com>
+ * @date 2017-09-29 6:56 PM
  */
-class UserModel(id:Int? = null): Orm(id), IAuthUserModel {
-    // 伴随对象就是元数据
-    // company object is meta data for model
-    companion object m: OrmMeta(UserModel::class){
-        init {
-            // 添加标签 + 规则
-            // add label and rule for field
-            addRule("username", "用户名", "notEmpty");
-            addRule("password", "密码", "notEmpty");
-            addRule("name", "姓名", "notEmpty");
-            addRule("age", "年龄", "between(1,120)");
+class UserModel(id:Int? = null): Orm(id) {
+	// 伴随对象就是元数据
+ 	companion object m: OrmMeta(UserModel::class, "用户模型", "user", "id"){}
 
-            // 添加关联关系
-            // add relaction for other model
-            hasOne("address", AddressModel::class)
-            hasMany("addresses", AddressModel::class)
-        }
-    }
+	// 代理属性读写
+	public var id:Int by property() // 用户编号 
 
-    // 代理属性读写
-    // delegate property
-    public var id:Int by property<Int>();
+	public var username:String by property() // 用户名 
 
-    public var username:String by property<String>();
+	public var password:String by property() // 密码 
 
-    public var password:String by property<String>();
+	public var name:String by property() // 中文名 
 
-    public var name:String by property<String>();
+	public var age:Int by property() // 年龄 
 
-    public var age:Int by property<Int>();
+	public var avatar:String by property() // 头像 
 
-    public var avatar:String? by property<String?>();
-
-    // 关联地址：一个用户有一个地址
-    // relate to AddressModel: user has an address
-    public var address:AddressModel by property<AddressModel>();
-
-    // 关联地址：一个用户有多个地址
-    // relate to AddressModel: user has many addresses
-    public var addresses:List<AddressModel> by property<List<AddressModel>>();
 }
