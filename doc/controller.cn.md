@@ -21,7 +21,7 @@ import com.jkmvc.http.Controller
 class WelcomeController: Controller() {
 
     /**
-     * 动作方法，用于响应uri "welcome/index"
+     * 操作方法，用于响应uri "welcome/index"
      */
     public fun actionIndex() {
         res.render("hello world");
@@ -67,17 +67,17 @@ res.render(file: File) | 设置响应内容为文件
 res.render(view:View) | 设置响应内容为视图
 res.setHeader(name:String, value:String) | 设置响应头
 
-## 5 Action 动作
+## 5 Action 操作
 
-Action 动作，其实就是控制器的一个方法，但定义必须满足以下条件
+Action 操作，其实就是控制器的一个方法，但定义必须满足以下条件
 1. public方法
 2. 以 `Action` 作为后缀
 
-动作是真正处理请求的方法，包含所有逻辑代码。
+操作是真正处理请求的方法，包含所有逻辑代码。
 
-每个动作方法都应该 `res.render(sth)` 来给浏览器响应内容，除非请求被重定向。
+每个操作方法都应该 `res.render(sth)` 来给浏览器响应内容，除非请求被重定向。
 
-我们来看看一个简单的动作方法，如加载 [view](view) 视图文件
+我们来看看一个简单的操作方法，如加载 [view](view) 视图文件
 
 ```
 	public function indexAction()
@@ -92,8 +92,10 @@ Action 动作，其实就是控制器的一个方法，但定义必须满足以�
 
 ### 6.1 定义路由规则
 
+vim src/main/resources/routes.yaml
+
 ```
-# 路由规则
+# 路由名
 default:
   #  url正则
   regex: <controller>(/<action>(/<id>)?)?
@@ -118,7 +120,7 @@ default:
 
 ## 7 例子
 
-显示用户详情的动作方法
+显示用户详情的操作方法
 
 ```
     /**

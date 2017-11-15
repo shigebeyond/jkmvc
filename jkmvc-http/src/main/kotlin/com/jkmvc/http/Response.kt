@@ -9,11 +9,9 @@ import javax.servlet.http.HttpServletResponse
 
 /**
  * 响应对象
- * 	TODO: 支持响应文件
- * 
+ *
  * @author shijianhang
  * @date 2016-10-7 下午11:32:07 
- *
  */
 class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpServletResponse by res
 {

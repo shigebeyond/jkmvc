@@ -70,16 +70,31 @@ public fun Connection.execute(sql: String, params: List<Any?>? = null, generated
         // 执行
         val rows:Int = pst.executeUpdate()
         // insert语句，返回自动生成的主键
-        if(generatedColumn != null /*&& "INSERT.*".toRegex(RegexOption.IGNORE_CASE).matches(sql)*/){
-            rs = pst.getGeneratedKeys(); //获取新增id
-            rs.next();
-            return rs.getInt(1); //返回新增id
-        }
+        if(generatedColumn != null /*&& "INSERT.*".toRegex(RegexOption.IGNORE_CASE).matches(sql)*/)
+            return getGeneratedKey(pst)
+
         // 非insert语句，返回行数
         return rows;
     }finally{
         rs?.close()
         pst?.close()
+    }
+}
+
+/**
+ * 获得自动生成的主键
+ *
+ * @param pst
+ * @return
+ */
+private fun getGeneratedKey(pst: PreparedStatement): Int {
+    var rs: ResultSet? = null
+    try {
+        rs = pst.getGeneratedKeys(); //获取新增id
+        rs.next();
+        return rs.getInt(1); //返回新增id
+    }finally{
+        rs?.close()
     }
 }
 

@@ -1,5 +1,6 @@
 package com.jkmvc.tests
 
+import com.jkmvc.common.Config
 import org.apache.velocity.VelocityContext
 import org.apache.velocity.io.VelocityWriter
 import org.apache.velocity.runtime.RuntimeInstance

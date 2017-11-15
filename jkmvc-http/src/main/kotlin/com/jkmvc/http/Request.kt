@@ -129,18 +129,18 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	}
 
 	/**
-	 * 判断请求参数是否为空
+	 * 检查请求参数是否为空
 	 *
 	 * @param key 参数名
 	 * @return
 	 */
 	public fun isEmpty(key:String):Boolean{
 		// 先取路由参数
-		if(routeParams.containsKey(key) && routeParams[key].isNullOrEmpty())
+		if(isEmptyRouteParameter(key))
 			return true;
 
 		// 再取get/post参数
-		return !containsParameter(key) || getParameter(key).isNullOrEmpty();
+		return isEmptyParameter(key);
 	}
 
 	/**
@@ -156,7 +156,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 
 	/**
 	 * 智能获得请求参数，先从路由参数中取得，如果没有，则从get/post参数中取
-	 *    注：智能获得请求参数时，需要根据返回值的类型来转换参数值的类型，因此调用时需明确返回值的类型
+	 *    注：调用时需明确指定返回类型，来自动转换参数值为指定类型
 	 *
 	 * <code>
 	 *     val id:Int? = req["id"]
@@ -212,7 +212,17 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	}
 
 	/**
-	 * 获得当前匹配路由的所有参数/单个参数
+	 * 检查路由参数是否为空
+	 *
+	 * @param key 参数名
+	 * @return
+	 */
+	public fun isEmptyRouteParameter(key: String): Boolean {
+		return routeParams.containsKey(key) && routeParams[key].isNullOrEmpty()
+	}
+
+	/**
+	 * 获得路由参数
 	 *
 	 * @param key 参数名
 	 * @param defaultValue 单个参数的默认值
@@ -254,7 +264,6 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	public fun getBooleanRouteParameter(key: String, defaultValue: Boolean? = null): Boolean? {
 		return getRouteParameter(key, defaultValue)
 	}
-
 
 	/**
 	 * 获得float类型的路由参数
@@ -309,6 +318,16 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 			return mulReq.getParameterMap().containsKey(key)
 
 		return req.parameterMap.containsKey(key);
+	}
+
+	/**
+	 * 检查get/post/upload参数是否为空
+	 *
+	 * @param key 参数名
+	 * @return
+	 */
+	public fun isEmptyParameter(key: String): Boolean {
+		return !containsParameter(key) || getParameter(key).isNullOrEmpty()
 	}
 
 	/**
@@ -374,7 +393,8 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	}
 
 	/**
-	 * 获得参数值，自动转换为指定类型
+	 * 获得get/post/upload参数值
+	 *   注：调用时需明确指定返回类型，来自动转换参数值为指定类型
 	 *
 	 * @param key 参数名
 	 * @param defaultValue 单个参数的默认值
@@ -385,7 +405,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	}
 
 	/**
-	 * 获得int类型的参数值
+	 * 获得int类型的get/post/upload的参数值
 	 *
 	 * @param key 参数名
 	 * @param defaultValue 单个参数的默认值
@@ -396,7 +416,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	}
 
 	/**
-	 * 获得long类型的参数值
+	 * 获得long类型的get/post/upload的参数值
 	 *
 	 * @param key 参数名
 	 * @param defaultValue 单个参数的默认值
@@ -407,7 +427,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	}
 
 	/**
-	 * 获得boolean类型的参数值
+	 * 获得boolean类型的get/post/upload的参数值
 	 *
 	 * @param key 参数名
 	 * @param defaultValue 单个参数的默认值
@@ -418,7 +438,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	}
 
 	/**
-	 * 获得Date类型的参数值
+	 * 获得Date类型的get/post/upload的参数值
 	 *
 	 * @param key 参数名
 	 * @param defaultValue 单个参数的默认值
@@ -429,7 +449,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	}
 
 	/**
-	 * 获得float类型的参数值
+	 * 获得float类型的get/post/upload的参数值
 	 *
 	 * @param key 参数名
 	 * @param defaultValue 单个参数的默认值
@@ -440,7 +460,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	}
 
 	/**
-	 * 获得double类型的参数值
+	 * 获得double类型的get/post/upload的参数值
 	 *
 	 * @param key 参数名
 	 * @param defaultValue 单个参数的默认值
@@ -451,7 +471,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	}
 
 	/**
-	 * 获得short类型的参数值
+	 * 获得short类型的get/post/upload的参数值
 	 *
 	 * @param key 参数名
 	 * @param defaultValue 单个参数的默认值

@@ -91,12 +91,14 @@ A very basic action method that simply loads a [view](view) file.
 
 Route parameters are accessed by calling `req.getRouteParameter('name')` where `name` is the name defined in the route.
 
-### 6.1 Define route configuration
+### 6.1 Define routing configuration
+
+vim src/main/resources/routes.yaml
 
 ```
-# route rule
+# route name
 default:
-  #  url pattern
+  #  uri pattern
   regex: <controller>(/<action>(/<id>)?)?
   # param pattern
   paramRegex:

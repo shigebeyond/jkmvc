@@ -24,7 +24,8 @@ abstract class IConfig {
     public abstract fun containsKey(key: String): Boolean;
 
     /**
-     * 获得配置项的值，自动转换为指定类型
+     * 获得配置项的值
+     *  注：调用时需明确指定返回类型，来自动转换参数值为指定类型
      */
     public operator inline fun <reified T:Any> get(key: String, defaultValue: T? = null): T?{
         return props.getAndConvert(key, defaultValue)
