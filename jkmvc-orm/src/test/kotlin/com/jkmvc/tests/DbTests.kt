@@ -40,8 +40,8 @@ class DbTests{
 
     @Test
     fun testInsert(){
-//       var id = DbQueryBuilder(db).table("user").value(mapOf("name" to "shi", "age" to 1)).insert(true);
-        var id = DbQueryBuilder(db).table("user").insertColumns("name", "age").value("shi", 1).insert(true);
+//       var id = DbQueryBuilder(db).table("user").value(mapOf("name" to "shi", "age" to 1)).insert("id);
+        var id = DbQueryBuilder(db).table("user").insertColumns("name", "age").value("shi", 1).insert("id");
         println("插入user表：" + id)
     }
 
@@ -51,7 +51,7 @@ class DbTests{
         val ids = ArrayList<Int>()
         for (i in id..(id+10)){
             query.value("shi-$i", i)
-            val id = query.insert(true);
+            val id = query.insert("id");
             ids.add(id)
         }
         println("批量插入user表, 起始id：${ids.first()}, 行数：10")
@@ -68,7 +68,7 @@ class DbTests{
             for (j in 1..10){
                 query.value("shi-$j", j)
             }
-            val id = query.insert(true);
+            val id = query.insert("id");
             println("批量插入user表, 起始id：$id, 行数：10")
             initQuery(query) // 重新初始化插入
         }
@@ -168,6 +168,10 @@ class DbTests{
         for(i in 0..10){
             println(csql.find<Record>(i))
         }
+    }
+
+    fun test(){
+
     }
 
 }
