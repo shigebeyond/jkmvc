@@ -55,7 +55,7 @@ class AddressModel(id:Int? = null): Orm(id) {
         init {
             // 添加标签 + 规则
             // add label and rule for field
-            addRule("user_id", "用户", "notEmpty");
+            addRule("userId", "用户", "notEmpty");
             addRule("addr", "地址", "notEmpty");
             addRule("tel", "电话", "notEmpty && digit");
 
@@ -69,7 +69,7 @@ class AddressModel(id:Int? = null): Orm(id) {
     // delegate property
     public var id:Int by property<Int>();
 
-    public var user_id:Int by property<Int>();
+    public var userId:Int by property<Int>();
 
     public var addr:String by property<String>();
 
