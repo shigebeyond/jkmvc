@@ -80,7 +80,7 @@ class ModelGenerator(val srcDir:String){
     public fun genenateModelClass(pck:String, model:String, label:String, table: String): String {
         // 查询字段的sql
         val sql = config.getString("columns")!!
-        val fields = db.queryRows(sql, listOf(table), Map::class.recordTranformer)
+        val fields = db.queryRows(sql, listOf(table, db.schema), Map::class.recordTranformer)
         // 找到主键
         var pk:String = ""
         var pkType: String = "Any"

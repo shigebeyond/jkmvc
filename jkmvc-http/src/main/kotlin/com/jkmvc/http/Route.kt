@@ -48,7 +48,7 @@ class Route(override val regex:String /* 原始正则: <controller>(\/<action>(\
 		/**
 		 * 参数的默认正则
 		 */
-		protected val REGEX_PARAM = "[^\\/]+";
+		protected val REGEX_PARAM = "[^/]+";
 	}
 
 	/**

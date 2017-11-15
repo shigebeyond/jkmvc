@@ -44,9 +44,12 @@ class MyTests{
 
     @Test
     fun testString(){
-        val funname = "indexAction"
+        val m = "jdbc:mysql://[^/]+/([^\\?]+)".toRegex().find("jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8")
+        if(m != null)
+            println(m.groupValues[1])
+        /*val funname = "indexAction"
         val name = funname.substring(0, funname.length - 6) // 去掉Action结尾
-        println(name)
+        println(name)*/
 //        println("my_favorite_food".underline2Camel())
 //        println("myFavoriteFood".camel2Underline())
 //        println("2017-09-27 08:47:04".to(Date::class))

@@ -175,11 +175,16 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      *    在 Db.tableColumns 中延迟加载表字段时，用来过滤 DYPT 库的表
      *    可省略，默认值=username
      */
-    protected val schema:String?
+    public val schema:String?
         get(){
             if(dbType == DbType.Oracle)
                 return dbConfig.getString("schema", dbConfig["username"])
 
+            if(dbType == DbType.Mysql){
+                val m = "jdbc:mysql://[^/]+/([^\\?]+)".toRegex().find(dbConfig["url"]!!)
+                if(m != null)
+                    return m.groupValues[1]
+            }
             return null
         }
 
