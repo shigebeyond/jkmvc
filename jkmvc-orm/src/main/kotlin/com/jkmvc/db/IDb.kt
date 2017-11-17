@@ -54,7 +54,7 @@ interface IDb{
      * 查询多行
      * @param sql
      * @param params
-     * @param action 处理结果的函数
+     * @param action 转换结果的函数
      * @return
      */
     fun <T> queryResult(sql: String, params: List<Any?>? = null, action: (ResultSet) -> T): T;
@@ -63,7 +63,7 @@ interface IDb{
      * 查询多行
      * @param sql
      * @param params
-     * @param transform 处理结果的函数
+     * @param transform 转换结果的函数
      * @return
      */
     fun <T> queryRows(sql: String, params: List<Any?>? = null, transform: (MutableMap<String, Any?>) -> T): List<T>;
@@ -72,7 +72,7 @@ interface IDb{
      * 查询一行(多列)
      * @param sql
      * @param params
-     * @param transform 处理结果的函数
+     * @param transform 转换结果的函数
      * @return
      */
     fun <T> queryRow(sql: String, params: List<Any?>? = null, transform: (MutableMap<String, Any?>) -> T): T?;
@@ -81,7 +81,7 @@ interface IDb{
      * 查询一列(多行)
      * @param sql
      * @param params
-     * @param transform 处理结果的函数
+     * @param transform 转换结果的函数
      * @return
      */
     fun queryColumn(sql: String, params: List<Any?>?): List<Any?>

@@ -291,10 +291,10 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     /**
      * 编译动作子句
      *
-     * @param sb 记录编译后的sql
+     * @param buffer 记录编译后的sql
      * @return
      */
-    public override fun compileAction(sb: StringBuilder): IDbQueryBuilder {
+    public override fun compileAction(buffer: StringBuilder): IDbQueryBuilder {
         if (action == null)
             throw DbException("未设置sql动作");
 
@@ -319,7 +319,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
         else if(action == ActionType.SELECT)
             sql = sql.replace(":distinct", if (distinct) "distinct" else "");
 
-        sb.append(sql);
+        buffer.append(sql);
         return this;
     }
 

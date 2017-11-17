@@ -264,7 +264,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * 查询多行
      * @param sql
      * @param params
-     * @param action 处理结果的函数
+     * @param action 转换结果的函数
      * @return
      */
     public override fun <T> queryResult(sql: String, params: List<Any?>?, action: (ResultSet) -> T): T {
@@ -280,7 +280,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * 查询多行
      * @param sql
      * @param params
-     * @param transform 处理结果的函数
+     * @param transform 转换结果的函数
      * @return
      */
     public override fun <T> queryRows(sql: String, params: List<Any?>?, transform: (MutableMap<String, Any?>) -> T): List<T> {
@@ -296,7 +296,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * 查询一行(多列)
      * @param sql
      * @param params
-     * @param transform 处理结果的函数
+     * @param transform 转换结果的函数
      * @return
      */
     public override fun <T> queryRow(sql: String, params: List<Any?>?, transform: (MutableMap<String, Any?>) -> T): T? {
@@ -312,7 +312,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * 查询一列(多行)
      * @param sql
      * @param params
-     * @param transform 处理结果的函数
+     * @param transform 转换结果的函数
      * @return
      */
     public override fun queryColumn(sql: String, params: List<Any?>?): List<Any?> {
