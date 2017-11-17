@@ -61,7 +61,18 @@ getIntParameter(key: String, defaultValue: Int? = null): Int? | 获得int类型�
 getLongParameter(key: String, defaultValue: Long? = null): Long? | 获得long类型的get/post参数值
 getShortParameter(key: String, defaultValue: Short? = null): Short? | 获得short类型的get/post参数值
 
-5. 获得请求参数（包含路由参数与get/post参数）的方法
+5. 获得上传文件的方法
+
+方法 | 作用
+--- | ---
+containsFile(key: String): Boolean | 检查是否有上传文件
+getFile(name: String): File | 获得某个上传文件
+getFileMap(): Map<String, File> | 获得上传文件
+getFileNames(): Enumeration<String> | 获得文件名的枚举
+getFileRelativePath(name: String): String | 获得某个上传文件的相对路径
+getUploadUrl(relativePath: String): String | 获得上传文件的url
+
+6. 获得请求参数（包含路由参数与get/post参数）的方法
 
 方法 | 作用
 --- | ---

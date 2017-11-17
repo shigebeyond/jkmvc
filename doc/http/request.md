@@ -59,7 +59,18 @@ getIntParameter(key: String, defaultValue: Int? = null): Int? | Get int type of 
 getLongParameter(key: String, defaultValue: Long? = null): Long? | Get long type of `get/post` parameter
 getShortParameter(key: String, defaultValue: Short? = null): Short? | Get short type of `get/post` parameter
 
-5. Get request parameter（including routing paramter and `get/post` parameter）
+5. Get uploaded file
+
+method | usage
+--- | ---
+containsFile(key: String): Boolean | Check whether contains uploaed file
+getFile(name: String): File | Get a uploaed file
+getFileMap(): Map<String, File> | Get all uploaed files
+getFileNames(): Enumeration<String> | Get all uploaed file names
+getFileRelativePath(name: String): String | Get a uploaed file's relative path where file is saved
+toUploadUrl(relativePath: String): String | Obtain an absolute url based on the uploaded file's relative path
+
+6. Get request parameter（including routing paramter and `get/post` parameter）
 
 method | usage
 --- | ---
