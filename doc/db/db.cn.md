@@ -93,38 +93,41 @@ prop2Column(prop: String): String | 根据对象属性名，获得db字段名
 // 获得 Db 对象
 val db: Db = Db.getDb()
 
-// 建表
-db.execute("""
-    CREATE TABLE IF NOT EXISTS `user` (
-        `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '用户编号',
-        `name` varchar(50) NOT NULL DEFAULT '' COMMENT '用户名',
-        `age` tinyint(4) unsigned NOT NULL DEFAULT '0' COMMENT '年龄',
-        `avatar` varchar(250) DEFAULT NULL COMMENT '头像',
-        PRIMARY KEY (`id`)
-    )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户';
-    """);
+// 开启事务
+db.transaction {
+    // 建表
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS `user` (
+            `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '用户编号',
+            `name` varchar(50) NOT NULL DEFAULT '' COMMENT '用户名',
+            `age` tinyint(4) unsigned NOT NULL DEFAULT '0' COMMENT '年龄',
+            `avatar` varchar(250) DEFAULT NULL COMMENT '头像',
+            PRIMARY KEY (`id`)
+        )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户';
+        """);
 
-// 查询
-// val id = db.execute("insert into user(name, age) values(?, ?)" /*sql*/, listOf("shi", 1)/*参数*/, "id"/*自增主键字段名，作为返回值*/) // 返回自增主键值
-println("插入user表：" + id)
+    // 查询
+    // val id = db.execute("insert into user(name, age) values(?, ?)" /*sql*/, listOf("shi", 1)/*参数*/, "id"/*自增主键字段名，作为返回值*/) // 返回自增主键值
+    println("插入user表：" + id)
 
-// 查询一条数据
-val record = db.queryRow("select * from user limit 1" /*sql*/, null /*参数*/, Map::class.recordTranformer /*转换结果的函数*/) // 返回 Map 类型的一行数据
-println("查询user表：" + record)
+    // 查询一条数据
+    val record = db.queryRow("select * from user limit 1" /*sql*/, null /*参数*/, Map::class.recordTranformer /*转换结果的函数*/) // 返回 Map 类型的一行数据
+    println("查询user表：" + record)
 
-// 统计行数
-val (hasNext, count) = db.queryCell("select count(1) from user" /*sql*/)
-println("统计user表：" + count)
+    // 统计行数
+    val (hasNext, count) = db.queryCell("select count(1) from user" /*sql*/)
+    println("统计user表：" + count)
 
-// 更新
-var f = db.execute("update user set name = ?, age = ? where id =?" /*sql*/, listOf("shi", 1, id) /*参数*/) // 返回更新行数
-println("更新user表：" + f)
+    // 更新
+    var f = db.execute("update user set name = ?, age = ? where id =?" /*sql*/, listOf("shi", 1, id) /*参数*/) // 返回更新行数
+    println("更新user表：" + f)
 
-// 查询多条数据
-val records = db.queryRows("select * from user limit 10" /*sql*/, null /*参数*/, Map::class.recordTranformer /*转换结果的函数*/) // 返回 Map 类型的多行数据
-println("查询user表：" + records)
+    // 查询多条数据
+    val records = db.queryRows("select * from user limit 10" /*sql*/, null /*参数*/, Map::class.recordTranformer /*转换结果的函数*/) // 返回 Map 类型的多行数据
+    println("查询user表：" + records)
 
-// 删除 
-f = db.execute("delete from user where id =?" /*sql*/, listOf(id) /*参数*/) // 返回更新行数
-println("删除user表：" + f)
+    // 删除 
+    f = db.execute("delete from user where id =?" /*sql*/, listOf(id) /*参数*/) // 返回更新行数
+    println("删除user表：" + f)
+}
 ```
