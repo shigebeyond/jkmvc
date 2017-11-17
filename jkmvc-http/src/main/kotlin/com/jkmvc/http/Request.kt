@@ -1,9 +1,6 @@
 package com.jkmvc.http
 
-import com.jkmvc.common.getAndConvert
-import com.jkmvc.common.to
-import com.jkmvc.common.toNullable
-import com.jkmvc.common.trim
+import com.jkmvc.common.*
 import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
@@ -383,16 +380,6 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	}
 
 	/**
-	 * 获得参数字符串
-	 * @return
-	 */
-	public fun getParameterString(): String{
-		return parameterMap.entries.joinToString {
-			"${it.key}=${it.value}"
-		}
-	}
-
-	/**
 	 * 获得get/post/upload参数值
 	 *   注：调用时需明确指定返回类型，来自动转换参数值为指定类型
 	 *
@@ -527,5 +514,27 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	public fun getWebPath(): String
 	{
 		return session.servletContext.getRealPath("/");
+	}
+
+	/**
+	 * 对query string进行 null 转 空字符串
+	 * @return
+	 */
+	public override fun getQueryString(): String {
+		val result = super.getQueryString()
+		return if(result == null) "" else result
+	}
+
+	/**
+	 * 构建curl命令
+	 * @return
+	 */
+	public fun buildCurlCommand(): String {
+		// get请求
+		if(isGet())
+			return "curl '${requestURL}?${queryString}'";
+
+		// post请求
+		return "curl -d '${parameterMap.toQueryString()}' '${requestURL}?${queryString}'"
 	}
 }

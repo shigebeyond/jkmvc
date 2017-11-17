@@ -192,7 +192,7 @@ public fun <T> Iterable<T>.enumeration(): ItEnumeration<T> {
  * @param valueField 子项字段名，其值作为结果哈希的value，如果为null，则用子项作为结果哈希的value
  * @return
  */
-fun Collection<out Map<*, *>>.asMap(keyField:String, valueField:String?): Map<*, *> {
+public fun Collection<out Map<*, *>>.asMap(keyField:String, valueField:String?): Map<*, *> {
     val result = HashMap<Any, Any?>()
     this.forEach {
         val key:Any = it[keyField]!!
@@ -200,4 +200,25 @@ fun Collection<out Map<*, *>>.asMap(keyField:String, valueField:String?): Map<*,
         result[key] = value
     }
     return result
+}
+
+/**
+ * 请求参数转query string
+ * @param buffer
+ * @return
+ */
+public fun Map<String, Array<String>>.toQueryString(buffer: StringBuilder): StringBuilder {
+    entries.joinTo(buffer, "") {
+        "${it.key}=${it.value.first()}&"
+    }
+    return buffer.deleteSuffix("&")
+}
+
+/**
+ * 请求参数转query string
+ * @param buffer
+ * @return
+ */
+public fun Map<String, Array<String>>.toQueryString(): String {
+    return toQueryString(StringBuilder()).toString()
 }

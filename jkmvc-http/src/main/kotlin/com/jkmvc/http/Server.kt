@@ -1,6 +1,7 @@
 package com.jkmvc.http
 
 import com.jkmvc.common.Config
+import com.jkmvc.common.toQueryString
 import com.jkmvc.common.ucFirst
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -36,11 +37,17 @@ object Server:IServer {
         //　构建请求对象
         val req:Request = Request(request);
         if(debug){
-            // 对上传请求，要等到设置了上传子目录，才能访问请求参数
-            if(req.isUpload())
-                httpLogger.debug("上传请求uri: ${req.routeUri}")
-            else
-                httpLogger.debug("请求uri: ${req.routeUri}, 参数：${req.getParameterString()}")
+
+            if(req.isUpload()) // 上传请求，要等到设置了上传子目录，才能访问请求参数
+                httpLogger.debug("Upload 请求: ${req.routeUri}")
+            else{
+                if(req.isGet()) // get请求
+                    httpLogger.debug("${req.method} 请求: ${req.routeUri}?${req.queryString}")
+                else // post请求
+                    httpLogger.debug("${req.method} 请求: ${req.routeUri}?" + req.parameterMap.toQueryString())
+                // curl命令
+                httpLogger.debug(req.buildCurlCommand())
+            }
         }
 
         //　如果是静态文件请求，则跳过路由解析
