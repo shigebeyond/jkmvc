@@ -159,7 +159,7 @@ class UserController: Controller()
 
         // 检查并处理上传文件 | check and handle upload request
         if(req.isUpload()){ // 检查上传请求 | check upload request
-            user.avatar = req.getUploadRelativePath("avatar")
+            user.avatar = req.getFileRelativePath("avatar")
             user.update()
         }
 
