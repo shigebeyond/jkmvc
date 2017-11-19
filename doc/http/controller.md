@@ -8,7 +8,7 @@ Controllers are called by the `com.jkmvc.http.Server#callController` function ba
 
 ## 1 Create Controller
 
-Create a subclass that extends parent class `com.jkmvc.http.Controller`
+Create a subclass that extends parent class `com.jkmvc.http.Controller`, with `Controller` postfix.
 
 Now, we have our first Controller
 

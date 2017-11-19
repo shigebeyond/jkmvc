@@ -6,7 +6,7 @@
 
 ## 1 创建控制器
 
-创建一个继承 `com.jkmvc.http.Controller` 的子类
+创建一个继承 `com.jkmvc.http.Controller` 的子类，类名以`Controller`作为后缀。
 
 请看我们的第一个控制器类
 
