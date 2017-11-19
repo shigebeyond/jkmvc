@@ -5,7 +5,7 @@
 vim src/main/resources/database.yaml
 
 ```
-# 数据库连接名
+# 数据库名
 default:
     driverClass: com.mysql.jdbc.Driver
     url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
@@ -17,7 +17,7 @@ default:
     columnUpperCase: false
 ```
 
-你可以配置多个数据库连接，只要使用不同的连接名就行
+你可以配置多个数据库连接，只要使用不同的数据库名就行
 
 
 ## 2 获得数据库操作对象
