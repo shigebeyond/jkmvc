@@ -116,13 +116,26 @@ default:
 		val id:Int = req.getRouteParameter('id');
 		val action:String = req.getRouteParameter('action');
 		val username:String = req.getRouteParameter('username', null); // 第二个参数设置默认值
+	}
 ```
 
-## 7 例子
+## 7 `res`属性
+
+你可以使用 `res.render()` 方法来向浏览器返回渲染结果
+
+注意：
+
+1. 在调用 `res.render()` 方法后程序并不会立即返回，如果需要立即返回，要使用 `return` 语句
+2. 在一个action方法中多次调用 `res.render()` 方法只有最后一次有效。
+
+
+## 8 例子
 
 显示用户详情的操作方法
 
 ```
+class UserController: Controller()
+{
     /**
      * 用户详情页
      */
@@ -143,4 +156,33 @@ default:
         view["user"] = user; // 设置视图参数
         res.render(view)
     }
+}
+```
+
+## 9 事件
+
+每个controller都有2个事件
+
+1. action方法的前置事件，通过重写 `before()` 方法来处理
+2. action方法的后置事件，通过重写 `after()` 方法来处理
+
+```
+class UserController: Controller()
+{
+    /**
+     * action前置处理
+     */
+    public override fun before() {
+        // 如检查权限
+        httpLogger.info("action前置处理")
+    }
+
+    /**
+     * action后置处理
+     */
+    public override fun after() {
+        // 如记录日志
+        httpLogger.info("action后置处理")
+    }
+}
 ```

@@ -119,11 +119,22 @@ default:
 		val username:String = req.getRouteParameter('username', null); // the second parameter will give default value if that param is not set.
 ```
 
-## 7 Examples
+## 7 `res`属性
+
+You can use `res.render()` to render sth to browser
+
+Note：
+
+1. After calling `res.render()` won't return immediately，so you must call `return`
+2. If you call `res.render()` multiple times in an action, but only the last call works
+
+## 8 Examples
 
 A view action for a user detail page.
 
 ```
+class UserController: Controller()
+{
     /**
      * user detail page
      */
@@ -144,4 +155,33 @@ A view action for a user detail page.
         view["user"] = user; // set view data
         res.render(view)
     }
+}
+```
+
+## 9 Event
+
+Every controller has 2 events:
+
+1. `before action` event: you can override `before()` method to handle it
+2. `after action` event: you can override `after()` method to handle it
+
+```
+class UserController: Controller()
+{
+    /**
+     * Automatically executed before the controller action
+     */
+    public override fun before() {
+        // eg. do authorization checks
+        httpLogger.info("before action")
+    }
+
+    /**
+     * Automatically executed after the controller action
+     */
+    public override fun after() {
+        // eg. write logs
+        httpLogger.info("after action")
+    }
+}
 ```
