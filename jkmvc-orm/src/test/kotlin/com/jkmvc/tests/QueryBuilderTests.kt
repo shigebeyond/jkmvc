@@ -138,6 +138,21 @@ class QueryBuilderTests{
     }
 
     @Test
+    fun testNestedClauses(){
+        val query = DbQueryBuilder(db).from("user")
+                .whereOpen()
+                    .where("id", "IN", arrayOf(1, 2, 3, 5))
+                    .andWhereOpen()
+                        .where("lastLogin", "<=", System.currentTimeMillis() / 1000)
+                        .orWhere("lastLogin", "IS", null)
+                    .andWhereClose()
+                .whereClose()
+                .andWhere("removed","IS", null);
+        val csql = query.compileSelect()
+        println(csql.previewSql())
+    }
+
+    @Test
     fun testCompiledSql(){
         println("使用编译过的sql来重复查询")
         val csql = DbQueryBuilder(db).table("user").where("id", "=", "?").compileSelectOne()

@@ -37,7 +37,7 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
         val (exp, delimiter) = subexp;
 
         // 跟在分组后面的第一个元素要在前面插入连接符
-        if(afterGroup && j == 0)
+        if(j != 0 || afterGroup)
             sql.append(delimiter).append(' ');
 
         // 遍历处理器来处理对应元素, 没有处理的元素也直接拼接
@@ -50,10 +50,6 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
             }
             sql.append(value).append(' '); // // 用空格拼接多个元素
         }
-
-        // 非最后一个元素要在后面追加连接符
-        if(j != subexps.size - 1)
-            sql.append(delimiter).append(' ');
     }
 
     /**

@@ -140,7 +140,7 @@ interface IDbQueryBuilderDecoration
      *
      * @return
      */
-    fun orwhereOpen():IDbQueryBuilder;
+    fun orWhereOpen():IDbQueryBuilder;
 
     /**
      * Closes an open "WHERE (...)" grouping.

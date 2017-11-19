@@ -308,7 +308,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
      *
      * @return
      */
-    public override fun orwhereOpen(): IDbQueryBuilder {
+    public override fun orWhereOpen(): IDbQueryBuilder {
         whereClause.open("OR");
         return this;
     }
