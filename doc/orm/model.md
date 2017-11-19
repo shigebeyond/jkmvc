@@ -1,17 +1,27 @@
-# Creating your Model
+# Model
+
+## 1 Creating your Model
 
 To create a model for the table `user` in your database, create the `UserModel` class with the following syntax:
 1. extends `com.jkmvc.orm.Orm` class
 2. define companion object as meta data 
+3. use `property()` to define delegate property
 
 ```
 class UserModel(id:Int? = null): Orm(id) {
 	// companion object is meta data
  	companion object m: OrmMeta(UserModel::class /* model class */, "User Model" /* model label */, "user" /* table name */, "id" /* table primary key */){}
+
+	// delegate property
+	public var id:Int by property()
+
+	public var username:String by property()
+
+	public var password:String by property()
 }
 ```
 
-## Meta data
+## 2 Meta data
 
 Meta data is the database information about this model, including database name, table name, primary key, etc.
 
@@ -28,10 +38,37 @@ When you create a `com.jkmvc.orm.OrmMeta` object, you must pass these properties
 OrmMeta(UserModel::class /* model class */, "User Model" /* model label */, "user" /* table name */, "id" /* table primary key */, "default" /* database name */){}
 ```
 
-## Bind meta data to model
+## 3 Bind meta data to model
 
 For each model, you must define meta data in companion object.
 
 ```
 companion object m: OrmMeta(UserModel::class, "User Model", "user", "id"){}
 ``` 
+
+## 4 Auto generate model code
+
+Jkmvc provide `com.jkmvc.util.ModelGenerator` to generate model code
+
+```
+val generator = ModelGenerator("/home/shi/code/java/jkmvc/jkmvc-example/src/main/kotlin" /* code directory */, "default" /* database name */)
+generator.genenateModelFile("com.jkmvc.example.model" /* model package */, "UserModel" /* model class name */, "用户模型" /* model label */, "user" /* table name */)
+```
+
+It will generate model code, according to the database and the table. And convert database column name to object's property name, according to configuration item `columnUnderline` and `columnUpperCase`  in file `database.yaml`.
+
+The code is following
+
+```
+class UserModel(id:Int? = null): Orm(id) {
+	// companion object is meta data
+ 	companion object m: OrmMeta(UserModel::class /* model class */, "User Model" /* model label */, "user" /* table name */, "id" /* table primary key */){}
+
+	// delegate property
+	public var id:Int by property()
+
+	public var username:String by property()
+
+	public var password:String by property()
+}
+```

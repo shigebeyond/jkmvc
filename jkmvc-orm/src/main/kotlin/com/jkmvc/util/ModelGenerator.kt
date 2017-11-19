@@ -12,12 +12,12 @@ import java.io.File
  * @author shijianhang
  * @date 2017-10-10
  */
-class ModelGenerator(val srcDir:String){
+class ModelGenerator(val srcDir:String, val dbName: String = "default"){
 
     /**
      * 数据库
      */
-    private val db = Db.getDb()
+    private val db = Db.getDb(dbName)
 
     /**
      * 元数据查询的配置
