@@ -1,6 +1,6 @@
 # Basic Usage
 
-## Load a new model instance
+## 1 Load a new model instance
 
 create a new `UserModel` instance
 
@@ -8,7 +8,7 @@ create a new `UserModel` instance
 val user = UserModel();
 ```
 
-## Inserting
+## 2 Inserting
 
 To insert a new record into the database, create a new instance of the model:
 
@@ -25,15 +25,15 @@ user.city = "Mercer";
 user.state = "PA";
 ```
 
-Insert the new record into the database by running `Orm::save`:
+Insert the new record into the database by running `Orm::save()`:
 
 ```
 user.save();
 ```
 
-`Orm::save` checks to see if a value is set for the primary key (`id` by default). If the primary key is set, then ORM will execute an `UPDATE` otherwise it will execute an `INSERT`.
+`Orm::save()` checks to see if a value is set for the primary key (`id` by default). If the primary key is set, then ORM will execute an `UPDATE` otherwise it will execute an `INSERT`.
 
-## Finding an object
+## 3 Finding an object
 
 To find an object you can call the `Orm.queryBuilder()` method to get a query builder or pass the id into the model constructor:
 
@@ -46,12 +46,12 @@ val user = UserModel.queryBuilder()
 val user = UserModel(20);
 ```
 
-## Check that ORM loaded a record
+## 4 Check that ORM loaded a record
 
-Use the `Orm::loaded` method to check that ORM successfully loaded a record.
+Use the `Orm::loaded` property to check that ORM successfully loaded a record.
 
 ```
-if (user.loaded())
+if (user.loaded)
 {
     // Load was successful
 }
@@ -61,7 +61,7 @@ else
 }
 ```
 
-## Updating and Saving
+## 5 Updating and Saving
 
 Once an ORM model has been loaded, you can modify a model's properties like this:
 
@@ -76,16 +76,16 @@ And if you want to save the changes you just made back to the database, just run
 user.save();
 ```
 
-## Deleting
+## 6 Deleting
 
-To delete an object, you can call the `Orm::delete` method on a loaded ORM model.
+To delete an object, you can call the `Orm::delete()` method on a loaded ORM model.
 
 ```
 val user = UserModel(20);
 user.delete();
 ```
 	
-## Mass assignment
+## 7 Mass assignment
 
 1. from `Map`
 
@@ -101,7 +101,9 @@ user.create()
 
 2. from `Request`
 
-We usually get values from request, just use `com.jkmvc.http.requestValues`
+We usually get values from request, just use `com.jkmvc.http.requestValues` method.
+
+But the data in the request is string, and  the model's property may not be string, so `com.jkmvc.http.requestValues` will intelligently convert the value in the request, and assigned to the model's property.
 
 ```	
 import com.jkmvc.http.requestValues
