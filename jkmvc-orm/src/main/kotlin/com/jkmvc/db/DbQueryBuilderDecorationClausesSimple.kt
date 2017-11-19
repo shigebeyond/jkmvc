@@ -12,7 +12,7 @@ package com.jkmvc.db
  * @date 2016-10-13
  */
 class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如where/group by */, elementHandlers: Array<((Any?) -> String)?> /* 每个元素的处理器, 可视为列的处理*/, protected val afterGroup:Boolean = false /* 跟在分组 DbQueryBuilderDecorationClausesGroup 后面 */)
-: DbQueryBuilderDecorationClauses<Pair<Array<Any?>, String>>/* subexps 是子表达式+连接符 */(operator, elementHandlers) {
+: DbQueryBuilderDecorationClauses<Pair<Array<Any?>, String>>/* subexps 是子表达式+连接符(针对where子句，放子表达式前面) */(operator, elementHandlers) {
     /**
      * 添加一个子表达式+连接符
      *
@@ -36,7 +36,8 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
     public override fun compileSubexp(subexp: Pair<Array<Any?>, String>, j:Int, sql: StringBuilder): Unit {
         val (exp, delimiter) = subexp;
 
-        // 跟在分组后面的第一个元素要在前面插入连接符
+        // 针对where子句，要在前面插入连接符
+        // 一般第一个元素不加，但跟在分组后面的第一个元素要加
         if(j != 0 || afterGroup)
             sql.append(delimiter).append(' ');
 
