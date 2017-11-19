@@ -10,7 +10,7 @@ vim src/main/resources/upload.properties
 
 ```
 # 上传文件的保存目录，末尾不要带/
-uploadDirectory=upload
+uploadDirectory=/var/www/upload
 # 上传文件的大小限制，单位 B K M G T
 maxPostSize=1M
 # 编码
@@ -27,6 +27,8 @@ uploadDomain | 访问上传文件的域名，结合它可以获得访问上传�
 ## 2 处理上传文件
 
 ### 2.1 上传的表单
+
+表单用 `enctype="multipart/form-data"` 来修饰
 
 ```
 <form class="form-inline" action="<%= req.absoluteUrl("user/uploadAvatar/" + user.getId()) %>" method="post" enctype="multipart/form-data">
@@ -69,3 +71,24 @@ public fun uploadAvatarAction()
     redirect("user/detail/$id");
 }
 ```
+
+## 3 下载文件
+
+文件上传后，当然需要被下载。文件下载有２种方式
+
+### 3.1 java提供的下载
+
+直接在Controller中调用`res.render(file: File)` 来向浏览器响应文件
+
+### 3.2 文件服务器提供的下载
+
+我们可以使用apache/nginx来提供文件下载服务，直接指定服务目录为上传目录
+
+```
+location ~ \.(gif|jpg|jpeg|.js|.css)$ {
+    root   /var/www/upload;
+    index  index.html index.htm;
+}
+
+```
+
