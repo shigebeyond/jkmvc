@@ -155,6 +155,15 @@ class QueryBuilderTests{
         println(csql.previewSql())
     }
 
+    @Test
+    fun testHaving(){
+        val query = DbQueryBuilder(db).select("username", "COUNT(`id`)" to "total_posts")
+                .from("posts").groupBy("username").having("total_posts", ">=", 10);
+        val csql = query.compileSelect()
+        println(csql.previewSql())
+    }
+
+
     /**
      * db表达式
      */
