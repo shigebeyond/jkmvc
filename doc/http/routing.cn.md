@@ -67,6 +67,15 @@ Jkmvc路由使用`kotlin.text.Regex`来匹配uri。每个参数(就是被`<>`包
 
 最后，如果我们访问 `user/detail`，不会应用控制器与操作方法的默认值，所以它会调用 `UserController::detailAction()`。
 
+### 1.5 默认路由的解析例子
+
+uri | controller#action
+--- | ---
+/ | WelcomeController#indexAction()
+user | UserController#indexAction()
+user/detail | UserController#detailAction()
+user/detail/1 | UserController#detailAction()，其中通过`req.req.getIntRouteParameter("id")` 可获得id参数值为1
+
 ## 2 获得路由参数
 
 对路由参数 `controller`和`action`，在 `Request` 中可以通过公共属性来直接访问

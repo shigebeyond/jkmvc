@@ -65,6 +65,15 @@ In the default route, all the keys are optional, and the controller and action a
 
 You can also use defaults to set a key that isn't in the route at all.
 
+### 1.5 default route's parsing process
+
+uri | controller#action
+--- | ---
+/ | WelcomeController#indexAction()
+user | UserController#indexAction()
+user/detail | UserController#detailAction()
+user/detail/1 | UserController#detailAction()，you can call `req.req.getIntRouteParameter("id")` to get route parameter `id`
+
 ## 2 Get routing parameters
 
 The `controller` and `action` can be accessed from the [Request](request) as public properties like so:
