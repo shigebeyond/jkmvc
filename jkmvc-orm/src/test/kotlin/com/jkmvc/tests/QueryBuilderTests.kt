@@ -137,6 +137,9 @@ class QueryBuilderTests{
         DbQueryBuilder(db).table("user").where("id", "=", "?").batchExecute(ActionType.DELETE, params, 1)// 每次只处理1个参数
     }
 
+    /**
+     * 嵌套的 whereOpen 子句
+     */
     @Test
     fun testNestedClauses(){
         val query = DbQueryBuilder(db).from("user")
@@ -151,6 +154,17 @@ class QueryBuilderTests{
         val csql = query.compileSelect()
         println(csql.previewSql())
     }
+
+    /**
+     * db表达式
+     */
+    @Test
+    fun testDbExpression(){
+        val f = DbQueryBuilder().table("user").set("age", DbExpression("age + 1")).where("id", "=", 1).update();
+        println("age++ : $f")
+
+    }
+
 
     @Test
     fun testCompiledSql(){
