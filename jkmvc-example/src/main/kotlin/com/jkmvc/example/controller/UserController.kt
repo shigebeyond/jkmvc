@@ -3,6 +3,7 @@ package com.jkmvc.example.controller
 import com.jkmvc.common.format
 import com.jkmvc.example.model.UserModel
 import com.jkmvc.http.Controller
+import com.jkmvc.http.httpLogger
 import com.jkmvc.http.requestValues
 import com.jkmvc.orm.OrmQueryBuilder
 import com.jkmvc.orm.isLoaded
@@ -16,6 +17,22 @@ import java.util.*
  */
 class UserController: Controller()
 {
+    /**
+     * action前置处理
+     */
+    public override fun before() {
+        // 如检查权限
+        httpLogger.info("action前置处理")
+    }
+
+    /**
+     * action后置处理
+     */
+    public override fun after() {
+        // 如记录日志
+        httpLogger.info("action后置处理")
+    }
+
     /**
      * 列表页
      * list page

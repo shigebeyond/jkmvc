@@ -1,6 +1,7 @@
 package com.jkmvc.http
 
 import java.util.*
+import kotlin.reflect.KFunction
 
 /**
  * 控制器
@@ -41,4 +42,29 @@ interface IController{
      * @param uri
      */
     fun redirect(uri: String):Unit
+
+    /**
+     * 执行action
+     * @param action action方法
+     */
+    public fun executeAction(action: KFunction<*>) {
+        // 前置处理
+        before()
+
+        // 执行真正的处理方法
+        action.call(this);
+
+        // 后置处理
+        after()
+    }
+
+    /**
+     * 前置处理
+     */
+    fun before(){}
+
+    /**
+     * 后置处理
+     */
+    fun after(){}
 }

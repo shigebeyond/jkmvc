@@ -110,7 +110,6 @@ object Server:IServer {
         controller.res = res;
 
         // 调用controller的action方法
-        action.call(controller);
+        controller.executeAction(action)
     }
-
 }
