@@ -1,5 +1,6 @@
 package com.jkmvc.validate
 
+import com.jkmvc.common.Config
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -16,18 +17,7 @@ object Validation:IValidation
 	/**
 	 * 校验方法对应的错误消息
 	 */
-	public val messages:Map<String, String> = mapOf(
-			"notEmpty" to "不能为空",
-			"length" to "的长度必须在:0到:1之间",
-			"range" to "的数值必须是:0到:1之间的整数",
-			"min" to "的数值必须不少于:0",
-			"max" to "的数值必须不大于:0",
-			"between" to "的数值必须是:0到:1之间的整数",
-			"digit" to "的数值必须是数字",
-			"numeric" to "的数值必须是数值",
-			"startsWith" to "必须以:0开头",
-			"endsWith" to "必须以:0结尾"
-	);
+	public val messages: Config = Config.instance("validation-messages")
 
 	/**
 	 * 缓存编译后的表达式
