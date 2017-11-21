@@ -33,6 +33,14 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 		public fun current(): Request {
 			return reqs.get()!!;
 		}
+
+		/**
+		 * 获得当前请求
+		 */
+		@JvmStatic
+		public fun currentOrNull(): Request? {
+			return reqs.get();
+		}
 	}
 
 	/**
