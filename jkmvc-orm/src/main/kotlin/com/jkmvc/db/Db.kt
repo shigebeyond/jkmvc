@@ -514,6 +514,36 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
                 quote(it).toString()
             }
         }
+        if(value is IntArray){
+            return value.joinToString(", ", "(", ")") {
+                quote(it).toString()
+            }
+        }
+        if(value is ShortArray){
+            return value.joinToString(", ", "(", ")") {
+                quote(it).toString()
+            }
+        }
+        if(value is LongArray){
+            return value.joinToString(", ", "(", ")") {
+                quote(it).toString()
+            }
+        }
+        if(value is FloatArray){
+            return value.joinToString(", ", "(", ")") {
+                quote(it).toString()
+            }
+        }
+        if(value is DoubleArray){
+            return value.joinToString(", ", "(", ")") {
+                quote(it).toString()
+            }
+        }
+        if(value is BooleanArray){
+            return value.joinToString(", ", "(", ")") {
+                quote(it).toString()
+            }
+        }
         if(value is Collection<*>){
             return value.joinToString(", ", "(", ")") {
                 quote(it).toString()
