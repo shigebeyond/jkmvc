@@ -113,19 +113,25 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
         val (limit, offset) = limitParams!!
         if(db.dbType == DbType.Oracle) { // oracle
             // select * from ( select t1_.*, rownum rownum_ from ( select * from USER ) t1_ where rownum <=  $end ) t2_ where t2_.rownum_ >=  $start
-            sql.insert(0, "SELECT * FROM ( SELECT t1_.*, rownum rownum_ FROM ( ").append(") t1_ WHERE rownum <=  ").append(offset + limit).append(" ) t2_ WHERE t2_.rownum_ >=  ").append(offset)
+            sql.insert(0, "SELECT t1_.*, rownum rownum_ FROM ( ").append(") t1_ WHERE rownum <=  ").append(offset + limit)
+            if(offset > 0)
+                sql.insert(0, "SELECT * FROM ( ").append(" ) t2_ WHERE t2_.rownum_ >=  ").append(offset)
             return
         }
 
         if(db.dbType == DbType.Postgresql) { // psql
             // select * from user limit $limit  offset $offset;
-            sql.append(" LIMIT ").append(limit).append(" OFFSET ").append(offset)
+            sql.append(" LIMIT ").append(limit)
+            if(offset > 0)
+                sql.append(" OFFSET ").append(offset)
             return
         }
 
         // 其他：mysql / sqlite
         // select * from user limit $offset, $limit;
-        sql.append(" LIMIT ").append(offset).append(", ").append(limit)
+        sql.append(" LIMIT ").append(offset)
+        if(offset > 0)
+            sql.append(", ").append(limit)
     }
 
     /**
