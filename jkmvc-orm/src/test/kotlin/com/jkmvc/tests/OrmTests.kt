@@ -3,6 +3,7 @@ package com.jkmvc.tests
 import com.jkmvc.db.Db
 import com.jkmvc.orm.*
 import org.junit.Test
+import java.util.HashMap
 import kotlin.reflect.jvm.jvmName
 
 /**
@@ -63,6 +64,12 @@ class AddressModel(id:Int? = null): Orm(id) {
             // add relaction for other model
             belongsTo("user", UserModel::class, "user_id")
         }
+
+        // 重写规则
+        /*public override val rules: MutableMap<String, IRuleMeta> = hashMapOf(
+                "userId" to RuleMeta("用户", "notEmpty"),
+                "age" to RuleMeta( "年龄", "between(1,120)")
+        )*/
     }
 
     // 代理属性读写
