@@ -59,7 +59,7 @@ abstract class OrmRelated: OrmPersistent() {
             if (!column.contains(":")){ // 自身字段
                 val prop = ormMeta.column2Prop(column)
                 data[prop] = value;
-            } else if (value !== null) {// 关联对象字段: 不处理null的值, 因为left join查询时, 关联对象可能没有匹配的行
+            } else if (value !== null) {// 关联对象字段: 不处理null值, 因为left join查询时, 关联对象可能没有匹配的行
                 // 多层:
                 val cols = column.split(":")
                 // 获得最后一层的关联对象
@@ -75,6 +75,32 @@ abstract class OrmRelated: OrmPersistent() {
 
         loaded = true;
         return this;
+    }
+
+    /**
+     * 获得字段值 -- 转为Map
+     * @return
+     */
+    public override fun asMap(): Map<String, Any?> {
+        // 转关联对象
+        for((name, relation) in ormMeta.relations){
+            val value = data[name]
+            if(value != null){
+                data[name] = when(value){
+                    is Collection<*> -> (value as Collection<IOrm>).itemAsMap() // 有多个
+                    is Orm -> value.asMap()  // 有一个
+                    else -> value
+                }
+            }
+        }
+
+        // 转当前对象：由于关联对象联查时不处理null值, 因此关联对象会缺少null值的字段，这里要补上
+        for(prop in ormMeta.props){
+            if(!data.containsKey(prop))
+                data[prop] = null
+        }
+
+        return data;
     }
 
     /**

@@ -134,7 +134,7 @@ object Validation:IValidation
 	*/
 	public fun range(value:Int, min:Int, max:Int, step:Int): Boolean {
 		return (value >= min && value <= max) // 是否在范围内
-						&& ((value - min) % step === 0); // 是否间隔指定步长
+				&& ((value - min) % step === 0); // 是否间隔指定步长
 	}
 
 	/**

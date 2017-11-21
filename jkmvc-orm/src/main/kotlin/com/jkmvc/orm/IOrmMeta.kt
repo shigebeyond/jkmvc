@@ -71,6 +71,11 @@ interface IOrmMeta {
     val columns:List<String>
 
     /**
+     * 对象属性
+     */
+    val props: List<String>
+
+    /**
      * 事件处理器
      */
     val eventHandlers:Map<String, KFunction<Unit>?>

@@ -86,6 +86,15 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
         get() = db.listColumns(table)
 
     /**
+     * 对象属性
+     */
+    public override val props: List<String> by lazy {
+        columns.map {
+            column2Prop(it)
+        }
+    }
+
+    /**
      * 是否有某个关联关系
      * @param name
      * @return

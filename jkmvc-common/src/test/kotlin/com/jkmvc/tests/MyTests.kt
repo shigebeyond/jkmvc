@@ -43,6 +43,19 @@ class MyTests{
     }
 
     @Test
+    fun testList(){
+        val list:MutableList<String> = LinkedList()
+        list.add("a")
+        list.add("b")
+        list.add("c")
+        println(list)
+        list.remove("c")
+        println(list)
+        list.add(0, "d")
+        println(list)
+    }
+
+    @Test
     fun testString(){
         val m = "jdbc:mysql://[^/]+/([^\\?]+)".toRegex().find("jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8")
         if(m != null)

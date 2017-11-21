@@ -156,24 +156,6 @@ abstract class OrmEntity : IOrm {
     }
 
     /**
-     * 获得字段值
-     * @return
-     */
-    public override fun asMap(): Map<String, Any?> {
-        for((name, relation) in ormMeta.relations){
-            val value = data[name]
-            if(value != null){
-                data[name] = when(value){
-                                is Collection<*> -> (value as Collection<IOrm>).itemAsMap() // 有多个
-                                is Orm -> value.asMap()  // 有一个
-                                else -> value
-                            }
-            }
-        }
-        return data;
-    }
-
-    /**
      * 序列化
      * @return
      */
