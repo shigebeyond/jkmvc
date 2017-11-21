@@ -8,7 +8,7 @@ import java.sql.ResultSet
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-interface IDb{
+interface IDb: IDbQuoter{
 
     /**
      * 获得数据库类型
@@ -206,14 +206,6 @@ interface IDb{
                 else
                     quoteColumn(column as String);
     }
-
-    /**
-     * 转义值
-     *
-     * @param value 字段值, 可以是值数组
-     * @return
-     */
-    fun quote(value:Any?):String;
 
     /**
      * 根据对象属性名，获得db字段名

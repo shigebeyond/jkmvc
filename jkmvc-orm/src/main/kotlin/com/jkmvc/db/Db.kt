@@ -501,74 +501,30 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
     }
 
     /**
-     * 转义值
+     * 转义单个值
      *
      * @param value 字段值, 可以是值数组
      * @return
      */
-    public override fun quote(value:Any?):String
-    {
-        // 1 多值
-        if(value is Array<*>){
-            return value.joinToString(", ", "(", ")") {
-                quote(it).toString()
-            }
-        }
-        if(value is IntArray){
-            return value.joinToString(", ", "(", ")") {
-                quote(it).toString()
-            }
-        }
-        if(value is ShortArray){
-            return value.joinToString(", ", "(", ")") {
-                quote(it).toString()
-            }
-        }
-        if(value is LongArray){
-            return value.joinToString(", ", "(", ")") {
-                quote(it).toString()
-            }
-        }
-        if(value is FloatArray){
-            return value.joinToString(", ", "(", ")") {
-                quote(it).toString()
-            }
-        }
-        if(value is DoubleArray){
-            return value.joinToString(", ", "(", ")") {
-                quote(it).toString()
-            }
-        }
-        if(value is BooleanArray){
-            return value.joinToString(", ", "(", ")") {
-                quote(it).toString()
-            }
-        }
-        if(value is Collection<*>){
-            return value.joinToString(", ", "(", ")") {
-                quote(it).toString()
-            }
-        }
-
-        // 2 单值
+    public override fun quoteSingleValue(value: Any?): String {
         // null => "null"
-        if(value == null)
+        if (value == null)
             return "null";
 
         // bool => int
-        if(value is Boolean)
-            return if(value) "1" else "0";
+        if (value is Boolean)
+            return if (value) "1" else "0";
 
         // int/float
-        if(value is Number)
+        if (value is Number)
             return value.toString();
 
         // string
-        if(value is String)
+        if (value is String)
             return "'$value'" // oracle字符串必须是''包含
 
         // date
-        if(value is Date)
+        if (value is Date)
             return quoteDate(value)
 
         return value.toString()

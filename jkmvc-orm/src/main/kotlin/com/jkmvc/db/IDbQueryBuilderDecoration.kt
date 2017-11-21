@@ -19,7 +19,7 @@ enum class ClauseType {
  * @author shijianhang
  * @date 2016-10-12
  */
-interface IDbQueryBuilderDecoration
+interface IDbQueryBuilderDecoration: IDbQuoter
 {
     /**
      * 编译修饰子句
@@ -28,14 +28,6 @@ interface IDbQueryBuilderDecoration
      * @return
      */
     fun compileDecoration(sql: StringBuilder): IDbQueryBuilder;
-
-    /**
-     * 改写转义值的方法，搜集sql参数
-     *
-     * @param value
-     * @return
-     */
-    fun quote(value:Any?):String;
 
     /**
      * 多个on条件
@@ -69,7 +61,8 @@ interface IDbQueryBuilderDecoration
      * @return
      */
     fun where(column:String, value:Any?):IDbQueryBuilder{
-        if(value is Array<*> || value is Collection<*>)
+        if(value is Array<*> || value is IntArray || value is ShortArray || value is LongArray || value is FloatArray || value is DoubleArray || value is BooleanArray
+                || value is Collection<*>)
             return where(column, "IN", value)
 
         return where(column, "=", value);

@@ -55,36 +55,21 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:Pair<String, String?> /*表
     }
 
     /**
-     * 改写转义值的方法，搜集sql参数
+     * 改写转义单个值的方法，搜集sql参数
      *
      * @param value
      * @return
      */
-    public override fun quote(value: Any?): String {
+    public override fun quoteSingleValue(value: Any?): String {
         // @Deprecated 将转义的参数值，直接拼接到sql
         //return db.quote(value);
 
         // sql参数化: 将参数名拼接到sql, 独立出参数值, 以便执行时绑定参数值
-        // 1 多值
-        if(value is Array<*>){
-            return value.joinToString(", ", "(", ")") {
-                // 单值
-                quote(it)
-            }
-        }
-        if(value is Collection<*>){
-            return value.joinToString(", ", "(", ")") {
-                // 单值
-                quote(it)
-            }
-        }
-
-        // 2 单值
-        // 2.1 db表达式：不转义，直接输出
+        // 1 db表达式：不转义，直接输出
         if(value is DbExpression)
             return value.toString()
 
-        // 2.2 字段值
+        // 2 字段值
         compiledSql.staticParams.add(value);
         return "?";
     }
