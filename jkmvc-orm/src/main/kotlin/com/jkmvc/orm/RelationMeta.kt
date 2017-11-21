@@ -75,7 +75,10 @@ open class RelationMeta(
         }
 
         // 查从表
-        return queryBuilder().where(tableAlias + foreignKey, "=", item[primaryProp]) as OrmQueryBuilder// 从表.外键 = 主表.主键
+        val pk: Any? = item[primaryProp]
+        if(pk == null)
+            return null
+        return queryBuilder().where(tableAlias + foreignKey, "=", pk) as OrmQueryBuilder// 从表.外键 = 主表.主键
     }
 
     /**

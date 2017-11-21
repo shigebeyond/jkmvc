@@ -55,9 +55,12 @@ class MiddleRelationMeta(
      */
     public override fun queryRelated(item: IOrm, withTableAlias:Boolean): OrmQueryBuilder? {
         // 通过join中间表 查从表
+        val pk: Any? = item[primaryProp]
+        if(pk == null)
+            return null;
         val tableAlias = middleTable + '.'
         return buildQuery() // 中间表.远端外键 = 从表.远端主键
-                .where(tableAlias + foreignKey, "=", item[primaryProp]) as OrmQueryBuilder // 中间表.外键 = 主表.主键
+                .where(tableAlias + foreignKey, "=", pk) as OrmQueryBuilder // 中间表.外键 = 主表.主键
     }
 
     /**
