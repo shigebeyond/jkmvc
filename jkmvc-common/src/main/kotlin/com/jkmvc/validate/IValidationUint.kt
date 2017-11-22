@@ -28,10 +28,10 @@ interface IValidationUint{
      * 执行校验表达式
      *
      * @param value 待校验的值
-     * @param binds 变量
+     * @param variables 变量
      * @returns
      */
-    fun execute(value:Any?, binds:Map<String, Any?> = emptyMap()): Any?
+    fun execute(value:Any?, variables:Map<String, Any?> = emptyMap()): Any?
 
     /**
      * 构建结果消息

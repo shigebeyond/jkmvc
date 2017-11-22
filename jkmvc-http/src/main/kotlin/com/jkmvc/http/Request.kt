@@ -1,10 +1,11 @@
 package com.jkmvc.http
 
 import com.jkmvc.common.*
+import com.jkmvc.validate.Validation
+import com.jkmvc.validate.ValidationException
 import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
-import kotlin.reflect.KClass
 
 /**
  * 请求对象
@@ -160,7 +161,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	}
 
 	/**
-	 * 智能获得请求参数，先从路由参数中取得，如果没有，则从get/post参数中取
+	 * 智能获得请求参数值，先从路由参数中取得，如果没有，则从get/post参数中取
 	 *    注：调用时需明确指定返回类型，来自动转换参数值为指定类型
 	 *
 	 * <code>
@@ -180,16 +181,56 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 */
 	public operator inline fun <reified T:Any> get(key: String, defaultValue: T? = null): T?
 	{
-		val clazz:KClass<T> = T::class
 		// 先取路由参数
 		if(routeParams.containsKey(key))
-			return routeParams[key]!!.to(clazz) as T
+			return routeParams[key]!!.to(T::class) as T
 
 		// 再取get/post参数
 		if(containsParameter(key))
-			return getParameter(key)!!.to(clazz) as T
+			return getParameter(key)!!.to(T::class) as T
 
 		return defaultValue;
+	}
+
+	/**
+	 * 智能获得并校验请求参数值，先从路由参数中取得，如果没有，则从get/post参数中取
+	 *    注：调用时需明确指定返回类型，来自动转换参数值为指定类型
+	 *
+	 * @param key 参数名
+	 * @param rule 校验规则
+	 * @param defaultValue 默认值
+	 * @return
+	 */
+	public inline fun <reified T:Any> getAndValidate(key: String, rule: String, defaultValue: T? = null): T?
+	{
+		// 获得参数值
+		var value:String
+		if(routeParams.containsKey(key)) // 先取路由参数
+			value = routeParams[key]!!
+		else if(containsParameter(key)) // 再取get/post参数
+			value = getParameter(key)!!
+		else
+			return defaultValue;
+
+		// 校验参数值
+		return validateValue(key, value, rule).to(T::class) as T
+	}
+
+	/**
+	 * 校验请求值
+	 *
+	 * @param key 参数名
+	 * @param value 参数值
+	 * @param rule 校验规则
+	 * @return
+	 */
+	protected inline fun validateValue(key: String, value: Any?, rule: String): String {
+		// 校验单个字段: 字段值可能被修改
+		val (succ, uint, lastValue) = Validation.execute(rule, value)
+		if (succ == false)
+			throw ValidationException(key + uint?.message());
+
+		return lastValue as String
 	}
 
 	/*************************** 路由参数 *****************************/
@@ -235,6 +276,18 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 */
 	public inline fun <reified T:Any> getRouteParameter(key:String, defaultValue:T? = null):T? {
 		return routeParams.getAndConvert(key, defaultValue)
+	}
+
+	/**
+	 * 获得并校验路由参数
+	 *
+	 * @param key 参数名
+	 * @param defaultValue 单个参数的默认值
+	 * @return
+	 */
+	public inline fun <reified T:Any> getAndValidateRouteParameter(key:String, rule: String, defaultValue:T? = null):T? {
+		val value = routeParams[key]
+		return validateValue(key, value, rule).toNullable(T::class, defaultValue)
 	}
 
 	/**
@@ -397,6 +450,20 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 */
 	public inline fun <reified T:Any> getParameter(key: String, defaultValue: T?): T? {
 		return getParameter(key).toNullable(T::class, defaultValue)
+	}
+
+	/**
+	 * 获得并校验get/post/upload参数值
+	 *   注：调用时需明确指定返回类型，来自动转换参数值为指定类型
+	 *
+	 * @param key 参数名
+	 * @param rule 校验规则
+	 * @param defaultValue 单个参数的默认值
+	 * @return
+	 */
+	public inline fun <reified T:Any> getAndValidateParameter(key: String, rule: String, defaultValue: T?): T? {
+		val value = getParameter(key)
+		return validateValue(key, value, rule).toNullable(T::class, defaultValue)
 	}
 
 	/**

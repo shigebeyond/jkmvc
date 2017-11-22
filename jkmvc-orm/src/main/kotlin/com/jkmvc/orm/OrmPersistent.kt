@@ -68,7 +68,7 @@ abstract class OrmPersistent: OrmValid() {
 			throw OrmException("没有要创建的数据");
 
 		// 校验
-		check();
+		validate();
 
 		// 触发前置事件
 		fireEvent("beforeCreate")
@@ -134,7 +134,7 @@ abstract class OrmPersistent: OrmValid() {
 		}
 
 		// 校验
-		check();
+		validate();
 
 		// 触发前置事件
 		fireEvent("beforeUpdate")

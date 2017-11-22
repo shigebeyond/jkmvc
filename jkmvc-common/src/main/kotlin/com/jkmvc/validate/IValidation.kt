@@ -17,10 +17,10 @@ interface IValidation
 	 *
 	 * @param exp 校验表达式
 	 * @param value 要校验的数值，该值可能被修改
-	 * @param data 变量
+	 * @param variables 变量
 	 * @return
 	 */
-	fun execute(exp:String, value:Any, binds:Map<String, Any?> = emptyMap()): Triple<Any?, ValidationUint?, Any?>
+	fun execute(exp:String, value:Any?, variables:Map<String, Any?> = emptyMap()): ValidationResult
 
 	/**
 	 * 获得消息

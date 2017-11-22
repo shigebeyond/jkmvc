@@ -122,7 +122,7 @@ abstract class OrmRelated: OrmPersistent() {
                 result = relation.newModelInstance();
             }else{  // 根据关联关系来构建查询
                 val query:OrmQueryBuilder? = relation.queryRelated(this) // 自动构建查询条件
-                if(query == null) // 如果查询为空，说明主/外键为空，则数据有问题，则不查询不赋值
+                if(query == null) // 如果查询为空，说明主/外键为空，则数据有问题，则不查询不赋值（一般出现在调试过程中）
                     return null;
 
                 query.select(columns) // 查字段

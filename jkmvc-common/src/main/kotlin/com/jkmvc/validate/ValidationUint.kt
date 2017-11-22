@@ -48,40 +48,59 @@ data class ValidationUint(
      * 执行校验表达式
      *
      * @param value 待校验的值
-     * @param binds 变量
+     * @param variables 变量
      * @returns
      */
-    public override fun execute(value:Any?, binds:Map<String, Any?>): Any? {
+    public override fun execute(value:Any?, variables:Map<String, Any?>): Any? {
         // 获得函数
         val f = validationFuncs[func]
         if(f == null)
             throw ValidationException("不存在校验方法$func");
 
-        // 构造参数
-        val args:Array<Any?> = Array<Any?>(params.size + 2){ i ->
+        // 构造实参
+        val realParams:Array<Any?> = Array<Any?>(params.size + 2){ i ->
             if(i == 0) // 对象：作为第1参数
                 Validation
             else if(i == 1) // 待校验的值: 作为第2参数
-                value // 正确类型，不需要转换类型
+                convertValue(value, f.parameters[i].type)
             else
-                param(i - 2, binds, f.parameters[i].type)
+                convertParam(i - 2, variables, f.parameters[i].type)
         }
 
         // 调用函数
         try{
-            return f.call(*args)
+            return f.call(*realParams)
         }catch (e:Exception){
-            throw Exception("调用校验方法出错：" + func + "(" + args.joinToString(",") + ")", e)
+            throw Exception("调用校验方法出错：" + func + "(" + realParams.joinToString(",") + ")", e)
         }
     }
 
     /**
-     * 获得实际参数
+     * 根据校验值的类型，转换校验值
+     *
+     * @param value 校验值
+     * @param type 值类型
+     * @return
      */
-    protected fun param(i: Int, binds: Map<String, Any?>, type: KType): Any? {
+    protected fun convertValue(value:Any?, type: KType): Any? {
+        // 只对String类型的值进行转换，只针对请求参数的校验
+        if(value is String)
+            return value.to(type)
+        return value
+    }
+
+    /**
+     * 根据参数类型，转换参数
+     *
+     * @param i 第几个参数
+     * @param variables 变量
+     * @param type 参数类型
+     * @return
+     */
+    protected fun convertParam(i: Int, variables: Map<String, Any?>, type: KType): Any? {
         val param:String = params[i]
         return if (param[0] == ':') // 变量: 从变量池中取值，都是正确类型，不需要转换类型
-                    binds[param.substring(1)];
+                    variables[param.substring(1)];
                 else // 值：转换类型
                     param.to(type);
     }

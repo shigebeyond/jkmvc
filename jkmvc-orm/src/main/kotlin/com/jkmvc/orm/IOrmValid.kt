@@ -13,5 +13,5 @@ interface IOrmValid : IOrmEntity {
      * 校验数据
      * @return
      */
-    fun check(): Boolean;
+    fun validate(): Boolean;
 }

@@ -29,17 +29,17 @@ object Validation:IValidation
 	 *
 	 * @param exp 校验表达式
 	 * @param value 要校验的数值，该值可能被修改
-	 * @param data 变量
+	 * @param variables 变量
 	 * @return
 	 */
-	public override fun execute(exp:String, value:Any, binds:Map<String, Any?>): Triple<Any?, ValidationUint?, Any?>
+	public override fun execute(exp:String, value:Any?, variables:Map<String, Any?>): ValidationResult
 	{
 		// 编译
 		val expCompiled = expsCached.getOrPut(exp){
 			ValidationExpression(exp);
 		}
 		// 执行
-		return expCompiled.execute(value, binds);
+		return expCompiled.execute(value, variables);
 	}
 
 	/**
@@ -151,21 +151,28 @@ object Validation:IValidation
 	}
 
 	/**
-	 * 以..开头
+	 * 检查字符串是否相等
 	 */
-	public fun startsWith(value:String, prefix: CharSequence, ignoreCase: Boolean = false): Boolean {
+	public fun strEquals(value:String, other: String, ignoreCase: Boolean = false): Boolean {
+		return value.equals(other, ignoreCase)
+	}
+
+	/**
+	 * 检查字符串是否有前缀
+	 */
+	public fun startsWith(value:String, prefix: String, ignoreCase: Boolean = false): Boolean {
 		return value.startsWith(prefix, ignoreCase);
 	}
 
 	/**
-	 * 以..结尾
+	 * 检查字符串是否有后缀
 	 */
-	public fun endsWith(value:String, suffix: CharSequence, ignoreCase: Boolean = false): Boolean {
+	public fun endsWith(value:String, suffix: String, ignoreCase: Boolean = false): Boolean {
 		return value.endsWith(suffix, ignoreCase);
 	}
 
 	/**
-	 * 删除两边的空白字符
+	 * 删除字符串两边的空白字符
 	 */
 	public fun trim(value:String): String {
 		return  value.trim()
@@ -173,14 +180,14 @@ object Validation:IValidation
 
 
 	/**
-	 * 转换为大写
+	 * 字符串转换为大写
 	 */
 	public fun toUpperCase(value:String): String {
 		return  value.toUpperCase();
 	}
 
 	/**
-	 * 转换为小写
+	 * 字符串转换为小写
 	 */
 	public fun toLowerCase(value:String): String {
 		return  value.toLowerCase();
@@ -188,7 +195,7 @@ object Validation:IValidation
 
 
 	/**
-	 * 截取子字符串
+	 * 字符串截取子字符串
 	 * @param startIndex 开始的位置
 	 * @param endIndex 结束的位置，如果为-1，则到末尾
 	 * @return
