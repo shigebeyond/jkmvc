@@ -178,9 +178,10 @@ abstract class OrmRelated: OrmPersistent() {
      *
      * @param name 关系名
      * @param nullValue 外键的空值
+     * @param fk hasMany关系下的单个外键值，如果为null，则删除所有关系, 否则删除单个关系
      * @return
      */
-    public override fun removeRelations(name:String, nullValue: Any?): Boolean {
+    public override fun removeRelations(name:String, nullValue: Any?, fk: Any?): Boolean {
         // 获得关联关系
         val relation = ormMeta.getRelation(name)!!;
         // 1 belongsTo：清空本对象的外键
@@ -191,10 +192,17 @@ abstract class OrmRelated: OrmPersistent() {
 
         // 2 hasOne/hasMany
         // 2.1 有中间表：删除中间表
-        if(relation is MiddleRelationMeta)
-            return DbQueryBuilder(ormMeta.db, relation.middleTable).where(relation.foreignKey, "=", this[relation.primaryProp]).delete();
+        if(relation is MiddleRelationMeta){
+            val query = DbQueryBuilder(ormMeta.db, relation.middleTable).where(relation.foreignKey, "=", this[relation.primaryProp])
+            if(fk != null) // hasMany关系下删除单个关系
+                query.where(relation.farForeignKey, fk)
+            return query.delete();
+        }
 
         // 2.2 无中间表：清空关联对象的外键
-        return relation.queryRelated(this)!!.set(relation.foreignKey, nullValue).update()
+        val query = relation.queryRelated(this)!!.set(relation.foreignKey, nullValue)
+        if(fk != null) // hasMany关系下删除单个关系
+            query.where(relation.ormMeta.primaryKey, fk)
+        return query.update()
     }
 }

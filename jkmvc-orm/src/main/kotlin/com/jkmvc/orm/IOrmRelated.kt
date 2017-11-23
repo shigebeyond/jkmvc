@@ -55,7 +55,8 @@ interface IOrmRelated : IOrmPersistent
 	 *
 	 * @param name 关系名
 	 * @param nullValue 外键的空值
+	 * @param fk hasMany关系下的单个外键值，如果为null，则删除所有关系, 否则删除单个关系
 	 * @return
 	 */
-	fun removeRelations(name:String, nullValue: Any? = null): Boolean
+	fun removeRelations(name:String, nullValue: Any? = null, fk: Any? = null): Boolean
 }

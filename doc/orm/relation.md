@@ -1,6 +1,6 @@
 # Relations
 
-Jkmvc ORM supports four types of object relations: `belongsTo`, `hasMany`, `hasManyThrough` and `hasOne`. The `hasManyThrough` relation can be used to function like Active Record's `hasMany_and_belongsTo` relation type.
+Jkmvc ORM supports 5 types of object relations: `belongsTo`, `hasMany`, `hasManyThrough` , `hasOne` and `hasOneThrough`. The `hasManyThrough` relation can be used to function like Active Record's `hasMany_and_belongsTo` relation type.
 
 ## belongsTo
 
@@ -133,3 +133,16 @@ To remove:
 ```
 post.remove('categories', category);
 ```
+
+## hasOneThrough
+
+A `hasOneThrough` relation is used for 1-to-1 relations through a middle table. It just like the `hasManyThrough` relation, and it's defined using `hasOneThrough()` method which also like `hasManyThrough()` method. 
+
+Use above example, we define our `hasOneThrough` relation.
+
+```
+hasOneThrough("category", CategoryModel::class, "post_id", "id", "categories_posts", "category_id", "id") 
+```
+
+
+
