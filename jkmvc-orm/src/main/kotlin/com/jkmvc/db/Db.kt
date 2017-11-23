@@ -218,6 +218,14 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
     }
 
     /**
+     * 是否在事务中
+     * @return
+     */
+    public override fun isInTransaction(): Boolean {
+        return transDepth > 0;
+    }
+
+    /**
      * 获得表的所有列
      *
      * @param table

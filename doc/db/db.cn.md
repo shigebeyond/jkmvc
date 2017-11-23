@@ -53,6 +53,7 @@ begin(): Unit | 开启事务
 commit(): Boolean | 提交事务
 rollback(): Boolean | 回滚事务
 transaction(statement: Db.() -> T): T | 执行事务，封装了事务的开启/提交与回滚的通过逻辑
+isInTransaction(): Boolean | 是否在事务中
 
 ### 3.3 执行更新sql的方法
 方法 | 作用

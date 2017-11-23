@@ -24,6 +24,12 @@ interface IDb: IDbQuoter{
     fun <T> transaction(statement: Db.() -> T):T;
 
     /**
+     * 是否在事务中
+     * @return
+     */
+    fun isInTransaction(): Boolean
+
+    /**
      * 获得表的所有列
      *
      * @param table
