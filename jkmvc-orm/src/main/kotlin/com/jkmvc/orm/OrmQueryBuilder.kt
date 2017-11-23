@@ -26,7 +26,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                       protected var convertingValue: Boolean = false /* 查询时是否智能转换字段值 */,
                       protected var convertingColumn: Boolean = false /* 查询时是否智能转换字段名 */,
                       public var withSelect: Boolean = true /* with()联查时自动select关联表的字段 */
-    ) : DbQueryBuilder(ormMeta.db, Pair(ormMeta.table, ormMeta.name)) {
+) : DbQueryBuilder(ormMeta.db, Pair(ormMeta.table, ormMeta.name)) {
 
     /**
      * 关联查询的记录，用于防止重复join同一个表
@@ -57,7 +57,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     public override fun <T:Any> getRecordTranformer(clazz: KClass<T>): ((MutableMap<String, Any?>) -> T) {
         // 只能是当前model类及其父类，不能是其他model类
         if(IOrm::class.java.isAssignableFrom(clazz.java) // 是model类
-            && !clazz.java.isAssignableFrom(ormMeta.model.java)) // 不是当前model类及其父类
+                && !clazz.java.isAssignableFrom(ormMeta.model.java)) // 不是当前model类及其父类
             throw UnsupportedOperationException("sql构建器将记录转为指定类型：只能指定 ${ormMeta.model} 类及其父类，实际指定 ${clazz}");
 
         return super.getRecordTranformer(clazz)
@@ -374,7 +374,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * Creates a new "AND WHERE" condition for the query.
      *
-     * @param   prop  column name or arrayOf(column, alias) or object
+     * @param   prop  column name or Pair(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -386,7 +386,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * Creates a new "OR WHERE" condition for the query.
      *
-     * @param   prop  column name or arrayOf(column, alias) or object
+     * @param   prop  column name or Pair(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -398,7 +398,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * Applies sorting with "ORDER BY ..."
      *
-     * @param   prop     column name or arrayOf(column, alias) or object
+     * @param   prop     column name or Pair(column, alias) or object
      * @param   direction  direction of sorting
      * @return
      */
@@ -419,7 +419,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * Creates a new "AND HAVING" condition for the query.
      *
-     * @param   prop  column name or arrayOf(column, alias) or object
+     * @param   prop  column name or Pair(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -431,7 +431,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * Creates a new "OR HAVING" condition for the query.
      *
-     * @param   prop  column name or arrayOf(column, alias) or object
+     * @param   prop  column name or Pair(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -448,9 +448,9 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      */
     public fun convertColumn(prop: String): String {
         return if (convertingColumn)
-                    prop2Column(prop)
-                else
-                    prop
+            prop2Column(prop)
+        else
+            prop
     }
 
     /**
@@ -462,9 +462,9 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      */
     public fun convertValue(prop: String, value: Any?): Any? {
         return if (convertingValue && (value is String || value is Array<*> || value is Collection<*>))
-                    convertIntelligent(prop, value)
-                else
-                    value
+            convertIntelligent(prop, value)
+        else
+            value
     }
 
     /**
