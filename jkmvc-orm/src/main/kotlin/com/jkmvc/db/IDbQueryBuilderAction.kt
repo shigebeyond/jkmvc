@@ -56,6 +56,14 @@ interface IDbQueryBuilderAction
     fun value(vararg row:Any?):IDbQueryBuilder;
 
     /**
+     * 设置插入的子查询, insert时用
+     *
+     * @param row 单行数据
+     * @return
+     */
+    fun value(subquery: DbQueryBuilder): IDbQueryBuilder
+
+    /**
      * 设置插入的单行, insert时用
      *
      * @param row
