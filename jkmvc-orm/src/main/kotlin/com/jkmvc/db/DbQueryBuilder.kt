@@ -70,21 +70,56 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:Pair<String, String?> /*表
             return value.toString()
 
         // 2 子查询: 编译select子句，并合并到 compiledSql 中
-        if(value is DbQueryBuilder){ // 无别名
-            val subsql = value.compileSelect()
-            compiledSql.staticParams.addAll(subsql.staticParams);
-            return subsql.sql
-        }
-        if(value is Pair<*, *>){ // 有别名
-            val (subquery, alias) = value as Pair<DbQueryBuilder, String>
-            val subsql = subquery.compileSelect()
-            compiledSql.staticParams.addAll(subsql.staticParams);
-            return "(${subsql.sql}) ${db.identifierQuoteString}$alias${db.identifierQuoteString}"
-        }
+        if(value is IDbQueryBuilder) // 无别名
+            return quoteSubQuery(value)
+        if(value is Pair<*, *>) // 有别名
+            return quoteSubQuery(value as Pair<DbQueryBuilder, String>)
 
         // 2 字段值
         compiledSql.staticParams.add(value);
         return "?";
+    }
+
+    /**
+     * 转义子查询
+     *
+     * @param subquery
+     * @return
+     */
+    public override fun quoteSubQuery(subquery: Pair<IDbQueryBuilder, String>): String {
+        val (query, alias) = subquery
+        val subsql = query.compileSelect()
+        compiledSql.staticParams.addAll(subsql.staticParams);
+        return "(${subsql.sql}) ${db.identifierQuoteString}$alias${db.identifierQuoteString}"
+    }
+
+    /**
+     * 转义子查询
+     *
+     * @param subquery
+     * @return
+     */
+    public override fun quoteSubQuery(subquery: IDbQueryBuilder): String {
+        val subsql = subquery.compileSelect()
+        compiledSql.staticParams.addAll(subsql.staticParams);
+        return subsql.sql
+    }
+
+    /**
+     * 转义表名
+     *
+     * @param table
+     * @return
+     */
+    public override fun quoteTable(table: Any):String{
+        // 1 子查询
+        if(table is Pair<*, *> && table.first is IDbQueryBuilder)
+            return quoteSubQuery(table as Pair<IDbQueryBuilder, String>)
+        if(table is IDbQueryBuilder)
+            return quoteSubQuery(table)
+
+        // 2 普通表
+        return db.quoteTable(table)
     }
 
     /**

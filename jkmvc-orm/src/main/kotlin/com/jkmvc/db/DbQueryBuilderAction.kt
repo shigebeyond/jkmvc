@@ -44,7 +44,7 @@ class InsertData: Cloneable{
      * @return
      */
     public fun isSubQuery(): Boolean {
-        return rows.first() is DbQueryBuilder
+        return rows.first() is IDbQueryBuilder
     }
 
     /**
@@ -63,7 +63,7 @@ class InsertData: Cloneable{
      * @param subquery
      * @return
      */
-    public fun add(subquery: DbQueryBuilder): InsertData {
+    public fun add(subquery: IDbQueryBuilder): InsertData {
         if(rows.isNotEmpty())
             throw DbException("已插入其他值，不能再插入子查询");
 
@@ -115,7 +115,7 @@ public val emptyTable = Pair<String, String?>("", null)
  * @author shijianhang
  * @date 2016-10-12
  */
-abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, var table: Pair<String, String?> /*表名*/) : IDbQueryBuilder() {
+abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, var table: Pair<Any, String?> /* 表名/子查询 */) : IDbQueryBuilder() {
 
     companion object {
 
@@ -225,7 +225,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * @param row 单行数据
      * @return
      */
-    public override fun value(subquery: DbQueryBuilder): IDbQueryBuilder {
+    public override fun values(subquery: IDbQueryBuilder): IDbQueryBuilder {
         insertRows.add(subquery);
         return this;
     }
@@ -368,9 +368,9 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      */
     public fun fillTable(): String {
         if(action == ActionType.INSERT || action == ActionType.DELETE) // mysql的insert/delete语句, 不支持表带别名
-            return db.quoteTable(table.component1())
+            return quoteTable(table.component1())
 
-        return db.quoteTable(table);
+        return quoteTable(table);
     }
 
     /**
@@ -401,7 +401,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     public fun fillValues(): String {
         // 1 insert...select..字句
         val firstValue = insertRows.rows.first()
-        if(firstValue is DbQueryBuilder) // 子查询
+        if(firstValue is IDbQueryBuilder) // 子查询
             return quote(firstValue)
 
         // 2 insert子句:  data是要插入的多行: columns + values

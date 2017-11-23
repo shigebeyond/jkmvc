@@ -61,7 +61,7 @@ interface IDbQueryBuilderAction
      * @param row 单行数据
      * @return
      */
-    fun value(subquery: DbQueryBuilder): IDbQueryBuilder
+    fun values(subquery: IDbQueryBuilder): IDbQueryBuilder
 
     /**
      * 设置插入的单行, insert时用

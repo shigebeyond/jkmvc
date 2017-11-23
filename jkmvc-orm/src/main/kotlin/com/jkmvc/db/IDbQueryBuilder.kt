@@ -190,4 +190,28 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
     public override fun clone(): Any{
         return super.clone()
     }
+
+    /**
+     * 转义子查询
+     *
+     * @param subquery
+     * @return
+     */
+    public abstract fun quoteSubQuery(subquery: Pair<IDbQueryBuilder, String>): String
+
+    /**
+     * 转义子查询
+     *
+     * @param subquery
+     * @return
+     */
+    public abstract fun quoteSubQuery(subquery: IDbQueryBuilder): String
+
+    /**
+     * 转义表名
+     *
+     * @param table
+     * @return
+     */
+    public abstract fun quoteTable(table: Any):String
 }

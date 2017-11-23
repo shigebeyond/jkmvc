@@ -61,6 +61,9 @@ interface IDbQueryBuilderDecoration: IDbQuoter
      * @return
      */
     fun where(column:String, value:Any?):IDbQueryBuilder{
+        if(value == null)
+            return where(column, "IS", value);
+
         if(value is Array<*> || value is IntArray || value is ShortArray || value is LongArray || value is FloatArray || value is DoubleArray || value is BooleanArray
                 || value is Collection<*>)
             return where(column, "IN", value)
@@ -293,11 +296,55 @@ interface IDbQueryBuilderDecoration: IDbQuoter
     /**
      * Adds addition tables to "JOIN ...".
      *
-     * @param   table  column name or Pair(column, alias) or object
+     * @param   table  table name | Pair(table, alias) | subquery | Pair(subquery, alias)
      * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
      * @return
      */
-    fun join(table:Any, type:String = "INNER"):IDbQueryBuilder;
+    fun join(table: Any, type:String = "INNER"): IDbQueryBuilder
+
+    /**
+     * Adds addition tables to "JOIN ...".
+     *
+     * @param   table  table name
+     * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
+     * @return
+     */
+    fun join(table: String, type:String = "INNER"): IDbQueryBuilder {
+        return join(table as Any, type);
+    }
+
+    /**
+     * Adds addition tables to "JOIN ...".
+     *
+     * @param   table  Pair(table, alias)
+     * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
+     * @return
+     */
+    fun join(table: Pair<String, String>, type:String = "INNER"):IDbQueryBuilder{
+        return join(table as Any, type);
+    }
+
+    /**
+     * Adds addition subquerys to "JOIN ...".
+     *
+     * @param   subquery  subquery
+     * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
+     * @return
+     */
+    fun joins(subquery: IDbQueryBuilder, type:String = "INNER"):IDbQueryBuilder{
+        return join(subquery as Any, type);
+    }
+
+    /**
+     * Adds addition subquerys to "JOIN ...".
+     *
+     * @param   subquery  Pair(subquery, alias)
+     * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
+     * @return
+     */
+    public fun joins(subquery:Pair<IDbQueryBuilder, String>, type:String):IDbQueryBuilder{
+        return join(subquery as Any, type);
+    }
 
     /**
      * Adds "ON ..." conditions for the last created JOIN statement.

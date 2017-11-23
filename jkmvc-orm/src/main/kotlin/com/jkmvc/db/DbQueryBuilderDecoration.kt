@@ -29,7 +29,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
      * 转义表
      */
     protected val tableQuoter: (Any?) -> String = { table: Any? ->
-        db.quoteTable(table!!)
+        quoteTable(table!!)
     }
 
     protected val orderDirection: (Any?) -> String = { value: Any? ->
@@ -483,7 +483,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
     /**
      * Adds addition tables to "JOIN ...".
      *
-     * @param   table  column name or Pair(column, alias) or object
+     * @param   table  table name | Pair(table, alias) | subquery | Pair(subquery, alias)
      * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
      * @return
      */
