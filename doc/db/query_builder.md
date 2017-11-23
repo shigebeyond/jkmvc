@@ -210,7 +210,7 @@ The `on()` method sets the conditions for the previous `join()` method and is ve
 
 ```
 // This query will find all the posts related to "smith" with JOIN
-query.select("authors.name", "posts.content").from("authors").join("posts").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith");
+query.select("authors.name", "posts.content").from("authors").join("posts").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith").findAll<Record>();
 ```
 
 This query would generate the following SQL:
@@ -223,7 +223,7 @@ If you want to do a LEFT, RIGHT or INNER JOIN you would do it like this `join("c
 
 ```
 // This query will find all the posts related to "smith" with LEFT JOIN
-query.from("authors").join("posts", "LEFT").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith");
+query.from("authors").join("posts", "LEFT").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith").findAll<Record>();
 ```
 
 This query would generate the following SQL:
@@ -239,7 +239,7 @@ SELECT `authors`.`name`, `posts`.`content` FROM `authors` LEFT JOIN `posts` ON (
 Aggregate functions like `COUNT()`, `SUM()`, `AVG()`, etc. will most likely be used with the `groupBy()` and possibly the `having()` methods in order to group and filter the results on a set of columns.
 
 ```
-query.select("username", "COUNT(`id`)" to "total_posts").from("posts").groupBy("username").having("total_posts", ">=", 10);
+query.select("username", "COUNT(`id`)" to "total_posts").from("posts").groupBy("username").having("total_posts", ">=", 10).findAll<Record>();
 ```
 
 This will generate the following query:
@@ -255,7 +255,7 @@ Query Builder objects can be passed as parameters to many of the methods to crea
 ```
 // subquery
 val sub = DbQueryBuilder().select("username", "COUNT(`id`)" to "total_posts")
-        .from("posts").groupBy("username").having("total_posts", ">=", 10);
+        .from("posts").groupBy("username").having("total_posts", ">=", 10)
 
 // join subquery
 DbQueryBuilder().select("profiles.*", "posts.total_posts").from("profiles")
