@@ -59,15 +59,17 @@ open class RelationMeta(
      *     对belongs_to关系，如果外键为空，则联查为空
      *
      * @param item Orm对象
+     * @param fkInMany hasMany关系下的单个外键值，如果为null，则更新所有关系, 否则更新单个关系
      * @param withTableAlias 是否带表前缀
      * @return
      */
-    public override fun queryRelated(item: IOrm, withTableAlias:Boolean): OrmQueryBuilder? {
+    public override fun queryRelated(item: IOrm, fkInMany: Any?, withTableAlias:Boolean): OrmQueryBuilder? {
         val tableAlias = if(withTableAlias)
                             model.modelName + '.'
                         else
                             ""
-        if(type == RelationType.BELONGS_TO) { // 查主表
+        // 查主表
+        if(type == RelationType.BELONGS_TO) {
             val fk: Any? = item[foreignProp]
             if(fk == null || (fk is Int && intForeighKeyMustPositive && fk == 0) || (fk is String && stringForeighKeyMustNotEmpty && fk.isEmpty())) // 如果外键为空，则联查为空
                 return null
@@ -75,10 +77,13 @@ open class RelationMeta(
         }
 
         // 查从表
-        val pk: Any? = item[primaryProp]
+        val pk: Any? = item[primaryProp] // 主键
         if(pk == null)
             return null
-        return queryBuilder().where(tableAlias + foreignKey, "=", pk) as OrmQueryBuilder// 从表.外键 = 主表.主键
+        val query = queryBuilder().where(tableAlias + foreignKey, "=", pk) as OrmQueryBuilder// 从表.外键 = 主表.主键
+        if(fkInMany != null) // hasMany关系下过滤单个关系
+            query.where(ormMeta.primaryKey, fkInMany)
+        return query;
     }
 
     /**

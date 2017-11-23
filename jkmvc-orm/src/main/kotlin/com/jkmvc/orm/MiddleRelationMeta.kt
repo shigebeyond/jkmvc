@@ -51,13 +51,17 @@ class MiddleRelationMeta(
      * 查询中间表
      *
      * @param item
+     * @param fkInMany hasMany关系下的单个外键值，如果为null，则更新所有关系, 否则更新单个关系
      * @return
      */
-    public fun queryMiddleTable(item: IOrm): IDbQueryBuilder? {
+    public fun queryMiddleTable(item: IOrm, fkInMany: Any? = null): IDbQueryBuilder? {
         val pk: Any? = item[primaryProp]
         if(pk == null)
             return null;
-        return DbQueryBuilder(ormMeta.db, middleTable).where(foreignKey, "=", pk)
+        val query = DbQueryBuilder(ormMeta.db, middleTable).where(foreignKey, "=", pk)
+        if (fkInMany != null) // hasMany关系下删除单个关系
+            query.where(farForeignKey, fkInMany)
+        return query;
     }
 
     /**
@@ -76,17 +80,21 @@ class MiddleRelationMeta(
      *     根据hasMany/hasOne的关联关系，来构建查询条件
      *
      * @param item Orm对象
+     * @param fkInMany hasMany关系下的单个外键值，如果为null，则更新所有关系, 否则更新单个关系
      * @param withTableAlias 是否带表前缀
      * @return
      */
-    public override fun queryRelated(item: IOrm, withTableAlias:Boolean): OrmQueryBuilder? {
+    public override fun queryRelated(item: IOrm, fkInMany: Any?, withTableAlias:Boolean): OrmQueryBuilder? {
         // 通过join中间表 查从表
-        val pk: Any? = item[primaryProp]
+        val pk: Any? = item[primaryProp] // 主键
         if(pk == null)
             return null;
         val tableAlias = middleTable + '.'
-        return buildQuery() // 中间表.远端外键 = 从表.远端主键
+        val query = buildQuery() // 中间表.远端外键 = 从表.远端主键
                 .where(tableAlias + foreignKey, "=", pk) as OrmQueryBuilder // 中间表.外键 = 主表.主键
+        if (fkInMany != null) // hasMany关系下过滤单个关系
+            query.where(tableAlias + farForeignKey, fkInMany)
+        return query
     }
 
     /**

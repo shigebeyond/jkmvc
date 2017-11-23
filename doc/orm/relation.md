@@ -11,7 +11,7 @@ This is the base `belongsTo` relation defined in `OrmMeta::init()`:
 ```
 companion object m: OrmMeta(...){
 	init {
-		belongsTo("user" /* name */, UserModel::class /* relatedModel */, "user_id" /* foreignKey */, "id" /* primaryKey */)
+		belongsTo("user" /* relation name */, UserModel::class /* relatedModel */, "user_id" /* foreignKey */, "id" /* primaryKey */)
 	}
 }
 ```
@@ -34,7 +34,7 @@ Let's say your `Post` database table schema doesn't have a `user_id` column but 
 belongsTo("user", UserModel::class, "author_id")
 ```
 
-If you wanted access a post's author by using code like `post["author"]` then you would simply need to change the alias and add the `model` index:
+If you wanted access a post's author by using code like `post["author"]` then you would simply need to change the relation name:
 
 ```
 belongsTo("author", UserModel::class, "author_id")
@@ -44,7 +44,7 @@ belongsTo("author", UserModel::class, "author_id")
 The standard `hasMany` relation will likely fall on the other side of a `belongsTo` relation.  In the above examples, a post belongs to a user.  From the user's perspective, a user has many posts. A hasMany relation is defined below:
 
 ```
-hasMany("posts" /* name */, PostModel::class /* relatedModel */, "post_id" /* foreignKey */, "id" /* primaryKey */)
+hasMany("posts" /* relation name */, PostModel::class /* relatedModel */, "post_id" /* foreignKey */, "id" /* primaryKey */)
 ```
 Let's have a look at the method definition 
 
@@ -61,7 +61,7 @@ hasMany("posts", PostModel::class, "post_id", "id")
 
 Using the above, the posts could be access using `user["posts"]`.
 
-The model name used by default will be the singular name of the alias using the `inflector` class.  In this case, `posts` uses `post` as the model name.  The foreign key used by default is the owner model's name followed by `_id`.  In this case, the foreign key will be `user_id` and it must exist in the posts table as before.
+The model name used by default will be the singular name of the relation name.  In this case, `posts` uses `post` as the model name.  The foreign key used by default is the owner model's name followed by `_id`.  In this case, the foreign key will be `user_id` and it must exist in the posts table as before.
 
 Let's assume now you want to access the posts using the name `stories` instead, and are still using the `author_id` key as in the `belongsTo` example.  You would define your hasMany relation as:
 
@@ -114,7 +114,19 @@ hasManyThrough("posts", PostModel::class, "category_id", "id", "categories_posts
 
 To access the categories and posts, you simply use `post["categories"]` and `category["posts"]`
 
-Methods are available to check for, add, and remove relations for many-to-many relations.  Let's assume you have a post model loaded, and a category model loaded as well.  You can check to see if the post is related to this category with the following call:
+## hasOneThrough
+
+A `hasOneThrough` relation is used for 1-to-1 relations through a middle table. It just like the `hasManyThrough` relation, and it's defined using `hasOneThrough()` method which also like `hasManyThrough()` method. 
+
+Use above example, we define our `hasOneThrough` relation.
+
+```
+hasOneThrough("category", CategoryModel::class, "post_id", "id", "categories_posts", "category_id", "id") 
+```
+
+## Manage relation
+
+Methods are available to check for, count, add, and remove relations for relations.  Let's assume you have a post model loaded, and a category model loaded as well.  You can check to see if the post is related to this category with the following call:
 
 ```
 post.has('categories', category);
@@ -133,16 +145,3 @@ To remove:
 ```
 post.remove('categories', category);
 ```
-
-## hasOneThrough
-
-A `hasOneThrough` relation is used for 1-to-1 relations through a middle table. It just like the `hasManyThrough` relation, and it's defined using `hasOneThrough()` method which also like `hasManyThrough()` method. 
-
-Use above example, we define our `hasOneThrough` relation.
-
-```
-hasOneThrough("category", CategoryModel::class, "post_id", "id", "categories_posts", "category_id", "id") 
-```
-
-
-

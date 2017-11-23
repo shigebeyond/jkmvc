@@ -143,13 +143,14 @@ abstract class OrmRelated: OrmPersistent() {
      *    一对一关系，你还统计个数干啥？
      *
      * @param name 关联对象名
+     * @param fkInMany hasMany关系下的单个外键值，如果为null，则删除所有关系, 否则删除单个关系
      * @return
      */
-    public override fun countRelated(name:String): Long {
+    public override fun countRelated(name:String, fkInMany: Any?): Long {
         // 获得关联关系
         val relation = ormMeta.getRelation(name)!!;
         // 构建查询：自动构建查询条件
-        val query = relation.queryRelated(this)
+        val query = relation.queryRelated(this, fkInMany)
         return if(query == null) 0 else query.count()
     }
 
@@ -187,10 +188,8 @@ abstract class OrmRelated: OrmPersistent() {
         val db = ormMeta.db
         return db.transaction {
             // 子查询
-            val subquery = relation.queryMiddleTable(this)
+            val subquery = relation.queryMiddleTable(this, fkInMany)
             if(subquery != null){
-                if(fkInMany != null)
-                    subquery.where(relation.farForeignKey, fkInMany)
                 // 删除关联对象
                 relation.ormMeta.queryBuilder().where(relation.farPrimaryKey, "IN", subquery.select(relation.farForeignKey)).delete()
                 // 删除中间表
@@ -234,14 +233,11 @@ abstract class OrmRelated: OrmPersistent() {
         //更新外键
         return updateForeighKey(name, nullValue, fkInMany){ relation: MiddleRelationMeta, fkInMany: Any? ->
             // 删除中间表
-            val query = relation.queryMiddleTable(this)
+            val query = relation.queryMiddleTable(this, fkInMany)
             if(query == null)
                 true
-            else{
-                if (fkInMany != null) // hasMany关系下删除单个关系
-                    query.where(relation.farForeignKey, fkInMany)
+            else
                 query.delete()
-            }
         }
     }
 
@@ -259,7 +255,7 @@ abstract class OrmRelated: OrmPersistent() {
         val relation = ormMeta.getRelation(name)!!;
         // 1 belongsTo：更新本对象的外键
         if(relation.type == RelationType.BELONGS_TO){
-            this[relation.foreignProp] = value
+            this[relation.foreignProp] = if(value is IOrm) value[relation.primaryProp] else value
             return this.update()
         }
 
@@ -269,9 +265,6 @@ abstract class OrmRelated: OrmPersistent() {
             return middleForeighKeyUpdater(relation, fkInMany)
 
         // 2.2 无中间表：更新关联对象的外键
-        val query = relation.queryRelated(this)!!.set(relation.foreignKey, value)
-        if(fkInMany != null) // hasMany关系下删除单个关系
-            query.where(relation.ormMeta.primaryKey, fkInMany)
-        return query.update()
+        return relation.queryRelated(this, fkInMany)!!.set(relation.foreignKey, value).update()
     }
 }

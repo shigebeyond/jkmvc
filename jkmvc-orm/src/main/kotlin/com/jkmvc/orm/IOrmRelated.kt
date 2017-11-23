@@ -29,14 +29,28 @@ interface IOrmRelated : IOrmPersistent
 	fun related(name:String, newed:Boolean = false, vararg columns:String): Any?;
 
 	/**
+	 * 检查是否有关联对象
+	 *    一般只用于一对多 hasMany 的关系
+	 *    一对一关系，你还统计个数干啥？
+	 *
+	 * @param name 关联对象名
+	 * @param fkInMany hasMany关系下的单个外键值，如果为null，则删除所有关系, 否则删除单个关系
+	 * @return
+	 */
+	fun hasRelated(name:String, fkInMany: Any? = null): Boolean {
+		return countRelated(name, fkInMany) > 0
+	}
+
+	/**
 	 * 统计关联对象个数
 	 *    一般只用于一对多 hasMany 的关系
 	 *    一对一关系，你还统计个数干啥？
 	 *
 	 * @param name 关联对象名
+	 * @param fkInMany hasMany关系下的单个外键值，如果为null，则删除所有关系, 否则删除单个关系
 	 * @return
 	 */
-	fun countRelated(name:String): Long
+	fun countRelated(name:String, fkInMany: Any? = null): Long
 
 	/**
 	 * 删除关联对象
