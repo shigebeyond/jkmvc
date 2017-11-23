@@ -337,6 +337,7 @@ interface IDbQueryBuilderDecoration: IDbQuoter
 
     /**
      * Adds addition subquerys to "JOIN ...".
+     *   由于该方法与 join(table: Pair<String, String>, type:String = "INNER") 签名相同，因此从 join() 改名为 joins()
      *
      * @param   subquery  Pair(subquery, alias)
      * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)

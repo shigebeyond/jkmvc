@@ -200,14 +200,14 @@ DELETE FROM `user` WHERE `username` IN ("john", "jane")
 如果你要联查多个表，则你需要使用 `join()` 与 `on()` 方法. 
 
 `join()` 需要2个参数
-* 表名，是 `Pair<String, String>` 对象，包含表名+表别名
+* 表名：可以是 `String` 或 `Pair<String, String>` （包含表名+表别名）
 * 连接方式: LEFT（左连接）, RIGHT（右连接）, INNER（内连接）.
 
 `on()` 方法主要用于设置2个关联表的连接条件，与 `where()` 方法类似，但它需要3个参数; 1 左字段名 2 符号 3 右字段名. 多次调用 `on()` 方法会构建多个连接条件，条件之间用 "AND" 操作符来连接
 
 ```
 // 使用`JOIN` 来查询出作者 "smith" 关联的所有文章
-query.select("authors.name", "posts.content").from("authors").join("posts").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith");
+query.select("authors.name", "posts.content").from("authors").join("posts").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith").findAll<Record>();
 ```
 
 生成sql如下：
@@ -236,7 +236,7 @@ SELECT `authors`.`name`, `posts`.`content` FROM `authors` LEFT JOIN `posts` ON (
 SQL中提供的聚合函数可以用来统计、求和、求最值等，如 `COUNT()`, `SUM()`, `AVG()`. 他们通常是结合 `groupBy()` 来分组统计，或结合 `having()` 来过滤聚合结果
 
 ```
-query.select("username", "COUNT(`id`)" to "total_posts").from("posts").groupBy("username").having("total_posts", ">=", 10);
+query.select("username", "COUNT(`id`)" to "total_posts").from("posts").groupBy("username").having("total_posts", ">=", 10).findAll<Record>()
 ```
 
 生成sql如下：
@@ -245,7 +245,47 @@ query.select("username", "COUNT(`id`)" to "total_posts").from("posts").groupBy("
 SELECT `username`, COUNT(`id`) AS `total_posts` FROM `posts` GROUP BY `username` HAVING `total_posts` >= 10
 ```
 
-### 6.3 布尔操作符与嵌套子句
+### 6.3 子查询
+
+查询构建器对象可以作为很多方法的参数，来构建子查询。让我们用上面的查询，传给新的查询作为子查询：
+
+```
+// subquery
+val sub = DbQueryBuilder().select("username", "COUNT(`id`)" to "total_posts")
+        .from("posts").groupBy("username").having("total_posts", ">=", 10);
+
+// join subquery
+DbQueryBuilder().select("profiles.*", "posts.total_posts").from("profiles")
+.joins(sub to "posts", "INNER").on("profiles.username", "=", "posts.username").findAll<Record>()
+```
+
+生成sql如下：
+
+```
+SELECT `profiles`.*, `posts`.`total_posts` FROM `profiles` INNER JOIN
+( SELECT `username`, COUNT(`id`) AS `total_posts` FROM `posts` GROUP BY `username` HAVING `total_posts` >= 10 ) `posts`
+ON `profiles`.`username` = `posts`.`username`
+```
+
+Insert 查询也可以接入 Select 子查询
+
+```
+// subquery
+val sub = DbQueryBuilder().select("username", "COUNT(`id`)" to "total_posts")
+.from("posts").groupBy("username").having("total_posts", ">=", 10);
+
+// insert subquery
+DbQueryBuilder().table("post_totals").insertColumns("username", "posts").values(sub).insert()
+```
+
+This will generate the following query:
+
+```
+INSERT INTO `post_totals` (`username`, `posts`) 
+SELECT `username`, COUNT(`id`) AS `total_posts` FROM `posts` GROUP BY `username` HAVING `total_posts` >= 10 
+```
+
+### 6.4 布尔操作符与嵌套子句
 
 多个 `WHERE` 与 `HAVING` 子句是用布尔操作符（`AND`/`OR`）来连接的。无前缀或前缀为 `and` 的方法的操作符是`AND`. 前缀为 `or` 的方法的操作符是`OR`. `WHERE` 与 `HAVING` 子句可以嵌套使用，你可以使用后缀为`open` 的方法来开启一个分组，使用后缀为 `close` 的方法来关闭一个分组. 
 
@@ -258,7 +298,8 @@ query.from("user")
             .orWhere("lastLogin", "IS", null)
         .andWhereClose()
     .whereClose()
-    .andWhere("removed","IS", null);
+    .andWhere("removed","IS", null)
+    .findAll<Record>()
 ```
 
 生成sql如下：
@@ -267,7 +308,7 @@ query.from("user")
 SELECT  * FROM `user` WHERE ( `id` IN (1, 2, 3, 5)  AND ( `lastLogin` <= 1511069644 OR `lastLogin` IS null )) AND `removed` IS null
 ```
 
-### 6.4 数据库表达式
+### 6.5 数据库表达式
 
 在 `DbQueryBuilder` 的 `insert/update` 语句中，要保存的字段值总是要被转义 `Db::quote(value:Any?)`。但是有时候字段值是一个原生的表达式与函数调用，此时是不需要转义的。
 

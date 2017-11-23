@@ -248,7 +248,47 @@ This will generate the following query:
 SELECT `username`, COUNT(`id`) AS `total_posts` FROM `posts` GROUP BY `username` HAVING `total_posts` >= 10
 ```
 
-### 6.3 Boolean Operators and Nested Clauses 
+### 6.3 Subqueries
+
+Query Builder objects can be passed as parameters to many of the methods to create subqueries. Let's take the previous example query and pass it to a new query.
+
+```
+// subquery
+val sub = DbQueryBuilder().select("username", "COUNT(`id`)" to "total_posts")
+        .from("posts").groupBy("username").having("total_posts", ">=", 10);
+
+// join subquery
+DbQueryBuilder().select("profiles.*", "posts.total_posts").from("profiles")
+.joins(sub to "posts", "INNER").on("profiles.username", "=", "posts.username").findAll<Record>()
+```
+
+This will generate the following query:
+
+```
+SELECT `profiles`.*, `posts`.`total_posts` FROM `profiles` INNER JOIN
+( SELECT `username`, COUNT(`id`) AS `total_posts` FROM `posts` GROUP BY `username` HAVING `total_posts` >= 10 ) `posts`
+ON `profiles`.`username` = `posts`.`username`
+```
+
+Insert queries can also use a select query for the input values
+
+```
+// subquery
+val sub = DbQueryBuilder().select("username", "COUNT(`id`)" to "total_posts")
+.from("posts").groupBy("username").having("total_posts", ">=", 10);
+
+// insert subquery
+DbQueryBuilder().table("post_totals").insertColumns("username", "posts").values(sub).insert()
+```
+
+This will generate the following query:
+
+```
+INSERT INTO `post_totals` (`username`, `posts`) 
+SELECT `username`, COUNT(`id`) AS `total_posts` FROM `posts` GROUP BY `username` HAVING `total_posts` >= 10 
+```
+
+### 6.4 Boolean Operators and Nested Clauses 
 
 Multiple Where and Having clauses are added to the query with Boolean operators connecting each expression. The default operator for both methods is `AND` which is the same as the `and` prefixed method. The `OR` operator can be specified by prefixing the methods with `or`. Where and Having clauses can be nested or grouped by post fixing either method with `open` and then followed by a method with a `close`. 
 
@@ -270,7 +310,7 @@ This will generate the following query:
 SELECT  * FROM `user` WHERE ( `id` IN (1, 2, 3, 5)  AND ( `lastLogin` <= 1511069644 OR `lastLogin` IS null )) AND `removed` IS null
 ```
 
-### 6.4 Database Expressions
+### 6.5 Database Expressions
 
 In `update/insert` Query Builder, the column value is always be escaped by `Db::quote(value:Any?)`. But there are cases were you need a complex expression or other database functions, which you don't want the Query Builder to try and escape. In these cases, you will need to use a database expression `DbExpression`.  **A database expression is taken as direct input and no escaping is performed.**
 
