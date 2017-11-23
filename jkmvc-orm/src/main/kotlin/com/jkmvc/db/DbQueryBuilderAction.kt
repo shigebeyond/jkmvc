@@ -23,8 +23,13 @@ class InsertData: Cloneable{
 
     /**
      * 检查行的大小
+     * @param rowSize
+     * @return
      */
     protected fun checkRowSize(rowSize:Int){
+        if(isSubQuery())
+            throw DbException("已插入子查询，不能再插入值");
+
         if(columns == null || columns!!.isEmpty())
             throw DbException("请先调用insertColumn()来设置插入的字段名");
 
@@ -35,11 +40,34 @@ class InsertData: Cloneable{
     }
 
     /**
+     * 是否插入子查询
+     * @return
+     */
+    public fun isSubQuery(): Boolean {
+        return rows.first() is DbQueryBuilder
+    }
+
+    /**
      * 添加一行/多行
+     * @param row
+     * @return
      */
     public fun add(row: Array<out Any?>): InsertData {
         checkRowSize(row.size)
         rows.addAll(row)
+        return this;
+    }
+
+    /**
+     * 添加子查询
+     * @param subquery
+     * @return
+     */
+    public fun add(subquery: DbQueryBuilder): InsertData {
+        if(rows.isNotEmpty())
+            throw DbException("已插入其他值，不能再插入子查询");
+
+        rows.add(subquery)
         return this;
     }
 
@@ -97,7 +125,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
          */
         protected val SqlTemplates:Array<String> = arrayOf(
                 "SELECT :distinct :columns FROM :table",
-                "INSERT INTO :table (:columns) VALUES :values", // quoteColumn 默认不加(), quotevalue 默认加()
+                "INSERT INTO :table (:columns) :values", // quoteColumn() 默认不加(), quote() 默认加()
                 "UPDATE :table SET :column = :value",
                 "DELETE FROM :table"
         );
@@ -126,7 +154,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     /**
      * 要查询的字段名: [alias to column]
      */
-    protected val selectColumns: HashSet<Any>
+    public val selectColumns: HashSet<Any>
         get(){
             return manipulatedData.getOrPut(ActionType.SELECT.ordinal){
                 HashSet<Any>();
@@ -188,6 +216,17 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      */
     public override fun value(vararg row:Any?): IDbQueryBuilder {
         insertRows.add(row);
+        return this;
+    }
+
+    /**
+     * 设置插入的子查询, insert时用
+     *
+     * @param row 单行数据
+     * @return
+     */
+    public override fun value(subquery: DbQueryBuilder): IDbQueryBuilder {
+        insertRows.add(subquery);
         return this;
     }
 
@@ -360,8 +399,13 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      *  @return
      */
     public fun fillValues(): String {
-        // insert子句:  data是要插入的多行: columns + values
-        val sql = StringBuilder();
+        // 1 insert...select..字句
+        val firstValue = insertRows.rows.first()
+        if(firstValue is DbQueryBuilder) // 子查询
+            return quote(firstValue)
+
+        // 2 insert子句:  data是要插入的多行: columns + values
+        val sql = StringBuilder("VALUES ");
         //对每行构建()
         var i = 0
         val valueSize = insertRows.rows.size
