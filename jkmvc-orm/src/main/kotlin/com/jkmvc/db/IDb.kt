@@ -17,6 +17,14 @@ interface IDb: IDbQuoter{
     val dbType:DbType
 
     /**
+     * sql标示符（表/字段）的转义字符
+     *   mysql为 `table`.`column`
+     *   oracle为 "table"."column"
+     *   sql server为 "table"."column" 或 [table].[column]
+     */
+    val identifierQuoteString:String
+
+    /**
      * 执行事务
      * @param statement db操作过程
      * @return

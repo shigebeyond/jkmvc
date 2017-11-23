@@ -163,6 +163,17 @@ class QueryBuilderTests{
         println(csql.previewSql())
     }
 
+    /**
+     * 测试子查询
+     */
+    @Test
+    fun testSubQuery(){
+        val sub = DbQueryBuilder(db).select("username", "COUNT(`id`)" to "total_posts")
+                .from("posts").groupBy("username").having("total_posts", ">=", 10);
+        val query = DbQueryBuilder(db).table("post_totals").insertColumns("username", "posts").value(sub)
+        val csql = query.compileInsert()
+        println(csql.previewSql())
+    }
 
     /**
      * db表达式

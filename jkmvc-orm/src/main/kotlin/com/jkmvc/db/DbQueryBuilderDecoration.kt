@@ -240,7 +240,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
     /**
      * Alias of andWhere()
      *
-     * @param   column  column name or array(column, alias) or object
+     * @param   column  column name or arrayOf(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -252,7 +252,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
     /**
      * Creates a new "AND WHERE" condition for the query.
      *
-     * @param   column  column name or array(column, alias) or object
+     * @param   column  column name or arrayOf(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -265,7 +265,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
     /**
      * Creates a new "OR WHERE" condition for the query.
      *
-     * @param   column  column name or array(column, alias) or object
+     * @param   column  column name or arrayOf(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -363,7 +363,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
     /**
      * Alias of andHaving()
      *
-     * @param   column  column name or array(column, alias) or object
+     * @param   column  column name or arrayOf(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -375,7 +375,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
     /**
      * Creates a new "AND HAVING" condition for the query.
      *
-     * @param   column  column name or array(column, alias) or object
+     * @param   column  column name or arrayOf(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -388,7 +388,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
     /**
      * Creates a new "OR HAVING" condition for the query.
      *
-     * @param   column  column name or array(column, alias) or object
+     * @param   column  column name or arrayOf(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -459,7 +459,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
     /**
      * Applies sorting with "ORDER BY ..."
      *
-     * @param   column     column name or array(column, alias) or object
+     * @param   column     column name or arrayOf(column, alias) or object
      * @param   direction  direction of sorting
      * @return
      */
@@ -483,7 +483,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
     /**
      * Adds addition tables to "JOIN ...".
      *
-     * @param   table  column name or array(column, alias) or object
+     * @param   table  column name or arrayOf(column, alias) or object
      * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
      * @return
      */
@@ -504,9 +504,9 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
     /**
      * Adds "ON ..." conditions for the last created JOIN statement.
      *
-     * @param   c1  column name or array(column, alias) or object
+     * @param   c1  column name or arrayOf(column, alias) or object
      * @param   op  logic operator
-     * @param   c2  column name or array(column, alias) or object
+     * @param   c2  column name or arrayOf(column, alias) or object
      * @return
      */
     public override fun on(c1: String, op: String, c2: String): IDbQueryBuilder {

@@ -374,7 +374,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * Creates a new "AND WHERE" condition for the query.
      *
-     * @param   prop  column name or array(column, alias) or object
+     * @param   prop  column name or arrayOf(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -386,7 +386,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * Creates a new "OR WHERE" condition for the query.
      *
-     * @param   prop  column name or array(column, alias) or object
+     * @param   prop  column name or arrayOf(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -398,7 +398,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * Applies sorting with "ORDER BY ..."
      *
-     * @param   prop     column name or array(column, alias) or object
+     * @param   prop     column name or arrayOf(column, alias) or object
      * @param   direction  direction of sorting
      * @return
      */
@@ -419,7 +419,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * Creates a new "AND HAVING" condition for the query.
      *
-     * @param   prop  column name or array(column, alias) or object
+     * @param   prop  column name or arrayOf(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -431,7 +431,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * Creates a new "OR HAVING" condition for the query.
      *
-     * @param   prop  column name or array(column, alias) or object
+     * @param   prop  column name or arrayOf(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return

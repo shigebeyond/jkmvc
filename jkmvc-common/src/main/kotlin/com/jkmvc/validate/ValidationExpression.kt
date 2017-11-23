@@ -96,7 +96,7 @@ class ValidationExpression(override val exp:String /* 原始表达式 */):IValid
 
 	/**
 	 * 子表达式的数组
-	 *   一个子表达式 = array(操作符, 函数名, 参数数组)
+	 *   一个子表达式 = listOf(操作符, 函数名, 参数数组)
 	 *   参数列表 = listOf("1", "2", ":name") 参数有值/变量（如:name）
 	 */
 	protected val subexps:List<ValidationUint> = compile(exp);

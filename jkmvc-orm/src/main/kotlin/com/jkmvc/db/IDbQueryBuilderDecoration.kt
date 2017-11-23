@@ -46,7 +46,7 @@ interface IDbQueryBuilderDecoration: IDbQuoter
     /**
      * Alias of andWhere()
      *
-     * @param   column  column name or array(column, alias) or object
+     * @param   column  column name or arrayOf(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -56,7 +56,7 @@ interface IDbQueryBuilderDecoration: IDbQuoter
     /**
      * Alias of andWhere()
      *
-     * @param   column  column name or array(column, alias) or object
+     * @param   column  column name or arrayOf(column, alias) or object
      * @param   value   column value
      * @return
      */
@@ -71,7 +71,7 @@ interface IDbQueryBuilderDecoration: IDbQuoter
     /**
      * Creates a new "OR WHERE" condition for the query.
      *
-     * @param   column  column name or array(column, alias) or object
+     * @param   column  column name or arrayOf(column, alias) or object
      * @param   value   column value
      * @return
      */
@@ -97,7 +97,7 @@ interface IDbQueryBuilderDecoration: IDbQuoter
     /**
      * Creates a new "AND WHERE" condition for the query.
      *
-     * @param   column  column name or array(column, alias) or object
+     * @param   column  column name or arrayOf(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -107,7 +107,7 @@ interface IDbQueryBuilderDecoration: IDbQuoter
     /**
      * Creates a new "OR WHERE" condition for the query.
      *
-     * @param   column  column name or array(column, alias) or object
+     * @param   column  column name or arrayOf(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -179,7 +179,7 @@ interface IDbQueryBuilderDecoration: IDbQuoter
     /**
      * Alias of andHaving()
      *
-     * @param   column  column name or array(column, alias) or object
+     * @param   column  column name or arrayOf(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -189,7 +189,7 @@ interface IDbQueryBuilderDecoration: IDbQuoter
     /**
      * Creates a new "AND HAVING" condition for the query.
      *
-     * @param   column  column name or array(column, alias) or object
+     * @param   column  column name or arrayOf(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -199,7 +199,7 @@ interface IDbQueryBuilderDecoration: IDbQuoter
     /**
      * Creates a new "OR HAVING" condition for the query.
      *
-     * @param   column  column name or array(column, alias) or object
+     * @param   column  column name or arrayOf(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -251,7 +251,7 @@ interface IDbQueryBuilderDecoration: IDbQuoter
     /**
      * Applies sorting with "ORDER BY ..."
      *
-     * @param   column     column name or array(column, alias) or object
+     * @param   column     column name or arrayOf(column, alias) or object
      * @param   direction  direction of sorting
      * @return
      */
@@ -293,7 +293,7 @@ interface IDbQueryBuilderDecoration: IDbQuoter
     /**
      * Adds addition tables to "JOIN ...".
      *
-     * @param   table  column name or array(column, alias) or object
+     * @param   table  column name or arrayOf(column, alias) or object
      * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
      * @return
      */
@@ -302,9 +302,9 @@ interface IDbQueryBuilderDecoration: IDbQuoter
     /**
      * Adds "ON ..." conditions for the last created JOIN statement.
      *
-     * @param   c1  column name or array(column, alias) or object
+     * @param   c1  column name or arrayOf(column, alias) or object
      * @param   op  logic operator
-     * @param   c2  column name or array(column, alias) or object
+     * @param   c2  column name or arrayOf(column, alias) or object
      * @return
      */
     fun on(c1:String, op:String, c2:String):IDbQueryBuilder;

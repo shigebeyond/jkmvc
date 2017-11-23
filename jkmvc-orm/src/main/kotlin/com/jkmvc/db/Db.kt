@@ -132,7 +132,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      *   oracle为 "table"."column"
      *   sql server为 "table"."column" 或 [table].[column]
      */
-    public val identifierQuoteString by lazy(LazyThreadSafetyMode.NONE) {
+    public override val identifierQuoteString:String by lazy(LazyThreadSafetyMode.NONE) {
         conn.metaData.identifierQuoteString
     }
 
