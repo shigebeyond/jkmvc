@@ -228,8 +228,8 @@ class OrmTests{
         println("用户[${user.name}]有 $count 个地址")
 
         // 删除关系： 清空外键，不删除关联对象
-        //val bool = user.removeRelations("addresses", 0)
-        //println("用户[${user.name}] 删除地址的关系")
+//        val bool = user.removeRelations("addresses", 0)
+//        println("用户[${user.name}] 删除地址的关系")
 
         // 删除关联对象
         val bool = user.deleteRelated("addresses")

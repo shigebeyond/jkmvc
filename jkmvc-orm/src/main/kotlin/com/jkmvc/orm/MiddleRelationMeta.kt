@@ -1,5 +1,7 @@
 package com.jkmvc.orm
 
+import com.jkmvc.db.DbQueryBuilder
+import com.jkmvc.db.IDbQueryBuilder
 import kotlin.reflect.KClass
 
 /**
@@ -43,6 +45,30 @@ class MiddleRelationMeta(
         return queryBuilder()
                 .select(model.modelName + ".*", middleTable + '.' + foreignKey) // 查关联字段：中间表.外键 = 主表.主键，以便在查询后绑定主对象
                 .join(middleTable).on(middleTable + '.' + farForeignKey, "=", model.modelName + '.' + farPrimaryKey) as OrmQueryBuilder // 中间表.远端外键 = 从表.远端主键
+    }
+
+    /**
+     * 查询中间表
+     *
+     * @param item
+     * @return
+     */
+    public fun queryMiddleTable(item: IOrm): IDbQueryBuilder? {
+        val pk: Any? = item[primaryProp]
+        if(pk == null)
+            return null;
+        return DbQueryBuilder(ormMeta.db, middleTable).where(foreignKey, "=", pk)
+    }
+
+    /**
+     * 插入中间表
+     *
+     * @param pk 主表主键
+     * @param farPk 从表主键
+     * @return
+     */
+    public fun insertMiddleTable(pk:Any, farPk:Any): Int {
+        return DbQueryBuilder(ormMeta.db, middleTable).insertColumns(foreignKey, farForeignKey).value(pk, farPk).insert()
     }
 
     /**

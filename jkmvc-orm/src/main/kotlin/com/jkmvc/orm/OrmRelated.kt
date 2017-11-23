@@ -1,7 +1,5 @@
 package com.jkmvc.orm
 
-import com.jkmvc.db.DbQueryBuilder
-
 /**
  * ORM之关联对象操作
  *
@@ -161,14 +159,65 @@ abstract class OrmRelated: OrmPersistent() {
      *    你敢删除 belongsTo 关系的主对象？
      *
      * @param name 关系名
+     * @param fkInMany hasMany关系下的单个外键值，如果为null，则删除所有关系, 否则删除单个关系
      * @return
      */
-    public override fun deleteRelated(name: String): Boolean {
+    public override fun deleteRelated(name: String, fkInMany: Any?): Boolean {
         // 获得关联关系
         val relation = ormMeta.getRelation(name)!!;
+
+        // 1 有中间表的关联对象
+        if(relation is MiddleRelationMeta)
+            return deleteMiddleRelated(relation, fkInMany)
+
+        // 2 普通关联对象
         // 构建查询：自动构建查询条件
         val query = relation.queryRelated(this, false)
         return if(query == null) true else query.delete()
+    }
+
+    /**
+     * 删除有中间表的关联对象
+     *
+     * @param relation
+     * @param fkInMany hasMany关系下的单个外键值，如果为null，则删除所有关系, 否则删除单个关系
+     * @return
+     */
+    protected fun deleteMiddleRelated(relation: MiddleRelationMeta, fkInMany: Any?): Boolean {
+        val db = ormMeta.db
+        return db.transaction {
+            // 子查询
+            val subquery = relation.queryMiddleTable(this)
+            if(subquery != null){
+                if(fkInMany != null)
+                    subquery.where(relation.farForeignKey, fkInMany)
+                // 删除关联对象
+                relation.ormMeta.queryBuilder().where(relation.farPrimaryKey, "IN", subquery.select(relation.farForeignKey)).delete()
+                // 删除中间表
+                subquery.delete()
+            }
+            true
+        }
+    }
+
+    /**
+     * 添加关系（添加关联的外键值）
+     *     一般用于添加 hasOne/hasMany 关系的从对象的外键值
+     *     至于 belongsTo 关系的主对象中只要主键，没有外键，你只能添加本对象的外键咯
+     *
+     * @param name 关系名
+     * @param value 外键值
+     * @return
+     */
+    public override fun addRelation(name:String, value: Any): Boolean {
+        //更新外键
+        return updateForeighKey(name, value){ relation: MiddleRelationMeta, fkInMany: Any? ->
+            val pk: Any? = this[relation.primaryProp]
+            if(pk == null)
+                true
+            else // 插入中间表
+                relation.insertMiddleTable(pk, value) > 0
+        }
     }
 
     /**
@@ -178,31 +227,51 @@ abstract class OrmRelated: OrmPersistent() {
      *
      * @param name 关系名
      * @param nullValue 外键的空值
-     * @param fk hasMany关系下的单个外键值，如果为null，则删除所有关系, 否则删除单个关系
+     * @param fkInMany hasMany关系下的单个外键值，如果为null，则删除所有关系, 否则删除单个关系
      * @return
      */
-    public override fun removeRelations(name:String, nullValue: Any?, fk: Any?): Boolean {
+    public override fun removeRelations(name:String, nullValue: Any?, fkInMany: Any?): Boolean {
+        //更新外键
+        return updateForeighKey(name, nullValue, fkInMany){ relation: MiddleRelationMeta, fkInMany: Any? ->
+            // 删除中间表
+            val query = relation.queryMiddleTable(this)
+            if(query == null)
+                true
+            else{
+                if (fkInMany != null) // hasMany关系下删除单个关系
+                    query.where(relation.farForeignKey, fkInMany)
+                query.delete()
+            }
+        }
+    }
+
+    /**
+     * 更新关系外键
+     *
+     * @param name 关系名
+     * @param value 外键值
+     * @param fkInMany hasMany关系下的单个外键值，如果为null，则更新所有关系, 否则更新单个关系
+     * @param middleForeighKeyUpdater 有中间表的关联关系的外键更新函数
+     * @return
+     */
+    protected fun updateForeighKey(name:String, value: Any?, fkInMany: Any? = null, middleForeighKeyUpdater: ((relation: MiddleRelationMeta, fkInMany: Any?) -> Boolean)): Boolean {
         // 获得关联关系
         val relation = ormMeta.getRelation(name)!!;
-        // 1 belongsTo：清空本对象的外键
+        // 1 belongsTo：更新本对象的外键
         if(relation.type == RelationType.BELONGS_TO){
-            this[relation.foreignProp] = nullValue
+            this[relation.foreignProp] = value
             return this.update()
         }
 
         // 2 hasOne/hasMany
-        // 2.1 有中间表：删除中间表
-        if(relation is MiddleRelationMeta){
-            val query = DbQueryBuilder(ormMeta.db, relation.middleTable).where(relation.foreignKey, "=", this[relation.primaryProp])
-            if(fk != null) // hasMany关系下删除单个关系
-                query.where(relation.farForeignKey, fk)
-            return query.delete();
-        }
+        // 2.1 有中间表：
+        if(relation is MiddleRelationMeta)
+            return middleForeighKeyUpdater(relation, fkInMany)
 
-        // 2.2 无中间表：清空关联对象的外键
-        val query = relation.queryRelated(this)!!.set(relation.foreignKey, nullValue)
-        if(fk != null) // hasMany关系下删除单个关系
-            query.where(relation.ormMeta.primaryKey, fk)
+        // 2.2 无中间表：更新关联对象的外键
+        val query = relation.queryRelated(this)!!.set(relation.foreignKey, value)
+        if(fkInMany != null) // hasMany关系下删除单个关系
+            query.where(relation.ormMeta.primaryKey, fkInMany)
         return query.update()
     }
 }

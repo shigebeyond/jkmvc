@@ -203,10 +203,10 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @param statement db操作过程
      * @return
      */
-    public override fun <T> transaction(statement: Db.() -> T):T{
+    public override fun <T> transaction(statement: () -> T):T{
         try{
             begin(); // 开启事务
-            val result:T = this .statement(); // 执行sql
+            val result:T = statement(); // 执行sql
             commit(); // 提交事务
             return result; // 返回结果
         }catch(e:Exception){

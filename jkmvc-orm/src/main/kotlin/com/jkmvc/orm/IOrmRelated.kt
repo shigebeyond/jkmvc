@@ -44,9 +44,21 @@ interface IOrmRelated : IOrmPersistent
 	 *    你敢删除 belongsTo 关系的主对象？
 	 *
 	 * @param name 关系名
+	 * @param fkInMany hasMany关系下的单个外键值，如果为null，则删除所有关系, 否则删除单个关系
 	 * @return
 	 */
-	fun deleteRelated(name: String): Boolean
+	fun deleteRelated(name: String, fkInMany: Any? = null): Boolean
+
+	/**
+	 * 添加关系（添加关联的外键值）
+	 *     一般用于添加 hasOne/hasMany 关系的从对象的外键值
+	 *     至于 belongsTo 关系的主对象中只要主键，没有外键，你只能添加本对象的外键咯
+	 *
+	 * @param name 关系名
+	 * @param value 外键值
+	 * @return
+	 */
+	fun addRelation(name:String, value: Any): Boolean
 
 	/**
 	 * 删除关系，不删除关联对象，只是将关联的外键给清空
@@ -55,8 +67,8 @@ interface IOrmRelated : IOrmPersistent
 	 *
 	 * @param name 关系名
 	 * @param nullValue 外键的空值
-	 * @param fk hasMany关系下的单个外键值，如果为null，则删除所有关系, 否则删除单个关系
+	 * @param fkInMany hasMany关系下的单个外键值，如果为null，则删除所有关系, 否则删除单个关系
 	 * @return
 	 */
-	fun removeRelations(name:String, nullValue: Any? = null, fk: Any? = null): Boolean
+	fun removeRelations(name:String, nullValue: Any? = null, fkInMany: Any? = null): Boolean
 }

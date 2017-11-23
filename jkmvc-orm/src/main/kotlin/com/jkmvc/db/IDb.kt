@@ -29,7 +29,7 @@ interface IDb: IDbQuoter{
      * @param statement db操作过程
      * @return
      */
-    fun <T> transaction(statement: Db.() -> T):T;
+    fun <T> transaction(statement: () -> T):T;
 
     /**
      * 是否在事务中
