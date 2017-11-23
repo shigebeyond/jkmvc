@@ -265,6 +265,11 @@ abstract class OrmRelated: OrmPersistent() {
             return middleForeighKeyUpdater(relation, fkInMany)
 
         // 2.2 无中间表：更新关联对象的外键
+        if(value is IOrm){ // 2.2.1 新加值
+            value[relation.foreignProp] = this[relation.primaryProp]
+            return value.update()
+        }
+        // 2.2.2 改旧值
         return relation.queryRelated(this, fkInMany)!!.set(relation.foreignKey, value).update()
     }
 }

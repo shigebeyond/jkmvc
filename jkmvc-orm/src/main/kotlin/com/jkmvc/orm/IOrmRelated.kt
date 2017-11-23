@@ -75,6 +75,19 @@ interface IOrmRelated : IOrmPersistent
 	fun addRelation(name:String, value: Any): Boolean
 
 	/**
+	 * 添加关系（添加关联的外键值）
+	 *     一般用于添加 hasOne/hasMany 关系的从对象的外键值
+	 *     至于 belongsTo 关系的主对象中只要主键，没有外键，你只能添加本对象的外键咯
+	 *
+	 * @param name 关系名
+	 * @param value 关联对象
+	 * @return
+	 */
+	fun addRelation(name:String, value: IOrm): Boolean{
+		return addRelation(name, value as Any)
+	}
+
+	/**
 	 * 删除关系，不删除关联对象，只是将关联的外键给清空
 	 *     一般用于清空 hasOne/hasMany 关系的从对象的外键值
 	 *     至于 belongsTo 关系的主对象中只要主键，没有外键，你只能清空本对象的外键咯
