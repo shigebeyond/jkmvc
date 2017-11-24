@@ -51,8 +51,8 @@ companion object m: OrmMeta(UserModel::class, "User Model", "user", "id"){}
 Jkmvc提供了`com.jkmvc.util.ModelGenerator` 来自动生成模型代码
 
 ```
-val generator = ModelGenerator("/home/shi/code/java/jkmvc/jkmvc-example/src/main/kotlin" /* 源码目录 */, "default" /* 数据库名 */)
-generator.genenateModelFile("com.jkmvc.example.model" /* 模型包 */, "UserModel" /* 模型类名 */, "用户模型" /* 模型名 */, "user" /* 表名 */)
+val generator = ModelGenerator("/home/shi/code/java/jkmvc/jkmvc-example/src/main/kotlin" /* 源码目录 */, "com.jkmvc.example.model" /* 包路径 */ "default" /* 数据库名 */, "shijianhang" /* 作者 */)
+generator.genenateModelFile("UserModel" /* 模型类名 */, "用户模型" /* 模型名 */, "user" /* 表名 */)
 ```
 
 它会根据指定的数据库与指定的表，来生成模型代码。其中根据`database.yaml`中的配置项 `columnUnderline` 和 `columnUpperCase` 来将数据库的字段名转换为对象属性名。

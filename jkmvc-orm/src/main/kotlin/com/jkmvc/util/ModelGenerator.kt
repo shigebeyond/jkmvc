@@ -14,7 +14,10 @@ import java.util.*
  * @author shijianhang
  * @date 2017-10-10
  */
-class ModelGenerator(val srcDir:String /* 源码目录 */, val pck: String /* 包路径 */, val dbName: String = "default" /* 数据库名 */, val author: String = "" /* 作者 */){
+class ModelGenerator(val srcDir:String /* 源码目录 */,
+                     val pck: String /* 包路径 */,
+                     val dbName: String = "default" /* 数据库名 */,
+                     val author: String = "" /* 作者 */){
 
     /**
      * 数据库

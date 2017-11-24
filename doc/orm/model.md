@@ -51,8 +51,8 @@ companion object m: OrmMeta(UserModel::class, "User Model", "user", "id"){}
 Jkmvc provide `com.jkmvc.util.ModelGenerator` to generate model code
 
 ```
-val generator = ModelGenerator("/home/shi/code/java/jkmvc/jkmvc-example/src/main/kotlin" /* code directory */, "default" /* database name */)
-generator.genenateModelFile("com.jkmvc.example.model" /* model package */, "UserModel" /* model class name */, "用户模型" /* model label */, "user" /* table name */)
+val generator = ModelGenerator("/home/shi/code/java/jkmvc/jkmvc-example/src/main/kotlin" /* code directory */, "com.jkmvc.example.model" /* package */, "default" /* database name */, "shijianhang" /* author */)
+generator.genenateModelFile("UserModel" /* model class name */, "用户模型" /* model label */, "user" /* table name */)
 ```
 
 It will generate model code, according to the database and the table. And convert database column name to object's property name, according to configuration item `columnUnderline` and `columnUpperCase`  in file `database.yaml`.
