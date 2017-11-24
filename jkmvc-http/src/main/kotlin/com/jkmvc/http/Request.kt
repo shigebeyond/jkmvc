@@ -245,7 +245,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req), Map<String, Any>
 	 */
 	protected inline fun validateValue(key: String, value: Any?, rule: String): String {
 		// 校验单个字段: 字段值可能被修改
-		val (succ, uint, lastValue) = Validation.execute(rule, value)
+		val (succ, uint, lastValue) = Validation.execute(rule, value, this)
 		if (succ == false)
 			throw ValidationException(key + uint?.message());
 
