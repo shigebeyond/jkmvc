@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest
  * @date 2016-10-6 上午9:27:56
  *
  */
-class Request(req:HttpServletRequest):MultipartRequest(req), Map<String, String>
+class Request(req:HttpServletRequest):MultipartRequest(req), Map<String, Any>
 {
 	companion object{
 		/**
@@ -548,24 +548,26 @@ class Request(req:HttpServletRequest):MultipartRequest(req), Map<String, String>
 	/**
 	 * Returns a read-only [Set] of all key/value pairs in this map.
 	 */
-	public override val entries: Set<Map.Entry<String, String>> = allParameters.entries
+	public override val entries: Set<Map.Entry<String, Any>>
+		get() = allParameters.entries
 
 	/**
 	 * Returns a read-only [Set] of all keys in this map.
 	 */
-	public override val keys: Set<String> = 1
+	public override val keys: Set<String>
+		get() = allParameters.keys
 
 	/**
 	 * Returns the number of key/value pairs in the map.
 	 */
-	public override val size: Int = 1
+	public override val size: Int
+		get() = allParameters.size
 
 	/**
 	 * Returns a read-only [Collection] of all values in this map. Note that this collection may contain duplicate values.
 	 */
-	public override val values: Collection<String> by lazy{
-
-	}
+	public override val values: Collection<Any>
+		get() = allParameters.values
 
 	/**
 	 * Returns `true` if the map is empty (contains no elements), `false` otherwise.
@@ -584,7 +586,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req), Map<String, String>
 	/**
 	 * Returns `true` if the map maps one or more keys to the specified [value].
 	 */
-	public override fun containsValue(value: String): Boolean {
+	public override fun containsValue(value: Any): Boolean {
 		if(routeParams.containsValue(value))
 			return false
 
