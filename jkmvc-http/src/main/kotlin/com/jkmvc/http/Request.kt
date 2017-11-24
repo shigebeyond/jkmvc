@@ -3,6 +3,7 @@ package com.jkmvc.http
 import com.jkmvc.common.*
 import com.jkmvc.validate.Validation
 import com.jkmvc.validate.ValidationException
+import org.apache.commons.collections.map.CompositeMap
 import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
@@ -14,7 +15,7 @@ import javax.servlet.http.HttpServletRequest
  * @date 2016-10-6 上午9:27:56
  *
  */
-class Request(req:HttpServletRequest):MultipartRequest(req)
+class Request(req:HttpServletRequest):MultipartRequest(req), Map<String, String>
 {
 	companion object{
 		/**
@@ -60,6 +61,25 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 * 当前匹配的路由参数
 	 */
 	public lateinit var routeParams:Map<String, String>;
+
+	/**
+	 * 请求参数
+	 *    兼容上传文件的情况
+	 */
+	public val httpParams: Map<String, Any>
+		get(){
+			return if(isUpload()) // 上传请求的参数类型：Map<String, Vector<String>>
+						mulReq.getParameterMap()
+					else // 非上传请求的参数类型：Map<String, Array<String>>
+						req.parameterMap
+		}
+
+	/**
+	 * 全部参数 = 路由参数 + 请求参数
+	 */
+	public val allParameters:Map<String, Any> by lazy{
+		CompositeMap(routeParams, httpParams) as Map<String, Any>
+	}
 
 	init{
 		// 中文编码
@@ -156,8 +176,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 * @return
 	 */
 	public fun contains(key:String):Boolean{
-		return routeParams.containsKey(key) // 先取路由参数
-			 && containsParameter(key); // 再取get/post参数
+		return containsKey(key)
 	}
 
 	/**
@@ -370,12 +389,8 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
      * @param key
      * @return
 	 */
-	public fun containsParameter(key: String): Boolean
-	{
-		if(isUpload())
-			return mulReq.getParameterMap().containsKey(key)
-
-		return req.parameterMap.containsKey(key);
+	public fun containsParameter(key: String): Boolean {
+		return httpParams.contains(key)
 	}
 
 	/**
@@ -424,20 +439,6 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 			return mulReq.getParameterValues(key)
 
 		return req.getParameterValues(key)
-	}
-
-	/**
-	 * 获得get/post/upload参数
-	 *    兼容上传文件的情况
-	 * @return
-	 */
-	public fun getParameterMap2(): Map<String, Any>{
-		// 上传请求的参数类型：Map<String, Vector<String>>
-		if(isUpload())
-			return mulReq.getParameterMap()
-
-		// 非上传请求的参数类型：Map<String, Array<String>>
-		return req.parameterMap
 	}
 
 	/**
@@ -541,6 +542,68 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 */
 	public fun getShortParameter(key: String, defaultValue: Short? = null): Short? {
 		return getParameter(key, defaultValue)
+	}
+
+	/*************************** 实现Map *****************************/
+	/**
+	 * Returns a read-only [Set] of all key/value pairs in this map.
+	 */
+	public override val entries: Set<Map.Entry<String, String>> = allParameters.entries
+
+	/**
+	 * Returns a read-only [Set] of all keys in this map.
+	 */
+	public override val keys: Set<String> = 1
+
+	/**
+	 * Returns the number of key/value pairs in the map.
+	 */
+	public override val size: Int = 1
+
+	/**
+	 * Returns a read-only [Collection] of all values in this map. Note that this collection may contain duplicate values.
+	 */
+	public override val values: Collection<String> by lazy{
+
+	}
+
+	/**
+	 * Returns `true` if the map is empty (contains no elements), `false` otherwise.
+	 */
+	public override fun isEmpty(): Boolean {
+		return allParameters.isEmpty()
+	}
+
+	/**
+	 * Returns `true` if the map contains the specified [key].
+	 */
+	public override fun containsKey(key: String): Boolean {
+		return allParameters.containsKey(key)
+	}
+
+	/**
+	 * Returns `true` if the map maps one or more keys to the specified [value].
+	 */
+	public override fun containsValue(value: String): Boolean {
+		if(routeParams.containsValue(value))
+			return false
+
+		if(isUpload()){
+			mulReq.getParameterMap().any{
+				it.value.contains(value)
+			}
+		}
+
+		return req.parameterMap.any{
+			it.value.contains(value)
+		}
+	}
+
+	/**
+	 * Returns the value corresponding to the given [key], or `null` if such a key is not present in the map.
+	 */
+	public override fun get(key: String): String? {
+		return get<String>(key, null)
 	}
 
 	/*************************** 其他 *****************************/
