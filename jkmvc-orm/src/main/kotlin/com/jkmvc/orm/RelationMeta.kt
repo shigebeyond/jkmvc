@@ -59,7 +59,7 @@ open class RelationMeta(
      *     对belongs_to关系，如果外键为空，则联查为空
      *
      * @param item Orm对象
-     * @param fkInMany hasMany关系下的单个外键值，如果为null，则更新所有关系, 否则更新单个关系
+     * @param fkInMany hasMany关系下的单个外键值Any|对象IOrm，如果为null，则更新所有关系, 否则更新单个关系
      * @param withTableAlias 是否带表前缀
      * @return
      */
@@ -81,8 +81,10 @@ open class RelationMeta(
         if(pk == null)
             return null
         val query = queryBuilder().where(tableAlias + foreignKey, "=", pk) as OrmQueryBuilder// 从表.外键 = 主表.主键
-        if(fkInMany != null) // hasMany关系下过滤单个关系
-            query.where(ormMeta.primaryKey, fkInMany)
+        if(fkInMany != null) { // hasMany关系下过滤单个关系
+            val fk = if(fkInMany is IOrm) fkInMany[ormMeta.primaryProp] else fkInMany
+            query.where(tableAlias + ormMeta.primaryKey, fk)
+        }
         return query;
     }
 

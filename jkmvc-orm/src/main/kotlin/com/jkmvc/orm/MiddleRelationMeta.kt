@@ -11,6 +11,10 @@ import kotlin.reflect.KClass
  *   1 用中间表来存储两表的关联关系
  *   2 两表对彼此都是hasMany/hasOne的关联关系
  *
+ * 表结构是2个字段
+ *   1 foreignKey： 中间表.外键 = 主表.主键
+ *   2 farForeignKey： 中间表.远端外键 = 从表.远端主键
+ *
  * 只涉及到2类的关联查询
  *   只针对hasMany/hasOne
  *   不考虑belongsTo
@@ -51,7 +55,18 @@ class MiddleRelationMeta(
      * 查询中间表
      *
      * @param item
-     * @param fkInMany hasMany关系下的单个外键值，如果为null，则更新所有关系, 否则更新单个关系
+     * @param fkInMany hasMany关系下的单个关联对象，如果为null，则更新所有关系, 否则更新单个关系
+     * @return
+     */
+    public fun queryMiddleTable(item: IOrm, fkInMany: IOrm): IDbQueryBuilder? {
+        return queryMiddleTable(item, fkInMany as Any)
+    }
+
+    /**
+     * 查询中间表
+     *
+     * @param item
+     * @param fkInMany hasMany关系下的单个外键值Any|对象IOrm，如果为null，则更新所有关系, 否则更新单个关系
      * @return
      */
     public fun queryMiddleTable(item: IOrm, fkInMany: Any? = null): IDbQueryBuilder? {
@@ -59,20 +74,35 @@ class MiddleRelationMeta(
         if(pk == null)
             return null;
         val query = DbQueryBuilder(ormMeta.db, middleTable).where(foreignKey, "=", pk)
-        if (fkInMany != null) // hasMany关系下删除单个关系
+        if (fkInMany != null) { // hasMany关系下过滤单个关系
+            val farPk = if(fkInMany is IOrm) fkInMany[farPrimaryProp] else fkInMany
             query.where(farForeignKey, fkInMany)
+        }
         return query;
     }
 
     /**
      * 插入中间表
      *
-     * @param pk 主表主键
-     * @param farPk 从表主键
+     * @param pk IOrm 主对象
+     * @param farPk IOrm 从对象
+     * @return
+     */
+    public fun insertMiddleTable(pk:IOrm, farPk:IOrm): Int {
+        return insertMiddleTable(pk as Any, farPk as Any)
+    }
+
+    /**
+     * 插入中间表
+     *
+     * @param pk Any主表主键 | IOrm 主对象
+     * @param farPk Any从表主键 | IOrm 从对象
      * @return
      */
     public fun insertMiddleTable(pk:Any, farPk:Any): Int {
-        return DbQueryBuilder(ormMeta.db, middleTable).insertColumns(foreignKey, farForeignKey).value(pk, farPk).insert()
+        val pk2 = if(pk is IOrm) pk[primaryProp] else pk
+        val farPk2 = if(farPk is IOrm) farPk[farPrimaryProp] else farPk
+        return DbQueryBuilder(ormMeta.db, middleTable).insertColumns(foreignKey, farForeignKey).value(pk2, farPk2).insert()
     }
 
     /**
@@ -80,7 +110,7 @@ class MiddleRelationMeta(
      *     根据hasMany/hasOne的关联关系，来构建查询条件
      *
      * @param item Orm对象
-     * @param fkInMany hasMany关系下的单个外键值，如果为null，则更新所有关系, 否则更新单个关系
+     * @param fkInMany hasMany关系下的单个外键值Any|对象IOrm，如果为null，则更新所有关系, 否则更新单个关系
      * @param withTableAlias 是否带表前缀
      * @return
      */
@@ -92,8 +122,10 @@ class MiddleRelationMeta(
         val tableAlias = middleTable + '.'
         val query = buildQuery() // 中间表.远端外键 = 从表.远端主键
                 .where(tableAlias + foreignKey, "=", pk) as OrmQueryBuilder // 中间表.外键 = 主表.主键
-        if (fkInMany != null) // hasMany关系下过滤单个关系
-            query.where(tableAlias + farForeignKey, fkInMany)
+        if (fkInMany != null) { // hasMany关系下过滤单个关系
+            val farPk = if(fkInMany is IOrm) fkInMany[farPrimaryProp] else fkInMany
+            query.where(tableAlias + farForeignKey, farPk)
+        }
         return query
     }
 

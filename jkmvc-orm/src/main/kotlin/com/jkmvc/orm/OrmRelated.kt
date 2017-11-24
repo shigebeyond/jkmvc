@@ -143,7 +143,7 @@ abstract class OrmRelated: OrmPersistent() {
      *    一对一关系，你还统计个数干啥？
      *
      * @param name 关联对象名
-     * @param fkInMany hasMany关系下的单个外键值，如果为null，则删除所有关系, 否则删除单个关系
+     * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
      * @return
      */
     public override fun countRelated(name:String, fkInMany: Any?): Long {
@@ -160,7 +160,7 @@ abstract class OrmRelated: OrmPersistent() {
      *    你敢删除 belongsTo 关系的主对象？
      *
      * @param name 关系名
-     * @param fkInMany hasMany关系下的单个外键值，如果为null，则删除所有关系, 否则删除单个关系
+     * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
      * @return
      */
     public override fun deleteRelated(name: String, fkInMany: Any?): Boolean {
@@ -181,7 +181,7 @@ abstract class OrmRelated: OrmPersistent() {
      * 删除有中间表的关联对象
      *
      * @param relation
-     * @param fkInMany hasMany关系下的单个外键值，如果为null，则删除所有关系, 否则删除单个关系
+     * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
      * @return
      */
     protected fun deleteMiddleRelated(relation: MiddleRelationMeta, fkInMany: Any?): Boolean {
@@ -205,17 +205,14 @@ abstract class OrmRelated: OrmPersistent() {
      *     至于 belongsTo 关系的主对象中只要主键，没有外键，你只能添加本对象的外键咯
      *
      * @param name 关系名
-     * @param value 外键值
+     * @param value 外键值Any | 关联对象IOrm
      * @return
      */
     public override fun addRelation(name:String, value: Any): Boolean {
         //更新外键
         return updateForeighKey(name, value){ relation: MiddleRelationMeta, fkInMany: Any? ->
-            val pk: Any? = this[relation.primaryProp]
-            if(pk == null)
-                true
-            else // 插入中间表
-                relation.insertMiddleTable(pk, value) > 0
+            // 插入中间表
+            relation.insertMiddleTable(this, value) > 0
         }
     }
 
@@ -226,7 +223,7 @@ abstract class OrmRelated: OrmPersistent() {
      *
      * @param name 关系名
      * @param nullValue 外键的空值
-     * @param fkInMany hasMany关系下的单个外键值，如果为null，则删除所有关系, 否则删除单个关系
+     * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
      * @return
      */
     public override fun removeRelations(name:String, nullValue: Any?, fkInMany: Any?): Boolean {
@@ -246,7 +243,7 @@ abstract class OrmRelated: OrmPersistent() {
      *
      * @param name 关系名
      * @param value 外键值
-     * @param fkInMany hasMany关系下的单个外键值，如果为null，则更新所有关系, 否则更新单个关系
+     * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则更新所有关系, 否则更新单个关系
      * @param middleForeighKeyUpdater 有中间表的关联关系的外键更新函数
      * @return
      */

@@ -24,6 +24,10 @@ class UserModel(id:Int? = null): Orm(id) {
             // add relaction for other model
             hasOne("address", AddressModel::class)
             hasMany("addresses", AddressModel::class)
+
+            hasMany("parcels", ParcelModel::class)
+            hasManyThrough("parcelSenders", UserModel::class, "receiver_id"/*外键*/, "id"/*主键*/, "parcel", "sender_id"/*远端外键*/, "id"/*远端主键*/)
+            hasManyThrough("parcelReceivers", UserModel::class, "sender_id"/*外键*/, "id"/*主键*/, "parcel", "receiver_id"/*远端外键*/, "id"/*远端主键*/)
         }
     }
 
@@ -44,6 +48,10 @@ class UserModel(id:Int? = null): Orm(id) {
     // 关联地址：一个用户有多个地址
     // relate to AddressModel: user has many addresses
     public var addresses:List<AddressModel> by property<List<AddressModel>>();
+
+    public var parcelSenders:List<UserModel> by property();
+
+    public var parcelReceivers:List<UserModel> by property();
 }
 
 /**
@@ -84,6 +92,44 @@ class AddressModel(id:Int? = null): Orm(id) {
 
     // 关联用户：一个地址从属于一个用户
     public var user:UserModel by property<UserModel>()
+}
+
+/**
+ * 包裹模型
+ *
+ * @ClassName: ParcelModel
+ * @Description:
+ * @author shijianhang<772910474@qq.com>
+ * @date 2017-11-24 09:42:34
+ */
+class ParcelModel(id:Int? = null): Orm(id) {
+    // 伴随对象就是元数据
+    companion object m: OrmMeta(ParcelModel::class, "包裹模型", "parcel", "id"){
+
+        init {
+            // 添加标签 + 规则
+            // add label and rule for field
+            addRule("sender_id", "寄件人", "notEmpty");
+            addRule("receiver_id", "收件人", "notEmpty");
+            addRule("content", "内容", "notEmpty");
+
+            // 添加关联关系
+            // add relaction for other model
+            belongsTo("sender", UserModel::class, "sender_id") // 寄件人
+            belongsTo("receiver", UserModel::class, "receiver_id") // 收件人
+        }
+
+    }
+
+    // 代理属性读写
+    public var id:Int by property() // 包裹id
+
+    public var senderId:Int by property() // 寄件人id
+
+    public var receiverId:Int by property() // 收件人id
+
+    public var content:String by property() // 寄件内容
+
 }
 
 class OrmTests{
@@ -234,6 +280,21 @@ class OrmTests{
         // 删除关联对象
         val bool = user.deleteRelated("addresses")
         println("用户[${user.name}] 删除地址的关联对象")
+    }
+
+    @Test
+    fun testMiddleRelationManage(){
+        val users = UserModel.queryBuilder().limit(2).findAll<UserModel>()
+        val (u1, u2) = users
+
+        println("${u1.id} 给 ${u2.id} 寄快递")
+        u1.addRelation("parcelReceivers", u2)
+        println("${u1.id} 的收件人 " + u1.parcelReceivers.collectColumn("id"))
+        println("${u2.id} 的寄件人 " + u2.parcelSenders.collectColumn("id"))
+
+        u2.removeRelations("parcelSenders", u1)
+        println("${u1.id} 有收件人${u2.id}? " + u1.hasRelated("parcelReceivers", u2))
+        println("${u2.id} 有寄件人${u1.id}? " + u2.hasRelated("parcelSenders", u1))
     }
 
 }

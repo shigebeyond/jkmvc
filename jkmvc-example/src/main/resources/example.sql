@@ -23,6 +23,6 @@ CREATE TABLE IF NOT EXISTS `parcel` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '包裹id',
   `sender_id` int(11) unsigned NOT NULL COMMENT '寄件人id',
   `receiver_id` int(11) unsigned NOT NULL COMMENT '收件人id',
-  `contet` varchar(50) NOT NULL DEFAULT '' COMMENT '寄件内容',
+  `content` varchar(50) NOT NULL DEFAULT '' COMMENT '寄件内容',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8 COMMENT='包裹';

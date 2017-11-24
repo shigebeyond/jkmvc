@@ -1,9 +1,11 @@
 package com.jkmvc.util
 
 import com.jkmvc.common.Config
+import com.jkmvc.common.format
 import com.jkmvc.db.Db
 import com.jkmvc.db.recordTranformer
 import java.io.File
+import java.util.*
 
 
 /**
@@ -12,7 +14,7 @@ import java.io.File
  * @author shijianhang
  * @date 2017-10-10
  */
-class ModelGenerator(val srcDir:String, val dbName: String = "default"){
+class ModelGenerator(val srcDir:String /* 源码目录 */, val pck: String /* 包路径 */, val dbName: String = "default" /* 数据库名 */, val author: String = "" /* 作者 */){
 
     /**
      * 数据库
@@ -56,14 +58,13 @@ class ModelGenerator(val srcDir:String, val dbName: String = "default"){
     /**
      * 生成类文件
      *
-     * @param pck 包
      * @param model 模型名
      * @param label 标题
      * @param table 表名
      */
-    public fun genenateModelFile(pck:String, model:String, label:String, table: String): Unit {
+    public fun genenateModelFile(model:String, label:String, table: String): Unit {
         val file = "$srcDir/$pck/$model".replace('.', '/') + ".kt"
-        val code = genenateModelClass(pck, model, label, table)
+        val code = genenateModelClass(model, label, table)
         File(file).writeText(code)
         println("生成${model}模型文件: $file")
     }
@@ -71,13 +72,12 @@ class ModelGenerator(val srcDir:String, val dbName: String = "default"){
     /**
      * 生成类
      *
-     * @param pck 包
      * @param model 模型名
      * @param label 标题
      * @param table 表名
      * @return
      */
-    public fun genenateModelClass(pck:String, model:String, label:String, table: String): String {
+    public fun genenateModelClass(model:String, label:String, table: String): String {
         // 查询字段的sql
         val sql = config.getString("columns")!!
         val fields = db.queryRows(sql, listOf(table, db.schema), Map::class.recordTranformer)
@@ -93,9 +93,10 @@ class ModelGenerator(val srcDir:String, val dbName: String = "default"){
 
         // 1 注释与包
         val code = StringBuilder()
+        val date = Date().format()
         code.append("package $pck \n\n")
         code.append("import com.jkmvc.orm.OrmMeta \nimport com.jkmvc.orm.Orm \n\n")
-        code.append("/**\n * $label\n *\n * @ClassName: $model\n * @Description:\n * @author shijianhang<772910474@qq.com>\n * @date 2017-09-29 6:56 PM\n */\n")
+        code.append("/**\n * $label\n *\n * @ClassName: $model\n * @Description:\n * @author shijianhang<772910474@qq.com>\n * @date $date\n */\n")
         // 2 类
         code.append("class $model(id:$pkType? = null): Orm(id) {\n")
         // 3 元数据
