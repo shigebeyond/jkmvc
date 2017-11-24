@@ -16,22 +16,22 @@ abstract class OrmValid: OrmEntity() {
      * @return
      */
     public override fun validate(): Boolean {
-        // 逐个字段校验
-        for ((column, rule) in ormMeta.rules) {
+        // 逐个属性校验
+        for ((field, rule) in ormMeta.rules) {
             if(rule.rule == null)
                 break;
 
-            // 获得字段值
-            val value: Any = this[column];
+            // 获得属性值
+            val value: Any = this[field];
 
-            // 校验单个字段: 字段值可能被修改
+            // 校验单个属性: 属性值可能被修改
             val (succ, uint, lastValue) = Validation.execute(rule.rule!!, value, data)
             if (succ == false)
                 throw ValidationException(rule.label + uint?.message());
 
-            // 更新被修改的字段值
+            // 更新被修改的属性值
             if (value !== lastValue)
-                this[column] = value;
+                this[field] = value;
         }
 
         return true;

@@ -106,20 +106,20 @@ interface IOrmMeta {
 
     /**
      * 添加规则
-     * @param name
+     * @param field
      * @param label
      * @param rule
      * @return
      */
-    fun addRule(name: String, label:String, rule: String? = null): OrmMeta;
+    fun addRule(field: String, label:String, rule: String? = null): OrmMeta;
 
     /**
      * 添加规则
-     * @param name
+     * @param field
      * @param rule
      * @return
      */
-    fun addRule(name: String, rule: IRuleMeta): OrmMeta;
+    fun addRule(field: String, rule: IRuleMeta): OrmMeta;
 
     /**
      * 根据对象属性名，获得db字段名

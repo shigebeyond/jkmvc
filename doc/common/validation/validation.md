@@ -5,7 +5,7 @@ Validation can be performed on a value using the `Validation::execute(exp:String
 It needs 3 paramters:
 1. `exp`: validation expression，[syntax reference](validation_expression)
 2. `value`: value to validate 
-3. `variables`: other values used as validate paramerter
+3. `variables`: other values used as validate paramerters
 
 The return type is `com.jkmvc.validate.ValidationResult`, it has 3 properties:
 1. `result`: the execution result
