@@ -37,8 +37,8 @@ interface IOrmRelated : IOrmPersistent
 	 * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
 	 * @return
 	 */
-	fun hasRelated(name:String, fkInMany: Any? = null): Boolean {
-		return countRelated(name, fkInMany) > 0
+	fun hasRelation(name:String, fkInMany: Any? = null): Boolean {
+		return countRelation(name, fkInMany) > 0
 	}
 
 	/**
@@ -50,8 +50,8 @@ interface IOrmRelated : IOrmPersistent
 	 * @param fkInMany hasMany关系下的单个关联对象，如果为null，则删除所有关系, 否则删除单个关系
 	 * @return
 	 */
-	fun hasRelated(name:String, fkInMany: IOrm): Boolean {
-		return hasRelated(name, fkInMany as Any)
+	fun hasRelation(name:String, fkInMany: IOrm): Boolean {
+		return hasRelation(name, fkInMany as Any)
 	}
 
 	/**
@@ -63,7 +63,7 @@ interface IOrmRelated : IOrmPersistent
 	 * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
 	 * @return
 	 */
-	fun countRelated(name:String, fkInMany: Any? = null): Long
+	fun countRelation(name:String, fkInMany: Any? = null): Long
 
 	/**
 	 * 删除关联对象

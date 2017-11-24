@@ -129,19 +129,19 @@ hasOneThrough("category", CategoryModel::class, "post_id", "id", "categories_pos
 Methods are available to check for, count, add, and remove relations for relations.  Let's assume you have a post model loaded, and a category model loaded as well.  You can check to see if the post is related to this category with the following call:
 
 ```
-post.has('categories', category);
+post.hasRelation('categories', category);
 ```
 
-The first parameter is the alias name to use (in case your post model has more than one relation to the category model) and the second is the model to check for a relation with.
+The first parameter is the relation name to use (in case your post model has more than one relation to the category model) and the second is the model to check for a relation with.
 
 Assuming you want to add the relation (by creating a new record in the categories_posts table), you would simply do:
 
 ```
-post.add('categories', category);
+post.addRelation('categories', category);
 ```
 
 To remove:
 
 ```
-post.remove('categories', category);
+post.removeRelation('categories', category);
 ```

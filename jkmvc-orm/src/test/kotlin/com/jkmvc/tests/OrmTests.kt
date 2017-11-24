@@ -270,7 +270,7 @@ class OrmTests{
     fun testRelationManage(){
         // 有几个关系
         val user = UserModel(id)
-        val count = user.countRelated("addresses")
+        val count = user.countRelation("addresses")
         println("用户[${user.name}]有 $count 个地址")
 
         // 删除关系： 清空外键，不删除关联对象
@@ -293,8 +293,8 @@ class OrmTests{
         println("${u2.id} 的寄件人 " + u2.parcelSenders.collectColumn("id"))
 
         u2.removeRelations("parcelSenders", u1)
-        println("${u1.id} 有收件人${u2.id}? " + u1.hasRelated("parcelReceivers", u2))
-        println("${u2.id} 有寄件人${u1.id}? " + u2.hasRelated("parcelSenders", u1))
+        println("${u1.id} 有收件人${u2.id}? " + u1.hasRelation("parcelReceivers", u2))
+        println("${u2.id} 有寄件人${u1.id}? " + u2.hasRelation("parcelSenders", u1))
     }
 
 }
