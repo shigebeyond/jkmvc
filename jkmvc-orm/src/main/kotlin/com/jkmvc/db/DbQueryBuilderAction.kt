@@ -44,7 +44,15 @@ class InsertData: Cloneable{
      * @return
      */
     public fun isSubQuery(): Boolean {
-        return rows.first() is IDbQueryBuilder
+        return rows.isNotEmpty() && rows[0] is IDbQueryBuilder
+    }
+
+    /**
+     * 获得子查询
+     * @return
+     */
+    public fun getSubQuery(): IDbQueryBuilder {
+        return rows[0] as IDbQueryBuilder
     }
 
     /**
@@ -400,9 +408,8 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      */
     public fun fillValues(): String {
         // 1 insert...select..字句
-        val firstValue = insertRows.rows.first()
-        if(firstValue is IDbQueryBuilder) // 子查询
-            return quote(firstValue)
+        if(insertRows.isSubQuery()) // 子查询
+            return quote(insertRows.getSubQuery())
 
         // 2 insert子句:  data是要插入的多行: columns + values
         val sql = StringBuilder("VALUES ");
