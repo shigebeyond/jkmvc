@@ -257,6 +257,7 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:Pair<String, String?> /*表
     public override fun count(vararg params: Any?):Long
     {
         // 1 编译
+        selectColumns.clear() // 清空多余的select
         val result = select(Pair("count(1)", "NUM" /* oracle会自动转为全大写 */)).compile(ActionType.SELECT);
 
         // 2 执行 select
