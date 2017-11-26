@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest
  * @date 2016-10-6 上午9:27:56
  *
  */
-class Request(req:HttpServletRequest):MultipartRequest(req), Map<String, Any>
+class Request(req:HttpServletRequest):MultipartRequest(req)
 {
 	companion object{
 		/**
@@ -176,7 +176,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req), Map<String, Any>
 	 * @return
 	 */
 	public fun contains(key:String):Boolean{
-		return containsKey(key)
+		return allParameters.containsKey(key)
 	}
 
 	/**
@@ -245,7 +245,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req), Map<String, Any>
 	 */
 	protected inline fun validateValue(key: String, value: Any?, rule: String): String {
 		// 校验单个字段: 字段值可能被修改
-		val (succ, uint, lastValue) = Validation.execute(rule, value, this)
+		val (succ, uint, lastValue) = Validation.execute(rule, value, this.toMap())
 		if (succ == false)
 			throw ValidationException(key + uint?.message());
 
@@ -544,70 +544,6 @@ class Request(req:HttpServletRequest):MultipartRequest(req), Map<String, Any>
 		return getParameter(key, defaultValue)
 	}
 
-	/*************************** 实现Map *****************************/
-	/**
-	 * Returns a read-only [Set] of all key/value pairs in this map.
-	 */
-	public override val entries: Set<Map.Entry<String, Any>>
-		get() = allParameters.entries
-
-	/**
-	 * Returns a read-only [Set] of all keys in this map.
-	 */
-	public override val keys: Set<String>
-		get() = allParameters.keys
-
-	/**
-	 * Returns the number of key/value pairs in the map.
-	 */
-	public override val size: Int
-		get() = allParameters.size
-
-	/**
-	 * Returns a read-only [Collection] of all values in this map. Note that this collection may contain duplicate values.
-	 */
-	public override val values: Collection<Any>
-		get() = allParameters.values
-
-	/**
-	 * Returns `true` if the map is empty (contains no elements), `false` otherwise.
-	 */
-	public override fun isEmpty(): Boolean {
-		return allParameters.isEmpty()
-	}
-
-	/**
-	 * Returns `true` if the map contains the specified [key].
-	 */
-	public override fun containsKey(key: String): Boolean {
-		return allParameters.containsKey(key)
-	}
-
-	/**
-	 * Returns `true` if the map maps one or more keys to the specified [value].
-	 */
-	public override fun containsValue(value: Any): Boolean {
-		if(routeParams.containsValue(value))
-			return false
-
-		if(isUpload()){
-			mulReq.getParameterMap().any{
-				it.value.contains(value)
-			}
-		}
-
-		return req.parameterMap.any{
-			it.value.contains(value)
-		}
-	}
-
-	/**
-	 * Returns the value corresponding to the given [key], or `null` if such a key is not present in the map.
-	 */
-	public override fun get(key: String): String? {
-		return get<String>(key, null)
-	}
-
 	/*************************** 其他 *****************************/
 	/**
 	 * 获得cookie值
@@ -676,5 +612,39 @@ class Request(req:HttpServletRequest):MultipartRequest(req), Map<String, Any>
 
 		// post请求
 		return "curl -d '${parameterMap.toQueryString()}' '${requestURL}?${queryString}'"
+	}
+
+	/**
+	 * 转换map
+	 *   只能转换map，不能实现map
+	 *   因为该类已实现了操作符[]，即public operator inline fun <reified T:Any> get(key: String, defaultValue: T? = null): T?，与Map中的实现冲突，导致编译失败
+	 */
+	public fun toMap(): Map<String, Any> {
+		return object: Map<String, Any> by allParameters{
+			/**
+			 * Returns `true` if the map maps one or more keys to the specified [value].
+			 */
+			public override fun containsValue(value: Any): Boolean {
+				if(routeParams.containsValue(value))
+					return false
+
+				if(isUpload()){
+					mulReq.getParameterMap().any{
+						it.value.contains(value)
+					}
+				}
+
+				return req.parameterMap.any{
+					it.value.contains(value)
+				}
+			}
+
+			/**
+			 * Returns the value corresponding to the given [key], or `null` if such a key is not present in the map.
+			 */
+			public override fun get(key: String): String? {
+				return get<String>(key, null)
+			}
+		}
 	}
 }
