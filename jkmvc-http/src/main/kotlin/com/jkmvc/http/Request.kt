@@ -78,7 +78,33 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 * 全部参数 = 路由参数 + 请求参数
 	 */
 	public val allParameters:Map<String, Any> by lazy{
-		CompositeMap(routeParams, httpParams) as Map<String, Any>
+		val params = CompositeMap(routeParams, httpParams) as Map<String, Any>
+		object: Map<String, Any> by params{
+			/**
+			 * Returns `true` if the map maps one or more keys to the specified [value].
+			 */
+			public override fun containsValue(value: Any): Boolean {
+				if(routeParams.containsValue(value))
+					return false
+
+				if(isUpload()){
+					mulReq.getParameterMap().any{
+						it.value.contains(value)
+					}
+				}
+
+				return req.parameterMap.any{
+					it.value.contains(value)
+				}
+			}
+
+			/**
+			 * Returns the value corresponding to the given [key], or `null` if such a key is not present in the map.
+			 */
+			public override fun get(key: String): String? {
+				return get<String>(key, null)
+			}
+		}
 	}
 
 	init{
@@ -245,7 +271,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 */
 	protected inline fun validateValue(key: String, value: Any?, rule: String): String {
 		// 校验单个字段: 字段值可能被修改
-		val (succ, uint, lastValue) = Validation.execute(rule, value, this.toMap())
+		val (succ, uint, lastValue) = Validation.execute(rule, value, allParameters)
 		if (succ == false)
 			throw ValidationException(key + uint?.message());
 
@@ -612,39 +638,5 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 
 		// post请求
 		return "curl -d '${parameterMap.toQueryString()}' '${requestURL}?${queryString}'"
-	}
-
-	/**
-	 * 转换map
-	 *   只能转换map，不能实现map
-	 *   因为该类已实现了操作符[]，即public operator inline fun <reified T:Any> get(key: String, defaultValue: T? = null): T?，与Map中的实现冲突，导致编译失败
-	 */
-	public fun toMap(): Map<String, Any> {
-		return object: Map<String, Any> by allParameters{
-			/**
-			 * Returns `true` if the map maps one or more keys to the specified [value].
-			 */
-			public override fun containsValue(value: Any): Boolean {
-				if(routeParams.containsValue(value))
-					return false
-
-				if(isUpload()){
-					mulReq.getParameterMap().any{
-						it.value.contains(value)
-					}
-				}
-
-				return req.parameterMap.any{
-					it.value.contains(value)
-				}
-			}
-
-			/**
-			 * Returns the value corresponding to the given [key], or `null` if such a key is not present in the map.
-			 */
-			public override fun get(key: String): String? {
-				return get<String>(key, null)
-			}
-		}
 	}
 }
