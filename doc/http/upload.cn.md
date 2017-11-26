@@ -2,8 +2,6 @@
 
 jkmvc对上传包`servlets.com:cos:05Nov2002`进行了二次封装，并提供了便捷的api来处理上传文件。
 
-但是考虑到上传的
-
 ## 1 上传配置
 
 vim src/main/resources/upload.properties
@@ -44,16 +42,14 @@ uploadDomain | 访问上传文件的域名，结合它可以获得访问上传�
 
 ```
 /**
-    * 上传头像
-    * upload avatar
-    */
+ * 上传头像
+ */
 public fun uploadAvatarAction()
 {
     // 设置上传的子目录（将上传文件保存到指定的子目录），必须要在调用 req 的其他api之前调用，否则无法生效
-    // set uploadSubdir which uploaded file is saved, you must set it before calling req's other api, or it's useless
     req.uploadSubdir = "avatar/" + Date().format("yyyy/MM/dd")
 
-    // 查询单个用户 | find a user
+    // 查询单个用户
     val id: Int = req["id"]!!
     val user = UserModel(id)
     if(!user.isLoaded()){
@@ -61,13 +57,13 @@ public fun uploadAvatarAction()
         return
     }
 
-    // 检查并处理上传文件 | check and handle upload request
-    if(req.isUpload()){ // 检查上传请求 | check upload request
+    // 检查并处理上传文件
+    if(req.isUpload()){ // 检查上传请求
         user.avatar = req.getFileRelativePath("avatar")
         user.update()
     }
 
-    // 重定向到详情页 | redirect to detail page
+    // 重定向到详情页
     redirect("user/detail/$id");
 }
 ```

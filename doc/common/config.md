@@ -30,6 +30,7 @@ Supports multiple level of key-value pairs
 eg. jkmvc/jkmvc-orm/src/main/resources/database.yaml
 
 ```
+#  database name
 default:
     driverClass: com.mysql.jdbc.Driver
     url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8

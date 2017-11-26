@@ -13,3 +13,5 @@ Db::queryRows()
 
 2. [query builder](query_builder) methods
 
+DbQueryBuilder provides methods similar to sql syntax, and generates real sql adapted to different databases(eg. mysql/oracle).
+

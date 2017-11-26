@@ -1,7 +1,6 @@
 # Query Builder
 
-Query Builder is a sql builder. It provides methods similar to sql syntax, and generates real sql adapted to
- different databases(eg. mysql/oracle).
+Query Builder is a sql builder. It provides methods similar to sql syntax, and generates real sql adapted to  different databases(eg. mysql/oracle).
 
 查询构建器，就是用来生成sql的，他提供了类sql的方法，来帮助生成具体数据库的原生sql。
 

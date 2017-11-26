@@ -40,6 +40,7 @@ val db = Db.getDb();
 我们先来看看 Db 类的属性与方法
 
 ### 3.1 元数据相关的属性与方法
+
 属性/方法 | 作用
 --- | ---
 dbType: DbType | 获得数据库类型 根据driverClass来获得
@@ -47,6 +48,7 @@ listColumns(table: String): List<String> | 获得表的所有列
 close(): Unit | 关闭
 
 ### 3.2 事务相关的方法
+
 方法 | 作用
 --- | ---
 begin(): Unit | 开启事务
@@ -56,12 +58,14 @@ transaction(statement: Db.() -> T): T | 执行事务，封装了事务的开启/
 isInTransaction(): Boolean | 是否在事务中
 
 ### 3.3 执行更新sql的方法
+
 方法 | 作用
 --- | ---
 execute(sql: String, params: List<Any?>? = null, generatedColumn: String? = null): Int | 执行更新
 batchExecute(sql: String, paramses: List<Any?>, paramSize: Int): IntArray | 批量更新: 每次更新sql参数不一样
 
 ### 3.4 执行查询sql的方法
+
 方法 | 作用
 --- | ---
 queryCell(sql: String, params: List<Any?>? = null): Pair<Boolean, Any?> | 查询一行一列
@@ -71,18 +75,20 @@ queryRow(sql: String, params: List<Any?>? = null, transform: (MutableMap<String,
 queryRows(sql: String, params: List<Any?>? = null, transform: (MutableMap<String, Any?>) -> T): List<T> | 查询多行
 
 ### 3.5 转义与预览的方法
+
 属性/方法 | 作用
 --- | ---
 previewSql(sql: String, params: List<Any?>? = null): String | 预览sql
 quote(value: Any?): String | 转义值
-quoteColumn(column: Pair<String, String>, with_brackets: Boolean = false): String | 转义字段名 mysql为column oracle为"column" sql server为"column" column
+quoteColumn(column: Pair<String, String>, with_brackets: Boolean = false): String | 转义字段名: mysql为`column`, oracle为"column", sql server为"column"
 quoteColumn(column: String, alias: String? = null, with_brackets: Boolean = false): String | quoteColumn(column: Any): String | 转义字段名
 quoteColumns(columns: Collection<Any>, with_brackets: Boolean = false): String | 转义多个字段名
-quoteTable(table: String, alias: String? = null): String | quoteTable(table: Pair<String, String?>): String | 转义表名 mysql为table oracle为"table" sql server为"table" table
+quoteTable(table: String, alias: String? = null): String | quoteTable(table: Pair<String, String?>): String | 转义表名: mysql为`table`, oracle为"table", sql server为"table" table
 quoteTable(table: Any): String | 转义表名
 quoteTables(tables: Collection<Any>, with_brackets: Boolean = false): String | 转义多个表名
 
 ### 3.6 数据库字段与对象属性名互转的方法，主要用在 model 中
+
 属性/方法 | 作用
 --- | ---
 column2Prop(column: String): String | 根据db字段名，获得对象属性名
