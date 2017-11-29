@@ -25,7 +25,7 @@ import kotlin.reflect.full.cast
 class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                       protected var convertingValue: Boolean = false /* 查询时是否智能转换字段值 */,
                       protected var convertingColumn: Boolean = false /* 查询时是否智能转换字段名 */,
-                      public var withSelect: Boolean = true /* with()联查时自动select关联表的字段 */
+                      protected var withSelect: Boolean = true /* with()联查时自动select关联表的字段 */
 ) : DbQueryBuilder(ormMeta.db, Pair(ormMeta.table, ormMeta.name)) {
 
     /**
@@ -93,18 +93,30 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * 联查单表
      *
      * @param name 关联关系名
+     * @param select 是否select关联表的字段
      * @param columns 关联模型的字段列表
      * @return
      */
-    public fun with(name: String, columns: SelectColumnList? = null): OrmQueryBuilder {
+    public fun with(name: String, select: Boolean = withSelect, columns: SelectColumnList? = null): OrmQueryBuilder {
         // select当前表字段
-        if (withSelect && selectColumns.isEmpty())
+        if (select && selectColumns.isEmpty())
             select(ormMeta.name + ".*");
 
         // join关联表
-        ormMeta.joinRelated(this, name, columns)
+        ormMeta.joinRelated(this, name, select, columns)
 
         return this
+    }
+
+    /**
+     * 联查单表
+     *
+     * @param name 关联关系名
+     * @param columns 关联模型的字段列表
+     * @return
+     */
+    public fun with(name: String, columns: SelectColumnList?): OrmQueryBuilder {
+        return with(name, withSelect, columns)
     }
 
     /**

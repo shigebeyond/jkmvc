@@ -104,7 +104,7 @@ interface IDbQueryBuilderAction
      * @param value
      * @returnAction
      */
-    fun distinct(value:Boolean):IDbQueryBuilder;
+    fun distinct(value:Boolean = true):IDbQueryBuilder;
 
     /**
      * 清空条件

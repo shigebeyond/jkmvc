@@ -340,10 +340,11 @@ interface IOrmMeta {
      *
      * @param query 查询构建器
      * @param name 关联关系名
+     * @param select 是否select关联字段
      * @param columns 关联字段列表
      * @param lastName 上一级关系名
      * @param path 列名父路径
      * @return 关联关系
      */
-    fun joinRelated(query: OrmQueryBuilder, name: String, columns: SelectColumnList?, lastName:String = this.name, path:String = ""): IRelationMeta
+    fun joinRelated(query: OrmQueryBuilder, name: String, select: Boolean, columns: SelectColumnList?, lastName:String = this.name, path:String = ""): IRelationMeta
 }

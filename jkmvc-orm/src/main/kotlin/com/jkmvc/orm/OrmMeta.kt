@@ -281,12 +281,13 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      *
      * @param query 查询构建器
      * @param name 关联关系名
+     * @param select 是否select关联字段
      * @param columns 关联字段列表
      * @param lastName 上一级关系名
      * @param path 列名父路径
      * @return 关联关系
      */
-    public override fun joinRelated(query: OrmQueryBuilder, name: String, columns: SelectColumnList?, lastName:String, path:String): IRelationMeta {
+    public override fun joinRelated(query: OrmQueryBuilder, name: String, select: Boolean, columns: SelectColumnList?, lastName:String, path:String): IRelationMeta {
         // 获得当前关联关系
         val relation = getRelation(name)!!;
         // 1 非hasMany关系：只处理一层
@@ -315,11 +316,11 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
 
         // 递归联查子关系
         columns?.forEachRelatedColumns { subname: String, subcolumns: SelectColumnList? ->
-            relation.ormMeta.joinRelated(query, subname, subcolumns, name, path2)
+            relation.ormMeta.joinRelated(query, subname, select, subcolumns, name, path2)
         }
 
         // 查询当前关系字段
-        if(query.withSelect)
+        if(select)
             query.selectRelated(relation, name, columns?.myColumns /* 若字段为空，则查全部字段 */, path2);
 
         return relation;
