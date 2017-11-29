@@ -32,8 +32,8 @@ object JedisFactory {
         if(jedis == null){ // 新建连接
             jedis = buildJedis(name)
             jedises[name] = jedis
-        }else{ // 如果断开连接，则重连
-            jedis.connect()
+        }else{ // 重用旧连接
+            jedis.connect() // 尝试重连
         }
         return jedis
     }

@@ -21,7 +21,10 @@ object RedisTokenManager:ITokenManager {
     /**
      * redis连接
      */
-    private val jedis:Jedis = JedisFactory.instance()
+    private val jedis:Jedis
+        get(){
+            return JedisFactory.instance()
+        }
 
     /**
      * 为指定用户创建一个token
