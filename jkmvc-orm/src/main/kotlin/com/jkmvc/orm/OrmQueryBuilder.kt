@@ -279,8 +279,13 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
             // 遍历每个hasMany关系的查询结果
             forEachManyQuery(result){ name:String, relation:IRelationMeta, relatedItems:List<IOrm> ->
                 // 检查主外键的类型: 数据库中主外键字段类型可能不同，则无法匹配
-                val firstPk: Any = items.first()[relation.primaryProp]
-                val firstFk: Any = relatedItems.first()[relation.foreignProp]
+                val primaryProp = relation.primaryProp // 主表.主键
+                val foreignProp = if(relation is MiddleRelationMeta)
+                                    relation.middleForeignProp // 中间表.外键
+                                else
+                                    relation.foreignProp // 从表.外键
+                val firstPk: Any = items.first()[primaryProp]
+                val firstFk: Any = relatedItems.first()[foreignProp]
                 if(firstPk::class != firstFk::class){
                     throw OrmException("模型[${ormMeta.name}]联查[${name}]的hasMany类型的关联对象失败: 主键[${ormMeta.table}.${relation.primaryKey}]字段类型[${firstPk::class}]与外键[${relation.model.modelOrmMeta.table}.${relation.foreignKey}]字段类型[${firstFk::class}]不一致，请改成一样的")
                 }
@@ -290,11 +295,8 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                     val myRelated = LinkedList<IOrm>()
                     for(relatedItem in relatedItems){ // 遍历每个关联对象，进行匹配
                         // hasMany关系的匹配：主表.主键 = 从表.外键
-                        val pk:Any = item[relation.primaryProp] // 主表.主键
-                        val fk:Any = if(relation is MiddleRelationMeta)
-                                        relatedItem[relation.middleForeignProp] // 中间表.外键
-                                     else
-                                        relatedItem[relation.foreignProp] // 从表.外键
+                        val pk:Any = item[primaryProp] // 主表.主键
+                        val fk:Any = relatedItem[foreignProp] // 从表.外键
                         if(pk == fk)
                             myRelated.add(relatedItem)
                     }
