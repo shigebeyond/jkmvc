@@ -15,6 +15,19 @@ class DbTests{
     }
 
     @Test
+    fun testDbType(){
+        /*for(type in DbType.values())
+            println(type)
+        print("current: " + db.dbType)*/
+        println(db.schema)
+    }
+
+    @Test
+    fun testColumn2Prop(){
+        println(db.column2Prop("ZDZCBH_"))
+    }
+
+    @Test
     fun testConnection(){
         db.execute("""
         CREATE TABLE IF NOT EXISTS `user` (

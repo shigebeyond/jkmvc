@@ -291,7 +291,10 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                     for(relatedItem in relatedItems){ // 遍历每个关联对象，进行匹配
                         // hasMany关系的匹配：主表.主键 = 从表.外键
                         val pk:Any = item[relation.primaryProp] // 主表.主键
-                        val fk:Any = relatedItem[relation.foreignProp] // 从表.外键
+                        val fk:Any = if(relation is MiddleRelationMeta)
+                                        relatedItem[relation.middleForeignProp] // 中间表.外键
+                                     else
+                                        relatedItem[relation.foreignProp] // 从表.外键
                         if(pk == fk)
                             myRelated.add(relatedItem)
                     }

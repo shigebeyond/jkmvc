@@ -33,13 +33,28 @@ class MiddleRelationMeta(
 
     /**
      * 远端主键属性
+     *   与 farPrimaryKey 对应
      */
     public val farPrimaryProp:String = sourceMeta.column2Prop(farPrimaryKey)
 
     /**
      *  远端外键属性
+     *    与 farForeignKey 对应
      */
     public val farForeignProp:String = sourceMeta.column2Prop(farForeignKey)
+
+    /**
+     * 中间表的外键字段别名
+     *    用在 OrmQueryBuilder.findAll() 联查从表时，绑定主对象
+     *    不能使用foreignKey, 因为中间表的该字段可能与从表字段重名
+     */
+    public val middleForeignKey = foreignKey + '_'
+
+    /**
+     * 中间表的外键属性
+     *    与 middleForeignKey 对应
+     */
+    public val middleForeignProp = sourceMeta.column2Prop(middleForeignKey)
 
     /**
      * 构建查询：通过join中间表来查询从表
@@ -47,7 +62,7 @@ class MiddleRelationMeta(
      */
     protected fun buildQuery(): OrmQueryBuilder {
         return queryBuilder()
-                .select(model.modelName + ".*", middleTable + '.' + foreignKey) // 查关联字段：中间表.外键 = 主表.主键，以便在查询后绑定主对象
+                .select(model.modelName + ".*", middleTable + '.' + foreignKey to middleForeignKey) // 查关联字段：中间表.外键 = 主表.主键，用在 OrmQueryBuilder.findAll() 联查从表时，绑定主对象
                 .join(middleTable).on(middleTable + '.' + farForeignKey, "=", model.modelName + '.' + farPrimaryKey) as OrmQueryBuilder // 中间表.远端外键 = 从表.远端主键
     }
 

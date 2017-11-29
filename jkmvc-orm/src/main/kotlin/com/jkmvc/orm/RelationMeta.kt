@@ -34,11 +34,13 @@ open class RelationMeta(
 
     /**
      * 主键属性
+     *   与 primaryKey 对应
      */
     public override val primaryProp:String = sourceMeta.column2Prop(primaryKey)
 
     /**
      *  外键属性
+     *   与 foreignKey 对应
      */
     public override val foreignProp:String = sourceMeta.column2Prop(foreignKey)
 
