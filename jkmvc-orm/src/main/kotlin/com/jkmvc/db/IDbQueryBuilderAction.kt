@@ -40,6 +40,14 @@ interface IDbQueryBuilderAction
     fun from(table:String, alias:String? = null):IDbQueryBuilder;
 
     /**
+     * 设置表名: 可能有多个表名
+     * @param subquery 子查询
+     * @param alias 别名
+     * @return
+     */
+    fun from(subquery: IDbQueryBuilder, alias:String): IDbQueryBuilder;
+
+    /**
      * 设置插入的列, insert时用
      *
      * @param column

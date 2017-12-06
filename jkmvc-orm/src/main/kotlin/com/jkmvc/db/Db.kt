@@ -446,9 +446,9 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
     public override fun quoteTable(table:String, alias:String?):String
     {
         return if(alias == null)
-            "$identifierQuoteString$table$identifierQuoteString";
-        else // 表与别名之间不加 as，虽然mysql可识别，但oracle不能识别
-            "$identifierQuoteString$table$identifierQuoteString $identifierQuoteString$alias$identifierQuoteString"
+                    "$identifierQuoteString$table$identifierQuoteString";
+                else // 表与别名之间不加 as，虽然mysql可识别，但oracle不能识别
+                    "$identifierQuoteString$table$identifierQuoteString $identifierQuoteString$alias$identifierQuoteString"
     }
 
     /**

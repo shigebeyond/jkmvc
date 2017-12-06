@@ -206,6 +206,17 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     }
 
     /**
+     * 设置表名: 可能有多个表名
+     * @param subquery 子查询
+     * @param alias 别名
+     * @return
+     */
+    public override fun from(subquery: IDbQueryBuilder, alias:String): IDbQueryBuilder {
+        this.table = Pair(subquery, alias)
+        return this
+    }
+
+    /**
      * 设置插入的列, insert时用
      *
      * @param column
