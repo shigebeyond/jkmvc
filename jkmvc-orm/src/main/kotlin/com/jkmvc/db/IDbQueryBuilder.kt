@@ -121,6 +121,14 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
     public abstract fun findColumn(vararg params: Any?): List<Any?>;
 
     /**
+     * 查询一行一列
+     *
+     * @param params 动态参数
+     * @return
+     */
+    public abstract fun findCell(vararg params: Any?): Pair<Boolean, Any?>
+
+    /**
      * 统计行数： count语句
      *
      * @param params 动态参数
