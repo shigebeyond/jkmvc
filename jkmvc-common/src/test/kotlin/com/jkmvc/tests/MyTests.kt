@@ -297,6 +297,25 @@ class MyTests{
     }
 
     @Test
+    fun testLine(){
+        var count:Int = 0
+        val dir = File("/home/shi/code/java/jkmvc/")
+        val reg = "^\\s*(//|/\\*|\\*|\\*/).*".toRegex() // 注释
+        dir.travel { file ->
+            if(file.name.endsWith(".kt")){
+                file.forEachLine { line ->
+                    if(line.isNotBlank() && !reg.matches(line)){ // 非空 + 非注释
+                        count++
+                    }else{
+                        //println(line)
+                    }
+                }
+            }
+        }
+        println(count)
+    }
+
+    @Test
     fun testGetFileContent(){
         // 扫描出id自增的代码
         /*val dir = File("/home/shi/Downloads/电网项目/source/szdl/0103_Code/NNDYPT/src/main/java")

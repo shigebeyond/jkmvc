@@ -106,7 +106,7 @@ class ValidationExpression(override val exp:String /* 原始表达式 */):IValid
 	 *
 	 * <code>
 	 * 	   // 编译
-	 *     val exp = ValidationExpression("trim > notempty && email");
+	 *     val exp = ValidationExpression("trim > notEmpty && email");
 	 *     // 执行
 	 *     result = exp.execute(value, data, lastsubexp);
 	 * </code>
