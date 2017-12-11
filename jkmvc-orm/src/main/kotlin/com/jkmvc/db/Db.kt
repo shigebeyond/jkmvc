@@ -47,7 +47,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
         /**
          * 获得db
          */
-        public fun getDb(name:String = "default"):Db{
+        public fun instance(name:String = "default"):Db{
             return dbs.get().getOrPut(name){
                 //获得数据源
                 val dataSource  = dataSourceFactory.getDataSource(name);

@@ -71,7 +71,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * 数据库
      */
     public override val db: IDb
-        get() = Db.getDb(dbName)
+        get() = Db.instance(dbName)
 
     /**
      * 默认外键

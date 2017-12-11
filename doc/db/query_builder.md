@@ -9,8 +9,8 @@ Query Builder is a sql builder. It provides methods similar to sql syntax, and g
 Just new a `DbQueryBuilder` object, and takes `Db` object as first parameterr. 
 
 ```
-val query = DbQueryBuilder(Db.getDb())
-val query = DbQueryBuilder() // first parameter'sdefalut value is Db.getDb() 
+val query = DbQueryBuilder(Db.instance())
+val query = DbQueryBuilder() // first parameter'sdefalut value is Db.instance() 
 ```
 
 ## 2 Select
@@ -329,7 +329,7 @@ UPDATE `user` SET `login_count` = `login_count` + 1 WHERE `id` = 45
 
 ```
 // Get Db object
-val db: Db = Db.getDb()
+val db: Db = Db.instance()
 
 // start transaction
 db.transaction {

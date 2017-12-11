@@ -25,13 +25,13 @@ Database manipulation class is `com.jkmvc.db.Db`, there are 2 usage
 1. Manage database connections
 2. Execute sql
 
-Use `Db::getDb(name:String = "default"):Db` to get `Db` object, it will get the configuration item corresponding to the `name` in file `database.yaml`, and establish a database connection.
+Use `Db::instance(name:String = "default"):Db` to get `Db` object, it will get the configuration item corresponding to the `name` in file `database.yaml`, and establish a database connection.
 
 Just like:
 
 ```
 // get `Db` object
-val db = Db.getDb();
+val db = Db.instance();
 ```
 
 ## 3 Use the `Db` object to execute sql
@@ -97,7 +97,7 @@ prop2Column (prop: String): String | Get the db property name according the obje
 
 ```
 // get `Db` object
-val db: Db = Db.getDb()
+val db: Db = Db.instance()
 
 // begin a transaction
 db.transaction {

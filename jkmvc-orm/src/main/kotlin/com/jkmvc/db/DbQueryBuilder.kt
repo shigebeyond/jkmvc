@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-13
  */
-open class DbQueryBuilder(db:IDb = Db.getDb(), table:Pair<String, String?> /*表名*/ = emptyTable) :DbQueryBuilderDecoration(db, table)
+open class DbQueryBuilder(db:IDb = Db.instance(), table:Pair<String, String?> /*表名*/ = emptyTable) :DbQueryBuilderDecoration(db, table)
 {
     /**
      * 缓存编译好的sql
@@ -31,7 +31,7 @@ open class DbQueryBuilder(db:IDb = Db.getDb(), table:Pair<String, String?> /*表
      * @param dbName 数据库名
      * @param table 表名
      */
-    public constructor(dbName:String, table:String = ""):this(Db.getDb(dbName), table){
+    public constructor(dbName:String, table:String = ""):this(Db.instance(dbName), table){
     }
 
     /**

@@ -53,7 +53,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
      *   => 只记录dbName，每次执行都获得当前线程最新的连接
      */
     public override val db: IDb
-        get() = Db.getDb(dbName)
+        get() = Db.instance(dbName)
 
     /**
      * 判断是否为空

@@ -22,7 +22,7 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
     /**
      * 数据库
      */
-    private val db = Db.getDb(dbName)
+    private val db = Db.instance(dbName)
 
     /**
      * 元数据查询的配置

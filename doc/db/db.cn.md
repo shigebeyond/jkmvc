@@ -26,13 +26,13 @@ default:
 1. 管理数据库连接
 2. 执行sql
 
-使用 `Db::getDb(name:String = "default"):Db` 来获得 Db 对象，他会找到配置文件 `database.yaml` 中对应 name 的连接配置，并建立连接
+使用 `Db::instance(name:String = "default"):Db` 来获得 Db 对象，他会找到配置文件 `database.yaml` 中对应 name 的连接配置，并建立连接
 
 例子
 
 ```
 // 获得 Db 对象
-val db = Db.getDb();
+val db = Db.instance();
 ```
 
 ## 3 使用 Db 对象来执行sql
@@ -98,7 +98,7 @@ prop2Column(prop: String): String | 根据对象属性名，获得db字段名
 
 ```
 // 获得 Db 对象
-val db: Db = Db.getDb()
+val db: Db = Db.instance()
 
 // 开启事务
 db.transaction {

@@ -7,8 +7,8 @@
 直接创建`DbQueryBuilder`对象, 第一个参数是 `Db` 对象. 
 
 ```
-val query = DbQueryBuilder(Db.getDb())
-val query = DbQueryBuilder() // 第一个参数有默认值 Db.getDb() 
+val query = DbQueryBuilder(Db.instance())
+val query = DbQueryBuilder() // 第一个参数有默认值 Db.instance() 
 ```
 
 ## 2 Select语句
@@ -330,7 +330,7 @@ UPDATE `user` SET `login_count` = `login_count` + 1 WHERE `id` = 45
 
 ```
 // 获得 Db 对象
-val db: Db = Db.getDb()
+val db: Db = Db.instance()
 
 // 开启事务
 db.transaction {

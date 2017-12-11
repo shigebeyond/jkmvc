@@ -6,7 +6,7 @@ import org.junit.Test
 
 class DbTests{
 
-    val db: Db = Db.getDb()
+    val db: Db = Db.instance()
 
     val id: Long by lazy {
         val (hasNext, minId) = db.queryCell("select id from user order by id limit 1" /*sql*/)
