@@ -15,9 +15,7 @@ class DruidDataSourceFactory : IDataSourceFactory {
     /**
      * 缓存数据源
      */
-    private val dataSources: ConcurrentHashMap<String, DruidDataSource> by lazy {
-        ConcurrentHashMap<String, DruidDataSource>();
-    }
+    private val dataSources: ConcurrentHashMap<String, DruidDataSource> = ConcurrentHashMap<String, DruidDataSource>();
 
     /**
      * 获得数据源

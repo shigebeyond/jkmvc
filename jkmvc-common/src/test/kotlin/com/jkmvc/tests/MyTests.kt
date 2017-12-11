@@ -1,5 +1,6 @@
 package com.jkmvc.tests
 
+import com.jkmvc.cache.JedisFactory
 import com.jkmvc.common.*
 import com.jkmvc.validate.Validation
 import org.junit.Test
@@ -414,6 +415,14 @@ class MyTests{
 
         println(System.currentTimeMillis() / 100)
 
+    }
+
+    @Test
+    fun testRedis(){
+        val jedis = JedisFactory.instance()
+        println(jedis.get("name"))
+        jedis.set("name", "shi")
+        println(jedis.get("name"))
     }
 
     /*
