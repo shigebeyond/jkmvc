@@ -3,6 +3,7 @@ package com.jkmvc.tests
 import com.jkmvc.cache.JedisFactory
 import com.jkmvc.common.*
 import com.jkmvc.validate.Validation
+import getIntranetHost
 import org.junit.Test
 import java.io.File
 import java.math.BigDecimal
@@ -10,6 +11,14 @@ import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.jvm.jvmName
+import java.net.InetAddress
+import java.net.Inet4Address
+import java.util.Enumeration
+import java.net.NetworkInterface
+
+
+
+
 
 open class A() {}
 class B():A() {
@@ -54,6 +63,24 @@ class MyTests{
         println(list)
         list.add(0, "d")
         println(list)
+    }
+
+    @Test
+    fun testIp(){
+        // 127.0.1.1
+        //val addr = InetAddress.getLocalHost().hostAddress
+        //val addr = InetAddress.getLoopbackAddress().hostAddress
+        //println(addr)
+
+        /*for(netInterface in NetworkInterface.getNetworkInterfaces()){
+            for(ip in netInterface.inetAddresses){
+                if (ip != null && ip is Inet4Address) {
+                    println("本机的IP = " + ip.hostAddress)
+                }
+            }
+        }*/
+        // 内网ip
+        println(getIntranetHost())
     }
 
     @Test
