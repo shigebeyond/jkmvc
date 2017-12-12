@@ -140,5 +140,7 @@ public inline fun KParameter.convert(value: String): Any {
  * @return
  */
 public fun Method.getSignature(): String {
-    return this.parameterTypes.joinTo(StringBuilder(this.name), ",", "(", ")").toString()
+    return this.parameterTypes.joinTo(StringBuilder(this.name), ",", "(", ")"){
+        it.name
+    }.toString().replace("java.lang.", "")
 }
