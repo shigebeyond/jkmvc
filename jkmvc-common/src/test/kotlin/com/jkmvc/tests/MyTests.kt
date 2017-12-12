@@ -17,9 +17,6 @@ import java.util.Enumeration
 import java.net.NetworkInterface
 
 
-
-
-
 open class A() {}
 class B():A() {
     protected val name:String = "test";
@@ -106,6 +103,16 @@ class MyTests{
         world
         """
         println(str)*/
+    }
+
+    @Test
+    fun testUrl(){
+        val url = URL("mysql://127.0.0.1:3306/test?username=root&password=root")
+        //val url = URL("mysql://127.0.0.1:3306/?username=root&password=root")
+        //val url = URL("mysql://127.0.0.1:3306?username=root&password=root")
+        //val url = URL("mysql://127.0.0.1?username=root&password=root")
+        //val url = URL("mysql://127.0.0.1")
+        println(url)
     }
 
     @Test
@@ -214,6 +221,11 @@ class MyTests{
         c.echo() // A
     }
 
+    @Test
+    fun testMethod(){
+        for(m in IConfig::class.java.methods)
+            println(m.getSignature())
+    }
 
     @Test
     fun testFunc(){
