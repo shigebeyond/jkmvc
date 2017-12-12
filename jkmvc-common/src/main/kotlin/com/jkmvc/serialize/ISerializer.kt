@@ -9,6 +9,20 @@ import java.io.InputStream
  * @create 2017-10-04 下午3:29
  **/
 interface ISerializer {
+
+    companion object{
+
+        /**
+         * 获得序列化器
+         *
+         * @param type
+         * @return
+         */
+        public fun instance(type: String): ISerializer {
+            return SerializeType.valueOf(type).serializer
+        }
+    }
+
     /**
      * 序列化
      *

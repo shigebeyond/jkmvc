@@ -28,7 +28,7 @@ abstract class OrmEntity : IOrm {
         /**
          * 序列化
          */
-        public val serializer: ISerializer = SerializeType.valueOf(config["serializeType"]!!).serializer
+        public val serializer: ISerializer = ISerializer.instance(config["serializeType"]!!)
 
         /**
          * 缓存属性代理
