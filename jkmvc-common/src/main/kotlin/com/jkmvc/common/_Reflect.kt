@@ -1,6 +1,7 @@
 package com.jkmvc.common
 
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl
+import java.lang.reflect.Method
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -132,4 +133,12 @@ public fun KClass<*>.findProperty(name:String): KProperty1<*, *>?{
  */
 public inline fun KParameter.convert(value: String): Any {
     return value.to(this.type)
+}
+
+/**
+ * 获得方法签名
+ * @return
+ */
+public fun Method.getSignature(): String {
+    return this.parameterTypes.joinTo(StringBuilder(this.name), ",", "(", ")").toString()
 }
