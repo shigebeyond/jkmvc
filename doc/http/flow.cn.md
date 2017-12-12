@@ -2,9 +2,9 @@
 
 每个应用都遵守同样的请求处理流程：
 
-应用入口是 `com.jkmvc.http.JkFilter`, 他的实现只是简单的调用 `Server.run(req as HttpServletRequest, res as HttpServletResponse)`
+应用入口是 `com.jkmvc.http.JkFilter`, 他的实现只是简单的调用 `HttpHandler.handle(req as HttpServletRequest, res as HttpServletResponse)`
 
-现在，让我们看看 `com.jkmvc.http.Server#run()`的实现
+现在，让我们看看 `com.jkmvc.http.HttpHandler#handle()`的实现
 
 1. 创建 [Request](request) 对象
 2. 创建 [Response](response)  对象

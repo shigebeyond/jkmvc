@@ -13,7 +13,7 @@ import kotlin.reflect.KFunction
  * @date 2016-10-6 上午9:27:56
  *
  */
-object Server:IServer {
+object HttpHandler: IHttpHandler {
 
     /**
      * http配置
@@ -32,7 +32,7 @@ object Server:IServer {
      * @param res
      * @return 是否处理，如果没有处理（如静态文件请求），则交给下一个filter/默认servlet来处理
      */
-    public override fun run(request: HttpServletRequest, response: HttpServletResponse):Boolean{
+    public override fun handle(request: HttpServletRequest, response: HttpServletResponse):Boolean{
         //　构建请求对象
         val req:Request = Request(request);
         if(debug){

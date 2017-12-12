@@ -2,9 +2,9 @@
 
 Every application follows the same flow:
 
-Application's entry is `com.jkmvc.http.JkFilter`, and nd it just call `Server.run(req as HttpServletRequest, res as HttpServletResponse)`
+Application's entry is `com.jkmvc.http.JkFilter`, and nd it just call `HttpHandler.handle(req as HttpServletRequest, res as HttpServletResponse)`
 
-Now, let's read `com.jkmvc.http.Server#run()`
+Now, let's read `com.jkmvc.http.HttpHandler#handle()`
 
 1. create [Request](request)  object
 2. create [Response](response)  object

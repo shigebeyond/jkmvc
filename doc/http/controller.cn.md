@@ -2,7 +2,7 @@
 
 控制器 Controller 是介于模型 Model 和视图 View 之间的负责协调的类。 他将请求数据传递给模型，以便由模型来读写数据。 然后把模型返回的数据，传递给视图来渲染，最终的输出到浏览器。 控制器负责控制web应用的流程。
 
-控制器在 `com.jkmvc.http.Server#callController` 中调用，只调用匹配路由的控制器。详情请阅读[routing](routing)。
+控制器在 `com.jkmvc.http.HttpHandler#callController` 中调用，只调用匹配路由的控制器。详情请阅读[routing](routing)。
 
 ## 1 创建控制器
 

@@ -4,7 +4,7 @@ A Controller stands in between the models and the views in an application. It pa
 
 Controllers then pass on the data of the model to the views where the data is used to render for the users.  Controllers essentially control the flow of the application.
 
-Controllers are called by the `com.jkmvc.http.Server#callController` function based on the Route that the url matched.  Be sure to read the [routing](routing) page to understand how to use routes to map urls to your controllers.
+Controllers are called by the `com.jkmvc.http.HttpHandler#callController` function based on the Route that the url matched.  Be sure to read the [routing](routing) page to understand how to use routes to map urls to your controllers.
 
 ## 1 Create Controller
 
