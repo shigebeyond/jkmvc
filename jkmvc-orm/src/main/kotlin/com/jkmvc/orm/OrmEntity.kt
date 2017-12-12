@@ -1,7 +1,9 @@
 package com.jkmvc.orm
 
 import com.jkmvc.common.*
+import com.jkmvc.serialize.ISerializer
 import com.jkmvc.serialize.JdkSerializer
+import com.jkmvc.serialize.SerializeType
 import java.util.*
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KMutableProperty1
@@ -17,6 +19,17 @@ import kotlin.reflect.KProperty
 abstract class OrmEntity : IOrm {
 
     companion object{
+
+        /**
+         * orm配置
+         */
+        public val config: Config = Config.instance("orm")
+
+        /**
+         * 序列化
+         */
+        public val serializer: ISerializer = SerializeType.valueOf(config["serializeType"]!!).serializer
+
         /**
          * 缓存属性代理
          */
@@ -160,7 +173,7 @@ abstract class OrmEntity : IOrm {
      * @return
      */
     public override fun serialize(): ByteArray? {
-        return JdkSerializer.serialize(data)
+        return serializer.serialize(data)
     }
 
     /**
@@ -169,7 +182,7 @@ abstract class OrmEntity : IOrm {
      * @param bytes
      */
     public override fun unserialize(bytes: ByteArray): Unit {
-        data.putAll(JdkSerializer.unserizlize(bytes) as Map<String, Any?>)
+        data.putAll(serializer.unserizlize(bytes) as Map<String, Any?>)
     }
 
     /**

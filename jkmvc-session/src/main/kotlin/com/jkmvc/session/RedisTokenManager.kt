@@ -1,7 +1,6 @@
 package com.jkmvc.session
 
 import com.jkmvc.cache.JedisFactory
-import com.jkmvc.serialize.JdkSerializer
 import com.jkmvc.common.SnowflakeIdWorker
 import redis.clients.jedis.Jedis
 
