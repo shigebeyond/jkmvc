@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletResponse
 import kotlin.reflect.KFunction
 
 /**
- * 服务端对象，用于处理请求
+ * http请求处理者
  *
  * @author shijianhang
  * @date 2016-10-6 上午9:27:56
