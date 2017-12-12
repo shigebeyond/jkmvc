@@ -106,8 +106,8 @@ object ControllerLoader:IControllerLoader{
         // 获得类
         val clazz = Class.forName(className)
         // 过滤Controller子类
-        val ctrl = Controller::class.java
-        if(ctrl != clazz && ctrl.isAssignableFrom(clazz)){
+        val base = Controller::class.java
+        if(base != clazz && base.isAssignableFrom(clazz)){
             // 收集controller的构造函数+所有action方法
             result.put(getControllerName(className), ControllerClass(clazz.kotlin))
         }

@@ -26,10 +26,17 @@ class ControllerClass(public override val clazz: KClass<*> /* controller类 */):
     public override val actions: MutableMap<String, KFunction<*>> = HashMap<String, KFunction<*>>();
 
     init{
-        // 获得所有action方法
+        // 解析所有action方法
+        parseActionMethods()
+    }
+
+    /**
+     * 解析所有action方法
+     */
+    private fun parseActionMethods() {
         for (func in clazz.memberFunctions) {
             val funname = func.name
-            if(funname.endsWith("Action") || func.parameters.isEmpty()) { // 以Action结尾 + 无参数
+            if (funname.endsWith("Action") || func.parameters.isEmpty()) { // 以Action结尾 + 无参数
                 val name = funname.substring(0, funname.length - 6) // 去掉Action结尾
                 actions[name] = func;
             }
