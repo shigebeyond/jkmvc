@@ -6,6 +6,7 @@ import com.jkmvc.validate.Validation
 import getIntranetHost
 import org.junit.Test
 import java.io.File
+import java.lang.reflect.Modifier
 import java.math.BigDecimal
 import java.util.*
 import kotlin.reflect.KClass
@@ -107,7 +108,7 @@ class MyTests{
 
     @Test
     fun testUrl(){
-        val url = URL("mysql://127.0.0.1:3306/test?username=root&password=root")
+        val url = Url("mysql://127.0.0.1:3306/test?username=root&password=root")
         //val url = URL("mysql://127.0.0.1:3306/?username=root&password=root")
         //val url = URL("mysql://127.0.0.1:3306?username=root&password=root")
         //val url = URL("mysql://127.0.0.1?username=root&password=root")
@@ -195,20 +196,22 @@ class MyTests{
 //        println(this.javaClass)
 //        println(this.javaClass.kotlin)
 //        println(this::class)
-        println(this::class.simpleName)
+       /* println(this::class.simpleName)
         println(this::class.qualifiedName)
         println(this::class.jvmName)
         println(this.javaClass.name)
         println(this.javaClass.canonicalName)
         println(this.javaClass.simpleName)
         println(this.javaClass.typeName)
-    }
 
-    @Test
-    fun testClassName(){
         println(MyTests::class.qualifiedName)
         println(Int::class.qualifiedName)
         println(String::class.qualifiedName)
+        */
+        //val m = this.javaClass.getModifiers()
+        val m = IConfig::class.java.modifiers
+        println(Modifier.isAbstract(m))
+        println(Modifier.isInterface(m))
     }
 
     @Test

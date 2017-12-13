@@ -1,10 +1,8 @@
 package com.jkmvc.http
 
-import com.jkmvc.common.Config
-import com.jkmvc.common.lcFirst
-import com.jkmvc.common.travel
-import com.jkmvc.common.trim
+import com.jkmvc.common.*
 import java.io.File
+import java.lang.reflect.Modifier
 import java.util.*
 
 /**
@@ -105,9 +103,10 @@ object ControllerLoader:IControllerLoader{
         val className = relativePath.substringBefore(".class").replace(File.separatorChar, '.')
         // 获得类
         val clazz = Class.forName(className)
+        val modifiers = clazz.modifiers
         // 过滤Controller子类
         val base = Controller::class.java
-        if(base != clazz && base.isAssignableFrom(clazz)){
+        if(base != clazz && base.isAssignableFrom(clazz) /* 继承Controller */ && !Modifier.isAbstract(modifiers) /* 非抽象类 */ && !Modifier.isInterface(modifiers) /* 非接口 */){
             // 收集controller的构造函数+所有action方法
             result.put(getControllerName(className), ControllerClass(clazz.kotlin))
         }
