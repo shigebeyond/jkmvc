@@ -27,27 +27,27 @@ class ValidationExpression(override val exp:String /* 原始表达式 */):IValid
 		/**
 		 * 运算符的正则
 		 */
-		val RegexOperator:String = "[&\\|\\.\\>]+";
+		val RegexOperator: String = "[&\\|\\.\\>]+";
 
 		/**
 		 * 函数参数字符的正则
 		 */
-		val RegexParamChar:String = "\\w\\d-:";
+		val RegexParamChar: String = "\\w\\d-:";
 
 		/**
 		 * 函数的正则
 		 */
-		val RegexFunc:String = "(\\w+)(\\(([\\s" + RegexParamChar + ",]*)\\))?";
+		val RegexFunc: String = "(\\w+)(\\(([\\s" + RegexParamChar + ",]*)\\))?";
 
 		/**
 		* 表达式的正则
 		 */
-		val RegxExp = "\\s*(" + RegexOperator + ")?\\s*" + RegexFunc;
+		val RegxExp: Regex = ("\\s*(" + RegexOperator + ")?\\s*" + RegexFunc).toRegex();
 
 		/**
 		 * 函数参数的正则
 		 */
-		val RegexParam:String = "([" + RegexParamChar + "]+),?";
+		val RegexParam: Regex = ("([" + RegexParamChar + "]+),?").toRegex();
 
 		/**
 		 * 编译 表达式
@@ -62,7 +62,7 @@ class ValidationExpression(override val exp:String /* 原始表达式 */):IValid
 		 */
 		public fun compile(exp:String): List<ValidationUint> {
 			// 第一个()是操作符，第二个()是函数名，第四个()是函数参数
-			val matches: Sequence<MatchResult> = RegxExp.toRegex().findAll(exp);
+			val matches: Sequence<MatchResult> = RegxExp.findAll(exp);
 
 			val subexps:MutableList<ValidationUint> = LinkedList<ValidationUint>();
 			for(m in matches){
@@ -85,7 +85,7 @@ class ValidationExpression(override val exp:String /* 原始表达式 */):IValid
 			if(exp == null)
 				return emptyList();
 
-			val matches: Sequence<MatchResult> = RegexParam.toRegex().findAll(exp);
+			val matches: Sequence<MatchResult> = RegexParam.findAll(exp);
 			val result:MutableList<String> = LinkedList<String>();
 			for(m in matches){
 				result.add(m.groups[1]!!.value)
