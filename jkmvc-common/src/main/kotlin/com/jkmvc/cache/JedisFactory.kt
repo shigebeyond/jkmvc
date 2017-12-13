@@ -69,7 +69,6 @@ object JedisFactory {
      * @param name 配置标识
      * @return
      */
-    @Synchronized
     public fun instance(name: String = "default"): Jedis {
         // 获得已有连接
         var jedis:Jedis = jedises.get().getOrPut(name){
