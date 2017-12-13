@@ -25,7 +25,6 @@ class Url(public var protocol: String /* 协议 */,
         parseUrl(url)
     }
 
-
     companion object{
 
         /**

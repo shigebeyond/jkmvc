@@ -209,9 +209,11 @@ class MyTests{
         println(String::class.qualifiedName)
         */
         //val m = this.javaClass.getModifiers()
-        val m = IConfig::class.java.modifiers
+       /* val m = IConfig::class.java.modifiers
         println(Modifier.isAbstract(m))
-        println(Modifier.isInterface(m))
+        println(Modifier.isInterface(m))*/
+
+        println(IConfig::class === IConfig::class)
     }
 
     @Test
