@@ -24,7 +24,7 @@ object ControllerClassLoader : IControllerClassLoader, ClassScanner() {
      *   key为相对路径
      *   value为类
      */
-    private val controllers:MutableMap<String, ControllerClass> = HashMap()
+    private val controllerClasses:MutableMap<String, ControllerClass> = HashMap()
 
     init{
         // 加载配置的包路径
@@ -52,7 +52,7 @@ object ControllerClassLoader : IControllerClassLoader, ClassScanner() {
         val base = Controller::class.java
         if(base != clazz && base.isAssignableFrom(clazz) /* 继承Controller */ && !Modifier.isAbstract(modifiers) /* 非抽象类 */ && !Modifier.isInterface(modifiers) /* 非接口 */){
             // 收集controller的构造函数+所有action方法
-            controllers[getControllerName(className)] = ControllerClass(clazz.kotlin)
+            controllerClasses[getControllerName(className)] = ControllerClass(clazz.kotlin)
         }
     }
 
@@ -75,7 +75,7 @@ object ControllerClassLoader : IControllerClassLoader, ClassScanner() {
      * @return
      */
     public override fun getControllerClass(name: String): ControllerClass? {
-        return controllers.get(name);
+        return controllerClasses.get(name);
     }
 
 }
