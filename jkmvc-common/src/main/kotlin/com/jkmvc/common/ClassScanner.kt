@@ -8,7 +8,7 @@ import java.util.*
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-abstract class ClassLoader : IClassLoader {
+abstract class ClassScanner : IClassScanner {
     /**
      * 自动扫描的包
      */

@@ -1,6 +1,6 @@
 package com.jkmvc.http
 
-import com.jkmvc.common.ClassLoader
+import com.jkmvc.common.ClassScanner
 import com.jkmvc.common.Config
 import com.jkmvc.common.lcFirst
 import java.io.File
@@ -12,7 +12,7 @@ import java.lang.reflect.Modifier
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-object ControllerClassLoader : IControllerClassLoader, ClassLoader() {
+object ControllerClassLoader : IControllerClassLoader, ClassScanner() {
 
     /**
      * http配置

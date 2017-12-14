@@ -6,7 +6,7 @@ package com.jkmvc.common
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-interface IClassLoader {
+interface IClassScanner {
     /**
      * 添加单个包
      *
