@@ -69,13 +69,22 @@ object ControllerClassLoader : IControllerClassLoader, ClassScanner() {
     }
 
     /**
-     * 获得controller类
+     * 根据名字来获得controller类
      *
      * @param controller名
      * @return
      */
     public override fun getControllerClass(name: String): ControllerClass? {
         return controllerClasses.get(name);
+    }
+
+    /**
+     * 获得所有的controller类
+     *
+     * @return
+     */
+    public override fun getControllerClasses(): Collection<ControllerClass> {
+        return controllerClasses.values
     }
 
 }
