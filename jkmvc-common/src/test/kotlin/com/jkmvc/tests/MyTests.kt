@@ -6,16 +6,10 @@ import com.jkmvc.validate.Validation
 import getIntranetHost
 import org.junit.Test
 import java.io.File
-import java.lang.reflect.Modifier
 import java.math.BigDecimal
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
-import kotlin.reflect.jvm.jvmName
-import java.net.InetAddress
-import java.net.Inet4Address
-import java.util.Enumeration
-import java.net.NetworkInterface
 
 
 open class A() {}
@@ -83,9 +77,9 @@ class MyTests{
 
     @Test
     fun testString(){
-        val m = "jdbc:mysql://[^/]+/([^\\?]+)".toRegex().find("jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8")
-        if(m != null)
-            println(m.groupValues[1])
+//        val m = "jdbc:mysql://[^/]+/([^\\?]+)".toRegex().find("jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8")
+//        if(m != null)
+//            println(m.groups[1]!!.value)
         /*val funname = "indexAction"
         val name = funname.substring(0, funname.length - 6) // 去掉Action结尾
         println(name)*/
@@ -104,16 +98,19 @@ class MyTests{
         world
         """
         println(str)*/
-    }
 
-    @Test
-    fun testUrl(){
-        val url = Url("mysql://127.0.0.1:3306/test?username=root&password=root")
-        //val url = URL("mysql://127.0.0.1:3306/?username=root&password=root")
-        //val url = URL("mysql://127.0.0.1:3306?username=root&password=root")
-        //val url = URL("mysql://127.0.0.1?username=root&password=root")
-        //val url = URL("mysql://127.0.0.1")
-        println(url)
+
+        val f = File("/home/shi/test/wiki.txt")
+        /*val ms = "<span.*>([^<]*)</span>".toRegex().findAll(f.readText())
+        for(m in ms){
+            println(m.groups[0]!!.value)
+        }*/
+        f.replaceText {
+            "<span.*>([^<]*)</span>".toRegex().replace(it){ result: MatchResult ->
+                result.groups[1]!!.value
+            }
+        }
+
     }
 
     @Test
@@ -380,7 +377,7 @@ class MyTests{
             if(it.name.indexOf("Controller.kt") > 0){
                 it.replaceText {
                     "fun\\s+action([\\w\\d]+)".toRegex().replace(it){ result: MatchResult ->
-                        "fun " + result.groupValues[1].decapitalize() + "Action"
+                        "fun " + result.groups[1]!!.value.decapitalize() + "Action"
                     }
                 }
                 println("处理文件: " + it.name)
@@ -398,19 +395,19 @@ class MyTests{
                 val matches = "^\\s+\\*\\s+([^@]+)$".toRegex().find(it)
                 if(matches != null){
                     i++
-                    clazz = matches.groupValues[1]
+                    clazz = matches.groups[1]!!.value
                 }else{
                     // 获得表名
                     val matches = "^@Table\\(name=\"(.+)\"\\)$".toRegex().find(it)
                     if(matches != null){
                         println("\n-------------------------------------------------\n")
-                        println(i.toString() + matches.groupValues[1] + "\t" + clazz)
+                        println(i.toString() + matches.groups[1]!!.value + "\t" + clazz)
                         println("-- 字段")
                     }else{
                         // 获得字段
                         val matches = "^\\s+private\\s+(.+)$".toRegex().find(it)
                         if(matches != null){
-                            val field = matches.groupValues[1]
+                            val field = matches.groups[1]!!.value
                             val arr = field.split("\\s+".toRegex())
                             var (type, name) = arr
                             name = name.trim(";")

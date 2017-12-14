@@ -82,7 +82,7 @@ object HttpHandler: IHttpHandler {
      */
     private fun callController(req: Request, res: Response) {
         // 获得controller类
-        val clazz:ControllerClass? = ControllerLoader.getControllerClass(req.controller);
+        val clazz:ControllerClass? = ControllerClassLoader.getControllerClass(req.controller);
         if (clazz == null)
             throw RouteException ("Controller类不存在：" + req.controller);
 
