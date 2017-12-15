@@ -136,6 +136,26 @@ public inline fun KParameter.convert(value: String): Any {
 }
 
 /**
+ * 检查当前类 是否是 指定类的子类
+ *
+ * @param superClass 父类
+ * @return
+ */
+public fun Class<*>.isSubClass(superClass: Class<*>): Boolean {
+    return this != superClass && superClass.isAssignableFrom(this)
+}
+
+/**
+ * 检查当前类 是否是 指定类的父类
+ *
+ * @param subClass 子类
+ * @return
+ */
+public fun Class<*>.isSuperClass(subClass: Class<*>): Boolean {
+    return this != subClass && this.isAssignableFrom(subClass)
+}
+
+/**
  * 获得方法签名
  * @return
  */
@@ -143,4 +163,16 @@ public fun Method.getSignature(): String {
     return this.parameterTypes.joinTo(StringBuilder(this.name), ",", "(", ")"){
         it.name
     }.toString().replace("java.lang.", "")
+}
+
+/**
+ * 获得当前类的方法哈系: <方法签名 to 方法>
+ * @return
+ */
+public fun Class<*>.getMethodMaps(): HashMap<String, Method> {
+    val methods = HashMap<String, Method>();
+    for (method in  this.methods) {
+        methods[method.getSignature()] = method
+    }
+    return methods
 }

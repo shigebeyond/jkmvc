@@ -217,7 +217,11 @@ class MyTests{
         println(Modifier.isAbstract(m))
         println(Modifier.isInterface(m))*/
 
-        println(IConfig::class === IConfig::class)
+        val clazz = IConfig::class
+        println(clazz === IConfig::class) // true
+        val java = clazz.java
+        println(java === IConfig::class.java) // true
+        println(java.isAssignableFrom(java)) // true
     }
 
     @Test

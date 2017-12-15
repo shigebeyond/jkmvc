@@ -2,6 +2,7 @@ package com.jkmvc.http
 
 import com.jkmvc.common.ClassScanner
 import com.jkmvc.common.Config
+import com.jkmvc.common.isSuperClass
 import com.jkmvc.common.lcFirst
 import java.io.File
 import java.lang.reflect.Modifier
@@ -49,8 +50,7 @@ object ControllerClassLoader : IControllerClassLoader, ClassScanner() {
         val clazz = Class.forName(className)
         val modifiers = clazz.modifiers
         // 过滤Controller子类
-        val base = Controller::class.java
-        if(base != clazz && base.isAssignableFrom(clazz) /* 继承Controller */ && !Modifier.isAbstract(modifiers) /* 非抽象类 */ && !Modifier.isInterface(modifiers) /* 非接口 */){
+        if(Controller::class.java.isSuperClass(clazz) /* 继承Controller */ && !Modifier.isAbstract(modifiers) /* 非抽象类 */ && !Modifier.isInterface(modifiers) /* 非接口 */){
             // 收集controller的构造函数+所有action方法
             controllerClasses[getControllerName(className)] = ControllerClass(clazz.kotlin)
         }
