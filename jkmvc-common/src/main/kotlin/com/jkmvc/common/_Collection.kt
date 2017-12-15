@@ -1,12 +1,30 @@
 package com.jkmvc.common
 
 import java.util.*
+import java.util.concurrent.ThreadLocalRandom
 
 /**
  * 检查集合是否为空
+ * @return
  */
 public fun <T> Collection<T>?.isNullOrEmpty(): Boolean {
     return this === null || this.isEmpty()
+}
+
+/**
+ * 从集合中获得随机一个元素
+ * @return
+ */
+public fun <T> Collection<T>.getRandom(): T {
+    var n = ThreadLocalRandom.current().nextInt(this.size)
+    if(this is List)
+        return this[n]
+
+    val it = this.iterator()
+    while (--n > 0){
+        it.next()
+    }
+    return it.next()
 }
 
 /**

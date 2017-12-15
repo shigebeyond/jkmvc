@@ -51,10 +51,17 @@ class MyTests{
         list.add("b")
         list.add("c")
         println(list)
-        list.remove("c")
+        /*list.remove("c")
         println(list)
         list.add(0, "d")
-        println(list)
+        println(list)*/
+
+        var n = list.size
+        val it = list.iterator()
+        while (--n > 0){
+            it.next()
+        }
+        println(it.next())
     }
 
     @Test

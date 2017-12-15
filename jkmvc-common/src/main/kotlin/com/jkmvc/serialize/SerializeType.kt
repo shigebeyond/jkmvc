@@ -16,5 +16,8 @@ enum class SerializeType {
         public override val serializer: ISerializer = FstSerializer
     };
 
+    /**
+     * 获得对应的序列器
+     */
     public abstract val serializer: ISerializer
 }

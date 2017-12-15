@@ -3,7 +3,7 @@ package com.jkmvc.serialize
 import java.io.InputStream
 
 /**
- * 序列化
+ * 序列器
  *
  * @author shijianhang
  * @create 2017-10-04 下午3:29
@@ -13,7 +13,7 @@ interface ISerializer {
     companion object{
 
         /**
-         * 获得序列化器
+         * 根据类型来获得序列化器
          *
          * @param type
          * @return
