@@ -18,7 +18,7 @@ abstract class ConfiguredSingleton<T> : IConfiguredSingleton<T> {
     /**
      * 根据单例名来获得单例
      */
-    override fun instance(name: String): T{
+    public override fun instance(name: String): T{
         return insts.getOrPut(name){
             Class.forName(config[name]!!).newInstance() as T
         }
