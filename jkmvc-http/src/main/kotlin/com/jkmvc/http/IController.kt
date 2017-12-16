@@ -47,7 +47,7 @@ interface IController{
      * 执行action
      * @param action action方法
      */
-    public fun executeAction(action: KFunction<*>) {
+    public fun callAction(action: KFunction<*>) {
         // 前置处理
         before()
 

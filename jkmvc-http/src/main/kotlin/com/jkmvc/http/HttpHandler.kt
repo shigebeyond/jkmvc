@@ -110,6 +110,6 @@ object HttpHandler: IHttpHandler {
         controller.res = res;
 
         // 调用controller的action方法
-        controller.executeAction(action)
+        controller.callAction(action)
     }
 }
