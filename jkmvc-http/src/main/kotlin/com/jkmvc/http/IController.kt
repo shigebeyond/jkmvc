@@ -45,9 +45,10 @@ interface IController{
 
     /**
      * 执行action
+     *   注意：为了区别业务action，该方法不能命名为callAction
      * @param action action方法
      */
-    public fun callAction(action: KFunction<*>) {
+    public fun callActionMethod(action: KFunction<*>) {
         // 前置处理
         before()
 
