@@ -1,0 +1,3 @@
+# 序列器的类型
+jdk: com.jkmvc.serialize.JdkSerializer
+fst: com.jkmvc.serialize.FstSerializer

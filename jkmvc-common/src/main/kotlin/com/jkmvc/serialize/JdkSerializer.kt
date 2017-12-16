@@ -8,7 +8,7 @@ import java.io.*
  * @author shijianhang
  * @create 2017-10-04 下午3:29
  **/
-object JdkSerializer : ISerializer {
+class JdkSerializer : ISerializer {
 
     /**
      * 序列化

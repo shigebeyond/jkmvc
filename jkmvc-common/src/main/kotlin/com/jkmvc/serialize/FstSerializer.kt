@@ -11,7 +11,7 @@ import java.io.InputStream
  * @author shijianhang<772910474@qq.com>
  * @date 2017-11-10 4:18 PM
  */
-object FstSerializer: ISerializer {
+class FstSerializer: ISerializer {
 
     /**
      * 配置

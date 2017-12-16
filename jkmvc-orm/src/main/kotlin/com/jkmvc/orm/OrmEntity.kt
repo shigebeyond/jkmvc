@@ -2,8 +2,6 @@ package com.jkmvc.orm
 
 import com.jkmvc.common.*
 import com.jkmvc.serialize.ISerializer
-import com.jkmvc.serialize.JdkSerializer
-import com.jkmvc.serialize.SerializeType
 import java.util.*
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KMutableProperty1

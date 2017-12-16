@@ -1,5 +1,8 @@
 package com.jkmvc.serialize
 
+import com.jkmvc.common.Config
+import com.jkmvc.common.ConfiguredSingleton
+import com.jkmvc.common.IConfig
 import java.io.InputStream
 
 /**
@@ -10,17 +13,12 @@ import java.io.InputStream
  **/
 interface ISerializer {
 
-    companion object{
-
+    // 可配置的单例
+    companion object: ConfiguredSingleton<ISerializer>() {
         /**
-         * 根据类型来获得序列化器
-         *
-         * @param type
-         * @return
+         * 配置，内容是哈希 <单例名 to 单例类>
          */
-        public fun instance(type: String): ISerializer {
-            return SerializeType.valueOf(type).serializer
-        }
+        public override val config: IConfig = Config.instance("serializer")
     }
 
     /**
