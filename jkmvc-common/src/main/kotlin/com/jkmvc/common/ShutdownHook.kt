@@ -10,7 +10,7 @@ import java.io.Closeable
  * @author shijianhang<772910474@qq.com>
  * @date 2017-12-16 3:48 PM
  */
-object ShutdownHook {
+object ShutdownHook : IShutdownHook {
 
     /**
      * 要关闭的对象
@@ -22,11 +22,18 @@ object ShutdownHook {
         Runtime.getRuntime().addShutdownHook(object : Thread() {
             public override fun run() {
                 // 关闭所有对象
-                for (c in closings){
-                    c.close()
-                }
+                closeAll()
             }
         })
+    }
+
+    /**
+     * 关闭所有对象
+     */
+    override fun closeAll() {
+        for (c in closings) {
+            c.close()
+        }
     }
 
     /**
@@ -34,7 +41,7 @@ object ShutdownHook {
      *
      * @param obj
      */
-    public fun addClosing(obj: Closeable){
+    override fun addClosing(obj: Closeable){
         closings.add(obj)
     }
 }
