@@ -87,6 +87,16 @@ public fun URL.isJar(): Boolean {
 }
 
 /**
+ * 获得根资源
+ */
+public fun ClassLoader.getRootResource(): URL {
+    val res = getResource("/") // web环境
+    if(res != null)
+        return res
+    return getResource(".") // cli环境
+}
+
+/**
  * 遍历url中的资源
  * @param action 访问者函数
  */
@@ -106,7 +116,7 @@ public fun URL.travel(action:(relativePath:String, isDir:Boolean) -> Unit):Unit{
          * 文件相对路径=文件绝对路径-跟路径：om\jkmvc\szpower\controller\WorkInstructionController.class
          * => com变为om，少了一个c，导致根据文件相对路径来加载对应的class错误
          */
-        val root = Thread.currentThread().contextClassLoader.getResource("/").path
+        val root =  Thread.currentThread().contextClassLoader.getRootResource().path
         val os = System.getProperty("os.name")
         // println("遍历资源")
         // println("操作系统：" + os)
