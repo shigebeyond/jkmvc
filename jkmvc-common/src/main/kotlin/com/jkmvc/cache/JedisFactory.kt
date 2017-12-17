@@ -54,7 +54,7 @@ object JedisFactory {
 
         // 构建redis连接池配置
         val poolConfig = JedisPoolConfig()
-        poolConfig.maxTotal = config.getInt("maxTotal", 10)!!
+        poolConfig.maxTotal = config.getInt("maxTotal", 100)!! // 最大连接数，与并发线程数一致
         poolConfig.maxIdle = 5
         poolConfig.maxWaitMillis = (1000 * 10).toLong()
         //在borrow一个jedis实例时，是否提前进行validate操作；如果为true，则得到的jedis实例均是可用的；
