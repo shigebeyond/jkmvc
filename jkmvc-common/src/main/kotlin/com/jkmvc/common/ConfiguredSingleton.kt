@@ -4,6 +4,12 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 配置的单例
+ *   可以动态的单例名来获得单例，但是需要实现配置单例名及其实现类
+ *   如序列器的配置
+ *   <code>
+ *      jdk: com.jkmvc.serialize.JdkSerializer
+ *      fst: com.jkmvc.serialize.FstSerializer
+ *  </code>
  *
  * @author shijianhang
  * @create 2017-12-16 下午3:17
