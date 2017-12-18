@@ -17,13 +17,14 @@ public fun <T> Collection<T>?.isNullOrEmpty(): Boolean {
  */
 public fun <T> Collection<T>.getRandom(): T {
     var n = ThreadLocalRandom.current().nextInt(this.size)
+    // list
     if(this is List)
         return this[n]
 
+    // 非list
     val it = this.iterator()
-    while (--n > 0){
+    while (--n > 0)
         it.next()
-    }
     return it.next()
 }
 
