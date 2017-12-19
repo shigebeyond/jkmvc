@@ -62,11 +62,16 @@ abstract class Auth:IAuth {
      *
      * @param username  用户名
      * @param password  密码
+     * @param withs 联查的关联对象名
      * @return Orm?
      */
-    public override fun login(username:String, password:String): IAuthUserModel? {
+    public override fun login(username:String, password:String, withs: Array<String>): IAuthUserModel? {
         // 动态获得queryBuilder，即UserModel.queryBuilder()
         val query = userModel.modelOrmMeta.queryBuilder(false, true)
+
+        // 联查
+        if(withs.isNotEmpty())
+            query.withs(*withs)
 
         // 根据用户名查找用户
         val user = query.where(sessionConfig["usernameField"]!!, "=", username).find(transform = userModel.recordTranformer) as IAuthUserModel?;

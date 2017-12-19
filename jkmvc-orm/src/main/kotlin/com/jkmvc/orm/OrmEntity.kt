@@ -171,7 +171,7 @@ abstract class OrmEntity : IOrm {
      * @return
      */
     public override fun serialize(): ByteArray? {
-        return serializer.serialize(data)
+        return serializer.serialize(this.asMap())
     }
 
     /**
