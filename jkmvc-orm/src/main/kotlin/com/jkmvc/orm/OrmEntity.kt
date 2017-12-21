@@ -48,6 +48,7 @@ abstract class OrmEntity : IOrm {
 
     /**
      * 变化的字段值：<字段名 to 原始字段值>
+     *     一般只读，lazy创建，节省内存
      */
     protected val dirty: MutableMap<String, Any?> by lazy {
         HashMap<String, Any?>()
