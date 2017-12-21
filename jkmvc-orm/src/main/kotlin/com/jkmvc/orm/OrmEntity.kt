@@ -103,6 +103,25 @@ abstract class OrmEntity : IOrm {
     }
 
     /**
+     * 获得或设置字段值
+     *
+     * @param key
+     * @param defaultValue
+     * @return
+     */
+    public inline fun getOrPut(key: String, defaultValue: () -> Any?): Any? {
+        // 获得字段值
+        val value = data[key]
+        if (value != null)
+            return value
+
+        // 设置字段值
+        val answer = defaultValue()
+        set(key, answer)
+        return answer
+    }
+
+    /**
      * 设置多个字段值
      *
      * @param values   字段值的数组：<字段名 to 字段值>
