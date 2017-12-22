@@ -1,0 +1,9 @@
+# 授权配置
+qq:
+  clientId: xxx
+  clientSecret: yyy
+  redirectUri: http://test.com?type=qq
+weibo:
+  clientId: xxx
+  clientSecret: yyy
+  redirectUri: http://test.com?type=weibo
