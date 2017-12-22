@@ -3,14 +3,14 @@ package com.jkmvc.session
 import com.jkmvc.http.Request
 
 /**
- * 认证用户 -- 使用token来保存登录用户的状态
+ * 基于token认证用户 -- 使用token来保存登录用户的状态
  *   1 登录
  *   2 注销
  *
  * @author shijianhang
  * @create 2017-10-04 下午3:40
  **/
-class AuthToken: Auth() {
+class TokenAuth : Auth() {
 
     /**
      * token管理器

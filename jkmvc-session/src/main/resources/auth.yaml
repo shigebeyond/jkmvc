@@ -1,0 +1,3 @@
+# 认证机制
+session: com.jkmvc.session.SessionAuth
+token: com.jkmvc.session.TokenAuth

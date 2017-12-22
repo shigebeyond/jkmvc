@@ -1,6 +1,8 @@
 package com.jkmvc.session
 
 import com.jkmvc.common.Config
+import com.jkmvc.common.IConfig
+import com.jkmvc.common.NamedSingleton
 import com.jkmvc.common.isSuperClass
 import com.jkmvc.db.dbLogger
 import com.jkmvc.db.recordTranformer
@@ -18,7 +20,7 @@ import kotlin.reflect.KClass
  **/
 abstract class Auth:IAuth {
 
-    companion object{
+    companion object: NamedSingleton<Auth>() {
 
         /**
          * 会话配置
@@ -42,18 +44,18 @@ abstract class Auth:IAuth {
             dbLogger.error("会话相关的用户模型为：" + sessionConfig.getString("userModel"))
         }
 
-        private var _inst:Auth? = null
+        /************************ NamedSingleton 的实现 *************************/
+        /**
+         * 配置，内容是哈希 <单例名 to 单例类>
+         */
+        public override val config: IConfig = Config.instance("auth", "yaml")
 
         /**
-         * 获得单例
+         * 根据单例名来获得单例
+         * @return
          */
-        public fun instance():Auth{
-            if(_inst == null) {
-                val authType = sessionConfig.getString("authType", "Session")!!
-                val clazz = "com.jkmvc.session.Auth$authType" // AuthSession 或 AuthToken
-                _inst = Class.forName(clazz).newInstance() as Auth
-            }
-            return _inst!!
+        public fun instance(): Auth{
+            return instance(sessionConfig["authType"]!!)
         }
     }
 

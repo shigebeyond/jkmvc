@@ -1,7 +1,7 @@
 package com.jkmvc.serialize
 
 import com.jkmvc.common.Config
-import com.jkmvc.common.ConfiguredSingleton
+import com.jkmvc.common.NamedSingleton
 import com.jkmvc.common.IConfig
 import java.io.InputStream
 
@@ -14,7 +14,7 @@ import java.io.InputStream
 interface ISerializer {
 
     // 可配置的单例
-    companion object: ConfiguredSingleton<ISerializer>() {
+    companion object: NamedSingleton<ISerializer>() {
         /**
          * 配置，内容是哈希 <单例名 to 单例类>
          */

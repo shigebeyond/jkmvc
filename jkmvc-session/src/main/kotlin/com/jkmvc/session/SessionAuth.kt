@@ -4,14 +4,14 @@ import com.jkmvc.http.Request
 import javax.servlet.http.HttpSession
 
 /**
- * 认证用户 -- 使用session来保存登录用户
+ * 基于session的认证用户 -- 使用session来保存登录用户
  *   1 登录
  *   2 注销
  *
  * @author shijianhang
  * @create 2017-10-04 下午3:40
  **/
-class AuthSession: Auth() {
+class SessionAuth : Auth() {
 
     /**
      * 获得当前会话
