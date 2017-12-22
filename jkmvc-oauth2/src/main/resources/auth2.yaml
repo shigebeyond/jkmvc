@@ -2,8 +2,8 @@
 qq:
   clientId: xxx
   clientSecret: yyy
-  redirectUri: http://test.com?type=qq
+  redirectUri: http://test.com/oauth2/callback?type=qq
 weibo:
   clientId: xxx
   clientSecret: yyy
-  redirectUri: http://test.com?type=weibo
+  redirectUri: http://test.com/oauth2/callback?type=weibo
