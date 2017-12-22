@@ -121,7 +121,7 @@ public inline fun String.replaces(params:List<String>, prefix:String = ":", post
     return this.replace("$prefix(\\d+)$postfix".toRegex()){ matches:MatchResult ->
         val i = matches.groupValues[1]
         val value = params.get(i.toInt());
-        value.toString()
+        value
     };
 }
 
