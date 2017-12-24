@@ -7,7 +7,7 @@ import com.jkmvc.common.IConfig
 import com.jkmvc.common.NamedSingleton
 
 /**
- * 授权处理
+ * 授权者
  *
  * @author shijianhang
  * @create 2017-10-04 下午3:29
@@ -16,6 +16,9 @@ public abstract class IOauth2Authorizer {
 
     companion object: NamedSingleton<IOauth2Authorizer>() {
 
+        /**
+         * 配置，内容是哈希 <单例名 to 单例类>
+         */
         override val config: IConfig = Config.instance("oauth2-authorizer")
 
     }
