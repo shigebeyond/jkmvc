@@ -32,9 +32,9 @@ object ShutdownHook : IShutdownHook {
      * 关闭所有对象
      */
     override fun closeAll() {
-        for (c in closings) {
+        for (c in closings) 
             c.close()
-        }
+        closings.clear()
     }
 
     /**
