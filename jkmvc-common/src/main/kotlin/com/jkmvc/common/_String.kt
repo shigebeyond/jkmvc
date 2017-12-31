@@ -76,14 +76,21 @@ public inline fun String.lcFirst(): String {
  * @return
  */
 public inline fun String.trim(str:String): String {
-    var start = 0;
-    var end = length
-    if(this.startsWith(str))
-        start = str.length;
-    if(this.endsWith(str))
-        end = length - str.length;
+    if(str.isEmpty())
+        return this
+
+    var start = if(startsWith(str))
+                    str.length
+                else
+                    0
+    var end = if(endsWith(str))
+                    length - str.length
+                else
+                    length
+
     if(start == 0 && end == length)
         return this;
+
     return this.substring(start, end);
 }
 
@@ -93,17 +100,25 @@ public inline fun String.trim(str:String): String {
  * @param suffix 尾部要去掉的子字符串
  * @return
  */
-public inline fun String.trim(preffix:String, suffix:String): String {
-    var start = 0;
-    var end = length
-    if(this.startsWith(preffix))
-        start = preffix.length;
-    if(this.endsWith(suffix))
-        end = length - suffix.length;
+public inline fun String.trim(preffix:String, suffix:String = ""): String {
+    if(preffix.isEmpty() && suffix.isEmpty())
+        return this
+
+    var start = if(preffix.isNotEmpty() && this.startsWith(preffix))
+                    preffix.length
+                else
+                    0
+    var end = if(suffix.isNotEmpty() && this.endsWith(suffix))
+                    length - suffix.length;
+                else
+                    length
+
     if(start == 0 && end == length)
         return this;
+
     if(start >= end)
         return "";
+
     return this.substring(start, end);
 }
 
