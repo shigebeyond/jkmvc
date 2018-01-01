@@ -16,7 +16,11 @@ import java.util.concurrent.*
  */
 open class BasicFuture<T>(protected val callback: FutureCallback<T?>? = null): Future<T?>, Cancellable {
 
-    protected val lock = java.lang.Object()
+    /**
+     * this的锁，即this自己
+     *   Kotlin的Any类似于Java的Object，但没有wait()，notify()和notifyAll()方法，因此只能将 this 转为 Object 才能调用这些方法
+     */
+    protected val thisLock:java.lang.Object = this as java.lang.Object
 
     /**
      * 是否已完成
@@ -78,7 +82,7 @@ open class BasicFuture<T>(protected val callback: FutureCallback<T?>? = null): F
     @Synchronized @Throws(InterruptedException::class, ExecutionException::class)
     public override fun get(): T? {
         while (!this.completed)
-            lock.wait()
+            thisLock.wait()
 
         return tryGetResult()
     }
@@ -95,15 +99,15 @@ open class BasicFuture<T>(protected val callback: FutureCallback<T?>? = null): F
         val msecs = unit.toMillis(timeout)
         val startTime = if (msecs <= 0) 0 else System.currentTimeMillis()
         var waitTime = msecs
-        if (this.completed)
+        if (completed)
             return tryGetResult()
 
         if (waitTime <= 0)
             throw TimeoutException()
 
         while (true) {
-            lock.wait(waitTime)
-            if (this.completed)
+            thisLock.wait(waitTime)
+            if (completed)
                 return tryGetResult()
 
             waitTime = msecs - (System.currentTimeMillis() - startTime)
@@ -126,7 +130,7 @@ open class BasicFuture<T>(protected val callback: FutureCallback<T?>? = null): F
             // 标识完成 + 记录结果
             completed = true
             this.result = result
-            lock.notifyAll()
+            thisLock.notifyAll()
         }
         // 回调
         callback?.completed(result)
@@ -147,7 +151,7 @@ open class BasicFuture<T>(protected val callback: FutureCallback<T?>? = null): F
             // 标识完成 + 记录异常
             completed = true
             ex = exception
-            lock.notifyAll()
+            thisLock.notifyAll()
         }
         // 回调
         callback?.failed(exception)
@@ -168,7 +172,7 @@ open class BasicFuture<T>(protected val callback: FutureCallback<T?>? = null): F
             // 标识完成 + 标识取消
             completed = true
             cancelled = true
-            lock.notifyAll()
+            thisLock.notifyAll()
         }
         // 回调
         callback?.cancelled()
