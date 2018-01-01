@@ -1,7 +1,7 @@
 package com.jkmvc.future
 
 /**
- * 已完成的异步结果，没有延后
+ * 已完成的异步结果，没有延迟
  *
  * @ClassName: CompletedFuture
  * @Description:
