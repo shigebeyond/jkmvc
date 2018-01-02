@@ -14,7 +14,7 @@ import java.util.concurrent.*
  * @author shijianhang<772910474@qq.com>
  * @date 2017-12-30 6:43 PM
  */
-open class BasicFuture<T>(protected val callback: FutureCallback<T?>? = null): Future<T?>, Cancellable {
+open class BasicFuture<T>(protected val callback: FutureCallback<T?>? = null /* 回调 */): Future<T?>, Cancellable {
 
     /**
      * this的锁，即this自己
