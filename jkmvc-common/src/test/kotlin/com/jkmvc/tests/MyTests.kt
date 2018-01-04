@@ -4,6 +4,10 @@ import com.jkmvc.cache.JedisFactory
 import com.jkmvc.common.*
 import com.jkmvc.validate.Validation
 import getIntranetHost
+import org.dom4j.Attribute
+import org.dom4j.DocumentException
+import org.dom4j.Element
+import org.dom4j.io.SAXReader
 import org.junit.Test
 import java.io.File
 import java.math.BigDecimal
@@ -170,6 +174,38 @@ class MyTests{
         // 不能识别正则，如 jkmvc.*
         val res = Thread.currentThread().contextClassLoader.getResource("jkmvc.properties")
         println(res)
+    }
+
+    @Test
+    fun testXml(){
+        // https://www.cnblogs.com/longqingyang/p/5577937.html
+        // 解析books.xml文件
+        // 创建SAXReader的对象reader
+        val reader = SAXReader();
+        try {
+            // 通过reader对象的read方法加载books.xml文件,获取docuemnt对象。
+            val document = reader.read(Thread.currentThread().contextClassLoader.getResourceAsStream("books.xml"));
+            // 通过document对象获取根节点bookstore
+            val bookStore = document.getRootElement();
+            // 通过element对象的elementIterator方法获取迭代器
+            // 遍历迭代器，获取根节点中的信息（书籍）
+            for(ib in bookStore.elementIterator()){
+                val book = ib as Element
+                System.out.println("=====开始遍历某一本书=====");
+                // 获取book的属性名以及 属性值
+                for (ia in book.attributes()) {
+                    val attr = ia as Attribute
+                    println("属性：" + attr.name + "=" + attr.value);
+                }
+                for(ie in book.elementIterator()){
+                    val child = ie as Element
+                    println("节点：" + child.name + "=" + child.getStringValue());
+                }
+                System.out.println("=====结束遍历某一本书=====");
+            }
+        } catch (e: DocumentException) {
+            e.printStackTrace();
+        }
     }
 
     @Test

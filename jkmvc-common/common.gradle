@@ -7,6 +7,9 @@ dependencies {
     // collection
     compile 'commons-collections:commons-collections:3.2.1'
 
+    // xml
+    compile 'dom4j:dom4j:1.6.1'
+
     // yaml
     compile 'org.yaml:snakeyaml:1.18'
 
