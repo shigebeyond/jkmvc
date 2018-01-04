@@ -9,6 +9,7 @@ dependencies {
 
     // xml
     compile 'dom4j:dom4j:1.6.1'
+    compile 'sax:sax:2.0.1'
 
     // yaml
     compile 'org.yaml:snakeyaml:1.18'

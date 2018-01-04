@@ -2,6 +2,7 @@ package com.jkmvc.tests
 
 import com.jkmvc.cache.JedisFactory
 import com.jkmvc.common.*
+import com.jkmvc.validate.IValidation
 import com.jkmvc.validate.Validation
 import getIntranetHost
 import org.dom4j.Attribute
@@ -253,11 +254,20 @@ class MyTests{
         println(Modifier.isAbstract(m))
         println(Modifier.isInterface(m))*/
 
-        val clazz = IConfig::class
+        /*val clazz = IConfig::class
         println(clazz === IConfig::class) // true
         val java = clazz.java
         println(java === IConfig::class.java) // true
-        println(java.isAssignableFrom(java)) // true
+        println(java.isAssignableFrom(java)) // true*/
+
+//        val method = Config::class.java.findMethod("containsKey", arrayListOf(String::class.java))
+//        println(method)
+
+//        val constructor = Config::class.java.findConstructor(arrayListOf(String::class.java, String::class.java))
+//        println(constructor)
+
+        //println(Config::class.java.isInterface)
+        //println(IValidation::class.java.isInterface)
     }
 
     @Test
