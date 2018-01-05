@@ -3,7 +3,7 @@ dependencies{
     compile project(':jkmvc-common')
 
     // datasource
-    compile 'com.alibaba:druid:1.0.25'
+    compile 'com.alibaba:druid:1.1.6'
 
     // jdbc
     testRuntime "mysql:mysql-connector-java:5.1.6"

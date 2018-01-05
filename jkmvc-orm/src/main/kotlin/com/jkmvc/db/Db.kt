@@ -40,12 +40,15 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
         /**
          * 线程安全的db缓存
          */
-        protected val dbs:ThreadLocal<MutableMap<String, Db>> = ThreadLocal.withInitial {
+        protected val dbs:ThreadLocal<HashMap<String, Db>> = ThreadLocal.withInitial {
             HashMap<String, Db>();
         }
 
         /**
-         * 获得db
+         * 获得db(线程安全)
+         *
+         * @param name
+         * @return
          */
         public fun instance(name:String = "default"):Db{
             return dbs.get().getOrPut(name){
@@ -57,25 +60,36 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
         }
 
         /**
-         * 关闭db
+         * 关闭当前线程的单个db
+         *
+         * @param db
          */
         public fun closeDb(db:Db){
+            // 删除引用
+            if(dbs.get().remove(db.name) == null)
+                throw DbException("当前线程并没有[${db.name}]连接，无法关闭")
+            // 关闭连接
             db.conn.close()
-            dbs.get().remove(db.name);
         }
 
         /**
-         * 关闭所有db
+         * 关闭当前线程的所有db
          */
         public fun closeAllDb(){
-            for((name, db) in dbs.get()){
+            // 获得当前线程的所有db
+            val localDbs = dbs.get()
+            if(localDbs.isEmpty())
+                return
+            // 关闭连接
+            for((name, db) in localDbs)
                 db.conn.close()
-            }
-            dbs.get().clear();
+            // 清空引用
+            localDbs.clear();
         }
 
         /**
          * 转化为Long
+         *
          * @param value
          * @return
          */
@@ -90,6 +104,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
 
         /**
          * 转化为Int
+         *
          * @param value
          * @return
          */

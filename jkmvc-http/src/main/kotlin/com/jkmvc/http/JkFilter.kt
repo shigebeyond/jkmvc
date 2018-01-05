@@ -19,10 +19,12 @@ open class JkFilter : Filter {
         // if not handled（eg request static file）, we delegate to next filter to use the default servlets
         if(!handled)
             chain.doFilter(req, res)
+
+        // 关闭当前线程的所有db连接
+        Db.closeAllDb();
     }
 
     override fun destroy() {
-        // 关闭当前线程相关的所有db连接
-        Db.closeAllDb();
+
     }
 }
