@@ -111,18 +111,32 @@ class MyTests{
         """
         println(str)*/
 
+    }
 
-        val f = File("/home/shi/test/wiki.txt")
-        /*val ms = "<span.*>([^<]*)</span>".toRegex().findAll(f.readText())
+    @Test
+    fun testFile(){
+        /*val f = File("/home/shi/test/wiki.txt")
+        val ms = "<span.*>([^<]*)</span>".toRegex().findAll(f.readText())
         for(m in ms){
             println(m.groups[0]!!.value)
-        }*/
+        }
         f.replaceText {
             "<span.*>([^<]*)</span>".toRegex().replace(it){ result: MatchResult ->
                 result.groups[1]!!.value
             }
-        }
+        }*/
 
+        // http://yipeiwu.com/getvideo.html
+        // 下载网易公开课
+        val f = File("/home/shi/test/course.html")
+        val ms = "<tr>\\s*<td>(.+)\\s*</td>\\s*<td><a href=\"([^\"]+)\".+</td>\\s*</tr>".toRegex().findAll(f.readText())
+        for(m in ms){
+            val title = m.groups[1]!!.value
+            val url = m.groups[2]!!.value
+            val ext = url.substringAfterLast('.')
+            // 服务器拒绝 aria2c 下载，只能用curl
+            println("aria2c -s 2 '$url' -o '$title.$ext'")
+        }
     }
 
     @Test
