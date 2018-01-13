@@ -41,7 +41,7 @@ public fun Date.print():Unit{
  * @return
  */
 public fun Calendar.zeroTime(): Calendar {
-    set(Calendar.HOUR, 0)
+    set(Calendar.HOUR_OF_DAY, 0)
     set(Calendar.MINUTE, 0)
     set(Calendar.SECOND, 0)
     set(Calendar.MILLISECOND, 0)
@@ -53,7 +53,7 @@ public fun Calendar.zeroTime(): Calendar {
  * @return
  */
 public fun Calendar.fullTime(): Calendar {
-    set(Calendar.HOUR, 23)
+    set(Calendar.HOUR_OF_DAY, 23)
     set(Calendar.MINUTE, 59)
     set(Calendar.SECOND, 59)
     set(Calendar.MILLISECOND, 999)
