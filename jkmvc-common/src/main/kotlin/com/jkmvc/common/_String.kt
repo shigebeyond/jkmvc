@@ -4,6 +4,10 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
+import oracle.net.aso.C11.x
+import java.text.NumberFormat
+
+
 
 /****************************** 字符串扩展 *******************************/
 /**
@@ -204,6 +208,18 @@ val datetimeFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 public fun String.toDate(): Date {
     val format: SimpleDateFormat = if(contains(':')) datetimeFormat else dateFormat;
     return format.parse(this)
+}
+
+/**
+ * 格式化 double 值
+ *
+ * @param precision 精度
+ * @return
+ */
+public fun Double.format(precision:Int = 2): String {
+    val format = NumberFormat.getNumberInstance()
+    format.maximumFractionDigits = precision
+    return format.format(this)
 }
 
 /**
