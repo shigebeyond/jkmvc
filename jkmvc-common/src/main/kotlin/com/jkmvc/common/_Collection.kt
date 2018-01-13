@@ -4,6 +4,46 @@ import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
 /**
+ * 是否数组
+ * @return
+ */
+public fun Any.isArray(): Boolean {
+    return this is Array<*> || this is IntArray || this is ShortArray || this is LongArray || this is FloatArray || this is DoubleArray || this is BooleanArray
+}
+
+/**
+ * 是否数组或集合
+ * @return
+ */
+public fun Any?.isArrayOrCollection(): Boolean {
+    return this != null && (this.isArray() || this is Collection<*>)
+}
+
+/**
+ * 是否数组或集合为空
+ * @return
+ */
+public fun Any.isArrayOrCollectionEmpty(): Boolean {
+    if(this is Array<*>)
+        return this.isEmpty()
+    if(this is IntArray)
+        return this.isEmpty()
+    if(this is ShortArray)
+        return this.isEmpty()
+    if(this is LongArray)
+        return this.isEmpty()
+    if(this is FloatArray)
+        return this.isEmpty()
+    if(this is DoubleArray)
+        return this.isEmpty()
+    if(this is BooleanArray)
+        return this.isEmpty()
+    if(this is Collection<*>)
+        return this.isEmpty()
+    return false
+}
+
+/**
  * 检查集合是否为空
  * @return
  */

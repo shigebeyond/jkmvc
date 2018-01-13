@@ -1,5 +1,7 @@
 package com.jkmvc.db
 
+import com.jkmvc.common.isArrayOrCollection
+
 /**
  * 修饰子句的类型
  * @author shijianhang
@@ -64,8 +66,7 @@ interface IDbQueryBuilderDecoration: IDbQuoter
         if(value == null)
             return where(column, "IS", value);
 
-        if(value is Array<*> || value is IntArray || value is ShortArray || value is LongArray || value is FloatArray || value is DoubleArray || value is BooleanArray
-                || value is Collection<*>)
+        if(value.isArrayOrCollection())
             return where(column, "IN", value)
 
         return where(column, "=", value);
@@ -79,7 +80,7 @@ interface IDbQueryBuilderDecoration: IDbQuoter
      * @return
      */
     fun orWhere(column:String, value:Any?):IDbQueryBuilder{
-        if(value is Array<*> || value is Collection<*>)
+        if(value.isArrayOrCollection())
             return orWhere(column, "IN", value)
 
         return orWhere(column, "=", value);

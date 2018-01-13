@@ -1,6 +1,7 @@
 package com.jkmvc.db
 
 import com.jkmvc.common.getOrPut
+import com.jkmvc.common.isArrayOrCollectionEmpty
 import java.util.*
 
 /**
@@ -246,7 +247,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
      * @return
      */
     public override fun where(column: String, op: String, value: Any?): IDbQueryBuilder {
-        return andWhere (column, op, value);
+        return andWhere(column, op, value);
     }
 
     /**
@@ -258,7 +259,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
      * @return
      */
     public override fun andWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
-        whereClause.addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "AND");
+        whereClause.addSubexp(arrayOf<Any?>(column, prepareOperator(column, op, value), value), "AND");
         return this;
     }
 
@@ -271,7 +272,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
      * @return
      */
     public override fun orWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
-        whereClause.addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "OR");
+        whereClause.addSubexp(arrayOf<Any?>(column, prepareOperator(column, op, value), value), "OR");
         return this;
 
     }
@@ -279,13 +280,17 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
     /**
      * Prepare operator
      *
+     * @param   column  column name or Pair(column, alias) or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
      */
-    protected fun prepareOperator(value: Any?, op: String = "="): String {
+    protected fun prepareOperator(column: String, op: String, value: Any?): String {
         if (value == null && op == "=") // IS null
             return "IS";
+
+        if(op.equals("IN", true) && (value == null || value.isArrayOrCollectionEmpty())) // IN 空数组/集合
+            throw DbException("查询条件where(\"$column\", \"IN\", ?)中的值为空数组/集合");
 
         return op;
     }
@@ -381,7 +386,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
      * @return
      */
     public override fun andHaving(column: String, op: String, value: Any?): IDbQueryBuilder {
-        havingClause.addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "AND");
+        havingClause.addSubexp(arrayOf<Any?>(column, prepareOperator(column, op, value), value), "AND");
         return this;
     }
 
@@ -394,7 +399,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
      * @return
      */
     public override fun orHaving(column: String, op: String, value: Any?): IDbQueryBuilder {
-        havingClause.addSubexp(arrayOf<Any?>(column, prepareOperator(value, op), value), "OR");
+        havingClause.addSubexp(arrayOf<Any?>(column, prepareOperator(column, op, value), value), "OR");
         return this;
     }
 
