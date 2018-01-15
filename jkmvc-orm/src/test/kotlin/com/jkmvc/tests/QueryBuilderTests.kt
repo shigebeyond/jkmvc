@@ -168,7 +168,7 @@ class QueryBuilderTests{
      */
     @Test
     fun testSubQuery(){
-        // 子查询
+        /*// 子查询
         val sub = DbQueryBuilder(db).select("username", "COUNT(`id`)" to "total_posts")
                 .from("posts").groupBy("username").having("total_posts", ">=", 10);
 
@@ -180,6 +180,15 @@ class QueryBuilderTests{
         // insert子查询： insert...select
         //val query = DbQueryBuilder(db).table("post_totals").insertColumns("username", "posts").values(sub)
         //val csql = query.compileInsert()
+        */
+
+        // 子查询
+        val sub = DbQueryBuilder(db).select("username").from("posts");
+
+        // select in 子查询
+        val query = DbQueryBuilder(db).from("users").where("username", "IN", sub);
+        val csql = query.compileSelect()
+
         println(csql.previewSql())
     }
 

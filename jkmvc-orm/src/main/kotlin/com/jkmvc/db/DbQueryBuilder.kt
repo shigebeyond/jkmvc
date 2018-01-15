@@ -102,7 +102,7 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:Pair<String, String?> /*
     public override fun quoteSubQuery(subquery: IDbQueryBuilder): String {
         val subsql = subquery.compileSelect()
         compiledSql.staticParams.addAll(subsql.staticParams);
-        return subsql.sql
+        return "(" + subsql.sql + ")"
     }
 
     /**
