@@ -17,7 +17,7 @@ abstract class Orm(id:Any? = null): OrmRelated() {
         if(id != null){
             // 构建根据主键来查询的sql
             queryBuilder().where(ormMeta.primaryKey, id).find(){
-                this.original(it); // 读取查询数据
+                this.setOriginal(it); // 读取查询数据
             }
         }
     }

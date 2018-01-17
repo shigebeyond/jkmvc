@@ -15,7 +15,7 @@ interface IOrmRelated : IOrmPersistent
 	 * @param orgn
 	 * @return
 	 */
-	fun original(orgn: Map<String, Any?>): IOrm;
+	fun setOriginal(orgn: Map<String, Any?>): IOrm;
 
 	/**
 	 * 获得关联对象

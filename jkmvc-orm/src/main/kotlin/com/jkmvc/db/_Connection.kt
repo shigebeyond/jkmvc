@@ -380,7 +380,7 @@ public val <T:Any> KClass<T>.recordTranformer: ((MutableMap<String, Any?>) -> T)
             // TODO: 优化性能，缓存结果
             return {
                 val obj = java.newInstance() as IOrm;
-                obj.original(it) as T
+                obj.setOriginal(it) as T
             }
         }
 

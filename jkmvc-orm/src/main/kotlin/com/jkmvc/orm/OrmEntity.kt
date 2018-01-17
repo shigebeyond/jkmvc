@@ -44,6 +44,9 @@ abstract class OrmEntity : IOrm {
         })
     }
 
+    /**
+     * 最新的字段值：<字段名 to 最新字段值>
+     */
     protected val data: MutableMap<String, Any?> = HashMap<String, Any?>()
 
     /**
