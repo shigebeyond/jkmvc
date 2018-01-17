@@ -91,7 +91,7 @@ abstract class ICompiledSql {
      * 查找多个： select 语句
      *  对 findAll(transform:(MutableMap<String, Any?>) 的精简版，直接根据泛型 T 来找到对应的记录转换器
      *  泛型 T 有3类情况，会生成不同的记录转换器
-     *  1 Orm类：实例化并调用original()
+     *  1 Orm类：实例化并调用setOriginal()
      *  2 Map类: 直接返回记录数据，不用转换
      *  3 其他类：如果实现带 Map 参数的构造函数，如 constructor(data: MutableMap<String, Any?>)，就调用
      *
@@ -107,7 +107,7 @@ abstract class ICompiledSql {
      * 查找一个： select ... limit 1语句
      *  对 find(transform:(MutableMap<String, Any?>) 的精简版，直接根据泛型 T 来找到对应的记录转换器
      *  泛型 T 有3类情况，会生成不同的记录转换器
-     *  1 Orm类：实例化并调用original()
+     *  1 Orm类：实例化并调用setOriginal()
      *  2 Map类: 直接返回记录数据，不用转换
      *  3 其他类：如果实现带 Map 参数的构造函数，如 constructor(data: MutableMap<String, Any?>)，就调用
      *

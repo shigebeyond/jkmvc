@@ -366,7 +366,7 @@ private val tranformingConstructorParamTypes = listOf(MutableMap::class.java)
 /**
  * 获得类的记录转换器
  *   不同的目标类型，有不同的记录转换器
- *   1 Orm类：实例化并调用original()
+ *   1 Orm类：实例化并调用setOriginal()
  *   2 Map类: 直接返回记录数据，不用转换
  *   3 其他类：如果实现带 Map 参数的构造函数，如 constructor(data: MutableMap<String, Any?>)，就调用
  *
@@ -375,7 +375,7 @@ private val tranformingConstructorParamTypes = listOf(MutableMap::class.java)
  */
 public val <T:Any> KClass<T>.recordTranformer: ((MutableMap<String, Any?>) -> T)
     get(){
-        // 1 如果是orm类，则实例化并调用original()
+        // 1 如果是orm类，则实例化并调用setOriginal()
         if(IOrm::class.java.isAssignableFrom(java)){
             // TODO: 优化性能，缓存结果
             return {
