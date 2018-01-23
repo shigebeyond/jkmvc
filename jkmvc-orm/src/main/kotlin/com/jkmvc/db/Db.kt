@@ -4,6 +4,7 @@ import com.jkmvc.common.Config
 import com.jkmvc.common.camel2Underline
 import com.jkmvc.common.format
 import com.jkmvc.common.underline2Camel
+import java.io.Closeable
 import java.math.BigDecimal
 import java.sql.Connection
 import java.sql.ResultSet
@@ -17,7 +18,7 @@ import java.util.*
  */
 class Db(protected val conn: Connection /* 数据库连接 */, public val name:String = "default" /* 标识 */):IDb{
 
-    companion object {
+    companion object:Closeable {
 
         /**
          * orm配置
@@ -64,6 +65,14 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
          */
         public fun all(): Collection<Db> {
             return dbs.get().values
+        }
+
+        /**
+         * 关闭当前线程的所有db
+         */
+        public override fun close():Unit{
+            for((name, db) in dbs.get())
+                db.close()
         }
 
         /**

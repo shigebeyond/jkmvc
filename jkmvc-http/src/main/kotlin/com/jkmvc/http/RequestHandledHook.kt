@@ -14,7 +14,7 @@ import com.jkmvc.db.Db
 object RequestHandledHook : ClosingHook() {
 
     init {
-        // 关闭当前线程的所有db
-        addClosings(Db.all())
+        // 每次处理完请求后，关闭当前线程的所有db
+        addClosing(Db.Companion)
     }
 }
