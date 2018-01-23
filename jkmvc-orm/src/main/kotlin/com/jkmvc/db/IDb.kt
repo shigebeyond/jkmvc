@@ -126,11 +126,6 @@ interface IDb: IDbQuoter, Closeable{
     fun rollback():Boolean;
 
     /**
-     * 关闭
-     */
-    fun close():Unit;
-
-    /**
      * 转义多个表名
      *
      * @param Collection<Any> tables 表名集合，其元素可以是String, 也可以是Pair<表名, 别名>
