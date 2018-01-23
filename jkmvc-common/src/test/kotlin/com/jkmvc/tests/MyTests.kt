@@ -50,6 +50,17 @@ class MyTests{
     }
 
     @Test
+    fun testMap(){
+        //val map = HashMap<Int, String>() // {1=a, 2=b}
+        val map = TreeMap<Int, String>() // {1=a, 2=b}
+        map[2] = "a"
+        map[1] = "b"
+        for((k, v) in map){
+            println("$k = $v")
+        }
+    }
+
+    @Test
     fun testList(){
         val list:MutableList<String> = LinkedList()
         list.add("a")

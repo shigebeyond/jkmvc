@@ -1,5 +1,6 @@
 package com.jkmvc.orm
 
+import org.apache.commons.collections.iterators.AbstractIteratorDecorator
 import kotlin.reflect.KClass
 import kotlin.reflect.full.companionObjectInstance
 
@@ -64,12 +65,32 @@ fun <K, V:IOrm> Collection<V>.asMap(keyField:String): Map<K, V> {
 /**
  * 收集某列的值
  *
- * @param key
+ * @param keyField 列名
  * @return
  */
-public fun Collection<out IOrm>.collectColumn(key:String):List<Any?>{
+public fun Collection<out IOrm>.collectColumn(keyField:String):List<Any?>{
     return this.map {
-        val v: Any? = it[key]
+        val v: Any? = it[keyField]
         v
+    }
+}
+
+/**
+ * 获得某列的迭代器
+ *
+ * @param keyField 列名
+ * @return
+ */
+public fun Collection<out IOrm>.columnIterator(keyField:String):Iterator<Any?>{
+    return ColumnIterator(this.iterator(), keyField)
+}
+
+/**
+ * 列的迭代器
+ */
+class ColumnIterator(iterator: Iterator<out IOrm>, protected val keyField:String): AbstractIteratorDecorator(iterator){
+    override fun next(): Any {
+        val item = super.next() as IOrm
+        return item[keyField]
     }
 }
