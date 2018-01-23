@@ -53,38 +53,17 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
         public fun instance(name:String = "default"):Db{
             return dbs.get().getOrPut(name){
                 //获得数据源
-                val dataSource  = dataSourceFactory.getDataSource(name);
+                val dataSource = dataSourceFactory.getDataSource(name);
                 // 新建db
                 Db(dataSource.connection, name);
             }
         }
 
         /**
-         * 关闭当前线程的单个db
-         *
-         * @param db
+         * 获得当前线程的所有db
          */
-        public fun closeDb(db:Db){
-            // 删除引用
-            if(dbs.get().remove(db.name) == null)
-                throw DbException("当前线程并没有[${db.name}]连接，无法关闭")
-            // 关闭连接
-            db.conn.close()
-        }
-
-        /**
-         * 关闭当前线程的所有db
-         */
-        public fun closeAllDb(){
-            // 获得当前线程的所有db
-            val localDbs = dbs.get()
-            if(localDbs.isEmpty())
-                return
-            // 关闭连接
-            for((name, db) in localDbs)
-                db.conn.close()
-            // 清空引用
-            localDbs.clear();
+        public fun all(): Collection<Db> {
+            return dbs.get().values
         }
 
         /**
@@ -419,7 +398,12 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * 关闭
      */
     public override fun close():Unit{
-        closeDb(this)
+        // 删除当前线程的引用
+        if(dbs.get().remove(name) == null)
+            throw DbException("当前线程并没有[${name}]连接，无法关闭")
+
+        // 关闭连接
+        conn.close()
     }
 
     /**

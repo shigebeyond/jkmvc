@@ -1,6 +1,7 @@
 package com.jkmvc.http
 
 import com.jkmvc.common.Config
+import com.jkmvc.common.RequestHandledHook
 import com.jkmvc.common.ucFirst
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -13,7 +14,7 @@ import kotlin.reflect.KFunction
  * @date 2016-10-6 上午9:27:56
  *
  */
-object HttpHandler: IHttpHandler {
+object RequestHandler : IRequestHandler {
 
     /**
      * http配置
@@ -70,6 +71,9 @@ object HttpHandler: IHttpHandler {
             e.printStackTrace(res.prepareWriter())
             httpLogger.debug("处理uri[${req.routeUri}]出错", e)
             return true
+        }finally {
+            // 请求处理后，关闭资源
+            RequestHandledHook.closeAll()
         }
 
     }

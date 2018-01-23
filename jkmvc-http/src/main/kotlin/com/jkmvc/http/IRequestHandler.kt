@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse
  * @date 2016-10-6 上午9:27:56
  *
  */
-interface IHttpHandler {
+interface IRequestHandler {
 
     /**
      * 处理请求

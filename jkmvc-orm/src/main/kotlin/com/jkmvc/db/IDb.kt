@@ -1,5 +1,6 @@
 package com.jkmvc.db
 
+import java.io.Closeable
 import java.sql.ResultSet
 
 /**
@@ -8,7 +9,7 @@ import java.sql.ResultSet
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-interface IDb: IDbQuoter{
+interface IDb: IDbQuoter, Closeable{
 
     /**
      * 获得数据库类型
