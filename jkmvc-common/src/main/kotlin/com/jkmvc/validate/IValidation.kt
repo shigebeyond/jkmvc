@@ -1,7 +1,5 @@
 package com.jkmvc.validate
 
-import java.util.*
-
 /**
  * 校验器
  *   其校验方法是要被ValidationUnit调用的，通过反射来调用，反射时不能识别参数的默认值，因此在定义校验方法时不要设置参数默认值

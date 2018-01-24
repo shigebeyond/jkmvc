@@ -1,7 +1,6 @@
 package com.jkmvc.validate
 
 import com.jkmvc.common.Config
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 /**

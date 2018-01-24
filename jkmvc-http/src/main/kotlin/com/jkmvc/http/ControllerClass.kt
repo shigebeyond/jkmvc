@@ -1,7 +1,6 @@
 package com.jkmvc.http
 
 import com.jkmvc.common.findConstructor
-import com.jkmvc.common.lcFirst
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction

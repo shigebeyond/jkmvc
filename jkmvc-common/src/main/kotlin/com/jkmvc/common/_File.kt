@@ -4,8 +4,6 @@ import java.io.File
 import java.net.JarURLConnection
 import java.net.URL
 import java.util.*
-import java.util.jar.JarEntry
-import java.util.jar.JarFile
 
 /****************************** 文件大小 *******************************/
 /**

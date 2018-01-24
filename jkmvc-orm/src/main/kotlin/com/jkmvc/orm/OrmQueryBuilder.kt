@@ -1,7 +1,5 @@
 package com.jkmvc.orm
 
-import com.jkmvc.common.castTo
-import com.jkmvc.common.findProperty
 import com.jkmvc.common.isNullOrEmpty
 import com.jkmvc.db.DbQueryBuilder
 import com.jkmvc.db.DbType
@@ -9,8 +7,6 @@ import com.jkmvc.db.IDbQueryBuilder
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.reflect.KClass
-import kotlin.reflect.KProperty1
-import kotlin.reflect.full.cast
 
 /**
  * 面向orm对象的sql构建器

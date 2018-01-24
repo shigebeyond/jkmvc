@@ -1,7 +1,5 @@
 package com.jkmvc.session
 
-import com.jkmvc.orm.Orm
-
 /**
  * 认证用户
  *   1 登录

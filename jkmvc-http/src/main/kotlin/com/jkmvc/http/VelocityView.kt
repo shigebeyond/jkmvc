@@ -3,7 +3,6 @@ package com.jkmvc.http
 import org.apache.velocity.VelocityContext
 import org.apache.velocity.io.VelocityWriter
 import org.apache.velocity.runtime.RuntimeInstance
-import java.io.IOException
 import java.util.*
 
 /**

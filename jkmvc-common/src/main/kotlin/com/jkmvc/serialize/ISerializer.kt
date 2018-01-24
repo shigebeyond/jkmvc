@@ -1,8 +1,8 @@
 package com.jkmvc.serialize
 
 import com.jkmvc.common.Config
-import com.jkmvc.common.NamedSingleton
 import com.jkmvc.common.IConfig
+import com.jkmvc.common.NamedSingleton
 import java.io.InputStream
 
 /**

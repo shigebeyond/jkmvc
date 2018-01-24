@@ -1,6 +1,5 @@
 package com.jkmvc.db
 
-import java.math.BigDecimal
 import kotlin.reflect.KClass
 
 /**

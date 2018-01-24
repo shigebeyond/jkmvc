@@ -226,13 +226,13 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 */
 	public operator inline fun <reified T:Any> get(key: String, defaultValue: T? = null): T?
 	{
-		// 先取路由参数
-		if(routeParams.containsKey(key))
-			return routeParams[key]!!.to(T::class) as T
-
-		// 再取get/post参数
+		// 先取get/post参数
 		if(containsParameter(key))
 			return getParameter(key)!!.to(T::class) as T
+
+		// 再取路由参数
+		if(routeParams.containsKey(key))
+			return routeParams[key]!!.to(T::class) as T
 
 		return defaultValue;
 	}

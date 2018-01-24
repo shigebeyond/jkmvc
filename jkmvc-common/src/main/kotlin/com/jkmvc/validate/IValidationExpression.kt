@@ -1,7 +1,5 @@
 package com.jkmvc.validate
 
-import java.util.*
-
 /**
  * 校验表达式
  *    校验表达式是由多个(函数调用的)子表达式与运算符组成, 格式为 a(1) & b(1,2) && c(3,4) | d(2) . e(1) > f(5)

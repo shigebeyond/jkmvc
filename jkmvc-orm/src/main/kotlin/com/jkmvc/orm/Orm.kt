@@ -1,8 +1,5 @@
 package com.jkmvc.orm
 
-import com.jkmvc.db.CompiledSql
-import java.util.concurrent.ConcurrentHashMap
-
 /**
  * ORM
 

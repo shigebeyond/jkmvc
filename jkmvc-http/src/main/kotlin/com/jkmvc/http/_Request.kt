@@ -1,7 +1,6 @@
 package com.jkmvc.http
 
 import com.jkmvc.common.isNullOrEmpty
-import com.jkmvc.orm.IOrm
 import com.jkmvc.orm.Orm
 import com.oreilly.servlet.MultipartRequest
 import org.slf4j.LoggerFactory
