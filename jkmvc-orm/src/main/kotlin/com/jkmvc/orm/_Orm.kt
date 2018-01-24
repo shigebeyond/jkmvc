@@ -30,6 +30,9 @@ public val KClass<out IOrm>.modelOrmMeta: IOrmMeta
  * orm列表获得字段值
  */
 fun Collection<out IOrm>.itemAsMap(): List<Map<String, Any?>> {
+    if(this.isEmpty())
+        return emptyList()
+
     return this.map {
         it.asMap()
     }
@@ -43,6 +46,9 @@ fun Collection<out IOrm>.itemAsMap(): List<Map<String, Any?>> {
  * @return
  */
 fun <K, V> Collection<out IOrm>.asMap(keyField:String, valueField:String?): Map<K, V?> {
+    if(this.isEmpty())
+        return emptyMap()
+
     val result = HashMap<K, V?>()
     this.forEach {
         val key:K = it[keyField]
@@ -69,6 +75,9 @@ fun <K, V:IOrm> Collection<V>.asMap(keyField:String): Map<K, V> {
  * @return
  */
 public fun Collection<out IOrm>.collectColumn(key:String):List<Any?>{
+    if(this.isEmpty())
+        return emptyList()
+
     return this.map {
         val v: Any? = it[key]
         v
@@ -82,6 +91,9 @@ public fun Collection<out IOrm>.collectColumn(key:String):List<Any?>{
  * @return
  */
 public fun Collection<out IOrm>.columnIterator(key:String):Iterator<Any?>{
+    if(this.isEmpty())
+        return org.apache.commons.collections.iterators.EmptyIterator.INSTANCE
+
     return ColumnIterator(this.iterator(), key)
 }
 

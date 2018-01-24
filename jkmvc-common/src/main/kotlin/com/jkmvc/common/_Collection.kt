@@ -56,6 +56,9 @@ public fun <T> Collection<T>?.isNullOrEmpty(): Boolean {
  * @return
  */
 public fun <T> Collection<T>.getRandom(): T {
+    if(this.isEmpty())
+        throw IndexOutOfBoundsException("No element in empty collection")
+
     var n = ThreadLocalRandom.current().nextInt(this.size)
     // list
     if(this is List)
@@ -252,6 +255,9 @@ public fun <T> Iterable<T>.enumeration(): ItEnumeration<T> {
  * @return
  */
 public fun Collection<out Map<*, *>>.asMap(keyField:String, valueField:String?): Map<*, *> {
+    if(this.isEmpty())
+        return emptyMap<Any, Any>()
+
     val result = HashMap<Any, Any?>()
     this.forEach {
         val key:Any = it[keyField]!!
@@ -279,5 +285,8 @@ public fun Map<String, Array<String>>.toQueryString(buffer: StringBuilder): Stri
  * @return
  */
 public fun Map<String, Array<String>>.toQueryString(): String {
+    if(this.isEmpty())
+        return ""
+
     return toQueryString(StringBuilder()).toString()
 }
