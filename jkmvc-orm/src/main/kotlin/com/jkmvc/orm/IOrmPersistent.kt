@@ -16,9 +16,14 @@ interface IOrmPersistent :IOrmValid {
 
 	/**
 	 * 获得主键值
-	 * @return|string
 	 */
 	val pk: Any?;
+
+	/**
+	 * 获得原始主键值
+	 *   update()时用到，因为主键可能被修改
+	 */
+	val oldPk:Any?
 
 	/**
 	 * 获得sql构建器

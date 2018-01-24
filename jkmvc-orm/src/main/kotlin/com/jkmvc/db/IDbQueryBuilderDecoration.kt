@@ -256,6 +256,17 @@ interface IDbQueryBuilderDecoration: IDbQuoter
      * Applies sorting with "ORDER BY ..."
      *
      * @param   column     column name or Pair(column, alias) or object
+     * @param   asc        whether asc direction
+     * @return
+     */
+    fun orderBy(column:String, asc:Boolean):IDbQueryBuilder{
+        return orderBy(column, if(asc) "ASC" else "DESC")
+    }
+
+    /**
+     * Applies sorting with "ORDER BY ..."
+     *
+     * @param   column     column name or Pair(column, alias) or object
      * @param   direction  direction of sorting
      * @return
      */

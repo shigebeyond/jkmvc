@@ -26,10 +26,16 @@ abstract class OrmPersistent: OrmValid() {
 
 	/**
 	 * 获得主键值
-	 * @return|string
 	 */
 	public override val pk:Any?
 		get() = this[ormMeta.primaryProp];
+
+	/**
+	 * 获得原始主键值
+	 *   update()时用到，因为主键可能被修改
+	 */
+	public override val oldPk:Any?
+		get() = dirty[ormMeta.primaryProp];
 
 	/**
 	 * 获得sql构建器
@@ -141,7 +147,7 @@ abstract class OrmPersistent: OrmValid() {
 		fireEvent("beforeSave")
 
 		// 更新数据库
-		val result = queryBuilder().sets(buildDirtyData()).where(ormMeta.primaryKey, pk).update();
+		val result = queryBuilder().sets(buildDirtyData()).where(ormMeta.primaryKey, oldPk /* 原始主键，因为主键可能被修改 */).update();
 
 		// 触发后置事件
 		fireEvent("afterUpdate")
