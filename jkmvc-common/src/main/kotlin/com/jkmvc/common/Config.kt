@@ -25,17 +25,20 @@ class Config(public override val props: Map<String, *>): IConfig(){
         val configs:ConcurrentHashMap<String, Config?> = ConcurrentHashMap<String, Config?>()
 
         /**
-         * Using the properties file. It will loading the properties file if not loading.
-         * <p>
-         * Example:<br>
-         * val config = Config.instance("config.txt", "UTF-8");<br>
-         * String username = config.get("username");<br>
-         * String password = config.get("password");<br><br>
+         * 获得配置数据，如果没有数据，则加载配置文件来读取数据
+         * Get the config data. It will loading the properties file if not loading.
          *
-         * username = Config.instance("other_config.txt").get("username");<br>
-         * password = Config.instance("other_config.txt").get("password");<br><br>
+         * 例子：
+         * <code>
+         *      val config = Config.instance("config.txt", "UTF-8");
+         *      String username = config.get("username");
+         *      String password = config.get("password");
          *
-         * Config.instance("com/jfinal/config_in_sub_directory_of_classpath.txt");
+         *      username = Config.instance("other_config.txt").get("username");
+         *      password = Config.instance("other_config.txt").get("password");
+         *
+         *      Config.instance("com/jfinal/config_in_sub_directory_of_classpath.txt");
+         * <code>
          *
          * @param file the properties file's name in classpath or the sub directory of classpath
          * @param type properties | yaml
@@ -98,11 +101,13 @@ class Config(public override val props: Map<String, *>): IConfig(){
     }
 
     /**
-     * Example:
-     * val config = Config("my_config.properties");
-     * val config = Config("my_config.properties", "properties");
-     * val config = Config("my_config.properties", "yaml");
-     * val username = config.get("username");
+     * 例子：
+     * <code>
+     *      val config = Config("my_config.properties");
+     *      val config = Config("my_config.properties", "properties");
+     *      val config = Config("my_config.properties", "yaml");
+     *      val username = config.get("username");
+     * <code>
      *
      * @param file the properties file's name in classpath or the sub directory of classpath
      * @param type properties | yaml
