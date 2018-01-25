@@ -37,7 +37,13 @@ abstract class OrmPersistent: OrmValid() {
 	 *   update()时用到，因为主键可能被修改
 	 */
 	public override val oldPk:Any?
-		get() = dirty[ormMeta.primaryProp];
+		get(){
+			val pp = ormMeta.primaryProp
+			if(dirty.containsKey(pp))
+				return dirty[pp]
+
+			return pk
+		}
 
 	/**
 	 * 获得sql构建器

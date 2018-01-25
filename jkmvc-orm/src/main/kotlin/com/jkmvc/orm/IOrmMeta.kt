@@ -164,7 +164,7 @@ interface IOrmMeta {
      * @param statement
      * @return
      */
-    fun <T> transactionWhenHandlingEvent(events:String, statement: () -> T): T{
+    fun <T> transactionWhenHandlingEvent(events:String, statement: () -> T): T
 
     /**
      * 生成属性代理 + 设置关联关系(belongs to)
