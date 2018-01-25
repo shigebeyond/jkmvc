@@ -33,6 +33,19 @@ interface IDb: IDbQuoter, Closeable{
     fun <T> transaction(statement: () -> T):T;
 
     /**
+     * 执行事务
+     * @param fake 不真正使用事务
+     * @param statement db操作过程
+     * @return
+     */
+    fun <T> transaction(fake: Boolean, statement: () -> T):T{
+        if(fake)
+            return statement()
+
+        return transaction(statement)
+    }
+
+    /**
      * 是否在事务中
      * @return
      */
@@ -40,7 +53,6 @@ interface IDb: IDbQuoter, Closeable{
 
     /**
      * 获得表的所有列
-     *
      * @param table
      * @return
      */

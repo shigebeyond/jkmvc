@@ -118,6 +118,34 @@ public inline fun <reified T:Any>  Map<*, *>.getAndConvert(key:String, defaultVa
 }
 
 /**
+ * 检查是否包含任一个键
+ *
+ * @param keys
+ * @return
+ */
+public fun Map<*, *>.containsAnyKey(vararg keys: Any): Boolean {
+    for(key in keys)
+        if(this.containsKey(key))
+            return true
+
+    return false
+}
+
+/**
+ * 检查是否包含所有键
+ *
+ * @param keys
+ * @return
+ */
+public fun Map<*, *>.containsAllKeys(vararg keys: Any): Boolean {
+    for(key in keys)
+        if(!this.containsKey(key))
+            return false
+
+    return true
+}
+
+/**
  * map删除多个key
  * @param keys
  * @return

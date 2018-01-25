@@ -1,5 +1,6 @@
 package com.jkmvc.orm
 
+import com.jkmvc.common.containsAnyKey
 import com.jkmvc.common.findFunction
 import com.jkmvc.common.findProperty
 import com.jkmvc.common.to
@@ -158,6 +159,31 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     public override fun getEventHandler(event:String): KFunction<Unit>? {
         return eventHandlers.getOrDefault(event, null)
     }
+
+    /**
+     * 能否处理任一事件
+     * @param events 多个事件名，以|分隔，如 beforeCreate|afterCreate
+     * @return
+     */
+    public override fun canHandleAnyEvent(events:String): Boolean {
+        for((event, handler) in eventHandlers){
+            if(events.contains(event))
+                return true
+        }
+        return false
+    }
+
+    /**
+     * 如果有要处理的事件，则开启事务
+     *
+     * @param events 多个事件名，以|分隔，如 beforeCreate|afterCreate
+     * @param statement
+     * @return
+     */
+    public override fun <T> transactionWhenHandlingEvent(events:String, statement: () -> T): T{
+        return db.transaction(canHandleAnyEvent(events), statement)
+    }
+
 
     /**
      * 生成属性代理 + 设置关联关系(belongs to)

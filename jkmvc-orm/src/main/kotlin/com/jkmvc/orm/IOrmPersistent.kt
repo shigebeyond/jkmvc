@@ -34,7 +34,7 @@ interface IOrmPersistent :IOrmValid {
 	/**
 	 * 保存数据
 	 *
-	 * @return 对insert返回新增数据的主键，对update返回影响行数
+	 * @return
 	 */
 	fun save(): Boolean;
 
@@ -42,7 +42,7 @@ interface IOrmPersistent :IOrmValid {
 	 * 插入数据: insert sql
 	 *
 	 * <code>
-	 *    user = ModelUser();
+	 *    val user = ModelUser();
 	 *    user.name = "shi";
 	 *    user.age = 24;
 	 *    user.create();
@@ -56,12 +56,12 @@ interface IOrmPersistent :IOrmValid {
 	 * 更新数据: update sql
 	 *
 	 * <code>
-	 *    user = ModelUser.queryBuilder().where("id", 1).find();
+	 *    val user = ModelUser.queryBuilder().where("id", 1).find();
 	 *    user.name = "li";
 	 *    user.update();
 	 * </code>
 	 * 
-	 * @return 影响行数
+	 * @return 
 	 */
 	fun update(): Boolean;
 
@@ -69,13 +69,25 @@ interface IOrmPersistent :IOrmValid {
 	 * 删除数据: delete sql
 	 *
 	 *　<code>
-	 *    user = ModelUser.queryBuilder().where("id", "=", 1).find();
+	 *    val user = ModelUser.queryBuilder().where("id", "=", 1).find();
 	 *    user.delete();
 	 *　</code>
 	 *
-	 * @return 影响行数
+	 * @return 
 	 */
 	fun delete(): Boolean;
+
+	/**
+	 * 字段值自增: update t1 set col1 = col1 + 1
+	 *
+	 * <code>
+	 *    val user = ModelUser.queryBuilder().where("id", 1).find();
+	 *    user.incr("age", 1);
+	 * </code>
+	 *
+	 * @return
+	 */
+	fun incr(prop: String, step: Int): Boolean;
 
 	/**
 	 * 触发事件

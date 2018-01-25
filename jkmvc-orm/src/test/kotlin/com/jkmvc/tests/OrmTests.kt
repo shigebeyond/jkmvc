@@ -204,6 +204,16 @@ class OrmTests{
     }
 
     @Test
+    fun testIncr(){
+        val user = UserModel.queryBuilder().where("id", id).find<UserModel>()
+        if(user == null || !user.isLoaded()){
+            println("用户[$id]不存在")
+            return
+        }
+        println("用户年龄+1：$user, result: ${user.incr("age", 1)}")
+    }
+
+    @Test
     fun testRelateFind(){
         val user = UserModel(id)
         val address = user.address

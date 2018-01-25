@@ -151,6 +151,22 @@ interface IOrmMeta {
     fun getEventHandler(event:String): KFunction<Unit>?;
 
     /**
+     * 能否处理任一事件
+     * @param events 多个事件名，以|分隔，如 beforeCreate|afterCreate
+     * @return
+     */
+    fun canHandleAnyEvent(events:String): Boolean
+
+    /**
+     * 如果有要处理的事件，则开启事务
+     *
+     * @param events 多个事件名，以|分隔，如 beforeCreate|afterCreate
+     * @param statement
+     * @return
+     */
+    fun <T> transactionWhenHandlingEvent(events:String, statement: () -> T): T{
+
+    /**
      * 生成属性代理 + 设置关联关系(belongs to)
      *
      *    公式：从表.外键 = 主表.主键

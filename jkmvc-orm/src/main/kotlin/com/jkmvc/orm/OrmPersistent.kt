@@ -1,5 +1,7 @@
 package com.jkmvc.orm
 
+import com.jkmvc.db.DbExpression
+import com.jkmvc.db.DbQueryBuilder
 import com.jkmvc.db.dbLogger
 import java.util.*
 
@@ -48,7 +50,7 @@ abstract class OrmPersistent: OrmValid() {
 	/**
 	 * 保存数据
 	 *
-	 * @return 对insert返回新增数据的主键，对update返回影响行数
+	 * @return
 	 */
 	public override fun save(): Boolean {
 		if(loaded)
@@ -61,7 +63,7 @@ abstract class OrmPersistent: OrmValid() {
 	 * 插入数据: insert sql
 	 *
 	 * <code>
-	 *    user = ModelUser();
+	 *    val user = ModelUser();
 	 *    user.name = "shi";
 	 *    user.age = 24;
 	 *    user.create();
@@ -76,28 +78,32 @@ abstract class OrmPersistent: OrmValid() {
 		// 校验
 		validate();
 
-		// 触发前置事件
-		fireEvent("beforeCreate")
-		fireEvent("beforeSave")
+		// 事务
+		return ormMeta.transactionWhenHandlingEvent("beforeCreate|afterCreate|beforeSave|afterSave") {
 
-		// 插入数据库
-		val needPk = ormMeta.primaryProp.isNotEmpty() && !data.containsKey(ormMeta.primaryProp) // 是否需要生成主键
-		val generatedColumn = if(needPk) ormMeta.primaryKey else null // 主键名
-		val pk = queryBuilder().value(buildDirtyData()).insert(generatedColumn);
+			// 触发前置事件
+			fireEvent("beforeCreate")
+			fireEvent("beforeSave")
 
-		// 更新内部数据
-		if(needPk)
-			data[ormMeta.primaryProp] = pk; // 主键
+			// 插入数据库
+			val needPk = ormMeta.primaryProp.isNotEmpty() && !data.containsKey(ormMeta.primaryProp) // 是否需要生成主键
+			val generatedColumn = if (needPk) ormMeta.primaryKey else null // 主键名
+			val pk = queryBuilder().value(buildDirtyData()).insert(generatedColumn);
 
-		// 触发后置事件
-		fireEvent("afterCreate")
-		fireEvent("afterSave")
+			// 更新内部数据
+			if (needPk)
+				data[ormMeta.primaryProp] = pk; // 主键
 
-		// beforeSave 与 afterCreate 事件根据这个来判定是新增与修改 + 变化的字段
-		loaded = true;
-		dirty.clear();
+			// 触发后置事件
+			fireEvent("afterCreate")
+			fireEvent("afterSave")
 
-		return pk;
+			// beforeSave 与 afterCreate 事件根据这个来判定是新增与修改 + 变化的字段
+			loaded = true;
+			dirty.clear();
+
+			pk;
+		}
 	}
 
 	/**
@@ -121,12 +127,12 @@ abstract class OrmPersistent: OrmValid() {
 	 * 更新数据: update sql
 	 *
 	 * <code>
-	 *    user = ModelUser.queryBuilder().where("id", 1).find();
+	 *    val user = ModelUser.queryBuilder().where("id", 1).find();
 	 *    user.name = "li";
 	 *    user.update();
 	 * </code>
 	 * 
-	 * @return 影响行数
+	 * @return
 	 */
 	public override fun update(): Boolean {
 		if(!loaded)
@@ -142,50 +148,76 @@ abstract class OrmPersistent: OrmValid() {
 		// 校验
 		validate();
 
-		// 触发前置事件
-		fireEvent("beforeUpdate")
-		fireEvent("beforeSave")
+		// 事务
+		return ormMeta.transactionWhenHandlingEvent("beforeUpdate|afterUpdate|beforeSave|afterSave") {
+			// 触发前置事件
+			fireEvent("beforeUpdate")
+			fireEvent("beforeSave")
 
-		// 更新数据库
-		val result = queryBuilder().sets(buildDirtyData()).where(ormMeta.primaryKey, oldPk /* 原始主键，因为主键可能被修改 */).update();
+			// 更新数据库
+			val result = queryBuilder().sets(buildDirtyData()).where(ormMeta.primaryKey, oldPk /* 原始主键，因为主键可能被修改 */).update();
 
-		// 触发后置事件
-		fireEvent("afterUpdate")
-		fireEvent("afterSave")
+			// 触发后置事件
+			fireEvent("afterUpdate")
+			fireEvent("afterSave")
 
-		// beforeSave 与 afterCreate 事件根据这个来判定变化的字段
-		dirty.clear()
-		return result;
+			// beforeSave 与 afterCreate 事件根据这个来判定变化的字段
+			dirty.clear()
+			result
+		};
 	}
 
 	/**
 	 * 删除数据: delete sql
 	 *
 	 *　<code>
-	 *    user = ModelUser.queryBuilder().where("id", "=", 1).find();
+	 *    val user = ModelUser.queryBuilder().where("id", "=", 1).find();
 	 *    user.delete();
 	 *　</code>
 	 *
-	 * @return 影响行数
+	 * @return
 	 */
 	public override fun delete(): Boolean {
 		if(!loaded)
 			throw OrmException("删除对象[$this]前先检查是否存在");
 
-		// 触发前置事件
-		fireEvent("beforeDelete")
+		// 事务
+		return ormMeta.transactionWhenHandlingEvent("beforeDelete|afterDelete") {
+			// 触发前置事件
+			fireEvent("beforeDelete")
 
-		// 删除数据
-		val result = queryBuilder().where(ormMeta.primaryKey, pk).delete();
+			// 删除数据
+			val result = queryBuilder().where(ormMeta.primaryKey, pk).delete();
 
-		// 更新内部数据
-		data.clear()
-		dirty.clear()
+			// 更新内部数据
+			data.clear()
+			dirty.clear()
 
-		// 触发后置事件
-		fireEvent("afterDelete")
+			// 触发后置事件
+			fireEvent("afterDelete")
 
-		return result;
+			result;
+		}
+	}
+
+	/**
+	 * 字段值自增: update t1 set col1 = col1 + 1
+	 *   一般用于计数字段更新
+	 *   注：没更新内存
+	 *
+	 * <code>
+	 *    val user = ModelUser.queryBuilder().where("id", 1).find();
+	 *    user.incr("age", 1);
+	 * </code>
+	 *
+	 * @return
+	 */
+	public override fun incr(prop: String, step: Int): Boolean {
+		if(step == 0)
+			return false
+
+		val column = ormMeta.prop2Column(prop)
+		return queryBuilder().set(column, DbExpression("$column + $step")).where(ormMeta.primaryKey, pk).update();
 	}
 
 	/**
