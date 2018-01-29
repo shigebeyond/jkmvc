@@ -104,9 +104,9 @@ abstract class OrmPersistent: OrmValid() {
 			fireEvent("afterCreate")
 			fireEvent("afterSave")
 
-			// beforeSave 与 afterCreate 事件根据这个来判定是新增与修改 + 变化的字段
-			loaded = true;
-			dirty.clear();
+			// 更新内部数据
+			loaded = true; // save事件据此来判定是新增与修改
+			dirty.clear(); // create事件据此来获得变化的字段
 
 			pk;
 		}
@@ -167,8 +167,8 @@ abstract class OrmPersistent: OrmValid() {
 			fireEvent("afterUpdate")
 			fireEvent("afterSave")
 
-			// beforeSave 与 afterCreate 事件根据这个来判定变化的字段
-			dirty.clear()
+			// 更新内部数据
+			dirty.clear() // update事件据此来获得变化的字段
 			result
 		};
 	}
@@ -195,12 +195,12 @@ abstract class OrmPersistent: OrmValid() {
 			// 删除数据
 			val result = queryBuilder().where(ormMeta.primaryKey, pk).delete();
 
-			// 更新内部数据
-			data.clear()
-			dirty.clear()
-
 			// 触发后置事件
 			fireEvent("afterDelete")
+
+			// 更新内部数据
+			data.clear() // delete事件据此来获得删除前的数据
+			dirty.clear()
 
 			result;
 		}
