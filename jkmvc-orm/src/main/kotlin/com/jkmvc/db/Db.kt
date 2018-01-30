@@ -215,8 +215,6 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
         }catch(e:Exception){
             rollback(); // 回顾
             throw e;
-        }finally{
-            close() // 关闭连接
         }
     }
 
