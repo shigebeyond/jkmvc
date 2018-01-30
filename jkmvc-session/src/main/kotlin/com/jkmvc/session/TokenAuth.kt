@@ -1,6 +1,8 @@
 package com.jkmvc.session
 
+import com.jkmvc.common.RequestHandledHook
 import com.jkmvc.http.Request
+import java.io.Closeable
 
 /**
  * 基于token认证用户 -- 使用token来保存登录用户的状态
@@ -10,12 +12,28 @@ import com.jkmvc.http.Request
  * @author shijianhang
  * @create 2017-10-04 下午3:40
  **/
-class TokenAuth : Auth() {
+class TokenAuth : Auth(), Closeable {
+
+    /**
+     * 登录用户缓存
+     */
+    protected val users:ThreadLocal<IAuthUserModel?> = ThreadLocal.withInitial {
+        // 获得当前token
+        val token = getToken()
+        if(token == null)
+            null
+        else // 根据token获得用户
+            tokenManager.getUser(token)?.component1()
+    }
 
     /**
      * token管理器
      */
     protected val tokenManager: ITokenManager = RedisTokenManager
+
+    init{
+        RequestHandledHook.addClosing(this)
+    }
 
     /**
      * 获得当前会话的token
@@ -36,14 +54,7 @@ class TokenAuth : Auth() {
      * @return
      */
     public override fun getUser(): IAuthUserModel?{
-        // 获得当前token
-        val token = getToken()
-        if(token == null)
-            return null
-
-        // 根据token获得用户
-        val result = tokenManager.getUser(token)
-        return result?.component1()
+        return users.get()
     }
 
     /**
@@ -68,5 +79,13 @@ class TokenAuth : Auth() {
         // 删除token
         tokenManager.deleteToken(token)
     }
+
+    /**
+     * 清理当前线程的登录用户
+     */
+    public override fun close() {
+        users.remove()
+    }
+
 
 }

@@ -69,6 +69,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
 
         /**
          * 关闭当前线程的所有db
+         *    谁使用，谁关闭
          */
         public override fun close():Unit{
             for((name, db) in dbs.get())
