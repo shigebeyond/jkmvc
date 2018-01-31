@@ -39,7 +39,11 @@ class TokenAuth : Auth(), Closeable {
      * 获得当前会话的token
      */
     public fun getToken(): String? {
-        val req = Request.current()
+        // web请求？
+        val req = Request.currentOrNull()
+        if(req == null)
+            return null
+
         // 先找请求参数
         val token = req.getParameter("token")
         if(!token.isNullOrEmpty())
@@ -64,7 +68,7 @@ class TokenAuth : Auth(), Closeable {
     protected override fun afterLogin(user: IAuthUserModel) {
         //生成登录token
         val token = RedisTokenManager.createToken(user)
-        Request.current().setAttribute("token", token);
+        Request.currentOrNull()?.setAttribute("token", token);
     }
 
     /**

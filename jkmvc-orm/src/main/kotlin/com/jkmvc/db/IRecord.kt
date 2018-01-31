@@ -1,5 +1,7 @@
 package com.jkmvc.db
 
+import java.math.BigDecimal
+
 /**
  * 封装查询结果
  * 扩展 [] 操作符，来代理属性读写
@@ -100,7 +102,7 @@ interface IRecord {
     /**
      * Get attribute of mysql type: decimal, numeric
      */
-    fun getBigDecimal(name: String): java.math.BigDecimal {
+    fun getBigDecimal(name: String): BigDecimal {
         return this[name]
     }
 
