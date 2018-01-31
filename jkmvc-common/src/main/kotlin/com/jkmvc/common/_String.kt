@@ -263,6 +263,15 @@ public inline fun <T: Any> String.to(clazz: KClass<T>): T{
 
 /**
  * 将字符串转换为指定类型的非空值
+ * @param class 要转换的类型
+ * @return
+ */
+public inline fun <T: Any> String.to(clazz: Class<T>): T{
+    return this.to(clazz.kotlin)
+}
+
+/**
+ * 将字符串转换为指定类型的非空值
  * @param type
  * @return
  */

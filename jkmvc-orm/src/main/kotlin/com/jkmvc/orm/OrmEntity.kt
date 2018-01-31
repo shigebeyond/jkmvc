@@ -2,6 +2,7 @@ package com.jkmvc.orm
 
 import com.jkmvc.common.*
 import com.jkmvc.serialize.ISerializer
+import java.math.BigDecimal
 import java.util.*
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KMutableProperty1
@@ -85,10 +86,32 @@ abstract class OrmEntity : IOrm {
             throw OrmException("类 ${this.javaClass} 没有字段 $column");
 
         // 记录变化的字段名 + 原始值
-        if(value != data[column] && !dirty.containsKey(column))
+        if(!dirty.containsKey(column)
+                //&& value != data[column])
+                && !equalsValue(data[column], value))
             dirty[column] = data[column];
 
         data[column] = value;
+    }
+
+    /**
+     * 判断属性值是否相等，只在 set() 中调用
+     *
+     * @param oldValue
+     * @param newValue
+     * @return
+     */
+    protected fun equalsValue(oldValue: Any?, newValue: Any?): Boolean{
+        if(oldValue == newValue) // 相等
+            return true
+
+        if(oldValue == null || newValue == null) // 不等，却有一个为空
+            return false
+
+        if(oldValue is BigDecimal && newValue !is BigDecimal) // 不等，却是 BigDecimal 与 其他数值类型
+            return oldValue.toNumber(newValue.javaClass) == newValue // 由于只在 set() 调用，所以假定oldValue转为newValue的类型时，不丢失精度
+
+        return false
     }
 
     /**
