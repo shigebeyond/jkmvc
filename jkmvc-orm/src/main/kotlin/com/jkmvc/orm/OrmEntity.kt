@@ -95,7 +95,8 @@ abstract class OrmEntity : IOrm {
     }
 
     /**
-     * 判断属性值是否相等，只在 set() 中调用
+     * 判断属性值是否相等
+     *    只在 set() 中调用，用于检查属性值是否修改
      *
      * @param oldValue
      * @param newValue
