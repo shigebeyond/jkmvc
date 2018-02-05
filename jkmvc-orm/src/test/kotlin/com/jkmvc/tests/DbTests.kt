@@ -23,6 +23,13 @@ class DbTests{
     }
 
     @Test
+    fun testDbDate(){
+        val (hasNext, date) = Db.instance().queryCell("SELECT  LAST_LOGIN_TIME FROM RC_ACCOUNTS WHERE ACCOUNT_CODE = 'tann771x@nng.gx.csg.cn'")
+        if(hasNext)
+            println(date)
+    }
+
+    @Test
     fun testColumn2Prop(){
         println(db.column2Prop("ZDZCBH_"))
     }

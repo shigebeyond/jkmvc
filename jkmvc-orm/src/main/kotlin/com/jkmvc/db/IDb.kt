@@ -111,7 +111,7 @@ interface IDb: IDbQuoter, Closeable{
      * @param transform 转换结果的函数
      * @return
      */
-    fun queryColumn(sql: String, params: List<Any?>?): List<Any?>
+    fun queryColumn(sql: String, params: List<Any?>? = null): List<Any?>
 
     /**
      * 查询一行一列

@@ -117,6 +117,8 @@ class Config(public override val props: Map<String, *>): IConfig(){
 
     /**
      * 判断是否含有配置项
+     * @param key
+     * @return
      */
     public override fun containsKey(key: String): Boolean {
         return props.containsKey(key)
@@ -124,6 +126,9 @@ class Config(public override val props: Map<String, *>): IConfig(){
 
     /**
      * 获得string类型的配置项
+     * @param key
+     * @param defaultValue
+     * @return
      */
     public override fun getString(key: String, defaultValue: String?): String? {
         val value = props.get(key)
@@ -135,6 +140,9 @@ class Config(public override val props: Map<String, *>): IConfig(){
 
     /**
      * 获得int类型的配置项
+     * @param key
+     * @param defaultValue
+     * @return
      */
     public override fun getInt(key: String, defaultValue: Int?): Int? {
         return props.getAndConvert(key, defaultValue)
@@ -142,6 +150,9 @@ class Config(public override val props: Map<String, *>): IConfig(){
 
     /**
      * 获得long类型的配置项
+     * @param key
+     * @param defaultValue
+     * @return
      */
     public override fun getLong(key: String, defaultValue: Long?): Long? {
         return props.getAndConvert(key, defaultValue)
@@ -150,6 +161,9 @@ class Config(public override val props: Map<String, *>): IConfig(){
 
     /**
      * 获得float类型的配置项
+     * @param key
+     * @param defaultValue
+     * @return
      */
     public override fun getFloat(key: String, defaultValue: Float?): Float? {
         return props.getAndConvert(key, defaultValue)
@@ -157,6 +171,9 @@ class Config(public override val props: Map<String, *>): IConfig(){
 
     /**
      * 获得double类型的配置项
+     * @param key
+     * @param defaultValue
+     * @return
      */
     public override fun getDouble(key: String, defaultValue: Double?): Double? {
         return props.getAndConvert(key, defaultValue)
@@ -164,6 +181,9 @@ class Config(public override val props: Map<String, *>): IConfig(){
 
     /**
      * 获得bool类型的配置项
+     * @param key
+     * @param defaultValue
+     * @return
      */
     public override fun getBoolean(key: String, defaultValue: Boolean?): Boolean? {
         return props.getAndConvert(key, defaultValue)
@@ -171,6 +191,9 @@ class Config(public override val props: Map<String, *>): IConfig(){
 
     /**
      * 获得short类型的配置项
+     * @param key
+     * @param defaultValue
+     * @return
      */
     public override fun getShort(key: String, defaultValue: Short?): Short?{
         return props.getAndConvert(key, defaultValue)
@@ -178,18 +201,51 @@ class Config(public override val props: Map<String, *>): IConfig(){
 
     /**
      * 获得Date类型的配置项
+     * @param key
+     * @param defaultValue
+     * @return
      */
     public override fun getDate(key: String, defaultValue: Date?): Date?{
         return props.getAndConvert(key, defaultValue)
     }
 
     /**
+     * 获得Map类型的配置项
+     * @param key
+     * @param defaultValue
+     * @return
+     */
+    public override fun getMap(key: String, defaultValue: Map<String, *>?): Map<String, *>?{
+        return props.getAndConvert(key, defaultValue)
+    }
+
+    /**
      * 获得Config类型的子配置项
+     * @param key
+     * @param defaultValue
+     * @return
      */
     public override fun getConfig(path: String): Config{
         try{
             val subprops = props.path(path) as Map<String, *>
             return Config(subprops)
+        }catch (e:ClassCastException){
+            throw NoSuchElementException("构建配置子项失败：配置数据为$props, 但路径[$path]的子项不是Map")
+        }
+    }
+
+    /**
+     * 获得Properties类型的子配置项
+     * @param key
+     * @param defaultValue
+     * @return
+     */
+    public override fun getProperties(path: String): Properties{
+        try{
+            val subprops = props.path(path) as Map<String, *>
+            val result = Properties()
+            result.putAll(subprops)
+            return result
         }catch (e:ClassCastException){
             throw NoSuchElementException("构建配置子项失败：配置数据为$props, 但路径[$path]的子项不是Map")
         }

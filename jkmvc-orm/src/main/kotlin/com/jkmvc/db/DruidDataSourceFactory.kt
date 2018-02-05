@@ -44,6 +44,9 @@ class DruidDataSourceFactory : IDataSourceFactory {
         val driverClass: String = config["driverClass"]!!
         ds.setDriverClassName(driverClass)
 
+        // 其他属性
+        ds.setConnectionProperties(config["connectionProperties"])
+
         // 连接池大小
         ds.setInitialSize(config.getInt("initialSize", 10)!!) // 初始连接池大小
         ds.setMinIdle(config.getInt("minIdle", 10)!!) // 最小空闲连接数
