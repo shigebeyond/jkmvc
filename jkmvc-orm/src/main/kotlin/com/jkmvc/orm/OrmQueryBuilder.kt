@@ -286,36 +286,58 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
 
             // 遍历每个hasMany关系的查询结果
             forEachManyQuery(result){ name:String, relation:IRelationMeta, relatedItems:List<IOrm> ->
-                // 检查主外键的类型: 数据库中主外键字段类型可能不同，则无法匹配
-                val primaryProp = relation.primaryProp // 主表.主键
-                val foreignProp = if(relation is MiddleRelationMeta)
-                                    relation.middleForeignProp // 中间表.外键
-                                else
-                                    relation.foreignProp // 从表.外键
-                val firstPk: Any = items.first()[primaryProp]
-                val firstFk: Any = relatedItems.first()[foreignProp]
-                if(firstPk::class != firstFk::class){
-                    throw OrmException("模型[${ormMeta.name}]联查[${name}]的hasMany类型的关联对象失败: 主键[${ormMeta.table}.${relation.primaryKey}]字段类型[${firstPk::class}]与外键[${relation.model.modelOrmMeta.table}.${relation.foreignKey}]字段类型[${firstFk::class}]不一致，请改成一样的")
-                }
-
-                // 设置关联属性 -- 双循环匹配主外键
-                for (item in items){ // 遍历每个源对象，收集关联对象
-                    val myRelated = LinkedList<IOrm>()
-                    for(relatedItem in relatedItems){ // 遍历每个关联对象，进行匹配
-                        // hasMany关系的匹配：主表.主键 = 从表.外键
-                        val pk:Any = item[primaryProp] // 主表.主键
-                        val fk:Any = relatedItem[foreignProp] // 从表.外键
-                        if(pk == fk)
-                            myRelated.add(relatedItem)
-                    }
-                    item[name] = myRelated
-                }
-
-                // 清空列表
-                (relatedItems as MutableList).clear()
+                setHasManyProp(items, name, relation, relatedItems)
             }
         }
         return result
+    }
+
+    /**
+     * 设置hasMany关系的属性值
+     *
+     * @param items 本模型对象
+     * @param name 关系名
+     * @param relation 关联关系
+     * @param relatedItems 关联模型对象
+     */
+    protected fun setHasManyProp(items: List<IOrm>, name: String, relation: IRelationMeta, relatedItems: List<IOrm>) {
+        if(items.isEmpty())
+            return
+
+        if(relatedItems.isEmpty()){
+            // 设置关联属性为null
+            for (item in items)
+                item[name] = null
+            return
+        }
+
+        // 检查主外键的类型: 数据库中主外键字段类型可能不同，则无法匹配
+        val primaryProp = relation.primaryProp // 主表.主键
+        val foreignProp = if (relation is MiddleRelationMeta)
+            relation.middleForeignProp // 中间表.外键
+        else
+            relation.foreignProp // 从表.外键
+        val firstPk: Any = items.first()[primaryProp]
+        val firstFk: Any = relatedItems.first()[foreignProp]
+        if (firstPk::class != firstFk::class) {
+            throw OrmException("模型[${ormMeta.name}]联查[${name}]的hasMany类型的关联对象失败: 主键[${ormMeta.table}.${relation.primaryKey}]字段类型[${firstPk::class}]与外键[${relation.model.modelOrmMeta.table}.${relation.foreignKey}]字段类型[${firstFk::class}]不一致，请改成一样的")
+        }
+
+        // 设置关联属性 -- 双循环匹配主外键
+        for (item in items) { // 遍历每个源对象，收集关联对象
+            val myRelated = LinkedList<IOrm>()
+            for (relatedItem in relatedItems) { // 遍历每个关联对象，进行匹配
+                // hasMany关系的匹配：主表.主键 = 从表.外键
+                val pk: Any = item[primaryProp] // 主表.主键
+                val fk: Any = relatedItem[foreignProp] // 从表.外键
+                if (pk == fk)
+                    myRelated.add(relatedItem)
+            }
+            item[name] = myRelated
+        }
+
+        // 清空列表
+        (relatedItems as MutableList).clear()
     }
 
     /**
