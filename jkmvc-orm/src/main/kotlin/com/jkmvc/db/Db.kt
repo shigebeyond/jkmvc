@@ -80,7 +80,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
          * 在操作之后关闭db
          * @param statement db操作过程
          */
-        public fun <T> closeAfter(statement: () -> Unit):Unit{
+        public inline fun <T> closeAfter(statement: () -> Unit):Unit{
             try{
                 statement()
             }finally{
