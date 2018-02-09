@@ -259,8 +259,35 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
      * @return
      */
     public override fun andWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
+        if(op == "IN" && trySplitInParams(column, op, value, true))
+            return this;
+
         whereClause.addSubexp(arrayOf<Any?>(column, prepareOperator(column, op, value), value), "AND");
         return this;
+    }
+
+    /**
+     * 拆分in参数
+     *
+     * @param   column  column name or Pair(column, alias) or object
+     * @param   op      logic operator
+     * @param   value   column value
+     * @param   and    and / or
+     * @return
+     */
+    protected fun trySplitInParams(column: String, op: String, value: Any?, and: Boolean): Boolean {
+        val maxInParamNum = 1000
+        if (value is List<*> && value.size > maxInParamNum) {
+            if(and) andWhereOpen() else orWhereOpen()
+            var i = 0;
+            while (i < value.size) {
+                orWhere(column, op, value.subList(i, minOf(i + maxInParamNum - 1, value.size - 1)))
+                i = i + maxInParamNum
+            }
+            if(and) andWhereClose() else orWhereClose()
+            return true
+        }
+        return false
     }
 
     /**
@@ -272,6 +299,9 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
      * @return
      */
     public override fun orWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
+        if(op == "IN" && trySplitInParams(column, op, value, false))
+            return this;
+
         whereClause.addSubexp(arrayOf<Any?>(column, prepareOperator(column, op, value), value), "OR");
         return this;
 
@@ -386,6 +416,9 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
      * @return
      */
     public override fun andHaving(column: String, op: String, value: Any?): IDbQueryBuilder {
+        if(op == "IN" && trySplitInParams(column, op, value, true))
+            return this;
+
         havingClause.addSubexp(arrayOf<Any?>(column, prepareOperator(column, op, value), value), "AND");
         return this;
     }
@@ -399,6 +432,9 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
      * @return
      */
     public override fun orHaving(column: String, op: String, value: Any?): IDbQueryBuilder {
+        if(op == "IN" && trySplitInParams(column, op, value, false))
+            return this;
+
         havingClause.addSubexp(arrayOf<Any?>(column, prepareOperator(column, op, value), value), "OR");
         return this;
     }
