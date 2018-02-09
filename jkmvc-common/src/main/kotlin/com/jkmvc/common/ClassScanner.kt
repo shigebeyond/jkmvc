@@ -47,6 +47,7 @@ abstract class ClassScanner : IClassScanner {
         if(packages.contains(pck))
             return
 
+        comLogger.debug("扫描包[$pck]下的类")
         // 获得类加载器
         val cld = Thread.currentThread().contextClassLoader
         // 获得该包的所有资源

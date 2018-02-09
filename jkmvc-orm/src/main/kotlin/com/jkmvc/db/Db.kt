@@ -78,11 +78,16 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
 
         /**
          * 在操作之后关闭db
+         * @param logging 是否打印异常日志，在定时任务中，不会自动打印异常，因此手动打印一下
          * @param statement db操作过程
          */
-        public inline fun <T> closeAfter(statement: () -> Unit):Unit{
-            try{
+        public inline fun closeAfter(logging: Boolean = true, statement: () -> Unit):Unit{
+            try {
                 statement()
+            }catch (e: Exception){
+                if(logging)
+                    dbLogger.error("db操作出错：${e.message}", e)
+                throw e
             }finally{
                 close()
             }

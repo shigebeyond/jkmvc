@@ -85,6 +85,22 @@ public fun Collection<out IOrm>.collectColumn(key:String):List<Any?>{
 }
 
 /**
+ * 收集某列去重唯一的值
+ *
+ * @param key 列名
+ * @return
+ */
+public fun Collection<out IOrm>.collectUniqueColumn(key:String):Set<Any?>{
+    if(this.isEmpty())
+        return emptySet()
+
+    val result = HashSet<Any?>()
+    for(item in this)
+        result.add(item[key])
+    return result
+}
+
+/**
  * 获得某列的迭代器
  *
  * @param key 列名

@@ -1,11 +1,14 @@
 package com.jkmvc.common
 
+import org.slf4j.LoggerFactory
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
+// common的日志
+val comLogger = LoggerFactory.getLogger("com.jkmvc.common")
 
 /****************************** 字符串扩展 *******************************/
 /**
