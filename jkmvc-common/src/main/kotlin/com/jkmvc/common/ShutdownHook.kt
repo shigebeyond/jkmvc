@@ -16,7 +16,7 @@ object ShutdownHook : ClosingHook() {
             public override fun run() {
                 println("程序结束")
                 // 关闭资源
-                closeAll()
+                closeAll(true)
             }
         })
     }

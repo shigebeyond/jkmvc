@@ -19,11 +19,14 @@ abstract class ClosingHook : IClosingHook {
 
     /**
      * 关闭所有对象
+     *
+     * @param clearing 关闭后是否清空要关闭的对象
      */
-    override fun closeAll() {
-        for (c in ShutdownHook.closings)
+    override fun closeAll(clearing: Boolean) {
+        for (c in closings)
             c.close()
-        closings.clear()
+        if(clearing)
+            closings.clear()
     }
 
     /**

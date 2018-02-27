@@ -13,8 +13,10 @@ import java.io.Closeable
 interface IClosingHook {
     /**
      * 关闭所有对象
+     *
+     * @param clearing 关闭后是否清空要关闭的对象（在RequestHandler中会重复关闭资源：每次请求结束后都关闭，因此不清空）
      */
-    fun closeAll()
+    fun closeAll(clearing: Boolean = false)
 
     /**
      * 添加要关闭的对象
