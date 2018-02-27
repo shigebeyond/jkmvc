@@ -37,7 +37,8 @@ class JedisCache(protected val name: String = "default"):ICache{
      * @return
      */
     public override fun get(key: Any): Any? {
-        return jedis.get(serializer.serialize(key))
+        val value = jedis.get(serializer.serialize(key))
+        return serializer.unserizlize(value)
     }
 
     /**
