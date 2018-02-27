@@ -18,14 +18,36 @@ abstract class OrmRelated: OrmPersistent() {
         // 设置关联对象
         val relation = ormMeta.getRelation(column);
         if (relation != null) {
-            data[column] = value;
-            // 如果关联的是主表，则更新从表的外键
-            if (relation.type == RelationType.BELONGS_TO)
-                this[relation.foreignKey] = (value as Orm).pk; // 更新字段 super.set(foreignKey, value.pk);
+            setRelated(column, value, relation)
             return;
         }
 
         super.set(column, value);
+    }
+
+    /**
+     * 设置关联对象
+     *
+     * @param column 字段名
+     * @param  value  字段值
+     * @param  relation 关联关系
+     */
+    protected fun setRelated(column: String, value: Any?, relation: IRelationMeta) {
+        // 获得关联对象
+        var obj: Orm
+        if(value is Map<*, *>){
+            obj = related(column, true) as Orm; // 创建关联对象
+            for ((k, v) in value) // 递归设置关联对象的字段值
+                obj[k as String] = v
+        }else{
+            obj = value as Orm
+        }
+        // 设置关联对象
+        data[column] = obj
+        // 如果关联的是主表，则更新从表的外键
+        if (relation.type == RelationType.BELONGS_TO) {
+            this[relation.foreignKey] = obj.pk; // 更新字段 super.set(foreignKey, obj.pk);
+        }
     }
 
     /**
@@ -63,7 +85,7 @@ abstract class OrmRelated: OrmPersistent() {
                 // 获得最后一层的关联对象
                 var obj:OrmRelated = this
                 for (i in 0..cols.size - 2){
-                    obj = obj.related(cols[i], true) as OrmRelated; // 创建关联对象
+                    obj = obj.related(cols[i], true) as Orm; // 创建关联对象
                 }
                 // 设置最底层的属性值
                 val prop = ormMeta.column2Prop(cols.last())
