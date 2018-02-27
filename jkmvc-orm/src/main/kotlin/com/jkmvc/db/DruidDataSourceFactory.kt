@@ -64,13 +64,17 @@ class DruidDataSourceFactory : IDataSourceFactory {
         ds.setTestOnBorrow(config.getBoolean("testOnBorrow", true)!!)
         ds.setTestOnReturn(config.getBoolean("testOnReturn", true)!!)
 
-
+        // 连接泄露检测
         ds.setRemoveAbandoned(config.getBoolean("removeAbandoned", false)!!) // 是否打开连接泄露自动检测
         ds.setRemoveAbandonedTimeoutMillis(config.getLong("removeAbandonedTimeoutMillis", 300 * 1000)!!) // 连接长时间没有使用，被认为发生泄露时长
         ds.setLogAbandoned(config.getBoolean("logAbandoned", false)!!)  // 发生泄露时是否需要输出 log，建议在开启连接泄露检测时开启，方便排错
 
         //只要maxPoolPreparedStatementPerConnectionSize>0,poolPreparedStatements就会被自动设定为true，参照druid的源码
         ds.setMaxPoolPreparedStatementPerConnectionSize(config.getInt("maxPoolPreparedStatementPerConnectionSize", -1)!!)
+
+        // 查询超时(秒)
+        if(config.containsKey("queryTimeOut"))
+            ds.setQueryTimeout(config.getInt("queryTimeOut", 3)!!);
 
         // 配置监控统计拦截的filters
         val filters: String? = config["filters"]    // 监控统计："stat"    防SQL注入："wall"     组合使用： "stat,wall"
