@@ -3,3 +3,5 @@ default:
     port: 6379
     password:
     dbname:
+    # 序列化类型
+    serializeType: jdk
