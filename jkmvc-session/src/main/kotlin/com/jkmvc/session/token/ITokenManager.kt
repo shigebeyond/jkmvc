@@ -1,4 +1,6 @@
-package com.jkmvc.session
+package com.jkmvc.session.token
+
+import com.jkmvc.session.IAuthUserModel
 
 /**
  * 管理会话的token
@@ -18,19 +20,10 @@ interface ITokenManager {
     fun createToken(user: IAuthUserModel): String
 
     /**
-     * 检查token是否有效
-     *
-     * @param token
-     * @param overtime 是否延长过期时间
-     * @return
-     */
-    fun checkToken(token: String, overtime:Boolean = true): Boolean
-
-    /**
      * 获得token相关的用户
      *
      * @param token
-     * @return
+     * @return [用户, tokenId]
      */
     fun getUser(token: String): Pair<IAuthUserModel, String>?
 

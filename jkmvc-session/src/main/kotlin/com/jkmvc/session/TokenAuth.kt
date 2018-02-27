@@ -2,6 +2,7 @@ package com.jkmvc.session
 
 import com.jkmvc.common.RequestHandledHook
 import com.jkmvc.http.Request
+import com.jkmvc.session.token.ITokenManager
 import java.io.Closeable
 
 /**
@@ -67,7 +68,7 @@ class TokenAuth : Auth(), Closeable {
      */
     protected override fun afterLogin(user: IAuthUserModel) {
         //生成登录token
-        val token = RedisTokenManager.createToken(user)
+        val token = tokenManager.createToken(user)
         Request.currentOrNull()?.setAttribute("token", token);
     }
 

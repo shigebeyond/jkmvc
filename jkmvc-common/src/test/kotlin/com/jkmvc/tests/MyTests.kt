@@ -188,9 +188,21 @@ class MyTests{
 
     @Test
     fun testLog(){
-        testLogger.info("打信息日志")
-        testLogger.debug("打调试日志")
-        testLogger.error("打错误日志")
+//        testLogger.info("打信息日志")
+//        testLogger.debug("打调试日志")
+//        testLogger.error("打错误日志")
+
+        // 去掉短信的异常
+        val dir = File("/home/shi/test/szdl/logs/cn")
+        val reg = "短信发送失败: null\\s\njava\\.lang\\.NullPointerException".toRegex() //
+        dir.travel { file ->
+            /*val txt = file.readText()
+            val m = reg.find(txt)
+            println(m?.value)*/
+            file.replaceText {
+                reg.replace(it, "")
+            }
+        }
     }
 
     @Test

@@ -1,16 +1,24 @@
-package com.jkmvc.session
+package com.jkmvc.session.token
 
-import com.jkmvc.cache.JedisFactory
+import com.jkmvc.cache.ICache
+import com.jkmvc.common.Config
 import com.jkmvc.common.SnowflakeIdWorker
-import redis.clients.jedis.Jedis
+import com.jkmvc.session.IAuthUserModel
 
 /**
- * @ClassName: RedisTokenManager
- * @Description:
+ * 用缓存来管理token
+ *
  * @author shijianhang<772910474@qq.com>
  * @date 2017-10-03 11:23 AM
  */
-object RedisTokenManager:ITokenManager {
+class TokenManager : ITokenManager {
+
+    companion object{
+        /**
+         * 会话配置
+         */
+        public val sessionConfig: Config = Config.instance("session")
+    }
 
     /**
      * token有效期（秒）
@@ -18,12 +26,9 @@ object RedisTokenManager:ITokenManager {
     public val TOKEN_EXPIRES:Int = 72 * 3600
 
     /**
-     * redis连接
+     * 缓存
      */
-    private val jedis:Jedis
-        get(){
-            return JedisFactory.instance()
-        }
+    protected val cache:ICache = ICache.instance(sessionConfig["tokenCache"]!!)
 
     /**
      * 为指定用户创建一个token
@@ -36,44 +41,17 @@ object RedisTokenManager:ITokenManager {
         val tokenId:Long = SnowflakeIdWorker.instance().nextId()
 
         //存储token，key为tokenId, value是user, 并设置过期时间
-        //jedis.set("token-$tokenId", user.pk.toString(), "NX", "EX", TOKEN_EXPIRES)
-        // 序列化user
-        jedis.set("token-$tokenId".toByteArray(), user.serialize(), "NX".toByteArray(), "EX".toByteArray(), TOKEN_EXPIRES)
+        cache.put("token-$tokenId", user, TOKEN_EXPIRES)
 
         // token = userId + tokenId
         return "${user.pk}.$tokenId"
     }
 
     /**
-     * 检查token是否有效
-     *
-     * @param token
-     * @param overtime 是否延长过期时间
-     * @return
-     */
-    public override fun checkToken(token: String, overtime: Boolean): Boolean {
-        if(token.isEmpty())
-            return false
-
-        // 验证token
-        val result = getUser(token)
-        if(result == null)
-            return false;
-
-        //如果验证成功，说明此用户进行了一次有效操作，延长token的过期时间
-        if(overtime){
-            val tokenId = result.component2()
-            jedis.expire("token-$tokenId", TOKEN_EXPIRES);
-        }
-
-        return true;
-    }
-
-    /**
      * 获得token相关的用户
      *
      * @param token
-     * @return
+     * @return [用户, tokenId]
      */
     public override fun getUser(token: String): Pair<IAuthUserModel, String>? {
         // 解析token
@@ -83,13 +61,9 @@ object RedisTokenManager:ITokenManager {
         val tokenId = token.substring(i + 1)
 
         // 获得缓存的token
-        val data = jedis.get("token-$tokenId".toByteArray())
-        if(data == null)
+        val user = cache.get("token-$tokenId") as IAuthUserModel
+        if(user == null)
             return null
-
-        // 反序列化user
-        val user = Auth.userModel.java.newInstance() as IAuthUserModel
-        user.unserialize(data)
 
         // 校验
         if(userId != user.pk.toString())
@@ -111,7 +85,7 @@ object RedisTokenManager:ITokenManager {
 
         // 删除token
         val (user, tokenId) = result
-        jedis.del("token-$tokenId")
+        cache.remove("token-$tokenId")
     }
 
 }
