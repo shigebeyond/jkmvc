@@ -1,6 +1,6 @@
 package com.jkmvc.db
 
-import com.alibaba.druid.pool.DruidDataSource
+import javax.sql.DataSource
 
 /**
  * 数据源工厂
@@ -15,7 +15,7 @@ interface IDataSourceFactory {
      * @param name 数据源名
      * @return
      */
-    fun getDataSource(name: String = "default"): DruidDataSource;
+    fun getDataSource(name: String = "default"): DataSource;
 
     /**
      * 关闭所有数据源

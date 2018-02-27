@@ -3,6 +3,7 @@ package com.jkmvc.db
 import com.alibaba.druid.pool.DruidDataSource
 import com.jkmvc.common.Config
 import java.util.concurrent.ConcurrentHashMap
+import javax.sql.DataSource
 
 /**
  * 数据源工厂
@@ -22,7 +23,7 @@ class DruidDataSourceFactory : IDataSourceFactory {
      * @param name 数据源名
      * @return
      */
-    public override fun getDataSource(name: String): DruidDataSource {
+    public override fun getDataSource(name: String): DataSource {
         return dataSources.getOrPut(name){
             buildDruidDataSource(name)
         }
