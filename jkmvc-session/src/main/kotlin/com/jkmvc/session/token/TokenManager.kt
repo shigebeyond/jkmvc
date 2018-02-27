@@ -11,14 +11,12 @@ import com.jkmvc.session.IAuthUserModel
  * @author shijianhang<772910474@qq.com>
  * @date 2017-10-03 11:23 AM
  */
-class TokenManager : ITokenManager {
+object TokenManager : ITokenManager {
 
-    companion object{
-        /**
-         * 会话配置
-         */
-        public val sessionConfig: Config = Config.instance("session")
-    }
+    /**
+     * 会话配置
+     */
+    public val sessionConfig: Config = Config.instance("session")
 
     /**
      * token有效期（秒）
@@ -28,7 +26,7 @@ class TokenManager : ITokenManager {
     /**
      * 缓存
      */
-    protected val cache:ICache = ICache.instance(sessionConfig["tokenCache"]!!)
+    private val cache:ICache = ICache.instance(sessionConfig["tokenCache"]!!)
 
     /**
      * 为指定用户创建一个token
@@ -61,7 +59,7 @@ class TokenManager : ITokenManager {
         val tokenId = token.substring(i + 1)
 
         // 获得缓存的token
-        val user = cache.get("token-$tokenId") as IAuthUserModel
+        val user = cache.get("token-$tokenId") as IAuthUserModel?
         if(user == null)
             return null
 

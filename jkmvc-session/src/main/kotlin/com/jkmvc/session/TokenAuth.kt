@@ -3,6 +3,7 @@ package com.jkmvc.session
 import com.jkmvc.common.RequestHandledHook
 import com.jkmvc.http.Request
 import com.jkmvc.session.token.ITokenManager
+import com.jkmvc.session.token.TokenManager
 import java.io.Closeable
 
 /**
@@ -30,7 +31,7 @@ class TokenAuth : Auth(), Closeable {
     /**
      * token管理器
      */
-    protected val tokenManager: ITokenManager = RedisTokenManager
+    protected val tokenManager: ITokenManager = TokenManager
 
     init{
         RequestHandledHook.addClosing(this)
