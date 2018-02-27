@@ -17,10 +17,10 @@ import java.util.concurrent.*
 open class BasicFuture<T>(protected val callback: FutureCallback<T?>? = null /* 回调 */): Future<T?>, Cancellable {
 
     /**
-     * this的锁，即this自己
+     * 用作同步的对象，为this对象
      *   Kotlin的Any类似于Java的Object，但没有wait()，notify()和notifyAll()方法，因此只能将 this 转为 Object 才能调用这些方法
      */
-    protected val thisLock:java.lang.Object = this as java.lang.Object
+    protected val mutex:java.lang.Object = this as java.lang.Object
 
     /**
      * 是否已完成
@@ -82,7 +82,7 @@ open class BasicFuture<T>(protected val callback: FutureCallback<T?>? = null /* 
     @Synchronized @Throws(InterruptedException::class, ExecutionException::class)
     public override fun get(): T? {
         while (!this.completed)
-            thisLock.wait()
+            mutex.wait()
 
         return tryGetResult()
     }
@@ -106,7 +106,7 @@ open class BasicFuture<T>(protected val callback: FutureCallback<T?>? = null /* 
             throw TimeoutException()
 
         while (true) {
-            thisLock.wait(waitTime)
+            mutex.wait(waitTime)
             if (completed)
                 return tryGetResult()
 
@@ -130,7 +130,7 @@ open class BasicFuture<T>(protected val callback: FutureCallback<T?>? = null /* 
             // 标识完成 + 记录结果
             completed = true
             this.result = result
-            thisLock.notifyAll()
+            mutex.notifyAll()
         }
         // 回调
         callback?.completed(result)
@@ -151,7 +151,7 @@ open class BasicFuture<T>(protected val callback: FutureCallback<T?>? = null /* 
             // 标识完成 + 记录异常
             completed = true
             ex = exception
-            thisLock.notifyAll()
+            mutex.notifyAll()
         }
         // 回调
         callback?.failed(exception)
@@ -172,7 +172,7 @@ open class BasicFuture<T>(protected val callback: FutureCallback<T?>? = null /* 
             // 标识完成 + 标识取消
             completed = true
             cancelled = true
-            thisLock.notifyAll()
+            mutex.notifyAll()
         }
         // 回调
         callback?.cancelled()
