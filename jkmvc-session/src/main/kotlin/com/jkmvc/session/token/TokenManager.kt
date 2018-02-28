@@ -66,8 +66,7 @@ object TokenManager : ITokenManager {
 
         // 创建用户模型
         val user = Auth.userModel.java.newInstance() as IAuthUserModel
-        for((k, v) in data)
-            user[k] = v
+        user.fromMap(data)
 
         // 校验
         if(userId != user.pk.toString())

@@ -23,10 +23,10 @@ interface IOrmRelated : IOrmPersistent
 	 * @param name 关联对象名
 	 * @param newed 是否创建新对象：在查询db后设置原始字段值data()时使用
 	 * @param columns 字段名数组: Array(column1, column2, alias to column3),
-	 * 													如 Array("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
+	 * 						如 Array("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
 	 * @return
 	 */
-	fun related(name:String, newed:Boolean = false, vararg columns:String): Any?;
+	fun related(name:String, newed:Boolean = false, vararg columns:String): IOrm?;
 
 	/**
 	 * 检查是否有关联对象

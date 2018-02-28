@@ -18,36 +18,15 @@ abstract class OrmRelated: OrmPersistent() {
         // 设置关联对象
         val relation = ormMeta.getRelation(column);
         if (relation != null) {
-            setRelated(column, value, relation)
+            // 设置关联对象
+            data[column] = value;
+            // 如果关联的是主表，则更新从表的外键
+            if (relation.type == RelationType.BELONGS_TO)
+                this[relation.foreignKey] = (value as Orm).pk; // 更新字段 super.set(foreignKey, obj.pk);
             return;
         }
 
         super.set(column, value);
-    }
-
-    /**
-     * 设置关联对象
-     *
-     * @param column 字段名
-     * @param  value  字段值
-     * @param  relation 关联关系
-     */
-    protected fun setRelated(column: String, value: Any?, relation: IRelationMeta) {
-        // 获得关联对象
-        var obj: Orm
-        if(value is Map<*, *>){
-            obj = related(column, true) as Orm; // 创建关联对象
-            for ((k, v) in value) // 递归设置关联对象的字段值
-                obj[k as String] = v
-        }else{
-            obj = value as Orm
-        }
-        // 设置关联对象
-        data[column] = obj
-        // 如果关联的是主表，则更新从表的外键
-        if (relation.type == RelationType.BELONGS_TO) {
-            this[relation.foreignKey] = obj.pk; // 更新字段 super.set(foreignKey, obj.pk);
-        }
     }
 
     /**
@@ -124,15 +103,31 @@ abstract class OrmRelated: OrmPersistent() {
     }
 
     /**
+     * 从map中设置字段值
+     *
+     * @param data
+     */
+    public override fun fromMap(data: Map<String, Any?>): Unit{
+        for((column, value) in data) {
+            var realValue: Any? = value // Any? / Orm / List / Map
+            if(value is Map<*, *>){ // 如果是map，则为关联对象
+                realValue = related(column, true) // 创建关联对象
+                (realValue as Orm).fromMap(value as Map<String, Any?>) // 递归设置关联对象的字段值
+            }
+            this[column] = realValue
+        }
+    }
+
+    /**
      * 获得关联对象
      *
      * @param name 关联对象名
      * @param 是否创建新对象：在查询db后设置原始字段值data()时使用
      * @param columns 字段名数组: Array(column1, column2, alias to column3),
-     * 													如 Array("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
+     * 				如 Array("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
      * @return
      */
-    public override fun related(name: String, newed: Boolean, vararg columns: String): Any? {
+    public override fun related(name: String, newed: Boolean, vararg columns: String): IOrm? {
         if (name !in data){
             // 获得关联关系
             val relation = ormMeta.getRelation(name)!!;
@@ -156,7 +151,7 @@ abstract class OrmRelated: OrmPersistent() {
             data[name] = result;
         }
 
-        return data[name];
+        return data[name] as IOrm?
     }
 
     /**

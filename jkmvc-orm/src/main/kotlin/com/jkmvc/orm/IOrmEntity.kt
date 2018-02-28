@@ -82,6 +82,13 @@ interface IOrmEntity: IRecord {
     fun asMap(): Map<String, Any?>;
 
     /**
+     * 从map中设置字段值
+     *
+     * @param data
+     */
+    fun fromMap(data: Map<String, Any?>): Unit;
+
+    /**
      * 序列化
      * @return
      */
