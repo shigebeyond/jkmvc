@@ -541,7 +541,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
     public override fun quoteSingleValue(value: Any?): String {
         // null => "null"
         if (value == null)
-            return "null";
+            return "NULL";
 
         // bool => int
         if (value is Boolean)
