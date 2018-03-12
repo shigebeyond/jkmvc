@@ -426,9 +426,15 @@ class MyTests{
 
     @Test
     fun testTravelFile(){
-        val dir = File("/home/shi/test")
-        dir.travel {
-            println(it)
+
+        val dir = File("/home/shi/code/java/szpower/szpower/jkmvc-szpower/src/main/kotlin/com/jkmvc/szpower/controller")
+        dir.travel { f ->
+            println("处理文件: " + f.name)
+            f.forEachLine { l ->
+                // println("\"\\w+\\.\\w+\\s=\"".toRegex().matches("\"a.b =\""))
+                if("\"\\w+\\.\\w+\\s=\"".toRegex().matches(l))
+                    println("\\t" + l)
+            }
         }
     }
 
