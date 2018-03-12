@@ -26,7 +26,7 @@ interface IOrmRelated : IOrmPersistent
 	 * 						如 Array("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
 	 * @return
 	 */
-	fun related(name:String, newed:Boolean = false, vararg columns:String): IOrm?;
+	fun related(name:String, newed:Boolean = false, vararg columns:String): Any?;
 
 	/**
 	 * 检查是否有关联对象

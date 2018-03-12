@@ -127,7 +127,7 @@ abstract class OrmRelated: OrmPersistent() {
      * 				如 Array("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
      * @return
      */
-    public override fun related(name: String, newed: Boolean, vararg columns: String): IOrm? {
+    public override fun related(name: String, newed: Boolean, vararg columns: String): Any? {
         if (name !in data){
             // 获得关联关系
             val relation = ormMeta.getRelation(name)!!;
@@ -151,7 +151,7 @@ abstract class OrmRelated: OrmPersistent() {
             data[name] = result;
         }
 
-        return data[name] as IOrm?
+        return data[name];
     }
 
     /**
