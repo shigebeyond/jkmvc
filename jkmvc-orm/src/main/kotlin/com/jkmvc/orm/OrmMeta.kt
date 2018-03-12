@@ -181,7 +181,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @return
      */
     public override fun <T> transactionWhenHandlingEvent(events:String, statement: () -> T): T{
-        return db.transaction(canHandleAnyEvent(events), statement)
+        return db.transaction(!canHandleAnyEvent(events), statement)
     }
 
 
