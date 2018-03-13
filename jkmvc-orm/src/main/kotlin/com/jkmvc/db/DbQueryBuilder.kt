@@ -64,7 +64,7 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:Pair<String, String?> /*
         //return db.quote(value);
 
         // sql参数化: 将参数名拼接到sql, 独立出参数值, 以便执行时绑定参数值
-        // 1 null => "NULL"
+        // 1 null => "NULL" -- oracle中不能使用null作为参数，因此只能直接输出null作为sql
         if (value == null)
             return "NULL";
 
