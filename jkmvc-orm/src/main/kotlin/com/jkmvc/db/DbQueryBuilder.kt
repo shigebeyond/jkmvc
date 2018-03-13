@@ -64,17 +64,21 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:Pair<String, String?> /*
         //return db.quote(value);
 
         // sql参数化: 将参数名拼接到sql, 独立出参数值, 以便执行时绑定参数值
-        // 1 db表达式：不转义，直接输出
+        // 1 null => "NULL"
+        if (value == null)
+            return "NULL";
+
+        // 2 db表达式：不转义，直接输出
         if(value is DbExpression)
             return value.toString()
 
-        // 2 子查询: 编译select子句，并合并到 compiledSql 中
+        // 3 子查询: 编译select子句，并合并到 compiledSql 中
         if(value is IDbQueryBuilder) // 无别名
             return quoteSubQuery(value)
         if(value is Pair<*, *>) // 有别名
             return quoteSubQuery(value as Pair<DbQueryBuilder, String>)
 
-        // 2 字段值
+        // 4 字段值
         compiledSql.staticParams.add(value);
         return "?";
     }

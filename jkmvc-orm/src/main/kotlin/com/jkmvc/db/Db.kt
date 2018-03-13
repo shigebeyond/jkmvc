@@ -539,7 +539,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @return
      */
     public override fun quoteSingleValue(value: Any?): String {
-        // null => "null"
+        // null => "NULL"
         if (value == null)
             return "NULL";
 
