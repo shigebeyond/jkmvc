@@ -95,6 +95,14 @@ abstract class OrmEntity : IOrm {
     }
 
     /**
+     * 显式标记字段有变化
+     * @param column 字段名
+     */
+    public override fun setDirty(column: String){
+        dirty[column] = data[column];
+    }
+
+    /**
      * 判断属性值是否相等
      *    只在 set() 中调用，用于检查属性值是否修改
      *
@@ -206,11 +214,15 @@ abstract class OrmEntity : IOrm {
         if(prop == null)
             return false
 
-        // 2 准备参数: 转换类型
-        val param = value.to(prop.setter.parameters[1].type)
-        // 3 调用setter方法
-        prop.setter.call(this, param);
-        return true
+        try {
+            // 2 准备参数: 转换类型
+            val param = value.to(prop.setter.parameters[1].type)
+            // 3 调用setter方法
+            prop.setter.call(this, param);
+            return true
+        }catch (e: Exception){
+            throw OrmException("智能设置属性[$column=$value]错误: ${e.message}", e)
+        }
     }
 
     /**

@@ -34,6 +34,12 @@ interface IOrmEntity: IRecord {
     override operator fun set(column: String, value: Any?);
 
     /**
+     * 显式标记字段有变化
+     * @param column 字段名
+     */
+    fun setDirty(column: String)
+
+    /**
      * 智能设置属性
      *    在不知属性类型的情况下，将string赋值给属性
      *    => 需要将string转换为属性类型
