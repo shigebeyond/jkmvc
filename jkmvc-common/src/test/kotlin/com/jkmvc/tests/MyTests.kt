@@ -206,6 +206,28 @@ class MyTests{
     }
 
     @Test
+    fun testCode(){
+        val singleReg = "//.*\\n".toRegex() // 单行注释
+        val multipleReg = "/\\*.+?\\*/".toRegex(setOf(RegexOption.DOT_MATCHES_ALL)) // 单行注释
+        var content = File("/home/shi/test/test.kt").readText()
+        println(multipleReg.findAll(content).joinToString {
+            it.value
+        })
+//        content = singleReg.replace(content, "")
+//        content = multipleReg.replace(content, "")
+//        println(content)
+
+        /*
+        val dir = File("")
+        dir.travel { file ->
+            file.replaceText {
+                val content = singleReg.replace(it, "")
+                multipleReg.replace(content, "")
+            }
+        }*/
+    }
+
+    @Test
     fun testResource(){
         val f = File("jkmvc.properties")
         println(f.absolutePath + " : " +  f.exists()) // /home/shi/code/java/jkmvc/jkmvc-common/jkmvc.properties : false
