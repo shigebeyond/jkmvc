@@ -139,7 +139,7 @@ class MyTests{
 
         // http://yipeiwu.com/getvideo.html
         // 下载网易公开课
-        val f = File("/home/shi/test/course.html")
+        /*val f = File("/home/shi/test/course.html")
         val ms = "<tr>\\s*<td>(.+)\\s*</td>\\s*<td><a href=\"([^\"]+)\".+</td>\\s*</tr>".toRegex().findAll(f.readText())
         for(m in ms){
             val title = m.groups[1]!!.value
@@ -147,6 +147,13 @@ class MyTests{
             val ext = url.substringAfterLast('.')
             // 服务器拒绝 aria2c 下载，只能用curl
             println("aria2c -s 2 '$url' -o '$title.$ext'")
+        }*/
+
+        // 添加行号
+        val f = File("/home/shi/test/voice.txt")
+        var i = 1
+        f.forEachLine {
+            println((i++).toString() + " " + it)
         }
     }
 
