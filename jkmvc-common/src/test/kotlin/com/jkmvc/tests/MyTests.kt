@@ -213,25 +213,32 @@ class MyTests{
     }
 
     @Test
-    fun testCode(){
-        val singleReg = "//.*\\n".toRegex() // 单行注释
+        fun testCode(){
+        val singleReg = "(?!property\\(\\) )//.*\\n".toRegex() // 单行注释
         val multipleReg = "/\\*.+?\\*/".toRegex(setOf(RegexOption.DOT_MATCHES_ALL)) // 单行注释
-        var content = File("/home/shi/test/test.kt").readText()
-        println(multipleReg.findAll(content).joinToString {
-            it.value
-        })
-//        content = singleReg.replace(content, "")
-//        content = multipleReg.replace(content, "")
-//        println(content)
+        val blank2Reg = "\n\\s*\n\\s*\n".toRegex() // 双空行
+        val firstReg = "\\{\\s*\n\\s*\n".toRegex() // {下的第一个空行
+       /*
+       var content = File("/home/shi/code/java/szpower/szpower2/src/main/kotlin/com/jkmvc/szpower/controller/AlarmController.kt").readText()
+//        println(multipleReg.findAll(content).joinToString {
+//            it.value
+//        })
+        content = singleReg.replace(content, "\n")
+        content = multipleReg.replace(content, "")
+        println(content)
+        */
 
-        /*
-        val dir = File("")
+        val dir = File("/home/shi/code/java/szpower/szpower2/src")
         dir.travel { file ->
-            file.replaceText {
-                val content = singleReg.replace(it, "")
-                multipleReg.replace(content, "")
+            if(file.name.endsWith(".kt")){
+                file.replaceText {
+                    var content = singleReg.replace(it, "\n")
+                    content = multipleReg.replace(content, "")
+                    content = blank2Reg.replace(content, "\n\n")
+                    firstReg.replace(content, "{\n")
+                }
             }
-        }*/
+        }
     }
 
     @Test
