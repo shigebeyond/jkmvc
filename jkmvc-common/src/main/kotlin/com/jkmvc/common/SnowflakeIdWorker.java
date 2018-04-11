@@ -58,7 +58,7 @@ public class SnowflakeIdWorker implements ISnowflakeIdWorker {
     private final long timestampLeftShift = sequenceBits + workerIdBits + datacenterIdBits;
 
     /** 生成序列的掩码，这里为4095 (0b111111111111=0xfff=4095) */
-    private final long sequenceMask = -1L ^ (-1L << sequenceBits);
+    private final long sequenceMask = -1L ^ (-1L << sequenceBits); // 微秒内序列号12位自增，并发4096
 
     /** 工作机器ID(0~31) */
     private long workerId;
@@ -113,7 +113,7 @@ public class SnowflakeIdWorker implements ISnowflakeIdWorker {
 
         //如果是同一时间生成的，则进行毫秒内序列
         if (lastTimestamp == timestamp) {
-            sequence = (sequence + 1) & sequenceMask;
+            sequence = (sequence + 1) & sequenceMask; // 微秒内序列号12位自增，并发4096
             //毫秒内序列溢出
             if (sequence == 0) {
                 //阻塞到下一个毫秒,获得新的时间戳
