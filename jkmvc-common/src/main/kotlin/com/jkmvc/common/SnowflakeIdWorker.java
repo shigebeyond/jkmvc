@@ -16,7 +16,7 @@ package com.jkmvc.common;
  * @author shijianhang
  * @date 2017-10-8 下午8:02:47
  */
-public class SnowflakeIdWorker implements ISnowflakeIdWorker {
+public class SnowflakeIdWorker implements IIdWorker {
 
     // ==============================单例===========================================
     private static SnowflakeIdWorker _inst;
@@ -100,7 +100,7 @@ public class SnowflakeIdWorker implements ISnowflakeIdWorker {
     // ==============================Methods==========================================
     /**
      * 获得下一个ID (该方法是线程安全的)
-     * @return SnowflakeId
+     * @return
      */
     public synchronized long nextId() {
         long timestamp = time();

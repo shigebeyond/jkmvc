@@ -2,9 +2,12 @@ package com.jkmvc.tests
 
 import com.jkmvc.cache.JedisFactory
 import com.jkmvc.common.*
-import com.jkmvc.validate.IValidation
 import com.jkmvc.validate.Validation
 import getIntranetHost
+import javassist.ClassClassPath
+import javassist.ClassPool
+import javassist.Modifier
+import javassist.bytecode.LocalVariableAttribute
 import org.dom4j.Attribute
 import org.dom4j.DocumentException
 import org.dom4j.Element
@@ -341,6 +344,25 @@ class MyTests{
 
         //println(Config::class.java.isInterface)
         //println(IValidation::class.java.isInterface)
+    }
+
+    @Test
+    fun testParamName(){
+        /*val method = Config::class.java.findMethod("containsKey", arrayListOf(String::class.java))
+        // 获得方法的参数名
+        val clazz = method.getDeclaringClass()
+        val methodName = method.getName()
+        val pool = ClassPool.getDefault()
+        pool.insertClassPath(ClassClassPath(clazz))
+        val cc = pool.get(clazz.getName())
+        val cm = cc.getDeclaredMethod(methodName)
+        val methodInfo = cm.getMethodInfo()
+        val codeAttribute = methodInfo.getCodeAttribute()
+        val paramNames = arrayOfNulls<String>(cm.getParameterTypes().size)
+        val pos = if (java.lang.reflect.Modifier.isStatic(cm.getModifiers())) 0 else 1
+        for (i in paramNames.indices)
+            println(codeAttribute.getAttribute(LocalVariableAttribute.tag).variableName(i + pos))
+        */
     }
 
     @Test
