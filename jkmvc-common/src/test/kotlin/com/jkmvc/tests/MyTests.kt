@@ -102,6 +102,23 @@ class MyTests{
     }
 
     @Test
+    fun testPerform(){
+        val start = System.currentTimeMillis()
+        val n = 1000000
+        val map = HashMap<String, Long>(n, 0.75f)
+        val sb = StringBuilder(100)
+
+
+        for (i in 0..n - 1) {
+            val time = System.currentTimeMillis()
+            map.put(sb.append(i).append("_").append(time).toString(), time)
+            sb.delete(0, sb.length)
+        }
+        println((System.currentTimeMillis() - start) / 1000.0)
+        Thread.sleep(150000)
+    }
+
+    @Test
     fun testString(){
 //        val m = "jdbc:mysql://[^/]+/([^\\?]+)".toRegex().find("jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8")
 //        if(m != null)
