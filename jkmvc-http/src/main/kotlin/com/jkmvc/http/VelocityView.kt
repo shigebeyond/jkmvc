@@ -55,8 +55,7 @@ class VelocityView(req: Request /* 请求对象 */, res: Response /* 响应对�
             template.merge(context, vwriter) // 合并上下文，根据数据渲染并输出
             vwriter.flush()
         } finally {
-            if (vwriter != null)
-                vwriter.recycle(null)
+            vwriter?.recycle(null)
         }
     }
 }
