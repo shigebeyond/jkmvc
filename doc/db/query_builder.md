@@ -314,7 +314,10 @@ SELECT  * FROM `user` WHERE ( `id` IN (1, 2, 3, 5)  AND ( `lastLogin` <= 1511069
 In `update/insert` Query Builder, the column value is always be escaped by `Db::quote(value:Any?)`. But there are cases were you need a complex expression or other database functions, which you don't want the Query Builder to try and escape. In these cases, you will need to use a database expression `DbExpression`.  **A database expression is taken as direct input and no escaping is performed.**
 
 ```
-DbQueryBuilder().table("user").set("login_count", DbExpression("login_count + 1")).where("id", "=", 45).update();
+DbQueryBuilder().table("user")
+    .set("login_count", DbExpression("login_count + 1")) // Equals: .set("login_count", "login_count + 1", true)
+    .where("id", "=", 45)
+    .update();
 ```
 
 This will generate the following query, assuming `$id = 45`:

@@ -315,7 +315,10 @@ SELECT  * FROM `user` WHERE ( `id` IN (1, 2, 3, 5)  AND ( `lastLogin` <= 1511069
 因此，我们需要数据库表达式 `DbExpression`，用于添加不转义的字段值，表示要保存的字段值是一个sql表达式，如 now() / column1 + 1
 
 ```
-DbQueryBuilder().table("user").set("login_count", DbExpression("login_count + 1")).where("id", "=", 45).update();
+DbQueryBuilder().table("user")
+    .set("login_count", DbExpression("login_count + 1")) // 等价于 .set("login_count", "login_count + 1", true)
+    .where("id", "=", 45)
+    .update();
 ```
 
 生成sql如下：
