@@ -44,7 +44,7 @@
       <% if(user.getAvatar() != null){ %>
           <div class="form-group">
              <label for="avatar">Avatar</label>
-             <img src="<%= req.uploadUrl(user.getAvatar())%>" width="150px" height="200px" >
+             <img src="<%= req.getUploadUrl(user.getAvatar())%>" width="150px" height="200px" >
            </div>
       <% } %>
       <form class="form-inline" action="<%= req.absoluteUrl("user/uploadAvatar/" + user.getId()) %>" method="post" enctype="multipart/form-data">

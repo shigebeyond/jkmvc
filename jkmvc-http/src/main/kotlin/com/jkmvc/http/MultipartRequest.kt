@@ -138,7 +138,7 @@ abstract class MultipartRequest(protected val req:HttpServletRequest /* 请求�
      * @param relativePath 上传文件的相对路径
      * @return
      */
-    public fun toUploadUrl(relativePath:String):String {
+    public fun getUploadUrl(relativePath:String):String {
         if(uploadConfig.containsKey("uploadDomain"))
             return uploadConfig.getString("uploadDomain") + '/' + relativePath;
         else

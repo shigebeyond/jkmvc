@@ -68,7 +68,7 @@ getFile(name: String): File | Get a uploaed file
 getFileMap(): Map<String, File> | Get all uploaed files
 getFileNames(): Enumeration<String> | Get all uploaed file names
 getFileRelativePath(name: String): String | Get a uploaed file's relative path where file is saved
-toUploadUrl(relativePath: String): String | Obtain an absolute url based on the uploaded file's relative path
+getUploadUrl(relativePath: String): String | Obtain an absolute url based on the uploaded file's relative path
 
 6. Get request parameter（including routing paramter and `get/post` parameter）
 
