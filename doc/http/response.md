@@ -11,9 +11,10 @@ Here is a list of the properties and methods special in `Response`
 method | usage
 --- | ---
 setStatus(status: Int): Unit | set response status code
-render(view: View): Unit | render view
-render(content: String): Unit | render string
-render(file: File): Unit | render file
+renderView(view: View): Unit | render view
+renderString(content: String): Unit | render string
+renderFile(file: File): Unit | render file
+renderFile(file: String): Unit | render file
 
 2. Cache Manipulating methods
 

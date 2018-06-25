@@ -11,7 +11,7 @@ class WelcomeController: Controller() {
      * 主页
      */
     public fun indexAction() {
-        res.render("hello world");
+        res.renderString("hello world");
     }
 
     /**
@@ -19,7 +19,7 @@ class WelcomeController: Controller() {
      * render jsp view
      */
     public fun jspAction(){
-        res.render(view("index" /* view file */, mutableMapOf("name" to "shijianhang") /* view data */))
+        res.renderView(view("index" /* view file */, mutableMapOf("name" to "shijianhang") /* view data */))
     }
 
 }

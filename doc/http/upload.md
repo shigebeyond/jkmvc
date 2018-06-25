@@ -61,7 +61,7 @@ public fun uploadAvatarAction()
     val id: Int = req["id"]!!
     val user = UserModel(id)
     if(!user.isLoaded()){
-        res.render("use [" + req["id"] + "] not exists")
+        res.renderString("use [" + req["id"] + "] not exists")
         return
     }
 

@@ -24,7 +24,7 @@ class WelcomeController: Controller() {
      * 操作方法，用于响应uri "welcome/index"
      */
     public fun actionIndex() {
-        res.render("hello world");
+        res.renderString("hello world");
     }
 }
 ```
@@ -62,9 +62,10 @@ req.routeParams | 匹配路由的所有参数，包含 controller / action
 属性/方法 | 作用
 --- | ---
 req.setStatus(status:Int)| 设置响应的状态码
-res.render(content:String) | 设置响应内容为文本
-res.render(file: File) | 设置响应内容为文件
-res.render(view:View) | 设置响应内容为视图
+res.renderString(content:String) | 设置响应内容为文本
+res.renderFile(file: File) | 设置响应内容为文件
+res.renderFile(file: String) | 设置响应内容为文件
+res.renderView(view:View) | 设置响应内容为视图
 res.setHeader(name:String, value:String) | 设置响应头
 
 ## 5 Action 操作
@@ -75,14 +76,14 @@ Action 操作，其实就是控制器的一个方法，但定义必须满足以�
 
 操作是真正处理请求的方法，包含所有逻辑代码。
 
-每个操作方法都应该 `res.render(sth)` 来给浏览器响应内容，除非请求被重定向。
+每个操作方法都应该 `res.renderXXX(sth)` 来给浏览器响应内容，除非请求被重定向。
 
 我们来看看一个简单的操作方法，如加载 [view](view) 视图文件
 
 ```
 	public function indexAction()
 	{
-		res.render(view("user/detail")); // This will load webapps/user/detail.jsp
+		res.renderView(view("user/detail")); // This will load webapps/user/detail.jsp
 	}
 ```
 
@@ -121,12 +122,12 @@ default:
 
 ## 7 `res`属性
 
-你可以使用 `res.render()` 方法来向浏览器返回渲染结果
+你可以使用 `res.renderXXX()` 方法来向浏览器返回渲染结果
 
 注意：
 
-1. 在调用 `res.render()` 方法后程序并不会立即返回，如果需要立即返回，要使用 `return` 语句
-2. 在一个action方法中多次调用 `res.render()` 方法只有最后一次有效。
+1. 在调用 `res.renderXXX()` 方法后程序并不会立即返回，如果需要立即返回，要使用 `return` 语句
+2. 在一个action方法中多次调用 `res.renderXXX()` 方法只有最后一次有效。
 
 
 ## 8 例子
@@ -148,13 +149,13 @@ class UserController: Controller()
         //val user = UserModel.queryBuilder().where("id", id).find<UserModel>()
         val user = UserModel(id)
         if(!user.isLoaded()){
-            res.render("用户[$id]不存在")
+            res.renderString("用户[$id]不存在")
             return
         }
         // 渲染视图
         val view = view("user/detail")
         view["user"] = user; // 设置视图参数
-        res.render(view)
+        res.renderView(view)
     }
 }
 ```

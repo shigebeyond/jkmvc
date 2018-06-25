@@ -13,9 +13,10 @@ jkmvc的响应类是 `com.jkmvc.http.Response`
 方法 | 作用
 --- | ---
 setStatus(status: Int): Unit | 设置响应状态码
-render(view: View): Unit | 响应视图
-render(content: String): Unit | 响应文本
-render(file: File): Unit | 响应文件
+renderView(view: View): Unit | 响应视图
+renderString(content: String): Unit | 响应字符串
+renderFile(file: File): Unit | 响应文件
+renderFile(file: String): Unit | 响应文件
 
 2. 操作缓存的方法
 

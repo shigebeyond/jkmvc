@@ -26,7 +26,7 @@ class WelcomeController: Controller() {
      * action，response to uri "welcome/index"
      */
     public fun actionIndex() {
-        res.render("hello world");
+        res.renderString("hello world");
     }
 }
 ```
@@ -64,9 +64,10 @@ Every controller has the `res` property which is the [Response](response) object
 Property/method | What it does
 --- | ---
 req.setStatus(status:Int)|Set HTTP status for the request (200, 404, 500, etc.)
-res.render(content:String) | Set content to return for this request
-res.render(file: File) | Set file to return for this request
-res.render(view:View) | Set view to return for this request
+res.renderString(content:String) | Set content to return for this request
+res.renderFile(file: File) | Set file to return for this request
+res.renderFile(file: String) | Set file to return for this request
+res.renderView(view:View) | Set view to return for this request
 res.setHeader(name:String, value:String) | Set HTTP headers to return with the response
 
 
@@ -76,14 +77,14 @@ You create actions for your controller by defining a public function with an `Ac
 
 An action method handles the current request, it contains all logic code for this request. 
 
-Every action should call `res.render(sth)` to send sth to the browser, unless it redirected.
+Every action should call `res.renderXXX(sth)` to send sth to the browser, unless it redirected.
 
 A very basic action method that simply loads a [view](view) file.
 
 ```
 	public function indexAction()
 	{
-		res.render(view("user/detail")); // This will load webapps/user/detail.jsp
+		res.renderView(view("user/detail")); // This will load webapps/user/detail.jsp
 	}
 ```
 
@@ -121,12 +122,12 @@ default:
 
 ## 7 `res`属性
 
-You can use `res.render()` to render sth to browser
+You can use `res.renderXXX()` to render sth to browser
 
 Note：
 
-1. After calling `res.render()` won't return immediately，so you must call `return`
-2. If you call `res.render()` multiple times in an action, but only the last call works
+1. After calling `res.renderXXX()` won't return immediately，so you must call `return`
+2. If you call `res.renderXXX()` multiple times in an action, but only the last call works
 
 ## 8 Examples
 
@@ -147,13 +148,13 @@ class UserController: Controller()
         //val user = UserModel.queryBuilder().where("id", id).find<UserModel>()
         val user = UserModel(id)
         if(!user.isLoaded()){
-            res.render("user[$id] not exist")
+            res.renderString("user[$id] not exist")
             return
         }
         // render view
         val view = view("user/detail")
         view["user"] = user; // set view data
-        res.render(view)
+        res.renderView(view)
     }
 }
 ```

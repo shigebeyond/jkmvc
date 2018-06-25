@@ -12,6 +12,12 @@ import java.util.concurrent.ConcurrentHashMap
 open class View(override val req: Request /* 请求对象 */, override val res: Response /* 响应对象 */, override val file:String/* 视图文件 */, override var data:MutableMap<String, Any?> /* 局部变量 */):IView
 {
 	companion object{
+
+		/**
+		 * 空map
+		 */
+		public val emptyMutableMap:MutableMap<String, Any?> = HashMap<String, Any?>()
+
 		/**
 		 * 全局变量
 		 */

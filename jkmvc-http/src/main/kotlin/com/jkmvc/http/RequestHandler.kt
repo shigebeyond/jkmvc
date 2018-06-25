@@ -67,7 +67,6 @@ object RequestHandler : IRequestHandler {
             res.setStatus(404).send();
         }  */
         catch (e: Exception) {
-//            res.render("异常 - " + e.message)
             e.printStackTrace(res.prepareWriter())
             httpLogger.debug("处理uri[${req.routeUri}]出错", e)
             return true

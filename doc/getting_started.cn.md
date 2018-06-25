@@ -135,7 +135,7 @@ class WelcomeController: Controller() {
      * 主页
      */
     public fun indexAction() {
-        res.render("hello world");
+        res.renderString("hello world");
     }
 
 }

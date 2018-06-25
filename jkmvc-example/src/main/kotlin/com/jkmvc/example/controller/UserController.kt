@@ -46,7 +46,7 @@ class UserController: Controller()
         // 查询所有用户 | find all users
         val users = query.findAll<UserModel>()
         // 渲染视图 | render view
-        res.render(view("user/index", mutableMapOf("count" to count, "users" to users)))
+        res.renderView(view("user/index", mutableMapOf("count" to count, "users" to users)))
     }
 
     /**
@@ -62,13 +62,13 @@ class UserController: Controller()
         //val user = UserModel.queryBuilder().where("id", id).find<UserModel>()
         val user = UserModel(id)
         if(!user.isLoaded()){
-            res.render("用户[$id]不存在")
+            res.renderString("用户[$id]不存在")
             return
         }
         // 渲染视图 | render view
         val view = view("user/detail")
         view["user"] = user; // 设置视图参数 | set view data
-        res.render(view)
+        res.renderView(view)
     }
 
     /**
@@ -97,7 +97,7 @@ class UserController: Controller()
             redirect("user/index");
         }else{ // get请求： 渲染视图 | get request: render view
             val view = view() // 默认视图为action名： user/new | default view's name = action：　user/new
-            res.render(view)
+            res.renderView(view)
         }
     }
 
@@ -111,7 +111,7 @@ class UserController: Controller()
         val id: Int = req["id"]!!
         val user = UserModel(id)
         if(!user.isLoaded()){
-            res.render("用户[" + req["id"] + "]不存在")
+            res.renderString("用户[" + req["id"] + "]不存在")
             return
         }
         // 处理请求 | handle request
@@ -133,7 +133,7 @@ class UserController: Controller()
         }else{ // get请求： 渲染视图 | get request: render view
             val view = view() // 默认视图为action名： user/edit | default view's name = action：　user/edit
             view["user"] = user; // 设置视图参数 |  set view data
-            res.render(view)
+            res.renderView(view)
         }
     }
 
@@ -147,7 +147,7 @@ class UserController: Controller()
         // 查询单个用户 | find a user
         val user = UserModel(id)
         if(!user.isLoaded()){
-            res.render("用户[$id]不存在")
+            res.renderString("用户[$id]不存在")
             return
         }
         // 删除 | delete user
@@ -170,7 +170,7 @@ class UserController: Controller()
         val id: Int = req["id"]!!
         val user = UserModel(id)
         if(!user.isLoaded()){
-            res.render("用户[" + req["id"] + "]不存在")
+            res.renderString("用户[" + req["id"] + "]不存在")
             return
         }
 
@@ -191,11 +191,11 @@ class UserController: Controller()
         if(req.isPost()){ // post请求
             val user = Auth.instance().login(req["username"]!!, req["password"]!!);
             if(user == null)
-                res.render("登录失败")
+                res.renderString("登录失败")
             else
                 redirect("user/login")
         }else{ // get请求
-            res.render(view())
+            res.renderView(view())
         }
     }
 

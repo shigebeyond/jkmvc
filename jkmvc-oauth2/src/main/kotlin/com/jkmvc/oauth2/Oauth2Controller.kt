@@ -57,9 +57,9 @@ public abstract class Oauth2Controller : Controller() {
         try {
             // 获得授权用户
             val user = getOauth2UserByCode()
-            res.render(JSONObject.toJSONString(user))
+            res.renderString(JSONObject.toJSONString(user))
         }catch (e: Exception){
-            res.render("错误： ${e.message}")
+            res.renderString("错误： ${e.message}")
         }
     }*/
 

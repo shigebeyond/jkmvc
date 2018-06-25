@@ -1,6 +1,12 @@
 package com.jkmvc.http
 
+import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.JSONObject
+import com.alibaba.fastjson.serializer.SerializerFeature
 import com.jkmvc.common.Config
+import com.jkmvc.http.util.AllPagination
+import com.jkmvc.http.util.Pagination
+import com.jkmvc.orm.IOrm
 import java.io.File
 import java.io.FileInputStream
 import java.io.PrintWriter
@@ -84,27 +90,7 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	}
 
 	/**
-	 * 响应视图
-	 *
-	 * @param View content
-	 */
-	public fun render(view:View):Unit
-	{
-		view.render();
-	}
-
-	/**
-	 * 响应文本
-	 *
-	 * @param content
-	 */
-	public fun render(content:String):Unit
-	{
-		prepareWriter().print(content);
-	}
-
-	/**
-	* 获得writer
+	 * 获得writer
 	 */
 	public fun prepareWriter(): PrintWriter
 	{
@@ -115,11 +101,52 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	}
 
 	/**
+	 * 响应视图
+	 *
+	 * @param view 视图
+	 */
+	public fun renderView(view:View):Unit
+	{
+		view.render();
+	}
+
+	/**
+	 * 响应视图
+	 *
+	 * @param file 视图文件
+	 * @param data 局部变量
+	 */
+	public fun renderView(file:String, data:MutableMap<String, Any?> = View.emptyMutableMap):Unit
+	{
+		renderView(View(Request.current(), this, file, data))
+	}
+
+	/**
+	 * 响应字符串
+	 *
+	 * @param content
+	 */
+	public fun renderString(content:String):Unit
+	{
+		prepareWriter().print(content);
+	}
+
+	/**
 	 * 响应文件
 	 *
-	 * @param File file
+	 * @param file
 	 */
-	public fun render(file: File):Unit
+	public fun renderFile(file: String):Unit
+	{
+		renderFile(File(file))
+	}
+
+	/**
+	 * 响应文件
+	 *
+	 * @param file
+	 */
+	public fun renderFile(file: File):Unit
 	{
 		//通知客户端文件的下载    URLEncoder.encode解决文件名中文的问题
 		res.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(file.name, "utf-8"))
@@ -166,7 +193,7 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	/**
 	 * 设置响应缓存
 	 *
-	 * @param long expires 过期时间
+	 * @param expires 过期时间
 	 * @return
 	 */
 	public fun setCache(expires:Long): Response {
@@ -255,5 +282,80 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	public fun deleteCookie(name:String): Response {
 		setCookie(name, "", -86400) // 让他过期
 		return this;
+	}
+
+
+	/**************************************** 渲染json结果 ************************************************/
+	/**
+	 * 渲染任意对象
+	 *
+	 * @param code 错误码，0是成功，非0是失败
+	 * @param msg 消息
+	 * @param items 数据
+	 */
+	public fun renderJson(code:Int, msg:String?, data:Any? = null){
+		//打印错误
+		if(code != 0)
+			httpLogger.error(msg);
+
+		// json响应
+		val obj = JSONObject()
+		obj["code"] = code
+		obj["msg"] = msg
+		obj["data"] = if (data is IOrm) data.asMap() else data // 对orm对象要转map
+		//renderString(obj.toJSONString())
+		renderString(JSON.toJSONString(obj, SerializerFeature.WriteDateUseDateFormat /* Date格式化 */, SerializerFeature.WriteMapNullValue /* 输出null值 */))
+	}
+
+	/**
+	 * 渲染orm列表，支持分页
+	 *
+	 * @param code 错误码，0是成功，非0是失败
+	 * @param msg 消息
+	 * @param items 当前页的数据
+	 * @param pagination 分页
+	 */
+	public fun renderJson(code:Int, msg:String?, items:List<*>, pagination: Pagination? = null){
+		//打印错误
+		if(code != 0)
+			httpLogger.error(msg);
+
+		// json响应
+		val obj = JSONObject()
+		obj["code"] = code
+		obj["msg"] = msg
+		obj["data"] = items
+
+		// 构造分页json
+		if(pagination != null)
+			obj["pagination"] = buildPaginationJson(pagination)
+
+		//renderString(obj.toJSONString())
+		renderString(JSON.toJSONString(obj, SerializerFeature.WriteDateUseDateFormat /* Date格式化 */, SerializerFeature.WriteMapNullValue /* 输出null值 */))
+	}
+
+	/**
+	 * 渲染orm列表，全量分页
+	 *
+	 * @param code 错误码，0是成功，非0是失败
+	 * @param msg 消息
+	 * @param pagination 全量分页
+	 */
+	public fun renderJson(code:Int, msg:String?, pagination: AllPagination<*>){
+		renderJson(code, msg, pagination.pageItems, pagination)
+	}
+
+	/**
+	 * 构造分页json
+	 *
+	 * @param pagination 分页
+	 * @return json
+	 */
+	private fun buildPaginationJson(pagination: Pagination): JSONObject {
+		val data = JSONObject()
+		data["page"] = pagination.page
+		data["total"] = pagination.total
+		data["totalPages"] = pagination.totalPages
+		return data
 	}
 }

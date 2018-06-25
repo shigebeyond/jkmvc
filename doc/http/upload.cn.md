@@ -53,7 +53,7 @@ public fun uploadAvatarAction()
     val id: Int = req["id"]!!
     val user = UserModel(id)
     if(!user.isLoaded()){
-        res.render("用户[" + req["id"] + "]不存在")
+        res.renderString("用户[" + req["id"] + "]不存在")
         return
     }
 
@@ -74,7 +74,7 @@ public fun uploadAvatarAction()
 
 ### 3.1 java提供的下载
 
-直接在Controller中调用`res.render(file: File)` 来向浏览器响应文件
+直接在Controller中调用`res.renderFile(file: File)` 来向浏览器响应文件
 
 ### 3.2 文件服务器提供的下载
 
