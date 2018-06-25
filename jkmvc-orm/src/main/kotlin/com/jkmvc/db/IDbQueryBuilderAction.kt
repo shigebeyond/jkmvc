@@ -89,6 +89,16 @@ interface IDbQueryBuilderAction
     fun set(column:String, value:Any?):IDbQueryBuilder;
 
     /**
+     * 设置更新的单个值, update时用
+     *
+     * @param column
+     * @param value
+     * @param isExpr 是否db表达式
+     * @return
+     */
+    fun set(column:String, value:String, isExpr: Boolean = false):IDbQueryBuilder;
+
+    /**
      * 设置更新的多个值, update时用
      *
      * @param row

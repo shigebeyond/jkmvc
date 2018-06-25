@@ -223,7 +223,7 @@ abstract class OrmPersistent: OrmValid() {
 			return false
 
 		val column = ormMeta.prop2Column(prop)
-		return queryBuilder().set(column, DbExpression("$column + $step")).where(ormMeta.primaryKey, pk).update();
+		return queryBuilder().set(column, "$column + $step", true).where(ormMeta.primaryKey, pk).update();
 	}
 
 	/**

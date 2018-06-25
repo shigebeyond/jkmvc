@@ -197,7 +197,10 @@ class QueryBuilderTests{
      */
     @Test
     fun testDbExpression(){
-        val f = DbQueryBuilder().table("user").set("age", DbExpression("age + 1")).where("id", "=", 1).update();
+        val f = DbQueryBuilder().table("user")
+                    .set("age", DbExpression("age + 1"))
+                    //.set("age", "age + 1", true)
+                    .where("id", "=", 1).update();
         println("age++ : $f")
 
     }
