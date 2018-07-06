@@ -113,8 +113,8 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
 
         val (start, offset) = limitParams!!
         if(db.dbType == DbType.Oracle) { // oracle
-            // select * from ( select t1_.*, rownum rownum_ from ( select * from USER ) t1_ where rownum <=  $end ) t2_ where t2_.rownum_ >=  $start
-            sql.insert(0, "SELECT t1_.*, rownum rownum_ FROM ( ").append(") t1_ WHERE rownum <=  ").append(offset + start)
+            // select * from ( select t1_.*, rownum rownum_ from ( select * from USER ) t1_ where rownum <  $end ) t2_ where t2_.rownum_ >=  $start
+            sql.insert(0, "SELECT t1_.*, rownum rownum_ FROM ( ").append(") t1_ WHERE rownum <  ").append(start + offset)
             if(offset > 0)
                 sql.insert(0, "SELECT * FROM ( ").append(" ) t2_ WHERE t2_.rownum_ >=  ").append(offset)
             return
@@ -128,11 +128,13 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
             }else{
                 // 截取 order by 子句
                 val iOrderBy = sql.indexOf("ORDER BY")
-                val orderBy = sql.substring(iOrderBy)
-                sql.delete(iOrderBy, sql.length)
-
-                // SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY name) as rownum_, * FROM "user" ) a WHERE rownum_ >= $start and rownum_ <= $end;
-                sql.insert(iSelect, "* FROM ( SELECT ROW_NUMBER() OVER (ORDER BY $orderBy) as rownum_, ").append(") t_ WHERE rownum_ >= ").append(start).append(" AND rownum_ <= ").append(offset + start)
+                var orderBy = "ORDER BY ID" // 由于排名函数 "ROW_NUMBER" 必须有 ORDER BY 子句, 因此默认给一个, 但是最好是开发者自己提供
+                if(iOrderBy != -1){
+                    orderBy = sql.substring(iOrderBy)
+                    sql.delete(iOrderBy, sql.length)
+                }
+                // SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY name) as rownum_, * FROM "user" ) a WHERE rownum_ >= $start and rownum_ < $end;
+                sql.insert(iSelect, "* FROM ( SELECT ROW_NUMBER() OVER ( $orderBy ) as rownum_, ").append(") t_ WHERE rownum_ >= ").append(start).append(" AND rownum_ < ").append(offset + start)
             }
 
             return
