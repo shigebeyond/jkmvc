@@ -303,7 +303,7 @@ interface IDbQueryBuilderDecoration: IDbQuoter
      * @param  offset
      * @return
      */
-    fun limit(limit:Int, offset:Int = 0):IDbQueryBuilder;
+    fun limit(start:Int, offset:Int = 0):IDbQueryBuilder;
 
     /**
      * Adds addition tables to "JOIN ...".
