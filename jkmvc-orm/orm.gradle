@@ -7,4 +7,6 @@ dependencies{
 
     // jdbc
     testRuntime "mysql:mysql-connector-java:5.1.6"
+    //testCompile 'com.microsoft.sqlserver:mssql-jdbc:6.5.4.jre8-preview'
+
 }

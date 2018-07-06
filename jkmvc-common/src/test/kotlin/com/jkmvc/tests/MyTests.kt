@@ -4,10 +4,12 @@ import com.jkmvc.cache.JedisFactory
 import com.jkmvc.common.*
 import com.jkmvc.validate.Validation
 import getIntranetHost
+import javafx.application.Application.launch
 import javassist.ClassClassPath
 import javassist.ClassPool
 import javassist.Modifier
 import javassist.bytecode.LocalVariableAttribute
+import kotlinx.coroutines.experimental.*
 import org.dom4j.Attribute
 import org.dom4j.DocumentException
 import org.dom4j.Element
@@ -44,12 +46,12 @@ class MyTests{
 
     @Test
     fun testBig(){
-        var a= BigDecimal("100")
-        var b=BigDecimal("3")
-        var c=a/b;
-        println(c)
-        var d=a.divide(b);
-        println(d)
+//        var a= BigDecimal("100")
+//        var b=BigDecimal("3")
+//        var c=a/b;
+//        println(c)
+//        var d=a.divide(b);
+//        println(d)
     }
 
     @Test
@@ -67,6 +69,7 @@ class MyTests{
     fun testList(){
         val list:MutableList<String> = LinkedList()
         list.add("a")
+        list += "a"
         list.add("b")
         list.add("c")
         println(list)
@@ -142,6 +145,9 @@ class MyTests{
         """
         println(str)*/
 
+        // 去空格
+        println("hello world".trim())
+        println("hello world".replace(" ", ""))
     }
 
     @Test
@@ -641,7 +647,6 @@ class MyTests{
         println(jedis.get("name"))
     }
 
-    /*
     @Test
     fun testCoroutine(){
         val mainThread = Thread.currentThread()
@@ -658,17 +663,22 @@ class MyTests{
 
         Thread.sleep(2000) // wait for 2 seconds
         println("Stop")
-    }*/
+    }
 
-    /*
     @Test
     fun testAsync(){
-        val deferred = (1..1_000_000).map { n ->
+        val deferred = (1..10).map { n ->
             async (CommonPool) {
                 n
             }
         }
-    }*/
+        println(deferred)
+
+    }
+
+    suspend fun doSomething(): Int {
+        return 10;
+    }
 }
 
 class Lambda {
