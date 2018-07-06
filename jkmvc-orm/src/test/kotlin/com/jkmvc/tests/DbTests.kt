@@ -2,6 +2,7 @@ package com.jkmvc.tests
 
 import com.jkmvc.db.*
 import org.junit.Test
+import java.io.File
 
 
 class DbTests{
@@ -36,26 +37,13 @@ class DbTests{
 
     @Test
     fun testConnection(){
-        db.execute("""
-        CREATE TABLE IF NOT EXISTS `user` (
-          `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '用户编号',
-          `name` varchar(50) NOT NULL DEFAULT '' COMMENT '用户名',
-          `age` tinyint(4) unsigned NOT NULL DEFAULT '0' COMMENT '年龄',
-          `avatar` varchar(250) DEFAULT NULL COMMENT '头像',
-          PRIMARY KEY (`id`)
-        )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户';
-        """);
-        println("创建user表")
-        db.execute("""
-        CREATE TABLE IF NOT EXISTS `address` (
-          `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '地址编号',
-          `user_id` int(11) unsigned NOT NULL COMMENT '用户编号',
-          `addr` varchar(50) NOT NULL DEFAULT '' COMMENT '地址',
-          `tel` varchar(50) NOT NULL DEFAULT '' COMMENT '电话',
-          PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8 COMMENT='地址';
-        """);
-        println("创建address表")
+        val file = "test." + db.dbType.toString().toLowerCase() + ".sql"
+        val cld = Thread.currentThread().contextClassLoader
+        val res = cld.getResource(file)
+        val sql = res.readText();
+
+        db.execute(sql);
+        println("创建表")
     }
 
     @Test
