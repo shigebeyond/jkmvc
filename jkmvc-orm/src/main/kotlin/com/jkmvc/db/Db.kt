@@ -135,11 +135,15 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      */
     public override val dbType:DbType by lazy{
         //通过driverName是否包含关键字判断
-        val driver: String = conn.metaData.driverName
+        var driver: String = conn.metaData.driverName
+        // fix bug: sqlserver的driverName居然有空格, 如 Microsoft JDBC Driver 6.5 for SQL Server
+        driver = driver.replace(" ", "")
         var result: DbType? = null
         for(type in DbType.values()){
-            if (driver.contains(type.toString(), true))
+            if (driver.contains(type.toString(), true)) {
                 result = type
+                break
+            }
         }
         if(result == null)
             throw RuntimeException("未知数据库类型")
