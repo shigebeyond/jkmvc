@@ -59,7 +59,7 @@ class DruidDataSourceFactory : IDataSourceFactory {
 
         // 校验的sql
         ds.setValidationQuery(config.get("validationQuery", getValidatioQuery(driverClass)))
-        //ds.setValidationQueryTimeout(config.get("validationQueryTimeout", 60000)!!)
+        ds.setValidationQueryTimeout(config.get("validationQueryTimeout", 30)!!)
         ds.setTestWhileIdle(config.getBoolean("testWhileIdle", true)!!)
         ds.setTestOnBorrow(config.getBoolean("testOnBorrow", true)!!)
         ds.setTestOnReturn(config.getBoolean("testOnReturn", true)!!)
