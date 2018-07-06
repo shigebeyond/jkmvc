@@ -2,7 +2,7 @@
 create table "user"
 (
 	id int identity(1,1),
-	name varchar(50) unique,
+	name varchar(50),
 	avatar varchar(50) default '',
 	age int default 0
 );
@@ -12,6 +12,6 @@ create table address
 (
 	id int identity(1,1),
 	user_id int default 0 ,
-	addr varchar(50) unique,
+	addr varchar(50),
 	tel varchar(50) default ''
 );
