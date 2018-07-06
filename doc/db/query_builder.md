@@ -97,7 +97,7 @@ SELECT DISTINCT `username` FROM `posts`
 
 ### 2.4 LIMIT
 
-When querying large sets of data, it is often better to limit the results and page through the data one chunk at a time. This is done using the `limit(limit:Int, offset:Int = 0)` methods.
+When querying large sets of data, it is often better to limit the results and page through the data one chunk at a time. This is done using the `limit(start:Int, offset:Int = 0)` methods.
 
 ```
 query.from(`posts`).limit(10, 30);

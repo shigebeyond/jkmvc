@@ -97,7 +97,7 @@ SELECT DISTINCT `username` FROM `posts`
 
 ### 2.4 `LIMIT` 限制行数
 
-有时候我们查询的表里有大量数据，但通常我们只需要某几行数据。此时通过调用 `limit(limit:Int, offset:Int = 0)` 方法来限制返回某几行
+有时候我们查询的表里有大量数据，但通常我们只需要某几行数据。此时通过调用 `limit(start:Int, offset:Int = 0)` 方法来限制返回某几行
 
 ```
 query.from(`posts`).limit(10, 30);
