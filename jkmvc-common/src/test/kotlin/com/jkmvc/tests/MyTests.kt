@@ -186,11 +186,11 @@ class MyTests{
     @Test
     fun testDate(){
         // 日期比较
-        val a = Date()
+        /*val a = Date()
         val b = a.add(Calendar.MINUTE, 1)
         val c = a.add(Calendar.DATE, -1)
         println(a > b)
-        println(a > c)
+        println(a > c)*/
 
         // 字符串转date
 //        "2016-12-21".toDate().print()
@@ -217,6 +217,9 @@ class MyTests{
 //        c.yearStartTime.print()
 //        c.yearEndTime.print()
 
+        // 跨第2月的月份运算
+        // 从01-29到01-31,加一个月后, 都是2017-02-28 00:00:00
+        "2017-01-31".toDate().add(Calendar.MONTH, 1).print()
     }
 
     @Test
