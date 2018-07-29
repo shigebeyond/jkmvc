@@ -113,7 +113,7 @@ class ValidationExpression(override val exp:String /* 原始表达式 */):IValid
 	 *
 	 * @param Any? value 要校验的数值，该值可能被修改
 	 * @param variables 变量
-	 * @return Triple 结果+最后一个校验单元+最后一个值
+	 * @return ValidationResult 结果+最后一个校验单元+最后一个值
 	 */
 	public override fun execute(value:Any?, variables:Map<String, Any?>):ValidationResult
 	{
