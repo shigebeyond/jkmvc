@@ -22,9 +22,7 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
     /**
      * 转义值
      */
-    protected val valueQuoter: (Any?) -> String = { value: Any? ->
-        quote(value);
-    }
+    protected val valueQuoter: (Any?) -> String = this::quote
 
     /**
      * 转义表
@@ -33,6 +31,9 @@ abstract class DbQueryBuilderDecoration(db: IDb, table: Pair<String, String?> /*
         quoteTable(table!!)
     }
 
+    /**
+     * 转义排序方向
+     */
     protected val orderDirection: (Any?) -> String = { value: Any? ->
         if (value != null && "^(ASC|DESC)$".toRegex().matches(value as String))
             value;

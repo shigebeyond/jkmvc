@@ -1,0 +1,273 @@
+
+数组拼接的优化
+value.joinToString(", ", "(", ")") {
+    quote(it)
+}
+
+----------
+
+问题：
+oracle中查询用户表，却select未知的字段
+
+解决：
+在database.yaml中添加一个配置项schema
+    # 在 Db.tableColumns 中延迟加载表字段时，用来过滤 DYPT 库的表，仅在oracle中有用
+    schema: DYPT
+
+在 Db.tableColumns 中使用schema 来过滤表与字段
+/**
+ * fix bug:
+ * mysql中查询，conn.catalog = 数据库名
+ * oracle中查询，conn.catalog = null，必须指定 dbConfig["schema"] 来过滤表，否则查出来多个库的表，会出现同名表，查出来的表字段有误
+ */
+val rs = conn.metaData.getColumns(conn.catalog, dbConfig["schema"], null, null)
+
+
+--------
+
+bug：
+java 数据库查询Date类型字段 没有了时分秒 全为 00
+
+
+分析：
+https://www.cnblogs.com/lidabo/archive/2013/03/08/2950107.html
+http://www.blogjava.net/midea0978/archive/2008/06/13/207655.html
+
+原因：
+odbc中对Date类型字段的处理，转为java.sql.Date，只保留日期，丢掉时分秒
+
+
+解决：
+添加连接属性：oracle.jdbc.V8Compatible=true
+
+vim database.yaml
+
+# 强制odbc使用旧的类型映射，将Date类型字段，转为java.sql.Timestamp，保留日期+时分秒
+connectionProperties: oracle.jdbc.V8Compatible=true
+
+
+--------
+
+字段做映射，应该缓存
+
+orm的主键类型可以自定义
+
+response的render()改名为 body()
+直接json()
+
+
+com.jkmvc.db.DruidDataSourceFactory
+适配oracle有问题
+=> dataSourceFactory 可配置，系统创建实例
+/**
+ * hsqldb - "select 1 from INFORMATION_SCHEMA.SYSTEM_USERS"
+ * Oracle - "select 1 from dual"
+ * DB2 - "select 1 from sysibm.sysdummy1"
+ * mysql - "select 1"
+ */
+ds.setValidationQuery(config.get("validationQuery", "select 1 from dual"))
+
+
+转义表有问题
+mysql是`` orable是""
+先暂时去掉
+    /**
+     * 转义表名
+     *
+     * @param table
+     * @param alias 表别名
+     * @return
+     */
+    public override fun quoteTable(table:String, alias:String?):String
+    {
+        val s = ""
+        return if(alias == null)
+            "$s$table$s";
+        else
+            "$s$table$s  AS `$alias`"
+    }
+
+
+判断数据库类型
+/**
+ * 判断数据库类型
+ * @return
+ * @throws SQLException
+ */
+        public String getDataBaseType() throws SQLException {
+            //通过driverName是否包含关键字判断
+            if (connection.getMetaData().getDriverName().toUpperCase()
+                    .indexOf("MYSQL") != -1) {
+                return "MySql";
+            } else if (connection.getMetaData().getDriverName().toUpperCase()
+                    .indexOf("SQL SERVER") != -1) {
+                //sqljdbc与sqljdbc4不同，sqlserver中间有空格
+                return "SqlServer";
+            }
+            return "-1";
+        }
+
+orm主键不是int -- 改造完毕 -- 直接弄成any
+
+orm querybuild中自动转换字段值，为了在各种action中适配各种值
+    public override fun andWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
+        // 智能转换字段值
+        val realValue = if(intelligent && value is String)
+                            ormMeta.convertIntelligent(column, value)
+                        else
+                            value
+        // 转换字段名
+        val realColumn = ormMeta.prop2Column(column)
+        return super.andWhere(realColumn, op, value)
+    }
+
+另外在action的元数据 renderMeta 中要指定query builder为智能模式：自动转换字段值
+    /**
+     * 获得orm查询构建器
+     */
+    public fun queryBuilder(): OrmQueryBuilder {
+        return model.modelOrmMeta.queryBuilder(true /* 查询时智能转换字段值 */).wheres(conditions) as OrmQueryBuilder
+    }
+
+对分页处理，由于oracle不支持limit语法，因此直接内存分页
+
+常见的oracle sql
+http://www.cnblogs.com/wishyouhappy/p/3700683.html
+
+todo: query build 的limit() 支持oracle
+
+
+----------
+
+智能判断是否包含关系
+
+/**
+ * 是否有某个关联关系
+ *
+ * @param name 字段名，类型可以是 1 String 本模型字段名 2 Pair<String, List<String>> 关系名 + 关联模型的字段列表
+ * @return
+ */
+fun hasRelation(name: Any):Boolean{
+    return when(name){
+        is Pair<*, *> -> hasRelation(name.first as String) // 多层关系
+        is String -> hasRelation(name)  // 单层关系
+        else -> throw IllegalArgumentException("查询字段参数类型必须是：1 String 本模型字段名 2 Pair<String, List<String>> 关系名 + 关联模型的字段列表")
+    }
+}
+
+---------
+
+
+
+代码启动jetty
+
+    // jetty
+    compile "org.eclipse.jetty.aggregate:jetty-all:${jetty_version}"
+//    compile "org.eclipse.jetty:jetty-server:${jetty_version}"
+//    compile "org.eclipse.jetty:jetty-servlet:${jetty_version}"
+//    compile "org.eclipse.jetty:jetty-webapp:${jetty_version}"
+//    compile "org.eclipse.jetty:jetty-servlets:${jetty_version}"
+
+
+
+package com.jkmvc.szpower
+
+import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.webapp.*
+
+fun main(args: Array<String>) {
+    val server = Server(8080);
+
+    val context = WebAppContext();
+  context.setDescriptor("/oldhome/shi/code/java/szpower/szpower/jkmvc-szpower/src/main/webapp/WEB-INF/web.xml");
+    context.setResourceBase("/oldhome/shi/code/java/szpower/szpower/jkmvc-szpower/src/main/webapp");
+    context.setContextPath("/");
+    context.setParentLoaderPriority(true);
+    server.setHandler(context);
+
+    println("start server in 8080")
+    server.start();
+    server.join();
+}
+
+---------------
+
+query builder支持子查询？
+
+### 6.4 Subqueries
+
+Query Builder objects can be passed as parameters to many of the methods to create subqueries. Let"s take the previous example query and pass it to a new query.
+
+    $sub = DB::select("username", array(DB::expr("COUNT(`id`)"), "total_posts")
+        .from("posts").group_by("username").having("total_posts", ">=", 10);
+
+    $query = DB::select("profiles.*", "posts.total_posts").from("profiles")
+        .join(array($sub, "posts"), "INNER").on("profiles.username", "=", "posts.username");
+
+This will generate the following query:
+
+    SELECT `profiles`.*, `posts`.`total_posts` FROM `profiles` INNER JOIN
+    ( SELECT `username`, COUNT(`id`) AS `total_posts` FROM `posts` GROUP BY `username` HAVING `total_posts` >= 10 ) AS posts
+    ON `profiles`.`username` = `posts`.`username`
+
+Insert queries can also use a select query for the input values
+
+    $sub = DB::select("username", array(DB::expr("COUNT(`id`)"), "total_posts")
+        .from("posts").group_by("username").having("total_posts", ">=", 10);
+
+    $query = DB::insert("post_totals", array("username", "posts")).select($sub);
+
+This will generate the following query:
+
+    INSERT INTO `post_totals` (`username`, `posts`)
+    SELECT `username`, COUNT(`id`) AS `total_posts` FROM `posts` GROUP BY `username` HAVING `total_posts` >= 10
+
+--------
+
+orm的关联查询支持, 跨库的关联表
+
+-------
+
+query builder中如果in参数超过1000个，则拆分
+
+目前是放在query builder层去拆分，一个list会拆成多个子list，性能差点
+好的应该放在valueQuoter，来使用字符串拼接的方式来做，性能好
+    /**
+     * 转义值
+     */
+    protected val valueQuoter: (Any?) -> String = { value: Any? ->
+        quote(value);
+    }
+
+-------
+
+优化命名
+
+搜索 Pair< 来重命名类型
+
+如路由参数
+typealias RouteParams = Pair<String, String>
+
+如表/字段别名
+table:Pair<String, String?>
+typealias NameAlias = Pair<String, String?>
+
+如修饰子句中 DbQueryBuilderDecoration
+: DbQueryBuilderDecorationClauses<Pair<Array<Any?>, String>>/* subexps 是子表达式+连接符(针对where子句，放子表达式前面) */
+typealias ValAndOpr = Pair<Array<Any?>, String>
+
+protected var limitParams:Pair<Int, Int>? = null
+
+如 SelectColumnList 中
+Pair<String, SelectColumnList?>
+
+
+------
+
+将函数调用封装为lambda -- 简化封装
+
+如 { value: Any? -> quote(value) } 可简化为 this::quote
+可通过 '对象::函数' 来引用
+
+
+

@@ -20,6 +20,10 @@ import java.math.BigDecimal
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
+import java.util.Calendar
+import java.util.GregorianCalendar
+
+
 
 
 open class A() {}
@@ -219,7 +223,16 @@ class MyTests{
 
         // 跨第2月的月份运算
         // 从01-29到01-31,加一个月后, 都是2017-02-28 00:00:00
-        "2017-01-31".toDate().add(Calendar.MONTH, 1).print()
+        val startTime = "2018-02-01".toDate()
+        startTime.print()
+
+        val month = 1
+        val cl = GregorianCalendar()
+        cl.time = startTime
+        cl.add(Calendar.MONTH, month)
+        cl.time.print()
+        val endTime = cl.timeInMillis / 1000 - 1 // 秒
+        Date(endTime * 1000).print()
     }
 
     @Test
