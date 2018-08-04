@@ -52,9 +52,7 @@ connectionProperties: oracle.jdbc.V8Compatible=true
 
 orm的主键类型可以自定义
 
-response的render()改名为 body()
-直接json()
-
+---------
 
 com.jkmvc.db.DruidDataSourceFactory
 适配oracle有问题
@@ -67,6 +65,18 @@ com.jkmvc.db.DruidDataSourceFactory
  */
 ds.setValidationQuery(config.get("validationQuery", "select 1 from dual"))
 
+---------
+
+优化quote()性能
+
+问题
+各种quote()涉及到字符串运算，如转义表从 user 变为 `user`
+如果调用频繁， 则会创建大量的临时字符串，大量消耗内存与cpu
+
+解决
+quote()都是落在Db，在db对象中建一个quote前quote后的字符串映射的map
+
+---------
 
 转义表有问题
 mysql是`` orable是""
@@ -87,6 +97,7 @@ mysql是`` orable是""
             "$s$table$s  AS `$alias`"
     }
 
+---------
 
 判断数据库类型
 /**
@@ -106,6 +117,8 @@ mysql是`` orable是""
             }
             return "-1";
         }
+
+---------
 
 orm主键不是int -- 改造完毕 -- 直接弄成any
 
@@ -268,6 +281,5 @@ Pair<String, SelectColumnList?>
 
 如 { value: Any? -> quote(value) } 可简化为 this::quote
 可通过 '对象::函数' 来引用
-
 
 

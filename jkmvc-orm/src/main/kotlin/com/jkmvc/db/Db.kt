@@ -588,12 +588,22 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      */
     public override fun prop2Column(prop:String): String {
         return prop2ColumnMapping.getOrPut(prop){
-            var column = prop
+            // 处理关键字
+            if(dbType == DbType.Oracle && prop == "rownum"){
+                return prop
+            }
+
+            // 表+属性
+            val tableAndProp = if(prop.contains('.')) prop.split('.') else null
+
+            // 转属性
+            var column = if(tableAndProp == null) prop else tableAndProp[1]
             if(dbConfig["columnUnderline"]!!) // 字段有下划线
                 column = column.camel2Underline()
             if(dbConfig["columnUpperCase"]!!)// 字段全大写
                 column = column.toUpperCase() // 转大写
-            column
+
+            if(tableAndProp == null) column else tableAndProp[0] + '.' + column
         }
     }
 

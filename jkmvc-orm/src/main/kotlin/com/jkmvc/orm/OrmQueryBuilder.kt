@@ -483,7 +483,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      */
     public fun convertColumn(prop: String): String {
         return if (convertingColumn)
-            prop2Column(prop)
+            db.prop2Column(prop)
         else
             prop
     }
@@ -566,26 +566,4 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         return Pair(relation.ormMeta, column)
     }
 
-    /**
-     * 根据对象属性名，获得db字段名
-     *    可根据实际需要在 model 类中重写
-     *
-     * @param prop 对象属性名
-     * @return db字段名
-     */
-    protected fun prop2Column(prop:String): String{
-        // 处理关键字
-        if(db.dbType == DbType.Oracle && prop == "rownum"){
-            return prop
-        }
-
-        // 表+属性
-        if(prop.contains('.')){
-            val (table, prop2) = prop.split('.')
-            return table + '.' + ormMeta.prop2Column(prop2)
-        }
-
-        // 纯属性
-        return ormMeta.prop2Column(prop)
-    }
 }
