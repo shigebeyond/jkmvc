@@ -1,5 +1,6 @@
 package com.jkmvc.orm
 
+import com.jkmvc.common.associate
 import com.jkmvc.db.DbExpression
 import com.jkmvc.db.DbQueryBuilder
 import com.jkmvc.db.dbLogger
@@ -120,13 +121,11 @@ abstract class OrmPersistent: OrmValid() {
 	 * @return
 	 */
 	protected fun buildDirtyData(): MutableMap<String, Any?> {
-		val result:MutableMap<String, Any?> = HashMap<String, Any?>();
 		// 挑出变化的属性
-		for((prop, oldValue) in dirty) {
-			val column = ormMeta.prop2Column(prop)
-			result[column] = data[prop];
+		return dirty.associate { prop, oldValue ->
+			// 字段名 => 字段值
+			ormMeta.prop2Column(prop) to data[prop]
 		}
-		return result;
 	}
 
 	/**

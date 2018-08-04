@@ -157,6 +157,43 @@ public fun  <K, V> MutableMap<K, V>.removeAll(keys: Collection<K>): MutableMap<K
 }
 
 /**
+ * Returns a [Map] containing key-value pairs provided by [transform] function
+ * applied to elements of the given array.
+ *
+ * If any of two pairs would have the same key the last one gets added to the map.
+ */
+public inline fun <K, V> Map<*, *>.associate(transform: (Map.Entry<*, *>) -> Pair<K, V>): MutableMap<K, V> {
+    val result:MutableMap<K, V> = HashMap<K, V>();
+    for(e in this)
+        result += transform(e)
+    return result;
+}
+
+/**
+ * Returns a [Map] containing key-value pairs provided by [transform] function
+ * applied to elements of the given array.
+ *
+ * If any of two pairs would have the same key the last one gets added to the map.
+ */
+public inline fun <A, B, K, V> Map<A, B>.associate(transform: (key: A, value: B) -> Pair<K, V>): MutableMap<K, V> {
+    val result:MutableMap<K, V> = HashMap<K, V>();
+    for((key, value) in this)
+        result += transform(key, value)
+    return result;
+}
+
+/**
+ * Returns `true` if at least one entry matches the given [predicate].
+ *
+ * @sample samples.collections.Collections.Aggregates.anyWithPredicate
+ */
+public inline fun <K, V> Map<out K, V>.any(predicate: (key: K, value: V) -> Boolean): Boolean {
+    if (isEmpty()) return false
+    for ((key, value) in this) if (predicate(key, value)) return true
+    return false
+}
+
+/**
  * 获得'.'分割的路径下的子项值
  *
  * @param path '.'分割的路径

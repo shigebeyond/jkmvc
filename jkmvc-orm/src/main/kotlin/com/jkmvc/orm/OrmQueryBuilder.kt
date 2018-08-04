@@ -516,18 +516,14 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         // 2 由关联模型来转
         // 2.1 多值
         if(value is Array<*>){
-            val arr = arrayOfNulls<Any?>(value.size) // 要明确Array<T>，否则无法使用set()方法
-            for(i in 0..(value.size - 1)){
-                arr[i] = model.convertIntelligent(column, value[i] as String)
+            value.map {
+                model.convertIntelligent(column, it as String)
             }
-            return arr
         }
         if(value is Collection<*>){
-            val list = value as MutableList<Any?>
-            for(i in 0..(value.size - 1)){
-                list[i] = model.convertIntelligent(column, value[i] as String)
+            value.map {
+                model.convertIntelligent(column, it as String)
             }
-            return list
         }
 
         // 2.2 单值

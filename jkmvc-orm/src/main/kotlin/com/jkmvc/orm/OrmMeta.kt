@@ -1,9 +1,6 @@
 package com.jkmvc.orm
 
-import com.jkmvc.common.containsAnyKey
-import com.jkmvc.common.findFunction
-import com.jkmvc.common.findProperty
-import com.jkmvc.common.to
+import com.jkmvc.common.*
 import com.jkmvc.db.Db
 import com.jkmvc.db.IDb
 import java.util.*
@@ -166,11 +163,9 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @return
      */
     public override fun canHandleAnyEvent(events:String): Boolean {
-        for((event, handler) in eventHandlers){
-            if(events.contains(event))
-                return true
+        return eventHandlers.any { event, handler ->
+            events.contains(event)
         }
-        return false
     }
 
     /**

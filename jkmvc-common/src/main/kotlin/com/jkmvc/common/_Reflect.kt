@@ -251,10 +251,8 @@ public fun Method.getSignature(): String {
  * 获得当前类的方法哈系: <方法签名 to 方法>
  * @return
  */
-public fun Class<*>.getMethodMaps(): HashMap<String, Method> {
-    val methods = HashMap<String, Method>();
-    for (method in  this.methods) {
-        methods[method.getSignature()] = method
+public fun Class<*>.getMethodMaps(): Map<String, Method> {
+    return methods.associate {
+        it.getSignature() to it
     }
-    return methods
 }
