@@ -315,22 +315,15 @@ public inline fun ResultSet.forEachCell(i:Int, action: (Any?) -> Unit): Unit {
  * @return
  */
 public fun Blob?.toByteArray(): ByteArray? {
-    if (this == null)
+    if (this == null || binaryStream == null)
         return null
 
-    var input: InputStream? = null
-    try {
-        input = this.binaryStream
-        if (input == null)
-            return null
+    return binaryStream.use {
         val data = ByteArray(this.length().toInt())        // byte[] data = new byte[is.available()];
         if (data.size == 0)
             return null
-        input.read(data)
-        return data
-    } finally {
-        input?.close()
-
+        it.read(data)
+        data
     }
 }
 
@@ -339,21 +332,15 @@ public fun Blob?.toByteArray(): ByteArray? {
  * @return
  */
 public fun Clob?.toString2(): String? {
-    if (this == null)
+    if (this == null || characterStream == null)
         return null
 
-    var reader: Reader? = null
-    try {
-        reader = this.characterStream
-        if (reader == null)
-            return null
+    return characterStream.use {
         val buffer = CharArray(this.length().toInt())
         if (buffer.size == 0)
             return null
-        reader.read(buffer)
-        return String(buffer)
-    } finally {
-        reader?.close()
+        it.read(buffer)
+        String(buffer)
     }
 }
 

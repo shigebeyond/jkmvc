@@ -155,13 +155,15 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 		// 输出文件
 		val `in` = FileInputStream(file)
 		val out = res.getOutputStream()
-		var length = -1
-		val buffer = ByteArray(1024)
-		do{
-			length = `in`.read(buffer)
-			out.write(buffer, 0, length)
-		}while(length != -1)
-		`in`.close()
+
+		`in`.use {
+			var length = -1
+			val buffer = ByteArray(1024)
+			do{
+				length = `in`.read(buffer)
+				out.write(buffer, 0, length)
+			}while(length != -1)
+		}
 	}
 
 	/**

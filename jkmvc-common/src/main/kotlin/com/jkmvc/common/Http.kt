@@ -32,16 +32,11 @@ object Http {
      * @return
      */
     public fun get(url: String): String {
-        var response: CloseableHttpResponse? = null
-        try {
-            // 执行get请求，并获得响应
-            val httpget = HttpGet(url)
-            response = httpclient.execute(httpget)
-
+        // 执行get请求，并获得响应
+        val httpget = HttpGet(url)
+        return httpclient.execute(httpget).use{ res ->
             // 处理响应
-            return EntityUtils.toString(response!!.entity)
-        } finally {
-            response?.close()
+            EntityUtils.toString(res!!.entity)
         }
     }
 
@@ -53,17 +48,12 @@ object Http {
      * @return
      */
     public fun post(url: String, params: Map<String, String>): String {
-        var response: CloseableHttpResponse? = null
-        try {
-            // 执行post请求，并获得响应
-            val httppost = HttpPost(url)
-            httppost.entity = map2FormEntity(params) // 参数
-            response = httpclient.execute(httppost)
-
+        // 执行post请求，并获得响应
+        val httppost = HttpPost(url)
+        httppost.entity = map2FormEntity(params) // 参数
+        return httpclient.execute(httppost).use { res ->
             // 处理响应
-            return EntityUtils.toString(response!!.entity)
-        } finally {
-            response?.close()
+            EntityUtils.toString(res!!.entity)
         }
     }
 

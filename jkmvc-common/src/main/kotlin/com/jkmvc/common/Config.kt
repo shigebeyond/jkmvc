@@ -88,14 +88,13 @@ class Config(public override val props: Map<String, *>): IConfig(){
         public fun buildProperties(inputStream: InputStream, type: String = "properties"): Properties {
             if(inputStream == null)
                 throw IllegalArgumentException("配置输入流为空")
-            try{
+
+            return inputStream.use {
                 when(type){
-                    "properties" -> return Properties().apply { load(InputStreamReader(inputStream, "UTF-8")) } // 加载 properties 文件
-                    "yaml" -> return Yaml().loadAs(inputStream, Properties::class.java) // 加载 yaml 文件
+                    "properties" -> Properties().apply { load(InputStreamReader(inputStream, "UTF-8")) } // 加载 properties 文件
+                    "yaml" -> Yaml().loadAs(inputStream, Properties::class.java) // 加载 yaml 文件
                     else -> throw IllegalArgumentException("未知配置文件类型")
                 }
-            } finally {
-                inputStream.close()
             }
         }
     }
