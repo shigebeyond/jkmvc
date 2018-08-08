@@ -323,13 +323,10 @@ public fun Collection<out Map<*, *>>.asMap(keyField:String, valueField:String?):
     if(this.isEmpty())
         return emptyMap<Any, Any>()
 
-    val result = HashMap<Any, Any?>()
-    this.forEach {
-        val key:Any = it[keyField]!!
-        val value:Any? = if(valueField == null) it else it[valueField]
-        result[key] = value
+    return this.associate {
+        // key to value
+        it[keyField]!! to (if(valueField == null) it else it[valueField])
     }
-    return result
 }
 
 /**
