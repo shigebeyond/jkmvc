@@ -249,19 +249,17 @@ public inline fun <T: Any> String.to(clazz: KClass<T>): T{
         return this as T
 
     // 2 转换为其他类型
-    var result: Any?;
-    when(clazz){
-        Int::class -> result = this.toInt()
-        Long::class -> result = this.toLong()
-        Float::class -> result = this.toFloat()
-        Double::class -> result = this.toDouble()
-        Boolean::class -> result = this.toBoolean()
-        Short::class -> result = this.toShort()
-        Byte::class -> result = this.toByte()
-        Date::class -> result = this.toDate()
+    return when(clazz){
+        Int::class -> this.toInt()
+        Long::class -> this.toLong()
+        Float::class -> this.toFloat()
+        Double::class -> this.toDouble()
+        Boolean::class -> this.toBoolean()
+        Short::class -> this.toShort()
+        Byte::class -> this.toByte()
+        Date::class -> this.toDate()
         else -> throw IllegalArgumentException("字符串不能自动转换为未识别的类型: " + clazz)
-    }
-    return result as T;
+    } as T;
 }
 
 /**

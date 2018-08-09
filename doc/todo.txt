@@ -282,4 +282,221 @@ Pair<String, SelectColumnList?>
 如 { value: Any? -> quote(value) } 可简化为 this::quote
 可通过 '对象::函数' 来引用
 
+-----
 
+
+优化从resultset中获得指定类型的数据
+
+参考spring api
+List<T> list =  this.jdbcTemplate.query(sql, new BeanPropertyRowMapper<T>(clazz), args);
+
+其中 BeanPropertyRowMapper.mapRow() 是从resultset中获得指定类型的属性（通过反射获得目标类的属性的类型）
+
+	/**
+	 * Extract the values for all columns in the current row.
+	 * <p>Utilizes public setters and result set metadata.
+	 * @see java.sql.ResultSetMetaData
+	 */
+	@Override
+	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
+		Assert.state(this.mappedClass != null, "Mapped class was not specified");
+		T mappedObject = BeanUtils.instantiate(this.mappedClass);
+		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(mappedObject);
+		initBeanWrapper(bw);
+
+		ResultSetMetaData rsmd = rs.getMetaData();
+		int columnCount = rsmd.getColumnCount();
+		Set<String> populatedProperties = (isCheckFullyPopulated() ? new HashSet<String>() : null);
+
+		for (int index = 1; index <= columnCount; index++) {
+			String column = JdbcUtils.lookupColumnName(rsmd, index);
+			String field = lowerCaseName(column.replaceAll(" ", ""));
+			PropertyDescriptor pd = this.mappedFields.get(field);
+			if (pd != null) {
+				try {
+					Object value = getColumnValue(rs, index, pd);
+					if (rowNumber == 0 && logger.isDebugEnabled()) {
+						logger.debug("Mapping column '" + column + "' to property '" + pd.getName() +
+								"' of type [" + ClassUtils.getQualifiedName(pd.getPropertyType()) + "]");
+					}
+					try {
+						bw.setPropertyValue(pd.getName(), value);
+					}
+					catch (TypeMismatchException ex) {
+						if (value == null && this.primitivesDefaultedForNullValue) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Intercepted TypeMismatchException for row " + rowNumber +
+										" and column '" + column + "' with null value when setting property '" +
+										pd.getName() + "' of type [" +
+										ClassUtils.getQualifiedName(pd.getPropertyType()) +
+										"] on object: " + mappedObject, ex);
+							}
+						}
+						else {
+							throw ex;
+						}
+					}
+					if (populatedProperties != null) {
+						populatedProperties.add(pd.getName());
+					}
+				}
+				catch (NotWritablePropertyException ex) {
+					throw new DataRetrievalFailureException(
+							"Unable to map column '" + column + "' to property '" + pd.getName() + "'", ex);
+				}
+			}
+			else {
+				// No PropertyDescriptor found
+				if (rowNumber == 0 && logger.isDebugEnabled()) {
+					logger.debug("No property found for column '" + column + "' mapped to field '" + field + "'");
+				}
+			}
+		}
+
+		if (populatedProperties != null && !populatedProperties.equals(this.mappedProperties)) {
+			throw new InvalidDataAccessApiUsageException("Given ResultSet does not contain all fields " +
+					"necessary to populate object of class [" + this.mappedClass.getName() + "]: " +
+					this.mappedProperties);
+		}
+
+		return mappedObject;
+	}
+
+
+
+	/**
+	 * Retrieve a JDBC column value from a ResultSet, using the specified value type.
+	 * <p>Uses the specifically typed ResultSet accessor methods, falling back to
+	 * {@link #getResultSetValue(java.sql.ResultSet, int)} for unknown types.
+	 * <p>Note that the returned value may not be assignable to the specified
+	 * required type, in case of an unknown type. Calling code needs to deal
+	 * with this case appropriately, e.g. throwing a corresponding exception.
+	 * @param rs is the ResultSet holding the data
+	 * @param index is the column index
+	 * @param requiredType the required value type (may be {@code null})
+	 * @return the value object
+	 * @throws SQLException if thrown by the JDBC API
+	 */
+	@UsesJava7  // guard optional use of JDBC 4.1 (safe with 1.6 due to getObjectWithTypeAvailable check)
+	public static Object getResultSetValue(ResultSet rs, int index, Class<?> requiredType) throws SQLException {
+		if (requiredType == null) {
+			return getResultSetValue(rs, index);
+		}
+
+		Object value;
+
+		// Explicitly extract typed value, as far as possible.
+		if (String.class == requiredType) {
+			return rs.getString(index);
+		}
+		else if (boolean.class == requiredType || Boolean.class == requiredType) {
+			value = rs.getBoolean(index);
+		}
+		else if (byte.class == requiredType || Byte.class == requiredType) {
+			value = rs.getByte(index);
+		}
+		else if (short.class == requiredType || Short.class == requiredType) {
+			value = rs.getShort(index);
+		}
+		else if (int.class == requiredType || Integer.class == requiredType) {
+			value = rs.getInt(index);
+		}
+		else if (long.class == requiredType || Long.class == requiredType) {
+			value = rs.getLong(index);
+		}
+		else if (float.class == requiredType || Float.class == requiredType) {
+			value = rs.getFloat(index);
+		}
+		else if (double.class == requiredType || Double.class == requiredType ||
+				Number.class == requiredType) {
+			value = rs.getDouble(index);
+		}
+		else if (BigDecimal.class == requiredType) {
+			return rs.getBigDecimal(index);
+		}
+		else if (java.sql.Date.class == requiredType) {
+			return rs.getDate(index);
+		}
+		else if (java.sql.Time.class == requiredType) {
+			return rs.getTime(index);
+		}
+		else if (java.sql.Timestamp.class == requiredType || java.util.Date.class == requiredType) {
+			return rs.getTimestamp(index);
+		}
+		else if (byte[].class == requiredType) {
+			return rs.getBytes(index);
+		}
+		else if (Blob.class == requiredType) {
+			return rs.getBlob(index);
+		}
+		else if (Clob.class == requiredType) {
+			return rs.getClob(index);
+		}
+		else {
+			// Some unknown type desired -> rely on getObject.
+			if (getObjectWithTypeAvailable) {
+				try {
+					return rs.getObject(index, requiredType);
+				}
+				catch (AbstractMethodError err) {
+					logger.debug("JDBC driver does not implement JDBC 4.1 'getObject(int, Class)' method", err);
+				}
+				catch (SQLFeatureNotSupportedException ex) {
+					logger.debug("JDBC driver does not support JDBC 4.1 'getObject(int, Class)' method", ex);
+				}
+				catch (SQLException ex) {
+					logger.debug("JDBC driver has limited support for JDBC 4.1 'getObject(int, Class)' method", ex);
+				}
+			}
+			// Fall back to getObject without type specification...
+			return getResultSetValue(rs, index);
+		}
+
+		// Perform was-null check if necessary (for results that the JDBC driver returns as primitives).
+		return (rs.wasNull() ? null : value);
+	}
+
+
+其实，可以根据类型来抽取出要调用的 resultset 的方法
+
+
+----------
+
+优化： 读取Blob/Clob字段
+
+用 blob.getBytes(1, (int) blob.length()); 替换
+/**
+ * Blob转ByteArray
+ * @return
+ */
+public fun Blob?.toByteArray(): ByteArray? {
+    if (this == null || binaryStream == null)
+        return null
+
+    return binaryStream.use {
+        val data = ByteArray(this.length().toInt())        // byte[] data = new byte[is.available()];
+        if (data.size == 0)
+            return null
+        it.read(data)
+        data
+    }
+}
+
+用 clob.getSubString(1, (int) clob.length()); 替换
+
+/**
+ * Clob转String
+ * @return
+ */
+public fun Clob?.toString2(): String? {
+    if (this == null || characterStream == null)
+        return null
+
+    return characterStream.use {
+        val buffer = CharArray(this.length().toInt())
+        if (buffer.size == 0)
+            return null
+        it.read(buffer)
+        String(buffer)
+    }
+}

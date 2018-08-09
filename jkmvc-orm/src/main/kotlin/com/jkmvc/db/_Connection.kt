@@ -3,8 +3,7 @@ package com.jkmvc.db
 import com.jkmvc.common.findConstructor
 import com.jkmvc.orm.IOrm
 import org.slf4j.LoggerFactory
-import java.io.InputStream
-import java.io.Reader
+import java.math.BigDecimal
 import java.sql.*
 import java.util.*
 import kotlin.reflect.KClass
@@ -227,6 +226,76 @@ public fun Connection.queryCell(sql: String, params: List<Any?>? = null): Pair<B
 
 /****************************** 从ResultSet中获取数据 *******************************/
 /**
+ * 获得结果集的单个值
+ *   参考 org.springframework.jdbc.support.JdbcUtils#getResultSetValue(java.sql.ResultSet, int)
+ * @param i
+ * @return
+ */
+public fun ResultSet.getValue(i:Int): Any? {
+    val obj: Any? = getObject(i)
+    if(obj == null)
+        return null
+
+    // 二进制大对象
+    if (obj is Blob)
+        return obj.getBytes(1, obj.length().toInt())
+
+    // 字符型大对象
+    if (obj is Clob)
+        return obj.getSubString(1, obj.length().toInt())
+
+    // oracle时间对象
+    val className = obj.javaClass.name
+    if ("oracle.sql.TIMESTAMP" == className || "oracle.sql.TIMESTAMPTZ" == className)
+        return getTimestamp(i)
+
+    if (className.startsWith("oracle.sql.DATE")) {
+        val metaDataClassName = metaData.getColumnClassName(i)
+        if ("java.sql.Timestamp" == metaDataClassName || "oracle.sql.TIMESTAMP" == metaDataClassName) {
+            return getTimestamp(i)
+        }
+
+        return  getDate(i)
+    }
+
+    return obj
+}
+
+/**
+ * 根据返回值的类型 XXX 来获得 ResultSet 的 getXXX() 方法
+ *   参考 org.springframework.jdbc.support.JdbcUtils#getResultSetValue(java.sql.ResultSet, int, java.lang.Class<?>)
+ * @param clazz
+ * @return
+ */
+public fun getResultSetGetter(clazz: KClass<*>? = null): (ResultSet.(Int) -> Any?) {
+    if(clazz == null)
+        return ResultSet::getValue
+
+    return when(clazz){
+        String::class -> ResultSet::getString
+
+        Int::class -> ResultSet::getInt
+        Long::class -> ResultSet::getLong
+        Float::class -> ResultSet::getFloat
+        Double::class -> ResultSet::getDouble
+        Boolean::class -> ResultSet::getBoolean
+        Short::class -> ResultSet::getShort
+        Byte::class -> ResultSet::getByte
+        BigDecimal::class -> ResultSet::getBigDecimal
+
+        java.sql.Date::class -> ResultSet::getDate
+        java.sql.Time::class -> ResultSet::getTime
+        java.sql.Timestamp::class -> ResultSet::getTimestamp
+
+        ByteArray::class -> ResultSet::getBytes
+        Blob::class -> ResultSet::getBlob
+        Clob::class -> ResultSet::getClob
+
+        else -> { columnIndex:Int -> getObject(columnIndex, clazz.java) }
+    }
+}
+
+/**
  * 获得结果集的下一行
  * @return
  */
@@ -234,17 +303,9 @@ public inline fun ResultSet.nextRow(): MutableMap<String, Any?>? {
     if(next()) {
         // 获得一行
         val row:MutableMap<String, Any?> = HashMap<String, Any?>();
-        val rsmd = metaData
-        for (i in 1..rsmd.columnCount) { // 多列
-            val type: Int = rsmd.getColumnType(i); // 类型
-            val label: String = rsmd.getColumnLabel(i); // 字段名
-            val value: Any? // 字段值
-            when (type) {
-                Types.CLOB -> value = getClob(i).toString2()
-                Types.NCLOB -> value = getNClob(i).toString2()
-                Types.BLOB -> value = getBlob(i).toByteArray()
-                else -> value = getObject(i)
-            }
+        for (i in 1..metaData.columnCount) { // 多列
+            val label: String = metaData.getColumnLabel(i); // 字段名
+            val value: Any? = getValue(i) // 字段值
             row[label] = value;
         }
         return row
@@ -275,19 +336,7 @@ public inline fun ResultSet.forEachRow(action: (MutableMap<String, Any?>) -> Uni
  */
 public inline fun ResultSet.nextCell(i:Int): Pair<Boolean, Any?> {
     val hasNext = next()
-    var value: Any? = null; // 字段值
-    if(hasNext) {
-        // 获得一行的某列
-        val rsmd = metaData
-        val type: Int = rsmd.getColumnType(i); // 类型
-        when (type) { // 字段值
-            Types.CLOB -> value = getClob(i).toString2()
-            Types.NCLOB -> value = getNClob(i).toString2()
-            Types.BLOB -> value = getBlob(i).toByteArray()
-            else -> value = getObject(i)
-        }
-    }
-
+    var value: Any? = if(hasNext) getValue(i) else null; // 字段值
     return Pair<Boolean, Any?>(hasNext, value);
 }
 
@@ -306,41 +355,6 @@ public inline fun ResultSet.forEachCell(i:Int, action: (Any?) -> Unit): Unit {
 
         // 处理一行某列
         action(value)
-    }
-}
-
-/****************************** 读取Blob/Clob字段 *******************************/
-/**
- * Blob转ByteArray
- * @return
- */
-public fun Blob?.toByteArray(): ByteArray? {
-    if (this == null || binaryStream == null)
-        return null
-
-    return binaryStream.use {
-        val data = ByteArray(this.length().toInt())        // byte[] data = new byte[is.available()];
-        if (data.size == 0)
-            return null
-        it.read(data)
-        data
-    }
-}
-
-/**
- * Clob转String
- * @return
- */
-public fun Clob?.toString2(): String? {
-    if (this == null || characterStream == null)
-        return null
-
-    return characterStream.use {
-        val buffer = CharArray(this.length().toInt())
-        if (buffer.size == 0)
-            return null
-        it.read(buffer)
-        String(buffer)
     }
 }
 

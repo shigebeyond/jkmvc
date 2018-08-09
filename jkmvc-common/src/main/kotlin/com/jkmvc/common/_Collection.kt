@@ -319,7 +319,7 @@ public fun <T> Iterable<T>.enumeration(): ItEnumeration<T> {
  * @param valueField 子项字段名，其值作为结果哈希的value，如果为null，则用子项作为结果哈希的value
  * @return
  */
-public fun Collection<out Map<*, *>>.asMap(keyField:String, valueField:String?): Map<*, *> {
+public fun Collection<out Map<*, *>>.asMap(keyField:String, valueField:String? = null): Map<*, *> {
     if(this.isEmpty())
         return emptyMap<Any, Any>()
 

@@ -9,15 +9,13 @@ import kotlin.reflect.KClass
  * @return
  */
 public inline fun <T: Any> BigDecimal.toNumber(clazz: KClass<T>): T{
-    var result: Any?
-    when(clazz){
-        Int::class -> result = this.toInt()
-        Long::class -> result = this.toLong()
-        Float::class -> result = this.toFloat()
-        Double::class -> result = this.toDouble()
+    return when(clazz){
+        Int::class -> this.toInt()
+        Long::class -> this.toLong()
+        Float::class -> this.toFloat()
+        Double::class -> this.toDouble()
         else -> throw IllegalArgumentException("字符串不能自动转换为未识别的类型: " + clazz)
-    }
-    return result as T
+    } as T
 }
 
 /**
