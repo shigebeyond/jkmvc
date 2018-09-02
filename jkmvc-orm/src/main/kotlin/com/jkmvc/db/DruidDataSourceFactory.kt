@@ -7,6 +7,7 @@ import javax.sql.DataSource
 
 /**
  * 数据源工厂
+ *   参考了 jfinal 的 com.jfinal.plugin.druid.DruidPlugin
  *
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
