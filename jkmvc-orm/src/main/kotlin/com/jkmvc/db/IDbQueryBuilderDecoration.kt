@@ -99,6 +99,18 @@ interface IDbQueryBuilderDecoration: IDbQuoter
     }
 
     /**
+     * Multiple Where
+     *
+     * @param   conditions
+     * @return
+     */
+    fun wheres(conditions:List<Triple<String, String, Any?>>):IDbQueryBuilder{
+        for((column, op, value) in conditions)
+            where(column, op, value)
+        return this as IDbQueryBuilder
+    }
+
+    /**
      * Creates a new "AND WHERE" condition for the query.
      *
      * @param   column  column name or Pair(column, alias) or object
