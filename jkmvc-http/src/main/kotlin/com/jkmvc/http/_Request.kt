@@ -20,7 +20,7 @@ val httpLogger = LoggerFactory.getLogger("com.jkmvc.db")
  * @return
  */
 public fun HttpServletRequest.isPost(): Boolean {
-    return method == "POST";
+    return method.equalsIgnoreCase("POST");
 }
 
 /**
@@ -28,7 +28,7 @@ public fun HttpServletRequest.isPost(): Boolean {
  * @return
  */
 public fun HttpServletRequest.isOptions(): Boolean {
-    return method == "OPTIONS";
+    return method.equalsIgnoreCase("OPTIONS");
 }
 
 /**
@@ -36,7 +36,7 @@ public fun HttpServletRequest.isOptions(): Boolean {
  * @return
  */
 public fun HttpServletRequest.isGet(): Boolean {
-    return method == "GET";
+    return method.equalsIgnoreCase("GET");
 }
 
 /**
