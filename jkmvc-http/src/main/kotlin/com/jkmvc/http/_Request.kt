@@ -5,6 +5,7 @@ import com.jkmvc.orm.Orm
 import com.oreilly.servlet.MultipartRequest
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.lang.StringBuilder
 import java.lang.reflect.Field
 import java.util.*
 import javax.servlet.http.HttpServletRequest
@@ -64,6 +65,44 @@ public fun HttpServletRequest.isUpload(): Boolean{
 public fun HttpServletRequest.isAjax(): Boolean {
     return "XMLHttpRequest".equals(getHeader("x-requested-with")) // // 通过XMLHttpRequest发送请求
             && "text/javascript, application/javascript, */*".equals(getHeader("Accept")); // 通过jsonp来发送请求
+}
+
+/**
+ * 生成curl命令
+ */
+public fun HttpServletRequest.toCurlCommand(): String {
+    // curl命令
+    val cmd = StringBuilder("curl ")
+
+    // 方法
+    if (isGet())
+        cmd.append("-G ")
+
+    //请求头： -H '$k:$v' -H '$k:$v'
+    while (headerNames.hasMoreElements()) {
+        val k = headerNames.nextElement();
+        val v = getHeader(k)
+        // -H '$k:$v'
+        cmd.append("-H '").append(k).append(':').append(v).append("' ");
+    }
+
+    // post参数： -d '$k=$v&$k=$v&'
+    if (isPost()) {
+        //-d '
+        cmd.append("-d '")
+        while (parameterNames.hasMoreElements()) {
+            val k = parameterNames.nextElement();
+            val v = getParameter(k)
+            // $k=$v&
+            cmd.append(k).append('=').append(v).append('&');
+        }
+        // '
+        cmd.append('\'');
+    }
+
+    // 路径: '$url'
+    cmd.append('\'').append(requestURL).append('\'')
+    return cmd.toString()
 }
 
 /****************************** com.oreilly.servlet.MultipartRequest扩展 *******************************/
