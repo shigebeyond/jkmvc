@@ -79,8 +79,9 @@ public fun HttpServletRequest.toCurlCommand(): String {
         cmd.append("-G ")
 
     //请求头： -H '$k:$v' -H '$k:$v'
-    while (headerNames.hasMoreElements()) {
-        val k = headerNames.nextElement();
+    val hnames = headerNames
+    while (hnames.hasMoreElements()) {
+        val k = hnames.nextElement();
         val v = getHeader(k)
         // -H '$k:$v'
         cmd.append("-H '").append(k).append(':').append(v).append("' ");
@@ -90,8 +91,9 @@ public fun HttpServletRequest.toCurlCommand(): String {
     if (isPost()) {
         //-d '
         cmd.append("-d '")
-        while (parameterNames.hasMoreElements()) {
-            val k = parameterNames.nextElement();
+        val pnames = parameterNames
+        while (pnames.hasMoreElements()) {
+            val k = pnames.nextElement();
             val v = getParameter(k)
             // $k=$v&
             cmd.append(k).append('=').append(v).append('&');
