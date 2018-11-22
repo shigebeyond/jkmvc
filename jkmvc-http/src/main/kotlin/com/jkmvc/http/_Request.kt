@@ -20,7 +20,7 @@ val httpLogger = LoggerFactory.getLogger("com.jkmvc.db")
  * @return
  */
 public fun HttpServletRequest.isPost(): Boolean {
-    return method.equalsIgnoreCase("POST");
+    return method.equals("POST", true);
 }
 
 /**
@@ -28,7 +28,7 @@ public fun HttpServletRequest.isPost(): Boolean {
  * @return
  */
 public fun HttpServletRequest.isOptions(): Boolean {
-    return method.equalsIgnoreCase("OPTIONS");
+    return method.equals("OPTIONS", true);
 }
 
 /**
@@ -36,7 +36,7 @@ public fun HttpServletRequest.isOptions(): Boolean {
  * @return
  */
 public fun HttpServletRequest.isGet(): Boolean {
-    return method.equalsIgnoreCase("GET");
+    return method.equals("GET", true);
 }
 
 /**
@@ -63,8 +63,8 @@ public fun HttpServletRequest.isUpload(): Boolean{
  * @return
  */
 public fun HttpServletRequest.isAjax(): Boolean {
-    return "XMLHttpRequest".equals(getHeader("x-requested-with")) // // 通过XMLHttpRequest发送请求
-            && "text/javascript, application/javascript, */*".equals(getHeader("Accept")); // 通过jsonp来发送请求
+    return "XMLHttpRequest".equals(getHeader("x-requested-with"), true) // // 通过XMLHttpRequest发送请求
+            && "text/javascript, application/javascript, */*".equals(getHeader("Accept"), true); // 通过jsonp来发送请求
 }
 
 /**
@@ -102,8 +102,12 @@ public fun HttpServletRequest.toCurlCommand(): String {
         cmd.append("' ");
     }
 
+    // 参数
+    var qs = queryString
+    qs = if(qs == null) "" else qs
+
     // 路径: '$url'
-    cmd.append('\'').append(requestURL).append('?').append(queryString).append('\'')
+    cmd.append('\'').append(requestURL).append('?').append(qs).append('\'')
     return cmd.toString()
 }
 
