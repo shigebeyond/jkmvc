@@ -99,11 +99,11 @@ public fun HttpServletRequest.toCurlCommand(): String {
             cmd.append(k).append('=').append(v).append('&');
         }
         // '
-        cmd.append('\'');
+        cmd.append("' ");
     }
 
     // 路径: '$url'
-    cmd.append('\'').append(requestURL).append('\'')
+    cmd.append('\'').append(requestURL).append('?').append(queryString).append('\'')
     return cmd.toString()
 }
 
