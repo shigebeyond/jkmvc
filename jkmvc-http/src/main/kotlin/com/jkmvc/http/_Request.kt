@@ -78,6 +78,13 @@ public fun HttpServletRequest.toCurlCommand(): String {
     if (isGet())
         cmd.append("-G ")
 
+    // get参数
+    var qs = queryString
+    qs = if(qs == null) "" else qs
+
+    // 路径: '$url?$qs'
+    cmd.append('\'').append(requestURL).append('?').append(qs).append('\'')
+
     //请求头： -H '$k:$v' -H '$k:$v'
     val hnames = headerNames
     while (hnames.hasMoreElements()) {
@@ -102,12 +109,6 @@ public fun HttpServletRequest.toCurlCommand(): String {
         cmd.append("' ");
     }
 
-    // 参数
-    var qs = queryString
-    qs = if(qs == null) "" else qs
-
-    // 路径: '$url'
-    cmd.append('\'').append(requestURL).append('?').append(qs).append('\'')
     return cmd.toString()
 }
 
