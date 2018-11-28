@@ -72,6 +72,18 @@ public fun <T> Collection<T>.getRandom(): T {
 }
 
 /**
+ * 集合转数组
+ *   注: Array<R> 不能使用R作为泛型参数, 只能使用具体类
+ */
+public inline fun <T, R> Collection<T>.mapToArray(transform: (T) -> R): Array<Any?> {
+    val arr = arrayOfNulls<Any?>(this.size);
+    var i = 0;
+    for (item in this)
+        arr[i++] = transform(item)
+    return arr
+}
+
+/**
  * 获得数组的某个元素值，如果值为空，则给该元素赋值
  * @param index 元素索引
  * @param default 赋值回调

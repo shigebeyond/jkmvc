@@ -1,9 +1,6 @@
 package com.jkmvc.db
 
-import com.jkmvc.common.Config
-import com.jkmvc.common.camel2Underline
-import com.jkmvc.common.format
-import com.jkmvc.common.underline2Camel
+import com.jkmvc.common.*
 import java.io.Closeable
 import java.math.BigDecimal
 import java.sql.Connection
@@ -637,9 +634,14 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
             return sql
 
         // 2 有参数：替换参数
-        var i = 0 // 迭代索引
+        // 正则替换
+        /*var i = 0 // 迭代索引
         return sql.replace("\\?".toRegex()) { matches: MatchResult ->
             quote(params[i++]) // 转义参数值
-        }
+        }*/
+
+        // 格式化字符串
+        val ps = params.mapToArray { quote(it) }
+        return sql.replace("?", "%s").format(*ps)
     }
 }
