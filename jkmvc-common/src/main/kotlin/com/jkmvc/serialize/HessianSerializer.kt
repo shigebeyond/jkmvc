@@ -1,14 +1,21 @@
 package com.jkmvc.serialize
 
-import java.io.*
+import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.Hessian2Output;
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.io.InputStream
 
 /**
- * 基于jdk的序列化
+ * 基于fast-serialization的序列化
  *
- * @author shijianhang
- * @create 2017-10-04 下午3:29
- **/
-class JdkSerializer : ISerializer {
+ * @ClassName: FstSerializer
+ * @Description:
+ * @author shijianhang<772910474@qq.com>
+ * @date 2017-11-10 4:18 PM
+ */
+class HessianSerializer: ISerializer {
 
     /**
      * 序列化
@@ -19,13 +26,13 @@ class JdkSerializer : ISerializer {
     public override fun serialize(obj: Any): ByteArray? {
         try {
             val bo = ByteArrayOutputStream()
-            ObjectOutputStream(bo).use {
-                it.writeObject(obj)
-            }
+            val hos = Hessian2Output(bo)
+            hos.writeObject(obj)
+            hos.flush()
             return bo.toByteArray()
         } catch (e: IOException) {
             e.printStackTrace()
-            return null
+            return null;
         }
     }
 
@@ -46,12 +53,13 @@ class JdkSerializer : ISerializer {
      * @return
      */
     public override fun unserizlize(input: InputStream): Any? {
-        try {
-            val oi = ObjectInputStream(input)
-            return oi.readObject()
-        } catch (e: Exception) {
+        try{
+            val his = Hessian2Input(input)
+            return his.readObject()
+        } catch (e: IOException) {
             e.printStackTrace()
-            return null
+            return null;
         }
     }
+
 }
