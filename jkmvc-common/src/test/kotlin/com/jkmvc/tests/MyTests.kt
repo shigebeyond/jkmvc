@@ -9,7 +9,7 @@ import javassist.ClassClassPath
 import javassist.ClassPool
 import javassist.Modifier
 import javassist.bytecode.LocalVariableAttribute
-import kotlinx.coroutines.experimental.*
+//import kotlinx.coroutines.experimental.*
 import org.dom4j.Attribute
 import org.dom4j.DocumentException
 import org.dom4j.Element
@@ -663,7 +663,7 @@ class MyTests{
         println(jedis.get("name"))
     }
 
-    @Test
+    /*@Test
     fun testCoroutine(){
         val mainThread = Thread.currentThread()
         println("Start")
@@ -694,7 +694,7 @@ class MyTests{
 
     suspend fun doSomething(): Int {
         return 10;
-    }
+    }*/
 }
 
 class Lambda {

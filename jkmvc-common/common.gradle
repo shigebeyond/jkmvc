@@ -3,6 +3,7 @@ dependencies {
     // kotlin
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    //compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
 
     // collection
     compile 'commons-collections:commons-collections:3.2.1'
@@ -26,6 +27,10 @@ dependencies {
 
     // 序列化
     compile "de.ruedigermoeller:fst:2.55"
+    compile "com.caucho:hessian:4.0.51"
+    compile "com.esotericsoftware:kryo-shaded:4.0.0"
+    compile "com.dyuproject.protostuff:protostuff-core:1.0.8"
+    compile "com.dyuproject.protostuff:protostuff-runtime:1.0.8"
 
     // http
     compile "org.apache.httpcomponents:httpclient:4.5.4"

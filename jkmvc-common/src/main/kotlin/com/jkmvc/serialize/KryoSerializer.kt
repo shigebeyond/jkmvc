@@ -1,20 +1,22 @@
 package com.jkmvc.serialize
 
-import com.caucho.hessian.io.Hessian2Input;
-import com.caucho.hessian.io.Hessian2Output;
+import com.esotericsoftware.kryo.Kryo
+import com.esotericsoftware.kryo.io.Input
+import com.esotericsoftware.kryo.io.Output
+import org.nustaq.serialization.FSTConfiguration
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
 
 /**
- * 基于Hessian的序列化
+ * 基于Kryo的序列化
  *
  * @Description:
  * @author shijianhang<772910474@qq.com>
  * @date 2017-11-10 4:18 PM
  */
-class HessianSerializer: ISerializer {
+class KryoSerializer: ISerializer {
 
     /**
      * 序列化
@@ -24,14 +26,13 @@ class HessianSerializer: ISerializer {
      */
     public override fun serialize(obj: Any): ByteArray? {
         try {
-            val bo = ByteArrayOutputStream()
-            val hos = Hessian2Output(bo)
-            hos.writeObject(obj)
-            hos.flush()
-            return bo.toByteArray()
+            val kryo = Kryo()
+            val output = Output(4096, 4096)
+            kryo.writeClassAndObject(output, obj)
+            return output.toBytes()
         } catch (e: IOException) {
             e.printStackTrace()
-            return null;
+            return null
         }
     }
 
@@ -42,12 +43,13 @@ class HessianSerializer: ISerializer {
      * @return
      */
     public override fun unserizlize(input: InputStream): Any? {
-        try{
-            val his = Hessian2Input(input)
-            return his.readObject()
+        try {
+            val kryo = Kryo()
+            val input = Input(input)
+            return kryo.readClassAndObject(input)
         } catch (e: IOException) {
             e.printStackTrace()
-            return null;
+            return null
         }
     }
 

@@ -32,16 +32,6 @@ class JdkSerializer : ISerializer {
     /**
      * 反序列化
      *
-     * @param bytes
-     * @return
-     */
-    public override fun unserizlize(bytes: ByteArray): Any? {
-        return unserizlize(ByteArrayInputStream(bytes))
-    }
-
-    /**
-     * 反序列化
-     *
      * @param input
      * @return
      */

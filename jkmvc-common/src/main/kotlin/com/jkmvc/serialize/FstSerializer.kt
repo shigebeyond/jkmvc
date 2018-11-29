@@ -6,7 +6,6 @@ import java.io.InputStream
 /**
  * 基于fast-serialization的序列化
  *
- * @ClassName: FstSerializer
  * @Description:
  * @author shijianhang<772910474@qq.com>
  * @date 2017-11-10 4:18 PM

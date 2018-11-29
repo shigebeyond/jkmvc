@@ -3,6 +3,7 @@ package com.jkmvc.serialize
 import com.jkmvc.common.Config
 import com.jkmvc.common.IConfig
 import com.jkmvc.common.NamedSingleton
+import java.io.ByteArrayInputStream
 import java.io.InputStream
 
 /**
@@ -35,7 +36,9 @@ interface ISerializer {
      * @param bytes
      * @return
      */
-    fun unserizlize(bytes: ByteArray): Any?
+    fun unserizlize(bytes: ByteArray): Any? {
+        return unserizlize(ByteArrayInputStream(bytes))
+    }
 
     /**
      * 反序列化
