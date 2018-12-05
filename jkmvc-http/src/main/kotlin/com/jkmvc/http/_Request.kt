@@ -1,5 +1,6 @@
 package com.jkmvc.http
 
+import com.alibaba.fastjson.JSON
 import com.jkmvc.common.isNullOrEmpty
 import com.jkmvc.orm.Orm
 import com.oreilly.servlet.MultipartRequest
@@ -182,22 +183,20 @@ public inline fun isSafeUploadFile(uploadFile: File): Boolean {
  * @return
  */
 public fun Orm.requestValues(req: Request, expected: List<String>? = null): Orm {
-    if (expected.isNullOrEmpty())
-    {
-        // 取得请求中的所有参数
-        val columns : Enumeration<String> = req.parameterNames
-        while(columns.hasMoreElements())
-        {
-            val column = columns.nextElement();
-            setIntelligent(column, req.getParameter(column)!!)
-        }
-    }
-    else
-    {
-        // 取得请求中的指定参数
-        for (column in expected!!)
-            if(!req.isEmpty(column)) // 只取非空值
-                setIntelligent(column, req.getParameter(column)!!)
+    // 默认为请求中的所有列
+    val columns = if (expected.isNullOrEmpty()) req.parameterNames.iterator() else expected!!.iterator()
+
+    // 取得请求中的指定参数
+    for (column in columns) {
+        if (req.isEmpty(column)) // 只取非空值
+            continue;
+
+        val value = req.getParameter(column)!!
+        if(hasRelation(column)) // 关联对象属性, 直接反json化
+            set(column, JSON.parse(value))
+        else // 普通属性, 智能设置string值
+            setIntelligent(column, value)
+
     }
     return this;
 }
