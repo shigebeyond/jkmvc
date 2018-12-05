@@ -15,7 +15,7 @@ interface IDbQueryBuilderDecorationClauses<T>
      * 编译多个子表达式
      * @param sql 保存编译sql
      */
-    public fun compile(sql:StringBuilder):Unit;
+    fun compile(sql:StringBuilder):Unit;
 
     /**
      * 添加一个子表达式+连接符
@@ -24,7 +24,7 @@ interface IDbQueryBuilderDecorationClauses<T>
      * @param delimiter 当前子表达式的连接符
      * @return
      */
-    public fun addSubexp(subexp:Array<Any?>, delimiter:String = ", "):IDbQueryBuilderDecorationClauses<T>;
+    fun addSubexp(subexp:Array<Any?>, delimiter:String = ", "):IDbQueryBuilderDecorationClauses<T>;
 
     /**
      * 编译一个子表达式
@@ -32,7 +32,7 @@ interface IDbQueryBuilderDecorationClauses<T>
      * @param j 索引
      * @param sql 保存编译的sql
      */
-    public fun compileSubexp(subexp:T, j:Int, sql:StringBuilder):Unit;
+    fun compileSubexp(subexp:T, j:Int, sql:StringBuilder):Unit;
 
     /**
      * 开启一个分组
@@ -40,18 +40,18 @@ interface IDbQueryBuilderDecorationClauses<T>
      * @param delimiter 连接符
      * @return
      */
-    public fun open(delimiter:String):IDbQueryBuilderDecorationClauses<T>;
+    fun open(delimiter:String):IDbQueryBuilderDecorationClauses<T>;
 
     /**
      * 结束一个分组
      *
      * @return
      */
-    public fun close():IDbQueryBuilderDecorationClauses<T>;
+    fun close():IDbQueryBuilderDecorationClauses<T>;
 
     /**
      * 清空
      * @returnDecorationClauses
      */
-    public fun clear():IDbQueryBuilderDecorationClauses<T>;
+    fun clear():IDbQueryBuilderDecorationClauses<T>;
 }
