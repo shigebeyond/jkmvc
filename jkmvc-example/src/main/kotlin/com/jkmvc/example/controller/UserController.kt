@@ -4,7 +4,7 @@ import com.jkmvc.common.format
 import com.jkmvc.example.model.UserModel
 import com.jkmvc.http.Controller
 import com.jkmvc.http.httpLogger
-import com.jkmvc.http.requestValues
+import com.jkmvc.http.valuesFromRequest
 import com.jkmvc.orm.OrmQueryBuilder
 import com.jkmvc.orm.isLoaded
 import com.jkmvc.session.Auth
@@ -90,8 +90,8 @@ class UserController: Controller()
             user.name = req["name"]!!;
             user.age = req["age"]!!;
 
-            // 3 Orm.requestValues(req)
-            user.requestValues(req)
+            // 3 Orm.valuesFromRequest(req)
+            user.valuesFromRequest(req)
             user.create(); // create user
             // 重定向到列表页 | redirect to list page
             redirect("user/index");
@@ -125,8 +125,8 @@ class UserController: Controller()
             user.name = req["name"]!!;
             user.age = req["age"]!!;
             */
-            // 3 Orm.requestValues(req)
-            user.requestValues(req)
+            // 3 Orm.valuesFromRequest(req)
+            user.valuesFromRequest(req)
             user.update() // update user
             // 重定向到列表页 | redirect to list page
             redirect("user/index");

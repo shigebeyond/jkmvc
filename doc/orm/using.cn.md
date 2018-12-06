@@ -103,18 +103,18 @@ user.create()
 
 2. 从 `Request` 中赋值
 
-通常，我们要从请求中读取相关的属性值，只要使用 `com.jkmvc.http.requestValues` 方法即可。
+通常，我们要从请求中读取相关的属性值，只要使用 `com.jkmvc.http.valuesFromRequest` 方法即可。
 
-当然，请求中的数据都是字符串类型，但是我们的属性却不一定是字符串类型的，`com.jkmvc.http.requestValues` 会智能转换请求中的值，并赋值给属性。
+当然，请求中的数据都是字符串类型，但是我们的属性却不一定是字符串类型的，`com.jkmvc.http.valuesFromRequest` 会智能转换请求中的值，并赋值给属性。
 
 ```	
-import com.jkmvc.http.requestValues
+import com.jkmvc.http.valuesFromRequest
 
 try
 {
     val user = UserModel(20);
     val expected = listOf("username","password")
-    user.requestValues(req, expected)
+    user.valuesFromRequest(req, expected)
     user.update();
 }
 catch (e: OrmException)
