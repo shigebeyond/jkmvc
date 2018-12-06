@@ -1,8 +1,12 @@
 package com.jkmvc.http
 
 import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.JSONArray
+import com.alibaba.fastjson.JSONObject
 import com.jkmvc.common.isNullOrEmpty
+import com.jkmvc.orm.IRelationMeta
 import com.jkmvc.orm.Orm
+import com.jkmvc.orm.RelationType
 import com.oreilly.servlet.MultipartRequest
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -176,27 +180,73 @@ public inline fun isSafeUploadFile(uploadFile: File): Boolean {
 
 /****************************** Orm扩展 *******************************/
 /**
- * 设置多个字段值
+ * 从请求中解析并设置多个字段值
  *
  * @param values   字段值的数组：<字段名 to 字段值>
  * @param expected 要设置的字段名的数组
  * @return
  */
-public fun Orm.requestValues(req: Request, expected: List<String>? = null): Orm {
+public fun Orm.valuesFromRequest(req: Request, expected: List<String>? = null): Orm {
     // 默认为请求中的所有列
     val columns = if (expected.isNullOrEmpty()) req.parameterNames.iterator() else expected!!.iterator()
 
     // 取得请求中的指定参数
-    for (column in columns) {
-        if (req.isEmpty(column)) // 只取非空值
-            continue;
-
-        val value = req.getParameter(column)!!
-        if(hasRelation(column)) // 关联对象属性, 直接反json化
-            set(column, JSON.parse(value))
-        else // 普通属性, 智能设置string值
-            setIntelligent(column, value)
-
-    }
+    for (column in columns)
+        setFromRequest(column, req.getParameter(column))
     return this;
+}
+
+/**
+ * 设置单个字段值
+ *
+ * @param column 列
+ * @param value 值
+ */
+private fun Orm.setFromRequest(column: String, value: Any?) {
+    if(value == null)
+        return;
+
+    // 获得关联属性
+    val relation = ormMeta.getRelation(column)
+
+    // 1 普通属性, 智能设置string值
+    if (relation != null) {
+        setIntelligent(column, value as String)
+        return
+    }
+
+    // 2 关联对象属性, 直接反json化
+    val json = if(value is String) JSON.parse(value) else value
+
+    // 2.1 有一个
+    if (relation!!.type == RelationType.BELONGS_TO || relation.type == RelationType.HAS_ONE) {
+        val related = buildRelatedFromRequest(column, relation, json)
+        set(column, related)
+        return
+    }
+
+    // 2.2 有多个
+    if(json !is JSONArray)
+        throw IllegalArgumentException("类[${javaClass}]的关联属性[${column}]赋值需要是JSONArray")
+    val related = json.map {
+        buildRelatedFromRequest(column, relation, it, "数组")
+    }
+    set(column, related)
+}
+
+/**
+ * 从请求中构建关联对象
+ * @param column 列
+ * @param relation 列的关联关系
+ * @param json 列的值
+ * @return 关联对象
+ */
+private fun Orm.buildRelatedFromRequest(column: String, relation: IRelationMeta, json: Any, postfix: String = ""): Orm {
+    if(json !is JSONObject)
+        throw IllegalArgumentException("类[$javaClass]的关联属性[$column]赋值需要是JSONObject$postfix")
+
+    val related = relation.newModelInstance() as Orm
+    for ((k, v) in json)
+        related.setFromRequest(k, v)
+    return related
 }
