@@ -90,11 +90,13 @@ abstract class OrmRelated: OrmPersistent() {
      * @return
      */
     public override fun asMap(): Map<String, Any?> {
+        val result = HashMap<String, Any?>()
+
         // 转关联对象
         for((name, relation) in ormMeta.relations){
             val value = data[name]
             if(value != null){
-                data[name] = when(value){
+                result[name] = when(value){
                     is Collection<*> -> (value as Collection<IOrm>).itemAsMap() // 有多个
                     is Orm -> value.asMap()  // 有一个
                     else -> value
@@ -104,11 +106,11 @@ abstract class OrmRelated: OrmPersistent() {
 
         // 转当前对象：由于关联对象联查时不处理null值, 因此关联对象会缺少null值的字段，这里要补上
         for(prop in ormMeta.props){
-            if(!data.containsKey(prop))
-                data[prop] = null
+            if(!result.containsKey(prop))
+                result[prop] = null
         }
 
-        return data;
+        return result;
     }
 
     /**
@@ -123,7 +125,6 @@ abstract class OrmRelated: OrmPersistent() {
                 realValue = related(column, true) // 创建关联对象
                 (realValue as Orm).fromMap(value as Map<String, Any?>) // 递归设置关联对象的字段值
             }
-            this[column] = realValue
         }
     }
 
