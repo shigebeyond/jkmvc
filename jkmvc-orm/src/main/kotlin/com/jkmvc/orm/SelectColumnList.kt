@@ -5,7 +5,7 @@ import java.util.*
 /**
  * 默认的查询字段
  */
-val defaultSelectColumnList = SelectColumnList(listOf("*"))
+val defaultSelectColumnList = SelectColumnList(emptyList())
 
 /**
  * 查询字段
