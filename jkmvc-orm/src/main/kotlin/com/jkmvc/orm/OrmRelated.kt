@@ -22,7 +22,7 @@ abstract class OrmRelated: OrmPersistent() {
             data[column] = value;
             // 如果关联的是主表，则更新从表的外键
             if (relation.type == RelationType.BELONGS_TO)
-                this[relation.foreignKey] = (value as Orm).pk; // 更新字段 super.set(foreignKey, obj.pk);
+                super.set(relation.foreignKey, (value as Orm).pk); // 更新字段
             return;
         }
 
@@ -124,7 +124,8 @@ abstract class OrmRelated: OrmPersistent() {
             if(value is Map<*, *>){ // 如果是map，则为关联对象
                 realValue = related(column, true) // 创建关联对象
                 (realValue as Orm).fromMap(value as Map<String, Any?>) // 递归设置关联对象的字段值
-            }
+            }else
+                set(column, value)
         }
     }
 
