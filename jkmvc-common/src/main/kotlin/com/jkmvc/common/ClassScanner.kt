@@ -20,10 +20,14 @@ abstract class ClassScanner : IClassScanner {
      * @param pck 包名
      */
     public override fun addPackage(pck: String): Unit {
+        // 检查是否添加过
+        if(packages.contains(pck))
+            return
+
+        // 记录包
+        packages.add(pck)
         // 扫描包
         scan(pck)
-        // 记录扫描过的包
-        packages.add(pck)
     }
 
     /**
@@ -43,10 +47,6 @@ abstract class ClassScanner : IClassScanner {
      * @param pck 包名
      */
     public override fun scan(pck: String): Unit {
-        // 检查是否扫描过
-        if(packages.contains(pck))
-            return
-
         comLogger.debug("扫描包[$pck]下的类")
         // 获得类加载器
         val cld = Thread.currentThread().contextClassLoader
