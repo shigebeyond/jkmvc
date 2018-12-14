@@ -435,26 +435,16 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
     /**
      * 转义多个表名
      *
-     * @param tables 表名集合，其元素可以是String, 也可以是Pair<表名, 别名>
+     * @param tables 表名集合，其元素可以是String, 也可以是DbAlias
      * @param with_brackets 当拼接数组时, 是否用()包裹
      * @return
      */
-    public override fun quoteTables(tables:Collection<Any>, with_brackets:Boolean):String
+    public override fun quoteTables(tables:Collection<CharSequence>, with_brackets:Boolean):String
     {
         // 遍历多个表转义
         return tables.joinToString(", ", if(with_brackets) "(" else "", if(with_brackets) ")" else ""){
             // 单个表转义
-            var table:String;
-            var alias:String?;
-            if(it is Pair<*, *>){ // 有别名
-                table = it.component1() as String;
-                alias = it .component2() as String;
-            }else{ // 无别名
-                table = it as String;
-                alias = null;
-            }
-            // 单个表转义
-            quoteTable(table, alias)
+            quoteTable(it)
         }
     }
 
@@ -464,26 +454,25 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      *   oracle为"table"
      *   sql server为"table" [table]
      *
-     * @param table
-     * @param alias 表别名
+     * @param table 表名或别名 DbAlias
      * @return
      */
-    public override fun quoteTable(table:String, alias:String?):String
+    public override fun quoteTable(table:CharSequence):String
     {
-        return if(alias == null)
+        return if(table is DbAlias) // 表与别名之间不加 as，虽然mysql可识别，但oracle不能识别
+                    "$identifierQuoteString${table.name}$identifierQuoteString $identifierQuoteString${table.alias}$identifierQuoteString"
+                else
                     "$identifierQuoteString$table$identifierQuoteString";
-                else // 表与别名之间不加 as，虽然mysql可识别，但oracle不能识别
-                    "$identifierQuoteString$table$identifierQuoteString $identifierQuoteString$alias$identifierQuoteString"
     }
 
     /**
      * 转义多个字段名
      *
-     * @param columns 表名集合，其元素可以是String, 也可以是Pair<字段名, 别名>
+     * @param columns 表名集合，其元素可以是String, 也可以是DbAlias
      * @param with_brackets 当拼接数组时, 是否用()包裹
      * @return
      */
-    public override fun quoteColumns(columns:Collection<Any>, with_brackets:Boolean):String
+    public override fun quoteColumns(columns:Collection<CharSequence>, with_brackets:Boolean):String
     {
         // 遍历多个字段转义
         return columns.joinToString(", ", if(with_brackets) "(" else "", if(with_brackets) ")" else "") {
@@ -498,15 +487,20 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      *   oracle为"column"
      *   sql server为"column" [column]
      *
-     * @param column 字段名, 可以是字段数组
-     * @param alias 字段别名
-     * @param with_brackets 当拼接数组时, 是否用()包裹
+     * @param column 字段名, 可能是别名 DbAlias
      * @return
      */
-    public override fun quoteColumn(column:String, alias:String?, with_brackets:Boolean):String
+    public override fun quoteColumn(column:CharSequence):String
     {
         var table = "";
-        var col = column;
+        var col: String;
+        var alias:String? = null;
+        if(column is DbAlias){
+            col = column.name.toString()
+            alias = column.alias
+        }else{
+            col = column.toString()
+        }
 
         // 非函数表达式
         if ("^\\w[\\w\\d_\\.\\*]*".toRegex().matches(column))

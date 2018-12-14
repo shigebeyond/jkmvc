@@ -8,7 +8,7 @@ package com.jkmvc.db
  * @author shijianhang<772910474@qq.com>
  * @date 2017-11-21 7:28 PM
  */
-interface IDbQuoter {
+interface IDbValueQuoter {
 
     /**
      * 转义值
@@ -16,8 +16,7 @@ interface IDbQuoter {
      * @param value 字段值, 可以是值数组
      * @return
      */
-    fun quote(value:Any?):String
-    {
+    fun quote(value:Any?):String {
         // 1 多值
         if(value is Array<*>){
             return value.joinToString(", ", "(", ")") {

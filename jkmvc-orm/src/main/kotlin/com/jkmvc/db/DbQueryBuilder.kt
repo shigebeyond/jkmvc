@@ -10,7 +10,7 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-13
  */
-open class DbQueryBuilder(db:IDb = Db.instance(), table:Pair<String, String?> /*表名*/ = emptyTable) :DbQueryBuilderDecoration(db, table)
+open class DbQueryBuilder(db:IDb = Db.instance(), table:DbAlias /*表名*/ = emptyTable) :DbQueryBuilderDecoration(db, table)
 {
     /**
      * 缓存编译好的sql
@@ -22,7 +22,7 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:Pair<String, String?> /*
      * @param db 数据库连接
      * @param table 表名
      */
-    public constructor(db: IDb, table: String):this(db, if(table == "") emptyTable else Pair(table, null)){
+    public constructor(db: IDb, table: String):this(db, if(table == "") emptyTable else DbAlias(table)){
     }
 
     /**
@@ -75,8 +75,8 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:Pair<String, String?> /*
         // 3 子查询: 编译select子句，并合并到 compiledSql 中
         if(value is IDbQueryBuilder) // 无别名
             return quoteSubQuery(value)
-        if(value is Pair<*, *>) // 有别名
-            return quoteSubQuery(value as Pair<DbQueryBuilder, String>)
+        if(value is DbAlias) // 有别名
+            return quoteSubQuery(value.name as IDbQueryBuilder, value.alias)
 
         // 4 字段值
         compiledSql.staticParams.add(value);
@@ -87,25 +87,16 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:Pair<String, String?> /*
      * 转义子查询
      *
      * @param subquery
+     * @param alias
      * @return
      */
-    public override fun quoteSubQuery(subquery: Pair<IDbQueryBuilder, String>): String {
-        val (query, alias) = subquery
-        val subsql = query.compileSelect()
-        compiledSql.staticParams.addAll(subsql.staticParams);
-        return "(${subsql.sql}) ${db.identifierQuoteString}$alias${db.identifierQuoteString}"
-    }
-
-    /**
-     * 转义子查询
-     *
-     * @param subquery
-     * @return
-     */
-    public override fun quoteSubQuery(subquery: IDbQueryBuilder): String {
+    public override fun quoteSubQuery(subquery: IDbQueryBuilder, alias: String?): String {
         val subsql = subquery.compileSelect()
         compiledSql.staticParams.addAll(subsql.staticParams);
-        return "(" + subsql.sql + ")"
+        if(alias == null)
+            return "(" + subsql.sql + ")"
+
+        return "(${subsql.sql}) ${db.identifierQuoteString}$alias${db.identifierQuoteString}"
     }
 
     /**
@@ -114,10 +105,10 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:Pair<String, String?> /*
      * @param table
      * @return
      */
-    public override fun quoteTable(table: Any):String{
+    public override fun quoteTable(table: CharSequence):String{
         // 1 子查询
-        if(table is Pair<*, *> && table.first is IDbQueryBuilder)
-            return quoteSubQuery(table as Pair<IDbQueryBuilder, String>)
+        if(table is DbAlias && table.name is IDbQueryBuilder)
+            return quoteSubQuery(table.name as IDbQueryBuilder, table.alias)
         if(table is IDbQueryBuilder)
             return quoteSubQuery(table)
 
@@ -180,7 +171,7 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:Pair<String, String?> /*
      * @return 编译好的sql
      */
     public override fun compileCount(): CompiledSql{
-        return select("count(1)" to "NUM" /* oracle会自动转为全大写 */).compile(ActionType.SELECT);
+        return select(DbAlias("count(1)", "NUM") /* oracle会自动转为全大写 */).compile(ActionType.SELECT);
     }
 
     /**
@@ -275,7 +266,7 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:Pair<String, String?> /*
     {
         // 1 编译
         selectColumns.clear() // 清空多余的select
-        val result = select("count(1)" to "NUM" /* oracle会自动转为全大写 */).compile(ActionType.SELECT);
+        val result = select(DbAlias("count(1)", "NUM") /* oracle会自动转为全大写 */).compile(ActionType.SELECT);
 
         // 2 执行 select
         val (hasNext, count) = db.queryCell(result.sql, result.buildParams(params));

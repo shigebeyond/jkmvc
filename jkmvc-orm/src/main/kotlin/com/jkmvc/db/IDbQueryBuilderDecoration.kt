@@ -21,8 +21,7 @@ enum class ClauseType {
  * @author shijianhang
  * @date 2016-10-12
  */
-interface IDbQueryBuilderDecoration: IDbQuoter
-{
+interface IDbQueryBuilderDecoration : IDbValueQuoter {
     /**
      * 编译修饰子句
      *
@@ -36,37 +35,37 @@ interface IDbQueryBuilderDecoration: IDbQuoter
      * @param conditions:Map<String, String>
      * @return
      */
-    fun ons(conditions:Map<String, String>):IDbQueryBuilder;
+    fun ons(conditions: Map<String, String>): IDbQueryBuilder;
 
     /**
      * 多个having条件
      * @param conditions
      * @return
      */
-    fun havings(conditions:Map<String, Any?>):IDbQueryBuilder;
+    fun havings(conditions: Map<String, Any?>): IDbQueryBuilder;
 
     /**
      * Alias of andWhere()
      *
-     * @param   column  column name or Pair(column, alias) or object
+     * @param   column  column name or DbAlias or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
      */
-    fun where(column:String, op:String, value:Any?):IDbQueryBuilder;
+    fun where(column: String, op: String, value: Any?): IDbQueryBuilder;
 
     /**
      * Alias of andWhere()
      *
-     * @param   column  column name or Pair(column, alias) or object
+     * @param   column  column name or DbAlias or object
      * @param   value   column value
      * @return
      */
-    fun where(column:String, value:Any?):IDbQueryBuilder{
-        if(value == null)
+    fun where(column: String, value: Any?): IDbQueryBuilder {
+        if (value == null)
             return where(column, "IS", value);
 
-        if(value.isArrayOrCollection())
+        if (value.isArrayOrCollection())
             return where(column, "IN", value)
 
         return where(column, "=", value);
@@ -75,12 +74,12 @@ interface IDbQueryBuilderDecoration: IDbQuoter
     /**
      * Creates a new "OR WHERE" condition for the query.
      *
-     * @param   column  column name or Pair(column, alias) or object
+     * @param   column  column name or DbAlias or object
      * @param   value   column value
      * @return
      */
-    fun orWhere(column:String, value:Any?):IDbQueryBuilder{
-        if(value.isArrayOrCollection())
+    fun orWhere(column: String, value: Any?): IDbQueryBuilder {
+        if (value.isArrayOrCollection())
             return orWhere(column, "IN", value)
 
         return orWhere(column, "=", value);
@@ -92,8 +91,8 @@ interface IDbQueryBuilderDecoration: IDbQuoter
      * @param   conditions
      * @return
      */
-    fun wheres(conditions:Map<String, Any?>):IDbQueryBuilder{
-        for((column, value) in conditions)
+    fun wheres(conditions: Map<String, Any?>): IDbQueryBuilder {
+        for ((column, value) in conditions)
             where(column, value)
         return this as IDbQueryBuilder
     }
@@ -104,8 +103,8 @@ interface IDbQueryBuilderDecoration: IDbQuoter
      * @param   conditions
      * @return
      */
-    fun wheres(conditions:List<Triple<String, String, Any?>>):IDbQueryBuilder{
-        for((column, op, value) in conditions)
+    fun wheres(conditions: List<Triple<String, String, Any?>>): IDbQueryBuilder {
+        for ((column, op, value) in conditions)
             where(column, op, value)
         return this as IDbQueryBuilder
     }
@@ -113,64 +112,64 @@ interface IDbQueryBuilderDecoration: IDbQuoter
     /**
      * Creates a new "AND WHERE" condition for the query.
      *
-     * @param   column  column name or Pair(column, alias) or object
+     * @param   column  column name or DbAlias or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
      */
-    fun andWhere(column:String, op:String, value:Any?):IDbQueryBuilder;
+    fun andWhere(column: String, op: String, value: Any?): IDbQueryBuilder;
 
     /**
      * Creates a new "OR WHERE" condition for the query.
      *
-     * @param   column  column name or Pair(column, alias) or object
+     * @param   column  column name or DbAlias or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
      */
-    fun orWhere(column:String, op:String, value:Any?):IDbQueryBuilder;
+    fun orWhere(column: String, op: String, value: Any?): IDbQueryBuilder;
 
     /**
      * Alias of andWhereOpen()
      *
      * @return
      */
-    fun whereOpen():IDbQueryBuilder;
+    fun whereOpen(): IDbQueryBuilder;
 
     /**
      * Opens a new "AND WHERE (...)" grouping.
      *
      * @return
      */
-    fun andWhereOpen():IDbQueryBuilder;
+    fun andWhereOpen(): IDbQueryBuilder;
 
     /**
      * Opens a new "OR WHERE (...)" grouping.
      *
      * @return
      */
-    fun orWhereOpen():IDbQueryBuilder;
+    fun orWhereOpen(): IDbQueryBuilder;
 
     /**
      * Closes an open "WHERE (...)" grouping.
      *
      * @return
      */
-    fun whereClose():IDbQueryBuilder;
+    fun whereClose(): IDbQueryBuilder;
 
     /**
      * Closes an open "WHERE (...)" grouping.
      *
      * @return
      */
-    fun andWhereClose():IDbQueryBuilder;
+    fun andWhereClose(): IDbQueryBuilder;
 
     /**
      * Closes an open "WHERE (...)" grouping.
      *
      * @return
      */
-    fun orWhereClose():IDbQueryBuilder;
+    fun orWhereClose(): IDbQueryBuilder;
 
     /**
      * Creates a "GROUP BY ..." filter.
@@ -178,7 +177,7 @@ interface IDbQueryBuilderDecoration: IDbQuoter
      * @param   column  column name
      * @return
      */
-    fun groupBy(column:String):IDbQueryBuilder;
+    fun groupBy(column: String): IDbQueryBuilder;
 
     /**
      * Creates a "GROUP BY ..." filter.
@@ -186,7 +185,7 @@ interface IDbQueryBuilderDecoration: IDbQuoter
      * @param   columns  column name
      * @return
      */
-    fun groupBys(vararg columns:String):IDbQueryBuilder{
+    fun groupBys(vararg columns: String): IDbQueryBuilder {
         for (col in columns)
             groupBy(col)
         return this as IDbQueryBuilder
@@ -195,94 +194,94 @@ interface IDbQueryBuilderDecoration: IDbQuoter
     /**
      * Alias of andHaving()
      *
-     * @param   column  column name or Pair(column, alias) or object
+     * @param   column  column name or DbAlias or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
      */
-    fun having(column:String, op:String, value:Any? = null):IDbQueryBuilder;
+    fun having(column: String, op: String, value: Any? = null): IDbQueryBuilder;
 
     /**
      * Creates a new "AND HAVING" condition for the query.
      *
-     * @param   column  column name or Pair(column, alias) or object
+     * @param   column  column name or DbAlias or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
      */
-    fun andHaving(column:String, op:String, value:Any?):IDbQueryBuilder;
+    fun andHaving(column: String, op: String, value: Any?): IDbQueryBuilder;
 
     /**
      * Creates a new "OR HAVING" condition for the query.
      *
-     * @param   column  column name or Pair(column, alias) or object
+     * @param   column  column name or DbAlias or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
      */
-    fun orHaving(column:String, op:String, value:Any?):IDbQueryBuilder;
+    fun orHaving(column: String, op: String, value: Any?): IDbQueryBuilder;
 
     /**
      * Alias of andHavingOpen()
      *
      * @return
      */
-    fun havingOpen():IDbQueryBuilder;
+    fun havingOpen(): IDbQueryBuilder;
 
     /**
      * Opens a new "AND HAVING (...)" grouping.
      *
      * @return
      */
-    fun andHavingOpen():IDbQueryBuilder;
+    fun andHavingOpen(): IDbQueryBuilder;
 
     /**
      * Opens a new "OR HAVING (...)" grouping.
      *
      * @return
      */
-    fun orHavingOpen():IDbQueryBuilder;
+    fun orHavingOpen(): IDbQueryBuilder;
 
     /**
      * Closes an open "AND HAVING (...)" grouping.
      *
      * @return
      */
-    fun havingClose():IDbQueryBuilder;
+    fun havingClose(): IDbQueryBuilder;
 
     /**
      * Closes an open "AND HAVING (...)" grouping.
      *
      * @return
      */
-    fun andHavingClose():IDbQueryBuilder;
+    fun andHavingClose(): IDbQueryBuilder;
 
     /**
      * Closes an open "OR HAVING (...)" grouping.
      *
      * @return
      */
-    fun orHavingClose():IDbQueryBuilder;
+    fun orHavingClose(): IDbQueryBuilder;
 
     /**
      * Applies sorting with "ORDER BY ..."
      *
-     * @param   column     column name or Pair(column, alias) or object
+     * @param   column     column name or DbAlias or object
      * @param   asc        whether asc direction
      * @return
      */
-    fun orderBy(column:String, asc:Boolean):IDbQueryBuilder{
-        return orderBy(column, if(asc) "ASC" else "DESC")
+    fun orderBy(column: String, asc: Boolean): IDbQueryBuilder {
+        return orderBy(column, if (asc) "ASC" else "DESC")
     }
 
     /**
      * Applies sorting with "ORDER BY ..."
      *
-     * @param   column     column name or Pair(column, alias) or object
+     * @param   column     column name or DbAlias or object
      * @param   direction  direction of sorting
      * @return
      */
-    fun orderBy(column:String, direction:String? = null):IDbQueryBuilder;
+    fun orderBy(column: String, direction: String? = null): IDbQueryBuilder;
 
     /**
      * Multiple OrderBy
@@ -290,7 +289,7 @@ interface IDbQueryBuilderDecoration: IDbQuoter
      * @param orders
      * @return
      */
-    fun orderBys(orders:Map<String, String?>):IDbQueryBuilder{
+    fun orderBys(orders: Map<String, String?>): IDbQueryBuilder {
         for ((column, direction) in orders)
             orderBy(column, direction)
         return this as IDbQueryBuilder
@@ -302,7 +301,7 @@ interface IDbQueryBuilderDecoration: IDbQuoter
      * @param columns
      * @return
      */
-    fun orderBys(vararg columns:String):IDbQueryBuilder{
+    fun orderBys(vararg columns: String): IDbQueryBuilder {
         for (col in columns)
             orderBy(col)
         return this as IDbQueryBuilder
@@ -315,69 +314,24 @@ interface IDbQueryBuilderDecoration: IDbQuoter
      * @param  offset
      * @return
      */
-    fun limit(start:Int, offset:Int = 0):IDbQueryBuilder;
+    fun limit(start: Int, offset: Int = 0): IDbQueryBuilder;
 
     /**
      * Adds addition tables to "JOIN ...".
      *
-     * @param   table  table name | Pair(table, alias) | subquery | Pair(subquery, alias)
+     * @param   table  table name | DbAlias | subquery
      * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
      * @return
      */
-    fun join(table: Any, type:String = "INNER"): IDbQueryBuilder
-
-    /**
-     * Adds addition tables to "JOIN ...".
-     *
-     * @param   table  table name
-     * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
-     * @return
-     */
-    fun join(table: String, type:String = "INNER"): IDbQueryBuilder {
-        return join(table as Any, type);
-    }
-
-    /**
-     * Adds addition tables to "JOIN ...".
-     *
-     * @param   table  Pair(table, alias)
-     * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
-     * @return
-     */
-    fun join(table: Pair<String, String>, type:String = "INNER"):IDbQueryBuilder{
-        return join(table as Any, type);
-    }
-
-    /**
-     * Adds addition subquerys to "JOIN ...".
-     *
-     * @param   subquery  subquery
-     * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
-     * @return
-     */
-    fun joins(subquery: IDbQueryBuilder, type:String = "INNER"):IDbQueryBuilder{
-        return join(subquery as Any, type);
-    }
-
-    /**
-     * Adds addition subquerys to "JOIN ...".
-     *   由于该方法与 join(table: Pair<String, String>, type:String = "INNER") 签名相同，因此从 join() 改名为 joins()
-     *
-     * @param   subquery  Pair(subquery, alias)
-     * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
-     * @return
-     */
-    public fun joins(subquery:Pair<IDbQueryBuilder, String>, type:String):IDbQueryBuilder{
-        return join(subquery as Any, type);
-    }
+    fun join(table: CharSequence, type: String = "INNER"): IDbQueryBuilder
 
     /**
      * Adds "ON ..." conditions for the last created JOIN statement.
      *
-     * @param   c1  column name or Pair(column, alias) or object
+     * @param   c1  column name or DbAlias or object
      * @param   op  logic operator
-     * @param   c2  column name or Pair(column, alias) or object
+     * @param   c2  column name or DbAlias or object
      * @return
      */
-    fun on(c1:String, op:String, c2:String):IDbQueryBuilder;
+    fun on(c1: String, op: String, c2: String): IDbQueryBuilder;
 }

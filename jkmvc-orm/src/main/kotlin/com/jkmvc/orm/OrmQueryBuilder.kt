@@ -1,6 +1,7 @@
 package com.jkmvc.orm
 
 import com.jkmvc.common.isNullOrEmpty
+import com.jkmvc.db.DbAlias
 import com.jkmvc.db.DbQueryBuilder
 import com.jkmvc.db.DbType
 import com.jkmvc.db.IDbQueryBuilder
@@ -22,7 +23,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                       protected var convertingValue: Boolean = false /* 查询时是否智能转换字段值 */,
                       protected var convertingColumn: Boolean = false /* 查询时是否智能转换字段名 */,
                       protected var withSelect: Boolean = true /* with()联查时自动select关联表的字段 */
-) : DbQueryBuilder(ormMeta.db, Pair(ormMeta.table, ormMeta.name)) {
+) : DbQueryBuilder(ormMeta.db, DbAlias(ormMeta.table, ormMeta.name)) {
 
     /**
      * 关联查询的记录，用于防止重复join同一个表
@@ -185,7 +186,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         val slaveFk = slaveName + "." + slaveRelation.foreignKey; // 从表.外键
 
         // 查从表
-        return join(slave.table to slaveName, "LEFT").on(slaveFk, "=", masterPk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
+        return join(DbAlias(slave.table, slaveName), "LEFT").on(slaveFk, "=", masterPk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
     }
 
     /**
@@ -218,7 +219,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         join(slaveRelation.middleTable).on(masterPk, "=", middleFk) // 中间表.外键 = 主表.主键
 
         // 查从表
-        return join(slave.table to slaveName, "LEFT").on(slavePk2, "=", middleFk2) as OrmQueryBuilder; // 中间表.远端外键 = 从表.远端主键
+        return join(DbAlias(slave.table, slaveName), "LEFT").on(slavePk2, "=", middleFk2) as OrmQueryBuilder; // 中间表.远端外键 = 从表.远端主键
     }
 
     /**
@@ -245,7 +246,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         val masterPk = masterName + "." + masterRelation.primaryKey; // 主表.主键
 
         // 查主表
-        return join(master.table to masterName, "LEFT").on(masterPk, "=", slaveFk) as OrmQueryBuilder; // 主表.主键 = 从表.外键
+        return join(DbAlias(master.table, masterName), "LEFT").on(masterPk, "=", slaveFk) as OrmQueryBuilder; // 主表.主键 = 从表.外键
     }
 
     /**
@@ -393,23 +394,22 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         }
 
         // 构建列别名
-        val select: MutableList<Pair<String, String>> = LinkedList<Pair<String, String>>();
         for (it in cols!!) {
             // 在每个select()处，智能转换字段名
             val col = if(convertingColumn) convertColumn(it) else it
             val columnAlias = path + ":" + col; // 列别名 = 表别名 : 列名，以便在设置orm对象字段值时，可以逐层设置关联对象的字段值
             val column = relationName + "." + col;
-            select.add(column to columnAlias);
+            select(DbAlias(column, columnAlias))
         }
 
-        return this.select(select) as OrmQueryBuilder;
+        return this
     }
 
     /********************************* 改写父类的方法：支持自动转换字段名（多级属性名 => 字段名）与字段值（字符串类型的字段值 => 准确类型的字段值），不改写join()，请使用with()来代替 **************************************/
     /**
      * Creates a new "AND WHERE" condition for the query.
      *
-     * @param   prop  column name or Pair(column, alias) or object
+     * @param   prop  column name or DbAlias or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -421,7 +421,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * Creates a new "OR WHERE" condition for the query.
      *
-     * @param   prop  column name or Pair(column, alias) or object
+     * @param   prop  column name or DbAlias or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -433,7 +433,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * Applies sorting with "ORDER BY ..."
      *
-     * @param   prop     column name or Pair(column, alias) or object
+     * @param   prop     column name or DbAlias or object
      * @param   direction  direction of sorting
      * @return
      */
@@ -454,7 +454,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * Creates a new "AND HAVING" condition for the query.
      *
-     * @param   prop  column name or Pair(column, alias) or object
+     * @param   prop  column name or DbAlias or object
      * @param   op      logic operator
      * @param   value   column value
      * @return
@@ -466,7 +466,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * Creates a new "OR HAVING" condition for the query.
      *
-     * @param   prop  column name or Pair(column, alias) or object
+     * @param   prop  column name or DbAlias or object
      * @param   op      logic operator
      * @param   value   column value
      * @return

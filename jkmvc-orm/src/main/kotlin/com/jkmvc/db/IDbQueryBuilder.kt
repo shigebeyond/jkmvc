@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-13
  */
-abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration, Cloneable {
+abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration, Cloneable, CharSequence by "" {
     /**
      * 获得记录转换器
      */
@@ -203,17 +203,10 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      * 转义子查询
      *
      * @param subquery
+     * @param alias
      * @return
      */
-    public abstract fun quoteSubQuery(subquery: Pair<IDbQueryBuilder, String>): String
-
-    /**
-     * 转义子查询
-     *
-     * @param subquery
-     * @return
-     */
-    public abstract fun quoteSubQuery(subquery: IDbQueryBuilder): String
+    public abstract fun quoteSubQuery(subquery: IDbQueryBuilder, alias: String? = null): String
 
     /**
      * 转义表名
@@ -221,5 +214,5 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      * @param table
      * @return
      */
-    public abstract fun quoteTable(table: Any):String
+    public abstract fun quoteTable(table: CharSequence):String
 }

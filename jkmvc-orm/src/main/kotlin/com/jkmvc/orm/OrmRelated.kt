@@ -151,7 +151,7 @@ abstract class OrmRelated: OrmPersistent() {
                 if(query == null) // 如果查询为空，说明主/外键为空，则数据有问题，则不查询不赋值（一般出现在调试过程中）
                     return null;
 
-                query.select(columns) // 查字段
+                query.select(*columns) // 查字段
                 if (relation.type == RelationType.HAS_MANY) { // 查多个
                     result = query.findAll(transform = relation.recordTranformer)
                 } else { // 查一个

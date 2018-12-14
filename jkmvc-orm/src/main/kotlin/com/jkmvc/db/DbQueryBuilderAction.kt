@@ -114,7 +114,7 @@ class InsertData: Cloneable{
 /**
  * 空表
  */
-public val emptyTable = Pair<String, String?>("", null)
+public val emptyTable = DbAlias("")
 
 /**
  * sql构建器 -- 动作子句: 由动态select/insert/update/delete来构建的子句
@@ -123,7 +123,7 @@ public val emptyTable = Pair<String, String?>("", null)
  * @author shijianhang
  * @date 2016-10-12
  */
-abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, var table: Pair<Any, String?> /* 表名/子查询 */) : IDbQueryBuilder() {
+abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, var table: DbAlias /* 表名/子查询 */) : IDbQueryBuilder() {
 
     companion object {
 
@@ -160,13 +160,13 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     protected var manipulatedData:Array<Any?> = arrayOfNulls(3)
 
     /**
-     * 要查询的字段名: [alias to column]
+     * 要查询的字段名
      */
-    public val selectColumns: HashSet<Any>
+    public val selectColumns: HashSet<CharSequence>
         get(){
             return manipulatedData.getOrPut(ActionType.SELECT.ordinal){
-                HashSet<Any>();
-            } as HashSet<Any>
+                HashSet<CharSequence>();
+            } as HashSet<CharSequence>
         }
 
     /**
@@ -201,7 +201,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * @return
      */
     public override fun from(table: String, alias:String?): IDbQueryBuilder {
-        this.table = Pair(table, alias)
+        this.table = DbAlias(table, alias)
         return this
     }
 
@@ -212,7 +212,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * @return
      */
     public override fun from(subquery: IDbQueryBuilder, alias:String): IDbQueryBuilder {
-        this.table = Pair(subquery, alias)
+        this.table = DbAlias(subquery, alias)
         return this
     }
 
@@ -300,22 +300,13 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     /**
      * 设置查询的字段, select时用
      *
-     * @param columns 字段名数组，其元素类型是 String 或 Pair<String, String>
-     *                如 arrayOf(column1, column2, alias to column3),
-     * 				  如 arrayOf("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
+     * @param columns 字段名数组，其元素类型是 String 或 DbAlias
+     *                如 arrayOf(column1, column2, DbAlias(column3, alias)),
+     * 				  如 arrayOf("name", "age", DbAlias("birthday", "birt"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
      * @return
      */
-    public override fun select(vararg columns: Any): IDbQueryBuilder {
-        if (!columns.isEmpty()){
-            for(column in columns){
-                when(column){
-                    is Array<*> -> selectColumns.addAll(column as Array<Any>)
-                    is Collection<*> -> selectColumns.addAll(column as Collection<Any>);
-                    else -> selectColumns.add(column);
-                }
-            }
-        }
-
+    public override fun select(vararg columns: CharSequence): IDbQueryBuilder {
+        selectColumns.addAll(columns)
         return this;
     }
 
@@ -412,7 +403,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * @return
      */
     public fun fillColumns(): String {
-        // 1 select子句:  data是要查询的字段名, [alias to column]
+        // 1 select子句:  data是要查询的字段名
         if (action == ActionType.SELECT) {
             if (selectColumns.isEmpty())
                 return "*";

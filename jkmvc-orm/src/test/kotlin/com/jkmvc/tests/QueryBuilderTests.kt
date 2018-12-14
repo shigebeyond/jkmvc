@@ -157,7 +157,7 @@ class QueryBuilderTests{
 
     @Test
     fun testHaving(){
-        val query = DbQueryBuilder(db).select("username", "COUNT(`id`)" to "total_posts")
+        val query = DbQueryBuilder(db).select("username", DbAlias("COUNT(`id`)", "total_posts"))
                 .from("posts").groupBy("username").having("total_posts", ">=", 10);
         val csql = query.compileSelect()
         println(csql.previewSql())
@@ -169,12 +169,12 @@ class QueryBuilderTests{
     @Test
     fun testSubQuery(){
         /*// 子查询
-        val sub = DbQueryBuilder(db).select("username", "COUNT(`id`)" to "total_posts")
+        val sub = DbQueryBuilder(db).select("username", DbAlias("COUNT(`id`)", "total_posts"))
                 .from("posts").groupBy("username").having("total_posts", ">=", 10);
 
         // join子查询： join select
         val query = DbQueryBuilder(db).select("profiles.*", "posts.total_posts").from("profiles")
-                .joins(sub to "posts", "INNER").on("profiles.username", "=", "posts.username");
+                .joins(DbAlias(sub, "posts"), "INNER").on("profiles.username", "=", "posts.username");
         val csql = query.compileSelect()
 
         // insert子查询： insert...select
