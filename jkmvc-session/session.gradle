@@ -1,5 +1,3 @@
-apply plugin: 'jetty'
-
 dependencies{
     // other project
     compile project(':jkmvc-orm')
