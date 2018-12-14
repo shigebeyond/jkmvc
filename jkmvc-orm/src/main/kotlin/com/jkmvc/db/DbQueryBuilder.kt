@@ -68,15 +68,17 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:DbExpr /*表名*/ = empt
         if (value == null)
             return "NULL";
 
-        // 2 db表达式：不转义，直接输出
-        if(value is DbExpr)
-            return value.toString()
-
-        // 3 子查询: 编译select子句，并合并到 compiledSql 中
-        if(value is IDbQueryBuilder) // 无别名
+        // 2 子查询: 编译select子句 + 并合并参数到 compiledSql 中
+        if(value is IDbQueryBuilder)
             return quoteSubQuery(value)
-        if(value is DbExpr) // 有别名
-            return quoteSubQuery(value.exp as IDbQueryBuilder, value.alias)
+
+        // 3 db表达式
+        if(value is DbExpr) {
+            if(value.exp is IDbQueryBuilder)
+                return quoteSubQuery(value.exp, value.alias)
+
+            return value.toString()
+        }
 
         // 4 字段值
         compiledSql.staticParams.add(value);
@@ -85,7 +87,7 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:DbExpr /*表名*/ = empt
 
     /**
      * 转义子查询
-     *
+     *   编译select子句 + 合并参数到 compiledSql 中
      * @param subquery
      * @param alias
      * @return

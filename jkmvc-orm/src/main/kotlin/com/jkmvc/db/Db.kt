@@ -460,7 +460,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
     public override fun quoteTable(table:CharSequence):String
     {
         return if(table is DbExpr) // 表与别名之间不加 as，虽然mysql可识别，但oracle不能识别
-                    "$identifierQuoteString${table.exp}$identifierQuoteString $identifierQuoteString${table.alias}$identifierQuoteString"
+                    table.quote(identifierQuoteString, " ")
                 else
                     "$identifierQuoteString$table$identifierQuoteString";
     }
@@ -493,17 +493,19 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
     public override fun quoteColumn(column:CharSequence):String
     {
         var table = "";
-        var col: String;
-        var alias:String? = null;
+        var col: String; // 字段
+        var alias:String? = null; // 别名
+        var colQuoting = true // 是否转义字段
         if(column is DbExpr){
             col = column.exp.toString()
             alias = column.alias
+            colQuoting = column.expQuoting
         }else{
             col = column.toString()
         }
 
-        // 非函数表达式
-        if ("^\\w[\\w\\d_\\.\\*]*".toRegex().matches(column))
+        // 转义字段 + 非函数表达式
+        if (colQuoting && "^\\w[\\w\\d_\\.\\*]*".toRegex().matches(column))
         {
             // 表名
             if(column.contains('.')){
