@@ -1,9 +1,8 @@
 package com.jkmvc.orm
 
 import com.jkmvc.common.isNullOrEmpty
-import com.jkmvc.db.DbAlias
+import com.jkmvc.db.DbExpr
 import com.jkmvc.db.DbQueryBuilder
-import com.jkmvc.db.DbType
 import com.jkmvc.db.IDbQueryBuilder
 import java.util.*
 import kotlin.collections.HashMap
@@ -23,7 +22,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                       protected var convertingValue: Boolean = false /* 查询时是否智能转换字段值 */,
                       protected var convertingColumn: Boolean = false /* 查询时是否智能转换字段名 */,
                       protected var withSelect: Boolean = true /* with()联查时自动select关联表的字段 */
-) : DbQueryBuilder(ormMeta.db, DbAlias(ormMeta.table, ormMeta.name)) {
+) : DbQueryBuilder(ormMeta.db, DbExpr(ormMeta.table, ormMeta.name)) {
 
     /**
      * 关联查询的记录，用于防止重复join同一个表
@@ -186,7 +185,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         val slaveFk = slaveName + "." + slaveRelation.foreignKey; // 从表.外键
 
         // 查从表
-        return join(DbAlias(slave.table, slaveName), "LEFT").on(slaveFk, "=", masterPk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
+        return join(DbExpr(slave.table, slaveName), "LEFT").on(slaveFk, "=", masterPk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
     }
 
     /**
@@ -219,7 +218,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         join(slaveRelation.middleTable).on(masterPk, "=", middleFk) // 中间表.外键 = 主表.主键
 
         // 查从表
-        return join(DbAlias(slave.table, slaveName), "LEFT").on(slavePk2, "=", middleFk2) as OrmQueryBuilder; // 中间表.远端外键 = 从表.远端主键
+        return join(DbExpr(slave.table, slaveName), "LEFT").on(slavePk2, "=", middleFk2) as OrmQueryBuilder; // 中间表.远端外键 = 从表.远端主键
     }
 
     /**
@@ -246,7 +245,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         val masterPk = masterName + "." + masterRelation.primaryKey; // 主表.主键
 
         // 查主表
-        return join(DbAlias(master.table, masterName), "LEFT").on(masterPk, "=", slaveFk) as OrmQueryBuilder; // 主表.主键 = 从表.外键
+        return join(DbExpr(master.table, masterName), "LEFT").on(masterPk, "=", slaveFk) as OrmQueryBuilder; // 主表.主键 = 从表.外键
     }
 
     /**
@@ -399,7 +398,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
             val col = if(convertingColumn) convertColumn(it) else it
             val columnAlias = path + ":" + col; // 列别名 = 表别名 : 列名，以便在设置orm对象字段值时，可以逐层设置关联对象的字段值
             val column = relationName + "." + col;
-            select(DbAlias(column, columnAlias))
+            select(DbExpr(column, columnAlias))
         }
 
         return this

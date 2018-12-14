@@ -10,7 +10,7 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-13
  */
-open class DbQueryBuilder(db:IDb = Db.instance(), table:DbAlias /*表名*/ = emptyTable) :DbQueryBuilderDecoration(db, table)
+open class DbQueryBuilder(db:IDb = Db.instance(), table:DbExpr /*表名*/ = emptyTable) :DbQueryBuilderDecoration(db, table)
 {
     /**
      * 缓存编译好的sql
@@ -22,7 +22,7 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:DbAlias /*表名*/ = emp
      * @param db 数据库连接
      * @param table 表名
      */
-    public constructor(db: IDb, table: String):this(db, if(table == "") emptyTable else DbAlias(table)){
+    public constructor(db: IDb, table: String):this(db, if(table == "") emptyTable else DbExpr(table, null)){
     }
 
     /**
@@ -69,14 +69,14 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:DbAlias /*表名*/ = emp
             return "NULL";
 
         // 2 db表达式：不转义，直接输出
-        if(value is DbExpression)
+        if(value is DbExpr)
             return value.toString()
 
         // 3 子查询: 编译select子句，并合并到 compiledSql 中
         if(value is IDbQueryBuilder) // 无别名
             return quoteSubQuery(value)
-        if(value is DbAlias) // 有别名
-            return quoteSubQuery(value.name as IDbQueryBuilder, value.alias)
+        if(value is DbExpr) // 有别名
+            return quoteSubQuery(value.exp as IDbQueryBuilder, value.alias)
 
         // 4 字段值
         compiledSql.staticParams.add(value);
@@ -107,8 +107,8 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:DbAlias /*表名*/ = emp
      */
     public override fun quoteTable(table: CharSequence):String{
         // 1 子查询
-        if(table is DbAlias && table.name is IDbQueryBuilder)
-            return quoteSubQuery(table.name as IDbQueryBuilder, table.alias)
+        if(table is DbExpr && table.exp is IDbQueryBuilder)
+            return quoteSubQuery(table.exp as IDbQueryBuilder, table.alias)
         if(table is IDbQueryBuilder)
             return quoteSubQuery(table)
 
@@ -171,7 +171,7 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:DbAlias /*表名*/ = emp
      * @return 编译好的sql
      */
     public override fun compileCount(): CompiledSql{
-        return select(DbAlias("count(1)", "NUM") /* oracle会自动转为全大写 */).compile(ActionType.SELECT);
+        return select(DbExpr("count(1)", "NUM", false) /* oracle会自动转为全大写 */).compile(ActionType.SELECT);
     }
 
     /**
@@ -266,7 +266,7 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:DbAlias /*表名*/ = emp
     {
         // 1 编译
         selectColumns.clear() // 清空多余的select
-        val result = select(DbAlias("count(1)", "NUM") /* oracle会自动转为全大写 */).compile(ActionType.SELECT);
+        val result = select(DbExpr("count(1)", "NUM", false) /* oracle会自动转为全大写 */).compile(ActionType.SELECT);
 
         // 2 执行 select
         val (hasNext, count) = db.queryCell(result.sql, result.buildParams(params));

@@ -1,7 +1,6 @@
 package com.jkmvc.orm
 
 import com.jkmvc.common.associate
-import com.jkmvc.db.DbExpression
 import com.jkmvc.db.DbQueryBuilder
 import com.jkmvc.db.dbLogger
 import java.util.*

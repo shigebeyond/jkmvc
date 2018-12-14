@@ -1,6 +1,6 @@
 package com.jkmvc.orm
 
-import com.jkmvc.db.DbAlias
+import com.jkmvc.db.DbExpr
 import com.jkmvc.db.DbQueryBuilder
 import com.jkmvc.db.IDbQueryBuilder
 import kotlin.reflect.KClass
@@ -63,7 +63,7 @@ class MiddleRelationMeta(
      */
     protected fun buildQuery(): OrmQueryBuilder {
         return queryBuilder()
-                .select(model.modelName + ".*", DbAlias(middleTable + '.' + foreignKey, middleForeignKey)) // 查关联字段：中间表.外键 = 主表.主键，用在 OrmQueryBuilder.findAll() 联查从表时，绑定主对象
+                .select(model.modelName + ".*", DbExpr(middleTable + '.' + foreignKey, middleForeignKey)) // 查关联字段：中间表.外键 = 主表.主键，用在 OrmQueryBuilder.findAll() 联查从表时，绑定主对象
                 .join(middleTable).on(middleTable + '.' + farForeignKey, "=", model.modelName + '.' + farPrimaryKey) as OrmQueryBuilder // 中间表.远端外键 = 从表.远端主键
     }
 

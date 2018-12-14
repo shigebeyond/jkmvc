@@ -157,7 +157,7 @@ class QueryBuilderTests{
 
     @Test
     fun testHaving(){
-        val query = DbQueryBuilder(db).select("username", DbAlias("COUNT(`id`)", "total_posts"))
+        val query = DbQueryBuilder(db).select("username", DbExpr("COUNT(`id`)", "total_posts", false))
                 .from("posts").groupBy("username").having("total_posts", ">=", 10);
         val csql = query.compileSelect()
         println(csql.previewSql())
@@ -196,9 +196,9 @@ class QueryBuilderTests{
      * db表达式
      */
     @Test
-    fun testDbExpression(){
+    fun testDbExpr(){
         val f = DbQueryBuilder().table("user")
-                    .set("age", DbExpression("age + 1"))
+                    .set("age", DbExpr("age + 1", false))
                     //.set("age", "age + 1", true)
                     .where("id", "=", 1).update();
         println("age++ : $f")

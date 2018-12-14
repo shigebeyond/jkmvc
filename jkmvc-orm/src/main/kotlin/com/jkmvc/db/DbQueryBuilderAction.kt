@@ -114,7 +114,7 @@ class InsertData: Cloneable{
 /**
  * 空表
  */
-public val emptyTable = DbAlias("")
+public val emptyTable = DbExpr("", null)
 
 /**
  * sql构建器 -- 动作子句: 由动态select/insert/update/delete来构建的子句
@@ -123,7 +123,7 @@ public val emptyTable = DbAlias("")
  * @author shijianhang
  * @date 2016-10-12
  */
-abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, var table: DbAlias /* 表名/子查询 */) : IDbQueryBuilder() {
+abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, var table: DbExpr /* 表名/子查询 */) : IDbQueryBuilder() {
 
     companion object {
 
@@ -201,7 +201,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * @return
      */
     public override fun from(table: String, alias:String?): IDbQueryBuilder {
-        this.table = DbAlias(table, alias)
+        this.table = DbExpr(table, alias)
         return this
     }
 
@@ -212,7 +212,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * @return
      */
     public override fun from(subquery: IDbQueryBuilder, alias:String): IDbQueryBuilder {
-        this.table = DbAlias(subquery, alias)
+        this.table = DbExpr(subquery, alias)
         return this
     }
 
@@ -282,7 +282,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * @return
      */
     public override fun set(column:String, value:String, isExpr: Boolean):IDbQueryBuilder{
-        val realValue = if (isExpr) DbExpression(value) else value
+        val realValue = if (isExpr) DbExpr(value, false) else value
         return this.set(column, realValue)
     }
 

@@ -459,8 +459,8 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      */
     public override fun quoteTable(table:CharSequence):String
     {
-        return if(table is DbAlias) // 表与别名之间不加 as，虽然mysql可识别，但oracle不能识别
-                    "$identifierQuoteString${table.name}$identifierQuoteString $identifierQuoteString${table.alias}$identifierQuoteString"
+        return if(table is DbExpr) // 表与别名之间不加 as，虽然mysql可识别，但oracle不能识别
+                    "$identifierQuoteString${table.exp}$identifierQuoteString $identifierQuoteString${table.alias}$identifierQuoteString"
                 else
                     "$identifierQuoteString$table$identifierQuoteString";
     }
@@ -495,8 +495,8 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
         var table = "";
         var col: String;
         var alias:String? = null;
-        if(column is DbAlias){
-            col = column.name.toString()
+        if(column is DbExpr){
+            col = column.exp.toString()
             alias = column.alias
         }else{
             col = column.toString()
