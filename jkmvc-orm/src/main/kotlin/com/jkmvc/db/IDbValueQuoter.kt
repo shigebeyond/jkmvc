@@ -1,5 +1,8 @@
 package com.jkmvc.db
 
+import com.jkmvc.common.iteratorArrayOrCollection
+import com.jkmvc.common.joinToString
+
 /**
  * Db值转义器
  *
@@ -18,43 +21,9 @@ interface IDbValueQuoter {
      */
     fun quote(value:Any?):String {
         // 1 多值
-        if(value is Array<*>){
-            return value.joinToString(", ", "(", ")") {
-                quote(it)
-            }
-        }
-        if(value is IntArray){
-            return value.joinToString(", ", "(", ")") {
-                quote(it)
-            }
-        }
-        if(value is ShortArray){
-            return value.joinToString(", ", "(", ")") {
-                quote(it)
-            }
-        }
-        if(value is LongArray){
-            return value.joinToString(", ", "(", ")") {
-                quote(it)
-            }
-        }
-        if(value is FloatArray){
-            return value.joinToString(", ", "(", ")") {
-                quote(it)
-            }
-        }
-        if(value is DoubleArray){
-            return value.joinToString(", ", "(", ")") {
-                quote(it)
-            }
-        }
-        if(value is BooleanArray){
-            return value.joinToString(", ", "(", ")") {
-                quote(it)
-            }
-        }
-        if(value is Collection<*>){
-            return value.joinToString(", ", "(", ")") {
+        val itr = value?.iteratorArrayOrCollection()
+        if(itr != null){
+            return itr.joinToString(", ", "(", ")") {
                 quote(it)
             }
         }

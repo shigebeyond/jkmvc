@@ -213,7 +213,7 @@ class QueryBuilderTests{
     @Test
     fun testCompiledSql(){
         println("使用编译过的sql来重复查询")
-        val csql = DbQueryBuilder().table("user").where("id", "=", "?").compileSelectOne()
+        val csql = DbQueryBuilder().table("user").where("id", "=", DbExpr.question).compileSelectOne()
         for(i in 0..10){
             println(csql.find<Record>(listOf(i)))
         }

@@ -135,9 +135,9 @@ class ParcelModel(id:Int? = null): Orm(id) {
 class OrmTests{
 
     val id: Int by lazy {
-        val minId = Db.instance().queryInt("select id from user order by id limit 1")
+        val minId = Db.instance().queryInt("select id from user order by id limit 1")!!
         println("随便选个id: " + minId)
-        (minId as Long).toInt();
+        minId
     }
 
     @Test

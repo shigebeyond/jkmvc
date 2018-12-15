@@ -1,6 +1,9 @@
 package com.jkmvc.orm
 
+import com.jkmvc.common.isArrayOrCollection
 import com.jkmvc.common.isNullOrEmpty
+import com.jkmvc.common.iteratorArrayOrCollection
+import com.jkmvc.common.map
 import com.jkmvc.db.DbExpr
 import com.jkmvc.db.DbQueryBuilder
 import com.jkmvc.db.IDb
@@ -500,8 +503,8 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @return 准确类型的属性值
      */
     public fun convertValue(prop: String, value: Any?): Any? {
-        return if (convertingValue && (value is String || value is Array<*> || value is Collection<*>))
-            convertIntelligent(prop, value)
+        return if (convertingValue && (value is String || value.isArrayOrCollection()))
+            convertIntelligent(prop, value!!)
         else
             value
     }
@@ -519,13 +522,9 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
 
         // 2 由关联模型来转
         // 2.1 多值
-        if(value is Array<*>){
-            value.map {
-                model.convertIntelligent(column, it as String)
-            }
-        }
-        if(value is Collection<*>){
-            value.map {
+        val itr = value?.iteratorArrayOrCollection()
+        if(itr != null){
+            itr.map {
                 model.convertIntelligent(column, it as String)
             }
         }

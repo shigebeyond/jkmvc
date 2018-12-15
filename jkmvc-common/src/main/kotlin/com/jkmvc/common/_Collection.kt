@@ -3,6 +3,7 @@ package com.jkmvc.common
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
+/****************************** 扩展 Array + Collection *****************************/
 /**
  * 是否数组
  * @return
@@ -41,6 +42,30 @@ public fun Any.isArrayOrCollectionEmpty(): Boolean {
     if(this is Collection<*>)
         return this.isEmpty()
     return false
+}
+
+/**
+ * 获得数组或集合的迭代器
+ * @return
+ */
+public fun Any.iteratorArrayOrCollection(): Iterator<*>? {
+    if(this is Array<*>)
+        return this.iterator()
+    if(this is IntArray)
+        return this.iterator()
+    if(this is ShortArray)
+        return this.iterator()
+    if(this is LongArray)
+        return this.iterator()
+    if(this is FloatArray)
+        return this.iterator()
+    if(this is DoubleArray)
+        return this.iterator()
+    if(this is BooleanArray)
+        return this.iterator()
+    if(this is Collection<*>)
+        return this.iterator()
+    return null
 }
 
 /**
@@ -95,6 +120,7 @@ public inline fun <T> Array<T>.getOrPut(index: Int, defaultValue: (Int) -> T): T
     return this[index];
 }
 
+/****************************** 扩展 Map *****************************/
 /**
  * 获得map的某个值，如果值为空，则返回默认值
  * @param key 键名
@@ -283,28 +309,6 @@ public fun <K, V> Collection<Map<K, V>>.collectColumn(key:K):Collection<V>{
 }
 
 /**
- * Iterator转Enumeration
- */
-class ItEnumeration<T>(val it: Iterator<T>) : Enumeration<T> {
-
-    override fun hasMoreElements(): Boolean{
-        return it.hasNext()
-    }
-
-    override fun nextElement(): T {
-        return it.next();
-    }
-}
-
-/**
- * 获得Enumeration
- * @return
- */
-public fun <T> Iterable<T>.enumeration(): ItEnumeration<T> {
-    return ItEnumeration(iterator())
-}
-
-/**
  * map列表转哈希
  *
  * @param keyField 子项字段名，其值作为结果哈希的key
@@ -321,6 +325,7 @@ public fun Collection<out Map<*, *>>.asMap(keyField:String, valueField:String? =
     }
 }
 
+/****************************** query string *****************************/
 /**
  * 请求参数转query string
  * @param buffer
@@ -343,4 +348,80 @@ public fun Map<String, Array<String>>.toQueryString(): String {
         return ""
 
     return toQueryString(StringBuilder()).toString()
+}
+
+/****************************** 扩展 Iterator *****************************/
+/**
+ * Returns a list containing the results of applying the given [transform] function
+ * to each element in the original collection.
+ */
+public inline fun <T, R> Iterator<T>.map(transform: (T) -> R): List<R> {
+    return mapTo(ArrayList<R>(), transform)
+}
+
+/**
+ * Applies the given [transform] function to each element of the original collection
+ * and appends the results to the given [destination].
+ */
+public inline fun <T, R, C : MutableCollection<in R>> Iterator<T>.mapTo(destination: C, transform: (T) -> R): C {
+    for (item in this)
+        destination.add(transform(item))
+    return destination
+}
+
+/**
+ * Creates a string from all the elements separated using [separator] and using the given [prefix] and [postfix] if supplied.
+ *
+ * If the collection could be huge, you can specify a non-negative value of [limit], in which case only the first [limit]
+ * elements will be appended, followed by the [truncated] string (which defaults to "...").
+ *
+ * @sample samples.collections.Collections.Transformations.joinToString
+ */
+public fun <T> Iterator<T>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", transform: ((T) -> CharSequence)? = null): String {
+    return joinTo(StringBuilder(), separator, prefix, postfix, limit, truncated, transform).toString()
+}
+
+/**
+ * Appends the string from all the elements separated using [separator] and using the given [prefix] and [postfix] if supplied.
+ *
+ * If the collection could be huge, you can specify a non-negative value of [limit], in which case only the first [limit]
+ * elements will be appended, followed by the [truncated] string (which defaults to "...").
+ *
+ * @sample samples.collections.Collections.Transformations.joinTo
+ */
+public fun <T> Iterator<T>.joinTo(buffer: StringBuilder, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", transform: ((T) -> CharSequence)? = null): StringBuilder {
+    buffer.append(prefix)
+    var count = 0
+    for (element in this) {
+        if (++count > 1) buffer.append(separator)
+        if (limit < 0 || count <= limit) {
+            val value = if(transform == null) element else transform(element)
+            buffer.append(value)
+        } else break
+    }
+    if (limit >= 0 && count > limit) buffer.append(truncated)
+    buffer.append(postfix)
+    return buffer
+}
+
+/**
+ * Iterator转Enumeration
+ */
+class ItEnumeration<T>(val it: Iterator<T>) : Enumeration<T> {
+
+    override fun hasMoreElements(): Boolean{
+        return it.hasNext()
+    }
+
+    override fun nextElement(): T {
+        return it.next();
+    }
+}
+
+/**
+ * 获得Enumeration
+ * @return
+ */
+public fun <T> Iterable<T>.enumeration(): ItEnumeration<T> {
+    return ItEnumeration(iterator())
 }
