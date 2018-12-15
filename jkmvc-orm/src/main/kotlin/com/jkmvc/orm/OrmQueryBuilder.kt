@@ -524,7 +524,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         // 2.1 多值
         val itr = value?.iteratorArrayOrCollection()
         if(itr != null){
-            itr.map {
+            return itr.map {
                 model.convertIntelligent(column, it as String)
             }
         }
