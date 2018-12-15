@@ -19,8 +19,8 @@ import javax.servlet.http.HttpServletResponse
  * @author shijianhang
  * @date 2016-10-7 下午11:32:07 
  */
-class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpServletResponse by res
-{
+class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpServletResponse by res {
+
 	companion object{
 		/**
 		 * 过期的期限

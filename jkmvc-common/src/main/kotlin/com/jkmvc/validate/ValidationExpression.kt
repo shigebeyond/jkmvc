@@ -21,8 +21,8 @@ import java.util.*
  * @date 2016-10-19 下午3:40:55
  *
  */
-class ValidationExpression(override val exp:String /* 原始表达式 */):IValidationExpression
-{
+class ValidationExpression(override val exp:String /* 原始表达式 */):IValidationExpression {
+
 	companion object{
 		/**
 		 * 运算符的正则

@@ -10,8 +10,8 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-13
  */
-open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) :DbQueryBuilderDecoration()
-{
+open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) :DbQueryBuilderDecoration() {
+
     /**
      * 缓存编译好的sql
      */

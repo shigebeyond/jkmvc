@@ -9,8 +9,12 @@ import java.util.concurrent.ConcurrentHashMap
  * @author shijianhang
  * @date 2016-10-21 下午3:14:54
  */
-open class View(override val req: Request /* 请求对象 */, override val res: Response /* 响应对象 */, override val file:String/* 视图文件 */, override var data:MutableMap<String, Any?> /* 局部变量 */):IView
-{
+open class View(override val req: Request /* 请求对象 */,
+				override val res: Response /* 响应对象 */,
+				override val file:String/* 视图文件 */,
+				override var data:MutableMap<String, Any?> /* 局部变量 */
+):IView{
+
 	companion object{
 
 		/**

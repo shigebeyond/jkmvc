@@ -11,8 +11,10 @@ package com.jkmvc.db
  * @author shijianhang
  * @date 2016-10-13
  */
-class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如where/group by */, elementHandlers: Array<((Any?) -> String)?> /* 每个元素的处理器, 可视为列的处理*/, protected val afterGroup:Boolean = false /* 跟在分组 DbQueryBuilderDecorationClausesGroup 后面 */)
-: DbQueryBuilderDecorationClauses<Pair<Array<Any?>, String>>/* subexps 是子表达式+连接符(针对where子句，放子表达式前面) */(operator, elementHandlers) {
+class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如where/group by */,
+                                            elementHandlers: Array<((Any?) -> String)?> /* 每个元素的处理器, 可视为列的处理*/,
+                                            protected val afterGroup:Boolean = false /* 跟在分组 DbQueryBuilderDecorationClausesGroup 后面 */
+): DbQueryBuilderDecorationClauses<Pair<Array<Any?>, String>>/* subexps 是子表达式+连接符(针对where子句，放子表达式前面) */(operator, elementHandlers) {
     /**
      * 添加一个子表达式+连接符
      *

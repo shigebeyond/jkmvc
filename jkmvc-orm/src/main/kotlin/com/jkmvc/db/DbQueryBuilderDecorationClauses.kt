@@ -10,8 +10,9 @@ import java.util.*
  * @author shijianhang
  * @date 2016-10-13
  */
-abstract class DbQueryBuilderDecorationClauses<T>(protected val operator: String /* 修饰符， 如where/group by */, protected val elementHandlers: Array<((Any?) -> String)?> /* 每个元素的处理器, 可视为列的处理*/)
-: IDbQueryBuilderDecorationClauses<T>, Cloneable {
+abstract class DbQueryBuilderDecorationClauses<T>(protected val operator: String /* 修饰符， 如where/group by */,
+                                                  protected val elementHandlers: Array<((Any?) -> String)?> /* 每个元素的处理器, 可视为列的处理*/
+): IDbQueryBuilderDecorationClauses<T>, Cloneable {
     /**
      * 子表达式, 可视为行
      */

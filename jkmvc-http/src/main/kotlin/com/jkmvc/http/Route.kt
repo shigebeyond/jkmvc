@@ -41,8 +41,8 @@ data class GroupRange(var start:Int, var end:Int){
  */
 class Route(override val regex:String /* 原始正则: <controller>(\/<action>(\/<id>)?)? */,
 			override val paramRegex:Map<String, String> = emptyMap() /* 参数的子正则 */,
-			override val defaults:Map<String, String>? /* 参数的默认值 */ = null)
-	: IRoute{
+			override val defaults:Map<String, String>? /* 参数的默认值 */ = null
+): IRoute{
 
 	companion object{
 		/**
