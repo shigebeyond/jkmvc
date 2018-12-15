@@ -6,6 +6,7 @@ import java.math.BigDecimal
 import java.sql.Connection
 import java.sql.ResultSet
 import java.util.*
+import kotlin.reflect.KClass
 
 /**
  * 封装db操作
@@ -358,9 +359,9 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @param params
      * @return
      */
-    public override fun queryCell(sql: String, params: List<Any?>?): Pair<Boolean, Any?> {
+    public override fun queryCell(sql: String, params: List<Any?>?, clazz: KClass<*>?): Pair<Boolean, Any?> {
         try{
-            return conn.queryCell(sql, params);
+            return conn.queryCell(sql, params, clazz);
         }catch (e:Exception){
             dbLogger.error("出错[${e.message}] sql: " + previewSql(sql, params))
             throw  e

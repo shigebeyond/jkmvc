@@ -217,10 +217,10 @@ public fun <T> Connection.queryRow(sql: String, params: List<Any?>? = null, tran
  * @param params 参数
  * @return
  */
-public fun Connection.queryCell(sql: String, params: List<Any?>? = null): Pair<Boolean, Any?> {
-    return queryResult<Pair<Boolean, Any?>>(sql, params){ rs: ResultSet ->
+public fun Connection.queryCell(sql: String, params: List<Any?>? = null, clazz: KClass<*>? = null): Pair<Boolean, Any?> {
+    return queryResult(sql, params){ rs: ResultSet ->
         // 处理查询结果
-        rs.nextCell(1)
+        rs.nextCell(1, clazz)
     }
 }
 
@@ -262,12 +262,12 @@ public fun ResultSet.getValue(i:Int): Any? {
 }
 
 /**
- * 根据返回值的类型 XXX 来获得 ResultSet 的 getXXX() 方法
+ * 根据返回值的类型 XXX 来获得 ResultSet 的 getXXX() 方法, 即某列的取值方法
  *   参考 org.springframework.jdbc.support.JdbcUtils#getResultSetValue(java.sql.ResultSet, int, java.lang.Class<?>)
  * @param clazz
  * @return
  */
-public fun getResultSetGetter(clazz: KClass<*>? = null): (ResultSet.(Int) -> Any?) {
+public fun getResultSetValueGetter(clazz: KClass<*>? = null): (ResultSet.(Int) -> Any?) {
     if(clazz == null)
         return ResultSet::getValue
 
@@ -334,9 +334,10 @@ public inline fun ResultSet.forEachRow(action: (MutableMap<String, Any?>) -> Uni
  * @param i 第几列
  * @return
  */
-public inline fun ResultSet.nextCell(i:Int): Pair<Boolean, Any?> {
+public inline fun ResultSet.nextCell(i:Int, clazz: KClass<*>? = null): Pair<Boolean, Any?> {
     val hasNext = next()
-    var value: Any? = if(hasNext) getValue(i) else null; // 字段值
+    val getter = getResultSetValueGetter(clazz)
+    var value: Any? = if(hasNext) getter(i) else null; // 字段值
     return Pair<Boolean, Any?>(hasNext, value);
 }
 

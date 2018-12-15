@@ -2,6 +2,7 @@ package com.jkmvc.db
 
 import java.io.Closeable
 import java.sql.ResultSet
+import kotlin.reflect.KClass
 
 /**
  * 封装db操作
@@ -119,8 +120,58 @@ interface IDb: IDbValueQuoter, Closeable{
      * @param params
      * @return
      */
-    fun queryCell(sql: String, params: List<Any?>? = null): Pair<Boolean, Any?>;
-    
+    fun queryCell(sql: String, params: List<Any?>? = null, clazz: KClass<*>? = null): Pair<Boolean, Any?>;
+
+    /**
+     * 查询一行一列
+     * @param sql
+     * @param params
+     * @return
+     */
+    fun queryCell(sql: String, clazz: KClass<*>?): Pair<Boolean, Any?>{
+        return queryCell(sql, null, clazz)
+    }
+
+    /**
+     * 查询一行一列
+     * @param sql
+     * @param params
+     * @return
+     */
+    fun queryInt(sql: String, params: List<Any?>? = null): Pair<Boolean, Any?>{
+        return queryCell(sql, params, Int::class)
+    }
+
+    /**
+     * 查询一行一列
+     * @param sql
+     * @param params
+     * @return
+     */
+    fun queryLong(sql: String, params: List<Any?>? = null): Pair<Boolean, Any?>{
+        return queryCell(sql, params, Long::class)
+    }
+
+    /**
+     * 查询一行一列
+     * @param sql
+     * @param params
+     * @return
+     */
+    fun queryBoolean(sql: String, params: List<Any?>? = null): Pair<Boolean, Any?>{
+        return queryCell(sql, params, Boolean::class)
+    }
+
+    /**
+     * 查询一行一列
+     * @param sql
+     * @param params
+     * @return
+     */
+    fun queryString(sql: String, params: List<Any?>? = null): Pair<Boolean, Any?>{
+        return queryCell(sql, params, String::class)
+    }
+
     /**
      * 开启事务
      */
