@@ -192,8 +192,9 @@ interface IDb: IDbValueQuoter, Closeable{
      * @param params
      * @return
      */
-    fun queryInt(sql: String, params: List<Any?>? = null): Pair<Boolean, Int?>{
-        return queryCell(sql, params, Int::class)
+    fun queryInt(sql: String, params: List<Any?>? = null): Int?{
+        val (hasNext, result) = queryCell(sql, params, Int::class)
+        return if(hasNext) result else null
     }
 
     /**
@@ -202,8 +203,9 @@ interface IDb: IDbValueQuoter, Closeable{
      * @param params
      * @return
      */
-    fun queryLong(sql: String, params: List<Any?>? = null): Pair<Boolean, Long?>{
-        return queryCell(sql, params, Long::class)
+    fun queryLong(sql: String, params: List<Any?>? = null): Long?{
+        val (hasNext, result) = queryCell(sql, params, Long::class)
+        return if(hasNext) result else null
     }
 
     /**
@@ -212,8 +214,9 @@ interface IDb: IDbValueQuoter, Closeable{
      * @param params
      * @return
      */
-    fun queryBoolean(sql: String, params: List<Any?>? = null): Pair<Boolean, Boolean?>{
-        return queryCell(sql, params, Boolean::class)
+    fun queryBoolean(sql: String, params: List<Any?>? = null): Boolean?{
+        val (hasNext, result) = queryCell(sql, params, Boolean::class)
+        return if(hasNext) result else null
     }
 
     /**
@@ -222,8 +225,9 @@ interface IDb: IDbValueQuoter, Closeable{
      * @param params
      * @return
      */
-    fun queryString(sql: String, params: List<Any?>? = null): Pair<Boolean, String?>{
-        return queryCell(sql, params, String::class)
+    fun queryString(sql: String, params: List<Any?>? = null): String?{
+        val (hasNext, result) = queryCell(sql, params, String::class)
+        return if(hasNext) result else null
     }
 
     /**

@@ -8,13 +8,12 @@ import kotlin.collections.ArrayList
 /**
  * 编译好的sql
  *   为了避免多次编译，可以缓存该编译好的sql，其属性 sql/staticParams/dynamicParams 方法 previewSql() 有可能会被调用多次
- *   动态参数，是指静态参数中为?的参数
- *   如果你的实际参数指就是?，请使用静态参数，不要使用动态参数（就是buildParams()中参数为空），因为这样动态参数的个数是对不上的
+ *   动态参数，是指静态参数中为?(DbExpr.question)的参数
  *
  * @author shijianhang
  * @date 2017-6-10 下午8:02:47
  */
-class CompiledSql(public override val dbName: String = "default" /* 数据库名 */) : Cloneable, ICompiledSql() {
+class CompiledSql : Cloneable, ICompiledSql() {
 
     /****************************** 构建参数/sql *******************************/
     /**
@@ -41,18 +40,10 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
         get(){
             var size = 0;
             for(param in staticParams)
-                if(param is String && param == DbExpr.question)
+                if(param == DbExpr.question)
                     size++;
             return size
         }
-
-    /**
-     * 数据库连接
-     *   由于 CompiledSql 作为编译后的sql可以被缓存起来，以便复用，避免重复编译sql，因此一个 CompiledSql 对象可以跨越多个请求/线程而存在的，从而导致他的属性不能有只存在于单个请求/线程的对象，如数据库连接（上一个请求与下一个请求获得的连接可以不一样）
-     *   => 只记录dbName，每次执行都获得当前线程最新的连接
-     */
-    public override val db: IDb
-        get() = Db.instance(dbName)
 
     /**
      * 判断是否为空
@@ -98,6 +89,10 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
         if(dynamicParams.size != size)
             throw IllegalArgumentException("动态参数个数不对：需要 $size 个，传递 ${dynamicParams.size} ");
 
+        // 全都是动态参数
+        if(staticParams.size == size)
+            return dynamicParams
+
         // 构建实际参数：将静态参数中?，替换为动态参数
         return collectParams(ArrayList<Any?>(staticParams.size), dynamicParams)
     }
@@ -114,7 +109,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
         // 构建实际参数：将静态参数中?，替换为动态参数
         var i = 0; // 动态变量的迭代索引
         for (v in staticParams) {
-            if (v is String && v == DbExpr.question) // 如果参数值是?，则认为是动态参数
+            if (v == DbExpr.question) // 如果参数值是?，则认为是动态参数
                 result.add(dynamicParams[fromIndex + (i++)])
             else // 静态参数
                 result.add(v)
@@ -140,11 +135,17 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
         if(paramSize != size)
             throw IllegalArgumentException("动态参数个数不对：需要 $size 个，传递 $paramSize ");
 
-        // 计算批处理的次数
+        // 检查批处理的次数
         if(paramSize <= 0)
             throw IllegalArgumentException("参数个数只能为正整数，但实际为 $paramSize");
         if(dynamicParamses.size % paramSize > 0)
             throw Exception("paramses 的大小必须是指定参数个数 $paramSize 的整数倍");
+
+        // 全都是动态参数
+        if(staticParams.size == size)
+            return dynamicParamses;
+
+        // 批处理的次数
         val batchNum:Int = dynamicParamses.size / paramSize
 
         // 构建实际参数：将静态参数中?，替换为动态参数
@@ -161,9 +162,10 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
      *
      * @param params 动态参数
      * @param fromIndex 动态参数的开始索引
+     * @param db 数据库连接
      * @return
      */
-    public override fun previewSql(dynamicParams: List<Any?>, fromIndex: Int): String {
+    public override fun previewSql(dynamicParams: List<Any?>, fromIndex: Int, db:IDb): String {
         // 替换实参
         var i = 0 // 静态变量的迭代索引
         var j = fromIndex // 动态变量的迭代索引
@@ -175,7 +177,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
         }
     }
 
-    /****************************** 执行与查询sql *******************************/
+    /****************************** 执行sql *******************************/
     /**
      * 查找多个： select 语句
      *
@@ -183,7 +185,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
      * @param transform 转换函数
      * @return 列表
      */
-    public override fun <T:Any> findAll(vararg params: Any?, transform:(MutableMap<String, Any?>) -> T): List<T>{
+    public override fun <T:Any> findAll(vararg params: Any?, db:IDb, transform:(MutableMap<String, Any?>) -> T): List<T>{
         // 执行 select
         return db.queryRows<T>(sql, buildParams(params), transform)
     }
@@ -195,11 +197,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
      * @param transform 转换函数
      * @return 单个数据
      */
-    public override fun <T:Any> find(vararg params: Any?, transform:(MutableMap<String, Any?>) -> T): T?{
-        // 执行 select limit 1
-        var psql = sql;
-        if(!psql.contains("LIMIT"))
-            psql += " LIMIT 1"
+    public override fun <T:Any> find(vararg params: Any?, db:IDb, transform:(MutableMap<String, Any?>) -> T): T?{
         return db.queryRow<T>(sql, buildParams(params), transform);
     }
 
@@ -209,7 +207,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
      * @param params 动态参数
      * @return
      */
-    public override fun findColumn(params: Array<out Any?>): List<Any?> {
+    public override fun findColumn(params: Array<out Any?>, db:IDb): List<Any?> {
         // 执行 select
         return db.queryColumn(sql, buildParams(params))
     }
@@ -220,84 +218,9 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
      * @param params 动态参数
      * @return
      */
-    public inline fun <reified T:Any> findCell(params: Array<out Any?>):T{
+    public fun findCell(params: Array<out Any?>, db:IDb):Pair<Boolean, Any?>{
         // 执行 select
-        val (hasNext, count) = db.queryCell(sql, buildParams(params), T::class);
-        return if(hasNext)
-            count as T;
-        else
-            T::class.defaultValue
-    }
-
-    /**
-     * 查询一个值（单行单列）
-     *
-     * @param params 动态参数
-     * @return
-     */
-    public override fun findInt(vararg params: Any?):Int {
-        return findCell(params)
-    }
-
-    /**
-     * 查询一个值（单行单列）
-     *
-     * @param params 动态参数
-     * @return
-     */
-    public override fun findLong(vararg params: Any?):Long {
-        return findCell(params)
-    }
-
-    /**
-     * 查询一个值（单行单列）
-     *
-     * @param params 动态参数
-     * @return
-     */
-    public override fun findFloat(vararg params: Any?):Float {
-        return findCell(params)
-    }
-
-    /**
-     * 查询一个值（单行单列）
-     *
-     * @param params 动态参数
-     * @return
-     */
-    public override fun findDouble(vararg params: Any?):Double {
-        return findCell(params)
-    }
-
-    /**
-     * 查询一个值（单行单列）
-     *
-     * @param params 动态参数
-     * @return
-     */
-    public override fun findBoolean(vararg params: Any?):Boolean {
-        val i:Int = findCell(params)
-        return i > 0;
-    }
-
-    /**
-     * 查询一个值（单行单列）
-     *
-     * @param params 动态参数
-     * @return
-     */
-    public override fun findByte(vararg params: Any?):Byte {
-        return findCell(params)
-    }
-
-    /**
-     * 查询一个值（单行单列）
-     *
-     * @param params 动态参数
-     * @return
-     */
-    public override fun findShort(vararg params: Any?):Short {
-        return findCell(params)
+        return db.queryCell(sql, buildParams(params));
     }
 
     /**
@@ -307,7 +230,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
      * @param generatedColumn 返回的自动生成的主键名
      * @return 影响行数|新增id
      */
-    public override fun execute(params:Array<out Any?>, generatedColumn:String?):Int {
+    public override fun execute(vararg params: Any?, generatedColumn:String?, db:IDb):Int {
         return db.execute(sql, buildParams(params), generatedColumn);
     }
 
@@ -319,7 +242,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
      * @param paramSize 一次处理的参数个数
      * @return
      */
-    public override fun batchExecute(paramses: List<Any?>, paramSize:Int): IntArray {
+    public override fun batchExecute(paramses: List<Any?>, paramSize:Int, db:IDb): IntArray {
         // 批量执行有参数sql
         return db.batchExecute(sql, buildBatchParamses(paramses, paramSize), staticParams.size);
     }

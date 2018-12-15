@@ -112,24 +112,19 @@ class InsertData: Cloneable{
 }
 
 /**
- * 空表
- */
-public val emptyTable = DbExpr("", null)
-
-/**
  * sql构建器 -- 动作子句: 由动态select/insert/update/delete来构建的子句
  *   通过字符串模板来实现
  *
  * @author shijianhang
  * @date 2016-10-12
  */
-abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, var table: DbExpr /* 表名/子查询 */) : IDbQueryBuilder() {
+abstract class DbQueryBuilderAction : IDbQueryBuilder() {
 
     companion object {
 
         /**
          * 动作子句的sql模板
-         *   sql模板的动作顺序 = ActionType中定义的动作顺序
+         *   sql模板的动作顺序 = SqlType中定义的动作顺序
          */
         protected val SqlTemplates:Array<String> = arrayOf(
                 "SELECT :distinct :columns FROM :table",
@@ -149,13 +144,24 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
     }
 
     /**
+     * 数据库连接
+     *   递延初始化, 在最后要编译与执行sql时才赋值, 方便实现按需选择不同的连接, 如读写分离
+     */
+    public lateinit var db:IDb;
+
+    /**
      * 动作
      */
-    protected var action: ActionType? = null;
+    protected var action: SqlType? = null;
+
+    /**
+     * 表名/子查询
+     */
+    protected var table: DbExpr = DbExpr.emptyTable
 
     /**
      * 要操作的数据：增改查的数据（没有删）
-     *   操作数据的动作顺序 = ActionType中定义的动作顺序
+     *   操作数据的动作顺序 = SqlType中定义的动作顺序
      */
     protected var manipulatedData:Array<Any?> = arrayOfNulls(3)
 
@@ -164,7 +170,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      */
     public val selectColumns: HashSet<CharSequence>
         get(){
-            return manipulatedData.getOrPut(ActionType.SELECT.ordinal){
+            return manipulatedData.getOrPut(SqlType.SELECT.ordinal){
                 HashSet<CharSequence>();
             } as HashSet<CharSequence>
         }
@@ -174,7 +180,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      */
     protected val insertRows: InsertData
         get(){
-            return manipulatedData.getOrPut(ActionType.INSERT.ordinal){
+            return manipulatedData.getOrPut(SqlType.INSERT.ordinal){
                 InsertData()
             } as InsertData
         }
@@ -184,7 +190,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      */
     protected val updateRow: HashMap<String, Any?>
         get(){
-            return manipulatedData.getOrPut(ActionType.UPDATE.ordinal){
+            return manipulatedData.getOrPut(SqlType.UPDATE.ordinal){
                 HashMap<String, Any?>();
             } as HashMap<String, Any?>
         }
@@ -193,6 +199,16 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * select语句中, 控制查询结果是否去重唯一
      */
     protected var distinct: Boolean = false;
+
+    /**
+     * 切换数据库连接
+     * @param db
+     * @return
+     */
+    public override fun db(db:IDb):IDbQueryBuilder{
+        this.db = db
+        return this
+    }
 
     /**
      * 设置表名: 可能有多个表名
@@ -327,12 +343,12 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      */
     public override fun clear(): IDbQueryBuilder {
         when (action) {
-            ActionType.SELECT -> selectColumns.clear();
-            ActionType.INSERT -> insertRows.clear();
-            ActionType.UPDATE -> updateRow.clear();
+            SqlType.SELECT -> selectColumns.clear();
+            SqlType.INSERT -> insertRows.clear();
+            SqlType.UPDATE -> updateRow.clear();
         }
         action = null;
-        table = emptyTable;
+        table = DbExpr.emptyTable;
         distinct = false;
         return this;
     }
@@ -373,12 +389,12 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
 
         // 2 填充字段谓句
         // 针对 update :table set :column = :value
-        if(action == ActionType.UPDATE)
+        if(action == SqlType.UPDATE)
             sql = ":column(.+):value".toRegex().replace(sql) { result: MatchResult ->
                 fillColumnPredicate(result.groupValues[1]);
             };
         // 3 填充distinct
-        else if(action == ActionType.SELECT)
+        else if(action == SqlType.SELECT)
             sql = sql.replace(":distinct", if (distinct) "distinct" else "");
 
         buffer.append(sql);
@@ -390,7 +406,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      * @return
      */
     public fun fillTable(): String {
-        if(action == ActionType.INSERT || action == ActionType.DELETE) // mysql的insert/delete语句, 不支持表带别名
+        if(action == SqlType.INSERT || action == SqlType.DELETE) // mysql的insert/delete语句, 不支持表带别名
             return quoteTable(table.component1())
 
         return quoteTable(table);
@@ -404,7 +420,7 @@ abstract class DbQueryBuilderAction(override val db: IDb/* 数据库连接 */, v
      */
     public fun fillColumns(): String {
         // 1 select子句:  data是要查询的字段名
-        if (action == ActionType.SELECT) {
+        if (action == SqlType.SELECT) {
             if (selectColumns.isEmpty())
                 return "*";
 

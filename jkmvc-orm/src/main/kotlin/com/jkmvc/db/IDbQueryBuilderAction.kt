@@ -10,9 +10,20 @@ package com.jkmvc.db
 interface IDbQueryBuilderAction
 {
     /**
-     * 数据库连接
+     * 切换数据库连接
+     * @param db
+     * @return
      */
-    val db:IDb;
+    fun db(db:IDb):IDbQueryBuilder
+
+    /**
+     * 设置数据库连接
+     * @param db
+     * @return
+     */
+    fun db(dbName: String):IDbQueryBuilder{
+        return db(Db.instance(dbName))
+    }
 
     /**
      * 编译动作子句

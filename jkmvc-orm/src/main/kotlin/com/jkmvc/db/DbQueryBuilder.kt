@@ -10,28 +10,12 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-13
  */
-open class DbQueryBuilder(db:IDb = Db.instance(), table:DbExpr /*表名*/ = emptyTable) :DbQueryBuilderDecoration(db, table)
+open class DbQueryBuilder :DbQueryBuilderDecoration()
 {
     /**
      * 缓存编译好的sql
      */
     protected var compiledSql: CompiledSql = CompiledSql();
-
-    /**
-     * 构造函数
-     * @param db 数据库连接
-     * @param table 表名
-     */
-    public constructor(db: IDb, table: String):this(db, if(table == "") emptyTable else DbExpr(table, null)){
-    }
-
-    /**
-     * 构造函数
-     * @param dbName 数据库名
-     * @param table 表名
-     */
-    public constructor(dbName:String, table:String = ""):this(Db.instance(dbName), table){
-    }
 
     /**
      * 清空条件
@@ -118,22 +102,13 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:DbExpr /*表名*/ = empt
         return db.quoteTable(table)
     }
 
-    /**
-     * 获得记录转换器
-     * @param clazz 要转换的类
-     * @return 转换的匿名函数
-     */
-    public override fun <T:Any> getRecordTranformer(clazz: KClass<T>): ((MutableMap<String, Any?>) -> T) {
-        return clazz.recordTranformer
-    }
-
+    /****************************** 编译sql ********************************/
     /**
      * 编译sql
-     *
      * @param action sql动作：select/insert/update/delete
      * @return 编译好的sql
      */
-    public override fun compile(action:ActionType): CompiledSql
+    public override fun compile(action:SqlType): CompiledSql
     {
         // 清空编译结果
         compiledSql.clear();
@@ -157,7 +132,7 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:DbExpr /*表名*/ = empt
      * @return 编译好的sql
      */
     public override fun compileSelect(): CompiledSql{
-        return compile(ActionType.SELECT)
+        return compile(SqlType.SELECT)
     }
 
     /**
@@ -165,7 +140,7 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:DbExpr /*表名*/ = empt
      * @return 编译好的sql
      */
     public override fun compileSelectOne(): CompiledSql{
-        return limit(1).compile(ActionType.SELECT)
+        return limit(1).compile(SqlType.SELECT)
     }
 
     /**
@@ -173,7 +148,7 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:DbExpr /*表名*/ = empt
      * @return 编译好的sql
      */
     public override fun compileCount(): CompiledSql{
-        return select(DbExpr("count(1)", "NUM", false) /* oracle会自动转为全大写 */).compile(ActionType.SELECT);
+        return select(DbExpr("count(1)", "NUM", false) /* oracle会自动转为全大写 */).compile(SqlType.SELECT);
     }
 
     /**
@@ -181,7 +156,7 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:DbExpr /*表名*/ = empt
      * @return 编译好的sql
      */
     public override fun compileInsert(): CompiledSql{
-        return compile(ActionType.INSERT)
+        return compile(SqlType.INSERT)
     }
 
     /**
@@ -189,7 +164,7 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:DbExpr /*表名*/ = empt
      * @return 编译好的sql
      */
     public override fun compileUpdate(): CompiledSql{
-        return compile(ActionType.UPDATE)
+        return compile(SqlType.UPDATE)
     }
 
     /**
@@ -197,85 +172,74 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:DbExpr /*表名*/ = empt
      * @return 编译好的sql
      */
     public override fun compileDelete(): CompiledSql{
-        return compile(ActionType.DELETE)
+        return compile(SqlType.DELETE)
     }
 
+    /****************************** 执行sql ********************************/
     /**
      * 查找多个： select 语句
      *
      * @param params 动态参数
+     * @param db 数据库连接
      * @param transform 转换函数
      * @return 列表
      */
-    public override fun <T:Any> findAll(vararg params: Any?, transform:(MutableMap<String, Any?>) -> T): List<T>{
-        // 1 编译
-        val result = compile(ActionType.SELECT);
-
-        // 2 执行 select
-        return db.queryRows<T>(result.sql, result.buildParams(params), transform)
+    public override fun <T:Any> findAll(vararg params: Any?, db: IDb, transform:(MutableMap<String, Any?>) -> T): List<T>{
+        // 编译 + 执行
+        return db(db).compile(SqlType.SELECT).findAll(*params, transform = transform)
     }
 
     /**
      * 查找一个： select ... limit 1语句
      *
      * @param params 动态参数
+     * @param db 数据库连接
      * @param transform 转换函数
      * @return 单个数据
      */
-    public override fun <T:Any> find(vararg params: Any?, transform:(MutableMap<String, Any?>) -> T): T?{
-        // 1 编译
-        val result = compileSelectOne()
-
-        // 2 执行 select
-        return db.queryRow<T>(result.sql, result.buildParams(params), transform);
+    public override fun <T:Any> find(vararg params: Any?, db: IDb, transform:(MutableMap<String, Any?>) -> T): T?{
+        // 编译 + 执行
+        return db(db).compileSelectOne().find(*params, transform = transform)
     }
 
     /**
      * 查询一列（多行）
      *
      * @param params 动态参数
+     * @param db 数据库连接
      * @return
      */
-    public override fun findColumn(vararg params: Any?): List<Any?>{
-        // 1 编译
-        val result = compile(ActionType.SELECT);
-
-        // 2 执行 select
-        return db.queryColumn(result.sql, result.buildParams(params))
+    public override fun findColumn(vararg params: Any?, db: IDb): List<Any?>{
+        // 编译 + 执行
+        return db(db).compile(SqlType.SELECT).findColumn(params)
     }
 
     /**
      * 查询一行一列
      *
      * @param params 动态参数
+     * @param db 数据库连接
      * @return
      */
-    public override fun findCell(vararg params: Any?): Pair<Boolean, Any?>{
-        // 1 编译
-        val result = compile(ActionType.SELECT);
-
-        // 2 执行 select
-        return db.queryCell(result.sql, result.buildParams(params))
+    public override fun findCell(vararg params: Any?, db: IDb): Pair<Boolean, Any?>{
+        // 编译 + 执行
+        return db(db).compile(SqlType.SELECT).findCell(params)
     }
 
     /**
      * 统计行数： count语句
      *
      * @param params 动态参数
+     * @param db 数据库连接
      * @return
      */
-    public override fun count(vararg params: Any?):Long
-    {
+    public override fun count(vararg params: Any?, db: IDb):Int {
         // 1 编译
         selectColumns.clear() // 清空多余的select
-        val result = select(DbExpr("count(1)", "NUM", false) /* oracle会自动转为全大写 */).compile(ActionType.SELECT);
+        val csql = select(DbExpr("count(1)", "NUM", false) /* oracle会自动转为全大写 */).db(db).compile(SqlType.SELECT);
 
         // 2 执行 select
-        val (hasNext, count) = db.queryCell(result.sql, result.buildParams(params));
-        if(!hasNext)
-            return 0
-
-        return Db.toLong(count)
+        return db.queryInt(csql.sql, csql.buildParams(params))!!
     }
 
     /**
@@ -284,15 +248,15 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:DbExpr /*表名*/ = empt
      * @param action sql动作：select/insert/update/delete
      * @param params 动态参数
      * @param generatedColumn 返回的自动生成的主键名
+     * @param db 数据库连接
      * @return 影响行数|新增id
      */
-    public override fun execute(action:ActionType, params:Array<out Any?>, generatedColumn:String?):Int
-    {
-        // 1 编译
-        val result = compile(action);
+    public override fun execute(action:SqlType, params:Array<out Any?>, generatedColumn:String?, db: IDb):Int {
+        // 编译 + 执行
+        val csql = db(db).compile(action);
 
         // 2 执行sql
-        return db.execute(result.sql, result.buildParams(params), generatedColumn);
+        return db.execute(csql.sql, csql.buildParams(params), generatedColumn);
     }
 
     /**
@@ -301,14 +265,15 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:DbExpr /*表名*/ = empt
      * @param action sql动作：select/insert/update/delete
      * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
      * @param paramSize 一次处理的参数个数
+     * @param db 数据库连接
      * @return
      */
-    public override fun batchExecute(action:ActionType, paramses: List<Any?>, paramSize:Int): IntArray {
-        // 1 编译
-        val result = compile(action);
+    public override fun batchExecute(action:SqlType, paramses: List<Any?>, paramSize:Int, db: IDb): IntArray {
+        // 编译 + 执行
+        val csql = db(db).compile(action);
 
         // 2 批量执行有参数sql
-        return db.batchExecute(result.sql, result.buildBatchParamses(paramses, paramSize), result.staticParams.size);
+        return db.batchExecute(csql.sql, csql.buildBatchParamses(paramses, paramSize), csql.staticParams.size);
     }
 
     /**
@@ -316,10 +281,11 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:DbExpr /*表名*/ = empt
      *
      * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
      * @param paramSize 一次处理的参数个数
+     * @param db 数据库连接
      * @return
      */
-    public override fun batchInsert(paramses: List<Any?>, paramSize:Int): IntArray {
-        return batchExecute(ActionType.INSERT, paramses, paramSize)
+    public override fun batchInsert(paramses: List<Any?>, paramSize:Int, db: IDb): IntArray {
+        return batchExecute(SqlType.INSERT, paramses, paramSize, db)
     }
 
     /**
@@ -327,32 +293,32 @@ open class DbQueryBuilder(db:IDb = Db.instance(), table:DbExpr /*表名*/ = empt
      *
      *  @param generatedColumn 返回的自动生成的主键名
      *  @param params 动态参数
+     *  @param db 数据库连接
      * @return 新增的id
      */
-    public override fun insert(generatedColumn:String?, vararg params: Any?):Int
-    {
-        return execute(ActionType.INSERT, params, generatedColumn);
+    public override fun insert(generatedColumn:String?, vararg params: Any?, db: IDb):Int {
+        return execute(SqlType.INSERT, params, generatedColumn, db);
     }
 
     /**
      * 更新：update语句
      *
      * @param params 动态参数
+     * @param db 数据库连接
      * @return
      */
-    public override fun update(vararg params: Any?):Boolean
-    {
-        return execute(ActionType.UPDATE, params) > 0;
+    public override fun update(vararg params: Any?, db: IDb):Boolean {
+        return execute(SqlType.UPDATE, params, null, db) > 0;
     }
 
     /**
      * 删除
      *
      * @param params 动态参数
+     * @param db 数据库连接
      * @return
      */
-    public override fun delete(vararg params: Any?):Boolean
-    {
-        return execute(ActionType.DELETE, params) > 0;
+    public override fun delete(vararg params: Any?, db: IDb):Boolean {
+        return execute(SqlType.DELETE, params, null, db) > 0;
     }
 }
