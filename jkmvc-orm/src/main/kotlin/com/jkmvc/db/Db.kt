@@ -234,7 +234,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @param generatedColumn 返回的自动生成的主键名
      * @return
      */
-    public override fun execute(sql: String, params: List<Any?>?, generatedColumn:String?): Int {
+    public override fun execute(sql: String, params: List<Any?>, generatedColumn:String?): Int {
         try{
             return conn.execute(sql, params, generatedColumn);
         }catch (e:Exception){
@@ -267,7 +267,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @param action 转换结果的函数
      * @return
      */
-    public override fun <T> queryResult(sql: String, params: List<Any?>?, action: (ResultSet) -> T): T {
+    public override fun <T> queryResult(sql: String, params: List<Any?>, action: (ResultSet) -> T): T {
         try{
             return conn.queryResult(sql, params, action)
         }catch (e:Exception){
@@ -283,7 +283,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @param transform 转换结果的函数
      * @return
      */
-    public override fun <T> queryRows(sql: String, params: List<Any?>?, transform: (MutableMap<String, Any?>) -> T): List<T> {
+    public override fun <T> queryRows(sql: String, params: List<Any?>, transform: (MutableMap<String, Any?>) -> T): List<T> {
         try{
             return conn.queryRows(sql, params, transform);
         }catch (e:Exception){
@@ -299,7 +299,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @param transform 转换结果的函数
      * @return
      */
-    public override fun <T> queryRow(sql: String, params: List<Any?>?, transform: (MutableMap<String, Any?>) -> T): T? {
+    public override fun <T> queryRow(sql: String, params: List<Any?>, transform: (MutableMap<String, Any?>) -> T): T? {
         try{
             return conn.queryRow(sql, params, transform);
         }catch (e:Exception){
@@ -313,10 +313,9 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @param sql
      * @param params
      * @param clazz 值类型
-     * @param transform 转换结果的函数
      * @return
      */
-    public override fun <T:Any> queryColumn(sql: String, params: List<Any?>?, clazz: KClass<T>?): List<T?> {
+    public override fun <T:Any> queryColumn(sql: String, params: List<Any?>, clazz: KClass<T>?): List<T?> {
         try{
             return conn.queryColumn(sql, params);
         }catch (e:Exception){
@@ -332,7 +331,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @param clazz 值类型
      * @return
      */
-    public override fun <T:Any> queryCell(sql: String, params: List<Any?>?, clazz: KClass<T>?): Pair<Boolean, T?> {
+    public override fun <T:Any> queryCell(sql: String, params: List<Any?>, clazz: KClass<T>?): Pair<Boolean, T?> {
         try{
             return conn.queryCell(sql, params, clazz);
         }catch (e:Exception){
@@ -598,9 +597,9 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * @param params sql参数
      * @return
      */
-    public override fun previewSql(sql: String, params: List<Any?>?): String {
+    public override fun previewSql(sql: String, params: List<Any?>): String {
         // 1 无参数
-        if(params == null || params.isEmpty())
+        if(params.isEmpty())
             return sql
 
         // 2 有参数：替换参数

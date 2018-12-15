@@ -22,24 +22,22 @@ val dbLogger = LoggerFactory.getLogger("com.jkmvc.db")
  * @param length 要设置的参数的个数
  * @param
  */
-public fun PreparedStatement.setParameters(params: List<Any?>?, start:Int = 0, length:Int = if(params == null) 0 else params.size): PreparedStatement {
-    if(params != null){
-        if(length < 0 || length > params.size)
-            throw ArrayIndexOutOfBoundsException("预编译sql中设置参数错误：需要的参数个数为 $length, 实际参数个数为 ${params.size}")
+public fun PreparedStatement.setParameters(params: List<Any?>, start:Int = 0, length:Int = params.size): PreparedStatement {
+    if(length < 0 || length > params.size)
+        throw ArrayIndexOutOfBoundsException("预编译sql中设置参数错误：需要的参数个数为 $length, 实际参数个数为 ${params.size}")
 
-        // 设置参数
-        for (i in 0..(length - 1)) {
-            var value = params[start + i] /* 实际参数从start开始 */
-            /**
-             * fix bug: oracle执行sql报错： 无效的列类型
-             * 原因：oracle的 DATE 类型字段，不能接受 java.util.Date 的值，只能接受 java.sql.Date 的值
-             * 解决：转日期参数 java.util.Date -> java.sql.Date
-             * 注意：我们还要兼顾oracle的2个类型 DATE|TIMESTAMP，mysql的4个类型 date|datetime|timestamp|time，为保证精度不丢失，统一使用 java.sql.Timestamp
-             */
-            if(value is java.util.Date && value !is java.sql.Date && value !is java.sql.Timestamp && value !is java.sql.Time)
-                value =  java.sql.Timestamp(value.time)
-            setObject(1 + i /* sql参数从1开始 */, value)
-        }
+    // 设置参数
+    for (i in 0..(length - 1)) {
+        var value = params[start + i] /* 实际参数从start开始 */
+        /**
+         * fix bug: oracle执行sql报错： 无效的列类型
+         * 原因：oracle的 DATE 类型字段，不能接受 java.util.Date 的值，只能接受 java.sql.Date 的值
+         * 解决：转日期参数 java.util.Date -> java.sql.Date
+         * 注意：我们还要兼顾oracle的2个类型 DATE|TIMESTAMP，mysql的4个类型 date|datetime|timestamp|time，为保证精度不丢失，统一使用 java.sql.Timestamp
+         */
+        if(value is java.util.Date && value !is java.sql.Date && value !is java.sql.Timestamp && value !is java.sql.Time)
+            value =  java.sql.Timestamp(value.time)
+        setObject(1 + i /* sql参数从1开始 */, value)
     }
     return this
 }
@@ -55,7 +53,7 @@ public fun PreparedStatement.setParameters(params: List<Any?>?, start:Int = 0, l
  *       注：mysql可以不指定自增主键名，但oracle必须指定，否则调用pst.getGeneratedKeys()报错：不允许的操作
  * @return
  */
-public fun Connection.execute(sql: String, params: List<Any?>? = null, generatedColumn:String? = null): Int {
+public fun Connection.execute(sql: String, params: List<Any?> = emptyList(), generatedColumn:String? = null): Int {
     var pst: PreparedStatement? = null
     var rs: ResultSet? = null;
     try{
@@ -139,7 +137,7 @@ public fun Connection.batchExecute(sql: String, params: List<Any?>, lengthPerExe
  * @param action 结果转换函数
  * @return
  */
-public fun <T> Connection.queryResult(sql: String, params: List<Any?>? = null, action:(ResultSet) -> T): T {
+public fun <T> Connection.queryResult(sql: String, params: List<Any?> = emptyList(), action:(ResultSet) -> T): T {
     var pst: PreparedStatement? = null;
     var rs: ResultSet? = null;
     try {
@@ -164,7 +162,7 @@ public fun <T> Connection.queryResult(sql: String, params: List<Any?>? = null, a
  * @param transform 结果转换函数
  * @return
  */
-public fun <T> Connection.queryRows(sql: String, params: List<Any?>? = null, transform:(MutableMap<String, Any?>) -> T): List<T> {
+public fun <T> Connection.queryRows(sql: String, params: List<Any?> = emptyList(), transform:(MutableMap<String, Any?>) -> T): List<T> {
     return queryResult<List<T>>(sql, params){ rs: ResultSet ->
         // 处理查询结果
         val result = LinkedList<T>()
@@ -183,7 +181,7 @@ public fun <T> Connection.queryRows(sql: String, params: List<Any?>? = null, tra
  * @param transform 结果转换函数
  * @return
  */
-public fun <T:Any> Connection.queryColumn(sql: String, params: List<Any?>? = null, clazz: KClass<T>? = null): List<T?> {
+public fun <T:Any> Connection.queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): List<T?> {
     return queryResult(sql, params){ rs: ResultSet ->
         // 处理查询结果
         val result = LinkedList<T?>()
@@ -201,7 +199,7 @@ public fun <T:Any> Connection.queryColumn(sql: String, params: List<Any?>? = nul
  * @param transform 结果转换函数
  * @return
  */
-public fun <T> Connection.queryRow(sql: String, params: List<Any?>? = null, transform:(MutableMap<String, Any?>) -> T): T? {
+public fun <T> Connection.queryRow(sql: String, params: List<Any?> = emptyList(), transform:(MutableMap<String, Any?>) -> T): T? {
     return queryResult<T?>(sql, params){ rs: ResultSet ->
         // 处理查询结果
         val row:MutableMap<String, Any?>? = rs.nextRow()
@@ -218,7 +216,7 @@ public fun <T> Connection.queryRow(sql: String, params: List<Any?>? = null, tran
  * @param params 参数
  * @return
  */
-public fun <T:Any> Connection.queryCell(sql: String, params: List<Any?>? = null, clazz: KClass<T>? = null): Pair<Boolean, T?> {
+public fun <T:Any> Connection.queryCell(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): Pair<Boolean, T?> {
     return queryResult(sql, params){ rs: ResultSet ->
         // 处理查询结果
         rs.nextCell(1, clazz)

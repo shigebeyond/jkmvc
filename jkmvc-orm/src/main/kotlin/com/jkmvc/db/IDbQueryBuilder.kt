@@ -10,6 +10,32 @@ package com.jkmvc.db
  */
 abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration, Cloneable, CharSequence by "", IDbQuery() {
 
+    /**
+     * 克隆对象: 单纯用于改权限为public
+     *
+     * @return o
+     */
+    public override fun clone(): Any{
+        return super.clone()
+    }
+
+    /**
+     * 转义子查询
+     *
+     * @param subquery
+     * @param alias
+     * @return
+     */
+    public abstract fun quoteSubQuery(subquery: IDbQueryBuilder, alias: String? = null): String
+
+    /**
+     * 转义表名
+     *
+     * @param table
+     * @return
+     */
+    public abstract fun quoteTable(table: CharSequence):String
+
     /****************************** 编译sql ********************************/
     /**
      * 编译sql
@@ -62,7 +88,63 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      * @param db 数据库连接
      * @return
      */
-    public abstract fun count(vararg params: Any?, db: IDb):Int;
+    public abstract fun count(params: List<Any?> = emptyList(), db: IDb = Db.instance()):Int;
+
+    /**
+     * 编译 + 执行
+     *
+     * @param action sql动作：select/insert/update/delete
+     * @param params 动态参数
+     * @param generatedColumn 返回自动生成的主键名
+     * @param db 数据库连接
+     * @return 影响行数|新增id
+     */
+    public abstract fun execute(action:SqlType, params:List<Any?> = emptyList(), generatedColumn:String? = null, db: IDb = Db.instance()):Int;
+
+    /**
+     * 插入：insert语句
+     *
+     *  @param generatedColumn 返回的自动生成的主键名
+     *  @param params 动态参数
+     *  @param db 数据库连接
+     * @return 新增的id
+     */
+    public fun insert(generatedColumn:String?, params: List<Any?> = emptyList(), db: IDb = Db.instance()):Int {
+        return execute(SqlType.INSERT, params, generatedColumn, db);
+    }
+
+    /**
+     * 更新：update语句
+     *
+     * @param params 动态参数
+     * @param db 数据库连接
+     * @return
+     */
+    public fun update(params: List<Any?> = emptyList(), db: IDb = Db.instance()):Boolean {
+        return execute(SqlType.UPDATE, params, null, db) > 0;
+    }
+
+    /**
+     * 删除
+     *
+     * @param params 动态参数
+     * @param db 数据库连接
+     * @return
+     */
+    public fun delete(params: List<Any?> = emptyList(), db: IDb = Db.instance()):Boolean {
+        return execute(SqlType.DELETE, params, null, db) > 0;
+    }
+
+    /**
+     * 批量更新有参数的sql
+     *
+     * @param action sql动作：select/insert/update/delete
+     * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
+     * @param paramSize 一次处理的参数个数
+     * @param db 数据库连接
+     * @return
+     */
+    public abstract fun batchExecute(action:SqlType, paramses: List<Any?>, paramSize:Int, db: IDb = Db.instance()): IntArray;
 
     /**
      * 批量插入
@@ -72,59 +154,31 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      * @param db 数据库连接
      * @return
      */
-    public abstract fun batchInsert(paramses: List<Any?>, paramSize:Int, db: IDb): IntArray;
-
-    /**
-     * 插入：insert语句
-     *
-     * @param generatedColumn 返回的自动生成的主键名
-     * @param params 动态参数
-     * @param db 数据库连接
-     * @return 影响行数|新增的id
-     */
-    public abstract fun insert(generatedColumn:String? = null, vararg params: Any?, db: IDb):Int;
-
-    /**
-     * 更新：update语句
-     *
-     * @param params 动态参数
-     * @param db 数据库连接
-     * @return
-     */
-    public abstract fun update(vararg params: Any?, db: IDb):Boolean;
-
-    /**
-     * 删除
-     *
-     * @param params 动态参数
-     * @param db 数据库连接
-     * @return
-     */
-    public abstract fun delete(vararg params: Any?, db: IDb):Boolean;
-
-    /**
-     * 克隆对象: 单纯用于改权限为public
-     * 
-     * @return o
-     */
-    public override fun clone(): Any{
-        return super.clone()
+    public fun batchInsert(paramses: List<Any?>, paramSize:Int, db: IDb = Db.instance()): IntArray {
+        return batchExecute(SqlType.INSERT, paramses, paramSize, db)
     }
 
     /**
-     * 转义子查询
+     * 批量更新
      *
-     * @param subquery
-     * @param alias
+     * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
+     * @param paramSize 一次处理的参数个数
+     * @param db 数据库连接
      * @return
      */
-    public abstract fun quoteSubQuery(subquery: IDbQueryBuilder, alias: String? = null): String
+    public fun batchUpdate(paramses: List<Any?>, paramSize:Int, db: IDb = Db.instance()): IntArray {
+        return batchExecute(SqlType.UPDATE, paramses, paramSize, db)
+    }
 
     /**
-     * 转义表名
+     * 批量插入
      *
-     * @param table
+     * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
+     * @param paramSize 一次处理的参数个数
+     * @param db 数据库连接
      * @return
      */
-    public abstract fun quoteTable(table: CharSequence):String
+    public fun batchDelete(paramses: List<Any?>, paramSize:Int, db: IDb = Db.instance()): IntArray {
+        return batchExecute(SqlType.DELETE, paramses, paramSize, db)
+    }
 }

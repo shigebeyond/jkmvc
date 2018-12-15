@@ -66,7 +66,7 @@ interface IDb: IDbValueQuoter, Closeable{
      * @param generatedColumn 返回的自动生成的主键名
      * @return
      */
-    fun execute(sql: String, params: List<Any?>? = null, generatedColumn:String? = null): Int;
+    fun execute(sql: String, params: List<Any?> = emptyList(), generatedColumn:String? = null): Int;
 
     /**
      * 批量更新: 每次更新sql参数不一样
@@ -85,7 +85,7 @@ interface IDb: IDbValueQuoter, Closeable{
      * @param action 转换结果的函数
      * @return
      */
-    fun <T> queryResult(sql: String, params: List<Any?>? = null, action: (ResultSet) -> T): T;
+    fun <T> queryResult(sql: String, params: List<Any?> = emptyList(), action: (ResultSet) -> T): T;
 
     /**
      * 查询多行
@@ -94,7 +94,7 @@ interface IDb: IDbValueQuoter, Closeable{
      * @param transform 转换结果的函数
      * @return
      */
-    fun <T> queryRows(sql: String, params: List<Any?>? = null, transform: (MutableMap<String, Any?>) -> T): List<T>;
+    fun <T> queryRows(sql: String, params: List<Any?> = emptyList(), transform: (MutableMap<String, Any?>) -> T): List<T>;
 
     /**
      * 查询一行(多列)
@@ -103,17 +103,16 @@ interface IDb: IDbValueQuoter, Closeable{
      * @param transform 转换结果的函数
      * @return
      */
-    fun <T> queryRow(sql: String, params: List<Any?>? = null, transform: (MutableMap<String, Any?>) -> T): T?;
+    fun <T> queryRow(sql: String, params: List<Any?> = emptyList(), transform: (MutableMap<String, Any?>) -> T): T?;
 
     /**
      * 查询一列(多行)
      * @param sql
      * @param params
      * @param clazz 值类型
-     * @param transform 转换结果的函数
      * @return
      */
-    fun <T:Any> queryColumn(sql: String, params: List<Any?>? = null, clazz: KClass<T>? = null): List<T?>
+    fun <T:Any> queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): List<T?>
 
     /**
      * 查询一列(多行)
@@ -123,7 +122,7 @@ interface IDb: IDbValueQuoter, Closeable{
      * @return
      */
     fun <T:Any> queryColumn(sql: String, clazz: KClass<T>): List<T?>{
-        return queryColumn(sql, null, clazz)
+        return queryColumn(sql, emptyList(), clazz)
     }
 
     /**
@@ -132,7 +131,7 @@ interface IDb: IDbValueQuoter, Closeable{
      * @param params
      * @return
      */
-    fun queryIntColumn(sql: String, params: List<Any?>? = null): List<Int>{
+    fun queryIntColumn(sql: String, params: List<Any?> = emptyList()): List<Int>{
         // 只要指定值类型, 则返回的列表元素类型就是该类型, 不会为null, 因此返回值不是List<Int?>, 而是List<Int>
         return queryColumn(sql, params, Int::class) as List<Int>
     }
@@ -143,7 +142,7 @@ interface IDb: IDbValueQuoter, Closeable{
      * @param params
      * @return
      */
-    fun queryLongColumn(sql: String, params: List<Any?>? = null): List<Long>{
+    fun queryLongColumn(sql: String, params: List<Any?> = emptyList()): List<Long>{
         return queryColumn(sql, params, Long::class) as List<Long>
     }
 
@@ -153,7 +152,7 @@ interface IDb: IDbValueQuoter, Closeable{
      * @param params
      * @return
      */
-    fun queryBooleanColumn(sql: String, params: List<Any?>? = null): List<Boolean>{
+    fun queryBooleanColumn(sql: String, params: List<Any?> = emptyList()): List<Boolean>{
         return queryColumn(sql, params, Boolean::class) as List<Boolean>
     }
 
@@ -163,7 +162,7 @@ interface IDb: IDbValueQuoter, Closeable{
      * @param params
      * @return
      */
-    fun queryStringColumn(sql: String, params: List<Any?>? = null): List<String>{
+    fun queryStringColumn(sql: String, params: List<Any?> = emptyList()): List<String>{
         return queryColumn(sql, params, String::class) as List<String>
     }
 
@@ -174,7 +173,7 @@ interface IDb: IDbValueQuoter, Closeable{
      * @param clazz 值类型
      * @return
      */
-    fun <T:Any> queryCell(sql: String, params: List<Any?>? = null, clazz: KClass<T>? = null): Pair<Boolean, T?>;
+    fun <T:Any> queryCell(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): Pair<Boolean, T?>;
 
     /**
      * 查询一行一列
@@ -183,7 +182,7 @@ interface IDb: IDbValueQuoter, Closeable{
      * @return
      */
     fun <T:Any> queryCell(sql: String, clazz: KClass<T>): Pair<Boolean, T?>{
-        return queryCell(sql, null, clazz)
+        return queryCell(sql, emptyList(), clazz)
     }
 
     /**
@@ -192,7 +191,7 @@ interface IDb: IDbValueQuoter, Closeable{
      * @param params
      * @return
      */
-    fun queryInt(sql: String, params: List<Any?>? = null): Int?{
+    fun queryInt(sql: String, params: List<Any?> = emptyList()): Int?{
         val (hasNext, result) = queryCell(sql, params, Int::class)
         return if(hasNext) result else null
     }
@@ -203,7 +202,7 @@ interface IDb: IDbValueQuoter, Closeable{
      * @param params
      * @return
      */
-    fun queryLong(sql: String, params: List<Any?>? = null): Long?{
+    fun queryLong(sql: String, params: List<Any?> = emptyList()): Long?{
         val (hasNext, result) = queryCell(sql, params, Long::class)
         return if(hasNext) result else null
     }
@@ -214,7 +213,7 @@ interface IDb: IDbValueQuoter, Closeable{
      * @param params
      * @return
      */
-    fun queryBoolean(sql: String, params: List<Any?>? = null): Boolean?{
+    fun queryBoolean(sql: String, params: List<Any?> = emptyList()): Boolean?{
         val (hasNext, result) = queryCell(sql, params, Boolean::class)
         return if(hasNext) result else null
     }
@@ -225,7 +224,7 @@ interface IDb: IDbValueQuoter, Closeable{
      * @param params
      * @return
      */
-    fun queryString(sql: String, params: List<Any?>? = null): String?{
+    fun queryString(sql: String, params: List<Any?> = emptyList()): String?{
         val (hasNext, result) = queryCell(sql, params, String::class)
         return if(hasNext) result else null
     }
@@ -309,5 +308,5 @@ interface IDb: IDbValueQuoter, Closeable{
      * @param params sql参数
      * @return
      */
-    fun previewSql(sql: String, params: List<Any?>? = null): String
+    fun previewSql(sql: String, params: List<Any?> = emptyList()): String
 }

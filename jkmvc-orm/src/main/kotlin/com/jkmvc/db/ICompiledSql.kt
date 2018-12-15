@@ -74,4 +74,24 @@ abstract class ICompiledSql: IDbQuery() {
      * @return
      */
     public abstract fun previewSql(dynamicParams:List<Any?> = emptyList(), fromIndex:Int = 0, db:IDb = Db.instance()): String
+
+    /****************************** 执行sql *******************************/
+    /**
+     * 编译 + 执行
+     *
+     * @param params 动态参数
+     * @param generatedColumn 返回的自动生成的主键名
+     * @return 影响行数|新增id
+     */
+    public abstract fun execute(params: List<Any?>, generatedColumn:String?, db:IDb):Int
+
+    /**
+     * 批量更新有参数的sql
+     *
+     * @param action sql动作：select/insert/update/delete
+     * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
+     * @param paramSize 一次处理的参数个数
+     * @return
+     */
+    public abstract fun batchExecute(paramses: List<Any?>, paramSize:Int, db:IDb): IntArray
 }

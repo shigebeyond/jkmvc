@@ -3,6 +3,7 @@ package com.jkmvc.orm
 import com.jkmvc.common.isNullOrEmpty
 import com.jkmvc.db.DbExpr
 import com.jkmvc.db.DbQueryBuilder
+import com.jkmvc.db.IDb
 import com.jkmvc.db.IDbQueryBuilder
 import java.util.*
 import kotlin.collections.HashMap
@@ -22,7 +23,11 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                       protected var convertingValue: Boolean = false /* 查询时是否智能转换字段值 */,
                       protected var convertingColumn: Boolean = false /* 查询时是否智能转换字段名 */,
                       protected var withSelect: Boolean = true /* with()联查时自动select关联表的字段 */
-) : DbQueryBuilder(ormMeta.db, DbExpr(ormMeta.table, ormMeta.name)) {
+) : DbQueryBuilder(ormMeta.db) {
+
+    init {
+        from(ormMeta.table, ormMeta.name)
+    }
 
     /**
      * 关联查询的记录，用于防止重复join同一个表
@@ -255,8 +260,8 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @param transform 转换函数
      * @return 单个数据
      */
-    public override fun <T:Any> find(vararg params: Any?, transform:(MutableMap<String, Any?>) -> T): T?{
-        val result = super.find(*params, transform = transform);
+    public override fun <T:Any> find(params: List<Any?>, db: IDb, transform:(MutableMap<String, Any?>) -> T): T?{
+        val result = super.find(params, db, transform);
         // 联查hasMany
         if(result is Orm){
             // 遍历每个hasMany关系的查询结果
@@ -275,8 +280,8 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @param transform 转换函数
      * @return 列表
      */
-    public override fun <T:Any> findAll(vararg params: Any?, transform:(MutableMap<String, Any?>) -> T): List<T>{
-        val result = super.findAll(*params, transform = transform);
+    public override fun <T:Any> findAll(params: List<Any?>, db:IDb, transform:(MutableMap<String, Any?>) -> T): List<T>{
+        val result = super.findAll(params, db, transform);
         if(result.isEmpty())
             return result
 

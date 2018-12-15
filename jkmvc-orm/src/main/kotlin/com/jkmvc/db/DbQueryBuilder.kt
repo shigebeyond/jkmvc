@@ -10,7 +10,7 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-13
  */
-open class DbQueryBuilder :DbQueryBuilderDecoration()
+open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) :DbQueryBuilderDecoration()
 {
     /**
      * 缓存编译好的sql
@@ -184,9 +184,9 @@ open class DbQueryBuilder :DbQueryBuilderDecoration()
      * @param transform 转换函数
      * @return 列表
      */
-    public override fun <T:Any> findAll(vararg params: Any?, db: IDb, transform:(MutableMap<String, Any?>) -> T): List<T>{
+    public override fun <T:Any> findAll(params: List<Any?>, db: IDb, transform:(MutableMap<String, Any?>) -> T): List<T>{
         // 编译 + 执行
-        return db(db).compile(SqlType.SELECT).findAll(*params, transform = transform)
+        return db(db).compile(SqlType.SELECT).findAll(params, db, transform)
     }
 
     /**
@@ -197,33 +197,35 @@ open class DbQueryBuilder :DbQueryBuilderDecoration()
      * @param transform 转换函数
      * @return 单个数据
      */
-    public override fun <T:Any> find(vararg params: Any?, db: IDb, transform:(MutableMap<String, Any?>) -> T): T?{
+    public override fun <T:Any> find(params: List<Any?>, db: IDb, transform:(MutableMap<String, Any?>) -> T): T?{
         // 编译 + 执行
-        return db(db).compileSelectOne().find(*params, transform = transform)
+        return db(db).compileSelectOne().find(params, db, transform)
     }
 
     /**
      * 查询一列（多行）
      *
      * @param params 动态参数
+     * @param clazz 值类型
      * @param db 数据库连接
      * @return
      */
-    public override fun findColumn(vararg params: Any?, db: IDb): List<Any?>{
+    public override fun <T:Any> findColumn(params: List<Any?>, clazz: KClass<T>?, db: IDb): List<Any?>{
         // 编译 + 执行
-        return db(db).compile(SqlType.SELECT).findColumn(params)
+        return db(db).compile(SqlType.SELECT).findColumn(params, clazz)
     }
 
     /**
      * 查询一行一列
      *
      * @param params 动态参数
+     * @param clazz 值类型
      * @param db 数据库连接
      * @return
      */
-    public override fun findCell(vararg params: Any?, db: IDb): Pair<Boolean, Any?>{
+    public override fun <T:Any> findCell(params: List<Any?>, clazz: KClass<T>?, db: IDb): Pair<Boolean, Any?>{
         // 编译 + 执行
-        return db(db).compile(SqlType.SELECT).findCell(params)
+        return db(db).compile(SqlType.SELECT).findCell(params, clazz)
     }
 
     /**
@@ -233,7 +235,7 @@ open class DbQueryBuilder :DbQueryBuilderDecoration()
      * @param db 数据库连接
      * @return
      */
-    public override fun count(vararg params: Any?, db: IDb):Int {
+    public override fun count(params: List<Any?>, db: IDb):Int {
         // 1 编译
         selectColumns.clear() // 清空多余的select
         val csql = select(DbExpr("count(1)", "NUM", false) /* oracle会自动转为全大写 */).db(db).compile(SqlType.SELECT);
@@ -251,12 +253,9 @@ open class DbQueryBuilder :DbQueryBuilderDecoration()
      * @param db 数据库连接
      * @return 影响行数|新增id
      */
-    public override fun execute(action:SqlType, params:Array<out Any?>, generatedColumn:String?, db: IDb):Int {
+    public override fun execute(action:SqlType, params:List<Any?>, generatedColumn:String?, db: IDb):Int {
         // 编译 + 执行
-        val csql = db(db).compile(action);
-
-        // 2 执行sql
-        return db.execute(csql.sql, csql.buildParams(params), generatedColumn);
+        return db(db).compile(action).execute(params, generatedColumn, db)
     }
 
     /**
@@ -270,55 +269,6 @@ open class DbQueryBuilder :DbQueryBuilderDecoration()
      */
     public override fun batchExecute(action:SqlType, paramses: List<Any?>, paramSize:Int, db: IDb): IntArray {
         // 编译 + 执行
-        val csql = db(db).compile(action);
-
-        // 2 批量执行有参数sql
-        return db.batchExecute(csql.sql, csql.buildBatchParamses(paramses, paramSize), csql.staticParams.size);
-    }
-
-    /**
-     * 批量插入
-     *
-     * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
-     * @param paramSize 一次处理的参数个数
-     * @param db 数据库连接
-     * @return
-     */
-    public override fun batchInsert(paramses: List<Any?>, paramSize:Int, db: IDb): IntArray {
-        return batchExecute(SqlType.INSERT, paramses, paramSize, db)
-    }
-
-    /**
-     * 插入：insert语句
-     *
-     *  @param generatedColumn 返回的自动生成的主键名
-     *  @param params 动态参数
-     *  @param db 数据库连接
-     * @return 新增的id
-     */
-    public override fun insert(generatedColumn:String?, vararg params: Any?, db: IDb):Int {
-        return execute(SqlType.INSERT, params, generatedColumn, db);
-    }
-
-    /**
-     * 更新：update语句
-     *
-     * @param params 动态参数
-     * @param db 数据库连接
-     * @return
-     */
-    public override fun update(vararg params: Any?, db: IDb):Boolean {
-        return execute(SqlType.UPDATE, params, null, db) > 0;
-    }
-
-    /**
-     * 删除
-     *
-     * @param params 动态参数
-     * @param db 数据库连接
-     * @return
-     */
-    public override fun delete(vararg params: Any?, db: IDb):Boolean {
-        return execute(SqlType.DELETE, params, null, db) > 0;
+        return db(db).compile(action).batchExecute(paramses, paramSize, db)
     }
 }

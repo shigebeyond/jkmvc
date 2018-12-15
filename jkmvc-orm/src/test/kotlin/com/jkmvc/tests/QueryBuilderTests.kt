@@ -134,7 +134,7 @@ class QueryBuilderTests{
         }
 
         // 批量插入
-        DbQueryBuilder().table("user").where("id", "=", "?").batchExecute(SqlType.DELETE, params, 1)// 每次只处理1个参数
+        DbQueryBuilder().table("user").where("id", "=", "?").batchDelete(params, 1)// 每次只处理1个参数
     }
 
     /**
@@ -211,7 +211,7 @@ class QueryBuilderTests{
         println("使用编译过的sql来重复查询")
         val csql = DbQueryBuilder().table("user").where("id", "=", "?").compileSelectOne()
         for(i in 0..10){
-            println(csql.find<Record>(i))
+            println(csql.find<Record>(listOf(i)))
         }
     }
 

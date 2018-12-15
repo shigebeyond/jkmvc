@@ -89,7 +89,7 @@ class MiddleRelationMeta(
         val pk: Any? = item[primaryProp]
         if(pk == null)
             return null;
-        val query = DbQueryBuilder(ormMeta.db, middleTable).where(foreignKey, "=", pk)
+        val query = DbQueryBuilder(ormMeta.db).from(middleTable).where(foreignKey, "=", pk)
         if (fkInMany != null) { // hasMany关系下过滤单个关系
             val farPk = if(fkInMany is IOrm) fkInMany[farPrimaryProp] else fkInMany
             query.where(farForeignKey, fkInMany)
@@ -118,7 +118,7 @@ class MiddleRelationMeta(
     public fun insertMiddleTable(pk:Any, farPk:Any): Int {
         val pk2 = if(pk is IOrm) pk[primaryProp] else pk
         val farPk2 = if(farPk is IOrm) farPk[farPrimaryProp] else farPk
-        return DbQueryBuilder(ormMeta.db, middleTable).insertColumns(foreignKey, farForeignKey).value(pk2, farPk2).insert()
+        return DbQueryBuilder(ormMeta.db).from(middleTable).insertColumns(foreignKey, farForeignKey).value(pk2, farPk2).insert()
     }
 
     /**

@@ -3,6 +3,7 @@ package com.jkmvc.db
 import com.jkmvc.common.defaultValue
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.reflect.KClass
 
 
 /**
@@ -185,7 +186,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param transform 转换函数
      * @return 列表
      */
-    public override fun <T:Any> findAll(vararg params: Any?, db:IDb, transform:(MutableMap<String, Any?>) -> T): List<T>{
+    public override fun <T:Any> findAll(params: List<Any?>, db:IDb, transform:(MutableMap<String, Any?>) -> T): List<T>{
         // 执行 select
         return db.queryRows<T>(sql, buildParams(params), transform)
     }
@@ -197,7 +198,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param transform 转换函数
      * @return 单个数据
      */
-    public override fun <T:Any> find(vararg params: Any?, db:IDb, transform:(MutableMap<String, Any?>) -> T): T?{
+    public override fun <T:Any> find(params: List<Any?>, db:IDb, transform:(MutableMap<String, Any?>) -> T): T?{
         return db.queryRow<T>(sql, buildParams(params), transform);
     }
 
@@ -207,9 +208,9 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param params 动态参数
      * @return
      */
-    public override fun findColumn(params: Array<out Any?>, db:IDb): List<Any?> {
+    public override fun <T:Any> findColumn(params: List<Any?>, clazz: KClass<T>?, db:IDb): List<Any?> {
         // 执行 select
-        return db.queryColumn(sql, buildParams(params))
+        return db.queryColumn(sql, buildParams(params), clazz)
     }
 
     /**
@@ -218,9 +219,9 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param params 动态参数
      * @return
      */
-    public fun findCell(params: Array<out Any?>, db:IDb):Pair<Boolean, Any?>{
+    public override fun <T:Any> findCell(params: List<Any?>, clazz: KClass<T>?, db:IDb):Pair<Boolean, Any?>{
         // 执行 select
-        return db.queryCell(sql, buildParams(params));
+        return db.queryCell(sql, buildParams(params), clazz);
     }
 
     /**
@@ -230,7 +231,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param generatedColumn 返回的自动生成的主键名
      * @return 影响行数|新增id
      */
-    public override fun execute(vararg params: Any?, generatedColumn:String?, db:IDb):Int {
+    public override fun execute(params: List<Any?>, generatedColumn:String?, db:IDb):Int {
         return db.execute(sql, buildParams(params), generatedColumn);
     }
 
