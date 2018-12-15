@@ -238,7 +238,7 @@ public fun Map<String, *>.path(path:String, withException: Boolean = true, defau
             return default
         }
 
-        data = value as Map<String, Any?>
+        data = value
     }
     return value
 }

@@ -109,7 +109,7 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      *  @param db 数据库连接
      * @return 新增的id
      */
-    public fun insert(generatedColumn:String?, params: List<Any?> = emptyList(), db: IDb = Db.instance()):Int {
+    public fun insert(generatedColumn:String? = null, params: List<Any?> = emptyList(), db: IDb = Db.instance()):Int {
         return execute(SqlType.INSERT, params, generatedColumn, db);
     }
 

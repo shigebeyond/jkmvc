@@ -63,7 +63,7 @@ interface IOrmRelated : IOrmPersistent
 	 * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
 	 * @return
 	 */
-	fun countRelation(name:String, fkInMany: Any? = null): Long
+	fun countRelation(name:String, fkInMany: Any? = null): Int
 
 	/**
 	 * 删除关联对象

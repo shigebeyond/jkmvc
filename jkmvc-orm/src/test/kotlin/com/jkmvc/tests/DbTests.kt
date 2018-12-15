@@ -3,6 +3,7 @@ package com.jkmvc.tests
 import com.jkmvc.db.*
 import org.junit.Test
 import java.io.File
+import java.util.*
 
 
 class DbTests{
@@ -10,7 +11,7 @@ class DbTests{
     val db: Db = Db.instance()
 
     val id: Long by lazy {
-        val (hasNext, minId) = db.queryCell("select id from user order by id limit 1" /*sql*/)
+        val minId = db.queryInt("select id from user order by id limit 1" /*sql*/)
         println("随便选个id: " + minId)
         minId as Long;
     }
@@ -25,7 +26,7 @@ class DbTests{
 
     @Test
     fun testDbDate(){
-        val (hasNext, date) = Db.instance().queryCell("SELECT  LAST_LOGIN_TIME FROM RC_ACCOUNTS WHERE ACCOUNT_CODE = 'tann771x@nng.gx.csg.cn'")
+        val (hasNext, date) = Db.instance().queryCell<Date>("SELECT  LAST_LOGIN_TIME FROM RC_ACCOUNTS WHERE ACCOUNT_CODE = 'tann771x@nng.gx.csg.cn'")
         if(hasNext)
             println(date)
     }
@@ -40,9 +41,14 @@ class DbTests{
         val file = "test." + db.dbType.toString().toLowerCase() + ".sql"
         val cld = Thread.currentThread().contextClassLoader
         val res = cld.getResource(file)
-        val sql = res.readText();
-
-        db.execute(sql);
+        var text = res.readText()
+        // 去掉注释
+        text = text.replace("^\\s*--\\s*$".toRegex(), "")
+        // 分隔多条sql
+        val sqls = text.split(";")
+        for(sql in sqls)
+            if(!sql.isBlank())
+                db.execute(sql);
         println("创建表")
     }
 
@@ -59,19 +65,19 @@ class DbTests{
 
     @Test
     fun testFind(){
-        val record = db.queryRow("select * from user limit 1" /*sql*/, null /*参数*/, Map::class.recordTranformer /*转换结果的函数*/) // 返回 Map 类型的一行数据
+        val record = db.queryRow("select * from user limit 1" /*sql*/, emptyList() /*参数*/, Map::class.recordTranformer /*转换结果的函数*/) // 返回 Map 类型的一行数据
         println("查询user表：" + record)
     }
 
     @Test
     fun testFindAll(){
-        val records = db.queryRows("select * from user limit 10" /*sql*/, null /*参数*/, Map::class.recordTranformer /*转换结果的函数*/) // 返回 Map 类型的多行数据
+        val records = db.queryRows("select * from user limit 10" /*sql*/, emptyList() /*参数*/, Map::class.recordTranformer /*转换结果的函数*/) // 返回 Map 类型的多行数据
         println("查询user表：" + records)
     }
 
     @Test
     fun testCount(){
-        val (hasNext, count) = db.queryCell("select count(1) from user" /*sql*/)
+        val count = db.queryInt("select count(1) from user" /*sql*/)
         println("统计user表：" + count)
     }
 

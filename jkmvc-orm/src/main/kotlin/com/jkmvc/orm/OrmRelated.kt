@@ -174,7 +174,7 @@ abstract class OrmRelated: OrmPersistent() {
      * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
      * @return
      */
-    public override fun countRelation(name:String, fkInMany: Any?): Long {
+    public override fun countRelation(name:String, fkInMany: Any?): Int {
         // 获得关联关系
         val relation = ormMeta.getRelation(name)!!;
         // 构建查询：自动构建查询条件

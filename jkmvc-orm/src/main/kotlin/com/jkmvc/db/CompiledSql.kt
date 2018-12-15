@@ -16,6 +16,11 @@ import kotlin.reflect.KClass
  */
 class CompiledSql : Cloneable, ICompiledSql() {
 
+    /**
+     * 默认db
+     */
+    public override val defaultDb: IDb = Db.instance()
+
     /****************************** 构建参数/sql *******************************/
     /**
      * 编译好的sql
