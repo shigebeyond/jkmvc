@@ -179,14 +179,15 @@ public fun <T> Connection.queryRows(sql: String, params: List<Any?>? = null, tra
  * 查询一列(多行)
  * @param sql
  * @param params 参数
+ * @param clazz 值类型
  * @param transform 结果转换函数
  * @return
  */
-public fun Connection.queryColumn(sql: String, params: List<Any?>? = null): List<Any?> {
-    return queryResult<List<Any?>>(sql, params){ rs: ResultSet ->
+public fun <T:Any> Connection.queryColumn(sql: String, params: List<Any?>? = null, clazz: KClass<T>? = null): List<T?> {
+    return queryResult(sql, params){ rs: ResultSet ->
         // 处理查询结果
-        val result = LinkedList<Any?>()
-        rs.forEachCell(1) { cell: Any? ->
+        val result = LinkedList<T?>()
+        rs.forEachCell(1, clazz) { cell: T? ->
             result.add(cell);
         }
         result;
@@ -217,7 +218,7 @@ public fun <T> Connection.queryRow(sql: String, params: List<Any?>? = null, tran
  * @param params 参数
  * @return
  */
-public fun Connection.queryCell(sql: String, params: List<Any?>? = null, clazz: KClass<*>? = null): Pair<Boolean, Any?> {
+public fun <T:Any> Connection.queryCell(sql: String, params: List<Any?>? = null, clazz: KClass<T>? = null): Pair<Boolean, T?> {
     return queryResult(sql, params){ rs: ResultSet ->
         // 处理查询结果
         rs.nextCell(1, clazz)
@@ -330,27 +331,29 @@ public inline fun ResultSet.forEachRow(action: (MutableMap<String, Any?>) -> Uni
 }
 
 /**
- * 访问结果集的下一行的某列
+ * 访问结果集的下一行的某列的值
  * @param i 第几列
+ * @param clazz 值类型
  * @return
  */
-public inline fun ResultSet.nextCell(i:Int, clazz: KClass<*>? = null): Pair<Boolean, Any?> {
+public inline fun <T:Any> ResultSet.nextCell(i:Int, clazz: KClass<T>? = null): Pair<Boolean, T?> {
     val hasNext = next()
     val getter = getResultSetValueGetter(clazz)
-    var value: Any? = if(hasNext) getter(i) else null; // 字段值
-    return Pair<Boolean, Any?>(hasNext, value);
+    var value: T? = if(hasNext) (getter(i) as T) else null; // 字段值
+    return Pair(hasNext, value);
 }
 
 /**
  * 遍历结果集的每一行的某列
  * @param i 第几列
+ * @param clazz值类型
  * @param action 处理函数
  * @return
  */
-public inline fun ResultSet.forEachCell(i:Int, action: (Any?) -> Unit): Unit {
+public inline fun <T:Any> ResultSet.forEachCell(i:Int, clazz: KClass<T>? = null, action: (T?) -> Unit): Unit {
     while(true){
         // 获得一行某列
-        val (hasNext, value) = nextCell(i)
+        val (hasNext, value) = nextCell(i, clazz)
         if(!hasNext)
             break;
 

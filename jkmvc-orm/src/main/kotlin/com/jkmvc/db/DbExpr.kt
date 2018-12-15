@@ -20,6 +20,14 @@ data class DbExpr(public val exp:CharSequence /* 表达式, 可以是 String | D
                   public val expQuoting:Boolean = (exp !is IDbQueryBuilder) /* 是否转义exp, 只要不是子查询, 默认都转 */
 ) : CharSequence by "" {
 
+    companion object {
+
+        /**
+         * 问号, 用于表示query builder的动态参数
+         */
+        public val question = DbExpr("?", false)
+    }
+
     public constructor(exp:CharSequence, quoting:Boolean): this(exp, null, quoting)
 
     init {

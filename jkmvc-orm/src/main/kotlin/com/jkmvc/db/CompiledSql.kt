@@ -41,7 +41,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
         get(){
             var size = 0;
             for(param in staticParams)
-                if(param is String && param == "?")
+                if(param is String && param == DbExpr.question)
                     size++;
             return size
         }
@@ -114,7 +114,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
         // 构建实际参数：将静态参数中?，替换为动态参数
         var i = 0; // 动态变量的迭代索引
         for (v in staticParams) {
-            if (v is String && v == "?") // 如果参数值是?，则认为是动态参数
+            if (v is String && v == DbExpr.question) // 如果参数值是?，则认为是动态参数
                 result.add(dynamicParams[fromIndex + (i++)])
             else // 静态参数
                 result.add(v)
@@ -169,7 +169,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
         var j = fromIndex // 动态变量的迭代索引
         return sql.replace("\\?".toRegex()) { matches: MatchResult ->
             var param = staticParams[i++] // 静态参数
-            if(param == "?" && dynamicParams.isNotEmpty())// 如果参数值是?，则认为是动态参数
+            if(param == DbExpr.question && dynamicParams.isNotEmpty())// 如果参数值是?，则认为是动态参数
                 param = dynamicParams[j++]
             db.quote(param)
         }
@@ -220,9 +220,9 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
      * @param params 动态参数
      * @return
      */
-    public inline fun <reified T:Any> findValue(params: Array<out Any?>):T{
+    public inline fun <reified T:Any> findCell(params: Array<out Any?>):T{
         // 执行 select
-        val (hasNext, count) = db.queryCell(sql, buildParams(params));
+        val (hasNext, count) = db.queryCell(sql, buildParams(params), T::class);
         return if(hasNext)
             count as T;
         else
@@ -236,7 +236,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
      * @return
      */
     public override fun findInt(vararg params: Any?):Int {
-        return findValue(params)
+        return findCell(params)
     }
 
     /**
@@ -246,7 +246,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
      * @return
      */
     public override fun findLong(vararg params: Any?):Long {
-        return findValue(params)
+        return findCell(params)
     }
 
     /**
@@ -256,7 +256,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
      * @return
      */
     public override fun findFloat(vararg params: Any?):Float {
-        return findValue(params)
+        return findCell(params)
     }
 
     /**
@@ -266,7 +266,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
      * @return
      */
     public override fun findDouble(vararg params: Any?):Double {
-        return findValue(params)
+        return findCell(params)
     }
 
     /**
@@ -276,7 +276,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
      * @return
      */
     public override fun findBoolean(vararg params: Any?):Boolean {
-        val i:Int = findValue(params)
+        val i:Int = findCell(params)
         return i > 0;
     }
 
@@ -287,7 +287,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
      * @return
      */
     public override fun findByte(vararg params: Any?):Byte {
-        return findValue(params)
+        return findCell(params)
     }
 
     /**
@@ -297,7 +297,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
      * @return
      */
     public override fun findShort(vararg params: Any?):Short {
-        return findValue(params)
+        return findCell(params)
     }
 
     /**
@@ -307,9 +307,7 @@ class CompiledSql(public override val dbName: String = "default" /* 数据库名
      * @param generatedColumn 返回的自动生成的主键名
      * @return 影响行数|新增id
      */
-    public override fun execute(params:Array<out Any?>, generatedColumn:String?):Int
-    {
-        // 2 执行sql
+    public override fun execute(params:Array<out Any?>, generatedColumn:String?):Int {
         return db.execute(sql, buildParams(params), generatedColumn);
     }
 

@@ -91,35 +91,6 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
             }
         }
 
-        /**
-         * 转化为Long
-         *
-         * @param value
-         * @return
-         */
-        public fun toLong(value:Any?):Long{
-            // oracle 是 BigDecimal
-            if(value is BigDecimal)
-                return value.toLong()
-
-            // mysql
-            return value as Long;
-        }
-
-        /**
-         * 转化为Int
-         *
-         * @param value
-         * @return
-         */
-        public fun toInt(value:Any?):Int{
-            // oracle 是 BigDecimal
-            if(value is BigDecimal)
-                return value.toInt()
-
-            // mysql
-            return value as Int;
-        }
     }
 
     /**
@@ -341,10 +312,11 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * 查询一列(多行)
      * @param sql
      * @param params
+     * @param clazz 值类型
      * @param transform 转换结果的函数
      * @return
      */
-    public override fun queryColumn(sql: String, params: List<Any?>?): List<Any?> {
+    public override fun <T:Any> queryColumn(sql: String, params: List<Any?>?, clazz: KClass<T>?): List<T?> {
         try{
             return conn.queryColumn(sql, params);
         }catch (e:Exception){
@@ -357,9 +329,10 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * 查询一行一列
      * @param sql
      * @param params
+     * @param clazz 值类型
      * @return
      */
-    public override fun queryCell(sql: String, params: List<Any?>?, clazz: KClass<*>?): Pair<Boolean, Any?> {
+    public override fun <T:Any> queryCell(sql: String, params: List<Any?>?, clazz: KClass<T>?): Pair<Boolean, T?> {
         try{
             return conn.queryCell(sql, params, clazz);
         }catch (e:Exception){
