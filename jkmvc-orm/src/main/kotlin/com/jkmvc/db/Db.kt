@@ -15,7 +15,7 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-class Db(public override val name:String /* 标识 */):IDb, IDbMeta by DbMeta.get(name) {
+class Db protected constructor(public override val name:String /* 标识 */):IDb, IDbMeta by DbMeta.get(name) {
 
     companion object:Closeable {
 
