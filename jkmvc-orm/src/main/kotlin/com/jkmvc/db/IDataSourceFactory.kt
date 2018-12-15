@@ -12,6 +12,7 @@ interface IDataSourceFactory {
 
     /**
      * 获得数据源
+     *    跨线程跨请求, 全局共有的数据源
      * @param name 数据源名
      * @return
      */

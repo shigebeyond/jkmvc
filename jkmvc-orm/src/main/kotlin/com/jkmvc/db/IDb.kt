@@ -10,21 +10,7 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-interface IDb: IDbValueQuoter, Closeable{
-
-    /**
-     * 获得数据库类型
-     *   根据driverClass来获得
-     */
-    val dbType:DbType
-
-    /**
-     * sql标示符（表/字段）的转义字符
-     *   mysql为 `table`.`column`
-     *   oracle为 "table"."column"
-     *   sql server为 "table"."column" 或 [table].[column]
-     */
-    val identifierQuoteString:String
+interface IDb: IDbValueQuoter, Closeable, IDbMeta {
 
     /**
      * 执行事务
@@ -51,13 +37,6 @@ interface IDb: IDbValueQuoter, Closeable{
      * @return
      */
     fun isInTransaction(): Boolean
-
-    /**
-     * 获得表的所有列
-     * @param table
-     * @return
-     */
-    fun listColumns(table:String): List<String>;
 
     /**
      * 执行更新
@@ -283,24 +262,6 @@ interface IDb: IDbValueQuoter, Closeable{
      * @return
      */
     fun quoteColumn(column:CharSequence):String
-
-    /**
-     * 根据对象属性名，获得db字段名
-     *    可根据实际需要在 model 类中重写
-     *
-     * @param prop 对象属性名
-     * @return db字段名
-     */
-    fun prop2Column(prop:String): String
-
-    /**
-     * 根据db字段名，获得对象属性名
-     *    可根据实际需要在 model 类中重写
-     *
-     * @param column db字段名
-     * @return 对象属性名
-     */
-    fun column2Prop(column:String): String
 
     /**
      * 预览sql

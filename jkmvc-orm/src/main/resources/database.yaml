@@ -9,7 +9,8 @@ _common:
 # 2 不同数据库的配置
 # mysql, 命名: 小写+下划线
 default:
-  master: # 主库
+  # 主库
+  master:
     driverClass: com.mysql.jdbc.Driver
     url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
     username: root
@@ -18,16 +19,13 @@ default:
     columnUnderline: true
     # 字段名全大写
     columnUpperCase: false
-  slaves: # 多个从库, 可省略
+  # 多个从库, 可省略
+  slaves:
     -
       driverClass: com.mysql.jdbc.Driver
       url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
       username: root
       password: root
-      # 字段名是下划线命名
-      columnUnderline: true
-      # 字段名全大写
-      columnUpperCase: false
 
 # sql server, 命名: 小写+下划线
 #default:

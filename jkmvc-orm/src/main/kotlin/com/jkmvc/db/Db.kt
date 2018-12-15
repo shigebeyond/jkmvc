@@ -10,11 +10,12 @@ import kotlin.reflect.KClass
 
 /**
  * 封装db操作
+ *   ThreadLocal保证的线程安全, 每个请求都创建新的db对象
  *
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-class Db(public val name:String /* 标识 */):IDb{
+class Db(public override val name:String /* 标识 */):IDb, IDbMeta by DbMeta.get(name) {
 
     companion object:Closeable {
 
@@ -38,6 +39,8 @@ class Db(public val name:String /* 标识 */):IDb{
 
         /**
          * 线程安全的db缓存
+         *    每个线程有多个db, 一个名称各一个db对象
+         *    每个请求都创建新的db对象
          */
         protected val dbs:ThreadLocal<HashMap<String, Db>> = ThreadLocal.withInitial {
             HashMap<String, Db>();
@@ -45,7 +48,8 @@ class Db(public val name:String /* 标识 */):IDb{
 
         /**
          * 获得db(线程安全)
-         *
+         *    获得当前线程下的指定名字的db, 没有则创建新db
+         *    每个请求都创建新的db对象
          * @param name
          * @return
          */
@@ -64,6 +68,7 @@ class Db(public val name:String /* 标识 */):IDb{
 
         /**
          * 关闭当前线程的所有db
+         *    每个请求结束后, 要关闭该请求创建的db对象
          *    谁使用，谁关闭
          */
         public override fun close():Unit{
@@ -87,21 +92,32 @@ class Db(public val name:String /* 标识 */):IDb{
                 close()
             }
         }
-
     }
+
+    /**
+     * 是否强制使用主库
+     */
+    public var forceMaster: Boolean = false;
 
     /**
      * 数据库配置
      */
-    val dbConfig: Config = Config.instance("database.$name", "yaml")
+    protected val config: Config = Config.instance("database.$name", "yaml")
 
     /**
      * 从库数量
      */
-    val slaveNum: Int by lazy{
-        val slaves = dbConfig.getList("slaves")
+    protected val slaveNum: Int by lazy{
+        val slaves = config.getList("slaves")
         if(slaves == null) 0 else slaves.size
     }
+
+    /**
+     * 连接使用情况
+     *   用2位bit来记录是否用到主从连接
+     *   主库第0位, 从库第1位
+     */
+    protected var connUsed: Int = 0
 
     /**
      * 主库连接
@@ -109,12 +125,14 @@ class Db(public val name:String /* 标识 */):IDb{
     protected val masterConn: Connection by lazy{
         //获得主库数据源
         val dataSource = dataSourceFactory.getDataSource("$name.master");
+        // 记录用到主库
+        connUsed = connUsed or 1
         // 新建连接
         dataSource.connection
     }
 
     /**
-     * 从库连接
+     * 随机一个从库连接
      */
     protected val slaveConn: Connection by lazy {
         if (slaveNum == 0) { // 无从库, 直接用主库
@@ -123,93 +141,25 @@ class Db(public val name:String /* 标识 */):IDb{
             val i = ThreadLocalRandom.current().nextInt(slaveNum)
             //获得从库数据源
             val dataSource = dataSourceFactory.getDataSource("$name.slaves.$i");
+            // 记录用到从库
+            connUsed = connUsed or 2
             // 新建连接
             dataSource.connection
         }
     }
 
     /**
-     * 获得数据库类型
-     *   根据driverClass来获得
+     * 获得通用的连接
+     *   如果有事务+强制, 就使用主库
+     *   否则使用从库
      */
-    public override val dbType:DbType by lazy{
-        //通过driverName是否包含关键字判断
-        var driver: String = conn.metaData.driverName
-        // fix bug: sqlserver的driverName居然有空格, 如 Microsoft JDBC Driver 6.5 for SQL Server
-        driver = driver.replace(" ", "")
-        var result: DbType? = null
-        for(type in DbType.values()){
-            if (driver.contains(type.toString(), true)) {
-                result = type
-                break
-            }
-        }
-        if(result == null)
-            throw RuntimeException("未知数据库类型")
-        else
-            result
-    }
-
-    /**
-     * sql标示符（表/字段）的转义字符
-     *   mysql为 `table`.`column`
-     *   oracle为 "table"."column"
-     *   sql server为 "table"."column" 或 [table].[column]
-     */
-    public override val identifierQuoteString:String by lazy(LazyThreadSafetyMode.NONE) {
-        conn.metaData.identifierQuoteString
-    }
-
-    /**
-     * 表的字段
-     */
-    protected val tableColumns: Map<String, List<String>> by lazy {
-        val tables = HashMap<String, MutableList<String>>()
-        // 查询所有表的所有列
-        /**
-         * fix bug:
-         * mysql中查询，conn.catalog = 数据库名
-         * oracle中查询，conn.catalog = null，必须指定 schema 来过滤表，否则查出来多个库的表，会出现同名表，查出来的表字段有误
-         */
-        val rs = conn.metaData.getColumns(conn.catalog, schema, null, null)
-        while (rs.next()) { // 逐个处理每一列
-            val table = rs.getString("TABLE_NAME")!! // 表名
-            val column = rs.getString("COLUMN_NAME")!! // 列名
-            // 添加表的列
-            tables.getOrPut(table){
-                LinkedList<String>()
-            }.add(column);
-        }
-        tables
-    }
-
-    /**
-     * 属性名到字段名的映射
-     */
-    protected val prop2ColumnMapping: MutableMap<String, String> = HashMap()
-
-    /**
-     * 字段名到属性名的映射
-     */
-    protected val column2PropMapping: MutableMap<String, String> = HashMap()
-
-    /**
-     * schema
-     *    oracle的概念，代表一组数据库对象
-     *    在 Db.tableColumns 中延迟加载表字段时，用来过滤 DYPT 库的表
-     *    可省略，默认值=username
-     */
-    public val schema:String?
+    public val conn: Connection
         get(){
-            if(dbType == DbType.Oracle)
-                return dbConfig.getString("schema", dbConfig["username"])
+            // 不能使用`if(isInTransaction()) masterConn else slaveConn`, 否则会创建2个连接
+            if(isInTransaction() || forceMaster)
+                return masterConn
 
-            if(dbType == DbType.Mysql){
-                val m = "jdbc:mysql://[^/]+/([^\\?]+)".toRegex().find(dbConfig["url"]!!)
-                if(m != null)
-                    return m.groupValues[1]
-            }
-            return null
+            return slaveConn
         }
 
     /**
@@ -248,16 +198,6 @@ class Db(public val name:String /* 标识 */):IDb{
     }
 
     /**
-     * 获得表的所有列
-     *
-     * @param table
-     * @return
-     */
-    public override fun listColumns(table:String): List<String> {
-        return tableColumns.get(table)!!;
-    }
-
-    /**
      * 执行更新
      * @param sql
      * @param params
@@ -266,7 +206,7 @@ class Db(public val name:String /* 标识 */):IDb{
      */
     public override fun execute(sql: String, params: List<Any?>, generatedColumn:String?): Int {
         try{
-            return conn.execute(sql, params, generatedColumn);
+            return masterConn.execute(sql, params, generatedColumn);
         }catch (e:Exception){
             dbLogger.error("出错[${e.message}] sql: " + previewSql(sql, params))
             throw  e
@@ -283,7 +223,7 @@ class Db(public val name:String /* 标识 */):IDb{
      */
     public override fun batchExecute(sql: String, paramses: List<Any?>, paramSize:Int): IntArray {
         try{
-            return conn.batchExecute(sql, paramses, paramSize)
+            return masterConn.batchExecute(sql, paramses, paramSize)
         }catch (e:Exception){
             dbLogger.error("出错[${e.message}], sql=$sql, params=$paramses ")
             throw  e
@@ -375,7 +315,7 @@ class Db(public val name:String /* 标识 */):IDb{
      */
     public override fun begin():Unit{
         if(transDepth++ === 0)
-            conn.autoCommit = false; // 禁止自动提交事务
+            masterConn.autoCommit = false; // 禁止自动提交事务
     }
 
     /**
@@ -384,16 +324,16 @@ class Db(public val name:String /* 标识 */):IDb{
     public override fun commit():Boolean{
         // 未开启事务
         if (transDepth <= 0)
-        return false;
+            return false;
 
         // 无嵌套事务
         if (--transDepth === 0)
         {
             // 回滚 or 提交事务: 回滚的话,返回false
             if(rollbacked)
-                conn.rollback();
+                masterConn.rollback();
             else
-                conn.commit()
+                masterConn.commit()
             val result = rollbacked;
             rollbacked = false; // 清空回滚标记
             return result;
@@ -415,7 +355,7 @@ class Db(public val name:String /* 标识 */):IDb{
         if (--transDepth === 0)
         {
             rollbacked = false; // 清空回滚标记
-            conn.rollback(); // 回滚事务
+            masterConn.rollback(); // 回滚事务
         }
 
         // 有嵌套事务
@@ -432,7 +372,10 @@ class Db(public val name:String /* 标识 */):IDb{
             throw DbException("当前线程并没有[${name}]连接，无法关闭")
 
         // 关闭连接
-        conn.close()
+        if(connUsed and 1 > 0)
+            masterConn.close()
+        if(connUsed and 2 > 0)
+            slaveConn.close()
     }
 
     /**
@@ -573,52 +516,6 @@ class Db(public val name:String /* 标识 */):IDb{
                     "to_date($value,'yyyy-mm-dd hh24:mi:ss')"
                 else
                     value
-    }
-
-    /**
-     * 根据对象属性名，获得db字段名
-     *    可根据实际需要在 model 类中重写
-     *
-     * @param prop 对象属性名
-     * @return db字段名
-     */
-    public override fun prop2Column(prop:String): String {
-        return prop2ColumnMapping.getOrPut(prop){
-            // 处理关键字
-            if(dbType == DbType.Oracle && prop == "rownum"){
-                return prop
-            }
-
-            // 表+属性
-            val tableAndProp = if(prop.contains('.')) prop.split('.') else null
-
-            // 转属性
-            var column = if(tableAndProp == null) prop else tableAndProp[1]
-            if(dbConfig["columnUnderline"]!!) // 字段有下划线
-                column = column.camel2Underline()
-            if(dbConfig["columnUpperCase"]!!)// 字段全大写
-                column = column.toUpperCase() // 转大写
-
-            if(tableAndProp == null) column else tableAndProp[0] + '.' + column
-        }
-    }
-
-    /**
-     * 根据db字段名，获得对象属性名
-     *    可根据实际需要在 model 类中重写
-     *
-     * @param column db字段名
-     * @return 对象属性名
-     */
-    public override fun column2Prop(column:String): String {
-        return column2PropMapping.getOrPut(column){
-            var prop = column
-            if(dbConfig["columnUpperCase"]!!)// 字段全大写
-                prop = prop.toLowerCase() // 转小写
-            if(dbConfig["columnUnderline"]!!) // 字段有下划线
-                prop = prop.underline2Camel()
-            prop
-        }
     }
 
     /**

@@ -17,10 +17,11 @@ class DruidDataSourceFactory : IDataSourceFactory {
     /**
      * 缓存数据源
      */
-    private val dataSources: ConcurrentHashMap<String, DruidDataSource> = ConcurrentHashMap();
+    protected val dataSources: ConcurrentHashMap<String, DruidDataSource> = ConcurrentHashMap();
 
     /**
      * 获得数据源
+     *    跨线程跨请求, 全局共有的数据源
      * @param name 数据源名
      * @return
      */
