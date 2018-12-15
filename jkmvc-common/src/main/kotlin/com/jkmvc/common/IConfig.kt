@@ -106,7 +106,15 @@ abstract class IConfig {
      * @param defaultValue
      * @return
      */
-    public abstract fun getMap(key: String, defaultValue: Map<String, *>?): Map<String, *>?
+    public abstract fun getMap(key: String, defaultValue: Map<String, *>? = null): Map<String, *>?
+
+    /**
+     * 获得List类型的配置项
+     * @param key
+     * @param defaultValue
+     * @return
+     */
+    public abstract fun getList(key: String, defaultValue: List<*>? = null): List<*>?
 
     /**
      * 获得Config类型的子配置项
@@ -114,7 +122,7 @@ abstract class IConfig {
      * @param defaultValue
      * @return
      */
-    public abstract fun getConfig(path: String): Config;
+    public abstract fun pathConfig(path: String): Config;
 
     /**
      * 获得Properties类型的子配置项
@@ -122,5 +130,5 @@ abstract class IConfig {
      * @param defaultValue
      * @return
      */
-    public abstract fun getProperties(path: String): Properties
+    public abstract fun pathProperties(path: String): Properties
 }

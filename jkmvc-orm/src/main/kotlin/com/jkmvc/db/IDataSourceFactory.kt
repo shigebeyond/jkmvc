@@ -15,7 +15,7 @@ interface IDataSourceFactory {
      * @param name 数据源名
      * @return
      */
-    fun getDataSource(name: String = "default"): DataSource;
+    fun getDataSource(name: String): DataSource;
 
     /**
      * 关闭所有数据源

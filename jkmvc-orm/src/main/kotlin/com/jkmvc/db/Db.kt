@@ -2,10 +2,10 @@ package com.jkmvc.db
 
 import com.jkmvc.common.*
 import java.io.Closeable
-import java.math.BigDecimal
 import java.sql.Connection
 import java.sql.ResultSet
 import java.util.*
+import java.util.concurrent.ThreadLocalRandom
 import kotlin.reflect.KClass
 
 /**
@@ -14,25 +14,25 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-class Db(protected val conn: Connection /* 数据库连接 */, public val name:String = "default" /* 标识 */):IDb{
+class Db(public val name:String /* 标识 */):IDb{
 
     companion object:Closeable {
 
         /**
-         * orm配置
+         * 公共配置
          */
-        public val ormConfig: Config = Config.instance("orm")
+        public val commonConfig: Config = Config.instance("database._common", "yaml")
 
         /**
          * 是否调试
          */
-        public val debug:Boolean = ormConfig.getBoolean("debug", false)!!;
+        public val debug:Boolean = commonConfig.getBoolean("debug", false)!!;
 
         /**
          * 数据源工厂
          */
         public val dataSourceFactory:IDataSourceFactory by lazy{
-            val clazz:String = ormConfig["dataSourceFactory"]!!
+            val clazz:String = commonConfig["dataSourceFactory"]!!
             Class.forName(clazz).newInstance() as IDataSourceFactory
         }
 
@@ -51,10 +51,7 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
          */
         public fun instance(name:String = "default"):Db{
             return dbs.get().getOrPut(name){
-                //获得数据源
-                val dataSource = dataSourceFactory.getDataSource(name);
-                // 新建db
-                Db(dataSource.connection, name);
+                Db(name);
             }
         }
 
@@ -97,6 +94,39 @@ class Db(protected val conn: Connection /* 数据库连接 */, public val name:S
      * 数据库配置
      */
     val dbConfig: Config = Config.instance("database.$name", "yaml")
+
+    /**
+     * 从库数量
+     */
+    val slaveNum: Int by lazy{
+        val slaves = dbConfig.getList("slaves")
+        if(slaves == null) 0 else slaves.size
+    }
+
+    /**
+     * 主库连接
+     */
+    protected val masterConn: Connection by lazy{
+        //获得主库数据源
+        val dataSource = dataSourceFactory.getDataSource("$name.master");
+        // 新建连接
+        dataSource.connection
+    }
+
+    /**
+     * 从库连接
+     */
+    protected val slaveConn: Connection by lazy {
+        if (slaveNum == 0) { // 无从库, 直接用主库
+            masterConn
+        } else{ // 随机选个从库
+            val i = ThreadLocalRandom.current().nextInt(slaveNum)
+            //获得从库数据源
+            val dataSource = dataSourceFactory.getDataSource("$name.slaves.$i");
+            // 新建连接
+            dataSource.connection
+        }
+    }
 
     /**
      * 获得数据库类型

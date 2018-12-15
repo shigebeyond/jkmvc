@@ -61,7 +61,7 @@ class Config(public override val props: Map<String, *>): IConfig(){
             if(path == null)
                 return config
             // 有子项
-            return config.getConfig(path)
+            return config.pathConfig(path)
         }
 
         /**
@@ -219,12 +219,22 @@ class Config(public override val props: Map<String, *>): IConfig(){
     }
 
     /**
+     * 获得List类型的配置项
+     * @param key
+     * @param defaultValue
+     * @return
+     */
+    public override fun getList(key: String, defaultValue: List<*>?): List<*>?{
+        return props.getAndConvert(key, defaultValue)
+    }
+
+    /**
      * 获得Config类型的子配置项
      * @param key
      * @param defaultValue
      * @return
      */
-    public override fun getConfig(path: String): Config{
+    public override fun pathConfig(path: String): Config{
         try{
             val subprops = props.path(path) as Map<String, *>
             return Config(subprops)
@@ -239,7 +249,7 @@ class Config(public override val props: Map<String, *>): IConfig(){
      * @param defaultValue
      * @return
      */
-    public override fun getProperties(path: String): Properties{
+    public override fun pathProperties(path: String): Properties{
         try{
             val subprops = props.path(path) as Map<String, *>
             val result = Properties()

@@ -209,56 +209,36 @@ public inline fun <K, V> Map<out K, V>.any(predicate: (key: K, value: V) -> Bool
  * 获得'.'分割的路径下的子项值
  *
  * @param path '.'分割的路径
- * @return
- */
-public fun Map<String, *>.path(path:String): Any? {
-    return path(path, true)
-}
-
-/**
- * 获得'.'分割的路径下的子项值
- *
- * @param path '.'分割的路径
  * @param withException 当不存在子项时，是否抛出异常，否则返回default默认值
  * @param default 默认值，当 withException 为false时有效
  * @return
  */
-public fun Map<String, *>.path(path:String, default: Any?): Any? {
-    return path(path, false, default)
-}
-
-/**
- * 获得'.'分割的路径下的子项值
- *
- * @param path '.'分割的路径
- * @param withException 当不存在子项时，是否抛出异常，否则返回default默认值
- * @param default 默认值，当 withException 为false时有效
- * @return
- */
-public fun Map<String, *>.path(path:String, withException: Boolean, default: Any?): Any? {
+public fun Map<String, *>.path(path:String, withException: Boolean = true, default: Any? = null): Any? {
     // 单层
     if(!path.contains('.'))
         return this[path]
 
     // 多层
-    val empty = emptyMap<String, Any?>()
     val keys:List<String> = path.split('.')
-    var data:Map<String, Any?> = this
+    var data:Any? = this
     var value:Any? = null
     for (key in keys){
-        // 当不存在子项时，抛异常 or 返回null
-        if(data == empty){
+        // 一层层往下走
+        if(data is Map<*, *>){ // Map
+            value =  data[key]
+        }else if(data is List<*>){ // List
+            try {
+                value = data[key.toInt()]
+            }catch (e: NumberFormatException){
+                throw IllegalArgumentException("获得Map子项失败：Map数据为$this, 但路径[$path]中的父项是List, 子项[$key]却不是Int")
+            }
+        }else{ // 当不存在子项时，抛异常 or 返回null
             if(withException)
-                throw NoSuchElementException("获得Map子项失败：Map数据为$this, 但路径[$path]的子项不存在")
+                throw NoSuchElementException("获得Map子项失败：Map数据为$this, 但路径[$path]中的无子项[$key]")
             return default
         }
 
-        // 一层层往下走
-        value =  data[key]
-        if(value is Map<*, *>)
-            data = value as Map<String, Any?>
-        else
-            data = empty
+        data = value as Map<String, Any?>
     }
     return value
 }

@@ -17,7 +17,7 @@ class DruidDataSourceFactory : IDataSourceFactory {
     /**
      * 缓存数据源
      */
-    private val dataSources: ConcurrentHashMap<String, DruidDataSource> = ConcurrentHashMap<String, DruidDataSource>();
+    private val dataSources: ConcurrentHashMap<String, DruidDataSource> = ConcurrentHashMap();
 
     /**
      * 获得数据源
@@ -36,7 +36,7 @@ class DruidDataSourceFactory : IDataSourceFactory {
      * @return
      */
     private fun buildDruidDataSource(name:String): DruidDataSource {
-        val config: Config = Config.instance("database.$name", "yaml")
+        val config: Config = Config.instance("database.datasources.$name", "yaml")
         val ds: DruidDataSource = DruidDataSource()
 
         // 基本属性 url、user、password

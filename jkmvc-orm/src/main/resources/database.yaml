@@ -1,5 +1,15 @@
+# 1 公共配置
+_common:
+  # 是否调试
+  debug: true
+  # 指定数据源工厂，需要 IDataSourceFactory 对象，可自定义实现类，但需自己实现根据数据源名来缓存创建好的数据源
+  # set dataSourceFactory for Db, it wants IDataSourceFactory's object, you can implements your subclass, but you need to cache dataSource by a name
+  dataSourceFactory: com.jkmvc.db.DruidDataSourceFactory
+
+# 2 不同数据库的配置
 # mysql, 命名: 小写+下划线
 default:
+  master: # 主库
     driverClass: com.mysql.jdbc.Driver
     url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
     username: root
@@ -8,9 +18,20 @@ default:
     columnUnderline: true
     # 字段名全大写
     columnUpperCase: false
+  slaves: # 多个从库, 可省略
+    -
+      driverClass: com.mysql.jdbc.Driver
+      url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
+      username: root
+      password: root
+      # 字段名是下划线命名
+      columnUnderline: true
+      # 字段名全大写
+      columnUpperCase: false
 
 # sql server, 命名: 小写+下划线
 #default:
+#  master:
 #    driverClass: com.microsoft.sqlserver.jdbc.SQLServerDriver
 #    url: jdbc:sqlserver://192.168.0.56:1433;databaseName=tempdb
 #    username: sa
@@ -22,6 +43,7 @@ default:
 
 # oracle, 命名: 大写+下划线
 #default:
+#  master:
 #    driverClass: oracle.jdbc.driver.OracleDriver
 #    url: jdbc:oracle:thin:@127.0.0.1:ORCL
 #    # schema - oracle的概念，代表一组数据库对象，在 Db.tableColumns 中延迟加载表字段时，用来过滤 DYPT 库的表，可省略，默认值=username
