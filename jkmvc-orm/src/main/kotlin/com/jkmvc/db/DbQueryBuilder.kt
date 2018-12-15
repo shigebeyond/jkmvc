@@ -57,7 +57,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) :D
             return quoteSubQuery(value)
 
         // 3 db表达式
-        if(value is DbExpr) {
+        if(value is DbExpr && value !== DbExpr.question) {
             if(value.exp is IDbQueryBuilder)
                 return quoteSubQuery(value.exp, value.alias)
 
@@ -106,10 +106,13 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) :D
     /**
      * 编译sql
      * @param action sql动作：select/insert/update/delete
+     * @param db 数据库连接
      * @return 编译好的sql
      */
-    public override fun compile(action:SqlType): CompiledSql
-    {
+    public override fun compile(action:SqlType, db: IDb): CompiledSql {
+        // 切换db
+        this.db = db
+
         // 清空编译结果
         compiledSql.clear();
 
@@ -127,54 +130,6 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) :D
         return compiledSql
     }
 
-    /**
-     * 编译select语句
-     * @return 编译好的sql
-     */
-    public override fun compileSelect(): CompiledSql{
-        return compile(SqlType.SELECT)
-    }
-
-    /**
-     * 编译select ... limit 1语句
-     * @return 编译好的sql
-     */
-    public override fun compileSelectOne(): CompiledSql{
-        return limit(1).compile(SqlType.SELECT)
-    }
-
-    /**
-     * 编译select count() 语句
-     * @return 编译好的sql
-     */
-    public override fun compileCount(): CompiledSql{
-        return select(DbExpr("count(1)", "NUM", false) /* oracle会自动转为全大写 */).compile(SqlType.SELECT);
-    }
-
-    /**
-     * 编译insert语句
-     * @return 编译好的sql
-     */
-    public override fun compileInsert(): CompiledSql{
-        return compile(SqlType.INSERT)
-    }
-
-    /**
-     * 编译update语句
-     * @return 编译好的sql
-     */
-    public override fun compileUpdate(): CompiledSql{
-        return compile(SqlType.UPDATE)
-    }
-
-    /**
-     * 编译delete语句
-     * @return 编译好的sql
-     */
-    public override fun compileDelete(): CompiledSql{
-        return compile(SqlType.DELETE)
-    }
-
     /****************************** 执行sql ********************************/
     /**
      * 查找多个： select 语句
@@ -186,7 +141,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) :D
      */
     public override fun <T:Any> findAll(params: List<Any?>, db: IDb, transform:(MutableMap<String, Any?>) -> T): List<T>{
         // 编译 + 执行
-        return db(db).compile(SqlType.SELECT).findAll(params, db, transform)
+        return compile(SqlType.SELECT, db).findAll(params, db, transform)
     }
 
     /**
@@ -199,7 +154,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) :D
      */
     public override fun <T:Any> find(params: List<Any?>, db: IDb, transform:(MutableMap<String, Any?>) -> T): T?{
         // 编译 + 执行
-        return db(db).compileSelectOne().find(params, db, transform)
+        return compileSelectOne(db).find(params, db, transform)
     }
 
     /**
@@ -212,7 +167,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) :D
      */
     public override fun <T:Any> findColumn(params: List<Any?>, clazz: KClass<T>?, db: IDb): List<Any?>{
         // 编译 + 执行
-        return db(db).compile(SqlType.SELECT).findColumn(params, clazz)
+        return compile(SqlType.SELECT, db).findColumn(params, clazz)
     }
 
     /**
@@ -225,7 +180,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) :D
      */
     public override fun <T:Any> findCell(params: List<Any?>, clazz: KClass<T>?, db: IDb): Pair<Boolean, Any?>{
         // 编译 + 执行
-        return db(db).compile(SqlType.SELECT).findCell(params, clazz)
+        return compile(SqlType.SELECT, db).findCell(params, clazz)
     }
 
     /**
@@ -238,7 +193,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) :D
     public override fun count(params: List<Any?>, db: IDb):Int {
         // 1 编译
         selectColumns.clear() // 清空多余的select
-        val csql = select(DbExpr("count(1)", "NUM", false) /* oracle会自动转为全大写 */).db(db).compile(SqlType.SELECT);
+        val csql = select(DbExpr("count(1)", "NUM", false) /* oracle会自动转为全大写 */).compile(SqlType.SELECT, db);
 
         // 2 执行 select
         return db.queryInt(csql.sql, csql.buildParams(params))!!
@@ -255,7 +210,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) :D
      */
     public override fun execute(action:SqlType, params:List<Any?>, generatedColumn:String?, db: IDb):Int {
         // 编译 + 执行
-        return db(db).compile(action).execute(params, generatedColumn, db)
+        return compile(action, db).execute(params, generatedColumn, db)
     }
 
     /**
@@ -269,6 +224,6 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) :D
      */
     public override fun batchExecute(action:SqlType, paramses: List<Any?>, paramSize:Int, db: IDb): IntArray {
         // 编译 + 执行
-        return db(db).compile(action).batchExecute(paramses, paramSize, db)
+        return compile(action, db).batchExecute(paramses, paramSize, db)
     }
 }

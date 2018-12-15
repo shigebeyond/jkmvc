@@ -201,16 +201,6 @@ abstract class DbQueryBuilderAction : IDbQueryBuilder() {
     protected var distinct: Boolean = false;
 
     /**
-     * 切换数据库连接
-     * @param db
-     * @return
-     */
-    public override fun db(db:IDb):IDbQueryBuilder{
-        this.db = db
-        return this
-    }
-
-    /**
      * 设置表名: 可能有多个表名
      * @param table 表名
      * @param alias 别名

@@ -8,10 +8,10 @@ class QueryBuilderTests{
 
     val db: Db = Db.instance()
 
-    val id: Long by lazy {
-        val minId = db.queryInt("select id from user order by id limit 1" /*sql*/)
+    val id: Int by lazy {
+        val minId = db.queryInt("select id from user order by id limit 1" /*sql*/)!!
         println("随便选个id: " + minId)
-        minId as Long;
+        minId
     }
 
     @Test
@@ -63,7 +63,7 @@ class QueryBuilderTests{
 
         // 批量插入
         //DbQueryBuilder().table("user").insertColumns("name", "age").value("?", "?").batchExecute(SqlType.INSERT, params, 2)// 每次只处理2个参数
-        DbQueryBuilder().table("user").insertColumns("name", "age").value("?", "?").batchInsert(params, 2)// 每次只处理2个参数
+        DbQueryBuilder().table("user").insertColumns("name", "age").value(DbExpr.question, DbExpr.question).batchInsert(params, 2)// 每次只处理2个参数
     }
 
     @Test
@@ -113,7 +113,11 @@ class QueryBuilderTests{
         }
 
         // 批量插入
-        DbQueryBuilder().table("user").set("name", "?").set("age", "?").where("id", "=", "?").batchExecute(SqlType.UPDATE, params, 3)// 每次只处理3个参数
+        DbQueryBuilder().table("user")
+                .set("name", DbExpr.question)
+                .set("age", DbExpr.question)
+                .where("id", "=", DbExpr.question)
+                .batchExecute(SqlType.UPDATE, params, 3)// 每次只处理3个参数
     }
 
     @Test
@@ -134,7 +138,7 @@ class QueryBuilderTests{
         }
 
         // 批量插入
-        DbQueryBuilder().table("user").where("id", "=", "?").batchDelete(params, 1)// 每次只处理1个参数
+        DbQueryBuilder().table("user").where("id", "=", DbExpr.question).batchDelete(params, 1)// 每次只处理1个参数
     }
 
     /**

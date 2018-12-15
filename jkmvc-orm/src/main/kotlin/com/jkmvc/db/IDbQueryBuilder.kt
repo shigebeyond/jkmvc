@@ -40,45 +40,64 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
     /**
      * 编译sql
      * @param action sql动作：select/insert/update/delete
+     * @param db 数据库连接
      * @return 编译好的sql
      */
-    public abstract fun compile(action:SqlType): CompiledSql;
+    public abstract fun compile(action:SqlType, db: IDb = defaultDb): CompiledSql;
 
     /**
      * 编译select语句
+     * @param db 数据库连接
      * @return 编译好的sql
      */
-    public abstract fun compileSelect(): CompiledSql
+    public fun compileSelect(db: IDb = defaultDb): CompiledSql{
+        return compile(SqlType.SELECT, db)
+    }
 
     /**
      * 编译select ... limit 1语句
+     * @param db 数据库连接
      * @return 编译好的sql
      */
-    public abstract fun compileSelectOne(): CompiledSql
+    public fun compileSelectOne(db: IDb = defaultDb): CompiledSql{
+        return limit(1).compile(SqlType.SELECT, db)
+    }
 
     /**
      * 编译select count() 语句
+     * @param db 数据库连接
      * @return 编译好的sql
      */
-    public abstract fun compileCount(): CompiledSql
+    public fun compileCount(db: IDb = defaultDb): CompiledSql{
+        return select(DbExpr("count(1)", "NUM", false) /* oracle会自动转为全大写 */).compile(SqlType.SELECT, db)
+    }
 
     /**
      * 编译insert语句
+     * @param db 数据库连接
      * @return 编译好的sql
      */
-    public abstract fun compileInsert(): CompiledSql
+    public fun compileInsert(db: IDb = defaultDb): CompiledSql{
+        return compile(SqlType.INSERT, db)
+    }
 
     /**
      * 编译update语句
+     * @param db 数据库连接
      * @return 编译好的sql
      */
-    public abstract fun compileUpdate(): CompiledSql
+    public fun compileUpdate(db: IDb = defaultDb): CompiledSql{
+        return compile(SqlType.UPDATE, db)
+    }
 
     /**
      * 编译delete语句
+     * @param db 数据库连接
      * @return 编译好的sql
      */
-    public abstract fun compileDelete(): CompiledSql
+    public fun compileDelete(db: IDb = defaultDb): CompiledSql{
+        return compile(SqlType.DELETE, db)
+    }
 
     /****************************** 执行sql ********************************/
     /**
@@ -88,7 +107,7 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      * @param db 数据库连接
      * @return
      */
-    public abstract fun count(params: List<Any?> = emptyList(), db: IDb = Db.instance()):Int;
+    public abstract fun count(params: List<Any?> = emptyList(), db: IDb = defaultDb):Int;
 
     /**
      * 编译 + 执行
@@ -99,7 +118,7 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      * @param db 数据库连接
      * @return 影响行数|新增id
      */
-    public abstract fun execute(action:SqlType, params:List<Any?> = emptyList(), generatedColumn:String? = null, db: IDb = Db.instance()):Int;
+    public abstract fun execute(action:SqlType, params:List<Any?> = emptyList(), generatedColumn:String? = null, db: IDb = defaultDb):Int;
 
     /**
      * 插入：insert语句
@@ -109,7 +128,7 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      *  @param db 数据库连接
      * @return 新增的id
      */
-    public fun insert(generatedColumn:String? = null, params: List<Any?> = emptyList(), db: IDb = Db.instance()):Int {
+    public fun insert(generatedColumn:String? = null, params: List<Any?> = emptyList(), db: IDb = defaultDb):Int {
         return execute(SqlType.INSERT, params, generatedColumn, db);
     }
 
@@ -120,7 +139,7 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      * @param db 数据库连接
      * @return
      */
-    public fun update(params: List<Any?> = emptyList(), db: IDb = Db.instance()):Boolean {
+    public fun update(params: List<Any?> = emptyList(), db: IDb = defaultDb):Boolean {
         return execute(SqlType.UPDATE, params, null, db) > 0;
     }
 
@@ -131,7 +150,7 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      * @param db 数据库连接
      * @return
      */
-    public fun delete(params: List<Any?> = emptyList(), db: IDb = Db.instance()):Boolean {
+    public fun delete(params: List<Any?> = emptyList(), db: IDb = defaultDb):Boolean {
         return execute(SqlType.DELETE, params, null, db) > 0;
     }
 
@@ -144,7 +163,7 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      * @param db 数据库连接
      * @return
      */
-    public abstract fun batchExecute(action:SqlType, paramses: List<Any?>, paramSize:Int, db: IDb = Db.instance()): IntArray;
+    public abstract fun batchExecute(action:SqlType, paramses: List<Any?>, paramSize:Int, db: IDb = defaultDb): IntArray;
 
     /**
      * 批量插入
@@ -154,7 +173,7 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      * @param db 数据库连接
      * @return
      */
-    public fun batchInsert(paramses: List<Any?>, paramSize:Int, db: IDb = Db.instance()): IntArray {
+    public fun batchInsert(paramses: List<Any?>, paramSize:Int, db: IDb = defaultDb): IntArray {
         return batchExecute(SqlType.INSERT, paramses, paramSize, db)
     }
 
@@ -166,7 +185,7 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      * @param db 数据库连接
      * @return
      */
-    public fun batchUpdate(paramses: List<Any?>, paramSize:Int, db: IDb = Db.instance()): IntArray {
+    public fun batchUpdate(paramses: List<Any?>, paramSize:Int, db: IDb = defaultDb): IntArray {
         return batchExecute(SqlType.UPDATE, paramses, paramSize, db)
     }
 
@@ -178,7 +197,7 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
      * @param db 数据库连接
      * @return
      */
-    public fun batchDelete(paramses: List<Any?>, paramSize:Int, db: IDb = Db.instance()): IntArray {
+    public fun batchDelete(paramses: List<Any?>, paramSize:Int, db: IDb = defaultDb): IntArray {
         return batchExecute(SqlType.DELETE, paramses, paramSize, db)
     }
 }

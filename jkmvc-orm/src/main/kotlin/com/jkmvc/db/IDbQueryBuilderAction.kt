@@ -7,23 +7,7 @@ package com.jkmvc.db
  * @author shijianhang
  * @date 2016-10-12
  */
-interface IDbQueryBuilderAction
-{
-    /**
-     * 切换数据库连接
-     * @param db
-     * @return
-     */
-    fun db(db:IDb):IDbQueryBuilder
-
-    /**
-     * 设置数据库连接
-     * @param db
-     * @return
-     */
-    fun db(dbName: String):IDbQueryBuilder{
-        return db(Db.instance(dbName))
-    }
+interface IDbQueryBuilderAction {
 
     /**
      * 编译动作子句

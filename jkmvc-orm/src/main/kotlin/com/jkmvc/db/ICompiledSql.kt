@@ -73,7 +73,7 @@ abstract class ICompiledSql: IDbQuery() {
      * @param db 数据库连接
      * @return
      */
-    public abstract fun previewSql(dynamicParams:List<Any?> = emptyList(), fromIndex:Int = 0, db:IDb = Db.instance()): String
+    public abstract fun previewSql(dynamicParams:List<Any?> = emptyList(), fromIndex:Int = 0, db:IDb = defaultDb): String
 
     /****************************** 执行sql *******************************/
     /**
