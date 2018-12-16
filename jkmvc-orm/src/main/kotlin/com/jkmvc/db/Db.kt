@@ -421,7 +421,7 @@ class Db protected constructor(public override val name:String /* 标识 */):IDb
      * @value value 参数
      * @return
      */
-    public fun quoteDate(value: Date): String {
+    protected fun quoteDate(value: Date): String {
         val value = "'${value.format()}'"
         return if(dbType == DbType.Oracle)
                     "to_date($value,'yyyy-mm-dd hh24:mi:ss')"
