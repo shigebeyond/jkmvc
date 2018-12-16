@@ -127,14 +127,19 @@ class DbMeta(public override val name:String /* 标识 */): IDbMeta {
     }
 
     /**
-     * 属性名到字段名的映射
+     * 属性名到字段名的映射 -- 缓存字段名
      */
     protected val prop2ColumnMapping: MutableMap<String, String> = HashMap()
 
     /**
-     * 字段名到属性名的映射
+     * 字段名到属性名的映射 -- 缓存属性名
      */
     protected val column2PropMapping: MutableMap<String, String> = HashMap()
+
+    /**
+     * 缓存转义的标识符
+     */
+    protected val quotedIds: MutableMap<String, String> = HashMap()
 
     /**
      * 根据对象属性名，获得db字段名
@@ -197,7 +202,9 @@ class DbMeta(public override val name:String /* 标识 */): IDbMeta {
      * @return
      */
     public override fun quoteIdentifier(id: String): String {
-        return "$identifierQuoteString$id$identifierQuoteString"
+        return quotedIds.getOrPut(id) {
+            "$identifierQuoteString$id$identifierQuoteString"
+        }
     }
 
 }

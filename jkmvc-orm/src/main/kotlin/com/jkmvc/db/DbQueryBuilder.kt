@@ -82,7 +82,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) :D
         if(alias == null)
             return "(" + subsql.sql + ")"
 
-        return "(${subsql.sql}) ${db.identifierQuoteString}$alias${db.identifierQuoteString}"
+        return "(${subsql.sql}) ${db.quoteIdentifier(alias)}"
     }
 
     /**

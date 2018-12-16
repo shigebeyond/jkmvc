@@ -89,7 +89,7 @@ interface IDbIdentifierQuoter{
             }
 
             // 字段名
-            if(col == "*" || (isKeyword(col))) { // * 或 关键字不转义
+            if(col == "*" || isKeyword(col)) { // * 或 关键字不转义
                 //...
             }else{ // 其他字段转义
                 col = quoteIdentifier(col)
