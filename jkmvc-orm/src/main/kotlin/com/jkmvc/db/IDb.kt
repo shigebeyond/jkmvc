@@ -10,7 +10,12 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-interface IDb: Closeable, IDbMeta, IDbValueQuoter {
+interface IDb: Closeable, IDbMeta, IDbValueQuoter, IDbIdentifierQuoter {
+
+    /**
+     * db元数据
+     */
+    val meta: IDbMeta;
 
     /**
      * 是否强制使用主库

@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-15 9:03 PM
  */
-class DbMeta(public override val name:String /* 标识 */): IDbMeta {
+class DbMeta(public override val name:String /* 标识 */): IDbMeta, IDbIdentifierQuoter {
 
     companion object {
 
@@ -40,6 +40,7 @@ class DbMeta(public override val name:String /* 标识 */): IDbMeta {
 
     }
 
+    /************************** 元数据 ***************************/
     /**
      * 主库配置
      */
@@ -126,6 +127,7 @@ class DbMeta(public override val name:String /* 标识 */): IDbMeta {
         null
     }
 
+    /************************** 属性名与字段名互转 ***************************/
     /**
      * 属性名到字段名的映射 -- 缓存字段名
      */
@@ -135,11 +137,6 @@ class DbMeta(public override val name:String /* 标识 */): IDbMeta {
      * 字段名到属性名的映射 -- 缓存属性名
      */
     protected val column2PropMapping: MutableMap<String, String> = HashMap()
-
-    /**
-     * 缓存转义的标识符
-     */
-    protected val quotedIds: MutableMap<String, String> = HashMap()
 
     /**
      * 根据对象属性名，获得db字段名
@@ -186,6 +183,12 @@ class DbMeta(public override val name:String /* 标识 */): IDbMeta {
             prop
         }
     }
+
+    /************************** 转义标识符 ***************************/
+    /**
+     * 缓存转义的标识符
+     */
+    protected val quotedIds: MutableMap<String, String> = HashMap()
 
     /**
      * 是否关键字
