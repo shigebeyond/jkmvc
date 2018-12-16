@@ -182,4 +182,22 @@ class DbMeta(public override val name:String /* 标识 */): IDbMeta {
         }
     }
 
+    /**
+     * 是否关键字
+     * @param col 列
+     * @return
+     */
+    public override fun isKeyword(col: String): Boolean{
+        return dbType == DbType.Oracle && col == "rownum"
+    }
+
+    /**
+     * 转义标识符(表名/字段名)
+     * @param 表名或字段名或别名 DbAlias
+     * @return
+     */
+    public override fun quoteIdentifier(id: String): String {
+        return "$identifierQuoteString$id$identifierQuoteString"
+    }
+
 }

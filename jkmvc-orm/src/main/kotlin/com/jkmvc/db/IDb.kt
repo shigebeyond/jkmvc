@@ -10,7 +10,7 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-interface IDb: IDbValueQuoter, Closeable, IDbMeta {
+interface IDb: Closeable, IDbMeta, IDbValueQuoter {
 
     /**
      * 是否强制使用主库
@@ -228,45 +228,6 @@ interface IDb: IDbValueQuoter, Closeable, IDbMeta {
      * 回滚
      */
     fun rollback():Boolean;
-
-    /**
-     * 转义多个表名
-     *
-     * @param Collection<CharSequence> tables 表名集合，其元素可以是String, 也可以是DbAlias
-     * @return
-     */
-    fun quoteTables(tables:Collection<CharSequence>, with_brackets:Boolean = false):String;
-
-    /**
-     * 转义多个字段名
-     *
-     * @param Collection<CharSequence> columns 表名集合，其元素可以是String, 也可以是DbAlias
-     * @param bool with_brackets 当拼接数组时, 是否用()包裹
-     * @return
-     */
-    fun quoteColumns(columns:Collection<CharSequence>, with_brackets:Boolean = false):String;
-
-    /**
-     * 转义表名
-     *   mysql为`table`
-     *   oracle为"table"
-     *   sql server为"table" [table]
-     *
-     * @param table
-     * @return
-     */
-    fun quoteTable(table:CharSequence):String
-
-    /**
-     * 转义字段名
-     *   mysql为`column`
-     *   oracle为"column"
-     *   sql server为"column" [column]
-     *
-     * @param column 字段名, 可以是字段数组
-     * @return
-     */
-    fun quoteColumn(column:CharSequence):String
 
     /**
      * 预览sql

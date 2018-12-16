@@ -6,10 +6,10 @@ import com.jkmvc.common.joinToString
 /**
  * Db值转义器
  *
- * @ClassName: IDbQuoter
+ * @ClassName: IDbValueQuoter
  * @Description:
  * @author shijianhang<772910474@qq.com>
- * @date 2017-11-21 7:28 PM
+ * @date 2018-11-21 7:28 PM
  */
 interface IDbValueQuoter {
 

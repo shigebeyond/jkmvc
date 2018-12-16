@@ -387,103 +387,6 @@ class Db protected constructor(public override val name:String /* 标识 */):IDb
     }
 
     /**
-     * 转义多个表名
-     *
-     * @param tables 表名集合，其元素可以是String, 也可以是DbAlias
-     * @param with_brackets 当拼接数组时, 是否用()包裹
-     * @return
-     */
-    public override fun quoteTables(tables:Collection<CharSequence>, with_brackets:Boolean):String
-    {
-        // 遍历多个表转义
-        return tables.joinToString(", ", if(with_brackets) "(" else "", if(with_brackets) ")" else ""){
-            // 单个表转义
-            quoteTable(it)
-        }
-    }
-
-    /**
-     * 转义表名
-     *   mysql为`table`
-     *   oracle为"table"
-     *   sql server为"table" [table]
-     *
-     * @param table 表名或别名 DbAlias
-     * @return
-     */
-    public override fun quoteTable(table:CharSequence):String
-    {
-        return if(table is DbExpr) // 表与别名之间不加 as，虽然mysql可识别，但oracle不能识别
-                    table.quote(identifierQuoteString, " ")
-                else
-                    "$identifierQuoteString$table$identifierQuoteString";
-    }
-
-    /**
-     * 转义多个字段名
-     *
-     * @param columns 表名集合，其元素可以是String, 也可以是DbAlias
-     * @param with_brackets 当拼接数组时, 是否用()包裹
-     * @return
-     */
-    public override fun quoteColumns(columns:Collection<CharSequence>, with_brackets:Boolean):String
-    {
-        // 遍历多个字段转义
-        return columns.joinToString(", ", if(with_brackets) "(" else "", if(with_brackets) ")" else "") {
-            // 单个字段转义
-            quoteColumn(it)
-        }
-    }
-
-    /**
-     * 转义字段名
-     *   mysql为`column`
-     *   oracle为"column"
-     *   sql server为"column" [column]
-     *
-     * @param column 字段名, 可能是别名 DbAlias
-     * @return
-     */
-    public override fun quoteColumn(column:CharSequence):String
-    {
-        var table = "";
-        var col: String; // 字段
-        var alias:String? = null; // 别名
-        var colQuoting = true // 是否转义字段
-        if(column is DbExpr){
-            col = column.exp.toString()
-            alias = column.alias
-            colQuoting = column.expQuoting
-        }else{
-            col = column.toString()
-        }
-
-        // 转义字段 + 非函数表达式
-        if (colQuoting && "^\\w[\\w\\d_\\.\\*]*".toRegex().matches(column))
-        {
-            // 表名
-            if(column.contains('.')){
-                var arr = column.split('.');
-                table = "$identifierQuoteString${arr[0]}$identifierQuoteString.";
-                col = arr[1]
-            }
-
-            // 字段名
-            if(col == "*" || (dbType == DbType.Oracle && col == "rownum")) { // * 或 oracle的rownum 字段不转义
-                //...
-            }else{ // 其他字段转义
-                col = "$identifierQuoteString$col$identifierQuoteString";
-            }
-        }
-
-        // 字段别名
-        if(alias == null)
-            return "$table$col";
-
-        return "$table$col AS $identifierQuoteString$alias$identifierQuoteString"; // 转义
-    }
-
-    /**
      * 转义单个值
      *
      * @param value 字段值, 可以是值数组
@@ -541,7 +444,7 @@ class Db protected constructor(public override val name:String /* 标识 */):IDb
         // 正则替换
         /*var i = 0 // 迭代索引
         return sql.replace("\\?".toRegex()) { matches: MatchResult ->
-            quote(params[i++]) // 转义参数值
+            quoteIdentifier(params[i++]) // 转义参数值
         }*/
 
         // 格式化字符串

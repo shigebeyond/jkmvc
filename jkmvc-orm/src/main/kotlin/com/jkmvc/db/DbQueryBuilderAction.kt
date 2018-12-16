@@ -128,7 +128,7 @@ abstract class DbQueryBuilderAction : IDbQueryBuilder() {
          */
         protected val SqlTemplates:Array<String> = arrayOf(
                 "SELECT :distinct :columns FROM :table",
-                "INSERT INTO :table (:columns) :values", // quoteColumn() 默认不加(), quote() 默认加()
+                "INSERT INTO :table (:columns) :values", // quoteColumn() 默认不加(), quoteIdentifier() 默认加()
                 "UPDATE :table SET :column = :value",
                 "DELETE FROM :table"
         );
@@ -439,7 +439,7 @@ abstract class DbQueryBuilderAction : IDbQueryBuilder() {
         val valueSize = insertRows.rows.size
         while(i < valueSize){ //insertRows.rows是多行数据，但是只有一维，需要按columns的大小，来拆分成多行
             sql.append("(")
-            //对每值执行db.quote(value);
+            //对每值执行db.quoteIdentifier(value);
             val columnSize = insertRows.columns!!.size
             for (j in 0..(columnSize - 1)){
                 val v = insertRows.rows[i++]

@@ -26,6 +26,7 @@ val rs = conn.metaData.getColumns(conn.catalog, dbConfig["schema"], null, null)
 --------
 
 bug：
+
 java 数据库查询Date类型字段 没有了时分秒 全为 00
 
 
@@ -510,3 +511,103 @@ public fun Clob?.toString2(): String? {
 ---------------
 
 
+
+
+
+
+
+去掉 Db.toLong
+
+Db.toInt
+
+? 改为  DbExpr.question
+
+
+transform =
+
+
+schema 读配置的, 无所谓
+
+
+    /**
+     * 切换数据库连接
+     * @param db
+     * @return
+     */
+    fun db(db:IDb):IDbQueryBuilder
+
+    /**
+     * 设置数据库连接
+     * @param db
+     * @return
+     */
+    fun db(dbName: String):IDbQueryBuilder{
+        return db(Db.instance(dbName))
+    }
+
+
+
+
+    /**
+     * 数据库连接
+     *   由于 CompiledSql 作为编译后的sql可以被缓存起来，以便复用，避免重复编译sql，因此一个 CompiledSql 对象可以跨越多个请求/线程而存在的，从而导致他的属性不能有只存在于单个请求/线程的对象，如数据库连接（上一个请求与下一个请求获得的连接可以不一样）
+     *   => 只记录dbName，每次执行都获得当前线程最新的连接
+     */
+    public abstract val db: IDb
+
+
+
+    /**
+     * 查询一个值（单行单列）
+     *
+     * @param params 动态参数
+     * @return
+     */
+    public override fun findInt(vararg params: Any?):Int {
+        return findCell(params)
+    }
+
+    /**
+     * 查询一个值（单行单列）
+     *
+     * @param params 动态参数
+     * @return
+     */
+    public override fun findLong(vararg params: Any?):Long {
+        return findCell(params)
+    }
+
+    /**
+     * 查询一个值（单行单列）
+     *
+     * @param params 动态参数
+     * @return
+     */
+    public override fun findFloat(vararg params: Any?):Float {
+        return findCell(params)
+    }
+
+    /**
+     * 查询一个值（单行单列）
+     *
+     * @param params 动态参数
+     * @return
+     */
+    public override fun findDouble(vararg params: Any?):Double {
+        return findCell(params)
+    }
+
+    /**
+     * 查询一个值（单行单列）
+     *
+     * @param params 动态参数
+     * @return
+     */
+    public override fun findBoolean(vararg params: Any?):Boolean {
+        val i:Int = findCell(params)
+        return i > 0;
+    }
+
+ -----------------
+
+ 将db属性(依赖)从query builder中删掉

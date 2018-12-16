@@ -62,15 +62,15 @@ data class DbExpr(public val exp:CharSequence /* 表达式, 可以是 String | D
      * @param delimiter 连接符, 连接表达式+别名
      * @return
      */
-    public fun quote(identifierQuoteString: String, delimiter:String = " "): String{
+    public fun quoteIdentifier(quoter: IDbIdentifierQuoter, delimiter:String = " "): String{
         // 转义别名
         val alias2 = if(alias == null)
                         ""
                     else
-                        "$identifierQuoteString$alias$identifierQuoteString"
+                        quoter.quoteIdentifier(alias)
         // 转义表达式
         return if(expQuoting) // 转
-                    "$identifierQuoteString$exp$identifierQuoteString$delimiter$alias2"
+                    "${quoter.quoteIdentifier(exp.toString())}$delimiter$alias2"
                 else // 不转
                     "$exp$delimiter$alias2"
     }

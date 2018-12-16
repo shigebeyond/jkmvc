@@ -4,7 +4,7 @@ package com.jkmvc.db
  * db元数据
  *
  */
-interface IDbMeta{
+interface IDbMeta: IDbIdentifierQuoter{
 
     /**
      * 标识名
@@ -62,7 +62,7 @@ interface IDbMeta{
      * @param table
      * @return
      */
-    public fun listColumns(table:String): List<String> {
+    fun listColumns(table:String): List<String> {
         return tableColumns.get(table)!!;
     }
 }
