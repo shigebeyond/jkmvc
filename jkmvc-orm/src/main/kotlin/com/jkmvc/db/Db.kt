@@ -173,6 +173,14 @@ class Db protected constructor(public override val name:String /* 标识 */):IDb
     protected var rollbacked = false;
 
     /**
+     * 是否强制使用主库
+     */
+    public override fun forceMaster(f: Boolean): IDb{
+        this.forceMaster = f
+        return this
+    }
+
+    /**
      * 执行事务
      * @param statement db操作过程
      * @return

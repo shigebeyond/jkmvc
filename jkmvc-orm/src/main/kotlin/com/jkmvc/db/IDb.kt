@@ -13,6 +13,11 @@ import kotlin.reflect.KClass
 interface IDb: IDbValueQuoter, Closeable, IDbMeta {
 
     /**
+     * 是否强制使用主库
+     */
+    fun forceMaster(f: Boolean): IDb
+
+    /**
      * 执行事务
      * @param statement db操作过程
      * @return
