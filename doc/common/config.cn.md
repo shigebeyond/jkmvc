@@ -1,6 +1,6 @@
 # 配置
 
-jkmvc的配置文件一般放在 src/main/resources/ 目录下
+jkmvc的配置文件一般放在 `src/main/resources/` 目录下
 
 jkmvc支持以下2种类型的配置文件
 
@@ -13,7 +13,7 @@ jkmvc支持以下2种类型的配置文件
 
 只支持定义一层的键值对
 
-如 jkmvc/jkmvc-http/src/main/resources/cookie.properties
+如 `jkmvc/jkmvc-http/src/main/resources/cookie.properties`
 
 ```
 expiry = 604800
@@ -27,7 +27,7 @@ httponly = false
 
 支持定义多层的键值对
 
-如 jkmvc/jkmvc-orm/src/main/resources/database.yaml
+如 `jkmvc/jkmvc-orm/src/main/resources/database.yaml`
 
 ```
 # 数据库名

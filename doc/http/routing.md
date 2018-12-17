@@ -2,13 +2,13 @@
 
 Jkmvc provides a very powerful routing system.  In essence, routes provide an interface between the urls and your controllers and actions.  With the correct routes you could make almost any url scheme correspond to almost any arrangement of controllers.
 
-As mentioned in the [Request Flow](flow) section, a request is handled by the `Request` class, which will look for a matching Route and load the appropriate controller to handle that request.
+As mentioned in the [Request Flow](flow.md) section, a request is handled by the `Request` class, which will look for a matching Route and load the appropriate controller to handle that request.
 
 [!!] It is important to understand that *routes are matched in the order they are added*, and as soon as a URL matches a route, routing is essentially "stopped" and *the remaining routes are never tried*.  Because the default route matches almost anything, including an empty url, new routes must be place before it.
 
 ## 1 Define routing configuration
 
-If you look in ``jkmvc/jkmvc-orm/src/main/resources/routes.yaml`` you will see the "default" routing configuration as follows:
+If you look in `jkmvc/jkmvc-orm/src/main/resources/routes.yaml` you will see the "default" routing configuration as follows:
 
 ```
 # 1.1 route name
@@ -42,7 +42,7 @@ Lets look at the default route again, the uri is `<controller>(/<action>(/<id>)?
 
 And a blank uri would match default controller and action (set by `defaults` configuration item) would be assumed resulting in the `WelcomeController` class being loaded and the `indexAction` method being called to handle the request.
 
-You can use any name you want for your keys, but the following keys have special meaning to the [Request](request) object, and will influence which controller and action are called:
+You can use any name you want for your keys, but the following keys have special meaning to the [Request](request.md) object, and will influence which controller and action are called:
 
  * **controller** - The controller that the request should execute.
  * **action** - The action method to call.
@@ -76,7 +76,7 @@ user/detail/1 | UserController#detailAction()，you can call `req.req.getIntRout
 
 ## 2 Get routing parameters
 
-The `controller` and `action` can be accessed from the [Request](request) as public properties like so:
+The `controller` and `action` can be accessed from the [Request](request.md) as public properties like so:
 
 ```
 	// From within a controller:

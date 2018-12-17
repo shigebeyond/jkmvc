@@ -1,6 +1,6 @@
 # 数据库操作
 
-## 1 数据库连接配置
+## 1 数据库配置
 
 vim src/main/resources/database.yaml
 
@@ -26,7 +26,7 @@ default:
       password: root
 ```
 
-你可以配置多个数据库连接，只要使用不同的数据库名就行
+你可以配置多个数据库，只要使用不同的数据库名就行
 
 
 ## 2 获得数据库操作对象
@@ -70,31 +70,27 @@ isInTransaction(): Boolean | 是否在事务中
 
 方法 | 作用
 --- | ---
-execute(sql: String, params: List<Any?>? = null, generatedColumn: String? = null): Int | 执行更新
+execute(sql: String, params: List<Any?> = emptyList(), generatedColumn: String? = null): Int | 执行更新
 batchExecute(sql: String, paramses: List<Any?>, paramSize: Int): IntArray | 批量更新: 每次更新sql参数不一样
 
 ### 3.4 执行查询sql的方法
 
 方法 | 作用
 --- | ---
-queryCell(sql: String, params: List<Any?>? = null): Pair<Boolean, Any?> | 查询一行一列
-queryColumn(sql: String, params: List<Any?>?): List<Any?> | 查询一列(多行)
-queryResult(sql: String, params: List<Any?>? = null, action: (ResultSet) -> T): T | 查询多行
-queryRow(sql: String, params: List<Any?>? = null, transform: (MutableMap<String, Any?>) -> T): T? | 查询一行(多列)
-queryRows(sql: String, params: List<Any?>? = null, transform: (MutableMap<String, Any?>) -> T): List<T> | 查询多行
+queryResult(sql: String, params: List<Any?> = emptyList(), action: (ResultSet) -> T): T | 查询多行
+queryRow(sql: String, params: List<Any?> = emptyList(), transform: (MutableMap<String, Any?>) -> T): T? | 查询一行(多列)
+queryRows(sql: String, params: List<Any?> = emptyList(), transform: (MutableMap<String, Any?>) -> T): List<T> | 查询多行
+queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): List<T?> | 查询一列(多行)
+queryCell(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): Cell<T> | 查询一行一列
 
 ### 3.5 转义与预览的方法
 
 属性/方法 | 作用
 --- | ---
-previewSql(sql: String, params: List<Any?>? = null): String | 预览sql
+previewSql(sql: String, params: List<Any?> = emptyList()): String | 预览sql
 quote(value: Any?): String | 转义值
-quoteColumn(column: Pair<String, String>, with_brackets: Boolean = false): String | 转义字段名: mysql为`column`, oracle为"column", sql server为"column"
-quoteColumn(column: String, alias: String? = null, with_brackets: Boolean = false): String | quoteColumn(column: Any): String | 转义字段名
-quoteColumns(columns: Collection<Any>, with_brackets: Boolean = false): String | 转义多个字段名
-quoteTable(table: String, alias: String? = null): String | quoteTable(table: Pair<String, String?>): String | 转义表名: mysql为`table`, oracle为"table", sql server为"table" table
-quoteTable(table: Any): String | 转义表名
-quoteTables(tables: Collection<Any>, with_brackets: Boolean = false): String | 转义多个表名
+quoteColumn(column: CharSequence): String | 转义字段名
+quoteTable(table: CharSequence): String | 转义表名
 
 ### 3.6 数据库字段与对象属性名互转的方法，主要用在 model 中
 
@@ -127,11 +123,11 @@ db.transaction {
     println("插入user表：" + id)
 
     // 查询一条数据
-    val record = db.queryRow("select * from user limit 1" /*sql*/, null /*参数*/, Map::class.recordTranformer /*转换结果的函数*/) // 返回 Map 类型的一行数据
+    val record = db.queryRow("select * from user limit 1" /*sql*/, emptyList() /*参数*/, Map::class.recordTranformer /*转换结果的函数*/) // 返回 Map 类型的一行数据
     println("查询user表：" + record)
 
     // 统计行数
-    val (hasNext, count) = db.queryCell("select count(1) from user" /*sql*/)
+    val count = db.queryCell<Int>("select count(1) from user" /*sql*/).get()!!
     println("统计user表：" + count)
 
     // 更新
@@ -139,7 +135,7 @@ db.transaction {
     println("更新user表：" + f)
 
     // 查询多条数据
-    val records = db.queryRows("select * from user limit 10" /*sql*/, null /*参数*/, Map::class.recordTranformer /*转换结果的函数*/) // 返回 Map 类型的多行数据
+    val records = db.queryRows("select * from user limit 10" /*sql*/, emptyList() /*参数*/, Map::class.recordTranformer /*转换结果的函数*/) // 返回 Map 类型的多行数据
     println("查询user表：" + records)
 
     // 删除 

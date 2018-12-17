@@ -3,7 +3,7 @@
 使用 `Validation::execute(exp:String, value:Any, variables:Map<String, Any?>): ValidationResult` 方法来执行校验。 
 
 该方法需要3个参数：
-1. `exp`: 校验表达式，[语法参考](validation_expression)
+1. `exp`: 校验表达式，[语法参考](validation_expression.cn.md)
 2. `value`: 待校验的值
 3. `variables`: 校验表达式中需要的其他变量
 

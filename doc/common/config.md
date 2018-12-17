@@ -13,7 +13,7 @@ Jkmvc supports two types of configuration files
 
 Only supports 1 level of key-value pairs
 
-eg. jkmvc/jkmvc-http/src/main/resources/cookie.properties
+eg. `jkmvc/jkmvc-http/src/main/resources/cookie.properties`
 
 ```
 expiry = 604800
@@ -27,7 +27,7 @@ httponly = false
 
 Supports multiple level of key-value pairs
 
-eg. jkmvc/jkmvc-orm/src/main/resources/database.yaml
+eg. `jkmvc/jkmvc-orm/src/main/resources/database.yaml`
 
 ```
 #  database name

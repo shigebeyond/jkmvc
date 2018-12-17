@@ -20,9 +20,12 @@ Select 语句需要指定表名，通过 `from()` 方法来指定。该方法有
 2. `alias`, 表别名，默认值是null
 
 ```
-query.from("user", "u")
-query.from("user")
+query.from("user") // 无别名
+query.from("user", "u") // 有别名
+query.from(DbExpr("user", "u")) // 等价于上一行
 ```
+
+其中, `DbExpr` 类参考
 
 ### 2.2 `where` 条件
 
@@ -72,7 +75,7 @@ SELECT `username`, `password` FROM `user` WHERE `username` = "john"
 如果你要在select字段时，指定字段别名，你需要在调用 `select()` 时，使用 `Pair<String, String>` 对象作为参数：
 
 ```
-query.select("username" to "u", "password" to "p").from("user");
+query.select(DbExpr(("username", "u"), DbExpr("password", "p")).from("user");
 ```
 
 生成sql如下：
@@ -142,7 +145,7 @@ val records = query.findAll<Record>()
 // SELECT * FROM `user` LIMIT 1
 val record = query.find<Record>()
 // SELECT username FROM `user`
-val usernames = query.select("username").findColumn()
+val usernames = query.select("username").findColumn<String>()
 // SELECT count(1) FROM `user`
 val count = query.count()
 ```
@@ -236,7 +239,7 @@ SELECT `authors`.`name`, `posts`.`content` FROM `authors` LEFT JOIN `posts` ON (
 SQL中提供的聚合函数可以用来统计、求和、求最值等，如 `COUNT()`, `SUM()`, `AVG()`. 他们通常是结合 `groupBy()` 来分组统计，或结合 `having()` 来过滤聚合结果
 
 ```
-query.select("username", "COUNT(`id`)" to "total_posts").from("posts").groupBy("username").having("total_posts", ">=", 10).findAll<Record>()
+query.select("username", DbExpr("COUNT(`id`)", "total_posts", false)).from("posts").groupBy("username").having("total_posts", ">=", 10).findAll<Record>()
 ```
 
 生成sql如下：
@@ -251,12 +254,12 @@ SELECT `username`, COUNT(`id`) AS `total_posts` FROM `posts` GROUP BY `username`
 
 ```
 // subquery
-val sub = DbQueryBuilder().select("username", "COUNT(`id`)" to "total_posts")
+val sub = DbQueryBuilder().select("username", DbExpr("COUNT(`id`)", "total_posts", false))
         .from("posts").groupBy("username").having("total_posts", ">=", 10);
 
 // join subquery
 DbQueryBuilder().select("profiles.*", "posts.total_posts").from("profiles")
-.joins(sub to "posts", "INNER").on("profiles.username", "=", "posts.username").findAll<Record>()
+.joins(DbExpr(sub, "posts", false), "INNER").on("profiles.username", "=", "posts.username").findAll<Record>()
 ```
 
 生成sql如下：
@@ -271,7 +274,7 @@ Insert 查询也可以接入 Select 子查询
 
 ```
 // subquery
-val sub = DbQueryBuilder().select("username", "COUNT(`id`)" to "total_posts")
+val sub = DbQueryBuilder().select("username", DbExpr("COUNT(`id`)", "total_posts", false))
 .from("posts").groupBy("username").having("total_posts", ">=", 10);
 
 // insert subquery

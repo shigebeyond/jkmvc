@@ -72,7 +72,7 @@ Notice that the column and table names are automatically escaped, as well as the
 It is also possible to create `AS` aliases when selecting, by passing a `Pair<String, String>` object as each parameter to `select()`:
 
 ```
-query.select("username" to "u", "password" to "p").from("user");
+query.select(DbExpr("username", "u"), DbExpr("password", "p")).from("user");
 ```
 
 This query would generate the following SQL:
@@ -142,7 +142,7 @@ val records = query.findAll<Record>()
 // SELECT * FROM `user` LIMIT 1
 val record = query.find<Record>()
 // SELECT username FROM `user`
-val usernames = query.select("username").findColumn()
+val usernames = query.select("username").findColumn<String>()
 // SELECT count(1) FROM `user`
 val count = query.count()
 ```
@@ -238,7 +238,7 @@ SELECT `authors`.`name`, `posts`.`content` FROM `authors` LEFT JOIN `posts` ON (
 Aggregate functions like `COUNT()`, `SUM()`, `AVG()`, etc. will most likely be used with the `groupBy()` and possibly the `having()` methods in order to group and filter the results on a set of columns.
 
 ```
-query.select("username", "COUNT(`id`)" to "total_posts").from("posts").groupBy("username").having("total_posts", ">=", 10).findAll<Record>();
+query.select("username", DbExpr("COUNT(`id`)", "total_posts", false)).from("posts").groupBy("username").having("total_posts", ">=", 10).findAll<Record>();
 ```
 
 This will generate the following query:
@@ -253,12 +253,12 @@ Query Builder objects can be passed as parameters to many of the methods to crea
 
 ```
 // subquery
-val sub = DbQueryBuilder().select("username", "COUNT(`id`)" to "total_posts")
+val sub = DbQueryBuilder().select("username", DbExpr("COUNT(`id`)", "total_posts", false))
         .from("posts").groupBy("username").having("total_posts", ">=", 10)
 
 // join subquery
 DbQueryBuilder().select("profiles.*", "posts.total_posts").from("profiles")
-.joins(sub to "posts", "INNER").on("profiles.username", "=", "posts.username").findAll<Record>()
+.joins(DbExpr(sub, "posts", false), "INNER").on("profiles.username", "=", "posts.username").findAll<Record>()
 ```
 
 This will generate the following query:
@@ -273,7 +273,7 @@ Insert queries can also use a select query for the input values
 
 ```
 // subquery
-val sub = DbQueryBuilder().select("username", "COUNT(`id`)" to "total_posts")
+val sub = DbQueryBuilder().select("username", DbExpr("COUNT(`id`)", "total_posts", false))
 .from("posts").groupBy("username").having("total_posts", ">=", 10);
 
 // insert subquery

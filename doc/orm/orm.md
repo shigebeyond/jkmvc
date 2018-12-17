@@ -29,4 +29,4 @@ default:
 
 Java use camel-case naming, so jkmvc will transform between ORM object's property name and table's column name, according to configuration item `columnUnderline` and `columnUpperCase`
 
-You can now create your [model](model) and [use ORM](using).
+You can now create your [model](model.md) and [use ORM](using.md).

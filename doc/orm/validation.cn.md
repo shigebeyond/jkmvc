@@ -1,6 +1,6 @@
 ＃ 校验
 
-Orm模型与[Validation](../common/validation/validation)库紧密集成，该库提供了异常类`com.jkmvc.validate.ValidationException`，来帮助您快速处理基本CRUD操作的验证错误。
+Orm模型与[Validation](../common/validation/validation.cn.md)库紧密集成，该库提供了异常类`com.jkmvc.validate.ValidationException`，来帮助您快速处理基本CRUD操作的验证错误。
 
 ## 1 定义校验规则
 

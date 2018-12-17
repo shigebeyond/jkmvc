@@ -4,7 +4,7 @@ A Controller stands in between the models and the views in an application. It pa
 
 Controllers then pass on the data of the model to the views where the data is used to render for the users.  Controllers essentially control the flow of the application.
 
-Controllers are called by the `com.jkmvc.http.HttpHandler#callController` function based on the Route that the url matched.  Be sure to read the [routing](routing) page to understand how to use routes to map urls to your controllers.
+Controllers are called by the `com.jkmvc.http.HttpHandler#callController` function based on the Route that the url matched.  Be sure to read the [routing](routing.md) page to understand how to use routes to map urls to your controllers.
 
 ## 1 Create Controller
 
@@ -45,21 +45,21 @@ controllerPackages:
 
 ## 3 `req` property
 
-Every controller has the `req` property which is the [Request](request) object and represents current request. 
+Every controller has the `req` property which is the [Request](request.md) object and represents current request. 
 
 Outside controler, you can get current request by `Request.current()`
 
-Here is a partial list of the properties and methods available to `req`. See the [Request](request) class for more information on any of these.
+Here is a partial list of the properties and methods available to `req`. See the [Request](request.md) class for more information on any of these.
 
 Property/method | What it does
 --- | ---
-[req.route](route) | The Route that matched the current request url
+[req.route](route.md) | The Route that matched the current request url
 req.controller, <br /> req.action | The controller and action that matched for the current route
 req.routeParams | params which is defined in your route, including controller/action
 
 ## 4 `res` property
 
-Every controller has the `res` property which is the [Response](response) object. 
+Every controller has the `res` property which is the [Response](response.md) object. 
 
 Property/method | What it does
 --- | ---
@@ -79,7 +79,7 @@ An action method handles the current request, it contains all logic code for thi
 
 Every action should call `res.renderXXX(sth)` to send sth to the browser, unless it redirected.
 
-A very basic action method that simply loads a [view](view) file.
+A very basic action method that simply loads a [view](view.md) file.
 
 ```
 	public function indexAction()

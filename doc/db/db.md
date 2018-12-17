@@ -1,6 +1,6 @@
 # Manipulate database
 
-## 1 Configure database connection
+## 1 Configure database
 
 vim src/main/resources/database.yaml
 
@@ -27,7 +27,7 @@ default:
       password: root
 ```
 
-You can configure multiple database connections, as long as you use a different database name.
+You can configure multiple database, as long as you use a different database name.
 
 ## 2 Get `Db` object
 
@@ -53,55 +53,51 @@ Let's take a look at `Db` class's properties and methods
 Property / Method | Function
 --- --- --- ---
 dbType: DbType | Get the database type by driverClass
-listColumns (table: String): List <String> | Get all the columns of the table
-close (): Unit | Close database connection
+listColumns (table: String): List<String> | Get all the columns of the table
+close(): Unit | Close database connection
 
 ### 3.2 Transaction-related methods
 
 Method | Function
 --- --- --- ---
-begin (): Unit | Begin a transaction
-commit (): Boolean | Commit the transaction
-rollback (): Boolean | Rollbak the transaction
-transaction (statement: Db. () -> T): T | Executes the transaction, encapsulating the transaction code with `begin()` / `commit()` / `rollback()`
-isInTransaction (): Boolean | Check whether in a transaction
+begin(): Unit | Begin a transaction
+commit(): Boolean | Commit the transaction
+rollback(): Boolean | Rollbak the transaction
+transaction (statement: Db.() -> T): T | Executes the transaction, encapsulating the transaction code with `begin()` / `commit()` / `rollback()`
+isInTransaction(): Boolean | Check whether in a transaction
 
 ### 3.3 Update-sql executing method
 
 Method | Function
 --- --- --- ---
-execute (sql: String, params: List <Any?>? = null, generatedColumn: String? = null): Int | Execute a update-sql
-batchExecute (sql: String, paramses: List <Any?>, paramSize: Int): IntArray | Batch update
+execute(sql: String, params: List<Any?> = emptyList(), generatedColumn: String? = null): Int | Execute a update-sql
+batchExecute(sql: String, paramses: List<Any?>, paramSize: Int): IntArray | Batch update
 
 ### 3.4 Query-sql executing method
 
 Method | Function
 --- --- --- ---
-queryCell (sql: String, params: List <Any?>? = null): Pair <Boolean, Any?> | Query a cell in a row
-queryColumn (sql: String, params: List <Any?>?): List <Any?> | Query a column in multiple rows
-queryResult (sql: String, params: List <Any?>? = null, action: (ResultSet) -> T): T | Query and get result with lambda
-queryRow (sql: String, params: List <Any?>? = null, transform: (MutableMap <String, Any?>) -> T) | Query one row
-queryRows (sql: String, params: List <Any?>? = null, transform: (MutableMap <String, Any?>) -> T): List <T> | Query multiple rows
+queryResult(sql: String, params: List<Any?> = emptyList(), action: (ResultSet) -> T): T | Query and get result with lambda
+queryRow(sql: String, params: List<Any?> = emptyList(), transform: (MutableMap<String, Any?>) -> T) | Query one row
+queryRows(sql: String, params: List<Any?> = emptyList(), transform: (MutableMap<String, Any?>) -> T): List<T> | Query multiple rows
+queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): List<T> | Query a column in multiple rows
+queryCell(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): Cell<T> | Query a cell in a row
 
 ### 3.5 Quote / Preview sql methods
 
 Property / Method | Function
 --- --- --- ---
-previewSql (sql: String, params: List <Any?>? = null): String | preview sql
-quote (value: Any?): String | quote value
-quoteColumn (column: Pair <String, String>, with_brackets: Boolean = false): String | Quote column name: ``column`` for mysql, `"column"` for oracle, `"column"` for sql server
-quoteColumn (column: String, alias: String? = null, with_brackets: Boolean = false): String | quoteColumn (column: Any): String | Quote column name
-quoteColumns (columns: Collection <Any>, with_brackets: Boolean = false): String | Quote multiple column names
-quoteTable (table: String, alias: String? = null): String | quoteTable (string: String? String): String | Quote table name: ``table`` for mysql, `"table"` for oracle, `"table"` for sql server
-quoteTable (table: Any): String | Quoted table name
-quoteTables (tables: Collection <Any>, with_brackets: Boolean = false): String | Quote multiple table names
+previewSql(sql: String, params: List<Any?> = emptyList()): String | preview sql
+quote(value: Any?): String | quote value
+quoteColumn(column: CharSequence): String | Quoted column name
+quoteTable(table: CharSequence): String | Quoted table name
 
 ### 3.6 Database field and object property name-transforming methods, used in the model
 
 Property / Method | Function
 --- --- --- ---
-column2Prop (column: String): String | Get the object property name according the db field name
-prop2Column (prop: String): String | Get the db property name according the object property name
+column2Prop(column: String): String | Get the object property name according the db field name
+prop2Column(prop: String): String | Get the db property name according the object property name
 
 ## 4 Example
 
@@ -127,11 +123,11 @@ db.transaction {
     println("insert a user：" + id)
 
     // select single row
-    val record = db.queryRow("select * from user limit 1" /*sql*/, null /*sql parameters*/, Map::class.recordTranformer /*transfrom lambda*/) // return a row as `Map` object
+    val record = db.queryRow("select * from user limit 1" /*sql*/, emptyList() /*sql parameters*/, Map::class.recordTranformer /*transfrom lambda*/) // return a row as `Map` object
     println("select a user：" + record)
 
     // count
-    val (hasNext, count) = db.queryCell("select count(1) from user" /*sql*/)
+    val count = db.queryCell<Int>("select count(1) from user" /*sql*/).get()!!
     println("count users: " + count)
 
     // update
@@ -139,7 +135,7 @@ db.transaction {
     println("update a user：" + f)
 
     // select multiple rows
-    val records = db.queryRows("select * from user limit 10" /*sql*/, null /*sql parameters*/, Map::class.recordTranformer /*transfrom lambda*/) // 返回 Map 类型的多行数据
+    val records = db.queryRows("select * from user limit 10" /*sql*/, emptyList() /*sql parameters*/, Map::class.recordTranformer /*transfrom lambda*/) // 返回 Map 类型的多行数据
     println("select multiple users: " + records)
 
     // delete

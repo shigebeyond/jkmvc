@@ -2,7 +2,7 @@
 
 控制器 Controller 是介于模型 Model 和视图 View 之间的负责协调的类。 他将请求数据传递给模型，以便由模型来读写数据。 然后把模型返回的数据，传递给视图来渲染，最终的输出到浏览器。 控制器负责控制web应用的流程。
 
-控制器在 `com.jkmvc.http.HttpHandler#callController` 中调用，只调用匹配路由的控制器。详情请阅读[routing](routing)。
+控制器在 `com.jkmvc.http.HttpHandler#callController` 中调用，只调用匹配路由的控制器。详情请阅读[routing](routing.cn.md)。
 
 ## 1 创建控制器
 
@@ -43,21 +43,21 @@ controllerPackages:
 
 ## 3 `req` 属性
 
-每个控制器都有一个 `req` 属性，他是 [Request](request) 对象，代表当前请求。
+每个控制器都有一个 `req` 属性，他是 [Request](request.cn.md) 对象，代表当前请求。
 
 当然，在控制器之外，你也可以通过 `Request.current()` 来获得当前请求。
 
-以下列出常用 `req` 的属性与方法。详情请参考 [Request](request)
+以下列出常用 `req` 的属性与方法。详情请参考 [Request](request.cn.md)
 
 属性/方法 | 作用
 --- | ---
-[req.route](route) | 匹配当前url的路由对象
+[req.route](route.cn.md) | 匹配当前url的路由对象
 req.controller, <br /> req.action | 当前匹配路由的 controller / action
 req.routeParams | 匹配路由的所有参数，包含 controller / action
 
 ## 4 `res` 属性
 
-每个控制器都有一个 `res` 属性，他是 [Response](response) 对象。
+每个控制器都有一个 `res` 属性，他是 [Response](response.cn.md) 对象。
 
 属性/方法 | 作用
 --- | ---
@@ -78,7 +78,7 @@ Action 操作，其实就是控制器的一个方法，但定义必须满足以�
 
 每个操作方法都应该 `res.renderXXX(sth)` 来给浏览器响应内容，除非请求被重定向。
 
-我们来看看一个简单的操作方法，如加载 [view](view) 视图文件
+我们来看看一个简单的操作方法，如加载 [view](view.cn.md) 视图文件
 
 ```
 	public function indexAction()

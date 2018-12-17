@@ -3,7 +3,7 @@
 Validation can be performed on a value using the `Validation::execute(exp:String, value:Any, variables:Map<String, Any?>): ValidationResult` method. 
 
 It needs 3 paramters:
-1. `exp`: validation expression，[syntax reference](validation_expression)
+1. `exp`: validation expression，[syntax reference](validation_expression.md)
 2. `value`: value to validate 
 3. `variables`: other values used as validate paramerters
 

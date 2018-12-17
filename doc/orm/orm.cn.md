@@ -29,4 +29,4 @@ default:
 
 Java 使用的是驼峰命名，因此 Jkmvc 会根据上面的 `columnUnderline` and `columnUpperCase` 配置项，在 ORM 对象与数据库字段名之间，自动转换命名。
  
-现在你就可以创建 [模型](model)，并[使用 ORM](using)。
+现在你就可以创建 [模型](model.cn.md)，并[使用 ORM](using.cn.md)。

@@ -2,7 +2,7 @@
 
 jkmvc提供了非常强大的路由系统。本质上，路由就是将url映射到对应的控制器和操作(Controller::action)上。使用正确的路由，几乎可以轻轻松松将大部分url都映射到对应的 Controller 上。
 
-在前文的<请求处理流程>中提到，每个请求都是由 `Request` 类来处理的，它会找到一个匹配当前url的路由，并加载对应的 Controller 该请求。
+在前文的[请求处理流程](flow.md)中提到，每个请求都是由 `Request` 类来处理的，它会找到一个匹配当前url的路由，并加载对应的 Controller 该请求。
 
 注意: 多个路由的匹配是有序的，路由的匹配顺序就是它们的添加顺序: 多个路由按照其添加的顺序逐个匹配，一旦前面的路由匹配成功，则后面的路由就直接忽略了.
 
@@ -42,7 +42,7 @@ uri是一个字符串，用于标识url中被匹配的部分。用 `<>` 包住�
 
 路由可以匹配一个空白uri，这时候匹配的 `controller` 与 `action`都是默认值(用 `defaults` 来设置的默认值)，这会调用 `WelcomeController.indexAction` 来处理请求。
 
-关于参数名，你可以随意命名，但是以后的参数名是系统定义，有特殊含义的，会影响哪个 `controller` 与 `action` 被调用
+关于参数名，你可以随意命名，但是以下的参数名在[Request](request.md)对象中有特殊含义的，会影响哪个 `controller` 与 `action` 被调用
 
  * **controlelr** - 处理请求的控制器
  * **action** - 要调用的操作方法，就是 `Controller` 类中的 `Action` 后缀的方法
@@ -78,7 +78,7 @@ user/detail/1 | UserController#detailAction()，其中通过`req.req.getIntRoute
 
 ## 2 获得路由参数
 
-对路由参数 `controller`和`action`，在 `Request` 中可以通过公共属性来直接访问
+对路由参数 `controller`和`action`，在 [Request](request.md) 中可以通过公共属性来直接访问
 
 ```
 	// 在 `Controller` 内:

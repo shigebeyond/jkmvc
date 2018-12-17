@@ -1,6 +1,6 @@
 # Validation
 
-Orm models are tightly integrated with the [Validation](../common/validation/validation) library which comes with a very flexible `com.jkmvc.validate.ValidationException` that helps you quickly handle validation errors from basic CRUD operations.
+Orm models are tightly integrated with the [Validation](../common/validation/validation.md) library which comes with a very flexible `com.jkmvc.validate.ValidationException` that helps you quickly handle validation errors from basic CRUD operations.
 
 ## 1 Defining Rules
 

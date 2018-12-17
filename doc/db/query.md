@@ -2,7 +2,7 @@
 
 There are two different ways to make queries. 
 
-1. [Db](db) methods 
+1. [Db](db.md) methods
 
 ```
 Db::execute()
@@ -11,7 +11,7 @@ Db::queryRow()
 Db::queryRows()
 ```
 
-2. [query builder](query_builder) methods
+2. [query builder](query_builder.md) methods
 
-DbQueryBuilder provides methods similar to sql syntax, and generates real sql adapted to different databases(eg. mysql/oracle).
+`DbQueryBuilder` provides methods similar to sql syntax, and generates real sql adapted to different databases(eg. mysql/oracle).
 
