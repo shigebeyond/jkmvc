@@ -30,7 +30,10 @@ httponly = false
 如 jkmvc/jkmvc-orm/src/main/resources/database.yaml
 
 ```
+# 数据库名
 default:
+  # 主库
+  master:
     driverClass: com.mysql.jdbc.Driver
     url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
     username: root
@@ -39,6 +42,13 @@ default:
     columnUnderline: true
     # 字段名全大写
     columnUpperCase: false
+  # 多个从库, 可省略
+  slaves:
+    -
+      driverClass: com.mysql.jdbc.Driver
+      url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
+      username: root
+      password: root
 ```
 
 ## 2 使用配置数据
@@ -60,7 +70,7 @@ val path:String? = cookieConfig["path"]; // 使用[]操作符来获得配置项�
 // 获得配置对象
 // 第一个参数：配置文件名+多层的键，以"."分隔
 // 第二个参数：配置文件类型
-val dbConfig: Config = Config.instance("database.default", "yaml")
+val dbConfig: Config = Config.instance("database.default.master", "yaml")
 // 获得单个配置项，与2.1一样
 val username: String? = config["username"]
 ```

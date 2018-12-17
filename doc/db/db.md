@@ -7,6 +7,8 @@ vim src/main/resources/database.yaml
 ```
 #  database name
 default:
+  # master database
+  master:
     driverClass: com.mysql.jdbc.Driver
     url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
     username: root
@@ -15,6 +17,14 @@ default:
     columnUnderline: true
     # column's naming conventions: all upperCase
     columnUpperCase: false
+        columnUnderline: true
+  # multiple slave databases
+  slaves:
+    -
+      driverClass: com.mysql.jdbc.Driver
+      url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
+      username: root
+      password: root
 ```
 
 You can configure multiple database connections, as long as you use a different database name.

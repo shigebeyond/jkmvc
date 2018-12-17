@@ -24,7 +24,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
         /**
          * 公共配置
          */
-        public val commonConfig: Config = Config.instance("database._common", "yaml")
+        public val commonConfig: Config = Config.instance("database.__common", "yaml")
 
         /**
          * 是否调试

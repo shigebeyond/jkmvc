@@ -7,6 +7,8 @@ vim src/main/resources/database.yaml
 ```
 # 数据库名
 default:
+  # 主库
+  master:
     driverClass: com.mysql.jdbc.Driver
     url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
     username: root
@@ -15,6 +17,13 @@ default:
     columnUnderline: true
     # 字段名全大写
     columnUpperCase: false
+  # 多个从库, 可省略
+  slaves:
+    -
+      driverClass: com.mysql.jdbc.Driver
+      url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
+      username: root
+      password: root
 ```
 
 你可以配置多个数据库连接，只要使用不同的数据库名就行

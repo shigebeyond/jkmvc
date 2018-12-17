@@ -1,5 +1,5 @@
 # 1 公共配置
-_common:
+__common:
   # 是否调试
   debug: true
   # 指定数据源工厂，需要 IDataSourceFactory 对象，可自定义实现类，但需自己实现根据数据源名来缓存创建好的数据源
