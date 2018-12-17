@@ -11,6 +11,11 @@ import kotlin.reflect.jvm.jvmName
  * User　model
  */
 class UserModel(id:Int? = null): Orm(id) {
+
+    public constructor(data: MutableMap<String, Any?>): this(null){
+        setOriginal(data)
+    }
+
     // 伴随对象就是元数据
     // company object is ormMeta data for model
     companion object m: OrmMeta(UserModel::class){
@@ -156,8 +161,8 @@ class OrmTests{
 
     @Test
     fun testFind(){
-//        val user = UserModel.queryBuilder().where("id", 1).find<UserModel>()
-        val user = UserModel(id)
+        val user = UserModel.queryBuilder().where("id", 1).find<UserModel>(transform = ::UserModel)
+//        val user = UserModel(id)
         println("查找用户: $user" )
     }
 

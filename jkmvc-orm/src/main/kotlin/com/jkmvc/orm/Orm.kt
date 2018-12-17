@@ -13,7 +13,6 @@ import com.jkmvc.db.DbMeta
 abstract class Orm(id:Any? = null) : OrmRelated() {
 
     init{
-        DbMeta.get("")
         if(id != null){
             // 构建根据主键来查询的sql
             queryBuilder().where(ormMeta.primaryKey, id).find(){

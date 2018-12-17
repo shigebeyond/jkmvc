@@ -102,9 +102,11 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
         code.append("/**\n * $label\n *\n * @ClassName: $model\n * @Description:\n * @author shijianhang<772910474@qq.com>\n * @date $date\n */\n")
         // 2 类
         code.append("class $model(id:$pkType? = null): Orm(id) {\n")
-        // 3 元数据
+        // 3 第二构造函数
+        code.append("\n\tpublic constructor(data: Map<String, Any?>): this(null){\n\t\tsetOriginal(data)\n\t}")
+        // 4 元数据
         code.append("\t// 伴随对象就是元数据\n \tcompanion object m: OrmMeta($model::class, \"$label\", \"$table\", \"$pk\"){}\n\n")
-        // 4 属性
+        // 5 属性
         code.append("\t// 代理属性读写")
         // 遍历字段来生成属性
         for (field in fields){

@@ -53,6 +53,9 @@ abstract class OrmRelated : OrmPersistent() {
      * @return
      */
     public override fun setOriginal(orgn: Map<String, Any?>): IOrm {
+        if(orgn.isEmpty())
+            return this
+
         // 设置属性值
         for ((column, value) in orgn) {
             // 关联查询时，会设置关联表字段的列别名（列别名 = 表别名 : 列名），可以据此来设置关联对象的字段值
