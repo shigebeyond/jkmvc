@@ -6,15 +6,8 @@ package com.jkmvc.db
  * @date 2016-10-10
  */
 public enum class SqlType {
-    // 查
-    SELECT,
-
-    // 增
-    INSERT,
-
-    // 改
-    UPDATE,
-
-    // 删
-    DELETE
+    SELECT, // 查
+    INSERT, // 增
+    UPDATE, // 改
+    DELETE // 删
 }
