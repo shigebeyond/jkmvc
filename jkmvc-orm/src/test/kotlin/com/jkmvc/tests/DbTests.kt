@@ -11,7 +11,7 @@ class DbTests{
     val db: Db = Db.instance()
 
     val id: Int by lazy {
-        val minId = db.queryInt("select id from user order by id limit 1" /*sql*/)!!
+        val minId = db.queryCell<Int>("select id from user order by id limit 1" /*sql*/).get()!!
         println("随便选个id: " + minId)
         minId
     }
@@ -77,7 +77,7 @@ class DbTests{
 
     @Test
     fun testCount(){
-        val count = db.queryInt("select count(1) from user" /*sql*/)
+        val count = db.queryCell<Int>("select count(1) from user" /*sql*/).get()!!
         println("统计user表：" + count)
     }
 

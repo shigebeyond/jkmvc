@@ -38,7 +38,7 @@ abstract class IDbQuery{
     /**
      * 查找多个： select 语句
      *
-     * @param params 动态参数
+     * @param params 参数
      * @param db 数据库连接
      * @param transform 转换函数
      * @return 列表
@@ -53,7 +53,7 @@ abstract class IDbQuery{
      *  2 Map类: 直接返回记录数据，不用转换
      *  3 其他类：如果实现带 Map 参数的构造函数，如 constructor(data: MutableMap<String, Any?>)，就调用
      *
-     * @param params 动态参数
+     * @param params 参数
      * @param db 数据库连接
      * @return 列表
      */
@@ -64,7 +64,7 @@ abstract class IDbQuery{
     /**
      * 查找一个： select ... limit 1语句
      *
-     * @param params 动态参数
+     * @param params 参数
      * @param db 数据库连接
      * @param transform 转换函数
      * @return 一个数据
@@ -79,7 +79,7 @@ abstract class IDbQuery{
      *  2 Map类: 直接返回记录数据，不用转换
      *  3 其他类：如果实现带 Map 参数的构造函数，如 constructor(data: MutableMap<String, Any?>)，就调用
      *
-     * @param params 动态参数
+     * @param params 参数
      * @param db 数据库连接
      * @return 一个数据
      */
@@ -90,7 +90,7 @@ abstract class IDbQuery{
     /**
      * 查询一列（多行）
      *
-     * @param params 动态参数
+     * @param params 参数
      * @param clazz 值类型
      * @param db 数据库连接
      * @return
@@ -100,7 +100,7 @@ abstract class IDbQuery{
     /**
      * 查询一列（多行）
      *
-     * @param params 动态参数
+     * @param params 参数
      * @param db 数据库连接
      * @return
      */
@@ -111,7 +111,7 @@ abstract class IDbQuery{
     /**
      * 查询一行一列
      *
-     * @param params 动态参数
+     * @param params 参数
      * @param clazz 值类型
      * @param db 数据库连接
      * @return
@@ -121,7 +121,7 @@ abstract class IDbQuery{
     /**
      * 查询一行一列
      *
-     * @param params 动态参数
+     * @param params 参数
      * @param db 数据库连接
      * @return
      */

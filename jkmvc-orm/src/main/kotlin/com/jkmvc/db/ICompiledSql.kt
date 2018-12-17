@@ -41,7 +41,7 @@ abstract class ICompiledSql: IDbQuery() {
     /**
      * 构建实际参数 = 静态参数 + 动态参数
      *
-     * @param params 动态参数
+     * @param dynamicParams 动态参数
      * @return
      */
     public abstract fun buildParams(dynamicParams: List<Any?> = emptyList()): List<Any?>
@@ -49,7 +49,7 @@ abstract class ICompiledSql: IDbQuery() {
     /**
      * 构建实际参数 = 静态参数 + 动态参数
      *
-     * @param params 动态参数
+     * @param dynamicParams 动态参数
      * @return
      */
     public fun buildParams(dynamicParams: Array<out Any?>): List<Any?>{
@@ -68,7 +68,7 @@ abstract class ICompiledSql: IDbQuery() {
     /**
      * 预览sql
      *
-     * @param params 动态参数
+     * @param dynamicParams 动态参数
      * @param fromIndex 动态参数的开始索引
      * @param db 数据库连接
      * @return

@@ -9,7 +9,7 @@ class QueryBuilderTests{
     val db: Db = Db.instance()
 
     val id: Int by lazy {
-        val minId = db.queryInt("select id from user order by id limit 1" /*sql*/)!!
+        val minId = db.queryCell<Int>("select id from user order by id limit 1" /*sql*/).get()!!
         println("随便选个id: " + minId)
         minId
     }

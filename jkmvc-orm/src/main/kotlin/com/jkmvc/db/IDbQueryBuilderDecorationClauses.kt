@@ -9,10 +9,11 @@ package com.jkmvc.db
  * @author shijianhang
  * @date 2016-10-13
  */
-interface IDbQueryBuilderDecorationClauses<T>
-{
+interface IDbQueryBuilderDecorationClauses<T> {
+
     /**
      * 编译多个子表达式
+     *
      * @param db 数据库连接
      * @param sql 保存编译sql
      */
@@ -29,6 +30,7 @@ interface IDbQueryBuilderDecorationClauses<T>
 
     /**
      * 编译一个子表达式
+     *
      * @param subexp 子表达式
      * @param j 索引
      * @param db 数据库连接
@@ -53,7 +55,7 @@ interface IDbQueryBuilderDecorationClauses<T>
 
     /**
      * 清空
-     * @returnDecorationClauses
+     * @return
      */
     fun clear():IDbQueryBuilderDecorationClauses<T>;
 }

@@ -259,7 +259,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * 查找一个： select ... limit 1语句
      *
-     * @param params 动态参数
+     * @param params 参数
      * @param transform 转换函数
      * @return 单个数据
      */
@@ -279,7 +279,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     /**
      * 查找多个： select 语句
      *
-     * @param params 动态参数
+     * @param params 参数
      * @param transform 转换函数
      * @return 列表
      */

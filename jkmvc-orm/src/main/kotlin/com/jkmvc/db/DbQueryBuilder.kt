@@ -41,7 +41,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
     /**
      * 查找多个： select 语句
      *
-     * @param params 动态参数
+     * @param params 参数
      * @param db 数据库连接
      * @param transform 转换函数
      * @return 列表
@@ -54,7 +54,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
     /**
      * 查找一个： select ... limit 1语句
      *
-     * @param params 动态参数
+     * @param params 参数
      * @param db 数据库连接
      * @param transform 转换函数
      * @return 单个数据
@@ -67,7 +67,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
     /**
      * 查询一列（多行）
      *
-     * @param params 动态参数
+     * @param params 参数
      * @param clazz 值类型
      * @param db 数据库连接
      * @return
@@ -80,7 +80,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
     /**
      * 查询一行一列
      *
-     * @param params 动态参数
+     * @param params 参数
      * @param clazz 值类型
      * @param db 数据库连接
      * @return
@@ -93,7 +93,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
     /**
      * 统计行数： count语句
      *
-     * @param params 动态参数
+     * @param params 参数
      * @param db 数据库连接
      * @return
      */
@@ -110,7 +110,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      * 编译 + 执行
      *
      * @param action sql动作：select/insert/update/delete
-     * @param params 动态参数
+     * @param params 参数
      * @param generatedColumn 返回的自动生成的主键名
      * @param db 数据库连接
      * @return 影响行数|新增id

@@ -22,6 +22,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
     /****************************** 编译sql ********************************/
     /**
      * 编译sql
+     *
      * @param action sql动作：select/insert/update/delete
      * @param db 数据库连接
      * @return 编译好的sql
@@ -30,6 +31,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
 
     /**
      * 编译select语句
+     *
      * @param db 数据库连接
      * @return 编译好的sql
      */
@@ -39,6 +41,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
 
     /**
      * 编译select ... limit 1语句
+     *
      * @param db 数据库连接
      * @return 编译好的sql
      */
@@ -48,6 +51,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
 
     /**
      * 编译select count() 语句
+     *
      * @param db 数据库连接
      * @return 编译好的sql
      */
@@ -57,6 +61,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
 
     /**
      * 编译insert语句
+     *
      * @param db 数据库连接
      * @return 编译好的sql
      */
@@ -66,6 +71,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
 
     /**
      * 编译update语句
+     *
      * @param db 数据库连接
      * @return 编译好的sql
      */
@@ -75,6 +81,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
 
     /**
      * 编译delete语句
+     *
      * @param db 数据库连接
      * @return 编译好的sql
      */
@@ -86,7 +93,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
     /**
      * 统计行数： count语句
      *
-     * @param params 动态参数
+     * @param params 参数
      * @param db 数据库连接
      * @return
      */
@@ -96,7 +103,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      * 编译 + 执行
      *
      * @param action sql动作：select/insert/update/delete
-     * @param params 动态参数
+     * @param params 参数
      * @param generatedColumn 返回自动生成的主键名
      * @param db 数据库连接
      * @return 影响行数|新增id
@@ -107,7 +114,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      * 插入：insert语句
      *
      *  @param generatedColumn 返回的自动生成的主键名
-     *  @param params 动态参数
+     *  @param params 参数
      *  @param db 数据库连接
      * @return 新增的id
      */
@@ -118,7 +125,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
     /**
      * 更新：update语句
      *
-     * @param params 动态参数
+     * @param params 参数
      * @param db 数据库连接
      * @return
      */
@@ -129,7 +136,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
     /**
      * 删除
      *
-     * @param params 动态参数
+     * @param params 参数
      * @param db 数据库连接
      * @return
      */

@@ -17,7 +17,7 @@ import kotlin.reflect.KClass
  */
 class Db protected constructor(public override val name:String /* 标识 */,
                                public override val dbMeta: IDbMeta = DbMeta.get(name) /* 元数据 */
-) : IDb, IDbMeta by dbMeta {
+) : IDb(), IDbMeta by dbMeta {
 
     companion object:Closeable {
 
@@ -262,6 +262,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
 
     /**
      * 预览sql
+     *
      * @param sql
      * @param params sql参数
      * @return
@@ -285,6 +286,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
 
     /**
      * 执行更新
+     *
      * @param sql
      * @param params
      * @param generatedColumn 返回的自动生成的主键名
@@ -318,6 +320,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
 
     /**
      * 查询多行
+     *
      * @param sql
      * @param params
      * @param action 转换结果的函数
@@ -334,6 +337,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
 
     /**
      * 查询多行
+     *
      * @param sql
      * @param params
      * @param transform 转换结果的函数
@@ -350,6 +354,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
 
     /**
      * 查询一行(多列)
+     *
      * @param sql
      * @param params
      * @param transform 转换结果的函数
@@ -366,6 +371,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
 
     /**
      * 查询一列(多行)
+     *
      * @param sql
      * @param params
      * @param clazz 值类型
@@ -382,6 +388,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
 
     /**
      * 查询一行一列
+     *
      * @param sql
      * @param params
      * @param clazz 值类型

@@ -11,6 +11,7 @@ interface IDbQueryBuilderAction {
 
     /**
      * 编译动作子句
+     *
      * @param db 数据库连接
      * @param sql 保存编译的sql
      * @return
@@ -19,6 +20,7 @@ interface IDbQueryBuilderAction {
 
     /**
      * 设置表名
+     *
      * @param table 表名
      * @param alias 别名
      * @return
@@ -29,6 +31,7 @@ interface IDbQueryBuilderAction {
 
     /**
      * 设置表名
+     *
      * @param table 表名
      * @return
      */
@@ -36,6 +39,7 @@ interface IDbQueryBuilderAction {
 
     /**
      * 设置表名
+     *
      * @param table 表名
      * @param alias 别名
      * @return
@@ -46,6 +50,7 @@ interface IDbQueryBuilderAction {
 
     /**
      * 设置表名
+     *
      * @param subquery 子查询
      * @param alias 别名
      * @return

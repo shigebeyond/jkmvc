@@ -9,6 +9,7 @@ import com.jkmvc.common.isArrayOrCollection
  * @date 2016-10-12
  */
 interface IDbQueryBuilderDecoration{
+
     /**
      * 编译修饰子句
      * @param db 数据库连接
