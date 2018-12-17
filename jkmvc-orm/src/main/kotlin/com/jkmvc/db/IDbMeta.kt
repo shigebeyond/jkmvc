@@ -34,6 +34,21 @@ interface IDbMeta: IDbIdentifierQuoter, IDbValueQuoter {
     val schema:String?
 
     /**
+     * 表的字段
+     */
+    val tableColumns: Map<String, List<String>>
+
+    /**
+     * 获得表的所有列
+     *
+     * @param table
+     * @return
+     */
+    fun listColumns(table:String): List<String> {
+        return tableColumns.get(table)!!;
+    }
+
+    /**
      * 根据对象属性名，获得db字段名
      *    可根据实际需要在 model 类中重写
      *
@@ -51,18 +66,4 @@ interface IDbMeta: IDbIdentifierQuoter, IDbValueQuoter {
      */
     fun column2Prop(column:String): String
 
-    /**
-     * 表的字段
-     */
-    val tableColumns: Map<String, List<String>>
-
-    /**
-     * 获得表的所有列
-     *
-     * @param table
-     * @return
-     */
-    fun listColumns(table:String): List<String> {
-        return tableColumns.get(table)!!;
-    }
 }

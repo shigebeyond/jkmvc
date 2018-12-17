@@ -7,7 +7,7 @@ package com.jkmvc.db
  *   用来在 DbQueryBuilder 的select/insert/update语句中，添加不转义的字段值，表示要保存的字段值是一个sql表达式，如 now() / column1 + 1, 如
  *   <code>
  *     // SELECT  COUNT(`id`) AS `total_posts`, `username` FROM `posts`
- *     DbQueryBuilder(db).select("username", DbExpr("COUNT(`id`)", "total_posts", false)).from("posts")
+ *     DbQueryBuilder().select("username", DbExpr("COUNT(`id`)", "total_posts", false)).from("posts")
  *     // UPDATE `user` SET `login_count` = `login_count` + 1 WHERE `id` = 45
  *     DbQueryBuilder().table("user").set("login_count", DbExpr("login_count + 1", false)).where("id", "=", 45).update();
  *   </code>

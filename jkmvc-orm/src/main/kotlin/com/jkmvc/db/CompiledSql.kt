@@ -213,7 +213,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param params 动态参数
      * @return
      */
-    public override fun <T:Any> findColumn(params: List<Any?>, clazz: KClass<T>?, db:IDb): List<Any?> {
+    public override fun <T:Any> findColumn(params: List<Any?>, clazz: KClass<T>?, db:IDb): List<T?> {
         // 执行 select
         return db.queryColumn(sql, buildParams(params), clazz)
     }
@@ -224,7 +224,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param params 动态参数
      * @return
      */
-    public override fun <T:Any> findCell(params: List<Any?>, clazz: KClass<T>?, db:IDb):Pair<Boolean, Any?>{
+    public override fun <T:Any> findCell(params: List<Any?>, clazz: KClass<T>?, db:IDb):Pair<Boolean, T?>{
         // 执行 select
         return db.queryCell(sql, buildParams(params), clazz);
     }

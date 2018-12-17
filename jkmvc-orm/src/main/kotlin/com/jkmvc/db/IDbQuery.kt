@@ -26,6 +26,7 @@ abstract class IDbQuery{
      */
     public abstract val defaultDb: IDb
 
+    /***************************** 查询行 ******************************/
     /**
      * 获得记录转换器
      * @param clazz 要转换的类
@@ -87,6 +88,7 @@ abstract class IDbQuery{
         return find(params, db, getRecordTranformer<T>(T::class));
     }
 
+    /***************************** 查询列 ******************************/
     /**
      * 查询一列（多行）
      *
@@ -95,8 +97,70 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return
      */
-    public abstract fun <T:Any> findColumn(params: List<Any?> = emptyList(), clazz: KClass<T>? = null, db: IDb = defaultDb): List<Any?>;
+    public abstract fun <T:Any> findColumn(params: List<Any?> = emptyList(), clazz: KClass<T>? = null, db: IDb = defaultDb): List<T?>;
 
+    /**
+     * 查询一列(多行)
+     * @param params
+     * @param db
+     * @return
+     */
+    public fun findIntColumn(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<Int>{
+        // 只要指定值类型, 则返回的列表元素类型就是该类型, 不会为null, 因此返回值不是List<Int?>, 而是List<Int>
+        return findColumn(params, Int::class, db) as List<Int>
+    }
+
+    /**
+     * 查询一列(多行)
+     * @param params
+     * @param db
+     * @return
+     */
+    public fun findLongColumn(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<Long>{
+        return findColumn(params, Long::class, db) as List<Long>
+    }
+
+    /**
+     * 查询一列(多行)
+     * @param params
+     * @param db
+     * @return
+     */
+    public fun findDoubleColumn(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<Double>{
+        return findColumn(params, Double::class, db) as List<Double>
+    }
+
+    /**
+     * 查询一列(多行)
+     * @param params
+     * @param db
+     * @return
+     */
+    public fun findFloatColumn(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<Float>{
+        return findColumn(params, Float::class, db) as List<Float>
+    }
+
+    /**
+     * 查询一列(多行)
+     * @param params
+     * @param db
+     * @return
+     */
+    public fun findBooleanColumn(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<Boolean>{
+        return findColumn(params, Boolean::class, db) as List<Boolean>
+    }
+
+    /**
+     * 查询一列(多行)
+     * @param params
+     * @param db
+     * @return
+     */
+    public fun findStringColumn(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<String?>{
+        return findColumn(params, String::class, db)
+    }
+
+    /***************************** 查询值 ******************************/
     /**
      * 查询一行一列
      *
@@ -105,5 +169,71 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return
      */
-    public abstract fun <T:Any> findCell(params: List<Any?> = emptyList(), clazz: KClass<T>? = null, db: IDb = defaultDb): Pair<Boolean, Any?>
+    public abstract fun <T:Any> findCell(params: List<Any?> = emptyList(), clazz: KClass<T>? = null, db: IDb = defaultDb): Pair<Boolean, T?>
+
+    /**
+     * 查询一行一列
+     * @param params
+     * @param db
+     * @return
+     */
+    public fun findInt(params: List<Any?> = emptyList(), db: IDb = defaultDb): Int?{
+        val (hasNext, result) = findCell(params, Int::class, db)
+        return if(hasNext) result else null
+    }
+
+    /**
+     * 查询一行一列
+     * @param params
+     * @param db
+     * @return
+     */
+    public fun findLong(params: List<Any?> = emptyList(), db: IDb = defaultDb): Long?{
+        val (hasNext, result) = findCell(params, Long::class, db)
+        return if(hasNext) result else null
+    }
+
+    /**
+     * 查询一行一列
+     * @param params
+     * @param db
+     * @return
+     */
+    public fun findDouble(params: List<Any?> = emptyList(), db: IDb = defaultDb): Double?{
+        val (hasNext, result) = findCell(params, Double::class, db)
+        return if(hasNext) result else null
+    }
+
+    /**
+     * 查询一行一列
+     * @param params
+     * @param db
+     * @return
+     */
+    public fun findFloat(params: List<Any?> = emptyList(), db: IDb = defaultDb): Float?{
+        val (hasNext, result) = findCell(params, Float::class, db)
+        return if(hasNext) result else null
+    }
+
+    /**
+     * 查询一行一列
+     * @param params
+     * @param db
+     * @return
+     */
+    public fun findBoolean(params: List<Any?> = emptyList(), db: IDb = defaultDb): Boolean?{
+        val (hasNext, result) = findCell(params, Boolean::class, db)
+        return if(hasNext) result else null
+    }
+
+    /**
+     * 查询一行一列
+     * @param params
+     * @param db
+     * @return
+     */
+    public fun findString(params: List<Any?> = emptyList(), db: IDb = defaultDb): String?{
+        val (hasNext, result) = findCell(params, String::class, db)
+        return if(hasNext) result else null
+    }
 }

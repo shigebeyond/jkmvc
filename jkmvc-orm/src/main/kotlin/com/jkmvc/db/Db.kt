@@ -200,11 +200,87 @@ class Db protected constructor(public override val name:String /* 标识 */,
     }
 
     /**
+     * 开启事务
+     */
+    public override fun begin():Unit{
+        if(transDepth++ === 0)
+            masterConn.autoCommit = false; // 禁止自动提交事务
+    }
+
+    /**
+     * 提交事务
+     */
+    public override fun commit():Boolean{
+        // 未开启事务
+        if (transDepth <= 0)
+            return false;
+
+        // 无嵌套事务
+        if (--transDepth === 0)
+        {
+            // 回滚 or 提交事务: 回滚的话,返回false
+            if(rollbacked)
+                masterConn.rollback();
+            else
+                masterConn.commit()
+            val result = rollbacked;
+            rollbacked = false; // 清空回滚标记
+            return result;
+        }
+
+        // 有嵌套事务
+        return true;
+    }
+
+    /**
+     * 回滚事务
+     */
+    public override fun rollback():Boolean{
+        // 未开启事务
+        if (transDepth <= 0)
+            return false;
+
+        // 无嵌套事务
+        if (--transDepth === 0)
+        {
+            rollbacked = false; // 清空回滚标记
+            masterConn.rollback(); // 回滚事务
+        }
+
+        // 有嵌套事务
+        rollbacked = true; // 标记回滚
+        return true;
+    }
+
+    /**
      * 是否在事务中
      * @return
      */
     public override fun isInTransaction(): Boolean {
         return transDepth > 0;
+    }
+
+    /**
+     * 预览sql
+     * @param sql
+     * @param params sql参数
+     * @return
+     */
+    public override fun previewSql(sql: String, params: List<Any?>): String {
+        // 1 无参数
+        if(params.isEmpty())
+            return sql
+
+        // 2 有参数：替换参数
+        // 正则替换
+        /*var i = 0 // 迭代索引
+        return sql.replace("\\?".toRegex()) { matches: MatchResult ->
+            quote(params[i++]) // 转义参数值
+        }*/
+
+        // 格式化字符串
+        val ps = params.mapToArray { quote(it) }
+        return sql.replace("?", "%s").format(*ps)
     }
 
     /**
@@ -321,59 +397,6 @@ class Db protected constructor(public override val name:String /* 标识 */,
     }
 
     /**
-     * 开启事务
-     */
-    public override fun begin():Unit{
-        if(transDepth++ === 0)
-            masterConn.autoCommit = false; // 禁止自动提交事务
-    }
-
-    /**
-     * 提交事务
-     */
-    public override fun commit():Boolean{
-        // 未开启事务
-        if (transDepth <= 0)
-            return false;
-
-        // 无嵌套事务
-        if (--transDepth === 0)
-        {
-            // 回滚 or 提交事务: 回滚的话,返回false
-            if(rollbacked)
-                masterConn.rollback();
-            else
-                masterConn.commit()
-            val result = rollbacked;
-            rollbacked = false; // 清空回滚标记
-            return result;
-        }
-
-        // 有嵌套事务
-        return true;
-    }
-
-    /**
-     * 回滚事务
-     */
-    public override fun rollback():Boolean{
-        // 未开启事务
-        if (transDepth <= 0)
-            return false;
-
-        // 无嵌套事务
-        if (--transDepth === 0)
-        {
-            rollbacked = false; // 清空回滚标记
-            masterConn.rollback(); // 回滚事务
-        }
-
-        // 有嵌套事务
-        rollbacked = true; // 标记回滚
-        return true;
-    }
-
-    /**
      * 关闭
      */
     public override fun close():Unit{
@@ -386,28 +409,5 @@ class Db protected constructor(public override val name:String /* 标识 */,
             masterConn.close()
         if(connUsed and 2 > 0)
             slaveConn.close()
-    }
-
-    /**
-     * 预览sql
-     * @param sql
-     * @param params sql参数
-     * @return
-     */
-    public override fun previewSql(sql: String, params: List<Any?>): String {
-        // 1 无参数
-        if(params.isEmpty())
-            return sql
-
-        // 2 有参数：替换参数
-        // 正则替换
-        /*var i = 0 // 迭代索引
-        return sql.replace("\\?".toRegex()) { matches: MatchResult ->
-            quote(params[i++]) // 转义参数值
-        }*/
-
-        // 格式化字符串
-        val ps = params.mapToArray { quote(it) }
-        return sql.replace("?", "%s").format(*ps)
     }
 }
