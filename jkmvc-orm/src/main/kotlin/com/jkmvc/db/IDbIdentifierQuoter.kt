@@ -11,21 +11,6 @@ package com.jkmvc.db
 interface IDbIdentifierQuoter{
 
     /**
-     * 转义多个表名
-     *
-     * @param tables 表名集合，其元素可以是String, 也可以是DbAlias
-     * @param with_brackets 当拼接数组时, 是否用()包裹
-     * @return
-     */
-    fun quoteTables(tables:Collection<CharSequence>, with_brackets:Boolean):String {
-        // 遍历多个表转义
-        return tables.joinToString(", ", if(with_brackets) "(" else "", if(with_brackets) ")" else ""){
-            // 单个表转义
-            quoteTable(it)
-        }
-    }
-
-    /**
      * 转义表名
      *   mysql为`table`
      *   oracle为"table"
@@ -39,21 +24,6 @@ interface IDbIdentifierQuoter{
                     table.quoteIdentifier(this, " ")
                 else
                     quoteIdentifier(table.toString())
-    }
-
-    /**
-     * 转义多个字段名
-     *
-     * @param columns 字段名集合，其元素可以是String, 也可以是DbAlias
-     * @param with_brackets 当拼接数组时, 是否用()包裹
-     * @return
-     */
-    fun quoteColumns(columns:Collection<CharSequence>, with_brackets:Boolean = false):String {
-        // 遍历多个字段转义
-        return columns.joinToString(", ", if(with_brackets) "(" else "", if(with_brackets) ")" else "") {
-            // 单个字段转义
-            quoteColumn(it)
-        }
     }
 
     /**

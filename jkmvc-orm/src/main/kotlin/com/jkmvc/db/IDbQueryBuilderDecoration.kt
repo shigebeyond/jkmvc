@@ -21,14 +21,14 @@ enum class ClauseType {
  * @author shijianhang
  * @date 2016-10-12
  */
-interface IDbQueryBuilderDecoration : IDbValueQuoter {
+interface IDbQueryBuilderDecoration{
     /**
      * 编译修饰子句
-     *
+     * @param db 数据库连接
      * @param sql 保存编译sql
      * @return
      */
-    fun compileDecoration(sql: StringBuilder): IDbQueryBuilder;
+    fun compileDecoration(db: IDb, sql: StringBuilder): IDbQueryBuilder;
 
     /**
      * 多个on条件

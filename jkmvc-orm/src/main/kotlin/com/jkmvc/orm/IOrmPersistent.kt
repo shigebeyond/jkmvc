@@ -7,7 +7,7 @@ package com.jkmvc.orm
  * @date 2016-10-10
  *
  */
-interface IOrmPersistent :IOrmValid {
+interface IOrmPersistent : IOrmValid {
 
 	/**
 	 * 元数据

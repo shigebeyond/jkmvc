@@ -1,5 +1,7 @@
 package com.jkmvc.orm
 
+import com.jkmvc.db.DbMeta
+
 /**
  * ORM
 
@@ -8,9 +10,10 @@ package com.jkmvc.orm
  * @author shijianhang
  * @date 2016-10-10 上午12:52:34
  */
-abstract class Orm(id:Any? = null): OrmRelated() {
+abstract class Orm(id:Any? = null) : OrmRelated() {
 
     init{
+        DbMeta.get("")
         if(id != null){
             // 构建根据主键来查询的sql
             queryBuilder().where(ormMeta.primaryKey, id).find(){

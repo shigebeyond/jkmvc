@@ -3,6 +3,7 @@ package com.jkmvc.db
 import com.jkmvc.common.getOrPut
 import com.jkmvc.common.isArrayOrCollectionEmpty
 import java.util.*
+import kotlin.reflect.KFunction2
 
 /**
  * sql构建器 -- 修饰子句: 由修饰词join/where/group by/order by/limit来构建的子句
@@ -10,36 +11,7 @@ import java.util.*
  * @author shijianhang
  * @date 2016-10-12
  */
-abstract class DbQueryBuilderDecoration : DbQueryBuilderAction() {
-
-    /**
-     * 转义列
-     */
-    protected val columnQuoter: (Any?) -> String = { column: Any? ->
-        db.quoteColumn(column!! as CharSequence)
-    }
-
-    /**
-     * 转义值
-     */
-    protected val valueQuoter: (Any?) -> String = this::quote
-
-    /**
-     * 转义表
-     */
-    protected val tableQuoter: (Any?) -> String = { table: Any? ->
-        quoteTable(table!! as CharSequence)
-    }
-
-    /**
-     * 转义排序方向
-     */
-    protected val orderDirection: (Any?) -> String = { value: Any? ->
-        if (value != null && "^(ASC|DESC)$".toRegex().matches(value as String))
-            value;
-        else
-            "";
-    }
+abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
 
     /**
      * where/group by/having/order by/limit子句的数组
@@ -59,7 +31,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction() {
     protected val whereClause: DbQueryBuilderDecorationClauses<*>
         get(){
             return clauses.getOrPut(ClauseType.WHERE.ordinal){
-                DbQueryBuilderDecorationClausesGroup("WHERE", arrayOf<((Any?) -> String)?>(columnQuoter, null, valueQuoter));
+                DbQueryBuilderDecorationClausesGroup("WHERE", arrayOf<KFunction2 <IDb, *, String>?>(this::quoteColumn, null, this::quote));
             } as DbQueryBuilderDecorationClauses<*>
         }
 
@@ -70,7 +42,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction() {
     protected val groupByClause: DbQueryBuilderDecorationClauses<*>
         get(){
             return clauses.getOrPut(ClauseType.GROUP_BY.ordinal){
-                DbQueryBuilderDecorationClausesSimple("GROUP BY", arrayOf<((Any?) -> String)?>(columnQuoter));
+                DbQueryBuilderDecorationClausesSimple("GROUP BY", arrayOf<KFunction2 <IDb, *, String>?>(this::quoteColumn));
             } as DbQueryBuilderDecorationClauses<*>
         }
 
@@ -81,7 +53,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction() {
     protected val havingClause: DbQueryBuilderDecorationClauses<*>
         get(){
             return clauses.getOrPut(ClauseType.HAVING.ordinal){
-                DbQueryBuilderDecorationClausesGroup("HAVING", arrayOf<((Any?) -> String)?>(columnQuoter, null, valueQuoter));
+                DbQueryBuilderDecorationClausesGroup("HAVING", arrayOf<KFunction2 <IDb, *, String>?>(this::quoteColumn, null, this::quote));
             } as DbQueryBuilderDecorationClauses<*>
         }
 
@@ -92,23 +64,37 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction() {
     protected val orderByClause: DbQueryBuilderDecorationClauses<*>
         get(){
             return clauses.getOrPut(ClauseType.ORDER_BY.ordinal){
-                DbQueryBuilderDecorationClausesSimple("ORDER BY", arrayOf<((Any?) -> String)?>(columnQuoter, orderDirection));
+                DbQueryBuilderDecorationClausesSimple("ORDER BY", arrayOf<KFunction2 <IDb, *, String>?>(this::quoteColumn, this::quoteOrderDirection));
             } as DbQueryBuilderDecorationClauses<*>
         }
 
     /**
      * limit参数: limit + offset
-     *    为了兼容不同db的特殊的limit语法，不使用 DbQueryBuilderDecorationClausesSimple("LIMIT", arrayOf<((Any?) -> String)?>(null));
+     *    为了兼容不同db的特殊的limit语法，不使用 DbQueryBuilderDecorationClausesSimple("LIMIT", arrayOf<KFunction2 <IDb, *, String>?>(null));
      *    直接硬编码
      */
     protected var limitParams:Pair<Int, Int>? = null
 
     /**
-     * 编译limit表达式
+     * 转义排序方向
      *
+     * @param db
+     * @param direction
+     * @return
+     */
+    fun quoteOrderDirection(db: IDb, direction: String?): String{
+        return if (direction != null && "^(ASC|DESC)$".toRegex().matches(direction))
+            direction;
+        else
+            "";
+    }
+
+    /**
+     * 编译limit表达式
+     * @param db 数据库连接
      * @param sql 保存编译的sql
      */
-    public fun compileLimit(sql: StringBuilder){
+    public fun compileLimit(db: IDb, sql: StringBuilder){
         if(limitParams == null)
             return
 
@@ -159,20 +145,20 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction() {
 
     /**
      * 编译修饰子句
-     *
+     * @param db 数据库连接
      * @param sql 保存编译的sql
      * @return
      */
-    public override fun compileDecoration(sql: StringBuilder): IDbQueryBuilder{
+    public override fun compileDecoration(db: IDb, sql: StringBuilder): IDbQueryBuilder{
         sql.append(' ');
         // 逐个编译修饰表达式
         travelDecorationClauses { clause: IDbQueryBuilderDecorationClauses<*> ->
-            clause.compile(sql);
+            clause.compile(db, sql);
             sql.append(' ');
         }
 
         // 单独编译limit表达式
-        compileLimit(sql)
+        compileLimit(db, sql)
 
         return this;
     }
@@ -551,11 +537,11 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction() {
      */
     public override fun join(table: CharSequence, type: String): IDbQueryBuilder {
         // joinClause　子句
-        val j = DbQueryBuilderDecorationClausesGroup("$type JOIN", arrayOf<((Any?) -> String)?>(tableQuoter));
+        val j = DbQueryBuilderDecorationClausesGroup("$type JOIN", arrayOf<KFunction2 <IDb, *, String>?>(this::quoteTable));
         j.addSubexp(arrayOf<Any?>(table));
 
         // on　子句
-        val on = DbQueryBuilderDecorationClausesGroup("ON", arrayOf<((Any?) -> String)?>(columnQuoter, null, columnQuoter));
+        val on = DbQueryBuilderDecorationClausesGroup("ON", arrayOf<KFunction2 <IDb, *, String>?>(this::quoteColumn, null, this::quoteColumn));
 
         joinClause.add(j);
         joinClause.add(on);

@@ -1,5 +1,7 @@
 package com.jkmvc.db
 
+import kotlin.reflect.KFunction2
+
 /**
  * 简单的(sql修饰)子句
  *
@@ -12,9 +14,9 @@ package com.jkmvc.db
  * @date 2016-10-13
  */
 class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如where/group by */,
-                                            elementHandlers: Array<((Any?) -> String)?> /* 每个元素的处理器, 可视为列的处理*/,
+                                            elementHandlers: Array<KFunction2 <IDb, *, String>?> /* 每个元素的处理器, 可视为列的处理*/,
                                             protected val afterGroup:Boolean = false /* 跟在分组 DbQueryBuilderDecorationClausesGroup 后面 */
-): DbQueryBuilderDecorationClauses<Pair<Array<Any?>, String>>/* subexps 是子表达式+连接符(针对where子句，放子表达式前面) */(operator, elementHandlers) {
+) : DbQueryBuilderDecorationClauses<Pair<Array<Any?>, String>>/* subexps 是子表达式+连接符(针对where子句，放子表达式前面) */(operator, elementHandlers) {
     /**
      * 添加一个子表达式+连接符
      *
@@ -33,9 +35,10 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
      *
      * @param subexp 子表达式
      * @param j 索引
+     * @param db 数据库连接
      * @param sql 保存编译的sql
      */
-    public override fun compileSubexp(subexp: Pair<Array<Any?>, String>, j:Int, sql: StringBuilder): Unit {
+    public override fun compileSubexp(subexp: Pair<Array<Any?>, String>, j:Int, db: IDb, sql: StringBuilder): Unit {
         val (exp, delimiter) = subexp;
 
         // 针对where子句，要在前面插入连接符
@@ -45,11 +48,11 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
 
         // 遍历处理器来处理对应元素, 没有处理的元素也直接拼接
         for (i in elementHandlers.indices) {
-            val handler: ((Any?) -> String)? = elementHandlers[i];
+            val handler: KFunction2 <IDb, *, String>? = elementHandlers[i];
             // 处理某个元素的值
             var value: Any? = exp[i];
             if (exp.size > i && handler != null) {
-                value = handler.invoke(exp[i]); // 调用元素处理函数
+                value = handler.call(db, exp[i]); // 调用元素处理函数
             }
             sql.append(value).append(' '); // // 用空格拼接多个元素
         }

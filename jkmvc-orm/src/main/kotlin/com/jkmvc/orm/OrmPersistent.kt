@@ -12,7 +12,7 @@ import java.util.*
  * @date 2016-10-10
  *
  */
-abstract class OrmPersistent: OrmValid() {
+abstract class OrmPersistent : OrmValid() {
 
 	/**
 	 * 判断当前记录是否存在于db: 有原始数据就认为它是存在的

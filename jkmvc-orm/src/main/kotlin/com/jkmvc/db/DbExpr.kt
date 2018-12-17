@@ -23,9 +23,9 @@ data class DbExpr(public val exp:CharSequence /* 表达式, 可以是 String | D
     companion object {
 
         /**
-         * 空表
+         * 空表/空字段
          */
-        public val emptyTable = DbExpr("", null)
+        public val empty = DbExpr("", null)
 
         /**
          * 问号, 用于表示query builder的动态参数

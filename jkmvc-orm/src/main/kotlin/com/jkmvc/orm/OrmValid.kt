@@ -10,7 +10,7 @@ import com.jkmvc.validate.ValidationException
  * @date 2016-10-10 上午12:52:34
  *
  */
-abstract class OrmValid: OrmEntity() {
+abstract class OrmValid : OrmEntity() {
     /**
      * 校验数据
      * @return

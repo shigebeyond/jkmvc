@@ -8,7 +8,7 @@ package com.jkmvc.db
  * @author shijianhang
  * @date 2016-10-13
  */
-abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration, Cloneable, CharSequence by "", IDbQuery() {
+abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, IDbQueryBuilderDecoration, Cloneable, CharSequence by "", IDbQuery() {
 
     /**
      * 克隆对象: 单纯用于改权限为public
@@ -18,23 +18,6 @@ abstract class IDbQueryBuilder:IDbQueryBuilderAction, IDbQueryBuilderDecoration,
     public override fun clone(): Any{
         return super.clone()
     }
-
-    /**
-     * 转义子查询
-     *
-     * @param subquery
-     * @param alias
-     * @return
-     */
-    public abstract fun quoteSubQuery(subquery: IDbQueryBuilder, alias: String? = null): String
-
-    /**
-     * 转义表名
-     *
-     * @param table
-     * @return
-     */
-    public abstract fun quoteTable(table: CharSequence):String
 
     /****************************** 编译sql ********************************/
     /**

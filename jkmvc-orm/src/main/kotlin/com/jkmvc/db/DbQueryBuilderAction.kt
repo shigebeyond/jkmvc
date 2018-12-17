@@ -5,111 +5,7 @@ import com.jkmvc.common.forceClone
 import com.jkmvc.common.getOrPut
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.reflect.KFunction1
-
-/**
- * 要插入的数据
- */
-class InsertData: Cloneable{
-    /**
-     * 要插入的字段
-     */
-    public var columns:List<String>? = null;
-
-    /**
-     * 要插入的多行数据，但是只有一维，需要按columns的大小，来拆分成多行
-     */
-    public var rows: ArrayList<Any?> = ArrayList<Any?>();
-
-    /**
-     * 检查行的大小
-     * @param rowSize
-     * @return
-     */
-    protected fun checkRowSize(rowSize:Int){
-        if(isSubQuery())
-            throw DbException("已插入子查询，不能再插入值");
-
-        if(columns == null || columns!!.isEmpty())
-            throw DbException("请先调用insertColumn()来设置插入的字段名");
-
-        // 字段值数，是字段名数的整数倍
-        val columnSize = columns!!.size
-        if(rowSize % columnSize != 0)
-            throw IllegalArgumentException("请插入的字段值数[$rowSize]与字段名数[$columnSize]不匹配");
-    }
-
-    /**
-     * 是否插入子查询
-     * @return
-     */
-    public fun isSubQuery(): Boolean {
-        return rows.isNotEmpty() && rows[0] is IDbQueryBuilder
-    }
-
-    /**
-     * 获得子查询
-     * @return
-     */
-    public fun getSubQuery(): IDbQueryBuilder {
-        return rows[0] as IDbQueryBuilder
-    }
-
-    /**
-     * 添加一行/多行
-     * @param row
-     * @return
-     */
-    public fun add(row: Array<out Any?>): InsertData {
-        checkRowSize(row.size)
-        rows.addAll(row)
-        return this;
-    }
-
-    /**
-     * 添加子查询
-     * @param subquery
-     * @return
-     */
-    public fun add(subquery: IDbQueryBuilder): InsertData {
-        if(rows.isNotEmpty())
-            throw DbException("已插入其他值，不能再插入子查询");
-
-        rows.add(subquery)
-        return this;
-    }
-
-    /**
-     * 添加一行/多行
-     */
-    public fun add(row: Collection<Any?>): InsertData {
-        checkRowSize(row.size)
-        rows.addAll(row)
-        return this;
-    }
-
-    /**
-     * 清空数据
-     */
-    public fun clear() {
-        columns = null;
-        rows.clear();
-    }
-
-    /**
-     * 克隆对象
-     * @return o
-     */
-    public override fun clone(): Any {
-        val o = super.clone() as InsertData
-        // columns是List类型，没实现Cloneable接口
-        //o.columns = columns?.clone() as List<String>?
-        if(columns != null)
-            o.columns = ArrayList(columns)
-        o.rows = rows.clone() as ArrayList<Any?>
-        return o;
-    }
-}
+import kotlin.reflect.KFunction2
 
 /**
  * sql构建器 -- 动作子句: 由动态select/insert/update/delete来构建的子句
@@ -118,7 +14,7 @@ class InsertData: Cloneable{
  * @author shijianhang
  * @date 2016-10-12
  */
-abstract class DbQueryBuilderAction : IDbQueryBuilder() {
+abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
 
     companion object {
 
@@ -128,7 +24,7 @@ abstract class DbQueryBuilderAction : IDbQueryBuilder() {
          */
         protected val SqlTemplates:Array<String> = arrayOf(
                 "SELECT :distinct :columns FROM :table",
-                "INSERT INTO :table (:columns) :values", // quoteColumn() 默认不加(), quoteIdentifier() 默认加()
+                "INSERT INTO :table (:columns) :values", // quoteColumn() 默认不加(), quote() 默认加()
                 "UPDATE :table SET :column = :value",
                 "DELETE FROM :table"
         );
@@ -136,18 +32,12 @@ abstract class DbQueryBuilderAction : IDbQueryBuilder() {
         /**
          * 缓存字段填充方法
          */
-        protected val fieldFillers: Map<String, KFunction1<DbQueryBuilderAction, String>> = mapOf(
+        protected val fieldFillers: Map<String, KFunction2<DbQueryBuilderAction, IDb, String>> = mapOf(
                 "table" to DbQueryBuilderAction::fillTable,
                 "columns" to DbQueryBuilderAction::fillColumns,
                 "values" to DbQueryBuilderAction::fillValues
         )
     }
-
-    /**
-     * 数据库连接
-     *   递延初始化, 在最后要编译与执行sql时才赋值, 方便实现按需选择不同的连接, 如读写分离
-     */
-    public lateinit var db:IDb;
 
     /**
      * 动作
@@ -157,7 +47,7 @@ abstract class DbQueryBuilderAction : IDbQueryBuilder() {
     /**
      * 表名/子查询
      */
-    protected var table: DbExpr = DbExpr.emptyTable
+    protected var table: DbExpr = DbExpr.empty
 
     /**
      * 要操作的数据：增改查的数据（没有删）
@@ -338,7 +228,7 @@ abstract class DbQueryBuilderAction : IDbQueryBuilder() {
             SqlType.UPDATE -> updateRow.clear();
         }
         action = null;
-        table = DbExpr.emptyTable;
+        table = DbExpr.empty;
         distinct = false;
         return this;
     }
@@ -358,11 +248,11 @@ abstract class DbQueryBuilderAction : IDbQueryBuilder() {
 
     /**
      * 编译动作子句
-     *
+     * @param db
      * @param buffer 记录编译后的sql
      * @return
      */
-    public override fun compileAction(buffer: StringBuilder): IDbQueryBuilder {
+    public override fun compileAction(db: IDb, buffer: StringBuilder): IDbQueryBuilder {
         if (action == null)
             throw DbException("未设置sql动作");
 
@@ -374,14 +264,14 @@ abstract class DbQueryBuilderAction : IDbQueryBuilder() {
         sql = ":(table|columns|values)".toRegex().replace(sql) { result: MatchResult ->
             // 调用对应的方法: fillTable() / fillColumns() / fillValues()
             val method = fieldFillers[result.groupValues[1]];
-            method?.call(this).toString();
+            method?.call(this, db).toString();
         };
 
         // 2 填充字段谓句
         // 针对 update :table set :column = :value
         if(action == SqlType.UPDATE)
             sql = ":column(.+):value".toRegex().replace(sql) { result: MatchResult ->
-                fillColumnPredicate(result.groupValues[1]);
+                fillColumnPredicate(db, result.groupValues[1]);
             };
         // 3 填充distinct
         else if(action == SqlType.SELECT)
@@ -393,44 +283,49 @@ abstract class DbQueryBuilderAction : IDbQueryBuilder() {
 
     /**
      * 编译表名: 转义
+     * @param db
      * @return
      */
-    public fun fillTable(): String {
+    public fun fillTable(db: IDb): String {
         if(action == SqlType.INSERT || action == SqlType.DELETE) // mysql的insert/delete语句, 不支持表带别名
-            return quoteTable(table.component1())
+            return quoteTable(db, table.component1())
 
-        return quoteTable(table);
+        return quoteTable(db, table);
     }
 
     /**
      * 编译多个字段名: 转义
      *     select/insert时用
-     *
+     * @param db
      * @return
      */
-    public fun fillColumns(): String {
-        // 1 select子句:  data是要查询的字段名
-        if (action == SqlType.SELECT) {
+    public fun fillColumns(db: IDb): String {
+        var cols: Collection<CharSequence>
+
+        if (action == SqlType.SELECT) { // 1 select子句:  data是要查询的字段名
             if (selectColumns.isEmpty())
                 return "*";
 
-            return db.quoteColumns(selectColumns);
-        }
+            cols = selectColumns
+        } else // 2 insert子句:  data是要插入的多行: columns + values
+            cols = insertRows.columns!!
 
-        // 2 insert子句:  data是要插入的多行: columns + values
-        return db.quoteColumns(insertRows.columns!!);
+        return cols.joinToString(", ") {
+            // 单个字段转义
+            quoteColumn(db, it)
+        }
     }
 
     /**
      * 编译多个字段值: 转义
      *     insert时用
-     *
-     *  @return
+     * @param db
+     * @return
      */
-    public fun fillValues(): String {
+    public fun fillValues(db: IDb): String {
         // 1 insert...select..字句
         if(insertRows.isSubQuery()) // 子查询
-            return quote(insertRows.getSubQuery())
+            return quote(db, insertRows.getSubQuery())
 
         // 2 insert子句:  data是要插入的多行: columns + values
         val sql = StringBuilder("VALUES ");
@@ -439,11 +334,11 @@ abstract class DbQueryBuilderAction : IDbQueryBuilder() {
         val valueSize = insertRows.rows.size
         while(i < valueSize){ //insertRows.rows是多行数据，但是只有一维，需要按columns的大小，来拆分成多行
             sql.append("(")
-            //对每值执行db.quoteIdentifier(value);
+            //对每值执行db.quote(value);
             val columnSize = insertRows.columns!!.size
             for (j in 0..(columnSize - 1)){
                 val v = insertRows.rows[i++]
-                sql.append(quote(v)).append(", ")
+                sql.append(quote(db, v)).append(", ")
             }
             sql.deleteSuffix(", ").append("), ")
         }
@@ -453,12 +348,12 @@ abstract class DbQueryBuilderAction : IDbQueryBuilder() {
     /**
      * 编译字段谓句: 转义 + 拼接谓句
      *    update时用
-     *
+     * @param db
      * @param operator 谓语
      * @param delimiter 拼接谓句的连接符
      * @return
      */
-    public fun fillColumnPredicate(operator: String, delimiter: String = ", "): String {
+    public fun fillColumnPredicate(db: IDb, operator: String, delimiter: String = ", "): String {
         // update子句:  data是要更新字段值: <column to value>
         if (updateRow.isEmpty())
             return "";
@@ -466,7 +361,7 @@ abstract class DbQueryBuilderAction : IDbQueryBuilder() {
         var sql: StringBuilder = StringBuilder();
         for ((column, value) in updateRow) {
             // column = value,
-            sql.append(db.quoteColumn(column)).append(" ").append(operator).append(" ").append(quote(value)).append(delimiter);
+            sql.append(quoteColumn(db, column)).append(" ").append(operator).append(" ").append(quote(db, value)).append(delimiter);
         }
 
         return sql.deleteSuffix(delimiter).toString();

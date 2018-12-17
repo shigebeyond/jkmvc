@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-15 9:03 PM
  */
-class DbMeta(public override val name:String /* 标识 */): IDbMeta {
+class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
 
     companion object {
 

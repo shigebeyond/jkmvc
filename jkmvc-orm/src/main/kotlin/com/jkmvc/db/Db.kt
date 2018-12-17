@@ -17,7 +17,7 @@ import kotlin.reflect.KClass
  */
 class Db protected constructor(public override val name:String /* 标识 */,
                                public override val dbMeta: IDbMeta = DbMeta.get(name) /* 元数据 */
-):IDb, IDbMeta by dbMeta {
+) : IDb, IDbMeta by dbMeta {
 
     companion object:Closeable {
 
@@ -403,7 +403,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
         // 正则替换
         /*var i = 0 // 迭代索引
         return sql.replace("\\?".toRegex()) { matches: MatchResult ->
-            quoteIdentifier(params[i++]) // 转义参数值
+            quote(params[i++]) // 转义参数值
         }*/
 
         // 格式化字符串

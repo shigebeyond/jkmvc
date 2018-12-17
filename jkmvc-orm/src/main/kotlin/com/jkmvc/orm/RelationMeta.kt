@@ -18,7 +18,7 @@ open class RelationMeta(
         public override val foreignKey:String /* 外键 */,
         public override val primaryKey:String/* 主键 */,
         public override val conditions:Map<String, Any?> = emptyMap() /* 查询条件 */
-): IRelationMeta {
+) : IRelationMeta {
 
     /**
      * 约定int类型的外键必须是正整数

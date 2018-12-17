@@ -11,10 +11,11 @@ interface IDbQueryBuilderAction {
 
     /**
      * 编译动作子句
-     *
+     * @param db 数据库连接
+     * @param sql 保存编译的sql
      * @return
      */
-    fun compileAction(sql: StringBuilder): IDbQueryBuilder;
+    fun compileAction(db: IDb, sql: StringBuilder): IDbQueryBuilder;
 
     /**
      * 设置表名: 一般是单个表名

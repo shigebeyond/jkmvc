@@ -10,97 +10,7 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-13
  */
-open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) :DbQueryBuilderDecoration() {
-
-    /**
-     * 缓存编译好的sql
-     */
-    protected var compiledSql: CompiledSql = CompiledSql();
-
-    /**
-     * 清空条件
-     * @return
-     */
-    public override fun clear(): IDbQueryBuilder {
-        compiledSql.clear();
-        return this;
-    }
-
-    /**
-     * 克隆对象
-     * @return o
-     */
-    public override fun clone(): Any {
-        val o = super.clone() as DbQueryBuilder
-        // 复制编译结果
-        o.compiledSql = compiledSql.clone() as CompiledSql
-        return o;
-    }
-
-    /**
-     * 改写转义单个值的方法，搜集sql参数
-     *
-     * @param value
-     * @return
-     */
-    public override fun quoteSingleValue(value: Any?): String {
-        // @Deprecated 将转义的参数值，直接拼接到sql
-        //return db.quoteIdentifier(value);
-
-        // sql参数化: 将参数名拼接到sql, 独立出参数值, 以便执行时绑定参数值
-        // 1 null => "NULL" -- oracle中不能使用null作为参数，因此只能直接输出null作为sql
-        if (value == null)
-            return "NULL";
-
-        // 2 子查询: 编译select子句 + 并合并参数到 compiledSql 中
-        if(value is IDbQueryBuilder)
-            return quoteSubQuery(value)
-
-        // 3 db表达式
-        if(value is DbExpr && value !== DbExpr.question) {
-            if(value.exp is IDbQueryBuilder)
-                return quoteSubQuery(value.exp, value.alias)
-
-            return value.toString()
-        }
-
-        // 4 字段值
-        compiledSql.staticParams.add(value);
-        return "?";
-    }
-
-    /**
-     * 转义子查询
-     *   编译select子句 + 合并参数到 compiledSql 中
-     * @param subquery
-     * @param alias
-     * @return
-     */
-    public override fun quoteSubQuery(subquery: IDbQueryBuilder, alias: String?): String {
-        val subsql = subquery.compileSelect()
-        compiledSql.staticParams.addAll(subsql.staticParams);
-        if(alias == null)
-            return "(" + subsql.sql + ")"
-
-        return "(${subsql.sql}) ${db.quoteIdentifier(alias)}"
-    }
-
-    /**
-     * 转义表名
-     *
-     * @param table
-     * @return
-     */
-    public override fun quoteTable(table: CharSequence):String{
-        // 1 子查询
-        if(table is DbExpr && table.exp is IDbQueryBuilder)
-            return quoteSubQuery(table.exp as IDbQueryBuilder, table.alias)
-        if(table is IDbQueryBuilder)
-            return quoteSubQuery(table)
-
-        // 2 普通表
-        return db.quoteTable(table)
-    }
+open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : DbQueryBuilderDecoration() {
 
     /****************************** 编译sql ********************************/
     /**
@@ -110,9 +20,6 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) :D
      * @return 编译好的sql
      */
     public override fun compile(action:SqlType, db: IDb): CompiledSql {
-        // 切换db
-        this.db = db
-
         // 清空编译结果
         compiledSql.clear();
 
@@ -122,7 +29,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) :D
         // 编译动作子句 + 修饰子句
         // 其中，sql收集编译好的语句，compiledSql.staticParams收集静态参数
         val sql: StringBuilder = StringBuilder();
-        this.compileAction(sql).compileDecoration(sql);
+        this.compileAction(db, sql).compileDecoration(db, sql);
 
         // 收集编译好的sql
         compiledSql.sql = sql.toString()

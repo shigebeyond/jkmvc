@@ -7,7 +7,7 @@ package com.jkmvc.orm
  * @date 2016-10-10 上午12:52:34
  *
  */
-abstract class OrmRelated: OrmPersistent() {
+abstract class OrmRelated : OrmPersistent() {
     /**
      * 设置对象字段值
      *

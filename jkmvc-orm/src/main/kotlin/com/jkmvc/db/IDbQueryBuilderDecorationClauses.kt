@@ -13,9 +13,10 @@ interface IDbQueryBuilderDecorationClauses<T>
 {
     /**
      * 编译多个子表达式
+     * @param db 数据库连接
      * @param sql 保存编译sql
      */
-    fun compile(sql:StringBuilder):Unit;
+    fun compile(db: IDb, sql:StringBuilder):Unit;
 
     /**
      * 添加一个子表达式+连接符
@@ -30,9 +31,10 @@ interface IDbQueryBuilderDecorationClauses<T>
      * 编译一个子表达式
      * @param subexp 子表达式
      * @param j 索引
+     * @param db 数据库连接
      * @param sql 保存编译的sql
      */
-    fun compileSubexp(subexp:T, j:Int, sql:StringBuilder):Unit;
+    fun compileSubexp(subexp:T, j:Int, db: IDb, sql:StringBuilder):Unit;
 
     /**
      * 开启一个分组
