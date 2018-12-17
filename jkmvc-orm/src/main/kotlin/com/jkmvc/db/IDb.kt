@@ -15,7 +15,7 @@ interface IDb: Closeable, IDbMeta, IDbValueQuoter, IDbIdentifierQuoter {
     /**
      * db元数据
      */
-    val meta: IDbMeta;
+    val dbMeta: IDbMeta;
 
     /**
      * 是否强制使用主库
