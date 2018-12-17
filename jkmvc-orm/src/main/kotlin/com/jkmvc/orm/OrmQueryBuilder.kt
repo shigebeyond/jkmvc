@@ -490,7 +490,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      */
     public fun convertColumn(prop: String): String {
         return if (convertingColumn)
-            db.prop2Column(prop)
+            ormMeta.prop2Column(prop)
         else
             prop
     }
