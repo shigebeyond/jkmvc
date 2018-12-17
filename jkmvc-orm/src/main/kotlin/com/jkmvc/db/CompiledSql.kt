@@ -224,7 +224,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param params 动态参数
      * @return
      */
-    public override fun <T:Any> findCell(params: List<Any?>, clazz: KClass<T>?, db:IDb):Pair<Boolean, T?>{
+    public override fun <T:Any> findCell(params: List<Any?>, clazz: KClass<T>?, db:IDb): Cell<T>{
         // 执行 select
         return db.queryCell(sql, buildParams(params), clazz);
     }

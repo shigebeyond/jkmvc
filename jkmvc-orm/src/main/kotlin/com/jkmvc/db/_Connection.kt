@@ -216,7 +216,7 @@ public fun <T> Connection.queryRow(sql: String, params: List<Any?> = emptyList()
  * @param params 参数
  * @return
  */
-public fun <T:Any> Connection.queryCell(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): Pair<Boolean, T?> {
+public fun <T:Any> Connection.queryCell(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): Cell<T> {
     return queryResult(sql, params){ rs: ResultSet ->
         // 处理查询结果
         rs.nextCell(1, clazz)
@@ -282,6 +282,7 @@ public fun getResultSetValueGetter(clazz: KClass<*>? = null): (ResultSet.(Int) -
         Byte::class -> ResultSet::getByte
         BigDecimal::class -> ResultSet::getBigDecimal
 
+        java.util.Date::class -> ResultSet::getDate
         java.sql.Date::class -> ResultSet::getDate
         java.sql.Time::class -> ResultSet::getTime
         java.sql.Timestamp::class -> ResultSet::getTimestamp
@@ -334,11 +335,11 @@ public inline fun ResultSet.forEachRow(action: (MutableMap<String, Any?>) -> Uni
  * @param clazz 值类型
  * @return
  */
-public inline fun <T:Any> ResultSet.nextCell(i:Int, clazz: KClass<T>? = null): Pair<Boolean, T?> {
+public inline fun <T:Any> ResultSet.nextCell(i:Int, clazz: KClass<T>? = null): Cell<T> {
     val hasNext = next()
     val getter = getResultSetValueGetter(clazz)
     var value: T? = if(hasNext) (getter(i) as T) else null; // 字段值
-    return Pair(hasNext, value);
+    return Cell(hasNext, value);
 }
 
 /**

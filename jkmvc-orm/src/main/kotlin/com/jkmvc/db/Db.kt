@@ -387,7 +387,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
      * @param clazz 值类型
      * @return
      */
-    public override fun <T:Any> queryCell(sql: String, params: List<Any?>, clazz: KClass<T>?): Pair<Boolean, T?> {
+    public override fun <T:Any> queryCell(sql: String, params: List<Any?>, clazz: KClass<T>?): Cell<T> {
         try{
             return conn.queryCell(sql, params, clazz);
         }catch (e:Exception){

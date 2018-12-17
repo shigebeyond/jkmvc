@@ -85,7 +85,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      * @param db 数据库连接
      * @return
      */
-    public override fun <T:Any> findCell(params: List<Any?>, clazz: KClass<T>?, db: IDb): Pair<Boolean, T?>{
+    public override fun <T:Any> findCell(params: List<Any?>, clazz: KClass<T>?, db: IDb): Cell<T> {
         // 编译 + 执行
         return compile(SqlType.SELECT, db).findCell(params, clazz, db)
     }
@@ -103,7 +103,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
         val csql = select(DbExpr("count(1)", "NUM", false) /* oracle会自动转为全大写 */).compile(SqlType.SELECT, db);
 
         // 2 执行 select
-        return csql.findInt(params, db)!!
+        return csql.findCell<Int>(params, db).get()!!
     }
 
     /**
