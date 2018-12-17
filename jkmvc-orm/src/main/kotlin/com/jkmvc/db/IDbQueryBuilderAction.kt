@@ -18,7 +18,7 @@ interface IDbQueryBuilderAction {
     fun compileAction(db: IDb, sql: StringBuilder): IDbQueryBuilder;
 
     /**
-     * 设置表名: 一般是单个表名
+     * 设置表名
      * @param table 表名
      * @param alias 别名
      * @return
@@ -28,20 +28,31 @@ interface IDbQueryBuilderAction {
     }
 
     /**
-     * 设置表名: 可能有多个表名
+     * 设置表名
+     * @param table 表名
+     * @return
+     */
+    fun from(table: DbExpr): IDbQueryBuilder
+
+    /**
+     * 设置表名
      * @param table 表名
      * @param alias 别名
      * @return
      */
-    fun from(table:String, alias:String? = null):IDbQueryBuilder;
+    fun from(table:String, alias:String? = null):IDbQueryBuilder{
+        return from(DbExpr(table, alias))
+    }
 
     /**
-     * 设置表名: 可能有多个表名
+     * 设置表名
      * @param subquery 子查询
      * @param alias 别名
      * @return
      */
-    fun from(subquery: IDbQueryBuilder, alias:String): IDbQueryBuilder;
+    fun from(subquery: IDbQueryBuilder, alias:String): IDbQueryBuilder{
+        return from(DbExpr(subquery, alias))
+    }
 
     /**
      * 设置插入的列, insert时用

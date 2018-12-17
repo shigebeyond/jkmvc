@@ -32,13 +32,14 @@ abstract class DbQueryBuilderQuoter: IDbQueryBuilder(){
     }
 
     /**
-     * 转移值
+     * 转义单个值
      *   转义为?, 并搜集sql参数
+     *
      * @param db
      * @param value
      * @return
      */
-    public override fun quote(db: IDb, value: Any?): String {
+    public override fun quoteSingleValue(db: IDb, value: Any?): String {
         // sql参数化: 将参数名拼接到sql, 独立出参数值, 以便执行时绑定参数值
         // 1 null => "NULL" -- oracle中不能使用null作为参数，因此只能直接输出null作为sql
         if (value == null)
@@ -64,6 +65,7 @@ abstract class DbQueryBuilderQuoter: IDbQueryBuilder(){
     /**
      * 转义子查询
      *   编译select子句 + 合并参数到 compiledSql 中
+     *
      * @param db
      * @param subquery
      * @param alias

@@ -35,7 +35,7 @@ interface IDbValueQuoter {
     /**
      * 转义单个值
      *
-     * @param value 字段值, 可以是值数组
+     * @param value 字段值
      * @return
      */
     fun quoteSingleValue(value: Any?): String

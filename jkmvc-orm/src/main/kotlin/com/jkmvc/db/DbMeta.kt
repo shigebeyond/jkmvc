@@ -215,7 +215,7 @@ class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
     /**
      * 转义单个值
      *
-     * @param value 字段值, 可以是值数组
+     * @param value 字段值
      * @return
      */
     public override fun quoteSingleValue(value: Any?): String {

@@ -1,5 +1,8 @@
 package com.jkmvc.db
 
+import com.jkmvc.common.iteratorArrayOrCollection
+import com.jkmvc.common.joinToString
+
 /**
  * 表名/字段名/值的转移器
  * @author shijianhang<772910474@qq.com>
@@ -11,10 +14,30 @@ interface IDbQueryBuilderQuoter {
      * 转义值
      *
      * @param db
-     * @param value
+     * @param value 字段值, 可以是值数组
      * @return
      */
-    fun quote(db: IDb, value: Any?): String
+    fun quote(db: IDb, value: Any?): String{
+        // 1 多值
+        val itr = value?.iteratorArrayOrCollection()
+        if(itr != null){
+            return itr.joinToString(", ", "(", ")") {
+                quote(db, it)
+            }
+        }
+
+        // 2 单值
+        return quoteSingleValue(db, value)
+    }
+
+    /**
+     * 转义单个值
+     *
+     * @param db
+     * @param value 字段值
+     * @return
+     */
+    fun quoteSingleValue(db: IDb, value: Any?): String
 
     /**
      * 转义字段名

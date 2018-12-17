@@ -91,24 +91,12 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
     protected var distinct: Boolean = false;
 
     /**
-     * 设置表名: 可能有多个表名
+     * 设置表名
      * @param table 表名
-     * @param alias 别名
      * @return
      */
-    public override fun from(table: String, alias:String?): IDbQueryBuilder {
-        this.table = DbExpr(table, alias)
-        return this
-    }
-
-    /**
-     * 设置表名: 可能有多个表名
-     * @param subquery 子查询
-     * @param alias 别名
-     * @return
-     */
-    public override fun from(subquery: IDbQueryBuilder, alias:String): IDbQueryBuilder {
-        this.table = DbExpr(subquery, alias)
+    public override fun from(table: DbExpr): IDbQueryBuilder {
+        this.table = table
         return this
     }
 
