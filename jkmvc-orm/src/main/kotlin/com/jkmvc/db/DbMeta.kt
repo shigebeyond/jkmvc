@@ -2,6 +2,7 @@ package com.jkmvc.db
 
 import com.jkmvc.common.Config
 import com.jkmvc.common.camel2Underline
+import com.jkmvc.common.format
 import com.jkmvc.common.underline2Camel
 import java.sql.Connection
 import java.util.*
@@ -17,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-15 9:03 PM
  */
-class DbMeta(public override val name:String /* 标识 */): IDbMeta, IDbIdentifierQuoter {
+class DbMeta(public override val name:String /* 标识 */): IDbMeta {
 
     companion object {
 
@@ -208,6 +209,50 @@ class DbMeta(public override val name:String /* 标识 */): IDbMeta, IDbIdentifi
         return quotedIds.getOrPut(id) {
             "$identifierQuoteString$id$identifierQuoteString"
         }
+    }
+
+    /************************** 转义值 ***************************/
+    /**
+     * 转义单个值
+     *
+     * @param value 字段值, 可以是值数组
+     * @return
+     */
+    public override fun quoteSingleValue(value: Any?): String {
+        // null => "NULL"
+        if (value == null)
+            return "NULL";
+
+        // bool => int
+        if (value is Boolean)
+            return if (value) "1" else "0";
+
+        // int/float
+        if (value is Number)
+            return value.toString();
+
+        // string
+        if (value is String)
+            return "'$value'" // oracle字符串必须是''包含
+
+        // date
+        if (value is Date)
+            return quoteDate(value)
+
+        return value.toString()
+    }
+
+    /**
+     * 转移日期值
+     * @value value 参数
+     * @return
+     */
+    protected fun quoteDate(value: Date): String {
+        val value = "'${value.format()}'"
+        return if(dbType == DbType.Oracle)
+            "to_date($value,'yyyy-mm-dd hh24:mi:ss')"
+        else
+            value
     }
 
 }

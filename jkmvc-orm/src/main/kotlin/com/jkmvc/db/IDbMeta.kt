@@ -4,7 +4,7 @@ package com.jkmvc.db
  * db元数据
  *
  */
-interface IDbMeta{
+interface IDbMeta: IDbIdentifierQuoter, IDbValueQuoter {
 
     /**
      * 标识名

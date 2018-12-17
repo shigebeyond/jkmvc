@@ -17,7 +17,7 @@ import kotlin.reflect.KClass
  */
 class Db protected constructor(public override val name:String /* 标识 */,
                                public override val dbMeta: IDbMeta = DbMeta.get(name) /* 元数据 */
-):IDb, IDbMeta by dbMeta, IDbIdentifierQuoter by (dbMeta as DbMeta) {
+):IDb, IDbMeta by dbMeta {
 
     companion object:Closeable {
 
@@ -386,49 +386,6 @@ class Db protected constructor(public override val name:String /* 标识 */,
             masterConn.close()
         if(connUsed and 2 > 0)
             slaveConn.close()
-    }
-
-    /**
-     * 转义单个值
-     *
-     * @param value 字段值, 可以是值数组
-     * @return
-     */
-    public override fun quoteSingleValue(value: Any?): String {
-        // null => "NULL"
-        if (value == null)
-            return "NULL";
-
-        // bool => int
-        if (value is Boolean)
-            return if (value) "1" else "0";
-
-        // int/float
-        if (value is Number)
-            return value.toString();
-
-        // string
-        if (value is String)
-            return "'$value'" // oracle字符串必须是''包含
-
-        // date
-        if (value is Date)
-            return quoteDate(value)
-
-        return value.toString()
-    }
-
-    /**
-     * 转移日期值
-     * @value value 参数
-     * @return
-     */
-    protected fun quoteDate(value: Date): String {
-        val value = "'${value.format()}'"
-        return if(dbType == DbType.Oracle)
-                    "to_date($value,'yyyy-mm-dd hh24:mi:ss')"
-                else
-                    value
     }
 
     /**
