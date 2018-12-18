@@ -1,7 +1,5 @@
 package com.jkmvc.orm
 
-import com.jkmvc.db.DbMeta
-
 /**
  * ORM
 
@@ -10,15 +8,11 @@ import com.jkmvc.db.DbMeta
  * @author shijianhang
  * @date 2016-10-10 上午12:52:34
  */
-abstract class Orm(id:Any? = null) : OrmRelated() {
+abstract class Orm(vararg pk:Any /* 主键值, 非null */) : OrmRelated() {
 
     init{
-        if(id != null){
-            // 构建根据主键来查询的sql
-            queryBuilder().where(ormMeta.primaryKey, id).find(){
-                this.setOriginal(it); // 读取查询数据
-            }
-        }
+        // 根据主键值来加载数据
+        loadByPk(*pk)
     }
 
     public override fun toString(): String {

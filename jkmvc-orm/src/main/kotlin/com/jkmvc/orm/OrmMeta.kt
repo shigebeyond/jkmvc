@@ -138,8 +138,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param rule
      * @return
      */
-    public override fun addRule(field: String, label:String, rule: String?): OrmMeta
-    {
+    public override fun addRule(field: String, label:String, rule: String?): OrmMeta {
         rules[field] = RuleMeta(label, rule);
         return this;
     }
@@ -150,8 +149,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param rule
      * @return
      */
-    public override fun addRule(field: String, rule: IRuleMeta): OrmMeta
-    {
+    public override fun addRule(field: String, rule: IRuleMeta): OrmMeta {
         rules[field] = rule;
         return this;
     }

@@ -1,6 +1,6 @@
 package com.jkmvc.orm
 
-import com.jkmvc.db.IRecord
+import java.math.BigDecimal
 import kotlin.properties.ReadWriteProperty
 
 /**
@@ -10,7 +10,7 @@ import kotlin.properties.ReadWriteProperty
  * @date 2016-10-10 上午12:52:34
  *
  */
-interface IOrmEntity: IRecord {
+interface IOrmEntity {
 
     /**
      * 获得属性代理
@@ -32,7 +32,7 @@ interface IOrmEntity: IRecord {
      * @param defaultValue 默认值
      * @return
      */
-    override operator fun <T> get(column: String, defaultValue: Any?): T;
+    operator fun <T> get(column: String, defaultValue: Any? = null): T;
 
     /**
      * 设置对象字段值
@@ -40,7 +40,7 @@ interface IOrmEntity: IRecord {
      * @param column 字段名
      * @param  value  字段值
      */
-    override operator fun set(column: String, value: Any?);
+    operator fun set(column: String, value: Any?);
 
     /**
      * 显式标记字段有变化
@@ -114,4 +114,5 @@ interface IOrmEntity: IRecord {
      * @return 将模板中的字段名替换为字段值
      */
     fun compileTemplate(template:String):String
+
 }

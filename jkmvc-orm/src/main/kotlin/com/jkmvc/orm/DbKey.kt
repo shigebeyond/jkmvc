@@ -15,6 +15,9 @@ import com.jkmvc.db.IDbQueryBuilder
  *   原来想限制类的访问权限为 internal, 但是 IOrmMeta 与 IRelationMeta 的主键外键属性都>直接暴露了该类
  *   那只好限制扩展方法了
  *
+ * 4 联合主键中字段值不能为null
+ *   All parts of a PRIMARY KEY must be NOT NULL
+ *
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-17 7:13 PM
  */
@@ -177,10 +180,10 @@ internal inline fun DbKeyNames.isAllEmpty(): Boolean{
 
 /*************************** DbKeyValues扩展 ******************************/
 /**
- * 检查值是否为null
+ * 检查值是否为null -- 联合主键中的字段值不能为空
  * @return
  */
-internal inline fun DbKeyValues.isAllNull(): Boolean {
+internal inline fun DbKeyValues.isAnyNull(): Boolean {
     return columns.isEmpty() || columns.all {
         it == null
     }

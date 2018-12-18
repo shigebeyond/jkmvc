@@ -338,23 +338,6 @@ class Db protected constructor(public override val name:String /* 标识 */,
     }
 
     /**
-     * 查询多行
-     *
-     * @param sql
-     * @param params
-     * @param transform 转换结果的函数
-     * @return
-     */
-    public override fun <T> queryRows(sql: String, params: List<Any?>, transform: (MutableMap<String, Any?>) -> T): List<T> {
-        try{
-            return conn.queryRows(sql, params, transform);
-        }catch (e:Exception){
-            dbLogger.error("出错[${e.message}] sql: " + previewSql(sql, params))
-            throw  e
-        }
-    }
-
-    /**
      * 查询一行(多列)
      *
      * @param sql
@@ -365,6 +348,23 @@ class Db protected constructor(public override val name:String /* 标识 */,
     public override fun <T> queryRow(sql: String, params: List<Any?>, transform: (MutableMap<String, Any?>) -> T): T? {
         try{
             return conn.queryRow(sql, params, transform);
+        }catch (e:Exception){
+            dbLogger.error("出错[${e.message}] sql: " + previewSql(sql, params))
+            throw  e
+        }
+    }
+
+    /**
+     * 查询多行
+     *
+     * @param sql
+     * @param params
+     * @param transform 转换结果的函数
+     * @return
+     */
+    public override fun <T> queryRows(sql: String, params: List<Any?>, transform: (MutableMap<String, Any?>) -> T): List<T> {
+        try{
+            return conn.queryRows(sql, params, transform);
         }catch (e:Exception){
             dbLogger.error("出错[${e.message}] sql: " + previewSql(sql, params))
             throw  e

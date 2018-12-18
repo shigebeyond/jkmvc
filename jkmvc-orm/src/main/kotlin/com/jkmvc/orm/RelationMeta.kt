@@ -92,7 +92,7 @@ open class RelationMeta(
 
         // 查从表
         val pk:DbKeyValues = item.gets(primaryProp) // 主键
-        if(pk.isAllNull())
+        if(pk.isAnyNull())
             return null
         val query = queryBuilder().where(foreignKey.wrap(tableAlias) /*tableAlias + foreignKey*/, "=", pk) as OrmQueryBuilder// 从表.外键 = 主表.主键
         if(fkInMany != null) { // hasMany关系下过滤单个关系

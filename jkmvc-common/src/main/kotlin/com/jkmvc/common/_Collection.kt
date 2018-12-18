@@ -1,5 +1,6 @@
 package com.jkmvc.common
 
+import java.math.BigDecimal
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
@@ -120,6 +121,107 @@ public inline fun <T> Array<T>.getOrPut(index: Int, defaultValue: (Int) -> T): T
     return this[index];
 }
 
+/****************************** query string *****************************/
+/**
+ * 请求参数转query string
+ * @param buffer
+ * @return
+ */
+public fun Map<String, Array<String>>.toQueryString(buffer: StringBuilder): StringBuilder {
+    entries.joinTo(buffer, "") {
+        "${it.key}=${it.value.first()}&"
+    }
+    return buffer.deleteSuffix("&")
+}
+
+/**
+ * 请求参数转query string
+ * @param buffer
+ * @return
+ */
+public fun Map<String, Array<String>>.toQueryString(): String {
+    if(this.isEmpty())
+        return ""
+
+    return toQueryString(StringBuilder()).toString()
+}
+
+/****************************** 扩展 Iterator *****************************/
+/**
+ * Returns a list containing the results of applying the given [transform] function
+ * to each element in the original collection.
+ */
+public inline fun <T, R> Iterator<T>.map(transform: (T) -> R): List<R> {
+    return mapTo(ArrayList<R>(), transform)
+}
+
+/**
+ * Applies the given [transform] function to each element of the original collection
+ * and appends the results to the given [destination].
+ */
+public inline fun <T, R, C : MutableCollection<in R>> Iterator<T>.mapTo(destination: C, transform: (T) -> R): C {
+    for (item in this)
+        destination.add(transform(item))
+    return destination
+}
+
+/**
+ * Creates a string from all the elements separated using [separator] and using the given [prefix] and [postfix] if supplied.
+ *
+ * If the collection could be huge, you can specify a non-negative value of [limit], in which case only the first [limit]
+ * elements will be appended, followed by the [truncated] string (which defaults to "...").
+ *
+ * @sample samples.collections.Collections.Transformations.joinToString
+ */
+public fun <T> Iterator<T>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", transform: ((T) -> CharSequence)? = null): String {
+    return joinTo(StringBuilder(), separator, prefix, postfix, limit, truncated, transform).toString()
+}
+
+/**
+ * Appends the string from all the elements separated using [separator] and using the given [prefix] and [postfix] if supplied.
+ *
+ * If the collection could be huge, you can specify a non-negative value of [limit], in which case only the first [limit]
+ * elements will be appended, followed by the [truncated] string (which defaults to "...").
+ *
+ * @sample samples.collections.Collections.Transformations.joinTo
+ */
+public fun <T> Iterator<T>.joinTo(buffer: StringBuilder, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", transform: ((T) -> CharSequence)? = null): StringBuilder {
+    buffer.append(prefix)
+    var count = 0
+    for (element in this) {
+        if (++count > 1) buffer.append(separator)
+        if (limit < 0 || count <= limit) {
+            val value = if(transform == null) element else transform(element)
+            buffer.append(value)
+        } else break
+    }
+    if (limit >= 0 && count > limit) buffer.append(truncated)
+    buffer.append(postfix)
+    return buffer
+}
+
+/**
+ * Iterator转Enumeration
+ */
+class ItEnumeration<T>(val it: Iterator<T>) : Enumeration<T> {
+
+    override fun hasMoreElements(): Boolean{
+        return it.hasNext()
+    }
+
+    override fun nextElement(): T {
+        return it.next();
+    }
+}
+
+/**
+ * 获得Enumeration
+ * @return
+ */
+public fun <T> Iterable<T>.enumeration(): ItEnumeration<T> {
+    return ItEnumeration(iterator())
+}
+
 /****************************** 扩展 Map *****************************/
 /**
  * 获得map的某个值，如果值为空，则返回默认值
@@ -130,9 +232,9 @@ public inline fun <T> Array<T>.getOrPut(index: Int, defaultValue: (Int) -> T): T
 public inline fun <K, V> Map<K, V>?.getOrDefault(key:K, default:V? = null): V? {
     val value = this?.get(key)
     return if(value == null)
-                default
-            else
-                value;
+        default
+    else
+        value;
 }
 
 /**
@@ -325,103 +427,101 @@ public fun Collection<out Map<*, *>>.asMap(keyField:String, valueField:String? =
     }
 }
 
-/****************************** query string *****************************/
+/********************** 转为各种类型的Map<String, *>.getter *********************/
 /**
- * 请求参数转query string
- * @param buffer
- * @return
+ * Get attribute of db type: varchar, char, enum, set, text, tinytext, mediumtext, longtext
  */
-public fun Map<String, Array<String>>.toQueryString(buffer: StringBuilder): StringBuilder {
-    entries.joinTo(buffer, "") {
-        "${it.key}=${it.value.first()}&"
-    }
-    return buffer.deleteSuffix("&")
+fun Map<String, *>.getString(name: String): String {
+    return this[name] as String
 }
 
 /**
- * 请求参数转query string
- * @param buffer
- * @return
+ * Get attribute of db type: int, integer, tinyint(n) n > 1, smallint, mediumint
  */
-public fun Map<String, Array<String>>.toQueryString(): String {
-    if(this.isEmpty())
-        return ""
-
-    return toQueryString(StringBuilder()).toString()
-}
-
-/****************************** 扩展 Iterator *****************************/
-/**
- * Returns a list containing the results of applying the given [transform] function
- * to each element in the original collection.
- */
-public inline fun <T, R> Iterator<T>.map(transform: (T) -> R): List<R> {
-    return mapTo(ArrayList<R>(), transform)
+fun Map<String, *>.getInt(name: String): Int? {
+    return this[name] as Int?
 }
 
 /**
- * Applies the given [transform] function to each element of the original collection
- * and appends the results to the given [destination].
+ * Get attribute of db type: bigint, unsign int
  */
-public inline fun <T, R, C : MutableCollection<in R>> Iterator<T>.mapTo(destination: C, transform: (T) -> R): C {
-    for (item in this)
-        destination.add(transform(item))
-    return destination
+fun Map<String, *>.getLong(name: String): Long? {
+    return this[name] as Long?
 }
 
 /**
- * Creates a string from all the elements separated using [separator] and using the given [prefix] and [postfix] if supplied.
- *
- * If the collection could be huge, you can specify a non-negative value of [limit], in which case only the first [limit]
- * elements will be appended, followed by the [truncated] string (which defaults to "...").
- *
- * @sample samples.collections.Collections.Transformations.joinToString
+ * Get attribute of db type: unsigned bigint
  */
-public fun <T> Iterator<T>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", transform: ((T) -> CharSequence)? = null): String {
-    return joinTo(StringBuilder(), separator, prefix, postfix, limit, truncated, transform).toString()
+fun Map<String, *>.getBigInteger(name: String): java.math.BigInteger {
+    return this[name] as java.math.BigInteger
 }
 
 /**
- * Appends the string from all the elements separated using [separator] and using the given [prefix] and [postfix] if supplied.
- *
- * If the collection could be huge, you can specify a non-negative value of [limit], in which case only the first [limit]
- * elements will be appended, followed by the [truncated] string (which defaults to "...").
- *
- * @sample samples.collections.Collections.Transformations.joinTo
+ * Get attribute of db type: date, year
  */
-public fun <T> Iterator<T>.joinTo(buffer: StringBuilder, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", transform: ((T) -> CharSequence)? = null): StringBuilder {
-    buffer.append(prefix)
-    var count = 0
-    for (element in this) {
-        if (++count > 1) buffer.append(separator)
-        if (limit < 0 || count <= limit) {
-            val value = if(transform == null) element else transform(element)
-            buffer.append(value)
-        } else break
-    }
-    if (limit >= 0 && count > limit) buffer.append(truncated)
-    buffer.append(postfix)
-    return buffer
+fun Map<String, *>.getDate(name: String): java.util.Date {
+    return this[name] as java.util.Date
 }
 
 /**
- * Iterator转Enumeration
+ * Get attribute of db type: time
  */
-class ItEnumeration<T>(val it: Iterator<T>) : Enumeration<T> {
-
-    override fun hasMoreElements(): Boolean{
-        return it.hasNext()
-    }
-
-    override fun nextElement(): T {
-        return it.next();
-    }
+fun Map<String, *>.getTime(name: String): java.sql.Time {
+    return this[name] as java.sql.Time
 }
 
 /**
- * 获得Enumeration
- * @return
+ * Get attribute of db type: timestamp, datetime
  */
-public fun <T> Iterable<T>.enumeration(): ItEnumeration<T> {
-    return ItEnumeration(iterator())
+fun Map<String, *>.getTimestamp(name: String): java.sql.Timestamp {
+    return this[name] as java.sql.Timestamp
+}
+
+/**
+ * Get attribute of db type: real, double
+ */
+fun Map<String, *>.getDouble(name: String): Double? {
+    return this[name] as Double?
+}
+
+/**
+ * Get attribute of db type: float
+ */
+fun Map<String, *>.getFloat(name: String): Float? {
+    return this[name] as Float?
+}
+
+/**
+ * Get attribute of db type: bit, tinyint(1)
+ */
+fun Map<String, *>.getBoolean(name: String): Boolean? {
+    return this[name] as Boolean?
+}
+
+/**
+ * Get attribute of db type: tinyint(1)
+ */
+fun Map<String, *>.getShort(name: String): Short? {
+    return this[name] as Short?
+}
+
+/**
+ * Get attribute of db type: decimal, numeric
+ */
+fun Map<String, *>.getBigDecimal(name: String): BigDecimal {
+    return this[name] as BigDecimal
+}
+
+/**
+ * Get attribute of db type: binary, varbinary, tinyblob, blob, mediumblob, longblob
+ */
+fun Map<String, *>.getBytes(name: String): ByteArray {
+    return this[name] as ByteArray
+}
+
+/**
+ * Get attribute of any type that extends from Number
+ */
+fun Map<String, *>.getNumber(name: String): Number {
+    return this[name] as Number
 }

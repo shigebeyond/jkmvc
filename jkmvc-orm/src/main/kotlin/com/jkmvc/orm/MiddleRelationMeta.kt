@@ -92,7 +92,7 @@ class MiddleRelationMeta(
      */
     public fun queryMiddleTable(item: IOrm, fkInMany: Any? = null): IDbQueryBuilder? {
         val pk: DbKeyValues = item.gets(primaryProp)
-        if(pk.isAllNull())
+        if(pk.isAnyNull())
             return null;
         val query = DbQueryBuilder(ormMeta.db).from(middleTable).where(foreignKey, "=", pk)
         if (fkInMany != null) { // hasMany关系下过滤单个关系
@@ -139,7 +139,7 @@ class MiddleRelationMeta(
     public override fun queryRelated(item: IOrm, fkInMany: Any?, withTableAlias:Boolean): OrmQueryBuilder? {
         // 通过join中间表 查从表
         val pk:DbKeyValues = item.gets(primaryProp) // 主键
-        if(pk.isAllNull())
+        if(pk.isAnyNull())
             return null;
         val tableAlias = middleTable + '.'
         val query = buildQuery() // 中间表.远端外键 = 从表.远端主键

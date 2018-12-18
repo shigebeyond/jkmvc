@@ -15,6 +15,11 @@ interface IOrmPersistent : IOrmValid {
 	val ormMeta: IOrmMeta;
 
 	/**
+	 * 判断当前记录是否存在于db: 有原始数据就认为它是存在的
+	 */
+	var loaded:Boolean;
+
+	/**
 	 * 获得主键值
 	 */
 	val pk:DbKeyValues
@@ -29,14 +34,28 @@ interface IOrmPersistent : IOrmValid {
 	 * 获得sql构建器
 	 * @return
 	 */
-	fun queryBuilder(): OrmQueryBuilder;
+	fun queryBuilder(): OrmQueryBuilder
+
+	/**
+	 * 根据主键值来加载数据
+	 *   如果是联合主键, 则参数按 ormMeta.primaryKey 中定义的字段的属性来传值
+	 *
+	 * @param pk
+	 * @return
+	 */
+	fun loadByPk(vararg pk: Any): IOrm
 
 	/**
 	 * 保存数据
 	 *
 	 * @return
 	 */
-	fun save(): Boolean;
+	fun save(): Boolean {
+		if(loaded)
+			return update();
+
+		return create() > 0;
+	}
 
 	/**
 	 * 插入数据: insert sql

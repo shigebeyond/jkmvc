@@ -15,7 +15,7 @@ abstract class OrmPersistent : OrmValid() {
 	/**
 	 * 判断当前记录是否存在于db: 有原始数据就认为它是存在的
 	 */
-	var loaded:Boolean = false;
+	public override var loaded:Boolean = false;
 
 	/**
 	 * 元数据
@@ -54,15 +54,19 @@ abstract class OrmPersistent : OrmValid() {
 	}
 
 	/**
-	 * 保存数据
+	 * 根据主键值来加载数据
+	 *   如果是联合主键, 则参数按 ormMeta.primaryKey 中定义的字段的属性来传值
 	 *
+	 * @param pk
 	 * @return
 	 */
-	public override fun save(): Boolean {
-		if(loaded)
-			return update();
+	public override fun loadByPk(vararg pk: Any): IOrm {
+		if(pk.isNotEmpty())
+			queryBuilder().where(ormMeta.primaryKey, DbKeyValues(pk)).find() {
+				this.setOriginal(it); // 读取查询数据
+			}
 
-		return create() > 0;
+		return this
 	}
 
 	/**
