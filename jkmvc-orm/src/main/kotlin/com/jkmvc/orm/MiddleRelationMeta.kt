@@ -23,12 +23,12 @@ import kotlin.reflect.KClass
 class MiddleRelationMeta(
         sourceMeta:IOrmMeta, /* 源模型元数据 */
         type:RelationType /* 关联关系 */,
-        model: KClass<out IOrm> /* 关联模型类型 */,
-        foreignKey:String /* 外键 */,
-        primaryKey:String/* 主键 */,
+        model:KClass<out IOrm> /* 关联模型类型 */,
+        foreignKey:DbKeyName /* 外键 */,
+        primaryKey:DbKeyName/* 主键 */,
         public val middleTable:String/* 中间表 */,
-        public val farForeignKey:String /* 远端外键 */,
-        public val farPrimaryKey:String/* 远端主键 */,
+        public val farForeignKey:DbKeyName /* 远端外键 */,
+        public val farPrimaryKey:DbKeyName/* 远端主键 */,
         conditions:Map<String, Any?> = emptyMap() /* 查询条件 */
 ) : RelationMeta(sourceMeta, type, model, foreignKey, primaryKey, conditions) {
 
@@ -36,26 +36,26 @@ class MiddleRelationMeta(
      * 远端主键属性
      *   与 farPrimaryKey 对应
      */
-    public val farPrimaryProp:String = sourceMeta.column2Prop(farPrimaryKey)
+    public val farPrimaryProp:DbKeyName = sourceMeta.column2Prop(farPrimaryKey)
 
     /**
      *  远端外键属性
      *    与 farForeignKey 对应
      */
-    public val farForeignProp:String = sourceMeta.column2Prop(farForeignKey)
+    public val farForeignProp:DbKeyName = sourceMeta.column2Prop(farForeignKey)
 
     /**
      * 中间表的外键字段别名
      *    用在 OrmQueryBuilder.findAll() 联查从表时，绑定主对象
      *    不能使用foreignKey, 因为中间表的该字段可能与从表字段重名
      */
-    public val middleForeignKey = foreignKey + '_'
+    public val middleForeignKey:DbKeyName = foreignKey.wrap("", "_") // foreignKey + '_'
 
     /**
      * 中间表的外键属性
      *    与 middleForeignKey 对应
      */
-    public val middleForeignProp = sourceMeta.column2Prop(middleForeignKey)
+    public val middleForeignProp:DbKeyName = sourceMeta.column2Prop(middleForeignKey)
 
     /**
      * 构建查询：通过join中间表来查询从表
@@ -86,12 +86,12 @@ class MiddleRelationMeta(
      * @return
      */
     public fun queryMiddleTable(item: IOrm, fkInMany: Any? = null): IDbQueryBuilder? {
-        val pk: Any? = item[primaryProp]
+        val pk: DbKeyValue = item.get(primaryProp)
         if(pk == null)
             return null;
         val query = DbQueryBuilder(ormMeta.db).from(middleTable).where(foreignKey, "=", pk)
         if (fkInMany != null) { // hasMany关系下过滤单个关系
-            val farPk = if(fkInMany is IOrm) fkInMany[farPrimaryProp] else fkInMany
+            val farPk = if(fkInMany is IOrm) fkInMany.get(farPrimaryProp) else fkInMany
             query.where(farForeignKey, fkInMany)
         }
         return query;

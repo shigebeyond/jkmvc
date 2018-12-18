@@ -30,12 +30,12 @@ interface IRelationMeta {
      *    一般情况下，是源模型中的主键（sourceMeta.primaryKey），不需要指定
      *    但是某些情况下，是源模型的业务主键，需要手动指定
      */
-    val primaryKey:String;
+    val primaryKey:DbKeyName;
 
     /**
      *  外键
      */
-    val foreignKey:String;
+    val foreignKey:DbKeyName;
 
     /**
      *  查询条件
@@ -45,12 +45,12 @@ interface IRelationMeta {
     /**
      * 主键属性
      */
-    val primaryProp:String
+    val primaryProp:DbKeyName
 
     /**
      *  外键属性
      */
-    val foreignProp:String;
+    val foreignProp:DbKeyName
 
     /**
      * 获得关联模型的元数据

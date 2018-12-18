@@ -16,7 +16,7 @@ interface IDbIdentifierQuoter{
      *   oracle为"table"
      *   sql server为"table" [table]
      *
-     * @param table 表名或别名 DbAlias
+     * @param table 表名或别名 DbExpr
      * @return
      */
     fun quoteTable(table:CharSequence):String {
@@ -32,7 +32,7 @@ interface IDbIdentifierQuoter{
      *   oracle为"column"
      *   sql server为"column" [column]
      *
-     * @param column 字段名, 可能是别名 DbAlias
+     * @param column 字段名, 可能是别名 DbExpr
      * @return
      */
     fun quoteColumn(column:CharSequence):String {

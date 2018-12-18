@@ -29,14 +29,14 @@ abstract class OrmPersistent : OrmValid() {
 	/**
 	 * 获得主键值
 	 */
-	public override val pk:Any?
+	public override val pk:DbKeyValue
 		get() = this[ormMeta.primaryProp];
 
 	/**
 	 * 获得原始主键值
 	 *   update()时用到，因为主键可能被修改
 	 */
-	public override val oldPk:Any?
+	public override val oldPk:DbKeyValue
 		get(){
 			val pp = ormMeta.primaryProp
 			if(dirty.containsKey(pp))
@@ -93,7 +93,7 @@ abstract class OrmPersistent : OrmValid() {
 
 			// 插入数据库
 			val needPk = ormMeta.primaryProp.isNotEmpty() && !data.containsKey(ormMeta.primaryProp) // 是否需要生成主键
-			val generatedColumn = if (needPk) ormMeta.primaryKey else null // 主键名
+			val generatedColumn = if (needPk) ormMeta.primaryKey.first else null // 主键名
 			val pk = queryBuilder().value(buildDirtyData()).insert(generatedColumn);
 
 			// 更新内部数据

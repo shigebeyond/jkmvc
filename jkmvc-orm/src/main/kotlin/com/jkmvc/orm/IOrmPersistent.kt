@@ -17,13 +17,13 @@ interface IOrmPersistent : IOrmValid {
 	/**
 	 * 获得主键值
 	 */
-	val pk: Any?;
+	val pk:DbKeyValue
 
 	/**
 	 * 获得原始主键值
 	 *   update()时用到，因为主键可能被修改
 	 */
-	val oldPk:Any?
+	val oldPk:DbKeyValue
 
 	/**
 	 * 获得sql构建器

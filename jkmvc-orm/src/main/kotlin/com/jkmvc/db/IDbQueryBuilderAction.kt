@@ -121,9 +121,9 @@ interface IDbQueryBuilderAction {
     /**
      * 设置查询的字段, select时用
      *
-     * @param columns 字段名数组，其元素类型是 String 或 DbAlias
-     *                如 arrayOf(column1, column2, DbAlias(column3, alias)),
-     * 				  如 arrayOf("name", "age", DbAlias("birthday", "birt"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
+     * @param columns 字段名数组，其元素类型是 String 或 DbExpr
+     *                如 arrayOf(column1, column2, DbExpr(column3, alias)),
+     * 				  如 arrayOf("name", "age", DbExpr("birthday", "birt"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
      * @return
      */
     fun select(vararg columns:CharSequence):IDbQueryBuilder;

@@ -1,6 +1,8 @@
 package com.jkmvc.db
 
 import com.jkmvc.common.isArrayOrCollection
+import com.jkmvc.orm.DbKeyName
+import com.jkmvc.orm.DbKeyValue
 
 /**
  * sql构建器 -- 修饰子句: 由修饰词where/group by/order by/limit来构建的子句
@@ -35,21 +37,21 @@ interface IDbQueryBuilderDecoration{
     /**
      * Alias of andWhere()
      *
-     * @param   column  column name or DbAlias or object
+     * @param   column  column name or DbExpr
      * @param   op      logic operator
      * @param   value   column value
      * @return
      */
-    fun where(column: String, op: String, value: Any?): IDbQueryBuilder;
+    fun where(column: CharSequence, op: String, value: Any?): IDbQueryBuilder;
 
     /**
      * Alias of andWhere()
      *
-     * @param   column  column name or DbAlias or object
+     * @param   column  column name or DbExpr
      * @param   value   column value
      * @return
      */
-    fun where(column: String, value: Any?): IDbQueryBuilder {
+    fun where(column: CharSequence, value: Any?): IDbQueryBuilder {
         if (value == null)
             return where(column, "IS", value);
 
@@ -62,11 +64,11 @@ interface IDbQueryBuilderDecoration{
     /**
      * Creates a new "OR WHERE" condition for the query.
      *
-     * @param   column  column name or DbAlias or object
+     * @param   column  column name or DbExpr
      * @param   value   column value
      * @return
      */
-    fun orWhere(column: String, value: Any?): IDbQueryBuilder {
+    fun orWhere(column: CharSequence, value: Any?): IDbQueryBuilder {
         if (value.isArrayOrCollection())
             return orWhere(column, "IN", value)
 
@@ -100,22 +102,22 @@ interface IDbQueryBuilderDecoration{
     /**
      * Creates a new "AND WHERE" condition for the query.
      *
-     * @param   column  column name or DbAlias or object
+     * @param   column  column name or DbExpr
      * @param   op      logic operator
      * @param   value   column value
      * @return
      */
-    fun andWhere(column: String, op: String, value: Any?): IDbQueryBuilder;
+    fun andWhere(column: CharSequence, op: String, value: Any?): IDbQueryBuilder;
 
     /**
      * Creates a new "OR WHERE" condition for the query.
      *
-     * @param   column  column name or DbAlias or object
+     * @param   column  column name or DbExpr
      * @param   op      logic operator
      * @param   value   column value
      * @return
      */
-    fun orWhere(column: String, op: String, value: Any?): IDbQueryBuilder;
+    fun orWhere(column: CharSequence, op: String, value: Any?): IDbQueryBuilder;
 
     /**
      * Alias of andWhereOpen()
@@ -165,7 +167,7 @@ interface IDbQueryBuilderDecoration{
      * @param   column  column name
      * @return
      */
-    fun groupBy(column: String): IDbQueryBuilder;
+    fun groupBy(column: CharSequence): IDbQueryBuilder;
 
     /**
      * Creates a "GROUP BY ..." filter.
@@ -182,32 +184,32 @@ interface IDbQueryBuilderDecoration{
     /**
      * Alias of andHaving()
      *
-     * @param   column  column name or DbAlias or object
+     * @param   column  column name or DbExpr
      * @param   op      logic operator
      * @param   value   column value
      * @return
      */
-    fun having(column: String, op: String, value: Any? = null): IDbQueryBuilder;
+    fun having(column: CharSequence, op: String, value: Any? = null): IDbQueryBuilder;
 
     /**
      * Creates a new "AND HAVING" condition for the query.
      *
-     * @param   column  column name or DbAlias or object
+     * @param   column  column name or DbExpr
      * @param   op      logic operator
      * @param   value   column value
      * @return
      */
-    fun andHaving(column: String, op: String, value: Any?): IDbQueryBuilder;
+    fun andHaving(column: CharSequence, op: String, value: Any?): IDbQueryBuilder;
 
     /**
      * Creates a new "OR HAVING" condition for the query.
      *
-     * @param   column  column name or DbAlias or object
+     * @param   column  column name or DbExpr
      * @param   op      logic operator
      * @param   value   column value
      * @return
      */
-    fun orHaving(column: String, op: String, value: Any?): IDbQueryBuilder;
+    fun orHaving(column: CharSequence, op: String, value: Any?): IDbQueryBuilder;
 
     /**
      * Alias of andHavingOpen()
@@ -254,22 +256,22 @@ interface IDbQueryBuilderDecoration{
     /**
      * Applies sorting with "ORDER BY ..."
      *
-     * @param   column     column name or DbAlias or object
+     * @param   column     column name or DbExpr
      * @param   asc        whether asc direction
      * @return
      */
-    fun orderBy(column: String, asc: Boolean): IDbQueryBuilder {
+    fun orderBy(column: CharSequence, asc: Boolean): IDbQueryBuilder {
         return orderBy(column, if (asc) "ASC" else "DESC")
     }
 
     /**
      * Applies sorting with "ORDER BY ..."
      *
-     * @param   column     column name or DbAlias or object
+     * @param   column     column name or DbExpr
      * @param   direction  direction of sorting
      * @return
      */
-    fun orderBy(column: String, direction: String? = null): IDbQueryBuilder;
+    fun orderBy(column: CharSequence, direction: String? = null): IDbQueryBuilder;
 
     /**
      * Multiple OrderBy
@@ -307,7 +309,7 @@ interface IDbQueryBuilderDecoration{
     /**
      * Adds addition tables to "JOIN ...".
      *
-     * @param   table  table name | DbAlias | subquery
+     * @param   table  table name | DbExpr | subquery
      * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
      * @return
      */
@@ -316,9 +318,9 @@ interface IDbQueryBuilderDecoration{
     /**
      * Adds "ON ..." conditions for the last created JOIN statement.
      *
-     * @param   c1  column name or DbAlias or object
+     * @param   c1  column name or DbExpr
      * @param   op  logic operator
-     * @param   c2  column name or DbAlias or object
+     * @param   c2  column name or DbExpr
      * @return
      */
     fun on(c1: String, op: String, c2: String): IDbQueryBuilder;

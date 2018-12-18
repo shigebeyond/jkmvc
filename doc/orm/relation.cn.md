@@ -16,7 +16,7 @@ companion object m: OrmMeta(...){
 }
 ```
 
-让我们来看看方法定义 `IOrmMeta::belongsTo(name:String, relatedModel: KClass<out IOrm>, 外键:String, primaryKey: String, conditions:Map<String, Any?>): IOrmMeta`
+让我们来看看方法定义 `IOrmMeta::belongsTo(name:String, relatedModel: KClass<out IOrm>, 外键:String, primaryKey:DbKeyColumn, conditions:Map<String, Any?>): IOrmMeta`
 
 `name` 参数是关系名, 是用来在代码中访问关联模型。譬如你有`Post` 模型，从属于`User`模型（就是一个文章从属于一个用户），则你可以定义 `belongsTo`关系如下:
 
@@ -49,7 +49,7 @@ hasMany("posts" /* 关系名 */, PostModel::class /* 关联模型的类 */, "pos
 让我们来看看方法定义： 
 
 ```
-IOrmMeta::hasMany(name: String, relatedModel: KClass<out IOrm>, foreighKey: String, primaryKey: String, conditions: Map<String, Any?>): IOrmMeta
+IOrmMeta::hasMany(name: String, relatedModel: KClass<out IOrm>, foreighKey: String, primaryKey:DbKeyColumn, conditions: Map<String, Any?>): IOrmMeta
 ```
 
 接上面的例子，`User`模型的的关系定义如下
@@ -92,11 +92,11 @@ hasOne("story", PostModel::class)
 ```
 IOrmMeta::hasManyThrough(name: String, 
 	relatedModel: KClass<out IOrm>,
-	foreignKey: String = this.defaultForeignKey,
-	primaryKey: String = this.primaryKey,
+	foreignKey:DbKeyColumn = this.defaultForeignKey,
+	primaryKey:DbKeyColumn = this.primaryKey,
 	middleTable:String = table + '_' + relatedModel.modelOrmMeta.table,
-	farForeignKey:String = relatedModel.modelOrmMeta.defaultForeignKey,
-	farPrimaryKey:String = relatedModel.modelOrmMeta.primaryKey,
+	farForeignKey:DbKeyColumn = relatedModel.modelOrmMeta.defaultForeignKey,
+	farPrimaryKey:DbKeyColumn = relatedModel.modelOrmMeta.primaryKey,
 	conditions: Map<String, Any?> = emptyMap()
 ): IOrmMeta
 ```

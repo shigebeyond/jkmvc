@@ -205,7 +205,7 @@ The `join()` method takes two parameters.
 * The first is either a table name, an `Pair<String, String>` object containing the table and alias. 
 * The second parameter is the join type: LEFT, RIGHT, INNER, etc.
 
-The `on()` method sets the conditions for the previous `join()` method and is very similar to the `where()` method in that it takes three parameters; 1. left column (name or object) 2. an operator 3. the right column (name or object). Multiple `on()` methods may be used to supply multiple conditions and they will be appended with an "AND" operator. 
+The `on()` method sets the conditions for the previous `join()` method and is very similar to the `where()` method in that it takes three parameters; 1. left column (name or DbExpr) 2. an operator 3. the right column (name or DbExpr). Multiple `on()` methods may be used to supply multiple conditions and they will be appended with an "AND" operator.
 
 ```
 // This query will find all the posts related to "smith" with JOIN

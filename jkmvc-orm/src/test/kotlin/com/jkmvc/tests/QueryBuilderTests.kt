@@ -173,12 +173,12 @@ class QueryBuilderTests{
     @Test
     fun testSubQuery(){
         /*// 子查询
-        val sub = DbQueryBuilder().select("username", DbAlias("COUNT(`id`)", "total_posts"))
+        val sub = DbQueryBuilder().select("username", DbExpr("COUNT(`id`)", "total_posts"))
                 .from("posts").groupBy("username").having("total_posts", ">=", 10);
 
         // join子查询： join select
         val query = DbQueryBuilder().select("profiles.*", "posts.total_posts").from("profiles")
-                .joins(DbAlias(sub, "posts"), "INNER").on("profiles.username", "=", "posts.username");
+                .joins(DbExpr(sub, "posts"), "INNER").on("profiles.username", "=", "posts.username");
         val csql = query.compileSelect()
 
         // insert子查询： insert...select

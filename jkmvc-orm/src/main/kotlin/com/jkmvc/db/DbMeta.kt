@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-15 9:03 PM
  */
-class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
+internal class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
 
     companion object {
 
@@ -202,7 +202,7 @@ class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
 
     /**
      * 转义标识符(表名/字段名)
-     * @param 表名或字段名或别名 DbAlias
+     * @param 表名或字段名或别名 DbExpr
      * @return
      */
     public override fun quoteIdentifier(id: String): String {

@@ -520,3 +520,7 @@ Db.toInt
 
 封装查询单个值的结果
 Cell<T> 替换 Pair<Boolean, T?>
+
+
+dbexpr 文档
+cell

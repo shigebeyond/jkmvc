@@ -16,7 +16,7 @@ companion object m: OrmMeta(...){
 }
 ```
 
-Let's have a look at the method definition `IOrmMeta::belongsTo(name:String, relatedModel: KClass<out IOrm>, foreignKey:String, primaryKey: String, conditions:Map<String, Any?>): IOrmMeta`
+Let's have a look at the method definition `IOrmMeta::belongsTo(name:String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyColumn, primaryKey:DbKeyColumn, conditions:Map<String, Any?>): IOrmMeta`
 
 `name` parameter is the relation name, it's what is used to access the related model in your code. If you had a `Post` model that belonged to a `User` model and wished to use the default values of the `belongsTo` configuration then your code would look like this:
 
@@ -49,7 +49,7 @@ hasMany("posts" /* relation name */, PostModel::class /* relatedModel */, "post_
 Let's have a look at the method definition 
 
 ```
-IOrmMeta::hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey: String, primaryKey: String, conditions: Map<String, Any?>): IOrmMeta
+IOrmMeta::hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyColumn, primaryKey:DbKeyColumn, conditions: Map<String, Any?>): IOrmMeta
 ```
 Again, for our user and post example, this would look like the following in the user model:
 
@@ -91,11 +91,11 @@ Let's have a look at the method definition
 ```
 IOrmMeta::hasManyThrough(name: String, 
 	relatedModel: KClass<out IOrm>,
-	foreignKey: String = this.defaultForeignKey,
-	primaryKey: String = this.primaryKey,
+	foreignKey:DbKeyColumn = this.defaultForeignKey,
+	primaryKey:DbKeyColumn = this.primaryKey,
 	middleTable:String = table + '_' + relatedModel.modelOrmMeta.table,
-	farForeignKey:String = relatedModel.modelOrmMeta.defaultForeignKey,
-	farPrimaryKey:String = relatedModel.modelOrmMeta.primaryKey,
+	farForeignKey:DbKeyColumn = relatedModel.modelOrmMeta.defaultForeignKey,
+	farPrimaryKey:DbKeyColumn = relatedModel.modelOrmMeta.primaryKey,
 	conditions: Map<String, Any?> = emptyMap()
 ): IOrmMeta
 ```

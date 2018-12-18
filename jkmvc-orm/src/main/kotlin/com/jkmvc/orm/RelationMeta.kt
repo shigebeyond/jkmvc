@@ -15,8 +15,8 @@ open class RelationMeta(
         public override val sourceMeta:IOrmMeta, /* 源模型元数据 */
         public override val type:RelationType /* 关联关系 */,
         public override val model: KClass<out IOrm> /* 关联模型类型 */,
-        public override val foreignKey:String /* 外键 */,
-        public override val primaryKey:String/* 主键 */,
+        public override val foreignKey:DbKeyName /* 外键 */,
+        public override val primaryKey:DbKeyName/* 主键 */,
         public override val conditions:Map<String, Any?> = emptyMap() /* 查询条件 */
 ) : IRelationMeta {
 
@@ -36,13 +36,13 @@ open class RelationMeta(
      * 主键属性
      *   与 primaryKey 对应
      */
-    public override val primaryProp:String = sourceMeta.column2Prop(primaryKey)
+    public override val primaryProp:DbKeyName = sourceMeta.column2Prop(primaryKey)
 
     /**
      *  外键属性
      *   与 foreignKey 对应
      */
-    public override val foreignProp:String = sourceMeta.column2Prop(foreignKey)
+    public override val foreignProp:DbKeyName = sourceMeta.column2Prop(foreignKey)
 
     /**
      * 构造函数
@@ -52,7 +52,7 @@ open class RelationMeta(
      * @param foreignKey 外键
      * @param conditions 查询条件
      */
-    /*public constructor(sourceMeta:IOrmMeta, type:RelationType, model: KClass<out IOrm>, foreignKey:String, conditions:Map<String, Any?> = emptyMap()):this(sourceMeta, type, model, foreignKey, sourceMeta.primaryKey, conditions){
+    /*public constructor(sourceMeta:IOrmMeta, type:RelationType, model: KClass<out IOrm>, foreignKey:DbKeyColumn, conditions:Map<String, Any?> = emptyMap()):this(sourceMeta, type, model, foreignKey, sourceMeta.primaryKey, conditions){
     }*/
 
     /**
