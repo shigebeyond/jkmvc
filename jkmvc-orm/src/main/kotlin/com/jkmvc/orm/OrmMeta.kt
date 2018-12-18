@@ -27,6 +27,14 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
         val events:Array<String> = arrayOf("beforeCreate", "afterCreate", "beforeUpdate", "afterUpdate", "beforeSave", "afterSave", "beforeDelete", "afterDelete");
     }
 
+    public constructor(
+            model: KClass<out IOrm> /* 模型类 */,
+            label: String /* 模型中文名 */,
+            table: String /* 表名，假定model类名, 都是以"Model"作为后缀 */,
+            primaryKey:String /* 主键 */,
+            dbName: String = "default" /* 数据库名 */
+    ):this(model, label, table, DbKeyNames(primaryKey), dbName)
+
     /**
      * 模型名
      */

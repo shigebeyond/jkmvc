@@ -166,6 +166,31 @@ interface IOrmMeta {
     fun <T> transactionWhenHandlingEvent(events:String, statement: () -> T): T
 
     /**
+     * 智能转换字段值
+     *    在不知字段类型的情况下，将string赋值给属性
+     *    => 需要将string转换为属性类型
+     *    => 需要显式声明属性
+     *
+     * @param column
+     * @param value 字符串
+     */
+    fun convertIntelligent(column:String, value:String):Any?
+
+    /**
+     * 联查关联表
+     *
+     * @param query 查询构建器
+     * @param name 关联关系名
+     * @param select 是否select关联字段
+     * @param columns 关联字段列表
+     * @param lastName 上一级关系名
+     * @param path 列名父路径
+     * @return 关联关系
+     */
+    fun joinRelated(query: OrmQueryBuilder, name: String, select: Boolean, columns: SelectColumnList?, lastName:String = this.name, path:String = ""): IRelationMeta
+
+    /************************************ 添加关联关系: 联合主键版本, 主外键类型为 DbKeyNames *************************************/
+    /**
      * 生成属性代理 + 设置关联关系(belongs to)
      *
      *    公式：从表.外键 = 主表.主键
@@ -298,12 +323,13 @@ interface IOrmMeta {
      * @param farPrimaryKey 远端主键
      * @return
      */
-    fun hasOneThrough(name: String, relatedModel: KClass<out IOrm>,
+    fun hasOneThrough(name: String,
+                      relatedModel: KClass<out IOrm>,
                       foreignKey:DbKeyNames = this.defaultForeignKey /* 主表_主键 = 本表_主键 */,
                       primaryKey:DbKeyNames = this.primaryKey /* 本表的主键 */,
                       middleTable:String = table + '_' + relatedModel.modelOrmMeta.table /* 主表_从表 */,
                       farForeignKey:DbKeyNames = relatedModel.modelOrmMeta.defaultForeignKey /* 远端主表_主键 = 从表_主键 */,
-                      farPrimaryKey:DbKeyNames = relatedModel.modelOrmMeta.primaryKey, /* 从表的主键 */
+                      farPrimaryKey:DbKeyNames = relatedModel.modelOrmMeta.primaryKey /* 从表的主键 */,
                       conditions: Map<String, Any?> = emptyMap()
     ): IOrmMeta
 
@@ -330,36 +356,200 @@ interface IOrmMeta {
      * @param farPrimaryKey 远端主键
      * @return
      */
-    fun hasManyThrough(name: String, relatedModel: KClass<out IOrm>,
+    fun hasManyThrough(name: String,
+                       relatedModel: KClass<out IOrm>,
                        foreignKey:DbKeyNames = this.defaultForeignKey /* 主表_主键 = 本表_主键 */,
                        primaryKey:DbKeyNames = this.primaryKey /* 本表的主键 */,
                        middleTable:String = table + '_' + relatedModel.modelOrmMeta.table /* 主表_从表 */,
                        farForeignKey:DbKeyNames = relatedModel.modelOrmMeta.defaultForeignKey /* 远端主表_主键 = 从表_主键 */,
-                       farPrimaryKey:DbKeyNames = relatedModel.modelOrmMeta.primaryKey,/* 从表的主键 */
+                       farPrimaryKey:DbKeyNames = relatedModel.modelOrmMeta.primaryKey /* 从表的主键 */,
                        conditions: Map<String, Any?> = emptyMap()
     ): IOrmMeta
 
+    /************************************ 添加关联关系: 单主键版本, 主外键类型为 String *************************************/
     /**
-     * 智能转换字段值
-     *    在不知字段类型的情况下，将string赋值给属性
-     *    => 需要将string转换为属性类型
-     *    => 需要显式声明属性
+     * 生成属性代理 + 设置关联关系(belongs to)
      *
-     * @param column
-     * @param value 字符串
+     *    公式：从表.外键 = 主表.主键
+     *             外键默认值 = 主表_主键 （= 关联表_主键）
+     *             主键默认值 = 主表的主键 （= 关联表的主键）
+     *
+     *    其中本表从属于关联表，因此 本表是从表，关联表是主表
+     *
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param foreignKey 外键
+     * @param conditions 关联查询条件
+     * @return
      */
-    fun convertIntelligent(column:String, value:String):Any?
+    fun belongsTo(name:String, relatedModel: KClass<out IOrm>, foreignKey:String, primaryKey:String, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
+        return  belongsTo(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), conditions)
+    }
 
     /**
-     * 联查关联表
+     * 生成属性代理 + 设置关联关系(belongs to)
      *
-     * @param query 查询构建器
-     * @param name 关联关系名
-     * @param select 是否select关联字段
-     * @param columns 关联字段列表
-     * @param lastName 上一级关系名
-     * @param path 列名父路径
-     * @return 关联关系
+     *    公式：从表.外键 = 主表.主键
+     *             外键默认值 = 主表_主键 （= 关联表_主键）
+     *             主键默认值 = 主表的主键 （= 关联表的主键）
+     *
+     *    其中本表从属于关联表，因此 本表是从表，关联表是主表
+     *
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param foreignKey 外键
+     * @param conditions 关联查询条件
+     * @return
      */
-    fun joinRelated(query: OrmQueryBuilder, name: String, select: Boolean, columns: SelectColumnList?, lastName:String = this.name, path:String = ""): IRelationMeta
+    fun belongsTo(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = relatedModel.modelOrmMeta.defaultForeignKey.first() /* 主表_主键 = 关联表_主键 */, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
+        return belongsTo(name, relatedModel, foreignKey, relatedModel.modelOrmMeta.primaryKey.first() /* 关联表的主键 */, conditions)
+    }
+
+    /**
+     * 设置关联关系(has one)
+     *
+     * 公式：从表.外键 = 主表.主键
+     *          外键默认值 = 主表_主键（= 本表_主键）
+     *          主键默认值 = 主表的主键（= 本表的主键）
+     *
+     *    其中本表有一个关联表，因此 本表是主表，关联表是从表
+     *
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param foreignKey 外键
+     * @param primaryKey 主键
+     * @param conditions 关联查询条件
+     * @return
+     */
+    fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey:String, primaryKey:String, conditions: Map<String, Any?> = emptyMap()): IOrmMeta{
+        return hasOne(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), conditions)
+    }
+
+    /**
+     * 设置关联关系(has one)
+     *
+     * 公式：从表.外键 = 主表.主键
+     *          外键默认值 = 主表_主键（= 本表_主键）
+     *          主键默认值 = 主表的主键（= 本表的主键）
+     *
+     *    其中本表有一个关联表，因此 本表是主表，关联表是从表
+     *
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param foreignKey 外键
+     * @param conditions 关联查询条件
+     * @return
+     */
+    fun hasOne(name:String, relatedModel: KClass<out IOrm>, foreignKey:String, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
+        return hasOne(name, relatedModel, foreignKey, this.primaryKey.first() /* 本表的主键 */, conditions)
+    }
+
+    /**
+     * 设置关联关系(has many)
+     *
+     * 公式：从表.外键 = 主表.主键
+     *          外键默认值 = 主表_主键（= 本表_主键）
+     *          主键默认值 = 主表的主键（= 本表的主键）
+     *
+     *    其中本表有一个关联表，因此 本表是主表，关联表是从表
+     *
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param foreignKey 外键
+     * @param primaryKey 主键
+     * @param conditions 关联查询条件
+     * @return
+     */
+    fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey:String, primaryKey:String, conditions: Map<String, Any?> = emptyMap()): IOrmMeta{
+        return hasMany(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), conditions)
+    }
+
+    /**
+     * 设置关联关系(has many)
+     *
+     * 公式：从表.外键 = 主表.主键
+     *          外键默认值 = 主表_主键（= 本表_主键）
+     *          主键默认值 = 主表的主键（= 本表的主键）
+     *
+     *    其中本表有一个关联表，因此 本表是主表，关联表是从表
+     *
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param foreignKey 外键
+     * @param conditions 关联查询条件
+     * @return
+     */
+    fun hasMany(name:String, relatedModel: KClass<out IOrm>, foreignKey:String, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
+        return hasMany(name, relatedModel, foreignKey, this.primaryKey.first() /* 本表的主键 */, conditions)
+    }
+
+    /**
+     * 设置关联关系(has one)
+     *
+     * 公式：中间表.外键 = 主表.主键
+     *      中间表.远端外键 = 远端主表.远端主键
+     *           外键默认值 = 主表_主键（= 本表_主键）
+     *           主键默认值 = 主表的主键（= 本表的主键）
+     *           中间表默认值 = 主表_从表
+     *           远端外键默认值 = 远端主表_主键（= 从表_主键）
+     *           远端主键默认值 = 远端主表的主键（= 从表的主键）
+     *
+     *
+     *    其中本表有一个关联表，因此 本表是主表，中间表与关联表是从表
+     *
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param foreignKey 外键
+     * @param primaryKey 主键
+     * @param middleTable 中间表
+     * @param farForeignKey 远端外键
+     * @param farPrimaryKey 远端主键
+     * @return
+     */
+    fun hasOneThrough(name: String,
+                      relatedModel: KClass<out IOrm>,
+                      foreignKey:String = this.defaultForeignKey.first() /* 主表_主键 = 本表_主键 */,
+                      primaryKey:String = this.primaryKey.first() /* 本表的主键 */,
+                      middleTable:String = table + '_' + relatedModel.modelOrmMeta.table /* 主表_从表 */,
+                      farForeignKey:String = relatedModel.modelOrmMeta.defaultForeignKey.first() /* 远端主表_主键 = 从表_主键 */,
+                      farPrimaryKey:String = relatedModel.modelOrmMeta.primaryKey.first() /* 从表的主键 */,
+                      conditions: Map<String, Any?> = emptyMap()
+    ): IOrmMeta{
+        return hasOneThrough(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), middleTable, DbKeyNames(farForeignKey), DbKeyNames(farPrimaryKey), conditions)
+    }
+
+    /**
+     * 设置关联关系(has many)
+     *
+     * 公式：中间表.外键 = 主表.主键
+     *      中间表.远端外键 = 远端主表.远端主键
+     *           外键默认值 = 主表_主键（= 本表_主键）
+     *           主键默认值 = 主表的主键（= 本表的主键）
+     *           中间表默认值 = 主表_从表
+     *           远端外键默认值 = 远端主表_主键（= 从表_主键）
+     *           远端主键默认值 = 远端主表的主键（= 从表的主键）
+     *
+     *
+     *    其中本表有一个关联表，因此 本表是主表，中间表与关联表是从表
+     *
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param foreignKey 外键
+     * @param primaryKey 主键
+     * @param middleTable 中间表
+     * @param farForeignKey 远端外键
+     * @param farPrimaryKey 远端主键
+     * @return
+     */
+    fun hasManyThrough(name: String,
+                       relatedModel: KClass<out IOrm>,
+                       foreignKey:String = this.defaultForeignKey.first() /* 主表_主键 = 本表_主键 */,
+                       primaryKey:String = this.primaryKey.first() /* 本表的主键 */,
+                       middleTable:String = table + '_' + relatedModel.modelOrmMeta.table /* 主表_从表 */,
+                       farForeignKey:String = relatedModel.modelOrmMeta.defaultForeignKey.first() /* 远端主表_主键 = 从表_主键 */,
+                       farPrimaryKey:String = relatedModel.modelOrmMeta.primaryKey.first() /* 从表的主键 */,
+                       conditions: Map<String, Any?> = emptyMap()
+    ): IOrmMeta{
+        return hasManyThrough(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), middleTable, DbKeyNames(farForeignKey), DbKeyNames(farPrimaryKey), conditions)
+    }
 }

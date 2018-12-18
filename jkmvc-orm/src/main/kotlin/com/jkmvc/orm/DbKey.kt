@@ -47,14 +47,14 @@ data class DbKey<T>(val columns: Array<T>) {
     public constructor(c1: T, c2:T, c3:T):this(toArray(c1, c2, c3))
 
     /**
-     * 第一个字段
-     */
-    public val first = columns.first()
-
-    /**
      * 字段个数
      */
     public val size = columns.size
+
+    /**
+     * 第一个字段
+     */
+    public fun first() = columns.first()
 
     /**
      * 遍历并生成新的主键
@@ -142,6 +142,7 @@ internal inline fun DbKeyNames.forEachNameValue(values:Any?, action: (name: Stri
     // 1 多值: DbKeyValue
     if(values is DbKey<*>) {
         forEachColumnWith(values, action)
+        return
     }
 
     // 2 单值

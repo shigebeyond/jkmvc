@@ -94,12 +94,12 @@ abstract class OrmPersistent : OrmValid() {
 			// 插入数据库
 			// TODO: 单主键
 			val needPk = !ormMeta.primaryProp.isAllEmpty() && !data.containsAllKeys(ormMeta.primaryProp) // 是否需要生成主键
-			val generatedColumn = if (needPk) ormMeta.primaryKey.first else null // 主键名
+			val generatedColumn = if (needPk) ormMeta.primaryKey.first() else null // 主键名
 			val pk = queryBuilder().value(buildDirtyData()).insert(generatedColumn);
 
 			// 更新内部数据
 			if (needPk)
-				data[ormMeta.primaryProp.first] = pk; // 主键
+				data[ormMeta.primaryProp.first()] = pk; // 主键
 
 			// 触发后置事件
 			fireEvent("afterCreate")
