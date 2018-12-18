@@ -38,17 +38,17 @@ interface IOrmMeta {
     /**
      * 主键
      */
-    val primaryKey:DbKeyName
+    val primaryKey:DbKeyNames
 
     /**
      * 主键属性
      */
-    val primaryProp:String
+    val primaryProp:DbKeyNames
 
     /**
      * 默认外键
      */
-    val defaultForeignKey:DbKeyName
+    val defaultForeignKey:DbKeyNames
 
     /**
      * 关联关系
@@ -133,19 +133,6 @@ interface IOrmMeta {
     }
 
     /**
-     * 根据对象属性名，获得db字段名 -- 多个字段
-     *    可根据实际需要在 model 类中重写
-     *
-     * @param prop 对象属性名
-     * @return db字段名
-     */
-    fun prop2Column(prop:DbKeyName): DbKeyName {
-        return prop.map {
-            prop2Column(it)
-        }
-    }
-
-    /**
      * 根据db字段名，获得对象属性名 -- 单个字段
      *
      * @param column db字段名
@@ -153,18 +140,6 @@ interface IOrmMeta {
      */
     fun column2Prop(column:String): String {
        return db.column2Prop(column)
-    }
-
-    /**
-     * 根据db字段名，获得对象属性名 -- 多个字段
-     *
-     * @param column db字段名
-     * @return 对象属性名
-     */
-    fun column2Prop(column:DbKeyName): DbKeyName {
-       return column.map {
-           column2Prop(it)
-       }
     }
 
     /**
@@ -205,7 +180,7 @@ interface IOrmMeta {
      * @param conditions 关联查询条件
      * @return
      */
-    fun belongsTo(name:String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyName, primaryKey:DbKeyName, conditions:Map<String, Any?> = emptyMap()): IOrmMeta;
+    fun belongsTo(name:String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions:Map<String, Any?> = emptyMap()): IOrmMeta;
 
     /**
      * 生成属性代理 + 设置关联关系(belongs to)
@@ -222,7 +197,7 @@ interface IOrmMeta {
      * @param conditions 关联查询条件
      * @return
      */
-    fun belongsTo(name:String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyName = relatedModel.modelOrmMeta.defaultForeignKey /* 主表_主键 = 关联表_主键 */, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
+    fun belongsTo(name:String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames = relatedModel.modelOrmMeta.defaultForeignKey /* 主表_主键 = 关联表_主键 */, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
         return belongsTo(name, relatedModel, foreignKey, relatedModel.modelOrmMeta.primaryKey /* 关联表的主键 */, conditions)
     }
 
@@ -242,7 +217,7 @@ interface IOrmMeta {
      * @param conditions 关联查询条件
      * @return
      */
-    fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyName, primaryKey:DbKeyName, conditions: Map<String, Any?> = emptyMap()): IOrmMeta
+    fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions: Map<String, Any?> = emptyMap()): IOrmMeta
 
     /**
      * 设置关联关系(has one)
@@ -259,7 +234,7 @@ interface IOrmMeta {
      * @param conditions 关联查询条件
      * @return
      */
-    fun hasOne(name:String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyName = this.defaultForeignKey /* 主表_主键 = 本表_主键 */, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
+    fun hasOne(name:String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames = this.defaultForeignKey /* 主表_主键 = 本表_主键 */, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
         return hasOne(name, relatedModel, foreignKey, this.primaryKey /* 本表的主键 */, conditions)
     }
 
@@ -279,7 +254,7 @@ interface IOrmMeta {
      * @param conditions 关联查询条件
      * @return
      */
-    fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyName, primaryKey:DbKeyName, conditions: Map<String, Any?> = emptyMap()): IOrmMeta
+    fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions: Map<String, Any?> = emptyMap()): IOrmMeta
 
     /**
      * 设置关联关系(has many)
@@ -296,7 +271,7 @@ interface IOrmMeta {
      * @param conditions 关联查询条件
      * @return
      */
-    fun hasMany(name:String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyName = this.defaultForeignKey /* 主表_主键 = 本表_主键 */, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
+    fun hasMany(name:String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames = this.defaultForeignKey /* 主表_主键 = 本表_主键 */, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
         return hasMany(name, relatedModel, foreignKey, this.primaryKey /* 本表的主键 */, conditions)
     }
 
@@ -324,11 +299,11 @@ interface IOrmMeta {
      * @return
      */
     fun hasOneThrough(name: String, relatedModel: KClass<out IOrm>,
-                      foreignKey:DbKeyName = this.defaultForeignKey /* 主表_主键 = 本表_主键 */,
-                      primaryKey:DbKeyName = this.primaryKey /* 本表的主键 */,
+                      foreignKey:DbKeyNames = this.defaultForeignKey /* 主表_主键 = 本表_主键 */,
+                      primaryKey:DbKeyNames = this.primaryKey /* 本表的主键 */,
                       middleTable:String = table + '_' + relatedModel.modelOrmMeta.table /* 主表_从表 */,
-                      farForeignKey:DbKeyName = relatedModel.modelOrmMeta.defaultForeignKey /* 远端主表_主键 = 从表_主键 */,
-                      farPrimaryKey:DbKeyName = relatedModel.modelOrmMeta.primaryKey, /* 从表的主键 */
+                      farForeignKey:DbKeyNames = relatedModel.modelOrmMeta.defaultForeignKey /* 远端主表_主键 = 从表_主键 */,
+                      farPrimaryKey:DbKeyNames = relatedModel.modelOrmMeta.primaryKey, /* 从表的主键 */
                       conditions: Map<String, Any?> = emptyMap()
     ): IOrmMeta
 
@@ -356,11 +331,11 @@ interface IOrmMeta {
      * @return
      */
     fun hasManyThrough(name: String, relatedModel: KClass<out IOrm>,
-                       foreignKey:DbKeyName = this.defaultForeignKey /* 主表_主键 = 本表_主键 */,
-                       primaryKey:DbKeyName = this.primaryKey /* 本表的主键 */,
+                       foreignKey:DbKeyNames = this.defaultForeignKey /* 主表_主键 = 本表_主键 */,
+                       primaryKey:DbKeyNames = this.primaryKey /* 本表的主键 */,
                        middleTable:String = table + '_' + relatedModel.modelOrmMeta.table /* 主表_从表 */,
-                       farForeignKey:DbKeyName = relatedModel.modelOrmMeta.defaultForeignKey /* 远端主表_主键 = 从表_主键 */,
-                       farPrimaryKey:DbKeyName = relatedModel.modelOrmMeta.primaryKey,/* 从表的主键 */
+                       farForeignKey:DbKeyNames = relatedModel.modelOrmMeta.defaultForeignKey /* 远端主表_主键 = 从表_主键 */,
+                       farPrimaryKey:DbKeyNames = relatedModel.modelOrmMeta.primaryKey,/* 从表的主键 */
                        conditions: Map<String, Any?> = emptyMap()
     ): IOrmMeta
 

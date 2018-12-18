@@ -1,8 +1,6 @@
 package com.jkmvc.db
 
-import com.jkmvc.common.deleteSuffix
-import com.jkmvc.common.forceClone
-import com.jkmvc.common.getOrPut
+import com.jkmvc.common.*
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.reflect.KFunction2
@@ -107,7 +105,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @return
      */
     public override fun insertColumns(vararg colums:String):IDbQueryBuilder{
-        insertRows.columns = colums.asList()
+        insertRows.columns = colums as Array<String>
         return this;
     }
 
@@ -140,7 +138,9 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @return
      */
     public override fun value(row:Map<String, Any?>):IDbQueryBuilder{
-        insertRows.columns = ArrayList(row.keys)
+        insertRows.columns = row.keys.mapToArray {
+            it
+        }
         insertRows.add(row.values)
         return this;
     }
@@ -288,15 +288,15 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @return
      */
     public fun fillColumns(db: IDb): String {
-        var cols: Collection<CharSequence>
+        var cols: Iterator<CharSequence>
 
         if (action == SqlType.SELECT) { // 1 select子句:  data是要查询的字段名
             if (selectColumns.isEmpty())
                 return "*";
 
-            cols = selectColumns
+            cols = selectColumns.iterator()
         } else // 2 insert子句:  data是要插入的多行: columns + values
-            cols = insertRows.columns!!
+            cols = insertRows.columns.iterator()
 
         return cols.joinToString(", ") {
             // 单个字段转义
@@ -323,7 +323,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
         while(i < valueSize){ //insertRows.rows是多行数据，但是只有一维，需要按columns的大小，来拆分成多行
             sql.append("(")
             //对每值执行db.quote(value);
-            val columnSize = insertRows.columns!!.size
+            val columnSize = insertRows.columns.size
             for (j in 0..(columnSize - 1)){
                 val v = insertRows.rows[i++]
                 sql.append(quote(db, v)).append(", ")

@@ -524,3 +524,8 @@ Cell<T> 替换 Pair<Boolean, T?>
 
 dbexpr 文档
 cell
+
+
+convertValue(prop)
+支持DbExpr + DbKey
+

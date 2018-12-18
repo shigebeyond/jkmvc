@@ -30,12 +30,12 @@ interface IRelationMeta {
      *    一般情况下，是源模型中的主键（sourceMeta.primaryKey），不需要指定
      *    但是某些情况下，是源模型的业务主键，需要手动指定
      */
-    val primaryKey:DbKeyName;
+    val primaryKey:DbKeyNames;
 
     /**
      *  外键
      */
-    val foreignKey:DbKeyName;
+    val foreignKey:DbKeyNames;
 
     /**
      *  查询条件
@@ -45,12 +45,12 @@ interface IRelationMeta {
     /**
      * 主键属性
      */
-    val primaryProp:DbKeyName
+    val primaryProp:DbKeyNames
 
     /**
      *  外键属性
      */
-    val foreignProp:DbKeyName
+    val foreignProp:DbKeyNames
 
     /**
      * 获得关联模型的元数据
@@ -80,6 +80,14 @@ interface IRelationMeta {
     fun newModelInstance(): IOrm {
         return model.java.newInstance();
     }
+
+    /**
+     * 检查指定外键值是否为空
+     *
+     * @param fk 外键值
+     * @return
+     */
+    fun isForeighKeyEmpty(fk: Any?): Boolean
 
     /**
      * 查询关联表

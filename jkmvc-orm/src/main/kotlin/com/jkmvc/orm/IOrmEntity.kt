@@ -35,18 +35,6 @@ interface IOrmEntity: IRecord {
     override operator fun <T> get(column: String, defaultValue: Any?): T;
 
     /**
-     * 获得对象字段
-     *
-     * @param column 字段名
-     * @return
-     */
-    fun get(column: DbKeyName): DbKeyValue{
-        return column.map {
-            get<Any?>(it)
-        }
-    }
-
-    /**
      * 设置对象字段值
      *
      * @param column 字段名

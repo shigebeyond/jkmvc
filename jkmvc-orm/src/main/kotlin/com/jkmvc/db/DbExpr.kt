@@ -11,6 +11,9 @@ package com.jkmvc.db
  *     // UPDATE `user` SET `login_count` = `login_count` + 1 WHERE `id` = 45
  *     DbQueryBuilder().table("user").set("login_count", DbExpr("login_count + 1", false)).where("id", "=", 45).update();
  *   </code>
+ * 3 CharSequence接口
+ *   为了适配 DbQueryBuilder 中的查询方法的查询参数类型, 如 select() / where()
+ *   否则要重载很多方法来接收 DbExpr 参数
  *
  * @author shijianhang
  * @create 2017-11-19 下午1:47
@@ -36,6 +39,10 @@ data class DbExpr(public val exp:CharSequence /* 表达式, 可以是 String | D
     public constructor(exp:CharSequence, quoting:Boolean): this(exp, null, quoting)
 
     init {
+        //表达式只能是 String | DbQueryBuilder
+        if(exp !is String && exp !is IDbQueryBuilder){
+            throw IllegalArgumentException("表达式只能是 String 或 DbQueryBuilder 类型, 但现在是 ${exp.javaClass} 类型: $exp")
+        }
         // 检查子查询与转义不能并存
         if(exp is IDbQueryBuilder && expQuoting)
             throw IllegalArgumentException("如果exp是子查询, 就不能指定expQuoting=true")

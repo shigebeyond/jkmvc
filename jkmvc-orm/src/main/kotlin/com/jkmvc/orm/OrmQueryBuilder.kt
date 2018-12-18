@@ -187,10 +187,14 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         joins[slaveName] = slaveRelation
 
         // 准备条件
-        val masterPk:DbKeyName = masterName + "." + slaveRelation.primaryKey; // 主表.主键
+        val masterPk:DbKeyNames = slaveRelation.primaryKey.map{  // 主表.主键
+            masterName + "." + it // masterName + "." + slaveRelation.primaryKey
+        };
 
         val slave = slaveRelation.ormMeta
-        val slaveFk:DbKeyName = slaveName + "." + slaveRelation.foreignKey; // 从表.外键
+        val slaveFk:DbKeyNames = slaveRelation.foreignKey.map {  // 从表.外键
+            slaveName + "." + it // slaveName + "." + slaveRelation.foreignKey
+        }
 
         // 查从表
         return join(DbExpr(slave.table, slaveName), "LEFT").on(slaveFk, "=", masterPk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
@@ -215,12 +219,20 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         joins[slaveName] = slaveRelation
 
         // 准备条件
-        val masterPk:DbKeyName = masterName + "." + slaveRelation.primaryKey; // 主表.主键
-        val middleFk:DbKeyName = slaveRelation.middleTable + '.' + slaveRelation.foreignKey // 中间表.外键
+        val masterPk:DbKeyNames = slaveRelation.primaryKey.map {  // 主表.主键
+            masterName + "." + it // masterName + "." + slaveRelation.primaryKey
+        };
+        val middleFk:DbKeyNames = slaveRelation.foreignKey.map { // // 中间表.外键
+            slaveRelation.middleTable + '.' + it // slaveRelation.middleTable + '.' + slaveRelation.foreignKey
+        }
 
         val slave = slaveRelation.ormMeta
-        val slavePk2:DbKeyName = slaveName + "." + slaveRelation.farPrimaryKey; // 从表.远端主键
-        val middleFk2:DbKeyName = slaveRelation.middleTable + '.' + slaveRelation.farForeignKey // 中间表.远端外键
+        val slavePk2:DbKeyNames = slaveRelation.farPrimaryKey.map { // 从表.远端主键
+            slaveName + "." + it // slaveName + "." + slaveRelation.farPrimaryKey
+        }
+        val middleFk2:DbKeyNames = slaveRelation.farForeignKey.map {  // 中间表.远端外键
+            slaveRelation.middleTable + '.' + it // slaveRelation.middleTable + '.' + slaveRelation.farForeignKey
+        }
 
         // 查中间表
         join(slaveRelation.middleTable).on(masterPk, "=", middleFk) // 中间表.外键 = 主表.主键
@@ -247,10 +259,14 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         joins[masterName] = masterRelation
 
         // 准备条件
-        val slaveFk:DbKeyName = slaveName + "." + masterRelation.foreignKey; // 从表.外键
+        val slaveFk:DbKeyNames = masterRelation.foreignKey.map { // 从表.外键
+            slaveName + "." + it // slaveName + "." + masterRelation.foreignKey
+        }
 
         val master: IOrmMeta = masterRelation.ormMeta;
-        val masterPk:DbKeyName = masterName + "." + masterRelation.primaryKey; // 主表.主键
+        val masterPk:DbKeyNames = masterRelation.primaryKey.map {  // 主表.主键
+            masterName + "." + it //masterName + "." + masterRelation.primaryKey
+        }
 
         // 查主表
         return join(DbExpr(master.table, masterName), "LEFT").on(masterPk, "=", slaveFk) as OrmQueryBuilder; // 主表.主键 = 从表.外键
@@ -325,8 +341,8 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
             relation.middleForeignProp // 中间表.外键
         else
             relation.foreignProp // 从表.外键
-        val firstPk: Any = items.first()[primaryProp]
-        val firstFk: Any = relatedItems.first()[foreignProp]
+        val firstPk:DbKeyValues = items.first().gets(primaryProp)
+        val firstFk:DbKeyValues = relatedItems.first().gets(foreignProp)
         if (firstPk::class != firstFk::class) {
             throw OrmException("模型[${ormMeta.name}]联查[${name}]的hasMany类型的关联对象失败: 主键[${ormMeta.table}.${relation.primaryKey}]字段类型[${firstPk::class}]与外键[${relation.model.modelOrmMeta.table}.${relation.foreignKey}]字段类型[${firstFk::class}]不一致，请改成一样的")
         }
@@ -336,9 +352,9 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
             val myRelated = LinkedList<IOrm>()
             for (relatedItem in relatedItems) { // 遍历每个关联对象，进行匹配
                 // hasMany关系的匹配：主表.主键 = 从表.外键
-                val pk: Any = item[primaryProp] // 主表.主键
-                val fk: Any = relatedItem[foreignProp] // 从表.外键
-                if (pk == fk)
+                val pk:DbKeyValues = item.gets(primaryProp) // 主表.主键
+                val fk:DbKeyValues = relatedItem.gets(foreignProp) // 从表.外键
+                if (pk == fk) // DbKey.equals()
                     myRelated.add(relatedItem)
             }
             item[name] = myRelated
@@ -421,7 +437,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @param   value   column value
      * @return
      */
-    public override fun andWhere(prop: CharSequence, op: String, value: Any?): IDbQueryBuilder {
+    public override fun andWhere(prop: String, op: String, value: Any?): IDbQueryBuilder {
         return super.andWhere(convertColumn(prop), op, convertValue(prop, value))
     }
 
@@ -433,7 +449,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @param   value   column value
      * @return
      */
-    public override fun orWhere(prop: CharSequence, op: String, value: Any?): IDbQueryBuilder {
+    public override fun orWhere(prop: String, op: String, value: Any?): IDbQueryBuilder {
         return super.orWhere(convertColumn(prop), op, convertValue(prop, value))
     }
 
@@ -454,7 +470,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @param   prop  column name
      * @return
      */
-    public override fun groupBy(prop: CharSequence): IDbQueryBuilder {
+    public override fun groupBy(prop: String): IDbQueryBuilder {
         return super.groupBy(convertColumn(prop))
     }
 
@@ -466,7 +482,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @param   value   column value
      * @return
      */
-    public override fun andHaving(prop: CharSequence, op: String, value: Any?): IDbQueryBuilder {
+    public override fun andHaving(prop: String, op: String, value: Any?): IDbQueryBuilder {
         return super.andHaving(convertColumn(prop), op, convertValue(prop, value))
     }
 
@@ -478,7 +494,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @param   value   column value
      * @return
      */
-    public override fun orHaving(prop: CharSequence, op: String, value: Any?): IDbQueryBuilder {
+    public override fun orHaving(prop: String, op: String, value: Any?): IDbQueryBuilder {
         return super.orHaving(convertColumn(prop), op, convertValue(prop, value))
     }
 
@@ -488,7 +504,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @param prop 属性名
      * @return 字段名
      */
-    public fun convertColumn(prop: CharSequence): String {
+    public fun convertColumn(prop: String): String {
         return if (convertingColumn)
             ormMeta.prop2Column(prop)
         else

@@ -10,10 +10,16 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * db元数据
+ *
+ * 1 属性初始化
  *    由于 Db 类依赖 DbMeta 对象来代理实现 IDbMeta 接口, 因此 Db 对象创建时就需要 DbMeta 对象
  *    同时 DbMeta.anyConn 属性及相关属性 又依赖 Db 对象来获得连接, 因此 DbMeta 属性时需要 Db 对象
  *    如果 DbMeta.anyConn 属性在 DbMeta 对象创建时就初始化/调用, 则无疑会导致死循环依赖
  *    =>  DbMeta.anyConn 属性及相关属性, 递延初始化/调用
+ *
+ * 2 internal声明
+ *    我不希望外部人使用该类, 减少可见性
+ *    建议直接使用Db, Db也是代理该类
  *
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-15 9:03 PM

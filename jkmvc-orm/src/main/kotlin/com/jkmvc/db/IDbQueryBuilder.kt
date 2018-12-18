@@ -2,8 +2,13 @@ package com.jkmvc.db
 
 /**
  * sql构建器
+ * 1 作用
  *   依次继承 DbQueryBuilderAction 处理动作子句 + DbQueryBuilderDecoration 处理修饰子句
  *   提供select/where等类sql的方法, 但是调用方法时, 不直接拼接sql, 而是在compile()时才延迟拼接sql, 因为调用方法时元素可以无序, 但生成sql时元素必须有序
+ *
+ * 2 CharSequence接口
+ *   为了适配 DbQueryBuilder 中的查询方法的查询参数类型, 如 select() / where()
+ *   否则要重载很多方法来接收 DbExpr 参数
  *
  * @author shijianhang
  * @date 2016-10-13

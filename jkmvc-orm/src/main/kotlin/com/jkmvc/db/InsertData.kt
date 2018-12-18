@@ -9,12 +9,12 @@ class InsertData: Cloneable{
     /**
      * 要插入的字段
      */
-    public var columns:List<String>? = null;
+    public var columns:Array<String> = emptyArray();
 
     /**
      * 要插入的多行数据，但是只有一维，需要按columns的大小，来拆分成多行
      */
-    public var rows: ArrayList<Any?> = ArrayList<Any?>();
+    public var rows: ArrayList<Any?> = ArrayList();
 
     /**
      * 检查行的大小
@@ -25,11 +25,11 @@ class InsertData: Cloneable{
         if(isSubQuery())
             throw DbException("已插入子查询，不能再插入值");
 
-        if(columns == null || columns!!.isEmpty())
+        if(columns.isEmpty())
             throw DbException("请先调用insertColumn()来设置插入的字段名");
 
         // 字段值数，是字段名数的整数倍
-        val columnSize = columns!!.size
+        val columnSize = columns.size
         if(rowSize % columnSize != 0)
             throw IllegalArgumentException("请插入的字段值数[$rowSize]与字段名数[$columnSize]不匹配");
     }
@@ -87,7 +87,7 @@ class InsertData: Cloneable{
      * 清空数据
      */
     public fun clear() {
-        columns = null;
+        columns = emptyArray();
         rows.clear();
     }
 
@@ -97,10 +97,7 @@ class InsertData: Cloneable{
      */
     public override fun clone(): Any {
         val o = super.clone() as InsertData
-        // columns是List类型，没实现Cloneable接口
-        //o.columns = columns?.clone() as List<String>?
-        if(columns != null)
-            o.columns = ArrayList(columns)
+        o.columns = columns.clone()
         o.rows = rows.clone() as ArrayList<Any?>
         return o;
     }

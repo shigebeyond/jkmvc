@@ -222,42 +222,6 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
     }
 
     /**
-     * 多个on条件
-     * @param conditions
-     * @return
-     */
-    public override fun ons(conditions: Map<String, String>): IDbQueryBuilder {
-        for ((column, value) in conditions)
-            on(column, "=", value);
-
-        return this;
-    }
-
-    /**
-     * 多个having条件
-     * @param conditions
-     * @return
-     */
-    public override fun havings(conditions: Map<String, Any?>): IDbQueryBuilder {
-        for ((column, value) in conditions)
-            having(column, "=", value);
-
-        return this;
-    }
-
-    /**
-     * Alias of andWhere()
-     *
-     * @param   column  column name or DbExpr
-     * @param   op      logic operator
-     * @param   value   column value
-     * @return
-     */
-    public override fun where(column: CharSequence, op: String, value: Any?): IDbQueryBuilder {
-        return andWhere(column, op, value);
-    }
-
-    /**
      * Creates a new "AND WHERE" condition for the query.
      *
      * @param   column  column name or DbExpr
@@ -265,7 +229,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * @param   value   column value
      * @return
      */
-    public override fun andWhere(column: CharSequence, op: String, value: Any?): IDbQueryBuilder {
+    public override fun andWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
         if(op == "IN" && trySplitInParams(column, op, value, true))
             return this;
 
@@ -282,7 +246,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * @param   and    and / or
      * @return
      */
-    protected fun trySplitInParams(column: CharSequence, op: String, value: Any?, and: Boolean): Boolean {
+    protected fun trySplitInParams(column: String, op: String, value: Any?, and: Boolean): Boolean {
         val maxInParamNum = 1000
         if (value is List<*> && value.size > maxInParamNum) {
             if(and) andWhereOpen() else orWhereOpen()
@@ -305,7 +269,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * @param   value   column value
      * @return
      */
-    public override fun orWhere(column: CharSequence, op: String, value: Any?): IDbQueryBuilder {
+    public override fun orWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
         if(op == "IN" && trySplitInParams(column, op, value, false))
             return this;
 
@@ -322,7 +286,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * @param   value   column value
      * @return
      */
-    protected fun prepareOperator(column: CharSequence, op: String, value: Any?): String {
+    protected fun prepareOperator(column: String, op: String, value: Any?): String {
         if (value == null && op == "=") // IS null
             return "IS";
 
@@ -332,15 +296,6 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
         return op;
     }
 
-
-    /**
-     * Alias of andWhereOpen()
-     *
-     * @return
-     */
-    public override fun whereOpen(): IDbQueryBuilder {
-        return andWhereOpen();
-    }
 
     /**
      * Opens a new "AND WHERE (...)" grouping.
@@ -360,15 +315,6 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
     public override fun orWhereOpen(): IDbQueryBuilder {
         whereClause.open("OR");
         return this;
-    }
-
-    /**
-     * Closes an open "WHERE (...)" grouping.
-     *
-     * @return
-     */
-    public override fun whereClose(): IDbQueryBuilder {
-        return andWhereClose();
     }
 
     /**
@@ -397,21 +343,9 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * @param   column  column name
      * @return
      */
-    public override fun groupBy(column: CharSequence): IDbQueryBuilder {
+    public override fun groupBy(column: String): IDbQueryBuilder {
         groupByClause.addSubexp(arrayOf(column));
         return this;
-    }
-
-    /**
-     * Alias of andHaving()
-     *
-     * @param   column  column name or DbExpr
-     * @param   op      logic operator
-     * @param   value   column value
-     * @return
-     */
-    public override fun having(column: CharSequence, op: String, value: Any?): IDbQueryBuilder {
-        return andHaving(column, op, value);
     }
 
     /**
@@ -422,7 +356,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * @param   value   column value
      * @return
      */
-    public override fun andHaving(column: CharSequence, op: String, value: Any?): IDbQueryBuilder {
+    public override fun andHaving(column: String, op: String, value: Any?): IDbQueryBuilder {
         if(op == "IN" && trySplitInParams(column, op, value, true))
             return this;
 
@@ -438,21 +372,12 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * @param   value   column value
      * @return
      */
-    public override fun orHaving(column: CharSequence, op: String, value: Any?): IDbQueryBuilder {
+    public override fun orHaving(column: String, op: String, value: Any?): IDbQueryBuilder {
         if(op == "IN" && trySplitInParams(column, op, value, false))
             return this;
 
         havingClause.addSubexp(arrayOf<Any?>(column, prepareOperator(column, op, value), value), "OR");
         return this;
-    }
-
-    /**
-     * Alias of andHavingOpen()
-     *
-     * @return
-     */
-    public override fun havingOpen(): IDbQueryBuilder {
-        return andHavingOpen();
     }
 
     /**
@@ -473,15 +398,6 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
     public override fun orHavingOpen(): IDbQueryBuilder {
         whereClause.open("OR");
         return this;
-    }
-
-    /**
-     * Closes an open "AND HAVING (...)" grouping.
-     *
-     * @return
-     */
-    public override fun havingClose(): IDbQueryBuilder {
-        return andHavingClose();
     }
 
     /**
@@ -511,7 +427,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * @param   direction  direction of sorting
      * @return
      */
-    public override fun orderBy(column: CharSequence, direction: String?): IDbQueryBuilder {
+    public override fun orderBy(column: String, direction: String?): IDbQueryBuilder {
         orderByClause.addSubexp(arrayOf<Any?>(column, direction));
         return this;
     }

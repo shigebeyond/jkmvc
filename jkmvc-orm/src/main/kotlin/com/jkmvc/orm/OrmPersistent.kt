@@ -1,9 +1,7 @@
 package com.jkmvc.orm
 
 import com.jkmvc.common.associate
-import com.jkmvc.db.DbQueryBuilder
 import com.jkmvc.db.dbLogger
-import java.util.*
 
 /**
  * ORM之持久化，主要是负责数据库的增删改查
@@ -29,18 +27,20 @@ abstract class OrmPersistent : OrmValid() {
 	/**
 	 * 获得主键值
 	 */
-	public override val pk:DbKeyValue
-		get() = this[ormMeta.primaryProp];
+	public override val pk:DbKeyValues
+		get() = gets(ormMeta.primaryProp)
 
 	/**
 	 * 获得原始主键值
 	 *   update()时用到，因为主键可能被修改
 	 */
-	public override val oldPk:DbKeyValue
+	public override val oldPk:DbKeyValues
 		get(){
 			val pp = ormMeta.primaryProp
-			if(dirty.containsKey(pp))
-				return dirty[pp]
+			if(dirty.containsAllKeys(pp))
+				return pp.map {
+					dirty[it]
+				}
 
 			return pk
 		}
@@ -92,13 +92,14 @@ abstract class OrmPersistent : OrmValid() {
 			fireEvent("beforeSave")
 
 			// 插入数据库
-			val needPk = ormMeta.primaryProp.isNotEmpty() && !data.containsKey(ormMeta.primaryProp) // 是否需要生成主键
+			// TODO: 单主键
+			val needPk = !ormMeta.primaryProp.isAllEmpty() && !data.containsAllKeys(ormMeta.primaryProp) // 是否需要生成主键
 			val generatedColumn = if (needPk) ormMeta.primaryKey.first else null // 主键名
 			val pk = queryBuilder().value(buildDirtyData()).insert(generatedColumn);
 
 			// 更新内部数据
 			if (needPk)
-				data[ormMeta.primaryProp] = pk; // 主键
+				data[ormMeta.primaryProp.first] = pk; // 主键
 
 			// 触发后置事件
 			fireEvent("afterCreate")
@@ -191,7 +192,7 @@ abstract class OrmPersistent : OrmValid() {
 			fireEvent("beforeDelete")
 
 			// 删除数据
-			val result = queryBuilder().where(ormMeta.primaryKey, pk).delete();
+			val result = queryBuilder().where(ormMeta.primaryKey, "=", pk).delete();
 
 			// 触发后置事件
 			fireEvent("afterDelete")

@@ -16,7 +16,7 @@ import kotlin.reflect.KFunction
 open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
                    public override val label: String = model.modelName /* 模型中文名 */,
                    public override var table: String = model.modelName /* 表名，假定model类名, 都是以"Model"作为后缀 */,
-                   public override var primaryKey:DbKeyName = DbKeyName("id") /* 主键 */,
+                   public override var primaryKey:DbKeyNames = DbKeyNames("id") /* 主键 */,
                    public override val dbName: String = "default" /* 数据库名 */
 ) : IOrmMeta {
 
@@ -35,7 +35,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     /**
      * 主键属性
      */
-    public override val primaryProp:String = column2Prop(primaryKey)
+    public override val primaryProp:DbKeyNames = columns2Props(primaryKey)
 
     /**
      * 关联关系
@@ -74,8 +74,8 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     /**
      * 默认外键
      */
-    public override val defaultForeignKey:DbKeyName
-        get() = table + '_' + primaryKey;
+    public override val defaultForeignKey:DbKeyNames
+        get() = primaryKey.wrap(table + '_')  // table + '_' + primaryKey;
 
     /**
      * 表字段
@@ -189,7 +189,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param conditions 关联查询条件
      * @return
      */
-    public override fun belongsTo(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyName, primaryKey:DbKeyName, conditions: Map<String, Any?>): IOrmMeta {
+    public override fun belongsTo(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions: Map<String, Any?>): IOrmMeta {
         // 设置关联关系
         relations.getOrPut(name) {
             RelationMeta(this, RelationType.BELONGS_TO, relatedModel, foreignKey, primaryKey, conditions)
@@ -207,7 +207,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param conditions 关联查询条件
      * @return
      */
-    public override fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyName, primaryKey:DbKeyName, conditions: Map<String, Any?>): IOrmMeta {
+    public override fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions: Map<String, Any?>): IOrmMeta {
         // 设置关联关系
         relations.getOrPut(name) {
             RelationMeta(this, RelationType.HAS_ONE, relatedModel, foreignKey, primaryKey, conditions)
@@ -225,7 +225,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param conditions 关联查询条件
      * @return
      */
-    public override fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyName, primaryKey:DbKeyName, conditions:Map<String, Any?>): IOrmMeta {
+    public override fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions:Map<String, Any?>): IOrmMeta {
         // 设置关联关系
         relations.getOrPut(name) {
             RelationMeta(this, RelationType.HAS_MANY, relatedModel, foreignKey, primaryKey, conditions)
@@ -246,7 +246,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param conditions 关联查询条件
      * @return
      */
-    public override fun hasOneThrough(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyName, primaryKey:DbKeyName, middleTable:String, farForeignKey:DbKeyName, farPrimaryKey:DbKeyName, conditions:Map<String, Any?>): IOrmMeta {
+    public override fun hasOneThrough(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, middleTable:String, farForeignKey:DbKeyNames, farPrimaryKey:DbKeyNames, conditions:Map<String, Any?>): IOrmMeta {
         // 设置关联关系
         relations.getOrPut(name) {
             MiddleRelationMeta(this, RelationType.HAS_ONE, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey, conditions)
@@ -267,7 +267,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param conditions 关联查询条件
      * @return
      */
-    public override fun hasManyThrough(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyName, primaryKey:DbKeyName, middleTable:String, farForeignKey:DbKeyName, farPrimaryKey:DbKeyName, conditions:Map<String, Any?>): IOrmMeta {
+    public override fun hasManyThrough(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, middleTable:String, farForeignKey:DbKeyNames, farPrimaryKey:DbKeyNames, conditions:Map<String, Any?>): IOrmMeta {
         // 设置关联关系
         relations.getOrPut(name) {
             MiddleRelationMeta(this, RelationType.HAS_MANY, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey)

@@ -22,7 +22,7 @@ abstract class OrmRelated : OrmPersistent() {
             data[column] = value;
             // 如果关联的是主表，则更新从表的外键
             if (relation.type == RelationType.BELONGS_TO)
-                super.set(relation.foreignKey, (value as Orm).pk); // 更新字段
+                sets(relation.foreignKey, (value as Orm).pk); // 更新字段
             return;
         }
 
@@ -222,7 +222,7 @@ abstract class OrmRelated : OrmPersistent() {
             val subquery = relation.queryMiddleTable(this, fkInMany)
             if(subquery != null){
                 // 删除关联对象
-                relation.ormMeta.queryBuilder().where(relation.farPrimaryKey, "IN", subquery.select(relation.farForeignKey)).delete()
+                relation.ormMeta.queryBuilder().where(relation.farPrimaryKey, "IN", subquery.select(*relation.farForeignKey.columns)).delete()
                 // 删除中间表
                 subquery.delete()
             }
@@ -273,7 +273,7 @@ abstract class OrmRelated : OrmPersistent() {
      * 更新关系外键
      *
      * @param name 关系名
-     * @param value 外键值
+     * @param value 外键值Any | 关联对象IOrm
      * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则更新所有关系, 否则更新单个关系
      * @param middleForeighKeyUpdater 有中间表的关联关系的外键更新函数
      * @return
@@ -283,7 +283,8 @@ abstract class OrmRelated : OrmPersistent() {
         val relation = ormMeta.getRelation(name)!!;
         // 1 belongsTo：更新本对象的外键
         if(relation.type == RelationType.BELONGS_TO){
-            this[relation.foreignProp] = if(value is IOrm) value[relation.primaryProp] else value
+            val value2 = if (value is IOrm) value.gets(relation.primaryProp) else value
+            this.sets(relation.foreignProp, value2)
             return this.update()
         }
 
@@ -294,7 +295,8 @@ abstract class OrmRelated : OrmPersistent() {
 
         // 2.2 无中间表：更新关联对象的外键
         if(value is IOrm){ // 2.2.1 新加值
-            value[relation.foreignProp] = this[relation.primaryProp]
+            //value[relation.foreignProp] = this[relation.primaryProp]
+            value.sets(relation.foreignProp, this.gets(relation.primaryProp))
             return value.update()
         }
         // 2.2.2 改旧值

@@ -15,8 +15,8 @@ open class RelationMeta(
         public override val sourceMeta:IOrmMeta, /* 源模型元数据 */
         public override val type:RelationType /* 关联关系 */,
         public override val model: KClass<out IOrm> /* 关联模型类型 */,
-        public override val foreignKey:DbKeyName /* 外键 */,
-        public override val primaryKey:DbKeyName/* 主键 */,
+        public override val foreignKey:DbKeyNames /* 外键 */,
+        public override val primaryKey:DbKeyNames/* 主键 */,
         public override val conditions:Map<String, Any?> = emptyMap() /* 查询条件 */
 ) : IRelationMeta {
 
@@ -36,13 +36,13 @@ open class RelationMeta(
      * 主键属性
      *   与 primaryKey 对应
      */
-    public override val primaryProp:DbKeyName = sourceMeta.column2Prop(primaryKey)
+    public override val primaryProp:DbKeyNames = sourceMeta.columns2Props(primaryKey)
 
     /**
      *  外键属性
      *   与 foreignKey 对应
      */
-    public override val foreignProp:DbKeyName = sourceMeta.column2Prop(foreignKey)
+    public override val foreignProp:DbKeyNames = sourceMeta.columns2Props(foreignKey)
 
     /**
      * 构造函数
@@ -54,6 +54,18 @@ open class RelationMeta(
      */
     /*public constructor(sourceMeta:IOrmMeta, type:RelationType, model: KClass<out IOrm>, foreignKey:DbKeyColumn, conditions:Map<String, Any?> = emptyMap()):this(sourceMeta, type, model, foreignKey, sourceMeta.primaryKey, conditions){
     }*/
+
+    /**
+     * 检查指定外键值是否为空
+     *
+     * @param fk 外键值
+     * @return
+     */
+    public override fun isForeighKeyEmpty(fk: Any?): Boolean {
+        return fk == null
+                || (fk is Int && intForeighKeyMustPositive && fk == 0)
+                || (fk is String && stringForeighKeyMustNotEmpty && fk.isEmpty())
+    }
 
     /**
      * 查询关联表
@@ -72,19 +84,19 @@ open class RelationMeta(
                             ""
         // 查主表
         if(type == RelationType.BELONGS_TO) {
-            val fk: Any? = item[foreignProp]
-            if(fk == null || (fk is Int && intForeighKeyMustPositive && fk == 0) || (fk is String && stringForeighKeyMustNotEmpty && fk.isEmpty())) // 如果外键为空，则联查为空
+            val fk:DbKeyValues = item.gets(foreignProp)
+            if(isForeighKeysAllEmpty(fk)) // 如果外键为空，则联查为空
                 return null
-            return queryBuilder().where(tableAlias + primaryKey, "=", fk) as OrmQueryBuilder // 主表.主键 = 从表.外键
+            return queryBuilder().where(primaryKey.wrap(tableAlias) /*tableAlias + primaryKey*/, "=", fk) as OrmQueryBuilder // 主表.主键 = 从表.外键
         }
 
         // 查从表
-        val pk: Any? = item[primaryProp] // 主键
-        if(pk == null)
+        val pk:DbKeyValues = item.gets(primaryProp) // 主键
+        if(pk.isAllNull())
             return null
-        val query = queryBuilder().where(tableAlias + foreignKey, "=", pk) as OrmQueryBuilder// 从表.外键 = 主表.主键
+        val query = queryBuilder().where(foreignKey.wrap(tableAlias) /*tableAlias + foreignKey*/, "=", pk) as OrmQueryBuilder// 从表.外键 = 主表.主键
         if(fkInMany != null) { // hasMany关系下过滤单个关系
-            val fk = if(fkInMany is IOrm) fkInMany[ormMeta.primaryProp] else fkInMany
+            val fk = if(fkInMany is IOrm) fkInMany.gets(ormMeta.primaryProp) else fkInMany
             query.where(tableAlias + ormMeta.primaryKey, fk)
         }
         return query;
@@ -100,9 +112,9 @@ open class RelationMeta(
     public override fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder {
         val query = queryBuilder()
         if(type == RelationType.BELONGS_TO) { // 查主表
-            query.where(model.modelName + '.' + primaryKey, "IN", items.collectColumn(foreignProp)) // 主表.主键 = 从表.外键
+            query.where(primaryKey.wrap(model.modelName + '.') /*model.modelName + '.' + primaryKey*/, "IN", items.collectColumn(foreignProp)) // 主表.主键 = 从表.外键
         } else { // 查从表
-            query.where(model.modelName + '.' + foreignKey, "IN", items.collectColumn(primaryProp)) // 从表.外键 = 主表.主键
+            query.where(foreignKey.wrap(model.modelName + '.') /*model.modelName + '.' + foreignKey*/, "IN", items.collectColumn(primaryProp)) // 从表.外键 = 主表.主键
         }
         return query
     }

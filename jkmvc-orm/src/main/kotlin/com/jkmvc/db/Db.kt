@@ -280,7 +280,9 @@ class Db protected constructor(public override val name:String /* 标识 */,
         }*/
 
         // 格式化字符串
-        val ps = params.mapToArray { quote(it) }
+        val ps = params.mapToArray {
+            quote(it)
+        }
         return sql.replace("?", "%s").format(*ps)
     }
 
