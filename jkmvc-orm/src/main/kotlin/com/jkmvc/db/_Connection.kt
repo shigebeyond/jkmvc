@@ -217,11 +217,13 @@ public fun <T> Connection.queryRow(sql: String, params: List<Any?> = emptyList()
 
         var result:T? = null
         if(row.isNotEmpty()) {
-            // 转换一行数据
-            result = transform(row)
-
-            // 清空以便复用
-            row.clear()
+            try {
+                // 转换一行数据
+                result = transform(row)
+            }finally {
+                // 清空以便复用
+                row.clear()
+            }
         }
         result
     }
@@ -338,11 +340,13 @@ public fun ResultSet.forEachRow(action: (Map<String, Any?>) -> Unit): Unit {
         if(row.isEmpty())
             break;
 
-        // 处理一行
-        action(row)
-
-        // 清空以便复用
-        row.clear()
+        try {
+            // 处理一行
+            action(row)
+        }finally {
+            // 清空以便复用
+            row.clear()
+        }
     }
 }
 
