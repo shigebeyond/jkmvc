@@ -1,5 +1,6 @@
 package com.jkmvc.common
 
+import org.nustaq.serialization.util.FSTUtil
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl
 import java.lang.reflect.*
 import java.util.*
@@ -255,4 +256,28 @@ public fun Class<*>.getMethodMaps(): Map<String, Method> {
     return methods.associate {
         it.getSignature() to it
     }
+}
+
+/**
+ * 创建类的实例
+ *   参考 FSTDefaultClassInstantiator#newInstance()
+ *
+ * @param initRequired 是否需要初始化, 即调用类自身的构造函数
+ * @return
+ */
+public fun <T: Any> KClass<T>.newInstance(initRequired: Boolean = true): Any? {
+    // 无[无参数构造函数]
+    if(this.findConstructor() == null && !initRequired){
+        // best effort. use Unsafe to instantiate.
+        // Warning: if class contains transient fields which have default values assigned ('transient int x = 3'),
+        // those will not be assigned after deserialization as unsafe instantiation does not execute any default
+        // construction code.
+        // Define a public no-arg constructor to avoid this behaviour (rarely an issue, but there are cases).
+        if (FSTUtil.unFlaggedUnsafe != null)
+            return FSTUtil.unFlaggedUnsafe.allocateInstance(java)
+
+        throw RuntimeException("no suitable constructor found and no Unsafe instance avaiable. Can't instantiate " + this)
+    }
+
+    return java.newInstance()
 }

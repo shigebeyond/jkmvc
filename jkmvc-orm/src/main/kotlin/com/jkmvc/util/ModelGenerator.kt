@@ -3,7 +3,7 @@ package com.jkmvc.util
 import com.jkmvc.common.Config
 import com.jkmvc.common.format
 import com.jkmvc.db.Db
-import com.jkmvc.db.recordTranformer
+import org.apache.commons.collections.map.HashedMap
 import java.io.File
 import java.util.*
 
@@ -83,7 +83,7 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
     public fun genenateModelClass(model:String, label:String, table: String): String {
         // 查询字段的sql
         val sql = config.getString("columns")!!
-        val fields = db.queryRows(sql, listOf(table, db.schema), Map::class.recordTranformer)
+        val fields = db.queryRows(sql, listOf(table, db.schema), ::HashedMap) // org.apache.commons.collections.map.HashedMap.HashedMap(java.util.Map)
         // 找到主键
         var pk:String = ""
         var pkType: String = "Any"
@@ -98,15 +98,13 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
         val code = StringBuilder()
         val date = Date().format()
         code.append("package $pck \n\n")
-        code.append("import com.jkmvc.orm.OrmMeta \nimport com.jkmvc.orm.Orm \n\n")
+        code.append("import com.jkmvc.orm.OrmMeta \nimport com.jkmvc.orm.Orm \nimport com.jkmvc.orm.toNotNullArray \n\n")
         code.append("/**\n * $label\n *\n * @ClassName: $model\n * @Description:\n * @author shijianhang<772910474@qq.com>\n * @date $date\n */\n")
         // 2 类
         code.append("class $model(id:$pkType? = null): Orm(id) {\n")
-        // 3 第二构造函数
-        code.append("\n\tpublic constructor(data: Map<String, Any?>): this(null){\n\t\tsetOriginal(data)\n\t}")
-        // 4 元数据
+        // 3 元数据
         code.append("\t// 伴随对象就是元数据\n \tcompanion object m: OrmMeta($model::class, \"$label\", \"$table\", \"$pk\"){}\n\n")
-        // 5 属性
+        // 4 属性
         code.append("\t// 代理属性读写")
         // 遍历字段来生成属性
         for (field in fields){

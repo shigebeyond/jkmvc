@@ -15,7 +15,7 @@ class DbIdWorker: IIdWorker {
 
     val db: Db = Db.instance()
 
-    val idSequences: ConcurrentHashMap<String, IdSequenceModel> = ConcurrentHashMap<String, IdSequenceModel>();
+    val idSequences: ConcurrentHashMap<String, IdSequenceModel> = ConcurrentHashMap();
 
     init{
         // 建表

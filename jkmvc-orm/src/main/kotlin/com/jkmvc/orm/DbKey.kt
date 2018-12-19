@@ -3,7 +3,7 @@ package com.jkmvc.orm
 import com.jkmvc.db.IDbQueryBuilder
 
 /**
- * 联合主键, 包含多个字段
+ * 复合主键, 包含多个字段
  * 1 CharSequence接口
  *   为了适配 DbQueryBuilderDecoration 中的条件方法的参数类型, 如 where()
  *   否则要重载很多方法来接收 DbKeyName 参数
@@ -15,7 +15,7 @@ import com.jkmvc.db.IDbQueryBuilder
  *   原来想限制类的访问权限为 internal, 但是 IOrmMeta 与 IRelationMeta 的主键外键属性都>直接暴露了该类
  *   那只好限制扩展方法了
  *
- * 4 联合主键中字段值不能为null
+ * 4 复合主键中字段值不能为null
  *   All parts of a PRIMARY KEY must be NOT NULL
  *
  * @author shijianhang<772910474@qq.com>
@@ -28,26 +28,17 @@ data class DbKey<T>(val columns: Array<T>) {
          * 空主键
          */
         internal val empty:DbKey<*> = DbKey<Any>(emptyArray())
-
-        /**
-         * 将参数转为array, 仅用于在构造函数中转参数
-         * @param params
-         * @return
-         */
-        internal inline fun <S> toArray(vararg params:S): Array<S> {
-            return params as Array<S>
-        }
     }
 
     // wrong: 主构造函数签名相同冲突
     //public constructor(vararg cols:T):this(cols)
 
     // 逐个实现1个参数/2个参数/3个参数的构造函数
-    public constructor(c1: T):this(toArray(c1))
+    public constructor(a: T):this(toArray(a))
 
-    public constructor(c1: T, c2:T):this(toArray(c1, c2))
+    public constructor(a: T, b:T):this(toArray(a, b))
 
-    public constructor(c1: T, c2:T, c3:T):this(toArray(c1, c2, c3))
+    public constructor(a: T, b:T, c:T):this(toArray(a, b, c))
 
     /**
      * 字段个数
@@ -133,6 +124,28 @@ typealias DbKeyNames = DbKey<String>
 // 主键的字段值
 internal typealias DbKeyValues = DbKey<Any?>
 
+/*************************** 普通类扩展 ******************************/
+/**
+ * 非空参数转为array, 仅用于在 DbKey/Orm 的构造函数中转参数
+ * @param params
+ * @return
+ */
+internal inline fun <S> toArray(vararg params:S): Array<S> {
+    return params as Array<S>
+}
+
+/**
+ * 检查Map是否全部包含主键字段
+ *
+ * @param names
+ * @return
+ */
+internal inline fun Map<String, *>.containsAllKeys(names: DbKeyNames): Boolean{
+    return names.columns.all {
+        Map@this.containsKey(it)
+    }
+}
+
 /*************************** DbKeyNames扩展 ******************************/
 /**
  * 遍历字段名+字段值
@@ -180,24 +193,12 @@ internal inline fun DbKeyNames.isAllEmpty(): Boolean{
 
 /*************************** DbKeyValues扩展 ******************************/
 /**
- * 检查值是否为null -- 联合主键中的字段值不能为空
+ * 检查值是否为null -- 复合主键中的字段值不能为空
  * @return
  */
 internal inline fun DbKeyValues.isAnyNull(): Boolean {
     return columns.isEmpty() || columns.all {
         it == null
-    }
-}
-
-/**
- * 检查Map是否全部包含主键字段
- *
- * @param names
- * @return
- */
-internal inline fun Map<String, *>.containsAllKeys(names: DbKeyNames): Boolean{
-    return names.columns.all {
-        Map@this.containsKey(it)
     }
 }
 

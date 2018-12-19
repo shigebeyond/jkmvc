@@ -5,7 +5,7 @@ import com.jkmvc.common.IConfig
 import com.jkmvc.common.NamedSingleton
 import com.jkmvc.common.isSuperClass
 import com.jkmvc.db.dbLogger
-import com.jkmvc.db.recordTranformer
+import com.jkmvc.orm.rowTranformer
 import com.jkmvc.orm.Orm
 import com.jkmvc.orm.modelOrmMeta
 import kotlin.reflect.KClass
@@ -76,13 +76,13 @@ abstract class Auth:IAuth {
             query.withs(*withs)
 
         // 根据用户名查找用户
-        val user = query.where(sessionConfig["usernameField"]!!, "=", username).find(transform = userModel.recordTranformer) as IAuthUserModel?;
+        val user = query.where(sessionConfig["usernameField"]!!, "=", username).find(transform = userModel.rowTranformer) as IAuthUserModel?;
         if(user == null)
             return null;
 
         //　检查密码
         val p1 = user.hash(password)
-        val p2 = user.getString(sessionConfig["passwordField"]!!)
+        val p2 = user.get(sessionConfig["passwordField"]!!, "")
         if(p1 != p2)
             return null;
 

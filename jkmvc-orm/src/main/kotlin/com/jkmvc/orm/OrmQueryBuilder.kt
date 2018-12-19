@@ -10,7 +10,6 @@ import com.jkmvc.db.IDb
 import com.jkmvc.db.IDbQueryBuilder
 import java.util.*
 import kotlin.collections.HashMap
-import kotlin.reflect.KClass
 
 /**
  * 面向orm对象的sql构建器
@@ -51,20 +50,6 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         joins.clear()
         joinMany.clear()
         return super.clear()
-    }
-
-    /**
-     * 获得记录转换器
-     * @param clazz 要转换的类型
-     * @return 转换函数
-     */
-    public override fun <T:Any> getRecordTranformer(clazz: KClass<T>): ((MutableMap<String, Any?>) -> T) {
-        // 只能是当前model类及其父类，不能是其他model类
-        if(IOrm::class.java.isAssignableFrom(clazz.java) // 是model类
-                && !clazz.java.isAssignableFrom(ormMeta.model.java)) // 不是当前model类及其父类
-            throw UnsupportedOperationException("sql构建器将记录转为指定类型：只能指定 ${ormMeta.model} 类及其父类，实际指定 ${clazz}");
-
-        return super.getRecordTranformer(clazz)
     }
 
     /**
@@ -386,7 +371,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                 query.selectWiths(columns)
 
             // 得结果
-            val relatedItems = query.findAll(transform = relation.recordTranformer)
+            val relatedItems = query.findAll(transform = relation.rowTranformer)
 
             // 处理查询结果
             action(name, relation, relatedItems)

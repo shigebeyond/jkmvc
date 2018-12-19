@@ -35,6 +35,12 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
             dbName: String = "default" /* 数据库名 */
     ):this(model, label, table, DbKeyNames(primaryKey), dbName)
 
+    init{
+        // 检查默认构造函数
+        if(model.findConstructor() == null)
+            throw OrmException("Class [${model}] has no no-arg constructor") // Model类${clazz}无默认构造函数
+    }
+
     /**
      * 模型名
      */

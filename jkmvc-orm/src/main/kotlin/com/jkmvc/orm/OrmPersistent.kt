@@ -55,16 +55,14 @@ abstract class OrmPersistent : OrmValid() {
 
 	/**
 	 * 根据主键值来加载数据
-	 *   如果是联合主键, 则参数按 ormMeta.primaryKey 中定义的字段的属性来传值
+	 *   如果是复合主键, 则参数按 ormMeta.primaryKey 中定义的字段的属性来传值
 	 *
 	 * @param pk
 	 * @return
 	 */
 	public override fun loadByPk(vararg pk: Any): IOrm {
 		if(pk.isNotEmpty())
-			queryBuilder().where(ormMeta.primaryKey, DbKeyValues(pk)).find() {
-				this.setOriginal(it); // 读取查询数据
-			}
+			queryBuilder().where(ormMeta.primaryKey, DbKeyValues(pk)).find(transform = this::class.rowTranformer)
 
 		return this
 	}
@@ -83,7 +81,7 @@ abstract class OrmPersistent : OrmValid() {
 	 */
 	public override fun create(): Int {
 		if(dirty.isEmpty())
-			throw OrmException("没有要创建的数据");
+			throw OrmException("No data to create"); // 没有要创建的数据
 
 		// 校验
 		validate();
@@ -145,12 +143,11 @@ abstract class OrmPersistent : OrmValid() {
 	 */
 	public override fun update(): Boolean {
 		if(!loaded)
-			throw OrmException("更新对象[$this]前先检查是否存在");
+			throw OrmException("Load before updating object[$this]"); // 更新对象[$this]前先检查是否存在
 
 		// 如果没有修改，则不执行sql，不抛异常，直接返回true
 		if (dirty.isEmpty()){
-			//throw OrmException("没有要更新的数据");
-			dbLogger.debug("执行${javaClass}.update()成功：没有要更新的数据")
+			dbLogger.debug("No data to update") // 没有要更新的数据
 			return true;
 		}
 
@@ -188,7 +185,7 @@ abstract class OrmPersistent : OrmValid() {
 	 */
 	public override fun delete(): Boolean {
 		if(!loaded)
-			throw OrmException("删除对象[$this]前先检查是否存在");
+			throw OrmException("Load before deleting object[$this]"); // 删除对象[$this]前先检查是否存在
 
 		// 事务
 		return ormMeta.transactionWhenHandlingEvent("beforeDelete|afterDelete") {

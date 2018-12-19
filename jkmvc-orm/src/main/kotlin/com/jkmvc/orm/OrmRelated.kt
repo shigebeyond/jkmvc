@@ -36,7 +36,7 @@ abstract class OrmRelated : OrmPersistent() {
      * @param defaultValue 默认值
      * @return
      */
-    public override operator fun <T> get(column: String, defaultValue: Any?): T {
+    public override operator fun <T> get(column: String, defaultValue: T?): T {
         // 获得关联对象
         if (ormMeta.hasRelation(column))
             return related(column, false) as T;
@@ -156,9 +156,9 @@ abstract class OrmRelated : OrmPersistent() {
 
                 query.select(*columns) // 查字段
                 if (relation.type == RelationType.HAS_MANY) { // 查多个
-                    result = query.findAll(transform = relation.recordTranformer)
+                    result = query.findAll(transform = relation.rowTranformer)
                 } else { // 查一个
-                    result = query.find(transform = relation.recordTranformer)
+                    result = query.find(transform = relation.rowTranformer)
                 }
             }
 

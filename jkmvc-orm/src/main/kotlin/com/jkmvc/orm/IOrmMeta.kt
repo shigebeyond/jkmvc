@@ -189,7 +189,7 @@ interface IOrmMeta {
      */
     fun joinRelated(query: OrmQueryBuilder, name: String, select: Boolean, columns: SelectColumnList?, lastName:String = this.name, path:String = ""): IRelationMeta
 
-    /************************************ 添加关联关系: 联合主键版本, 主外键类型为 DbKeyNames *************************************/
+    /************************************ 添加关联关系: 复合主键版本, 主外键类型为 DbKeyNames *************************************/
     /**
      * 生成属性代理 + 设置关联关系(belongs to)
      *

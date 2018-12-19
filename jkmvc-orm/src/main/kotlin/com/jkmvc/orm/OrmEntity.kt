@@ -130,7 +130,7 @@ abstract class OrmEntity : IOrm {
      * @param defaultValue 默认值
      * @return
      */
-    public override operator fun <T> get(column: String, defaultValue: Any?): T {
+    public override operator fun <T> get(column: String, defaultValue: T?): T {
         if (!hasColumn(column))
             throw OrmException("类 ${this.javaClass} 没有字段 $column");
 

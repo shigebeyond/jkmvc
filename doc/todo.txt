@@ -529,3 +529,23 @@ cell
 convertValue(prop)
 支持DbExpr + DbKey
 
+orm的构造函数, 支持复合主键
+
+
+------------------
+
+去掉 KClass<T>.recordTranformer
+
+将 transform: (Map 替换为 transform: (Map
+
+transform: (Map<String, Any?>) -> T)
+
+
+record 变量, 改名为row
+
+
+Map<String, Any?> 类, 别名为 Row
+
+------------
+
+英文异常

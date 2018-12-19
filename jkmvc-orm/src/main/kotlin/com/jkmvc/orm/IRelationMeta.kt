@@ -1,6 +1,5 @@
 package com.jkmvc.orm
 
-import com.jkmvc.db.recordTranformer
 import kotlin.reflect.KClass
 
 /**
@@ -60,10 +59,10 @@ interface IRelationMeta {
         get() = model.modelOrmMeta
 
     /**
-     * 记录转换器
+     * 行转换器
      */
-    val recordTranformer: (MutableMap<String, Any?>) -> IOrm
-        get()= model.recordTranformer
+    val rowTranformer: (Map<String, Any?>) -> IOrm
+        get()= model.rowTranformer
 
     /**
      * 获得关联模型的查询器

@@ -1,5 +1,8 @@
 package com.jkmvc.db
 
+import com.jkmvc.orm.IOrm
+import com.jkmvc.orm.rowTranformer
+import org.apache.commons.collections.map.HashedMap
 import kotlin.reflect.KClass
 
 /**
@@ -27,15 +30,6 @@ abstract class IDbQuery{
     public abstract val defaultDb: IDb
 
     /**
-     * 获得记录转换器
-     * @param clazz 要转换的类
-     * @return 转换的匿名函数
-     */
-    public open fun <T:Any> getRecordTranformer(clazz: KClass<T>): ((MutableMap<String, Any?>) -> T) {
-        return clazz.recordTranformer
-    }
-
-    /**
      * 查找多个： select 语句
      *
      * @param params 参数
@@ -43,22 +37,28 @@ abstract class IDbQuery{
      * @param transform 转换函数
      * @return 列表
      */
-    public abstract fun <T:Any> findAll(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (Map<String, Any?>) -> T): List<T>;
+    public abstract fun <T:Any> findAll(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (Map<String, Any?>) -> T): List<T>
 
     /**
      * 查找多个： select 语句
-     *  对 findAll(transform: (Map<String, Any?>) 的精简版，直接根据泛型 T 来找到对应的记录转换器
-     *  泛型 T 有3类情况，会生成不同的记录转换器
-     *  1 Orm类：实例化并调用setOriginal()
-     *  2 Map类: 直接返回记录数据，不用转换
-     *  3 其他类：如果实现带 Map 参数的构造函数，如 constructor(data: MutableMap<String, Any?>)，就调用
      *
      * @param params 参数
      * @param db 数据库连接
      * @return 列表
      */
-    public inline fun <reified T:Any> findAll(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<T> {
-        return findAll(params, db, getRecordTranformer<T>(T::class))
+    public fun findAllRows(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<Map<String, Any?>>{
+        return findAll(params, db, ::HashedMap) as List<Map<String, Any?>>
+    }
+
+    /**
+     * 查找多个： select 语句
+     *
+     * @param params 参数
+     * @param db 数据库连接
+     * @return 列表
+     */
+    public inline fun <reified T: IOrm> findAll(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<T> {
+        return findAll(params, db, T::class.rowTranformer)
     }
 
     /**
@@ -69,22 +69,29 @@ abstract class IDbQuery{
      * @param transform 转换函数
      * @return 一个数据
      */
-    public abstract fun <T:Any> find(params: List<Any?> = emptyList(),  db: IDb = defaultDb, transform: (Map<String, Any?>) -> T): T?;
+    public fun findRow(params: List<Any?> = emptyList(), db: IDb = defaultDb): Map<String, Any?>?{
+        return find(params, db, ::HashedMap) as Map<String, Any?>?
+    }
 
     /**
      * 查找一个： select ... limit 1语句
-     *  对 find(transform: (Map<String, Any?>) 的精简版，直接根据泛型 T 来找到对应的记录转换器
-     *  泛型 T 有3类情况，会生成不同的记录转换器
-     *  1 Orm类：实例化并调用setOriginal()
-     *  2 Map类: 直接返回记录数据，不用转换
-     *  3 其他类：如果实现带 Map 参数的构造函数，如 constructor(data: MutableMap<String, Any?>)，就调用
+     *
+     * @param params 参数
+     * @param db 数据库连接
+     * @param transform 转换函数
+     * @return 一个数据
+     */
+    public abstract fun <T:Any> find(params: List<Any?> = emptyList(),  db: IDb = defaultDb, transform: (Map<String, Any?>) -> T): T?
+
+    /**
+     * 查找一个： select ... limit 1语句
      *
      * @param params 参数
      * @param db 数据库连接
      * @return 一个数据
      */
-    public inline fun <reified T:Any> find(params: List<Any?> = emptyList(), db: IDb = defaultDb): T? {
-        return find(params, db, getRecordTranformer<T>(T::class));
+    public inline fun <reified T: IOrm> find(params: List<Any?> = emptyList(), db: IDb = defaultDb): T? {
+        return find(params, db, T::class.rowTranformer)
     }
 
     /**

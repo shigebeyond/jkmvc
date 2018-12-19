@@ -21,7 +21,7 @@ class ControllerClass(public override val clazz: KClass<*> /* controller类 */):
     init{
         // 检查默认构造函数
         if(clazz.findConstructor() == null)
-            throw RouteException("Controller类${clazz}无默认构造函数")
+            throw RouteException("Class [${clazz}] has no no-arg constructor") // Controller类${clazz}无默认构造函数
 
         // 解析所有action方法
         parseActionMethods()

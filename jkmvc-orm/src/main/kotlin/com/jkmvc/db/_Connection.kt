@@ -328,6 +328,7 @@ public inline fun ResultSet.nextRow(row:MutableMap<String, Any?>): Unit {
         }
     }
 }
+
 /**
  * 遍历结果集的每一行
  * @param action 访问者函数
@@ -368,7 +369,7 @@ public inline fun <T:Any> ResultSet.nextCell(i:Int, clazz: KClass<T>? = null): C
  * @param i 第几列
  * @param clazz值类型
  * @param action 处理函数
- * @returnrecordTranformer
+ * @return
  */
 public inline fun <T:Any> ResultSet.forEachCell(i:Int, clazz: KClass<T>? = null, action: (T?) -> Unit): Unit {
     while(true){

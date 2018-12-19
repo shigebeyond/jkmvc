@@ -1,5 +1,6 @@
 package com.jkmvc.orm
 
+import com.jkmvc.common.newInstance
 import org.apache.commons.collections.iterators.AbstractIteratorDecorator
 import kotlin.reflect.KClass
 import kotlin.reflect.full.companionObjectInstance
@@ -25,6 +26,19 @@ public val KClass<out IOrm>.modelName:String
  */
 public val KClass<out IOrm>.modelOrmMeta: IOrmMeta
     get() = companionObjectInstance as IOrmMeta
+
+/**
+ * 获得类的行转换器
+ * @return 转换的匿名函数
+ */
+public val <T:IOrm> KClass<T>.rowTranformer: (Map<String, Any?>) -> T
+    get(){
+        return {
+            //val obj = this.newInstance(false) as IOrm // 无需默认构造函数
+            val obj = java.newInstance() as IOrm // 必须默认构造函数
+            obj.setOriginal(it) as T
+        }
+    }
 
 /**
  * orm列表获得字段值

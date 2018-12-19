@@ -101,8 +101,8 @@ public fun <T> Collection<T>.getRandom(): T {
  * 集合转数组
  *   注: Array<R> 不能使用R作为泛型参数, 只能使用具体类
  */
-public inline fun <T, R> Collection<T>.mapToArray(transform: (T) -> R): Array<R> {
-    val arr = arrayOfNulls<Any?>(this.size);
+public inline fun <T, reified R> Collection<T>.mapToArray(transform: (T) -> R): Array<R> {
+    val arr = arrayOfNulls<R?>(this.size);
     var i = 0;
     for (item in this)
         arr[i++] = transform(item)

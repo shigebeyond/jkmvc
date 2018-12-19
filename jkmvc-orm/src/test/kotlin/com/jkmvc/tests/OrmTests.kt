@@ -3,18 +3,12 @@ package com.jkmvc.tests
 import com.jkmvc.db.Db
 import com.jkmvc.orm.*
 import org.junit.Test
-import java.util.HashMap
-import kotlin.reflect.jvm.jvmName
 
 /**
  * 用户模型
  * User　model
  */
 class UserModel(id:Int? = null): Orm(id) {
-
-    public constructor(data: MutableMap<String, Any?>): this(null){
-        setOriginal(data)
-    }
 
     // 伴随对象就是元数据
     // company object is ormMeta data for model
@@ -38,21 +32,21 @@ class UserModel(id:Int? = null): Orm(id) {
 
     // 代理属性读写
     // delegate property
-    public var id:Int by property<Int>();
+    public var id:Int by property();
 
-    public var name:String by property<String>();
+    public var name:String by property();
 
-    public var age:Int by property<Int>();
+    public var age:Int by property();
 
-    public var avatar:String? by property<String?>();
+    public var avatar:String? by property();
 
     // 关联地址：一个用户有一个地址
     // relate to AddressModel: user has an address
-    public var address:AddressModel by property<AddressModel>();
+    public var address:AddressModel by property();
 
     // 关联地址：一个用户有多个地址
     // relate to AddressModel: user has many addresses
-    public var addresses:List<AddressModel> by property<List<AddressModel>>();
+    public var addresses:List<AddressModel> by property();
 
     public var parcelSenders:List<UserModel> by property();
 
@@ -87,16 +81,16 @@ class AddressModel(id:Int? = null): Orm(id) {
 
     // 代理属性读写
     // delegate property
-    public var id:Int by property<Int>();
+    public var id:Int by property();
 
-    public var userId:Int by property<Int>();
+    public var userId:Int by property();
 
-    public var addr:String by property<String>();
+    public var addr:String by property();
 
-    public var tel:String by property<String>();
+    public var tel:String by property();
 
     // 关联用户：一个地址从属于一个用户
-    public var user:UserModel by property<UserModel>()
+    public var user:UserModel by property()
 }
 
 /**
@@ -137,6 +131,7 @@ class ParcelModel(id:Int? = null): Orm(id) {
 
 }
 
+
 class OrmTests{
 
     val id: Int by lazy {
@@ -161,7 +156,7 @@ class OrmTests{
 
     @Test
     fun testFind(){
-        val user = UserModel.queryBuilder().where("id", 1).find<UserModel>(transform = ::UserModel)
+        val user = UserModel.queryBuilder().where("id", 1).find<UserModel>()
 //        val user = UserModel(id)
         println("查找用户: $user" )
     }

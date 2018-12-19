@@ -32,7 +32,7 @@ interface IOrmEntity {
      * @param defaultValue 默认值
      * @return
      */
-    operator fun <T> get(column: String, defaultValue: Any? = null): T;
+    operator fun <T> get(column: String, defaultValue: T? = null): T;
 
     /**
      * 设置对象字段值

@@ -20,12 +20,12 @@ open class View(override val req: Request /* 请求对象 */,
 		/**
 		 * 空map
 		 */
-		public val emptyMutableMap:MutableMap<String, Any?> = HashMap<String, Any?>()
+		public val emptyMutableMap:MutableMap<String, Any?> = HashMap()
 
 		/**
 		 * 全局变量
 		 */
-		public val globalData: ConcurrentHashMap<String, Any?> = ConcurrentHashMap<String, Any?>();
+		public val globalData: ConcurrentHashMap<String, Any?> = ConcurrentHashMap();
 
 		/**
 		 * 设置全局变量

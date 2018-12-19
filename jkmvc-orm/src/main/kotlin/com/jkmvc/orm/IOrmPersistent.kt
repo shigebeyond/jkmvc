@@ -38,7 +38,7 @@ interface IOrmPersistent : IOrmValid {
 
 	/**
 	 * 根据主键值来加载数据
-	 *   如果是联合主键, 则参数按 ormMeta.primaryKey 中定义的字段的属性来传值
+	 *   如果是复合主键, 则参数按 ormMeta.primaryKey 中定义的字段的属性来传值
 	 *
 	 * @param pk
 	 * @return

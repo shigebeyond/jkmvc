@@ -1,6 +1,7 @@
 package com.jkmvc.tests
 
 import com.jkmvc.db.*
+import org.apache.commons.collections.map.HashedMap
 import org.junit.Test
 import java.io.File
 import java.util.*
@@ -17,18 +18,18 @@ class DbTests{
     }
 
     @Test
-    fun testDbType(){
-        /*for(type in DbType.values())
-            println(type)
-        print("current: " + db.dbType)*/
-        println(db.schema)
+    fun testDbMeta(){
+        println("database type: " + db.dbType)
+        println("database schema: " + db.schema)
     }
 
     @Test
     fun testDbDate(){
+        /*
         val (hasNext, date) = Db.instance().queryCell<Date>("SELECT  LAST_LOGIN_TIME FROM RC_ACCOUNTS WHERE ACCOUNT_CODE = 'tann771x@nng.gx.csg.cn'")
         if(hasNext)
             println(date)
+        */
     }
 
     @Test
@@ -65,14 +66,14 @@ class DbTests{
 
     @Test
     fun testFind(){
-        val record = db.queryRow("select * from user limit 1" /*sql*/, emptyList() /*参数*/, Map::class.recordTranformer /*转换结果的函数*/) // 返回 Map 类型的一行数据
-        println("查询user表：" + record)
+        val row = db.queryRow("select * from user limit 1" /*sql*/, emptyList() /*参数*/, ::HashedMap /*转换结果的函数*/) // 返回 Map 类型的一行数据
+        println("查询user表：" + row)
     }
 
     @Test
     fun testFindAll(){
-        val records = db.queryRows("select * from user limit 10" /*sql*/, emptyList() /*参数*/, Map::class.recordTranformer /*转换结果的函数*/) // 返回 Map 类型的多行数据
-        println("查询user表：" + records)
+        val rows = db.queryRows("select * from user limit 10" /*sql*/, emptyList() /*参数*/, ::HashedMap /*转换结果的函数*/) // 返回 Map 类型的多行数据
+        println("查询user表：" + rows)
     }
 
     @Test

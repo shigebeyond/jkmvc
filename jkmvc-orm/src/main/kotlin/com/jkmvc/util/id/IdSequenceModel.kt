@@ -2,11 +2,7 @@ package com.jkmvc.util.id
 
 import com.jkmvc.orm.Orm
 import com.jkmvc.orm.OrmMeta
-import sun.management.MemoryUsageCompositeData.getMax
 import java.util.concurrent.atomic.AtomicLong
-import javax.swing.text.Segment
-
-
 
 /**
  * id序列

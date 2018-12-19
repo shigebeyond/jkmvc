@@ -77,7 +77,7 @@ internal class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
             }
         }
         if(result == null)
-            throw RuntimeException("未知数据库类型")
+            throw RuntimeException("Unknow database type")
         else
             result
     }
