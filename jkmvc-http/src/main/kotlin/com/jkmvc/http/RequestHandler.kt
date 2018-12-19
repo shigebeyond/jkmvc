@@ -97,7 +97,7 @@ object RequestHandler : IRequestHandler {
         }
 
         // 创建controller
-        val controller:Controller = clazz.constructer.call() as Controller;
+        val controller:Controller = clazz.javaClass.newInstance() as Controller;
 
         // 允许跨域
         if(config.getBoolean("allowCrossDomain", false)!!){

@@ -2,6 +2,7 @@ package com.jkmvc.http
 
 /**
  * 控制器
+ *   子类必须要有默认构造函数, 即参数为空的构造函数
  *
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47

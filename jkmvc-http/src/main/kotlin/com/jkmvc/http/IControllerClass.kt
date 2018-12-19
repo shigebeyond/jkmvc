@@ -16,11 +16,6 @@ interface IControllerClass{
     val clazz: KClass<*>;
 
     /**
-     * 构造函数
-     */
-    val constructer: KFunction<*>;
-
-    /**
      * 所有action方法
      */
     val actions: MutableMap<String, KFunction<*>>;

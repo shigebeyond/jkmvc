@@ -14,17 +14,15 @@ import kotlin.reflect.full.memberFunctions
 class ControllerClass(public override val clazz: KClass<*> /* controller类 */):IControllerClass{
 
     /**
-     * 无参数的构造函数
-     */
-    public override val constructer: KFunction<*>
-            get() = clazz.findConstructor()!!;
-
-    /**
      * 所有action方法
      */
-    public override val actions: MutableMap<String, KFunction<*>> = HashMap<String, KFunction<*>>();
+    public override val actions: MutableMap<String, KFunction<*>> = HashMap();
 
     init{
+        // 检查默认构造函数
+        if(clazz.findConstructor() == null)
+            throw RouteException("Controller类${clazz}无默认构造函数")
+
         // 解析所有action方法
         parseActionMethods()
     }
