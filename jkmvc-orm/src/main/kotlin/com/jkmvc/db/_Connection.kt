@@ -176,7 +176,7 @@ public fun <T> Connection.queryRows(sql: String, params: List<Any?> = emptyList(
     return queryResult<List<T>>(sql, params){ rs: ResultSet ->
         // 处理查询结果
         val result = LinkedList<T>()
-        rs.forEachRow { row:MutableMap<String, Any?> ->
+        rs.forEachRow { row: Map<String, Any?> ->
             result.add(transform(row));// 转换一行数据
         }
         result;
@@ -330,7 +330,7 @@ public inline fun ResultSet.nextRow(row:MutableMap<String, Any?>): Unit {
  * 遍历结果集的每一行
  * @param action 访问者函数
  */
-public fun ResultSet.forEachRow(action: (MutableMap<String, Any?>) -> Unit): Unit {
+public fun ResultSet.forEachRow(action: (Map<String, Any?>) -> Unit): Unit {
     val row: MutableMap<String, Any?> = reusedRows.get() // 复用map
     while(true){
         // 获得一行
