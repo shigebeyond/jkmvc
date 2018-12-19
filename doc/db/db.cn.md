@@ -78,8 +78,8 @@ batchExecute(sql: String, paramses: List<Any?>, paramSize: Int): IntArray | 批�
 方法 | 作用
 --- | ---
 queryResult(sql: String, params: List<Any?> = emptyList(), action: (ResultSet) -> T): T | 查询多行
-queryRow(sql: String, params: List<Any?> = emptyList(), transform: (MutableMap<String, Any?>) -> T): T? | 查询一行(多列)
-queryRows(sql: String, params: List<Any?> = emptyList(), transform: (MutableMap<String, Any?>) -> T): List<T> | 查询多行
+queryRow(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T): T? | 查询一行(多列)
+queryRows(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T): List<T> | 查询多行
 queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): List<T?> | 查询一列(多行)
 queryCell(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): Cell<T> | 查询一行一列
 

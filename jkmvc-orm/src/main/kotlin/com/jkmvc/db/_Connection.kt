@@ -14,6 +14,16 @@ val dbLogger = LoggerFactory.getLogger("com.jkmvc.db")
 
 /****************************** Connection直接提供查询与更新数据的方法 *******************************/
 /**
+ * 全局共享的可复用的用于存储一行数据的 HashMap 对象池
+ *   就是每查到一行, 就用该对象来临时存储该行数据, 用完就清空该行数据
+ *   线程安全, 每个线程只共享一个 HashMap 对象, 无论你查到多少行, 仅占用一个 HashMap 对象, 极大的节省内存
+ *   用在 queryRow() / queryRows() 的 transform 函数中, 参数就是不可变的行数据(类型转为 Map<String, Any?>), 表示禁止改变或引用行数据
+ */
+private val reusedRows:ThreadLocal<MutableMap<String, Any?>> = ThreadLocal.withInitial {
+    HashMap<String, Any?>();
+}
+
+/**
  * PreparedStatement扩展
  * 设置参数
  *
@@ -162,7 +172,7 @@ public fun <T> Connection.queryResult(sql: String, params: List<Any?> = emptyLis
  * @param transform 结果转换函数
  * @return
  */
-public fun <T> Connection.queryRows(sql: String, params: List<Any?> = emptyList(), transform:(MutableMap<String, Any?>) -> T): List<T> {
+public fun <T> Connection.queryRows(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T): List<T> {
     return queryResult<List<T>>(sql, params){ rs: ResultSet ->
         // 处理查询结果
         val result = LinkedList<T>()
@@ -199,14 +209,21 @@ public fun <T:Any> Connection.queryColumn(sql: String, params: List<Any?> = empt
  * @param transform 结果转换函数
  * @return
  */
-public fun <T> Connection.queryRow(sql: String, params: List<Any?> = emptyList(), transform:(MutableMap<String, Any?>) -> T): T? {
+public fun <T> Connection.queryRow(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T): T? {
+    val row: MutableMap<String, Any?> = reusedRows.get() // 复用map
     return queryResult<T?>(sql, params){ rs: ResultSet ->
         // 处理查询结果
-        val row:MutableMap<String, Any?>? = rs.nextRow()
-        if(row == null)
-            null
-        else
-            transform(row);// 转换一行数据
+        rs.nextRow(row)
+
+        var result:T? = null
+        if(row.isNotEmpty()) {
+            // 转换一行数据
+            result = transform(row)
+
+            // 清空以便复用
+            row.clear()
+        }
+        result
     }
 }
 
@@ -299,33 +316,33 @@ public fun getResultSetValueGetter(clazz: KClass<*>? = null): (ResultSet.(Int) -
  * 获得结果集的下一行
  * @return
  */
-public inline fun ResultSet.nextRow(): MutableMap<String, Any?>? {
+public inline fun ResultSet.nextRow(row:MutableMap<String, Any?>): Unit {
     if(next()) {
         // 获得一行
-        val row:MutableMap<String, Any?> = HashMap<String, Any?>();
         for (i in 1..metaData.columnCount) { // 多列
             val label: String = metaData.getColumnLabel(i); // 字段名
             val value: Any? = getValue(i) // 字段值
             row[label] = value;
         }
-        return row
     }
-
-    return null;
 }
 /**
  * 遍历结果集的每一行
  * @param action 访问者函数
  */
-public inline fun ResultSet.forEachRow(action: (MutableMap<String, Any?>) -> Unit): Unit {
+public fun ResultSet.forEachRow(action: (MutableMap<String, Any?>) -> Unit): Unit {
+    val row: MutableMap<String, Any?> = reusedRows.get() // 复用map
     while(true){
         // 获得一行
-        val row = nextRow()
-        if(row == null)
+        nextRow(row)
+        if(row.isEmpty())
             break;
 
         // 处理一行
         action(row)
+
+        // 清空以便复用
+        row.clear()
     }
 }
 
@@ -347,7 +364,7 @@ public inline fun <T:Any> ResultSet.nextCell(i:Int, clazz: KClass<T>? = null): C
  * @param i 第几列
  * @param clazz值类型
  * @param action 处理函数
- * @return
+ * @returnrecordTranformer
  */
 public inline fun <T:Any> ResultSet.forEachCell(i:Int, clazz: KClass<T>? = null, action: (T?) -> Unit): Unit {
     while(true){
@@ -360,49 +377,3 @@ public inline fun <T:Any> ResultSet.forEachCell(i:Int, clazz: KClass<T>? = null,
         action(value)
     }
 }
-
-/****************************** 记录转换器 *******************************/
-/**
- * 在查找对应带 Map 参数的构造函数时，所需要的参数类型列表
- */
-private val tranformingConstructorParamTypes = listOf(MutableMap::class.java)
-
-/**
- * 获得类的记录转换器
- *   不同的目标类型，有不同的记录转换器
- *   1 Orm类：实例化并调用setOriginal()
- *   2 Map类: 直接返回记录数据，不用转换
- *   3 其他类：如果实现带 Map 参数的构造函数，如 constructor(data: MutableMap<String, Any?>)，就调用
- *
- * @param clazz 要转换的类
- * @return 转换的匿名函数
- */
-public val <T:Any> KClass<T>.recordTranformer: ((MutableMap<String, Any?>) -> T)
-    get(){
-        // 1 如果是orm类，则实例化并调用setOriginal()
-        if(IOrm::class.java.isAssignableFrom(java)){
-            // TODO: 优化性能，缓存结果
-            return {
-                val obj = java.newInstance() as IOrm;
-                obj.setOriginal(it) as T
-            }
-        }
-
-        // 2 如果是map类，则直接返回，不用转换
-        if(Map::class.java.isAssignableFrom(java)){
-            return {
-                it as T;
-            }
-        }
-
-        // 3 否则，调用该类的构造函数（假定该类有接收map参数的构建函数）
-        // 获得类的构造函数
-        val construtor = this.findConstructor(tranformingConstructorParamTypes)
-        if(construtor == null)
-            throw UnsupportedOperationException("类${this}没有构造函数constructor(MutableMap)");
-
-        // 调用构造函数
-        return {
-            construtor.call(it) as T; // 转换一行数据: 直接调用构造函数
-        }
-    }

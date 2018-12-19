@@ -126,9 +126,9 @@ SELECT * FROM `posts` ORDER BY `published` DESC
 
 method | usage
 --- | ---
-find(vararg params: Any?, transform:(MutableMap<String, Any?>) -> T): T? | find single record, the `transform` parameter is a lambda which transforms db row to result row
+find(vararg params: Any?, transform: (Map<String, Any?>) -> T): T? | find single record, the `transform` parameter is a lambda which transforms db row to result row
 find(vararg params: Any?): T? | find single record, it needs no `transform` parameter, but depends on the return type for transforming, and the return type only takes 3 type of class: 1. `Map` 2. Implementation class of `IOrm` 3. Any class which has a constructor function with a `Map` parameter
-findAll(vararg params: Any?, transform:(MutableMap<String, Any?>) -> T): List<T> | find multiple records, the `transform` parameter is a lambda which transforms db row to result row
+findAll(vararg params: Any?, transform: (Map<String, Any?>) -> T): List<T> | find multiple records, the `transform` parameter is a lambda which transforms db row to result row
 findAll(vararg params: Any?): List<T> | find multiple records, it needs no `transform` parameter, but depends on the return type for transforming, and the return type only takes 3 type of class: 1. `Map` 2. Implementation class of `IOrm` 3. Any class which has a constructor function with a `Map` parameter
 findColumn(vararg params: Any?): List<Any?> | find multiple row in single column
 count(vararg params: Any?):Long | count rows

@@ -43,11 +43,11 @@ abstract class IDbQuery{
      * @param transform 转换函数
      * @return 列表
      */
-    public abstract fun <T:Any> findAll(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform:(MutableMap<String, Any?>) -> T): List<T>;
+    public abstract fun <T:Any> findAll(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (Map<String, Any?>) -> T): List<T>;
 
     /**
      * 查找多个： select 语句
-     *  对 findAll(transform:(MutableMap<String, Any?>) 的精简版，直接根据泛型 T 来找到对应的记录转换器
+     *  对 findAll(transform: (Map<String, Any?>) 的精简版，直接根据泛型 T 来找到对应的记录转换器
      *  泛型 T 有3类情况，会生成不同的记录转换器
      *  1 Orm类：实例化并调用setOriginal()
      *  2 Map类: 直接返回记录数据，不用转换
@@ -69,11 +69,11 @@ abstract class IDbQuery{
      * @param transform 转换函数
      * @return 一个数据
      */
-    public abstract fun <T:Any> find(params: List<Any?> = emptyList(),  db: IDb = defaultDb, transform:(MutableMap<String, Any?>) -> T): T?;
+    public abstract fun <T:Any> find(params: List<Any?> = emptyList(),  db: IDb = defaultDb, transform: (Map<String, Any?>) -> T): T?;
 
     /**
      * 查找一个： select ... limit 1语句
-     *  对 find(transform:(MutableMap<String, Any?>) 的精简版，直接根据泛型 T 来找到对应的记录转换器
+     *  对 find(transform: (Map<String, Any?>) 的精简版，直接根据泛型 T 来找到对应的记录转换器
      *  泛型 T 有3类情况，会生成不同的记录转换器
      *  1 Orm类：实例化并调用setOriginal()
      *  2 Map类: 直接返回记录数据，不用转换

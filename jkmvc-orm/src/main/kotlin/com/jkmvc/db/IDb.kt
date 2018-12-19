@@ -112,7 +112,7 @@ abstract class IDb: Closeable, IDbMeta, IDbValueQuoter, IDbIdentifierQuoter {
      * @param transform 转换结果的函数
      * @return
      */
-    public abstract fun <T> queryRows(sql: String, params: List<Any?> = emptyList(), transform: (MutableMap<String, Any?>) -> T): List<T>;
+    public abstract fun <T> queryRows(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T): List<T>;
 
     /**
      * 查询一行(多列)
@@ -122,7 +122,7 @@ abstract class IDb: Closeable, IDbMeta, IDbValueQuoter, IDbIdentifierQuoter {
      * @param transform 转换结果的函数
      * @return
      */
-    public abstract fun <T> queryRow(sql: String, params: List<Any?> = emptyList(), transform: (MutableMap<String, Any?>) -> T): T?;
+    public abstract fun <T> queryRow(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T): T?;
 
     /**
      * 查询一列(多行)

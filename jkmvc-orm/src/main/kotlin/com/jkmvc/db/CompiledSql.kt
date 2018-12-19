@@ -191,7 +191,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param transform 转换函数
      * @return 列表
      */
-    public override fun <T:Any> findAll(params: List<Any?>, db:IDb, transform:(MutableMap<String, Any?>) -> T): List<T>{
+    public override fun <T:Any> findAll(params: List<Any?>, db:IDb, transform: (Map<String, Any?>) -> T): List<T>{
         // 执行 select
         return db.queryRows<T>(sql, buildParams(params), transform)
     }
@@ -203,7 +203,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param transform 转换函数
      * @return 单个数据
      */
-    public override fun <T:Any> find(params: List<Any?>, db:IDb, transform:(MutableMap<String, Any?>) -> T): T?{
+    public override fun <T:Any> find(params: List<Any?>, db:IDb, transform: (Map<String, Any?>) -> T): T?{
         return db.queryRow<T>(sql, buildParams(params), transform);
     }
 
