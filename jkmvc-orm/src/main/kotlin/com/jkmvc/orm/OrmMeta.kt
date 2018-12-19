@@ -37,7 +37,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
 
     init{
         // 检查默认构造函数
-        if(model.findConstructor() == null)
+        if(model.java.getConstructor() == null)
             throw OrmException("Class [${model}] has no no-arg constructor") // Model类${clazz}无默认构造函数
     }
 
@@ -72,7 +72,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
         val handlers = HashMap<String, KFunction<Unit>?>()
         // 遍历每个事件填充
         for (event in events){
-            val handler = model.findFunction(event)  as KFunction<Unit>?
+            val handler = model.getFunction(event)  as KFunction<Unit>?
             if(handler != null)
                 handlers[event] = handler
         }
@@ -301,7 +301,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     public override fun convertIntelligent(column:String, value:String):Any?
     {
         // 1 获得属性
-        val prop = model.findProperty(column)
+        val prop = model.getProperty(column)
         if(prop == null)
             throw OrmException("类 ${model} 没有属性: $column");
 

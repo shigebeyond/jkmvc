@@ -1,7 +1,5 @@
 package com.jkmvc.db
 
-import com.jkmvc.common.findConstructor
-import com.jkmvc.orm.IOrm
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.sql.*

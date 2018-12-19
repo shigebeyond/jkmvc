@@ -4,11 +4,6 @@ import com.jkmvc.cache.JedisFactory
 import com.jkmvc.common.*
 import com.jkmvc.validate.Validation
 import getIntranetHost
-import javafx.application.Application.launch
-import javassist.ClassClassPath
-import javassist.ClassPool
-import javassist.Modifier
-import javassist.bytecode.LocalVariableAttribute
 //import kotlinx.coroutines.experimental.*
 import org.dom4j.Attribute
 import org.dom4j.DocumentException
@@ -16,7 +11,6 @@ import org.dom4j.Element
 import org.dom4j.io.SAXReader
 import org.junit.Test
 import java.io.File
-import java.math.BigDecimal
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
@@ -375,10 +369,10 @@ class MyTests{
         println(java === IConfig::class.java) // true
         println(java.isAssignableFrom(java)) // true*/
 
-//        val method = Config::class.java.findMethod("containsKey", arrayListOf(String::class.java))
+//        val method = Config::class.java.getMethod("containsKey", String::class.java)
 //        println(method)
 
-//        val constructor = Config::class.java.findConstructor(arrayListOf(String::class.java, String::class.java))
+//        val constructor = Config::class.java.getConstructor(String::class.java, String::class.java)
 //        println(constructor)
 
         //println(Config::class.java.isInterface)
@@ -622,11 +616,11 @@ class MyTests{
     @Test
     fun testProp(){
         // 获得不了getter/setter方法
-//        println(MyTests::class.findFunction("getId")) // null
-//        println(MyTests::class.findFunction("setName")) // null
+//        println(MyTests::class.getFunction("getId")) // null
+//        println(MyTests::class.getFunction("setName")) // null
 
         // 获得属性
-        val p = MyTests::class.findProperty("id")!!
+        val p = MyTests::class.getProperty("id")!!
         println(p)
         println(p is KMutableProperty1) // true
         println(p::class) // class kotlin.reflect.jvm.internal.KMutableProperty1Impl
@@ -636,7 +630,7 @@ class MyTests{
         println(p.getter.parameters[0])
 
         // 不能修改属性的访问权限
-//        val prop: KProperty1<B, *> = B::class.findProperty("name") as KProperty1<B, *>
+//        val prop: KProperty1<B, *> = B::class.getProperty("name") as KProperty1<B, *>
 //        println(prop.get(B()))
 
         // kotlin类

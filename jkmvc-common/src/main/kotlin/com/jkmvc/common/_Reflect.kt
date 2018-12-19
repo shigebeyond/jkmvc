@@ -20,7 +20,7 @@ public fun Any.forceClone():Any {
     if(!(this is Cloneable))
         throw IllegalArgumentException("非Cloneable对象，不能调用clone()方法")
 
-    val f:KFunction<*> = javaClass.kotlin.findFunction("clone")!!
+    val f:KFunction<*> = javaClass.kotlin.getFunction("clone")!!
     return f.call(this) as Any;
 }
 
@@ -49,7 +49,7 @@ public inline val <T: Any> KClass<T>.defaultValue:T
  * @param paramTypes 参数类型
  * @return
  */
-public fun KFunction<*>.matches(name:String, paramTypes:List<Class<*>> = emptyList()):Boolean{
+public fun KFunction<*>.matches(name:String, paramTypes:Array<out Class<*>>):Boolean{
     // 1 匹配名称
     if(name != this.name)
         return false
@@ -78,18 +78,14 @@ public fun KFunction<*>.matches(name:String, paramTypes:List<Class<*>> = emptyLi
  * @param paramTypes 参数类型
  * @return
  */
-public fun KClass<*>.findFunction(name:String, paramTypes:List<Class<*>> = emptyList()): KFunction<*>?{
-    var pt = if(paramTypes is MutableList){
-        paramTypes
-    }else{
-        ArrayList<Class<*>>(paramTypes);
-    }
+public fun KClass<*>.getFunction(name:String, vararg paramTypes:Class<*>): KFunction<*>?{
+    var pt = paramTypes.toMutableList() as ArrayList
 
     // 第一个参数为this
     pt.add(0, this.java);
 
     return memberFunctions.find {
-        it.matches(name, pt);
+        it.matches(name, pt.toArray() as Array<Class<*>>);
     }
 }
 
@@ -99,7 +95,7 @@ public fun KClass<*>.findFunction(name:String, paramTypes:List<Class<*>> = empty
  * @param paramTypes 参数类型
  * @return
  */
-public fun KClass<*>.findStaticFunction(name:String, paramTypes:List<Class<*>> = emptyList()): KFunction<*>?{
+public fun KClass<*>.getStaticFunction(name:String, vararg paramTypes:Class<*>): KFunction<*>?{
     return staticFunctions.find {
         it.matches(name, paramTypes);
     }
@@ -110,7 +106,7 @@ public fun KClass<*>.findStaticFunction(name:String, paramTypes:List<Class<*>> =
  * @param paramTypes 参数类型
  * @return
  */
-public fun KClass<*>.findConstructor(paramTypes:List<Class<*>> = emptyList()): KFunction<*>?{
+public fun KClass<*>.getConstructor(vararg paramTypes:Class<*>): KFunction<*>?{
     return constructors.find {
         it.matches("<init>", paramTypes); // 构造函数的名称为 <init>
     }
@@ -121,7 +117,7 @@ public fun KClass<*>.findConstructor(paramTypes:List<Class<*>> = emptyList()): K
  * @param name 属性名
  * @return
  */
-public fun KClass<*>.findProperty(name:String): KProperty1<*, *>?{
+public fun KClass<*>.getProperty(name:String): KProperty1<*, *>?{
     return this.declaredMemberProperties.find {
         it.name == name;
     }
@@ -137,75 +133,6 @@ public inline fun KParameter.convert(value: String): Any {
 }
 
 /****************************** java反射扩展: Class *******************************/
-/**
- * 匹配方法的名称与参数类型
- * @param name 方法名
- * @param paramTypes 参数类型
- * @return
- */
-public fun Executable.matches(name:String, paramTypes:List<Class<*>> = emptyList()):Boolean{
-    // 1 匹配名称
-    if(name != this.name)
-        return false
-
-    // 2 匹配参数
-    // 2.1 匹配参数个数
-    if(paramTypes.size != this.parameterTypes.size)
-        return false;
-
-    // 2.2 匹配参数类型
-    for (i in paramTypes.indices){
-        var targetType = this.parameterTypes[i]
-        if(targetType is ParameterizedTypeImpl) // 若是泛型类型，则去掉泛型，只保留原始类型
-            targetType = targetType.rawType;
-
-        if(paramTypes[i] != targetType)
-            return false
-    }
-
-    return true;
-}
-
-/**
- * 查找方法
- * @param name 方法名
- * @param paramTypes 参数类型
- * @return
- */
-public fun Class<*>.findMethod(name:String, paramTypes:List<Class<*>> = emptyList()): Method?{
-    var pt = if(paramTypes is MutableList){
-        paramTypes
-    }else{
-        ArrayList<Class<*>>(paramTypes);
-    }
-
-    return methods.find {
-        it.matches(name, pt);
-    }
-}
-
-/**
- * 查找构造函数
- * @param paramTypes 参数类型
- * @return
- */
-public fun Class<*>.findConstructor(paramTypes:List<Class<*>> = emptyList()): Constructor<*>?{
-    return constructors.find {
-        it.matches(this.name, paramTypes);
-    }
-}
-
-/**
- * 查找属性
- * @param name 属性名
- * @return
- */
-public fun Class<*>.findField(name:String): Field? {
-    return this.fields.find {
-        it.name == name;
-    }
-}
-
 /**
  * 是否静态方法
  */
@@ -267,7 +194,7 @@ public fun Class<*>.getMethodMaps(): Map<String, Method> {
  */
 public fun <T: Any> KClass<T>.newInstance(initRequired: Boolean = true): Any? {
     // 无[无参数构造函数]
-    if(this.findConstructor() == null && !initRequired){
+    if(java.getConstructor() == null && !initRequired){
         // best effort. use Unsafe to instantiate.
         // Warning: if class contains transient fields which have default values assigned ('transient int x = 3'),
         // those will not be assigned after deserialization as unsafe instantiation does not execute any default
