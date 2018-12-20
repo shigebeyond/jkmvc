@@ -18,10 +18,13 @@ interface IControllerClass{
     /**
      * 所有action方法
      */
-    val actions: MutableMap<String, KFunction<*>>;
+    val actions: Map<String, KFunction<*>>;
 
     /**
      * 获得action方法
+     * @return
      */
-    fun getActionMethod(name:String): KFunction<*>?;
+    fun getActionMethod(name:String): KFunction<*>? {
+        return actions.get(name);
+    }
 }

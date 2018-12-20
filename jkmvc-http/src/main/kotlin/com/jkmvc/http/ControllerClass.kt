@@ -39,10 +39,4 @@ class ControllerClass(public override val clazz: KClass<*> /* controller类 */):
         }
     }
 
-    /**
-     * 获得action方法
-     */
-    public override fun getActionMethod(name:String): KFunction<*>? {
-        return actions.get(name);
-    }
 }
