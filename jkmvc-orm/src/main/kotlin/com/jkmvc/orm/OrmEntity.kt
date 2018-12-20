@@ -232,7 +232,7 @@ abstract class OrmEntity : IOrm {
      * @return
      */
     public override fun serialize(): ByteArray? {
-        return serializer.serialize(this.asMap())
+        return serializer.serialize(this.toMap())
     }
 
     /**

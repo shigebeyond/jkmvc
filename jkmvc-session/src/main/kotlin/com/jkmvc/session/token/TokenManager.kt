@@ -40,7 +40,7 @@ object TokenManager : ITokenManager {
         val tokenId:Long = SnowflakeIdWorker.instance().nextId()
 
         //存储token，key为tokenId, value是user, 并设置过期时间
-        cache.put("token-$tokenId", user.asMap(), TOKEN_EXPIRES)
+        cache.put("token-$tokenId", user.toMap(), TOKEN_EXPIRES)
 
         // token = userId + tokenId
         return "${user.pk}.$tokenId"

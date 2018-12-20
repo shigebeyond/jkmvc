@@ -94,7 +94,7 @@ abstract class OrmRelated : OrmPersistent() {
      * 获得字段值 -- 转为Map
      * @return
      */
-    public override fun asMap(): Map<String, Any?> {
+    public override fun toMap(): Map<String, Any?> {
         val result = HashMap<String, Any?>()
 
         // 转关联对象
@@ -102,8 +102,8 @@ abstract class OrmRelated : OrmPersistent() {
             val value = data[name]
             if(value != null){
                 result[name] = when(value){
-                    is Collection<*> -> (value as Collection<IOrm>).itemAsMap() // 有多个
-                    is Orm -> value.asMap()  // 有一个
+                    is Collection<*> -> (value as Collection<IOrm>).itemToMap() // 有多个
+                    is Orm -> value.toMap()  // 有一个
                     else -> value
                 }
             }

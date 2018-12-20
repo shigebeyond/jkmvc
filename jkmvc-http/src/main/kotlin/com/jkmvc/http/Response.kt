@@ -304,7 +304,7 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 		val obj = JSONObject()
 		obj["code"] = code
 		obj["msg"] = msg
-		obj["data"] = if (data is IOrm) data.asMap() else data // 对orm对象要转map
+		obj["data"] = if (data is IOrm) data.toMap() else data // 对orm对象要转map
 		//renderString(obj.toJSONString())
 		renderString(JSON.toJSONString(obj, SerializerFeature.WriteDateUseDateFormat /* Date格式化 */, SerializerFeature.WriteMapNullValue /* 输出null值 */))
 	}

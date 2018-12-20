@@ -86,7 +86,7 @@ interface IOrmEntity {
      * 获得字段值
      * @return
      */
-    fun asMap(): Map<String, Any?>;
+    fun toMap(): Map<String, Any?>;
 
     /**
      * 从map中设置字段值

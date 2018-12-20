@@ -44,12 +44,12 @@ public val <T:IOrm> KClass<T>.rowTranformer: (Row) -> T
 /**
  * orm列表获得字段值
  */
-fun Collection<out IOrm>.itemAsMap(): List<Map<String, Any?>> {
+fun Collection<out IOrm>.itemToMap(): List<Map<String, Any?>> {
     if(this.isEmpty())
         return emptyList()
 
     return this.map {
-        it.asMap()
+        it.toMap()
     }
 }
 
@@ -60,7 +60,7 @@ fun Collection<out IOrm>.itemAsMap(): List<Map<String, Any?>> {
  * @param valueField 子项字段名，其值作为结果哈希的value，如果为null，则用子项作为结果哈希的value
  * @return
  */
-fun <K, V> Collection<out IOrm>.asMap(keyField:String, valueField:String?): Map<K, V?> {
+fun <K, V> Collection<out IOrm>.toMap(keyField:String, valueField:String?): Map<K, V?> {
     if(this.isEmpty())
         return emptyMap()
 
@@ -79,8 +79,8 @@ fun <K, V> Collection<out IOrm>.asMap(keyField:String, valueField:String?): Map<
  * @param keyField 字段名，其值作为结果哈希的key
  * @return
  */
-fun <K, V:IOrm> Collection<V>.asMap(keyField:String): Map<K, V> {
-    return asMap<K, V>(keyField, null) as Map<K, V>
+fun <K, V:IOrm> Collection<V>.toMap(keyField:String): Map<K, V> {
+    return toMap<K, V>(keyField, null) as Map<K, V>
 }
 
 /**
