@@ -315,9 +315,9 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
             return
 
         if(relatedItems.isEmpty()){
-            // 设置关联属性为null
+            // 设置关联属性为空list
             for (item in items)
-                item[name] = null
+                item[name] = emptyList<Any>()
             return
         }
 

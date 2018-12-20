@@ -57,7 +57,7 @@ By default, select clause will select all columns (`SELECT * ...`), but you can 
 query.select("username", "password").from("user").where("username", "=", "john");
 ```
 
-Now take a minute to look at what this method chain is doing. First, we select colums using `select()` method. Next, we set table(s) using the `from()` method. Last, we search for a specific records using the `where()` method. 
+Now take a minute to look at what this method chain is doing. First, we select colums using `select()` method. Next, we set table(s) using the `from()` method. Last, we search for a specific rows using the `where()` method. 
 
 And it will generate following sql:
 
@@ -126,10 +126,10 @@ SELECT * FROM `posts` ORDER BY `published` DESC
 
 method | usage
 --- | ---
-find(vararg params: Any?, transform: (Map<String, Any?>) -> T): T? | find single record, the `transform` parameter is a lambda which transforms db row to result row
-find(vararg params: Any?): T? | find single record, it needs no `transform` parameter, but depends on the return type for transforming, and the return type only takes 3 type of class: 1. `Map` 2. Implementation class of `IOrm` 3. Any class which has a constructor function with a `Map` parameter
-findAll(vararg params: Any?, transform: (Map<String, Any?>) -> T): List<T> | find multiple records, the `transform` parameter is a lambda which transforms db row to result row
-findAll(vararg params: Any?): List<T> | find multiple records, it needs no `transform` parameter, but depends on the return type for transforming, and the return type only takes 3 type of class: 1. `Map` 2. Implementation class of `IOrm` 3. Any class which has a constructor function with a `Map` parameter
+find(vararg params: Any?, transform: (Map<String, Any?>) -> T): T? | find single row, the `transform` parameter is a lambda which transforms db row to result row
+find(vararg params: Any?): T? | find single row, it needs no `transform` parameter, but depends on the return type for transforming, and the return type only takes 3 type of class: 1. `Map` 2. Implementation class of `IOrm` 3. Any class which has a constructor function with a `Map` parameter
+findAll(vararg params: Any?, transform: (Map<String, Any?>) -> T): List<T> | find multiple rows, the `transform` parameter is a lambda which transforms db row to result row
+findAll(vararg params: Any?): List<T> | find multiple rows, it needs no `transform` parameter, but depends on the return type for transforming, and the return type only takes 3 type of class: 1. `Map` 2. Implementation class of `IOrm` 3. Any class which has a constructor function with a `Map` parameter
 findColumn(vararg params: Any?): List<Any?> | find multiple row in single column
 count(vararg params: Any?):Long | count rows
 
@@ -138,9 +138,9 @@ There are some examples:
 ```
 val query = DbQueryBuilder().from("user")
 // SELECT * FROM `user`
-val records = query.findAll<Record>()
+val rows = query.findAllRows()
 // SELECT * FROM `user` LIMIT 1
-val record = query.find<Record>()
+val row = query.findRow()
 // SELECT username FROM `user`
 val usernames = query.select("username").findColumn<String>()
 // SELECT count(1) FROM `user`
@@ -151,7 +151,7 @@ val count = query.count()
 
 ## 3 Insert
 
-To create records into the database, use `table()` to pass table, using `insertColumns(vararg c:String)` to pass columns, using `value(vararg v:Any?)` to pass data, using `insert(generatedColumn:String)` to execute insert sql:
+To create rows into the database, use `table()` to pass table, using `insertColumns(vararg c:String)` to pass columns, using `value(vararg v:Any?)` to pass data, using `insert(generatedColumn:String)` to execute insert sql:
 
 ```
 val id:Long = DbQueryBuilder().table("user").insertColumns("username", "password").value("fred", "p@5sW0Rd").insert("id");
@@ -171,7 +171,7 @@ So the return value is auto-generated id.
 
 ## 4 Update
 
-To modify an existing record, use `table()` to pass table, using `set()` to pass data, using `udpate()` to execute update sql:
+To modify an existing row, use `table()` to pass table, using `set()` to pass data, using `udpate()` to execute update sql:
 
 ```
 val f:Boolean = DbQueryBuilder().table("user").set("username", "jane").where("username", "=", "john").update();
@@ -181,7 +181,7 @@ val f:Boolean = DbQueryBuilder().table("user").set("username", "jane").where("us
 
 ## 5 Delete
 
-To remove an existing record, use `table()` to pass table,using `delete()` to execute delete sql:
+To remove an existing row, use `table()` to pass table,using `delete()` to execute delete sql:
 
 ```
 val f = DbQueryBuilder().table("user").where("username", "IN", arrayOf("john", "jane")).delete();
@@ -209,7 +209,7 @@ The `on()` method sets the conditions for the previous `join()` method and is ve
 
 ```
 // This query will find all the posts related to "smith" with JOIN
-query.select("authors.name", "posts.content").from("authors").join("posts").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith").findAll<Record>();
+query.select("authors.name", "posts.content").from("authors").join("posts").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith").findAllRows();
 ```
 
 This query would generate the following SQL:
@@ -222,7 +222,7 @@ If you want to do a LEFT, RIGHT or INNER JOIN you would do it like this `join("c
 
 ```
 // This query will find all the posts related to "smith" with LEFT JOIN
-query.from("authors").join("posts", "LEFT").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith").findAll<Record>();
+query.from("authors").join("posts", "LEFT").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith").findAllRows();
 ```
 
 This query would generate the following SQL:
@@ -238,7 +238,7 @@ SELECT `authors`.`name`, `posts`.`content` FROM `authors` LEFT JOIN `posts` ON (
 Aggregate functions like `COUNT()`, `SUM()`, `AVG()`, etc. will most likely be used with the `groupBy()` and possibly the `having()` methods in order to group and filter the results on a set of columns.
 
 ```
-query.select("username", DbExpr("COUNT(`id`)", "total_posts", false)).from("posts").groupBy("username").having("total_posts", ">=", 10).findAll<Record>();
+query.select("username", DbExpr("COUNT(`id`)", "total_posts", false)).from("posts").groupBy("username").having("total_posts", ">=", 10).findAllRows();
 ```
 
 This will generate the following query:
@@ -258,7 +258,7 @@ val sub = DbQueryBuilder().select("username", DbExpr("COUNT(`id`)", "total_posts
 
 // join subquery
 DbQueryBuilder().select("profiles.*", "posts.total_posts").from("profiles")
-.joins(DbExpr(sub, "posts", false), "INNER").on("profiles.username", "=", "posts.username").findAll<Record>()
+.joins(DbExpr(sub, "posts", false), "INNER").on("profiles.username", "=", "posts.username").findAllRows()
 ```
 
 This will generate the following query:
@@ -340,17 +340,17 @@ db.transaction {
     var id = DbQueryBuilder(db).table("user").insertColumns("name", "age").value("shi", 1).insert("id");
     println("insert into user: " + id)
 
-    // query a record
-    val record = DbQueryBuilder(db).table("user").where("id", "=", id).find<Record>()
-    println("query user: " + record)
+    // query a row
+    val row = DbQueryBuilder(db).table("user").where("id", "=", id).findRow()
+    println("query user: " + row)
 
     // update
     var f = DbQueryBuilder(db).table("user").sets(mapOf("name" to "wang", "age" to 2)).where("id", "=", id).update();
     println("update user: " + f)
 
-    // query multiple records
-    val records = DbQueryBuilder(db).table("user").orderBy("id").limit(1).findAll<Record>()
-    println("query user: " + records)
+    // query multiple rows
+    val rows = DbQueryBuilder(db).table("user").orderBy("id").limit(1).findAllRows()
+    println("query user: " + rows)
 
     // delete
     f = DbQueryBuilder(db).table("user").where("id", "=", id).delete();

@@ -61,7 +61,7 @@ interface IOrmPersistent : IOrmValid {
 	 * 插入数据: insert sql
 	 *
 	 * <code>
-	 *    val user = ModelUser();
+	 *    val user = UserModel();
 	 *    user.name = "shi";
 	 *    user.age = 24;
 	 *    user.create();
@@ -75,7 +75,7 @@ interface IOrmPersistent : IOrmValid {
 	 * 更新数据: update sql
 	 *
 	 * <code>
-	 *    val user = ModelUser.queryBuilder().where("id", 1).find();
+	 *    val user = UserModel.queryBuilder().where("id", 1).find<UserModel>();
 	 *    user.name = "li";
 	 *    user.update();
 	 * </code>
@@ -88,7 +88,7 @@ interface IOrmPersistent : IOrmValid {
 	 * 删除数据: delete sql
 	 *
 	 *　<code>
-	 *    val user = ModelUser.queryBuilder().where("id", "=", 1).find();
+	 *    val user = UserModel.queryBuilder().where("id", "=", 1).find<UserModel>();
 	 *    user.delete();
 	 *　</code>
 	 *
@@ -100,7 +100,7 @@ interface IOrmPersistent : IOrmValid {
 	 * 字段值自增: update t1 set col1 = col1 + 1
 	 *
 	 * <code>
-	 *    val user = ModelUser.queryBuilder().where("id", 1).find();
+	 *    val user = UserModel.queryBuilder().where("id", 1).find<UserModel>();
 	 *    user.incr("age", 1);
 	 * </code>
 	 *

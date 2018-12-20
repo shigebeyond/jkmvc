@@ -1,5 +1,7 @@
 package com.jkmvc.orm
 
+import com.jkmvc.common.toArray
+
 /**
  * ORM
 

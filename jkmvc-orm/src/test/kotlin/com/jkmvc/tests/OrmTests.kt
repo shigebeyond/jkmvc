@@ -156,17 +156,17 @@ class OrmTests{
 
     @Test
     fun testFind(){
-        val user = UserModel.queryBuilder().where("id", 1).find<UserModel>()
+        val user = UserModel.queryBuilder().where("id", 1).findModel<UserModel>()
 //        val user = UserModel(id)
         println("查找用户: $user" )
     }
 
     @Test
     fun testFindAll(){
-//        val users = UserModel.queryBuilder().findAll<UserModel>()
-//        val users = UserModel.queryBuilder().where("id", "=", 6).findAll<UserModel>()
-//        val users = UserModel.queryBuilder().where("id", "IN", arrayOf(6, 7)).findAll<UserModel>()
-        val users = UserModel.queryBuilder(true).where("id", "IN", arrayOf("6", "7")).findAll<UserModel>()
+//        val users = UserModel.queryBuilder().findAllModels<UserModel>()
+//        val users = UserModel.queryBuilder().where("id", "=", 6).findAllModels<UserModel>()
+//        val users = UserModel.queryBuilder().where("id", "IN", arrayOf(6, 7)).findAllModels<UserModel>()
+        val users = UserModel.queryBuilder(true).where("id", "IN", arrayOf("6", "7")).findAllModels<UserModel>()
         println("查找所有用户: $users" )
     }
 
@@ -182,7 +182,7 @@ class OrmTests{
 
     @Test
     fun testUpdate(){
-        val user = UserModel.queryBuilder().where("id", id).find<UserModel>()
+        val user = UserModel.queryBuilder().where("id", id).findModel<UserModel>()
         if(!user.isLoaded()){
             println("用户[$id]不存在")
             return
@@ -195,7 +195,7 @@ class OrmTests{
 
     @Test
     fun testDelete(){
-        val user = UserModel.queryBuilder().where("id", id).find<UserModel>()
+        val user = UserModel.queryBuilder().where("id", id).findModel<UserModel>()
         if(user == null || !user.isLoaded()){
             println("用户[$id]不存在")
             return
@@ -205,7 +205,7 @@ class OrmTests{
 
     @Test
     fun testIncr(){
-        val user = UserModel.queryBuilder().where("id", id).find<UserModel>()
+        val user = UserModel.queryBuilder().where("id", id).findModel<UserModel>()
         if(user == null || !user.isLoaded()){
             println("用户[$id]不存在")
             return
@@ -228,7 +228,7 @@ class OrmTests{
 //        println(addresses)
 
         // 多个user，联查多个address
-        var users = UserModel.queryBuilder().with("addresses").limit(100).findAll<UserModel>()
+        var users = UserModel.queryBuilder().with("addresses").limit(100).findAllModels<UserModel>()
         for (user in users){
             println("user[${user.id}]: ${user.name}")
             for(address in user.addresses){
@@ -294,7 +294,7 @@ class OrmTests{
 
     @Test
     fun testMiddleRelationManage(){
-        val users = UserModel.queryBuilder().limit(2).findAll<UserModel>()
+        val users = UserModel.queryBuilder().limit(2).findAllModels<UserModel>()
         val (u1, u2) = users
 
         println("${u1.id} 给 ${u2.id} 寄快递")

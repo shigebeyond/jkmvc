@@ -304,7 +304,7 @@ class UserController: Controller()
     public fun indexAction()
     {
         // 查询所有用户 | find all users
-        val users = UserModel.queryBuilder().findAll<UserModel>()
+        val users = UserModel.queryBuilder().findAllModels<UserModel>()
         // 渲染视图 | render view
         res.renderView(view("user/index", mutableMapOf("users" to users)))
     }
@@ -319,7 +319,7 @@ class UserController: Controller()
         // val id = req.getIntRouteParameter("id"); // req.getRouteParameter["xxx"]
         val id:Int? = req["id"] // req["xxx"]
         // 查询单个用户 | find a user
-        //val user = UserModel.queryBuilder().where("id", id).find<UserModel>()
+        //val user = UserModel.queryBuilder().where("id", id).findModel<UserModel>()
         val user = UserModel(id)
         if(!user.isLoaded()){
             res.renderString("用户[$id]不存在")

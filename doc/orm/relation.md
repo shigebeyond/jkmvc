@@ -28,7 +28,7 @@ belongsTo("user", UserModel::class, "user_id", "id")
 
 To access the user model, you would use `post["user"]`.  The `foreignKey` and `primaryKey` has a default value. The `foreignKey` in the post table will be the model name followed by `_id`, in this case it would be `user_id`.
 
-Let's say your `Post` database table schema doesn't have a `user_id` column but instead has an `author_id` column which is a foreign key for a record in the `User` table. You could use code like this:
+Let's say your `Post` database table schema doesn't have a `user_id` column but instead has an `author_id` column which is a foreign key for a row in the `User` table. You could use code like this:
 
 ```
 belongsTo("user", UserModel::class, "author_id" /* foreignKey */)
@@ -140,7 +140,7 @@ The first parameter is the relation name to use (in case your post model has mor
 
 ### 6.2 add relation
 
-Assuming you want to add the relation (by creating a new record in the categories_posts table), you would simply do:
+Assuming you want to add the relation (by creating a new row in the categories_posts table), you would simply do:
 
 ```
 post.addRelation('categories', category);

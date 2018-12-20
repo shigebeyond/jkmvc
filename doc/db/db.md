@@ -123,8 +123,8 @@ db.transaction {
     println("insert a user：" + id)
 
     // select single row
-    val record = db.queryRow("select * from user limit 1" /*sql*/, emptyList() /*sql parameters*/, Map::class.recordTranformer /*transfrom lambda*/) // return a row as `Map` object
-    println("select a user：" + record)
+    val row = db.queryRow("select * from user limit 1" /*sql*/, emptyList() /*sql parameters*/, Map::class.rowTranformer /*transfrom lambda*/) // return a row as `Map` object
+    println("select a user：" + row)
 
     // count
     val count = db.queryCell<Int>("select count(1) from user" /*sql*/).get()!!
@@ -135,8 +135,8 @@ db.transaction {
     println("update a user：" + f)
 
     // select multiple rows
-    val records = db.queryRows("select * from user limit 10" /*sql*/, emptyList() /*sql parameters*/, Map::class.recordTranformer /*transfrom lambda*/) // 返回 Map 类型的多行数据
-    println("select multiple users: " + records)
+    val rows = db.queryRows("select * from user limit 10" /*sql*/, emptyList() /*sql parameters*/, Map::class.rowTranformer /*transfrom lambda*/) // 返回 Map 类型的多行数据
+    println("select multiple users: " + rows)
 
     // delete
     f = db.execute("delete from user where id =?" /*sql*/, listOf(id) /*sql parameters*/) // return the deleted rows count

@@ -32,7 +32,7 @@ class DbIdWorker: IIdWorker {
         println("创建id序列表")
 
         // 加载数据
-        val items = IdSequenceModel.queryBuilder().findAll<IdSequenceModel>()
+        val items = IdSequenceModel.queryBuilder().findAllModels<IdSequenceModel>()
         for (item in items){
             idSequences[item.module] = item
         }

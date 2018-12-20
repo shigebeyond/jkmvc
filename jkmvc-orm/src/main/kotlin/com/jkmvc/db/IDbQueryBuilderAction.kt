@@ -68,7 +68,8 @@ interface IDbQueryBuilderAction {
     fun insertColumns(vararg colums:String):IDbQueryBuilder;
 
     /**
-     * 设置插入的单行, insert时用
+     * 设置插入的单行值, insert时用
+     *    插入的值的数目必须登录插入的列的数目
      *
      * @param row
      * @return
