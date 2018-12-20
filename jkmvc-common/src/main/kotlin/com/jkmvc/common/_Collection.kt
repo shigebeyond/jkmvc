@@ -6,6 +6,15 @@ import java.util.concurrent.ThreadLocalRandom
 
 /****************************** 扩展 Array + Collection *****************************/
 /**
+ * 非空参数转为array, 仅用于在 DbKey/Orm 的构造函数中转参数
+ * @param params
+ * @return
+ */
+public inline fun <T> toArray(vararg params:T): Array<T> {
+    return params as Array<T>
+}
+
+/**
  * 是否数组
  * @return
  */

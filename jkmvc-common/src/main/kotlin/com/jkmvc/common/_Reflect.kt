@@ -79,13 +79,10 @@ public fun KFunction<*>.matches(name:String, paramTypes:Array<out Class<*>>):Boo
  * @return
  */
 public fun KClass<*>.getFunction(name:String, vararg paramTypes:Class<*>): KFunction<*>?{
-    var pt = paramTypes.toMutableList() as ArrayList
-
     // 第一个参数为this
-    pt.add(0, this.java);
-
+    val pt = toArray(this.java, *paramTypes)
     return memberFunctions.find {
-        it.matches(name, pt.toArray() as Array<Class<*>>);
+        it.matches(name, pt);
     }
 }
 
