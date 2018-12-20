@@ -46,7 +46,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      * @param transform 转换函数
      * @return 列表
      */
-    public override fun <T:Any> findAll(params: List<Any?>, db: IDb, transform: (Map<String, Any?>) -> T): List<T>{
+    public override fun <T:Any> findAll(params: List<Any?>, db: IDb, transform: (Row) -> T): List<T>{
         // 编译 + 执行
         return compile(SqlType.SELECT, db).findAll(params, db, transform)
     }
@@ -59,7 +59,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      * @param transform 转换函数
      * @return 单个数据
      */
-    public override fun <T:Any> find(params: List<Any?>, db: IDb, transform: (Map<String, Any?>) -> T): T?{
+    public override fun <T:Any> find(params: List<Any?>, db: IDb, transform: (Row) -> T): T?{
         // 编译 + 执行
         return compileSelectOne(db).find(params, db, transform)
     }

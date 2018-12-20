@@ -1,6 +1,8 @@
 package com.jkmvc.orm
 
 import com.jkmvc.common.*
+import com.jkmvc.db.MutableRow
+import com.jkmvc.db.Row
 import com.jkmvc.serialize.ISerializer
 import java.math.BigDecimal
 import java.util.*
@@ -48,13 +50,13 @@ abstract class OrmEntity : IOrm {
     /**
      * 最新的字段值：<字段名 to 最新字段值>
      */
-    protected val data: MutableMap<String, Any?> = HashMap<String, Any?>()
+    protected val data: MutableRow = HashMap<String, Any?>()
 
     /**
      * 变化的字段值：<字段名 to 原始字段值>
      *     一般只读，lazy创建，节省内存
      */
-    protected val dirty: MutableMap<String, Any?> by lazy {
+    protected val dirty: MutableRow by lazy {
         HashMap<String, Any?>()
     };
 
@@ -163,7 +165,7 @@ abstract class OrmEntity : IOrm {
      * @param expected 要设置的字段名的数组
      * @return
      */
-    public override fun values(values: Map<String, Any?>, expected: List<String>?): IOrm {
+    public override fun values(values: Row, expected: List<String>?): IOrm {
         if(values.isEmpty())
             return this
 

@@ -89,7 +89,7 @@ interface IDbQueryBuilderAction {
      * @param row
      * @return
      */
-    fun value(row:Map<String, Any?>):IDbQueryBuilder;
+    fun value(row:Row):IDbQueryBuilder;
 
     /**
      * 设置更新的单个值, update时用
@@ -116,7 +116,7 @@ interface IDbQueryBuilderAction {
      * @param row
      * @return
      */
-    fun sets(row:Map<String, Any?>):IDbQueryBuilder;
+    fun sets(row:Row):IDbQueryBuilder;
 
     /**
      * 设置查询的字段, select时用

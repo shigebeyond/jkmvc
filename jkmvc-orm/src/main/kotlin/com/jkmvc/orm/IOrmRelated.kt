@@ -1,5 +1,7 @@
 package com.jkmvc.orm
 
+import com.jkmvc.db.Row
+
 /**
  * ORM之关联对象操作
  *
@@ -15,7 +17,7 @@ interface IOrmRelated : IOrmPersistent
 	 * @param orgn
 	 * @return
 	 */
-	fun setOriginal(orgn: Map<String, Any?>): IOrm;
+	fun setOriginal(orgn: Row): IOrm;
 
 	/**
 	 * 获得关联对象

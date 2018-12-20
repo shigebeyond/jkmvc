@@ -1,6 +1,7 @@
 package com.jkmvc.orm
 
 import com.jkmvc.common.associate
+import com.jkmvc.db.MutableRow
 import com.jkmvc.db.dbLogger
 
 /**
@@ -122,7 +123,7 @@ abstract class OrmPersistent : OrmValid() {
 	 *
 	 * @return
 	 */
-	protected fun buildDirtyData(): MutableMap<String, Any?> {
+	protected fun buildDirtyData(): MutableRow {
 		// 挑出变化的属性
 		return dirty.associate { prop, oldValue ->
 			// 字段名 => 字段值

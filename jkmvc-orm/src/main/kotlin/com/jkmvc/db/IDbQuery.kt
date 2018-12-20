@@ -37,7 +37,7 @@ abstract class IDbQuery{
      * @param transform 转换函数
      * @return 列表
      */
-    public abstract fun <T:Any> findAll(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (Map<String, Any?>) -> T): List<T>
+    public abstract fun <T:Any> findAll(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (Row) -> T): List<T>
 
     /**
      * 查找多个： select 语句
@@ -46,8 +46,8 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return 列表
      */
-    public fun findAllRows(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<Map<String, Any?>>{
-        return findAll(params, db, ::HashedMap) as List<Map<String, Any?>>
+    public fun findAllRows(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<Row>{
+        return findAll(params, db, ::HashedMap) as List<Row>
     }
 
     /**
@@ -69,8 +69,8 @@ abstract class IDbQuery{
      * @param transform 转换函数
      * @return 一个数据
      */
-    public fun findRow(params: List<Any?> = emptyList(), db: IDb = defaultDb): Map<String, Any?>?{
-        return find(params, db, ::HashedMap) as Map<String, Any?>?
+    public fun findRow(params: List<Any?> = emptyList(), db: IDb = defaultDb): Row?{
+        return find(params, db, ::HashedMap) as Row?
     }
 
     /**
@@ -81,7 +81,7 @@ abstract class IDbQuery{
      * @param transform 转换函数
      * @return 一个数据
      */
-    public abstract fun <T:Any> find(params: List<Any?> = emptyList(),  db: IDb = defaultDb, transform: (Map<String, Any?>) -> T): T?
+    public abstract fun <T:Any> find(params: List<Any?> = emptyList(),  db: IDb = defaultDb, transform: (Row) -> T): T?
 
     /**
      * 查找一个： select ... limit 1语句

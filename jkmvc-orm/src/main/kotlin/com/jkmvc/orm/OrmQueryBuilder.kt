@@ -8,6 +8,7 @@ import com.jkmvc.db.DbExpr
 import com.jkmvc.db.DbQueryBuilder
 import com.jkmvc.db.IDb
 import com.jkmvc.db.IDbQueryBuilder
+import com.jkmvc.db.Row
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -264,7 +265,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @param transform 转换函数
      * @return 单个数据
      */
-    public override fun <T:Any> find(params: List<Any?>, db: IDb, transform: (Map<String, Any?>) -> T): T?{
+    public override fun <T:Any> find(params: List<Any?>, db: IDb, transform: (Row) -> T): T?{
         val result = super.find(params, db, transform);
         // 联查hasMany
         if(result is Orm){
@@ -284,7 +285,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @param transform 转换函数
      * @return 列表
      */
-    public override fun <T:Any> findAll(params: List<Any?>, db:IDb, transform: (Map<String, Any?>) -> T): List<T>{
+    public override fun <T:Any> findAll(params: List<Any?>, db:IDb, transform: (Row) -> T): List<T>{
         val result = super.findAll(params, db, transform);
         if(result.isEmpty())
             return result

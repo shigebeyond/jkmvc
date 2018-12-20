@@ -2,6 +2,7 @@ package com.jkmvc.orm
 
 import java.math.BigDecimal
 import kotlin.properties.ReadWriteProperty
+import com.jkmvc.db.Row
 
 /**
  * ORM之实体对象
@@ -79,7 +80,7 @@ interface IOrmEntity {
      * @param expected 要设置的字段名的数组
      * @return
      */
-    fun values(values: Map<String, Any?>, expected: List<String>? = null): IOrm;
+    fun values(values: Row, expected: List<String>? = null): IOrm;
 
     /**
      * 获得字段值

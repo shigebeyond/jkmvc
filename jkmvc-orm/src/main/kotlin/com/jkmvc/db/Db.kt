@@ -345,7 +345,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
      * @param transform 转换结果的函数
      * @return
      */
-    public override fun <T> queryRow(sql: String, params: List<Any?>, transform: (Map<String, Any?>) -> T): T? {
+    public override fun <T> queryRow(sql: String, params: List<Any?>, transform: (Row) -> T): T? {
         try{
             return conn.queryRow(sql, params, transform);
         }catch (e:Exception){
@@ -362,7 +362,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
      * @param transform 转换结果的函数
      * @return
      */
-    public override fun <T> queryRows(sql: String, params: List<Any?>, transform: (Map<String, Any?>) -> T): List<T> {
+    public override fun <T> queryRows(sql: String, params: List<Any?>, transform: (Row) -> T): List<T> {
         try{
             return conn.queryRows(sql, params, transform);
         }catch (e:Exception){

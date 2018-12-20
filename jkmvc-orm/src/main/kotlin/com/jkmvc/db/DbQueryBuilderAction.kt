@@ -76,7 +76,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
     /**
      * 要更新字段值: <column to value>
      */
-    protected val updateRow: HashMap<String, Any?>
+    protected val updateRow: MutableRow
         get(){
             return manipulatedData.getOrPut(SqlType.UPDATE.ordinal){
                 HashMap<String, Any?>();
@@ -137,7 +137,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @param row
      * @return
      */
-    public override fun value(row:Map<String, Any?>):IDbQueryBuilder{
+    public override fun value(row:Row):IDbQueryBuilder{
         insertRows.columns = row.keys.mapToArray {
             it
         }
@@ -176,7 +176,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @param row 单行数据
      * @return
      */
-    public override fun sets(row: Map<String, Any?>): IDbQueryBuilder {
+    public override fun sets(row: Row): IDbQueryBuilder {
         updateRow.putAll(row);
         return this;
     }

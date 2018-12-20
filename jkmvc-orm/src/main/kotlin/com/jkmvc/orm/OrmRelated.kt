@@ -1,5 +1,7 @@
 package com.jkmvc.orm
 
+import com.jkmvc.db.Row
+
 /**
  * ORM之关联对象操作
  *
@@ -52,7 +54,7 @@ abstract class OrmRelated : OrmPersistent() {
      * @param data
      * @return
      */
-    public override fun setOriginal(orgn: Map<String, Any?>): IOrm {
+    public override fun setOriginal(orgn: Row): IOrm {
         if(orgn.isEmpty())
             return this
 

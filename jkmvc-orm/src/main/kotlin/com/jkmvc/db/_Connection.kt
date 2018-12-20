@@ -10,14 +10,17 @@ import kotlin.reflect.KClass
 // db的日志
 val dbLogger = LoggerFactory.getLogger("com.jkmvc.db")
 
+typealias Row = Map<String, Any?>
+typealias MutableRow = MutableMap<String, Any?>
+
 /****************************** Connection直接提供查询与更新数据的方法 *******************************/
 /**
  * 全局共享的可复用的用于存储一行数据的 HashMap 对象池
  *   就是每查到一行, 就用该对象来临时存储该行数据, 用完就清空该行数据
  *   线程安全, 每个线程只共享一个 HashMap 对象, 无论你查到多少行, 仅占用一个 HashMap 对象, 极大的节省内存
- *   用在 queryRow() / queryRows() 的 transform 函数中, 参数就是不可变的行数据(类型转为 Map<String, Any?>), 表示禁止改变或引用行数据
+ *   用在 queryRow() / queryRows() 的 transform 函数中, 参数就是不可变的行数据(类型转为 Row), 表示禁止改变或引用行数据
  */
-private val reusedRows:ThreadLocal<MutableMap<String, Any?>> = ThreadLocal.withInitial {
+private val reusedRows:ThreadLocal<MutableRow> = ThreadLocal.withInitial {
     HashMap<String, Any?>();
 }
 
@@ -170,11 +173,11 @@ public fun <T> Connection.queryResult(sql: String, params: List<Any?> = emptyLis
  * @param transform 结果转换函数
  * @return
  */
-public fun <T> Connection.queryRows(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T): List<T> {
+public fun <T> Connection.queryRows(sql: String, params: List<Any?> = emptyList(), transform: (Row) -> T): List<T> {
     return queryResult<List<T>>(sql, params){ rs: ResultSet ->
         // 处理查询结果
         val result = LinkedList<T>()
-        rs.forEachRow { row: Map<String, Any?> ->
+        rs.forEachRow { row: Row ->
             result.add(transform(row));// 转换一行数据
         }
         result;
@@ -207,8 +210,8 @@ public fun <T:Any> Connection.queryColumn(sql: String, params: List<Any?> = empt
  * @param transform 结果转换函数
  * @return
  */
-public fun <T> Connection.queryRow(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T): T? {
-    val row: MutableMap<String, Any?> = reusedRows.get() // 复用map
+public fun <T> Connection.queryRow(sql: String, params: List<Any?> = emptyList(), transform: (Row) -> T): T? {
+    val row: MutableRow = reusedRows.get() // 复用map
     return queryResult<T?>(sql, params){ rs: ResultSet ->
         // 处理查询结果
         rs.nextRow(row)
@@ -316,7 +319,7 @@ public fun getResultSetValueGetter(clazz: KClass<*>? = null): (ResultSet.(Int) -
  * 获得结果集的下一行
  * @return
  */
-public inline fun ResultSet.nextRow(row:MutableMap<String, Any?>): Unit {
+public inline fun ResultSet.nextRow(row:MutableRow): Unit {
     if(next()) {
         // 获得一行
         for (i in 1..metaData.columnCount) { // 多列
@@ -331,8 +334,8 @@ public inline fun ResultSet.nextRow(row:MutableMap<String, Any?>): Unit {
  * 遍历结果集的每一行
  * @param action 访问者函数
  */
-public fun ResultSet.forEachRow(action: (Map<String, Any?>) -> Unit): Unit {
-    val row: MutableMap<String, Any?> = reusedRows.get() // 复用map
+public fun ResultSet.forEachRow(action: (Row) -> Unit): Unit {
+    val row: MutableRow = reusedRows.get() // 复用map
     while(true){
         // 获得一行
         nextRow(row)
