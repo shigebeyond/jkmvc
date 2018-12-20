@@ -124,7 +124,7 @@ class MiddleRelationMeta(
         val query = DbQueryBuilder(ormMeta.db).from(middleTable).insertColumns(*foreignKey.columns, *farForeignKey.columns)
         val pk2 = if(pk is IOrm) pk.gets(primaryProp) else pk
         val farPk2 = if(farPk is IOrm) farPk.gets(farPrimaryProp) else farPk
-        return query.value(pk2, farPk2).insert()
+        return query.insertValue(pk2, farPk2).insert()
     }
 
     /**

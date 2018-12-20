@@ -1,6 +1,8 @@
 package com.jkmvc.orm
 
+import com.jkmvc.common.toArray
 import com.jkmvc.db.IDbQueryBuilder
+import java.util.*
 
 /**
  * 复合主键, 包含多个字段
@@ -125,15 +127,6 @@ typealias DbKeyNames = DbKey<String>
 internal typealias DbKeyValues = DbKey<Any?>
 
 /*************************** 普通类扩展 ******************************/
-/**
- * 非空参数转为array, 仅用于在 DbKey/Orm 的构造函数中转参数
- * @param params
- * @return
- */
-internal inline fun <S> toArray(vararg params:S): Array<S> {
-    return params as Array<S>
-}
-
 /**
  * 检查Map是否全部包含主键字段
  *
@@ -289,7 +282,7 @@ internal fun Collection<out IOrm>.collectColumn(names: DbKeyNames):DbKey<List<An
  * @param   values   column value
  * @return
  */
-fun IDbQueryBuilder.where(columns: DbKeyNames, op: String, values: Any?): IDbQueryBuilder {
+internal fun IDbQueryBuilder.where(columns: DbKeyNames, op: String, values: Any?): IDbQueryBuilder {
     return andWhere(columns, op, values);
 }
 
@@ -300,7 +293,7 @@ fun IDbQueryBuilder.where(columns: DbKeyNames, op: String, values: Any?): IDbQue
  * @param   values   column value
  * @return
  */
-fun IDbQueryBuilder.where(columns: DbKeyNames, values: Any?): IDbQueryBuilder {
+internal fun IDbQueryBuilder.where(columns: DbKeyNames, values: Any?): IDbQueryBuilder {
     columns.forEachNameValue(values) { name, value, i ->
         IDbQueryBuilder@this.where(name, value)
     }
@@ -315,7 +308,7 @@ fun IDbQueryBuilder.where(columns: DbKeyNames, values: Any?): IDbQueryBuilder {
  * @param   values   column value
  * @return
  */
-fun IDbQueryBuilder.andWhere(columns: DbKeyNames, op: String, values: Any?): IDbQueryBuilder{
+internal fun IDbQueryBuilder.andWhere(columns: DbKeyNames, op: String, values: Any?): IDbQueryBuilder{
     columns.forEachNameValue(values){ name, value, i ->
         IDbQueryBuilder@this.andWhere(name, op, value)
     }
@@ -330,7 +323,7 @@ fun IDbQueryBuilder.andWhere(columns: DbKeyNames, op: String, values: Any?): IDb
  * @param   cols2  column name or DbExpr
  * @return
  */
-fun IDbQueryBuilder.on(cols1: DbKeyNames, op: String, cols2: DbKeyNames): IDbQueryBuilder{
+internal fun IDbQueryBuilder.on(cols1: DbKeyNames, op: String, cols2: DbKeyNames): IDbQueryBuilder{
     cols1.forEachColumnWith(cols2){ col1, col2, i ->
         IDbQueryBuilder@this.on(col1, op, col2)
     }
@@ -344,10 +337,28 @@ fun IDbQueryBuilder.on(cols1: DbKeyNames, op: String, cols2: DbKeyNames): IDbQue
  * @param values
  * @return
  */
-fun IDbQueryBuilder.set(columns:DbKeyNames, values:Any?):IDbQueryBuilder{
+internal fun IDbQueryBuilder.set(columns:DbKeyNames, values:Any?):IDbQueryBuilder{
     columns.forEachNameValue(values){ name, value, i ->
         IDbQueryBuilder@this.set(name, value)
     }
     return this
+}
+
+/**
+ * 设置插入的单行值, insert时用
+ *   插入的值的数目必须登录插入的列的数目
+ *
+ * @param row
+ * @return
+ */
+internal fun IDbQueryBuilder.insertValue(vararg row:Any?):IDbQueryBuilder{
+    val vals = ArrayList<Any?>()
+    row.forEach {
+        if(it is DbKey<*>)
+            vals.addAll(it.columns)
+        else
+            vals.add(it)
+    }
+    return this.value(*vals.toArray())
 }
 
