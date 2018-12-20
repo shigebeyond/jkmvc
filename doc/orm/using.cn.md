@@ -43,7 +43,7 @@ user.save();
 // 查询id为20的用户
 val user = UserModel.queryBuilder()
     .where("id", "=", 20)
-    .find<UserModel>();
+    .findModel<UserModel>();
 // 或者
 val user = UserModel(20);
 ```

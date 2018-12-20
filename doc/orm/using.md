@@ -10,7 +10,7 @@ val user = UserModel();
 
 ## 2 Inserting
 
-To insert a new record into the database, create a new instance of the model:
+To insert a new row into the database, create a new instance of the model:
 
 ```
 val user = UserModel();
@@ -25,7 +25,7 @@ user.city = "Mercer";
 user.state = "PA";
 ```
 
-Insert the new record into the database by running `Orm::save()`:
+Insert the new row into the database by running `Orm::save()`:
 
 ```
 user.save();
@@ -41,14 +41,14 @@ To find an object you can call the `Orm.queryBuilder()` method to get a query bu
 // Find user with ID 20
 val user = UserModel.queryBuilder()
     .where("id", "=", 20)
-    .find<UserModel>();
+    .findModel<UserModel>();
 // Or
 val user = UserModel(20);
 ```
 
-## 4 Check that ORM loaded a record
+## 4 Check that ORM loaded a row
 
-Use the `Orm::loaded` property to check that ORM successfully loaded a record.
+Use the `Orm::loaded` property to check that ORM successfully loaded a row.
 
 ```
 if (user.loaded)
