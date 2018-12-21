@@ -17,8 +17,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
                    public override val label: String = model.modelName /* 模型中文名 */,
                    public override var table: String = model.modelName /* 表名，假定model类名, 都是以"Model"作为后缀 */,
                    public override var primaryKey:DbKeyNames = DbKeyNames("id") /* 主键 */,
-                   public override val dbName: String = "default" /* 数据库名 */,
-                   public override var needInstanceInit: Boolean = true /* 实例化时是否需要初始化, 即调用类自身的默认构造函数 */
+                   public override val dbName: String = "default" /* 数据库名 */
 ) : IOrmMeta {
 
     companion object{
@@ -33,15 +32,13 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
             label: String /* 模型中文名 */,
             table: String /* 表名，假定model类名, 都是以"Model"作为后缀 */,
             primaryKey:String /* 主键 */,
-            dbName: String = "default" /* 数据库名 */,
-            needInstanceInit: Boolean = true /* 实例化时是否需要初始化, 即调用类自身的默认构造函数 */
-    ):this(model, label, table, DbKeyNames(primaryKey), dbName, needInstanceInit)
+            dbName: String = "default" /* 数据库名 */
+    ):this(model, label, table, DbKeyNames(primaryKey), dbName)
 
-    init{
-        // 检查默认构造函数
-        if(needInstanceInit && model.java.getConstructorOrNull() == null)
-            throw OrmException("Class [${model}] has no no-arg constructor") // Model类${clazz}无默认构造函数
-    }
+    /**
+     * 实例化时是否需要初始化, 即调用类自身的默认构造函数
+     */
+    public override var needInstanceInit: Boolean = true
 
     /**
      * 模型名

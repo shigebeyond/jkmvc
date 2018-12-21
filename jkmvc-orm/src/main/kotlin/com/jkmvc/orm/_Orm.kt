@@ -1,5 +1,6 @@
 package com.jkmvc.orm
 
+import com.jkmvc.common.getConstructorOrNull
 import com.jkmvc.common.newInstance
 import com.jkmvc.db.Row
 import org.apache.commons.collections.iterators.AbstractIteratorDecorator
@@ -32,9 +33,13 @@ public val KClass<out IOrm>.modelOrmMeta: IOrmMeta
  * 获得类的行转换器
  * @return 转换的匿名函数
  */
-public val <T:IOrm> KClass<T>.rowTranformer: (Row) -> T
+public inline val <T:IOrm> KClass<T>.rowTransformer: (Row) -> T
     get(){
+        // 检查是否需要默认构造函数
         val needInit = modelOrmMeta.needInstanceInit
+        if(needInit && java.getConstructorOrNull() == null)
+            throw OrmException("Class [$this] has no no-arg constructor") // Model类${clazz}无默认构造函数
+
         return {
             //val obj = java.newInstance() as IOrm // 必须默认构造函数
             val obj = this.newInstance(needInit) as IOrm // 无需默认构造函数
