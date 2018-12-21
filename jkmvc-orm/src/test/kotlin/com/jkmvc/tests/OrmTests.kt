@@ -207,15 +207,17 @@ class OrmTests{
     @Test
     fun testGeneralModel(){
         // 插入
-        val user1 = GeneralModel("user", "id")
+        val table = "user"
+        val primaryKey = "id"
+        val user1 = GeneralModel(table, primaryKey)
         user1["name"] = "tom"
         user1["age"] = 13
         user1.create()
-        val id:Int = user1["id"]
+        val id:Int = user1[primaryKey]
         println("插入用户: $user1")
 
         // 查询
-        val user2 = GeneralModel("user", "id")
+        val user2 = GeneralModel(table, primaryKey)
         user2.loadByPk(id)
         if(!user2.loaded)
             println("用户[$id]不存在")
@@ -230,6 +232,10 @@ class OrmTests{
         // 删除
         user2.delete()
         println("删除用户: $id")
+
+        // query builder
+        val users = GeneralModel(table, primaryKey).queryBuilder().limit(2).findAllModels<GeneralModel>()
+        println(users)
     }
 
     @Test
