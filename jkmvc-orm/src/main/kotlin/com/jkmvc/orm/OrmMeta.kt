@@ -2,6 +2,7 @@ package com.jkmvc.orm
 
 import com.jkmvc.common.*
 import com.jkmvc.db.Db
+import com.jkmvc.db.GeneralModel
 import com.jkmvc.db.IDb
 import java.util.*
 import kotlin.reflect.KClass
@@ -34,6 +35,12 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
             primaryKey:String /* 主键 */,
             dbName: String = "default" /* 数据库名 */
     ):this(model, label, table, DbKeyNames(primaryKey), dbName)
+
+    init{
+        // 检查 model 类的默认构造函数
+        if(model != GeneralModel::class && model.java.getConstructorOrNull() == null)
+            throw OrmException("Model Class [$model] has no no-arg constructor, without default way to create instance when ") // Model类${clazz}无默认构造函数
+    }
 
     /**
      * 模型名
