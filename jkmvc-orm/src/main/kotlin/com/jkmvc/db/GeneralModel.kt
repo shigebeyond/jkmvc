@@ -21,8 +21,16 @@ class GeneralModel(ormMetaFactory:()->IOrmMeta /* 元数据构建器 */) : Orm(e
     public constructor(table: String /* 表名 */, primaryKey:String = "id" /* 主键 */):this({ -> OrmMeta(GeneralModel::class, "`$table`'s general model", table, primaryKey)})
 
     /**
-     * 元数据
+     * 增删查改时需要的元数据
      */
-    public override val ormMeta: IOrmMeta = ormMetaFactory()
+    public override var ormMeta: IOrmMeta = ormMetaFactory()
 
+    init{
+        ((OrmMeta)ormMeta).needInstanceInit = false
+    }
+
+    /**
+     * 实例化时需要的元数据，在 KClass<T>.rowTranformer　中使用
+     */
+    companion object m: OrmMeta(GeneralModel::class, "?", "?", "?", needInstanceInit = false /* use Unsafe to instantiate */)
 }
