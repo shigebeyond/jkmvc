@@ -36,11 +36,6 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     ):this(model, label, table, DbKeyNames(primaryKey), dbName)
 
     /**
-     * 实例化时是否需要初始化, 即调用类自身的默认构造函数
-     */
-    public override var needInstanceInit: Boolean = true
-
-    /**
      * 模型名
      */
     public override val name:String = model.modelName

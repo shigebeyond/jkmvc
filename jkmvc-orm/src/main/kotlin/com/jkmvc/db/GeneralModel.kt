@@ -1,6 +1,7 @@
 package com.jkmvc.db
 
 import com.jkmvc.orm.*
+import java.util.HashMap
 
 /**
  * 通用模型
@@ -19,14 +20,48 @@ class GeneralModel(myOrmMeta: IOrmMeta /* 自定义元数据 */) : Orm(emptyArra
     public constructor(table: String /* 表名 */, primaryKey:String = "id" /* 主键 */):this(OrmMeta(GeneralModel::class, "`$table`'s general model", table, primaryKey))
 
     /**
-     * 增删改查时需要的元数据
+     * 改写ormMeta -- 增删改查时需要的元数据
      */
     public override var ormMeta: IOrmMeta = GeneralOrmMeta(myOrmMeta)
 
     /**
-     * 实例化时需要的元数据，在 KClass<T>.rowTransformer　中使用
+     * 伴随对象 -- 实例化时需要的元数据，在 KClass<T>.rowTransformer　中使用
      */
     companion object m: EmptyOrmMeta()
+
+    /**
+     * 临时存储的原始字段值
+     */
+    //protected val tempOriginal: MutableRow = HashMap<String, Any?>() // 在使用 Unsafe　实例化本模型对象时，该初始化语句不能执行，只能换为延迟初始化
+    //protected val tempOriginal: MutableRow by lazy{ HashMap<String, Any?>() }
+    protected var tempOriginal: MutableRow? = null
+
+    /**
+     * 改写 setOriginal(), 将原始字段值临时存储 tempOriginal
+     * @param data
+     * @return
+     */
+    public override fun setOriginal(orgn: Row): IOrm {
+        if(tempOriginal == null)
+            tempOriginal = HashMap<String, Any?>()
+        tempOriginal!!.putAll(orgn)
+        return this
+    }
+
+    /**
+     * 延迟设置元数据 =>　递延设置原始字段值
+     * @param ormMeta
+     * @return
+     */
+    public fun delaySetMeta(ormMeta: IOrmMeta): IOrm {
+        this.ormMeta = ormMeta
+        // 设置原始字段值
+        if(tempOriginal != null) {
+            super.setOriginal(tempOriginal!!)
+            tempOriginal!!.clear()
+        }
+        return this
+    }
 }
 
 
@@ -38,13 +73,7 @@ class GeneralModel(myOrmMeta: IOrmMeta /* 自定义元数据 */) : Orm(emptyArra
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-17 3:38 PM
  */
-open class EmptyOrmMeta(): OrmMeta(GeneralModel::class, "?", "?", "?"){
-
-    /**
-     * 实例化时是否需要初始化, 即调用类自身的默认构造函数
-     *   使用 Unsafe 来实例化
-     */
-    public override var needInstanceInit: Boolean = false
+public open class EmptyOrmMeta(): OrmMeta(GeneralModel::class, "?", "?", "?"){
 
     /**
      * 禁用 queryBuilder()
@@ -67,13 +96,7 @@ open class EmptyOrmMeta(): OrmMeta(GeneralModel::class, "?", "?", "?"){
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-17 3:38 PM
  */
-open class GeneralOrmMeta(val source: IOrmMeta): IOrmMeta by source{
-
-    /**
-     * 实例化时是否需要初始化, 即调用类自身的默认构造函数
-     *   使用 Unsafe 来实例化
-     */
-    public override var needInstanceInit: Boolean = false
+internal open class GeneralOrmMeta(val source: IOrmMeta): IOrmMeta by source{
 
     /**
      * 改写 queryBuilder(), 返回 GeneralOrmQueryBuilder
@@ -94,7 +117,7 @@ open class GeneralOrmMeta(val source: IOrmMeta): IOrmMeta by source{
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-17 3:38 PM
  */
-class GeneralOrmQueryBuilder(ormMeta: IOrmMeta /* orm元数据 */,
+internal class GeneralOrmQueryBuilder(ormMeta: IOrmMeta /* orm元数据 */,
                                       convertingValue: Boolean = false /* 查询时是否智能转换字段值 */,
                                       convertingColumn: Boolean = false /* 查询时是否智能转换字段名 */,
                                       withSelect: Boolean = true /* with()联查时自动select关联表的字段 */
@@ -111,7 +134,7 @@ class GeneralOrmQueryBuilder(ormMeta: IOrmMeta /* orm元数据 */,
         val items = super.findAll(params, db, transform)
         if(items.isNotEmpty() && items.first() is GeneralModel){
             for(item in items)
-                (item as GeneralModel).ormMeta = ormMeta
+                (item as GeneralModel).delaySetMeta(ormMeta)
         }
         return items
     }
@@ -126,7 +149,7 @@ class GeneralOrmQueryBuilder(ormMeta: IOrmMeta /* orm元数据 */,
     public override fun <T:Any> find(params: List<Any?>, db: IDb, transform: (Row) -> T): T?{
         val item = super.find(params, db, transform)
         if(item != null && item is GeneralModel){
-            item.ormMeta = ormMeta
+            item.delaySetMeta(ormMeta)
         }
         return item
     }

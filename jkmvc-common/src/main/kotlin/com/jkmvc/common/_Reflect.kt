@@ -137,7 +137,7 @@ public inline fun KParameter.convert(value: String): Any {
  */
 public fun <T: Any> KClass<T>.newInstance(needInit: Boolean = true): Any? {
     // 无[无参数构造函数]
-    if(java.getConstructorOrNull() == null && !needInit){
+    if(!needInit && java.getConstructorOrNull() == null){
         // best effort. use Unsafe to instantiate.
         // Warning: if class contains transient fields which have default values assigned ('transient int x = 3'),
         // those will not be assigned after deserialization as unsafe instantiation does not execute any default
