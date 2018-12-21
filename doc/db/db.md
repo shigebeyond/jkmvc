@@ -123,7 +123,7 @@ db.transaction {
     println("insert a user：" + id)
 
     // select single row
-    val row = db.queryRow("select * from user limit 1" /*sql*/, emptyList() /*sql parameters*/, Map::class.rowTranformer /*transfrom lambda*/) // return a row as `Map` object
+    val row = db.queryRow("select * from user limit 1" /*sql*/, emptyList() /*sql parameters*/, ::HashedMap /*transfrom lambda: org.apache.commons.collections.map.HashedMap.HashedMap(java.util.Map)*/) // return a row as `Map` object
     println("select a user：" + row)
 
     // count
@@ -135,7 +135,7 @@ db.transaction {
     println("update a user：" + f)
 
     // select multiple rows
-    val rows = db.queryRows("select * from user limit 10" /*sql*/, emptyList() /*sql parameters*/, Map::class.rowTranformer /*transfrom lambda*/) // 返回 Map 类型的多行数据
+    val rows = db.queryRows("select * from user limit 10" /*sql*/, emptyList() /*sql parameters*/, ::HashedMap /*transfrom lambda: org.apache.commons.collections.map.HashedMap.HashedMap(java.util.Map)*/) // 返回 Map 类型的多行数据
     println("select multiple users: " + rows)
 
     // delete

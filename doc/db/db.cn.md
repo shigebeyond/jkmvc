@@ -123,7 +123,7 @@ db.transaction {
     println("插入user表：" + id)
 
     // 查询一条数据
-    val row = db.queryRow("select * from user limit 1" /*sql*/, emptyList() /*参数*/, Map::class.rowTranformer /*转换结果的函数*/) // 返回 Map 类型的一行数据
+    val row = db.queryRow("select * from user limit 1" /*sql*/, emptyList() /*参数*/, ::HashedMap /*转换结果的函数: org.apache.commons.collections.map.HashedMap.HashedMap(java.util.Map)*/) // 返回 Map 类型的一行数据
     println("查询user表：" + row)
 
     // 统计行数
@@ -135,7 +135,7 @@ db.transaction {
     println("更新user表：" + f)
 
     // 查询多条数据
-    val rows = db.queryRows("select * from user limit 10" /*sql*/, emptyList() /*参数*/, Map::class.rowTranformer /*转换结果的函数*/) // 返回 Map 类型的多行数据
+    val rows = db.queryRows("select * from user limit 10" /*sql*/, emptyList() /*参数*/, ::HashedMap /*转换结果的函数: org.apache.commons.collections.map.HashedMap.HashedMap(java.util.Map)*/) // 返回 Map 类型的多行数据
     println("查询user表：" + rows)
 
     // 删除 
