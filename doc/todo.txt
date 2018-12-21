@@ -536,15 +536,22 @@ orm的构造函数, 支持复合主键
 
 去掉 KClass<T>.recordTranformer
 
-将 transform: (Map 替换为 transform: (Map
-
-transform: (Map<String, Any?>) -> T)
-
+行参数类型为不可变map
+将 transform: (MutableMap 替换为 transform: (Map
 
 record 变量, 改名为row
 
-
 Map<String, Any?> 类, 别名为 Row
+
+
+findAll<Record> 改为 findAllRows
+findAll< 改为 findAllModels<
+
+find<Record> 改为 findRow
+find< 改为 findModel<
+
+
+反射的findxxx()方法, 改名为getxxx(), 与java的Class类一致
 
 ------------
 
