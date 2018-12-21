@@ -372,7 +372,7 @@ class MyTests{
 //        val method = Config::class.java.getMethod("containsKey", String::class.java)
 //        println(method)
 
-//        val constructor = Config::class.java.getConstructor(String::class.java, String::class.java)
+//        val constructor = Config::class.java.getConstructorOrNull(String::class.java, String::class.java)
 //        println(constructor)
 
         //println(Config::class.java.isInterface)

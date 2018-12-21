@@ -16,18 +16,9 @@ import com.jkmvc.orm.OrmMeta
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-17 3:38 PM
  */
-class GeneralModel(ormMetaFactory:()->IOrmMeta /* 元数据构建器 */) : Orm(emptyArray()) {
+class GeneralModel(public override val ormMeta: IOrmMeta /* 元数据构建器 */) : Orm(emptyArray()) {
 
-    public constructor(table: String /* 表名 */, primaryKey:String = "id" /* 主键 */):this({ -> OrmMeta(GeneralModel::class, "`$table`'s general model", table, primaryKey)})
-
-    /**
-     * 增删查改时需要的元数据
-     */
-    public override var ormMeta: IOrmMeta = ormMetaFactory()
-
-    init{
-        ((OrmMeta)ormMeta).needInstanceInit = false
-    }
+    public constructor(table: String /* 表名 */, primaryKey:String = "id" /* 主键 */):this(OrmMeta(GeneralModel::class, "`$table`'s general model", table, primaryKey, needInstanceInit = false /* use Unsafe to instantiate */))
 
     /**
      * 实例化时需要的元数据，在 KClass<T>.rowTranformer　中使用

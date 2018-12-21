@@ -34,9 +34,10 @@ public val KClass<out IOrm>.modelOrmMeta: IOrmMeta
  */
 public val <T:IOrm> KClass<T>.rowTranformer: (Row) -> T
     get(){
+        val needInit = modelOrmMeta.needInstanceInit
         return {
-            //val obj = this.newInstance(false) as IOrm // 无需默认构造函数
-            val obj = java.newInstance() as IOrm // 必须默认构造函数
+            //val obj = java.newInstance() as IOrm // 必须默认构造函数
+            val obj = this.newInstance(needInit) as IOrm // 无需默认构造函数
             obj.setOriginal(it) as T
         }
     }

@@ -81,6 +81,11 @@ interface IOrmMeta {
     val eventHandlers:Map<String, KFunction<Unit>?>
 
     /**
+     * 实例化时是否需要初始化, 即调用类自身的默认构造函数
+     */
+    val needInstanceInit: Boolean;
+
+    /**
      * 是否有某个关联关系
      * @param name
      * @return

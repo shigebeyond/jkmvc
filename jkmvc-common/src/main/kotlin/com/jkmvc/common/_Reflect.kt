@@ -3,7 +3,6 @@ package com.jkmvc.common
 import org.nustaq.serialization.util.FSTUtil
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl
 import java.lang.reflect.*
-import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -129,6 +128,30 @@ public inline fun KParameter.convert(value: String): Any {
     return value.to(this.type)
 }
 
+/**
+ * 创建类的实例
+ *   参考 FSTDefaultClassInstantiator#newInstance()
+ *
+ * @param needInit 是否需要初始化, 即调用类自身的默认构造函数
+ * @return
+ */
+public fun <T: Any> KClass<T>.newInstance(needInit: Boolean = true): Any? {
+    // 无[无参数构造函数]
+    if(java.getConstructorOrNull() == null && !needInit){
+        // best effort. use Unsafe to instantiate.
+        // Warning: if class contains transient fields which have default values assigned ('transient int x = 3'),
+        // those will not be assigned after deserialization as unsafe instantiation does not execute any default
+        // construction code.
+        // Define a public no-arg constructor to avoid this behaviour (rarely an issue, but there are cases).
+        if (FSTUtil.unFlaggedUnsafe != null)
+            return FSTUtil.unFlaggedUnsafe.allocateInstance(java)
+
+        throw RuntimeException("no suitable constructor found and no Unsafe instance avaiable. Can't instantiate " + this)
+    }
+
+    return java.newInstance()
+}
+
 /****************************** java反射扩展: Class *******************************/
 /**
  * 是否静态方法
@@ -139,7 +162,7 @@ public val Method.isStatic: Boolean
 /**
  * 是否抽象类
  */
-public val  <T> Class<T>.isAbstract: Boolean
+public val <T> Class<T>.isAbstract: Boolean
     get() =  Modifier.isAbstract(modifiers)
 
 /**
@@ -183,25 +206,14 @@ public fun Class<*>.getMethodMaps(): Map<String, Method> {
 }
 
 /**
- * 创建类的实例
- *   参考 FSTDefaultClassInstantiator#newInstance()
- *
- * @param initRequired 是否需要初始化, 即调用类自身的构造函数
+ * 查找构造函数
+ * @param paramTypes 参数类型
  * @return
  */
-public fun <T: Any> KClass<T>.newInstance(initRequired: Boolean = true): Any? {
-    // 无[无参数构造函数]
-    if(java.getConstructor() == null && !initRequired){
-        // best effort. use Unsafe to instantiate.
-        // Warning: if class contains transient fields which have default values assigned ('transient int x = 3'),
-        // those will not be assigned after deserialization as unsafe instantiation does not execute any default
-        // construction code.
-        // Define a public no-arg constructor to avoid this behaviour (rarely an issue, but there are cases).
-        if (FSTUtil.unFlaggedUnsafe != null)
-            return FSTUtil.unFlaggedUnsafe.allocateInstance(java)
-
-        throw RuntimeException("no suitable constructor found and no Unsafe instance avaiable. Can't instantiate " + this)
+public inline fun <T> Class<T>.getConstructorOrNull(vararg parameterTypes: Class<*>): Constructor<T>? {
+    try{
+        return this.getConstructor(*parameterTypes)
+    }catch (e: NoSuchMethodException){
+        return null
     }
-
-    return java.newInstance()
 }

@@ -1,6 +1,7 @@
 package com.jkmvc.tests
 
 import com.jkmvc.db.Db
+import com.jkmvc.db.GeneralModel
 import com.jkmvc.orm.*
 import org.junit.Test
 
@@ -201,6 +202,34 @@ class OrmTests{
             return
         }
         println("删除用户：$user, result: ${user.delete()}")
+    }
+
+    @Test
+    fun testGeneralModel(){
+        // 插入
+        val user1 = GeneralModel("user", "id")
+        user1["name"] = "tom"
+        user1["age"] = 13
+        user1.create()
+        val id:Int = user1["id"]
+        println("插入用户: $user1")
+
+        // 查询
+        val user2 = GeneralModel("user", "id")
+        user2.loadByPk(id)
+        if(!user2.loaded)
+            println("用户[$id]不存在")
+        else
+            println("查询用户: $user2")
+
+        // 更新
+        user2["age"] = 23
+        user2.update()
+        println("更新用户: $user2")
+
+        // 删除
+        user2.delete()
+        println("删除用户: $id")
     }
 
     @Test
