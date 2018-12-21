@@ -1,7 +1,7 @@
 package com.jkmvc.db
 
 import com.jkmvc.orm.IOrm
-import com.jkmvc.orm.rowTranformer
+import com.jkmvc.orm.rowTransformer
 import org.apache.commons.collections.map.HashedMap
 import kotlin.reflect.KClass
 
@@ -57,7 +57,7 @@ abstract class IDbQuery{
      * @return 列表
      */
     public inline fun <reified T: IOrm> findAllModels(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<T> {
-        return findAll(params, db, T::class.rowTranformer)
+        return findAll(params, db, T::class.rowTransformer)
     }
 
     /**
@@ -90,7 +90,7 @@ abstract class IDbQuery{
      * @return 一个数据
      */
     public inline fun <reified T: IOrm> findModel(params: List<Any?> = emptyList(), db: IDb = defaultDb): T? {
-        return find(params, db, T::class.rowTranformer)
+        return find(params, db, T::class.rowTransformer)
     }
 
     /**

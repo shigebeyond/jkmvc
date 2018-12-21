@@ -63,7 +63,7 @@ abstract class OrmPersistent : OrmValid() {
 	 */
 	public override fun loadByPk(vararg pk: Any): IOrm {
 		if(pk.isNotEmpty())
-			queryBuilder().where(ormMeta.primaryKey, DbKeyValues(pk)).find(transform = this::class.rowTranformer)
+			queryBuilder().where(ormMeta.primaryKey, DbKeyValues(pk)).find(transform = this::class.rowTransformer)
 
 		return this
 	}

@@ -22,7 +22,7 @@ import kotlin.collections.HashMap
  * @date 2016-10-16 下午8:02:28
  *
  */
-class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
+open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                       protected var convertingValue: Boolean = false /* 查询时是否智能转换字段值 */,
                       protected var convertingColumn: Boolean = false /* 查询时是否智能转换字段名 */,
                       protected var withSelect: Boolean = true /* with()联查时自动select关联表的字段 */
@@ -372,7 +372,7 @@ class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                 query.selectWiths(columns)
 
             // 得结果
-            val relatedItems = query.findAll(transform = relation.rowTranformer)
+            val relatedItems = query.findAll(transform = relation.rowTransformer)
 
             // 处理查询结果
             action(name, relation, relatedItems)
