@@ -2,7 +2,6 @@ package com.jkmvc.db
 
 import com.jkmvc.common.*
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.reflect.KFunction2
 
 /**
@@ -260,7 +259,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
         // 针对 update :table set :column = :value
         if(action == SqlType.UPDATE)
             sql = ":column(.+):value".toRegex().replace(sql) { result: MatchResult ->
-                fillColumnPredicate(db, result.groupValues[1]);
+                fillColumnValueExpr(db, result.groupValues[1]);
             };
         // 3 填充distinct
         else if(action == SqlType.SELECT)
@@ -335,14 +334,14 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
     }
 
     /**
-     * 编译字段谓句: 转义 + 拼接谓句
+     * 编译字段名与字段值的表达式: 转义 + 构建表达式 + 连接表达式
      *    update时用
      * @param db
-     * @param operator 谓语
-     * @param delimiter 拼接谓句的连接符
+     * @param operator 一对字段名与字段值之间的操作符, 组成一个表达式
+     * @param delimiter 表达式之间的连接符
      * @return
      */
-    public fun fillColumnPredicate(db: IDb, operator: String, delimiter: String = ", "): String {
+    public fun fillColumnValueExpr(db: IDb, operator: String, delimiter: String = ", "): String {
         // update子句:  data是要更新字段值: <column to value>
         if (updateRow.isEmpty())
             return "";
