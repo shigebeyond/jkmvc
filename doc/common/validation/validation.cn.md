@@ -19,7 +19,7 @@
 代码:
 
 ```
-val exp = ValidationExpression("min(1)");
+val exp = ValidationExpr("min(1)");
         val result = exp.execute("3");
         println(result)
 ```

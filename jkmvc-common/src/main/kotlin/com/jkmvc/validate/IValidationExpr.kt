@@ -19,7 +19,7 @@ package com.jkmvc.validate
  * @date 2016-10-19 下午3:40:55
  *
  */
-interface IValidationExpression
+interface IValidationExpr
 {
 	/**
 	* 原始表达式
@@ -31,7 +31,7 @@ interface IValidationExpression
 	 *
 	 * <code>
 	 * 	   // 编译
-	 *     val exp = ValidationExpression("trim > notEmpty && email");
+	 *     val exp = ValidationExpr("trim > notEmpty && email");
 	 *     // 执行
 	 *     result = exp.execute(value, data, lastsubexp);
 	 * </code>

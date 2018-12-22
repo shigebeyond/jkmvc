@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 校验器
- *   其校验方法是要被ValidationUnit调用的，通过反射来调用，反射时不能识别参数的默认值，因此在定义校验方法时不要设置参数默认值
+ *   其校验方法是要被 ValidationExpr 调用的，通过反射来调用，反射时不能识别参数的默认值，因此在定义校验方法时不要设置参数默认值
  *
  * @author shijianhang
  * @date 2016-10-20 下午2:20:13  
@@ -14,14 +14,9 @@ import java.util.concurrent.ConcurrentHashMap
 object Validation:IValidation
 {
 	/**
-	 * 校验方法对应的错误消息
-	 */
-	public val messages: Config = Config.instance("validation-messages")
-
-	/**
 	 * 缓存编译后的表达式
 	 */
-	private val expsCached: ConcurrentHashMap<String, ValidationExpression> = ConcurrentHashMap<String, ValidationExpression>();
+	private val expsCached: ConcurrentHashMap<String, ValidationExpr> = ConcurrentHashMap();
 
 	/**
 	 * 编译与执行校验表达式
@@ -35,24 +30,13 @@ object Validation:IValidation
 	{
 		// 编译
 		val expCompiled = expsCached.getOrPut(exp){
-			ValidationExpression(exp);
+			ValidationExpr(exp);
 		}
 		// 执行
 		return expCompiled.execute(value, variables);
 	}
 
-	/**
-	 * 获得消息
-	 * @param key
-	 * @return
-	 */
-	public override fun getMessage(key:String):String?{
-		if(messages.containsKey(key))
-			return messages[key];
-
-		return null;
-	}
-
+	/************************** 校验值的方法 ************************/
 	/**
 	 * 检查非空
 	 *
@@ -115,12 +99,12 @@ object Validation:IValidation
 	/**
 	 * 检查是否在某个范围内
 	 *
-	* @param value
-	* @param min 最小值
-	* @param max 最大值
-	* @param step 步长
-	* @return
-	*/
+	 * @param value
+	 * @param min 最小值
+	 * @param max 最大值
+	 * @param step 步长
+	 * @return
+	 */
 	public fun range(value:Int, min:Int, max:Int, step:Int): Boolean {
 		return (value >= min && value <= max) // 是否在范围内
 				&& ((value - min) % step === 0); // 是否间隔指定步长
@@ -170,13 +154,13 @@ object Validation:IValidation
 		return value.endsWith(suffix, ignoreCase);
 	}
 
+	/************************** 改变值的方法 ************************/
 	/**
 	 * 删除字符串两边的空白字符
 	 */
 	public fun trim(value:String): String {
 		return  value.trim()
 	}
-
 
 	/**
 	 * 字符串转换为大写
@@ -192,9 +176,9 @@ object Validation:IValidation
 		return  value.toLowerCase();
 	}
 
-
 	/**
 	 * 字符串截取子字符串
+	 *
 	 * @param startIndex 开始的位置
 	 * @param endIndex 结束的位置，如果为-1，则到末尾
 	 * @return
@@ -202,4 +186,16 @@ object Validation:IValidation
 	public fun substring(value:String, startIndex: Int, endIndex: Int): String {
 		return value.substring(startIndex, if(endIndex == -1) value.length else endIndex);
 	}
+
+	/**
+	 * 添加前缀/后缀
+	 *
+	 * @param prefix 前缀
+	 * @param postfix 后缀
+	 * @return
+	 */
+	public fun wrap(value:String, prefix: String, postfix: String): String {
+		return "$prefix$value$postfix"
+	}
+
 }

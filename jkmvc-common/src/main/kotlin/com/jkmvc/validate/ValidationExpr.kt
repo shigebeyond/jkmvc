@@ -2,9 +2,12 @@ package com.jkmvc.validate
 
 import java.util.*
 
+// 校验表达式运算单位： 1 运算符 2 函数名 3 函数参数
+typealias ValidationUint = Triple<String?, String, Array<String>>
+
 /**
  * 校验表达式
- *    校验表达式是由多个(函数调用的)子表达式与运算符组成, 格式为 a(1) & b(1,2) && c(3,4) | d(2) . e(1) > f(5)
+ *    校验表达式是由多个(函数调用的)子表达式与运算符组成, 格式为 a(1) b(1,2) && c(3,4) | d(2) . e(1) > f(5)
  *    子表达式是函数调用, 格式为 a(1,2)
  *    子表达式之间用运算符连接, 运算符有 & && | || . >
  *    运算符的含义:
@@ -19,9 +22,8 @@ import java.util.*
  *
  * @author shijianhang
  * @date 2016-10-19 下午3:40:55
- *
  */
-class ValidationExpression(override val exp:String /* 原始表达式 */):IValidationExpression {
+class ValidationExpr(override val exp:String /* 原始表达式 */):IValidationExpr {
 
 	companion object{
 		/**
@@ -54,7 +56,7 @@ class ValidationExpression(override val exp:String /* 原始表达式 */):IValid
 		 *     表达式是由多个(函数调用的)子表达式组成, 子表达式之间用运算符连接, 运算符有 & && | || . >
 		 *
 		 * <code>
-		 *     val (ops, subexps) = ValidationExpression::compile("trim > notEmpty && email");
+		 *     val (ops, subexps) = ValidationExpr::compile("trim > notEmpty && email");
 		 * </code>
 		 *
 		 * @param exp
@@ -64,7 +66,7 @@ class ValidationExpression(override val exp:String /* 原始表达式 */):IValid
 			// 第一个()是操作符，第二个()是函数名，第四个()是函数参数
 			val matches: Sequence<MatchResult> = RegxExp.findAll(exp);
 
-			val subexps:MutableList<ValidationUint> = LinkedList<ValidationUint>();
+			val subexps:MutableList<ValidationUint> = LinkedList();
 			for(m in matches){
 				val op = m.groups[1]?.value; // 操作符
 				val func = m.groups[2]!!.value; // 函数名
@@ -81,16 +83,16 @@ class ValidationExpression(override val exp:String /* 原始表达式 */):IValid
 		 * @param params
 		 * @return
 		 */
-		public fun compileParams(exp:String?): List<String> {
+		public fun compileParams(exp:String?): Array<String> {
 			if(exp == null)
-				return emptyList();
+				return emptyArray()
 
 			val matches: Sequence<MatchResult> = RegexParam.findAll(exp);
-			val result:MutableList<String> = LinkedList<String>();
-			for(m in matches){
+			val result:ArrayList<String> = ArrayList();
+			for(m in matches)
 				result.add(m.groups[1]!!.value)
-			}
-			return result;
+
+			return result.toArray() as Array<String>
 		}
 	}
 
@@ -106,7 +108,7 @@ class ValidationExpression(override val exp:String /* 原始表达式 */):IValid
 	 *
 	 * <code>
 	 * 	   // 编译
-	 *     val exp = ValidationExpression("trim > notEmpty && email");
+	 *     val exp = ValidationExpr("trim > notEmpty && email");
 	 *     // 执行
 	 *     result = exp.execute(value, data, lastsubexp);
 	 * </code>
@@ -123,9 +125,8 @@ class ValidationExpression(override val exp:String /* 原始表达式 */):IValid
 		// 逐个运算子表达式
 		var result:Any? = null;
 		var lastValue:Any? = value;
-		for (subexp in subexps)
-		{
-			val (op) = subexp;
+		for (subexp in subexps) {
+			val op = subexp.component1();
 
 			// 短路
 			if(isShortReturn(op, result))
@@ -136,11 +137,10 @@ class ValidationExpression(override val exp:String /* 原始表达式 */):IValid
 				lastValue = result;
 
 			// 运算子表达式
-			val curr = subexp.execute(lastValue, variables);
+			val curr = executeSubexp(subexp, lastValue, variables);
 
 			// 处理结果
-			when (op)
-			{
+			when (op) {
 				"&", // 与
 				"&&" -> // 短路与
 					result = (result as Boolean) && (curr as Boolean);
@@ -159,6 +159,21 @@ class ValidationExpression(override val exp:String /* 原始表达式 */):IValid
 		}
 
 		return ValidationResult(result, subexps.last(), lastValue);
+	}
+
+	/**
+	 * 运算子表达式
+	 *
+	 * @param subexp 子表达式
+	 * @param value 要校验的值
+	 * @param variables 变量
+	 * @return
+	 */
+	protected fun executeSubexp(subexp: ValidationUint, value: Any?, variables: Map<String, Any?>): Any? {
+		// 解析 1 运算符 2 函数名 3 函数参数
+		val (op, func, params) = subexp
+		// 调用校验方法
+		return ValidationFunc.get(func).execute(value, params, variables)
 	}
 
 	/**

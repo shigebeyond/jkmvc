@@ -19,7 +19,7 @@ The return type is `com.jkmvc.validate.ValidationResult`, it has 3 properties:
 Codes:
 
 ```
-val exp = ValidationExpression("min(1)");
+val exp = ValidationExpr("min(1)");
         val result = exp.execute("3");
         println(result)
 ```
