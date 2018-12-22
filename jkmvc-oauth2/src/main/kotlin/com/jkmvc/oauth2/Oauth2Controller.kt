@@ -39,7 +39,7 @@ public abstract class Oauth2Controller : Controller() {
         val sessionState: String = req.session.getAttribute("oauth2_state") as String
 
         if (sessionState != state) {
-            throw Exception("state not validate")
+            throw IllegalArgumentException("state not validate")
         }
 
         val type: String = req["type"]!!

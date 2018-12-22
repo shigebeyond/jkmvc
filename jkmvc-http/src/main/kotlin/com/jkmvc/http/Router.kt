@@ -22,7 +22,7 @@ object Router:IRouter
 	/**
 	 * 全部路由规则
 	 */
-	private val routes:MutableMap<String, Route> = HashMap<String, Route>();
+	private val routes:MutableMap<String, Route> = HashMap();
 
 	/**
 	 * 静态文件uri的正则

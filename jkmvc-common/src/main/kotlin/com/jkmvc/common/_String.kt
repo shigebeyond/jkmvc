@@ -136,7 +136,7 @@ public inline fun String.trim(preffix:String, suffix:String = ""): String {
  * @param postfix 参数名后缀正则
  * @return
  */
-public inline fun String.replaces(params:List<String>, prefix:CharSequence = ":", postfix:CharSequence = ""):String
+public inline fun String.replaces(params:Array<String>, prefix:CharSequence = ":", postfix:CharSequence = ""):String
 {
     return this.replace("$prefix(\\d+)$postfix".toRegex()){ matches:MatchResult ->
         val i = matches.groupValues[1]

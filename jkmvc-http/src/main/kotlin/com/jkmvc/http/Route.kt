@@ -117,7 +117,7 @@ class Route(override val regex:String /* 原始正则: <controller>(\/<action>(\
 	 */
 	protected fun buildParamGroupMapping(): MutableMap<String, Int> {
 		val matches: Sequence<MatchResult> = "<(\\w+)>".toRegex().findAll(groupRegex)
-		val mapping:MutableMap<String, Int> = HashMap<String, Int>();
+		val mapping:MutableMap<String, Int> = HashMap();
 		for(m in matches){
 			val param = m.groups[1]!!
 			val paramRange = param.range // 参数的范围
@@ -156,7 +156,7 @@ class Route(override val regex:String /* 原始正则: <controller>(\/<action>(\
 			return defaults;
 
 		//返回 默认参数值 + 匹配的参数值
-		val params: MutableMap<String, String> = HashMap<String, String>();
+		val params: MutableMap<String, String> = HashMap();
 		if(defaults != null)// 默认参数值
 			params.putAll(defaults);
 		for((name, group) in paramGroupMapping){ // 匹配的参数值

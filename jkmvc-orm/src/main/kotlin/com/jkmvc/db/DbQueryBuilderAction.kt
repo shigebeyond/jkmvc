@@ -274,7 +274,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @param db
      * @return
      */
-    public fun fillTable(db: IDb): String {
+    protected fun fillTable(db: IDb): String {
         if(action == SqlType.INSERT || action == SqlType.DELETE) // mysql的insert/delete语句, 不支持表带别名
             return quoteTable(db, table.exp)
 
@@ -287,7 +287,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @param db
      * @return
      */
-    public fun fillColumns(db: IDb): String {
+    protected fun fillColumns(db: IDb): String {
         var cols: Iterator<CharSequence>
 
         if (action == SqlType.SELECT) { // 1 select子句:  data是要查询的字段名
@@ -310,7 +310,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @param db
      * @return
      */
-    public fun fillValues(db: IDb): String {
+    protected fun fillValues(db: IDb): String {
         // 1 insert...select..字句
         if(insertRows.isSubQuery()) // 子查询
             return quote(db, insertRows.getSubQuery())
@@ -341,7 +341,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @param delimiter 表达式之间的连接符
      * @return
      */
-    public fun fillColumnValueExpr(db: IDb, operator: String, delimiter: String = ", "): String {
+    protected fun fillColumnValueExpr(db: IDb, operator: String, delimiter: String = ", "): String {
         // update子句:  data是要更新字段值: <column to value>
         if (updateRow.isEmpty())
             return "";

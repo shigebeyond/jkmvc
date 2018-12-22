@@ -17,7 +17,7 @@ abstract class DbQueryBuilderDecorationClauses<T>(protected val operator: String
     /**
      * 子表达式, 可视为行
      */
-    protected var subexps: LinkedList<T> = LinkedList<T>();
+    protected var subexps: LinkedList<T> = LinkedList();
 
     /**
      * 编译多个子表达式

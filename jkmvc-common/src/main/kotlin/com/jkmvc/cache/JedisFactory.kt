@@ -18,7 +18,7 @@ object JedisFactory {
     /**
      * redis连接池
      */
-    private val pools: ConcurrentHashMap<String, JedisPool> = ConcurrentHashMap<String, JedisPool>();
+    private val pools: ConcurrentHashMap<String, JedisPool> = ConcurrentHashMap();
 
     /**
      * 线程安全的redis连接

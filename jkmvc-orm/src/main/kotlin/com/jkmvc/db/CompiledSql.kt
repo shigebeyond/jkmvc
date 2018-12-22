@@ -145,7 +145,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
         if(paramSize <= 0)
             throw IllegalArgumentException("参数个数只能为正整数，但实际为 $paramSize");
         if(dynamicParamses.size % paramSize > 0)
-            throw Exception("paramses 的大小必须是指定参数个数 $paramSize 的整数倍");
+            throw IllegalArgumentException("paramses 的大小必须是指定参数个数 $paramSize 的整数倍");
 
         // 全都是动态参数
         if(staticParams.size == size)
