@@ -33,7 +33,7 @@ interface IValidator
 		return object: IValidator{
 			override fun validate(value: Any?, variables: Map<String, Any?>): Any? {
 				val result = me.validate(value, variables)
-				return other.validate(result)
+				return other.validate(result, variables)
 			}
 
 		}

@@ -6,7 +6,7 @@ Orm models are tightly integrated with the [Validation](../common/validation/val
 
 Validation rules are defined in the `OrmMeta::rules` property. This property is the rules for each field to be executed by `Validation.execute(exp:String, value:Any, binds:Map<String, Any?>)` method.
 
-Each rule is `com.jkmvc.orm.RuleMeta` object, which has 2 properties:
+Each rule is `com.jkmvc.orm.RuleValidator` object, which has 2 properties:
 1. `label`: A label is a human-readable version of the field name.
 2. `rule`: A validation expression
 
@@ -14,9 +14,9 @@ There are 2 way to define rules
 1. override `OrmMeta::rules` property
 
 ```
-public override val rules: MutableMap<String, IRuleMeta> = hashMapOf(
-	"userId" to RuleMeta("Id label", "notEmpty"),
-	"age" to RuleMeta( "Age label", "between(1,120)")
+public override val rules: MutableMap<String, IValidator> = hashMapOf(
+	"userId" to RuleValidator("Id label", "notEmpty"),
+	"age" to RuleValidator( "Age label", "between(1,120)")
 )
 ```
 

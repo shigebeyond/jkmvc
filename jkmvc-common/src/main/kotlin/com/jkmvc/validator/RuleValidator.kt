@@ -20,7 +20,10 @@ private typealias SubRule = Pair<String, Array<String>>
  * @author shijianhang
  * @date 2016-10-19 下午3:40:55
  */
-class RuleValidator protected constructor(protected val rule:String /* 规则表达式 */):IValidator {
+class RuleValidator(public val label: String /* 值的标识, 如orm中的字段名, 如请求中的表单域名 */,
+					public val rule: String /* 规则表达式 */
+
+) : IValidator {
 
 	companion object{
 
@@ -30,35 +33,24 @@ class RuleValidator protected constructor(protected val rule:String /* 规则表
 		protected val REGEX_PARAM: Regex = ("([\\w\\d-:]+),?").toRegex();
 
 		/**
-		 * 缓存编译后的表达式
+		 * 缓存编译后的规则子表达式
 		 */
-		protected val rulesCached: ConcurrentHashMap<String, RuleValidator> = ConcurrentHashMap();
-
-		/**
-		 * 线程安全的标签缓存
-		 */
-		protected val label:ThreadLocal<String> = ThreadLocal()
-
-		/**
-		 * 获得编译后的规则表达式
-		 */
-		public fun from(exp: String): RuleValidator{
-			return rulesCached.getOrPut(exp){
-				RuleValidator(exp);
-			}
-		}
+		protected val compiledSubRules: ConcurrentHashMap<String, List<SubRule>> = ConcurrentHashMap();
 
 		/**
 		 * 编译规则表达式
 		 *     规则表达式是由多个(函数调用的)规则子表达式组成, 规则子表达式之间以空格分隔, 格式为 a(1) b(1,2) c(3,4)
 		 * <code>
-		 *     val subRules = ValidationExpr::compile("trim notEmpty email");
+		 *     val subRules = ValidationExpr::compileSubRules("trim notEmpty email");
 		 * </code>
 		 *
 		 * @param rule
 		 * @return
 		 */
-		public fun compile(rule:String): List<SubRule> {
+		public fun compileSubRules(rule:String): List<SubRule> {
+			if(rule.isEmpty())
+				return emptyList()
+
 			// 规则子表达式之间以空格分隔, 格式为 a(1) b(1,2) c(3,4)
 			val subRules = rule.split(" ")
 			return subRules.map { subRule ->
@@ -93,7 +85,9 @@ class RuleValidator protected constructor(protected val rule:String /* 规则表
 	 *   一个规则子表达式 = listOf(函数名, 参数数组)
 	 *   参数数组 = listOf("1", "2", ":name") 参数有值/变量（如:name）
 	 */
-	protected val subRules:List<SubRule> = compile(rule);
+	protected val subRules:List<SubRule> = compiledSubRules.getOrPut(rule){
+		compileSubRules(rule)
+	}
 
 	/**
 	 * 执行规则表达式
@@ -115,7 +109,7 @@ class RuleValidator protected constructor(protected val rule:String /* 规则表
 		// 逐个运算规则子表达式
 		var result:Any? = value
 		for (subRule in subRules)
-			result = executeSubRule(subRule, result, variables);
+			result = executeSubRule(subRule, result, variables, label);
 		return result
 	}
 
@@ -125,12 +119,13 @@ class RuleValidator protected constructor(protected val rule:String /* 规则表
 	 * @param subRule 规则子表达式
 	 * @param value 要校验的值
 	 * @param variables 变量
+	 * @param label 值的标识, 如orm中的字段名, 如请求中的表单域名
 	 * @return
 	 */
-	protected fun executeSubRule(subRule: SubRule, value: Any?, variables: Map<String, Any?>): Any? {
+	protected fun executeSubRule(subRule: SubRule, value: Any?, variables: Map<String, Any?>, label: String): Any? {
 		// 获得 1 函数名 2 函数参数
 		val (func, params) = subRule
 		// 调用校验方法
-		return ValidatorFunc.get(func).execute(value, params, variables)
+		return ValidatorFunc.get(func).execute(value, params, variables, label)
 	}
 }

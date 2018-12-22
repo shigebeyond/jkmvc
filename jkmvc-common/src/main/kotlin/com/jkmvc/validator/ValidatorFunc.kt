@@ -72,9 +72,10 @@ class ValidatorFunc(protected val func: KFunction<*> /* 方法 */){
      * @param value 待校验的值
      * @param params 参数
      * @param variables 变量
+     * @param label 值的标识, 如orm中的字段名, 如请求中的表单域名
      * @return 如果是预言函数, 返回原值, 否则返回执行结果
      */
-    public fun execute(value:Any?, params:Array<String>, variables:Map<String, Any?>): Any? {
+    public fun execute(value:Any?, params:Array<String>, variables:Map<String, Any?>, label:String): Any? {
         // 获得函数
         if(func == null)
             throw ValidatorException("不存在校验方法${this.func}");
@@ -98,7 +99,7 @@ class ValidatorFunc(protected val func: KFunction<*> /* 方法 */){
                 // 如果预言失败, 则抛异常
                 if(result == false) {
                     val message: String = messages[name]!!
-                    throw ValidatorException("label" + message.replaces(params));
+                    throw ValidatorException(label + message.replaces(params));
                 }
 
                 // 返回原值

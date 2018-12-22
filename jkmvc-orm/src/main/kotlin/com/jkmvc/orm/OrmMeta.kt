@@ -4,6 +4,7 @@ import com.jkmvc.common.*
 import com.jkmvc.db.Db
 import com.jkmvc.db.GeneralModel
 import com.jkmvc.db.IDb
+import com.jkmvc.validator.IValidator
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -62,8 +63,8 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     /**
      * 每个字段的校验规则
      */
-    public override val rules: MutableMap<String, IRuleMeta> by lazy {
-        HashMap<String, IRuleMeta>()
+    public override val rules: MutableMap<String, IValidator> by lazy {
+        HashMap<String, IValidator>()
     };
 
     /**
@@ -141,22 +142,10 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     /**
      * 添加规则
      * @param field
-     * @param label
      * @param rule
      * @return
      */
-    public override fun addRule(field: String, label:String, rule: String?): OrmMeta {
-        rules[field] = RuleMeta(label, rule);
-        return this;
-    }
-
-    /**
-     * 添加规则
-     * @param field
-     * @param rule
-     * @return
-     */
-    public override fun addRule(field: String, rule: IRuleMeta): OrmMeta {
+    public override fun addRule(field: String, rule: IValidator): OrmMeta {
         rules[field] = rule;
         return this;
     }

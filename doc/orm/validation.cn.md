@@ -6,7 +6,7 @@ Orm模型与[Validation](../common/validation/validation.cn.md)库紧密集成�
 
 验证规则是定义在`OrmMeta::rules`属性中。 这个属性包含多个字段的规则，每个规则都是由`Validation.execute(exp:String, value:Any, binds:Map<String, Any?>)`来执行。
 
-每个规则是`com.jkmvc.orm.RuleMeta`对象，它有2个属性：
+每个规则是`com.jkmvc.orm.RuleValidator`对象，它有2个属性：
 1. `label`：字段中文名
 2. `rule`：验证表达式
 
@@ -14,9 +14,9 @@ Orm模型与[Validation](../common/validation/validation.cn.md)库紧密集成�
 1.重写`OrmMeta :: rules`属性
 
 ```
-public override val rules: MutableMap<String, IRuleMeta> = hashMapOf(
-	"userId" to RuleMeta("用户", "notEmpty"),
-	"age" to RuleMeta( "年龄", "between(1,120)")
+public override val rules: MutableMap<String, IValidator> = hashMapOf(
+	"userId" to RuleValidator("用户", "notEmpty"),
+	"age" to RuleValidator( "年龄", "between(1,120)")
 )
 ```
 

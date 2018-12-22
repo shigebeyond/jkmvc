@@ -1,6 +1,8 @@
 package com.jkmvc.orm
 
 import com.jkmvc.db.IDb
+import com.jkmvc.validator.IValidator
+import com.jkmvc.validator.RuleValidator
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 
@@ -58,7 +60,7 @@ interface IOrmMeta {
     /**
      * 每个字段的规则
      */
-    val rules: MutableMap<String, IRuleMeta>
+    val rules: MutableMap<String, IValidator>
 
     /**
      * 数据库
@@ -111,7 +113,9 @@ interface IOrmMeta {
      * @param rule
      * @return
      */
-    fun addRule(field: String, label:String, rule: String? = null): OrmMeta;
+    fun addRule(field: String, label:String, rule: String = "", otherRule: IValidator? = null): OrmMeta{
+        return addRule(field, RuleValidator(label, rule).combile(otherRule))
+    }
 
     /**
      * 添加规则
@@ -119,7 +123,7 @@ interface IOrmMeta {
      * @param rule
      * @return
      */
-    fun addRule(field: String, rule: IRuleMeta): OrmMeta;
+    fun addRule(field: String, rule: IValidator): OrmMeta;
 
     /**
      * 根据对象属性名，获得db字段名 -- 单个字段

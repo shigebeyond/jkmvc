@@ -17,7 +17,7 @@ class UserModel(id:Int? = null): Orm(id) {
         init {
             // 添加标签 + 规则
             // add label and rule for field
-            addRule("name", "姓名", "notEmpty");
+            addRule("name", "姓名", "notEmpty")
             addRule("age", "年龄", "between(1,120)");
 
             // 添加关联关系
@@ -74,9 +74,9 @@ class AddressModel(id:Int? = null): Orm(id) {
         }
 
         // 重写规则
-        /*public override val rules: MutableMap<String, IRuleMeta> = hashMapOf(
-                "userId" to RuleMeta("用户", "notEmpty"),
-                "age" to RuleMeta( "年龄", "between(1,120)")
+        /*public override val rules: MutableMap<String, IValidator> = hashMapOf(
+                "userId" to RuleValidator("用户", "notEmpty"),
+                "age" to RuleValidator( "年龄", "between(1,120)")
         )*/
     }
 
