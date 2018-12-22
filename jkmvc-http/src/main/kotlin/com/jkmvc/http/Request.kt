@@ -2,7 +2,6 @@ package com.jkmvc.http
 
 import com.jkmvc.common.*
 import com.jkmvc.validator.Validator
-import com.jkmvc.validator.ValidatorException
 import org.apache.commons.collections.map.CompositeMap
 import java.util.*
 import javax.servlet.http.Cookie

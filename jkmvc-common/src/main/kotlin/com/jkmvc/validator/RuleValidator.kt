@@ -126,6 +126,6 @@ class RuleValidator(public val label: String /* 值的标识, 如orm中的字段
 		// 获得 1 函数名 2 函数参数
 		val (func, params) = subRule
 		// 调用校验方法
-		return ValidatorFunc.get(func).execute(value, params, variables, label)
+		return ValidateFunc.get(func).execute(value, params, variables, label)
 	}
 }

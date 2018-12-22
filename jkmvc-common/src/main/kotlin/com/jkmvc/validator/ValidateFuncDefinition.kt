@@ -6,7 +6,7 @@ package com.jkmvc.validator
  * 1 无默认参数
  *   校验方法是要被 ExprValidator 调用的，通过反射来调用，反射时不能识别参数的默认值，因此在定义校验方法时不要设置参数默认值
  */
-object ValidatorFuncDefinition{
+object ValidateFuncDefinition{
 
     /************************** 校验值的方法 ************************/
     /**

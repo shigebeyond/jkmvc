@@ -3,6 +3,7 @@ package com.jkmvc.orm
 import com.jkmvc.db.IDb
 import com.jkmvc.validator.IValidator
 import com.jkmvc.validator.RuleValidator
+import com.jkmvc.validator.ValidateLambda
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 
@@ -113,7 +114,7 @@ interface IOrmMeta {
      * @param rule
      * @return
      */
-    fun addRule(field: String, label:String, rule: String = "", otherRule: IValidator? = null): OrmMeta{
+    fun addRule(field: String, label:String, rule: String = "", otherRule: ValidateLambda? = null): OrmMeta{
         return addRule(field, RuleValidator(label, rule).combile(otherRule))
     }
 

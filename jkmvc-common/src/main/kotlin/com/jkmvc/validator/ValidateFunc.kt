@@ -19,7 +19,7 @@ import kotlin.reflect.full.memberFunctions
  * @author shijianhang
  * @date 2016-10-19 下午3:40:55
  */
-class ValidatorFunc(protected val func: KFunction<*> /* 方法 */){
+class ValidateFunc(protected val func: KFunction<*> /* 方法 */) : IValidateFunc {
 
     companion object{
 
@@ -31,7 +31,7 @@ class ValidatorFunc(protected val func: KFunction<*> /* 方法 */){
         /**
          * 校验方法
          */
-        protected val funcs: MutableMap<String, ValidatorFunc> = HashMap();
+        protected val funcs: MutableMap<String, ValidateFunc> = HashMap();
 
         init {
             /*// String的成员方法
@@ -42,9 +42,9 @@ class ValidatorFunc(protected val func: KFunction<*> /* 方法 */){
             */
 
             // Validation的静态方法
-            for (f in ValidatorFuncDefinition::class.memberFunctions)
+            for (f in ValidateFuncDefinition::class.memberFunctions)
                 if(f.name != "execute")
-                    funcs[f.name] = ValidatorFunc(f);
+                    funcs[f.name] = ValidateFunc(f);
         }
 
         /**
@@ -52,7 +52,7 @@ class ValidatorFunc(protected val func: KFunction<*> /* 方法 */){
          * @param name 方法名
          * @return
          */
-        public fun get(name: String): ValidatorFunc{
+        public fun get(name: String): ValidateFunc{
             val f = funcs[name]
             if(f == null)
                 throw Exception("Class [Validation] has no method [$name()]")
@@ -68,6 +68,7 @@ class ValidatorFunc(protected val func: KFunction<*> /* 方法 */){
 
     /**
      * 执行函数
+     *   如果是预言函数 + 预言失败, 则抛 ValidateException 异常
      *
      * @param value 待校验的值
      * @param params 参数
@@ -75,10 +76,10 @@ class ValidatorFunc(protected val func: KFunction<*> /* 方法 */){
      * @param label 值的标识, 如orm中的字段名, 如请求中的表单域名
      * @return 如果是预言函数, 返回原值, 否则返回执行结果
      */
-    public fun execute(value:Any?, params:Array<String>, variables:Map<String, Any?>, label:String): Any? {
+    public override fun execute(value:Any?, params:Array<String>, variables:Map<String, Any?>, label:String): Any? {
         // 获得函数
         if(func == null)
-            throw ValidatorException("不存在校验方法${this.func}");
+            throw ValidateException("不存在校验方法${this.func}");
 
         try{
             // 其他参数
@@ -89,17 +90,17 @@ class ValidatorFunc(protected val func: KFunction<*> /* 方法 */){
 
             // 调用函数
             val result = func.call(
-                    ValidatorFuncDefinition, // 对象
+                    ValidateFuncDefinition, // 对象
                     convertValue(value, func.parameters[0].type), // 待校验的值
                     *otherParams // 其他参数
             )
 
             // 如果是预言函数, 返回原值
             if(isPredict() ){
-                // 如果预言失败, 则抛异常
+                // 如果预言失败, 则抛 ValidateException 异常
                 if(result == false) {
                     val message: String = messages[name]!!
-                    throw ValidatorException(label + message.replaces(params));
+                    throw ValidateException(label + message.replaces(params));
                 }
 
                 // 返回原值

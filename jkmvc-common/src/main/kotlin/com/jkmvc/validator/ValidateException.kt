@@ -3,7 +3,7 @@ package com.jkmvc.validator
 /**
  * 校验异常
  */
-class ValidatorException : RuntimeException {
+class ValidateException : RuntimeException {
     constructor(message: String) : super(message) {
     }
 
