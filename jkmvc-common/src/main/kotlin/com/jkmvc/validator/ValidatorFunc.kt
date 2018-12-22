@@ -1,7 +1,14 @@
 package com.jkmvc.validator
 
-import com.jkmvc.common.*
+import com.jkmvc.common.Config
+import com.jkmvc.common.mapToArray
+import com.jkmvc.common.replaces
+import com.jkmvc.common.to
 import java.util.*
+import kotlin.collections.Map
+import kotlin.collections.MutableMap
+import kotlin.collections.joinToString
+import kotlin.collections.set
 import kotlin.reflect.KFunction
 import kotlin.reflect.KType
 import kotlin.reflect.full.memberFunctions
@@ -35,7 +42,7 @@ class ValidatorFunc(protected val func: KFunction<*> /* 方法 */){
             */
 
             // Validation的静态方法
-            for (f in Validator::class.memberFunctions)
+            for (f in ValidatorFuncDefinition::class.memberFunctions)
                 if(f.name != "execute")
                     funcs[f.name] = ValidatorFunc(f);
         }
@@ -81,7 +88,7 @@ class ValidatorFunc(protected val func: KFunction<*> /* 方法 */){
 
             // 调用函数
             val result = func.call(
-                    Validator, // 对象
+                    ValidatorFuncDefinition, // 对象
                     convertValue(value, func.parameters[0].type), // 待校验的值
                     *otherParams // 其他参数
             )

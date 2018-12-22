@@ -11,12 +11,32 @@ package com.jkmvc.validator
 interface IValidator
 {
 	/**
-	 * 编译与执行校验表达式
+	 * 校验器
 	 *
-	 * @param exp 校验表达式
 	 * @param value 要校验的数值，该值可能被修改
 	 * @param variables 变量
 	 * @return
 	 */
-	fun execute(exp:String, value:Any?, variables:Map<String, Any?> = emptyMap()): Any?
+	fun validate(value:Any?, variables:Map<String, Any?> = emptyMap()): Any?
+
+	/**
+	 * 合并2个校验器
+	 *
+	 * @param other
+	 * @return
+	 */
+	fun combile(other: IValidator?): IValidator{
+		if(other == null)
+			return this
+
+		val me = this
+		return object: IValidator{
+			override fun validate(value: Any?, variables: Map<String, Any?>): Any? {
+				val result = me.validate(value, variables)
+				return other.validate(result)
+			}
+
+		}
+	}
+
 }

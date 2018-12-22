@@ -25,13 +25,11 @@ abstract class OrmValid : OrmEntity() {
             val value: Any = this[field];
 
             // 校验单个属性: 属性值可能被修改
-            val (succ, uint, lastValue) = Validator.execute(rule.rule!!, value, data)
-            if (succ == false)
-                throw ValidatorException(rule.label + uint?.message());
+            val newValue = Validator.validate(rule.rule!!, value, data)
 
             // 更新被修改的属性值
-            if (value !== lastValue)
-                this[field] = value;
+            if (value !== newValue)
+                this[field] = newValue;
         }
 
         return true;

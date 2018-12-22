@@ -19,7 +19,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 {
 	companion object{
 		/**
-		 * 请求对象缓存
+		 * 线程安全的请求对象缓存
 		 */
 		protected val reqs:ThreadLocal<Request> = ThreadLocal();
 
@@ -271,11 +271,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 */
 	protected inline fun validateValue(key: String, value: Any?, rule: String): String {
 		// 校验单个字段: 字段值可能被修改
-		val (succ, uint, lastValue) = Validator.execute(rule, value, allParameters)
-		if (succ == false)
-			throw ValidatorException(key + uint?.message());
-
-		return lastValue as String
+		return Validator.validate(rule, value, allParameters) as String
 	}
 
 	/*************************** 路由参数 *****************************/
