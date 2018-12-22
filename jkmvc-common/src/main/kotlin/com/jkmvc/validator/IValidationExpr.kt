@@ -1,4 +1,4 @@
-package com.jkmvc.validate
+package com.jkmvc.validator
 
 /**
  * 校验表达式

@@ -1,4 +1,4 @@
-package com.jkmvc.validate
+package com.jkmvc.validator
 
 import com.jkmvc.common.*
 import java.util.*
@@ -12,7 +12,7 @@ import kotlin.reflect.full.memberFunctions
  * @author shijianhang
  * @date 2016-10-19 下午3:40:55
  */
-class ValidationFunc(protected val func: KFunction<*> /* 方法 */){
+class ValidatorFunc(protected val func: KFunction<*> /* 方法 */){
 
     companion object{
 
@@ -24,7 +24,7 @@ class ValidationFunc(protected val func: KFunction<*> /* 方法 */){
         /**
          * 校验方法
          */
-        protected val funcs: MutableMap<String, ValidationFunc> = HashMap();
+        protected val funcs: MutableMap<String, ValidatorFunc> = HashMap();
 
         init {
             /*// String的成员方法
@@ -35,9 +35,9 @@ class ValidationFunc(protected val func: KFunction<*> /* 方法 */){
             */
 
             // Validation的静态方法
-            for (f in Validation::class.memberFunctions)
+            for (f in Validator::class.memberFunctions)
                 if(f.name != "execute")
-                    funcs[f.name] = ValidationFunc(f);
+                    funcs[f.name] = ValidatorFunc(f);
         }
 
         /**
@@ -45,7 +45,7 @@ class ValidationFunc(protected val func: KFunction<*> /* 方法 */){
          * @param name 方法名
          * @return
          */
-        public fun get(name: String): ValidationFunc{
+        public fun get(name: String): ValidatorFunc{
             val f = funcs[name]
             if(f == null)
                 throw Exception("Class [Validation] has no method [$name()]")
@@ -70,7 +70,7 @@ class ValidationFunc(protected val func: KFunction<*> /* 方法 */){
     public fun execute(value:Any?, params:Array<String>, variables:Map<String, Any?>): Any? {
         // 获得函数
         if(func == null)
-            throw ValidationException("不存在校验方法${this.func}");
+            throw ValidatorException("不存在校验方法${this.func}");
 
         try{
             // 其他参数
@@ -81,7 +81,7 @@ class ValidationFunc(protected val func: KFunction<*> /* 方法 */){
 
             // 调用函数
             val result = func.call(
-                    Validation, // 对象
+                    Validator, // 对象
                     convertValue(value, func.parameters[0].type), // 待校验的值
                     *otherParams // 其他参数
             )
@@ -91,7 +91,7 @@ class ValidationFunc(protected val func: KFunction<*> /* 方法 */){
                 // 如果预言失败, 则抛异常
                 if(result == false) {
                     val message: String = messages[name]!!
-                    throw ValidationException("label" + message.replaces(params));
+                    throw ValidatorException("label" + message.replaces(params));
                 }
 
                 // 返回原值

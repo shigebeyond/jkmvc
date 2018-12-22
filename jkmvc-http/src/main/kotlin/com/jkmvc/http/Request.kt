@@ -1,8 +1,8 @@
 package com.jkmvc.http
 
 import com.jkmvc.common.*
-import com.jkmvc.validate.Validation
-import com.jkmvc.validate.ValidationException
+import com.jkmvc.validator.Validator
+import com.jkmvc.validator.ValidatorException
 import org.apache.commons.collections.map.CompositeMap
 import java.util.*
 import javax.servlet.http.Cookie
@@ -271,9 +271,9 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 */
 	protected inline fun validateValue(key: String, value: Any?, rule: String): String {
 		// 校验单个字段: 字段值可能被修改
-		val (succ, uint, lastValue) = Validation.execute(rule, value, allParameters)
+		val (succ, uint, lastValue) = Validator.execute(rule, value, allParameters)
 		if (succ == false)
-			throw ValidationException(key + uint?.message());
+			throw ValidatorException(key + uint?.message());
 
 		return lastValue as String
 	}

@@ -1,4 +1,4 @@
-package com.jkmvc.validate
+package com.jkmvc.validator
 
 /**
  * 校验器
@@ -8,7 +8,7 @@ package com.jkmvc.validate
  * @date 2016-10-20 下午2:20:13  
  *
  */
-interface IValidation
+interface IValidator
 {
 	/**
 	 * 编译与执行校验表达式

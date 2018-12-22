@@ -1,7 +1,7 @@
 package com.jkmvc.orm
 
-import com.jkmvc.validate.Validation
-import com.jkmvc.validate.ValidationException
+import com.jkmvc.validator.Validator
+import com.jkmvc.validator.ValidatorException
 
 /**
  * ORM之数据校验
@@ -25,9 +25,9 @@ abstract class OrmValid : OrmEntity() {
             val value: Any = this[field];
 
             // 校验单个属性: 属性值可能被修改
-            val (succ, uint, lastValue) = Validation.execute(rule.rule!!, value, data)
+            val (succ, uint, lastValue) = Validator.execute(rule.rule!!, value, data)
             if (succ == false)
-                throw ValidationException(rule.label + uint?.message());
+                throw ValidatorException(rule.label + uint?.message());
 
             // 更新被修改的属性值
             if (value !== lastValue)

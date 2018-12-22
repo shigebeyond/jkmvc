@@ -2,7 +2,7 @@ package com.jkmvc.tests
 
 import com.jkmvc.cache.JedisFactory
 import com.jkmvc.common.*
-import com.jkmvc.validate.Validation
+import com.jkmvc.validator.Validator
 import getIntranetHost
 //import kotlinx.coroutines.experimental.*
 import org.dom4j.Attribute
@@ -441,7 +441,7 @@ class MyTests{
 
     @Test
     fun testType(){
-        val type = Validation::trim.parameters[0].type
+        val type = Validator::trim.parameters[0].type
         println(type::class)
         println(type.javaClass)
         println(type.classifier)

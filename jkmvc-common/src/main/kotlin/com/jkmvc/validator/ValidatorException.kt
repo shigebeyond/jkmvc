@@ -1,9 +1,9 @@
-package com.jkmvc.validate
+package com.jkmvc.validator
 
 /**
  * 校验异常
  */
-class ValidationException : RuntimeException {
+class ValidatorException : RuntimeException {
     constructor(message: String) : super(message) {
     }
 

@@ -1,7 +1,4 @@
-package com.jkmvc.validate
-
-import com.jkmvc.common.Config
-import java.util.concurrent.ConcurrentHashMap
+package com.jkmvc.validator
 
 /**
  * 校验器
@@ -11,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @date 2016-10-20 下午2:20:13  
  *
  */
-object Validation:IValidation {
+object Validator:IValidator {
 
 	/**
 	 * 编译与执行校验表达式
@@ -22,7 +19,7 @@ object Validation:IValidation {
 	 * @return
 	 */
 	public override fun execute(exp:String, value:Any?, variables:Map<String, Any?>): Any? {
-		return ValidationExpr.instance(exp).execute(value, variables);
+		return ValidatorExpr.instance(exp).execute(value, variables);
 	}
 
 	/************************** 校验值的方法 ************************/
