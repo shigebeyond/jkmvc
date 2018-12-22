@@ -49,8 +49,7 @@ interface IDbIdentifierQuoter{
         }
 
         // 转义字段 + 非函数表达式
-        if (colQuoting && "^\\w[\\w\\d_\\.\\*]*".toRegex().matches(column))
-        {
+        if (colQuoting && "^\\w[\\w\\d_\\.\\*]*".toRegex().matches(column)) {
             // 表名
             if(column.contains('.')){
                 var arr = column.split('.');

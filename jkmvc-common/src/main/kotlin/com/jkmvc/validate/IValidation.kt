@@ -18,12 +18,5 @@ interface IValidation
 	 * @param variables 变量
 	 * @return
 	 */
-	fun execute(exp:String, value:Any?, variables:Map<String, Any?> = emptyMap()): ValidationResult
-
-	/**
-	 * 获得消息
-	 * @param key
-	 * @return
-	 */
-	fun getMessage(key:String):String?
+	fun execute(exp:String, value:Any?, variables:Map<String, Any?> = emptyMap()): Any?
 }

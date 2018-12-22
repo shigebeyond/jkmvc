@@ -65,7 +65,7 @@ class ValidationFunc(protected val func: KFunction<*> /* 方法 */){
      * @param value 待校验的值
      * @param params 参数
      * @param variables 变量
-     * @returns
+     * @return 如果是预言函数, 返回原值, 否则返回执行结果
      */
     public fun execute(value:Any?, params:Array<String>, variables:Map<String, Any?>): Any? {
         // 获得函数
@@ -86,12 +86,19 @@ class ValidationFunc(protected val func: KFunction<*> /* 方法 */){
                     *otherParams // 其他参数
             )
 
-            // 如果是预言函数+预言失败, 则抛异常
-            if(isPredict() && result == false){
-                val message: String = messages[name]!!
-                throw ValidationException("label" + message.replaces(params));
+            // 如果是预言函数, 返回原值
+            if(isPredict() ){
+                // 如果预言失败, 则抛异常
+                if(result == false) {
+                    val message: String = messages[name]!!
+                    throw ValidationException("label" + message.replaces(params));
+                }
+
+                // 返回原值
+                return value
             }
 
+            // 否则返回执行结果
             return result
         }catch (e:Exception){
             throw Exception("调用校验方法出错：" + name + "(" + params.joinToString(",") + ")", e)

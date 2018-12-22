@@ -11,12 +11,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @date 2016-10-20 下午2:20:13  
  *
  */
-object Validation:IValidation
-{
-	/**
-	 * 缓存编译后的表达式
-	 */
-	private val expsCached: ConcurrentHashMap<String, ValidationExpr> = ConcurrentHashMap();
+object Validation:IValidation {
 
 	/**
 	 * 编译与执行校验表达式
@@ -26,14 +21,8 @@ object Validation:IValidation
 	 * @param variables 变量
 	 * @return
 	 */
-	public override fun execute(exp:String, value:Any?, variables:Map<String, Any?>): ValidationResult
-	{
-		// 编译
-		val expCompiled = expsCached.getOrPut(exp){
-			ValidationExpr(exp);
-		}
-		// 执行
-		return expCompiled.execute(value, variables);
+	public override fun execute(exp:String, value:Any?, variables:Map<String, Any?>): Any? {
+		return ValidationExpr.instance(exp).execute(value, variables);
 	}
 
 	/************************** 校验值的方法 ************************/
