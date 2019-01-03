@@ -32,7 +32,8 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
         protected val fieldFillers: Map<String, KFunction2<DbQueryBuilderAction, IDb, String>> = mapOf(
                 "table" to DbQueryBuilderAction::fillTable,
                 "columns" to DbQueryBuilderAction::fillColumns,
-                "values" to DbQueryBuilderAction::fillValues
+                "values" to DbQueryBuilderAction::fillValues,
+                "distinct" to DbQueryBuilderAction::fillDistinct
         )
     }
 
@@ -248,22 +249,19 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
         var sql: String = SqlTemplates[action!!.ordinal];
 
         // 1 填充表名/多个字段名/多个字段值
-        // 针对 select :columns from :table / insert into :table :columns values :values / update :table
-        sql = ":(table|columns|values)".toRegex().replace(sql) { result: MatchResult ->
-            // 调用对应的方法: fillTable() / fillColumns() / fillValues()
+        // 针对 select :distinct :columns from :table / insert into :table :columns values :values / update :table
+        sql = ":(table|columns|values|distinct)".toRegex().replace(sql) { result: MatchResult ->
+            // 调用对应的方法: fillTable() / fillColumns() / fillValues() / fillDistinct()
             val method = fieldFillers[result.groupValues[1]];
             method?.call(this, db).toString();
         };
 
-        // 2 填充字段谓句
+        // 2 填充字段名与字段值的表达式
         // 针对 update :table set :column = :value
         if(action == SqlType.UPDATE)
             sql = ":column(.+):value".toRegex().replace(sql) { result: MatchResult ->
                 fillColumnValueExpr(db, result.groupValues[1]);
             };
-        // 3 填充distinct
-        else if(action == SqlType.SELECT)
-            sql = sql.replace(":distinct", if (distinct) "distinct" else "");
 
         buffer.append(sql);
         return this;
@@ -274,7 +272,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @param db
      * @return
      */
-    protected fun fillTable(db: IDb): String {
+    internal fun fillTable(db: IDb): String {
         if(action == SqlType.INSERT || action == SqlType.DELETE) // mysql的insert/delete语句, 不支持表带别名
             return quoteTable(db, table.exp)
 
@@ -287,7 +285,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @param db
      * @return
      */
-    protected fun fillColumns(db: IDb): String {
+    internal fun fillColumns(db: IDb): String {
         var cols: Iterator<CharSequence>
 
         if (action == SqlType.SELECT) { // 1 select子句:  data是要查询的字段名
@@ -310,7 +308,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @param db
      * @return
      */
-    protected fun fillValues(db: IDb): String {
+    internal fun fillValues(db: IDb): String {
         // 1 insert...select..字句
         if(insertRows.isSubQuery()) // 子查询
             return quote(db, insertRows.getSubQuery())
@@ -334,6 +332,16 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
     }
 
     /**
+     * 编译distinct
+     *     select时用
+     * @param db
+     * @return
+     */
+    internal fun fillDistinct(db: IDb): String {
+        return if (distinct) "distinct" else ""
+    }
+
+    /**
      * 编译字段名与字段值的表达式: 转义 + 构建表达式 + 连接表达式
      *    update时用
      * @param db
@@ -341,7 +349,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @param delimiter 表达式之间的连接符
      * @return
      */
-    protected fun fillColumnValueExpr(db: IDb, operator: String, delimiter: String = ", "): String {
+    internal fun fillColumnValueExpr(db: IDb, operator: String, delimiter: String = ", "): String {
         // update子句:  data是要更新字段值: <column to value>
         if (updateRow.isEmpty())
             return "";

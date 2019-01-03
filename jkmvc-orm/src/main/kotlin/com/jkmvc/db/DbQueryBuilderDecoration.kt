@@ -16,13 +16,13 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
     /**
      * where/group by/having/order by/limit子句的数组
      */
-    protected var clauses: Array<DbQueryBuilderDecorationClauses<*>?> = arrayOfNulls<DbQueryBuilderDecorationClauses<*>>(5);
+    protected var clauses: Array<DbQueryBuilderDecorationClauses<*>?> = arrayOfNulls(5);
 
     /**
      * join子句
      *   联表数组，每个联表join = 表名 + 联表方式 | 每个联表条件on = 字段 + 运算符 + 字段
      */
-    protected var joinClause: LinkedList<DbQueryBuilderDecorationClausesGroup> = LinkedList<DbQueryBuilderDecorationClausesGroup>()
+    protected var joinClause: LinkedList<DbQueryBuilderDecorationClausesGroup> = LinkedList()
 
     /**
      * where子句
