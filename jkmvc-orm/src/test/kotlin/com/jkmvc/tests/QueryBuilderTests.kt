@@ -168,6 +168,17 @@ class QueryBuilderTests{
     }
 
     /**
+     * 测试join
+     */
+    @Test
+    fun testJoin(){
+        val query = DbQueryBuilder().select("profiles.*", "posts.total_posts").from("profiles")
+                .join("posts", "INNER").on("profiles.username", "=", "posts.username");
+        val csql = query.compileSelect()
+        println(csql.previewSql())
+    }
+
+    /**
      * 测试子查询
      */
     @Test
@@ -178,7 +189,7 @@ class QueryBuilderTests{
 
         // join子查询： join select
         val query = DbQueryBuilder().select("profiles.*", "posts.total_posts").from("profiles")
-                .joins(DbExpr(sub, "posts"), "INNER").on("profiles.username", "=", "posts.username");
+                .join(DbExpr(sub, "posts"), "INNER").on("profiles.username", "=", "posts.username");
         val csql = query.compileSelect()
 
         // insert子查询： insert...select

@@ -259,7 +259,7 @@ val sub = DbQueryBuilder().select("username", DbExpr("COUNT(`id`)", "total_posts
 
 // join subquery
 DbQueryBuilder().select("profiles.*", "posts.total_posts").from("profiles")
-.joins(DbExpr(sub, "posts", false), "INNER").on("profiles.username", "=", "posts.username").findAllRows()
+.join(DbExpr(sub, "posts", false), "INNER").on("profiles.username", "=", "posts.username").findAllRows()
 ```
 
 生成sql如下：

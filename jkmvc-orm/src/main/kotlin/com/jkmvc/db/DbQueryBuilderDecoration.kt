@@ -386,7 +386,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * @return
      */
     public override fun andHavingOpen(): IDbQueryBuilder {
-        whereClause.open("AND");
+        havingClause.open("AND");
         return this;
     }
 
@@ -396,7 +396,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * @return
      */
     public override fun orHavingOpen(): IDbQueryBuilder {
-        whereClause.open("OR");
+        havingClause.open("OR");
         return this;
     }
 
@@ -406,7 +406,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * @return
      */
     public override fun andHavingClose(): IDbQueryBuilder {
-        whereClause.close();
+        havingClause.close();
         return this;
     }
 
@@ -416,7 +416,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * @return
      */
     public override fun orHavingClose(): IDbQueryBuilder {
-        whereClause.close();
+        havingClause.close();
         return this;
     }
 
