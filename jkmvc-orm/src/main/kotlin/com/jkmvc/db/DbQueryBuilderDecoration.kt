@@ -22,7 +22,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * join子句
      *   联表数组，每个联表join = 表名 + 联表方式 | 每个联表条件on = 字段 + 运算符 + 字段
      */
-    protected var joinClause: LinkedList<DbQueryBuilderDecorationClausesGroup> = LinkedList()
+    protected var joinClause: LinkedList<DbQueryBuilderDecorationClauses<*>> = LinkedList()
 
     /**
      * where子句
@@ -203,7 +203,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
     public override fun clone(): Any {
         val o = super.clone() as DbQueryBuilderDecoration
         //join子句
-        o.joinClause = joinClause.clone() as LinkedList<DbQueryBuilderDecorationClausesGroup>
+        o.joinClause = joinClause.clone() as LinkedList<DbQueryBuilderDecorationClauses<*>>
         //where/group by/having/order by/limit子句
         o.clauses = arrayOfNulls(clauses.size)
         for (i in 0..(clauses.size - 1))
@@ -452,11 +452,11 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * @return
      */
     public override fun join(table: CharSequence, type: String): IDbQueryBuilder {
-        // joinClause　子句
-        val j = DbQueryBuilderDecorationClausesGroup("$type JOIN", arrayOf<KFunction2 <IDb, *, String>?>(this::quoteTable));
+        // join　子句
+        val j = DbQueryBuilderDecorationClausesSimple("$type JOIN", arrayOf<KFunction2 <IDb, *, String>?>(this::quoteTable));
         j.addSubexp(arrayOf<Any?>(table));
 
-        // on　子句
+        // on　子句 -- on总是追随最近的一个join
         val on = DbQueryBuilderDecorationClausesGroup("ON", arrayOf<KFunction2 <IDb, *, String>?>(this::quoteColumn, null, this::quoteColumn));
 
         joinClause.add(j);
@@ -467,6 +467,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
 
     /**
      * Adds "ON ..." conditions for the last created JOIN statement.
+     *    on总是追随最近的一个join
      *
      * @param   c1  column name or DbExpr
      * @param   op  logic operator
