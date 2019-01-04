@@ -24,7 +24,8 @@ abstract class Orm(pk: Array<Any> /* 主键值, 非null */) : OrmRelated() {
 
     init{
         // 根据主键值来加载数据
-        loadByPk(*pk)
+        if(pk.isNotEmpty())
+            loadByPk(*pk)
     }
 
     public override fun toString(): String {
