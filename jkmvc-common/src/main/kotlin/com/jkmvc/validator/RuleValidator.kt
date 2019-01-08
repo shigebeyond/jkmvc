@@ -10,8 +10,8 @@ private typealias SubRule = Pair<String, Array<String>>
  * 规则校验器, 由一个规则表达式, 来表达校验逻辑
  *
  * 1 格式
- *    规则表达式是由多个(函数调用的)规则子表达式组成, 规则子表达式之间以空格分隔, 格式为 a(1) b(1,2) c(3,4)
- *    规则子表达式是函数调用, 格式为 a(1,2)
+ *    规则表达式是由多个(函数调用的)规则子表达式组成, 规则子表达式之间以空格分隔, 格式为 a(1) b(1,"2") c(3,4)
+ *    规则子表达式是函数调用, 格式为 a(1,"2")
  *
  * 2 限制
  *   无意于实现完整语义的布尔表达式, 暂时先满足于输入校验与orm保存数据时的校验, 因此:
@@ -30,7 +30,7 @@ class RuleValidator(public val label: String /* 值的标识, 如orm中的字段
 		/**
 		 * 函数参数的正则
 		 */
-		protected val REGEX_PARAM: Regex = ("([\\w\\d-:]+),?").toRegex();
+		protected val REGEX_PARAM: Regex = ("([\\w\\d-:\"]+),?").toRegex();
 
 		/**
 		 * 缓存编译后的规则子表达式
@@ -72,7 +72,7 @@ class RuleValidator(public val label: String /* 值的标识, 如orm中的字段
 		 */
 		public fun compileParams(exp: String): Array<String> {
 			val matches: Sequence<MatchResult> = REGEX_PARAM.findAll(exp);
-			val result:ArrayList<String> = ArrayList();
+			val result: ArrayList<String> = ArrayList();
 			for(m in matches)
 				result.add(m.groups[1]!!.value)
 

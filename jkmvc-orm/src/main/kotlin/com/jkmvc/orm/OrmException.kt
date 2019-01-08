@@ -8,12 +8,12 @@ package com.jkmvc.orm
  *
  */
 class OrmException : RuntimeException {
-    constructor(message: String) : super(message) {
+    public constructor(message: String) : super(message) {
     }
 
-    constructor(cause: Throwable) : super(cause) {
+    public constructor(cause: Throwable) : super(cause) {
     }
 
-    constructor(message: String, cause: Throwable) : super(message, cause) {
+    public constructor(message: String, cause: Throwable) : super(message, cause) {
     }
 }

@@ -87,6 +87,33 @@ public fun <T> Collection<T>?.isNullOrEmpty(): Boolean {
 }
 
 /**
+ * Returns the element at the specified position in this collection.
+ *
+ * @param index index of the element to return
+ * @return the element at the specified position in this collection
+ * @throws IndexOutOfBoundsException if the index is out of range
+ * (<tt>index &lt; 0 || index &gt;= size()</tt>)
+ */
+public operator fun <T> Collection<T>.get(index: Int): T {
+    if(index < 0 || index > size)
+        throw IndexOutOfBoundsException("Index: $index, Size: $size")
+
+    // list
+    if(this is List)
+        return this[index]
+
+    // 非list
+    var i = 0
+    for (item in this){
+        if(i++ == index)
+            return item
+    }
+
+    // 不可达
+    throw Exception("Unreachable code")
+}
+
+/**
  * 从集合中获得随机一个元素
  * @return
  */
@@ -94,7 +121,7 @@ public fun <T> Collection<T>.getRandom(): T {
     if(this.isEmpty())
         throw IndexOutOfBoundsException("No element in empty collection")
 
-    var n = ThreadLocalRandom.current().nextInt(this.size)
+    var n = randomInt(this.size)
     // list
     if(this is List)
         return this[n]

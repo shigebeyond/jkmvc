@@ -2,7 +2,7 @@ package com.jkmvc.tests
 
 import com.jkmvc.cache.JedisFactory
 import com.jkmvc.common.*
-import com.jkmvc.validator.Validator
+import com.jkmvc.validator.ValidateFuncDefinition
 import getIntranetHost
 //import kotlinx.coroutines.experimental.*
 import org.dom4j.Attribute
@@ -44,6 +44,7 @@ class MyTests{
 
     @Test
     fun testBig(){
+        println(-1%10)
 //        var a= BigDecimal("100")
 //        var b=BigDecimal("3")
 //        var c=a/b;
@@ -441,7 +442,7 @@ class MyTests{
 
     @Test
     fun testType(){
-        val type = Validator::trim.parameters[0].type
+        val type = ValidateFuncDefinition::trim.parameters[0].type
         println(type::class)
         println(type.javaClass)
         println(type.classifier)

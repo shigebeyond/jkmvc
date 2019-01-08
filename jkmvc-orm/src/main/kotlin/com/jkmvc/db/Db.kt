@@ -140,7 +140,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
         if (slaveNum == 0) { // 无从库, 直接用主库
             masterConn
         } else{ // 随机选个从库
-            val i = ThreadLocalRandom.current().nextInt(slaveNum)
+            val i = randomInt(slaveNum)
             //获得从库数据源
             val dataSource = dataSourceFactory.getDataSource("$name.slaves.$i");
             // 记录用到从库

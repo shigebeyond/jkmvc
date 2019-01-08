@@ -1,7 +1,24 @@
 package com.jkmvc.common
 
 import java.math.BigDecimal
+import java.util.concurrent.ThreadLocalRandom
 import kotlin.reflect.KClass
+
+/**
+ * 随机的int
+ * @return
+ */
+public inline fun randomInt(bound: Int): Int {
+    return ThreadLocalRandom.current().nextInt(bound)
+}
+
+/**
+ * 随机的bool
+ * @return
+ */
+public inline fun randomBoolean(): Boolean {
+    return randomInt(2) == 1
+}
 
 /**
  * 将BigDecimal转换为指定类型的数值
