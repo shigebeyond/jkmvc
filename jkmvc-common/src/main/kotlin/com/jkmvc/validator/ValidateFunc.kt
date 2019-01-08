@@ -144,10 +144,8 @@ class ValidateFunc(protected val func: KFunction<*> /* 方法 */) : IValidateFun
     protected fun convertParam(param:String, variables: Map<String, Any?>, type: KType): Any? {
         return if (param[0] == ':') // 变量: 从变量池中取值，都是正确类型，不需要转换类型
                     variables[param.substring(1)];
-                else if(type.classifier == String::class)
-                    param.trim("\"")
                 else // 值：转换类型
-                    param.to(type);
+                    param.exprTo(type)
     }
 
 }

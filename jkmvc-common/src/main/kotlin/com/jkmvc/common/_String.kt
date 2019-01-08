@@ -280,6 +280,43 @@ public inline fun String.to(type: KType): Any{
     return this.to(type.classifier as KClass<*>)
 }
 
+
+/**
+ * 将表达式转换为指定类型的非空值
+ *   支持表达式如: "a"(包含引号) / null / 1 / 3 等
+ * @param class 要转换的类型
+ * @return
+ */
+public inline fun <T: Any> String.exprTo(clazz: KClass<T>): T? {
+    if(clazz == String::class) {
+        if(this.equals("null", true))
+            return null
+
+        return this.trim("\"") as T
+    }
+
+    // 值：转换类型
+    return this.to(clazz)
+}
+
+/**
+ * 将表达式转换为指定类型的非空值
+ * @param class 要转换的类型
+ * @return
+ */
+public inline fun <T: Any> String.exprTo(clazz: Class<T>): T? {
+    return this.exprTo(clazz.kotlin)
+}
+
+/**
+ * 将表达式转换为指定类型的非空值
+ * @param type
+ * @return
+ */
+public inline fun String.exprTo(type: KType): Any? {
+    return this.exprTo(type.classifier as KClass<*>)
+}
+
 /**
  * 将当前值强制类型转换为指定类型的非空值
  * @param class 要转换的类型
