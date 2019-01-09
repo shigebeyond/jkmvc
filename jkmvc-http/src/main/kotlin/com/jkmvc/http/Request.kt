@@ -1,7 +1,7 @@
 package com.jkmvc.http
 
 import com.jkmvc.common.*
-import com.jkmvc.validator.Validator
+import com.jkmvc.validator.RuleValidator
 import org.apache.commons.collections.map.CompositeMap
 import java.util.*
 import javax.servlet.http.Cookie
@@ -87,13 +87,13 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 					return false
 
 				if(isUpload()){
-					mulReq.getParameterMap().any{
-						it.value.contains(value)
+					return mulReq.getParameterMap().any{ k, v ->
+						v.contains(value)
 					}
 				}
 
-				return req.parameterMap.any{
-					it.value.contains(value)
+				return req.parameterMap.any{ k, v ->
+					v.contains(value)
 				}
 			}
 
@@ -270,7 +270,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 	 */
 	protected inline fun validateValue(key: String, value: Any?, rule: String): String {
 		// 校验单个字段: 字段值可能被修改
-		return Validator.validate(rule, value, allParameters) as String
+		return RuleValidator(key, rule).validate(value, allParameters) as String
 	}
 
 	/*************************** 路由参数 *****************************/
