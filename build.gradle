@@ -1,11 +1,15 @@
 //gradle脚本自身需要使用的资源
 buildscript {
     repositories {
+		maven {
+            url 'http://oss.jfrog.org/artifactory/oss-snapshot-local'
+        }
         maven {
             url 'http://maven.aliyun.com/nexus/content/repositories/snapshots'
         }
         jcenter()
         mavenCentral()
+        
         maven {
             url "http://dl.bintray.com/kotlin/kotlin"
         }
@@ -16,6 +20,7 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokka_version}"
+        classpath 'org.gretty:gretty:2.3.0'
     }
 }
 

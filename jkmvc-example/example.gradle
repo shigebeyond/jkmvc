@@ -1,18 +1,17 @@
-apply plugin: 'jetty'
+apply plugin: "org.gretty"
 
 dependencies{
     // other project
     compile project(':jkmvc-session')
 
     // jdbc
-    providedRuntime "mysql:mysql-connector-java:5.1.6"
+    runtime "mysql:mysql-connector-java:5.1.6"
 }
 
 // 启动jetty
-jettyRun{
-    webAppSourceDirectory file("$projectDir/src/main/webapp")
+gretty{
+    inplaceMode "hard" // 资源目录 src/main/webapp
     httpPort 8080
-    contextPath project.name
-    scanIntervalSeconds 1 // jetty 热部署，当值为0时，不扫描新class，不热部署
-    reload "automatic"
+    contextPath "/${project.name}"
+    scanInterval 1 // jetty 热部署，当值为0时，不扫描新class，不热部署
 }
