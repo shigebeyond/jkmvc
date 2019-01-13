@@ -114,26 +114,6 @@ public operator fun <T> Collection<T>.get(index: Int): T {
 }
 
 /**
- * 从集合中获得随机一个元素
- * @return
- */
-public fun <T> Collection<T>.getRandom(): T {
-    if(this.isEmpty())
-        throw IndexOutOfBoundsException("No element in empty collection")
-
-    var n = randomInt(this.size)
-    // list
-    if(this is List)
-        return this[n]
-
-    // 非list
-    val it = this.iterator()
-    while (--n > 0)
-        it.next()
-    return it.next()
-}
-
-/**
  * 集合转数组
  *   注: Array<R> 不能使用R作为泛型参数, 只能使用具体类
  */
