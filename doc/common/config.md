@@ -19,7 +19,9 @@ eg. `jkmvc/jkmvc-http/src/main/resources/cookie.properties`
 expiry = 604800
 path = /
 domain = localhost
+# only in https/ssl protocol
 secure = false
+# forbid js reading
 httponly = false
 ```
 
