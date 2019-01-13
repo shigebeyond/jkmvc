@@ -14,9 +14,9 @@ package com.jkmvc.common
  **/
 interface INamedSingleton<T> {
     /**
-     * 配置，内容是哈希 <单例名 to 单例类>
+     * 单例类的配置，内容是哈希 <单例名 to 单例类>
      */
-    val config: IConfig
+    val instsConfig: IConfig
 
     /**
      * 根据单例名来获得单例

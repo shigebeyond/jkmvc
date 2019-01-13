@@ -17,9 +17,9 @@ public abstract class IOauth2Authorizer {
     companion object: NamedSingleton<IOauth2Authorizer>() {
 
         /**
-         * 配置，内容是哈希 <单例名 to 单例类>
+         * 单例类的配置，内容是哈希 <单例名 to 单例类>
          */
-        override val config: IConfig = Config.instance("oauth2-authorizer")
+        override val instsConfig: IConfig = Config.instance("oauth2-authorizer")
 
     }
 

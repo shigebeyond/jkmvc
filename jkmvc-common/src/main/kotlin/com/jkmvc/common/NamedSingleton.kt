@@ -29,7 +29,7 @@ abstract class NamedSingleton<T> : INamedSingleton<T> {
      */
     public override fun instance(name: String): T{
         return insts.getOrPut(name){
-            Class.forName(config[name]!!).newInstance() as T
+            Class.forName(instsConfig[name]!!).newInstance() as T
         }
     }
 

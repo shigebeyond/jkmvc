@@ -9,12 +9,12 @@ import redis.clients.jedis.Jedis
  * @author shijianhang
  * @create 2018-02-27 下午7:24
  **/
-class JedisCache(protected val name: String = "default"):ICache{
+class JedisCache(protected val configName: String = "default"):ICache{
 
     /**
      * redis配置
      */
-    public val config = Config.instance("redis.${name}", "yaml")
+    public val config = Config.instance("redis.${configName}", "yaml")
 
     /**
      * 序列化
@@ -24,9 +24,9 @@ class JedisCache(protected val name: String = "default"):ICache{
     /**
      * redis连接
      */
-    private val jedis: Jedis
+    protected val jedis: Jedis
         get(){
-            return JedisFactory.instance(name)
+            return JedisFactory.instance(configName)
         }
 
 
