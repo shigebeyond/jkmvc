@@ -2,6 +2,7 @@ package com.jkmvc.future
 
 import org.apache.http.concurrent.Cancellable
 import org.apache.http.concurrent.FutureCallback
+import java.util.*
 import java.util.concurrent.*
 
 /**
@@ -14,7 +15,14 @@ import java.util.concurrent.*
  * @author shijianhang<772910474@qq.com>
  * @date 2017-12-30 6:43 PM
  */
-open class BasicFuture<T>(public var callback: FutureCallback<T?>? = null /* 回调 */): Future<T?>, Cancellable {
+open class BasicFuture<T>(): Future<T?>, Cancellable {
+
+    /**
+     * 回调
+     */
+    protected val callbacks: MutableList<FutureCallback<T?>> by lazy {
+        LinkedList<FutureCallback<T?>>()
+    }
 
     /**
      * 用作同步的对象，为this对象
@@ -43,6 +51,14 @@ open class BasicFuture<T>(public var callback: FutureCallback<T?>? = null /* 回
      */
     @Volatile public var ex: Exception? = null
         protected set
+
+    /**
+     * 添加回调
+     * @param callback
+     */
+    public fun addCallback(callback: FutureCallback<T?>){
+        callbacks.add(callback)
+    }
 
     /**
      * 是否被取消
@@ -133,7 +149,9 @@ open class BasicFuture<T>(public var callback: FutureCallback<T?>? = null /* 回
             mutex.notifyAll()
         }
         // 回调
-        callback?.completed(result)
+        callbacks.forEach {
+            it.completed(result)
+        }
         return true
     }
 
@@ -154,7 +172,9 @@ open class BasicFuture<T>(public var callback: FutureCallback<T?>? = null /* 回
             mutex.notifyAll()
         }
         // 回调
-        callback?.failed(exception)
+        callbacks.forEach {
+            it.failed(exception)
+        }
         return true
     }
 
@@ -175,7 +195,9 @@ open class BasicFuture<T>(public var callback: FutureCallback<T?>? = null /* 回
             mutex.notifyAll()
         }
         // 回调
-        callback?.cancelled()
+        callbacks.forEach {
+            it.cancelled()
+        }
         return true
     }
 
