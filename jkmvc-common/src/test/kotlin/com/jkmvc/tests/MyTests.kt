@@ -1,5 +1,6 @@
 package com.jkmvc.tests
 
+import com.alibaba.fastjson.JSONObject
 import com.jkmvc.cache.JedisFactory
 import com.jkmvc.common.*
 import com.jkmvc.validator.ValidateFuncDefinition
@@ -40,6 +41,12 @@ enum class NumType {
     LONG
 }
 
+/**
+ * 基本测试
+ * @Description:
+ * @author shijianhang<772910474@qq.com>
+ * @date 2017-12-14 3:11 PM
+ */
 class MyTests{
 
     @Test
@@ -320,8 +327,9 @@ class MyTests{
     }
 
     @Test
-    fun testYaml(){
-        val config = Config.instance("test", "yaml")
+    fun testConfig(){
+        //val config = Config.instance("man", "yaml")
+        val config = Config.instance("man", "json")
         println(config.props)
         println(config.props["age"] is Int)
         // 数组字段的类型是： ArrayList

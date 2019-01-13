@@ -1,6 +1,7 @@
 package com.jkmvc.common
 
 
+import com.alibaba.fastjson.JSONObject
 import org.yaml.snakeyaml.Yaml
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -68,10 +69,10 @@ class Config(public override val props: Map<String, *>): IConfig(){
          * 构建配置项
          *
          * @param file the properties file's name in classpath or the sub directory of classpath
-         * @param type properties | yaml
+         * @param type properties | yaml | json
          * @return
          */
-        public fun buildProperties(file:String, type: String = "properties"): Properties {
+        public fun buildProperties(file:String, type: String = "properties"): Map<String, *> {
             val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(file)
             if(inputStream == null)
                 throw IllegalArgumentException("配置文件[$file]不存在")
@@ -82,20 +83,21 @@ class Config(public override val props: Map<String, *>): IConfig(){
          * 构建配置项
          *
          * @param inputStream
-         * @param type properties | yaml
+         * @param type properties | yaml | json
          * @return
          */
-        public fun buildProperties(inputStream: InputStream, type: String = "properties"): Properties {
+        public fun buildProperties(inputStream: InputStream, type: String = "properties"): Map<String, *> {
             if(inputStream == null)
                 throw IllegalArgumentException("配置输入流为空")
 
             return inputStream.use {
                 when(type){
                     "properties" -> Properties().apply { load(InputStreamReader(inputStream, "UTF-8")) } // 加载 properties 文件
-                    "yaml" -> Yaml().loadAs(inputStream, Properties::class.java) // 加载 yaml 文件
+                    "yaml" -> Yaml().loadAs(inputStream, HashMap::class.java) // 加载 yaml 文件
+                    "json" -> JSONObject.parseObject(inputStream.reader().readText()) // 加载 json 文件
                     else -> throw IllegalArgumentException("未知配置文件类型")
                 }
-            }
+            } as Map<String, *>
         }
     }
 

@@ -1,0 +1,12 @@
+{
+  "age":1,
+  "name":"jiaobuchong",
+  "params":{
+    "event":"what's up",
+    "url":"http://www.jiaobuchong.com"
+  },
+  "favoriteBooks":[
+    "Gone with the wind",
+    "The Little Prince"
+  ]
+}
