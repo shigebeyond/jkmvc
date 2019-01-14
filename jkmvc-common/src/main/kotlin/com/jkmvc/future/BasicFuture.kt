@@ -20,9 +20,7 @@ open class BasicFuture<T>(): Future<T?>, Cancellable {
     /**
      * 回调
      */
-    protected val callbacks: MutableList<FutureCallback<T?>> by lazy {
-        LinkedList<FutureCallback<T?>>()
-    }
+    protected var callbacks: MutableList<FutureCallback<T?>>? = null
 
     /**
      * 用作同步的对象，为this对象
@@ -57,7 +55,9 @@ open class BasicFuture<T>(): Future<T?>, Cancellable {
      * @param callback
      */
     public fun addCallback(callback: FutureCallback<T?>){
-        callbacks.add(callback)
+        if(callbacks == null) // 延迟创建
+            callbacks = LinkedList()
+        callbacks!!.add(callback)
     }
 
     /**
@@ -149,7 +149,7 @@ open class BasicFuture<T>(): Future<T?>, Cancellable {
             mutex.notifyAll()
         }
         // 回调
-        callbacks.forEach {
+        callbacks?.forEach {
             it.completed(result)
         }
         return true
@@ -172,7 +172,7 @@ open class BasicFuture<T>(): Future<T?>, Cancellable {
             mutex.notifyAll()
         }
         // 回调
-        callbacks.forEach {
+        callbacks?.forEach {
             it.failed(exception)
         }
         return true
@@ -195,7 +195,7 @@ open class BasicFuture<T>(): Future<T?>, Cancellable {
             mutex.notifyAll()
         }
         // 回调
-        callbacks.forEach {
+        callbacks?.forEach {
             it.cancelled()
         }
         return true
