@@ -2,7 +2,6 @@ package com.jkmvc.future
 
 import org.apache.http.concurrent.Cancellable
 import org.apache.http.concurrent.FutureCallback
-import java.util.*
 import java.util.concurrent.*
 
 /**
@@ -15,12 +14,7 @@ import java.util.concurrent.*
  * @author shijianhang<772910474@qq.com>
  * @date 2017-12-30 6:43 PM
  */
-open class BasicFuture<T>(): Future<T?>, Cancellable {
-
-    /**
-     * 回调
-     */
-    protected var callbacks: MutableList<FutureCallback<T?>>? = null
+open class BasicFuture<T>(): Future<T?>, Cancellable, Callbackable<T>() {
 
     /**
      * 用作同步的对象，为this对象
@@ -49,16 +43,6 @@ open class BasicFuture<T>(): Future<T?>, Cancellable {
      */
     @Volatile public var ex: Exception? = null
         protected set
-
-    /**
-     * 添加回调
-     * @param callback
-     */
-    public fun addCallback(callback: FutureCallback<T?>){
-        if(callbacks == null) // 延迟创建
-            callbacks = LinkedList()
-        callbacks!!.add(callback)
-    }
 
     /**
      * 是否被取消
