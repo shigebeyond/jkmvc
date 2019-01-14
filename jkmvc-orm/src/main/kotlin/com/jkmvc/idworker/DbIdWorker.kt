@@ -1,6 +1,6 @@
-package com.jkmvc.util.id
+package com.jkmvc.idworker
 
-import com.jkmvc.common.IIdWorker
+import com.jkmvc.idworker.IIdWorker
 import com.jkmvc.db.Db
 import java.util.concurrent.ConcurrentHashMap
 
@@ -43,7 +43,7 @@ class DbIdWorker: IIdWorker {
      * 获得下一个ID (该方法是线程安全的)
      * @return
      */
-    override fun nextId(): Long {
+    public override fun nextId(): Long {
         // TODO: module可通过参数指定
         val module = "default"
         val seq = idSequences.getOrPut(module){

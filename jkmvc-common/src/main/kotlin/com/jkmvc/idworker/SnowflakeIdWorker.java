@@ -1,5 +1,6 @@
-package com.jkmvc.common;
+package com.jkmvc.idworker;
 
+import com.jkmvc.common.Config;
 
 /**
  * Twitter_Snowflake<br>
@@ -20,21 +21,7 @@ package com.jkmvc.common;
  */
 public class SnowflakeIdWorker implements IIdWorker {
 
-    // ==============================单例===========================================
-    private static SnowflakeIdWorker _inst;
-
-    public static synchronized SnowflakeIdWorker instance(){
-        if(_inst == null){
-            Config config = Config.instance("jkmvc", "properties");
-            _inst = new SnowflakeIdWorker(config);
-        }
-        return _inst;
-    }
-
     // ==============================Fields===========================================
-    /** 开始时间截 (2015-01-01) */
-    private final long twepoch = 1420041600000L;
-
     /** 机器id所占的位数 */
     private final long workerIdBits = 5L;
 
@@ -62,6 +49,9 @@ public class SnowflakeIdWorker implements IIdWorker {
     /** 生成序列的掩码，这里为4095 (0b111111111111=0xfff=4095) */
     private final long sequenceMask = -1L ^ (-1L << sequenceBits); // 微秒内序列号12位自增，并发4096
 
+    /** 开始时间截 */
+    private long startTimestamp;
+
     /** 工作机器ID(0~31) */
     private long workerId;
 
@@ -77,10 +67,28 @@ public class SnowflakeIdWorker implements IIdWorker {
     //==============================Constructors=====================================
     /**
      * 构造函数
+     * @param startTimestamp 开始时间戳
      * @param workerId 工作ID (0~31)
      * @param datacenterId 数据中心ID (0~31)
      */
-    public SnowflakeIdWorker(long workerId, long datacenterId) {
+    public SnowflakeIdWorker(long startTimestamp, long workerId, long datacenterId) {
+        init(startTimestamp, workerId, datacenterId);
+    }
+
+    /**
+     * 默认构造函数
+     */
+    public SnowflakeIdWorker() {
+        Config config = Config.instance("snow-flake-id", "properties");
+        init(config.getLong("startTimestamp", 0L), config.getLong("workerId", 0L), config.getLong("datacenterId", 0L));
+    }
+
+    /**
+     * 初始化
+     * @param workerId
+     * @param datacenterId
+     */
+    private void init(long startTimestamp, long workerId, long datacenterId) {
         if (workerId > maxWorkerId || workerId < 0) {
             throw new IllegalArgumentException(String.format("worker Id can't be greater than %d or less than 0", maxWorkerId));
         }
@@ -89,14 +97,6 @@ public class SnowflakeIdWorker implements IIdWorker {
         }
         this.workerId = workerId;
         this.datacenterId = datacenterId;
-    }
-
-    /**
-     * 构造函数
-     * @param config 配置数据
-     */
-    public SnowflakeIdWorker(Config config) {
-        this(config.getLong("workerId", 0L), config.getLong("datacenterId", 0L));
     }
 
     // ==============================Methods==========================================
@@ -113,7 +113,7 @@ public class SnowflakeIdWorker implements IIdWorker {
                     String.format("Clock moved backwards.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
         }
 
-        //如果是同一时间生成的，则进行毫秒内序列
+        //如果是同一毫秒内生成的，则进行毫秒内序列
         if (lastTimestamp == timestamp) {
             sequence = (sequence + 1) & sequenceMask; // 微秒内序列号12位自增，并发4096
             //毫秒内序列溢出
@@ -121,9 +121,7 @@ public class SnowflakeIdWorker implements IIdWorker {
                 //阻塞到下一个毫秒,获得新的时间戳
                 timestamp = tilNextMillis(lastTimestamp);
             }
-        }
-        //时间戳改变，毫秒内序列重置
-        else {
+        } else { //时间戳改变，毫秒内序列重置
             sequence = 0L;
         }
 
@@ -131,7 +129,7 @@ public class SnowflakeIdWorker implements IIdWorker {
         lastTimestamp = timestamp;
 
         //移位并通过或运算拼到一起组成64位的ID
-        return ((timestamp - twepoch) << timestampLeftShift) //
+        return ((timestamp - startTimestamp) << timestampLeftShift) //
                 | (datacenterId << datacenterIdShift) //
                 | (workerId << workerIdShift) //
                 | sequence;

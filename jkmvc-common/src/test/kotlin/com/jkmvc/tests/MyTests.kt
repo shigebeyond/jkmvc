@@ -1,8 +1,8 @@
 package com.jkmvc.tests
 
-import com.alibaba.fastjson.JSONObject
 import com.jkmvc.cache.JedisFactory
 import com.jkmvc.common.*
+import com.jkmvc.idworker.SnowflakeIdWorker
 import com.jkmvc.validator.ValidateFuncDefinition
 import getIntranetHost
 //import kotlinx.coroutines.experimental.*
@@ -341,7 +341,7 @@ class MyTests{
     @Test
     fun testSnowflakeId(){
 //        val idWorker = SnowflakeIdWorker(0, 0)
-        val idWorker = SnowflakeIdWorker.instance()
+        val idWorker = SnowflakeIdWorker()
         for (i in 0..999) {
             val id = idWorker.nextId()
             println(java.lang.Long.toBinaryString(id))

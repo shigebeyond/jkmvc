@@ -1,4 +1,4 @@
-package com.jkmvc.util.id
+package com.jkmvc.idworker
 
 import com.jkmvc.orm.Orm
 import com.jkmvc.orm.OrmMeta
@@ -28,7 +28,6 @@ class IdSequenceModel(id:Int? = null): Orm(id) {
     private val currId: AtomicLong by lazy{
         AtomicLong(maxId)
     }
-
 
     /**
      * get next id when segment have it

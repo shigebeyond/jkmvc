@@ -2,7 +2,7 @@ package com.jkmvc.session.token
 
 import com.jkmvc.cache.ICache
 import com.jkmvc.common.Config
-import com.jkmvc.common.SnowflakeIdWorker
+import com.jkmvc.idworker.IIdWorker
 import com.jkmvc.session.Auth
 import com.jkmvc.session.IAuthUserModel
 
@@ -37,7 +37,7 @@ object TokenManager : ITokenManager {
      */
     public override fun createToken(user: IAuthUserModel): String {
         //创建tokenId
-        val tokenId:Long = SnowflakeIdWorker.instance().nextId()
+        val tokenId:Long = IIdWorker.instance("snowflakeId").nextId()
 
         //存储token，key为tokenId, value是user, 并设置过期时间
         cache.put("token-$tokenId", user.toMap(), TOKEN_EXPIRES)
