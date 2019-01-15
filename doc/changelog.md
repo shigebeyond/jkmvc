@@ -1,5 +1,7 @@
 # 1.1 
-实现http路由, 还有一些公共的类, 如Config等
+1. 实现一些公共的类, 如Config等
+2. 实现http路由
+3. 实现自动扫描controller类, 并注册
 
 # 1.2 
 实现orm, 支持session

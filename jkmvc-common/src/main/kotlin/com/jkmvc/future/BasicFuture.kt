@@ -9,7 +9,6 @@ import java.util.concurrent.*
  *   可以通过以下方法来表示完成状态: cancel() / failed() / completed()
  *   参考包 org.apache.httpcomponents:httpcore:4.4.7 中的类 org.apache.http.concurrent.BasicFuture 的实现，但由于 BasicFuture 中的属性都是public的，所以子类无法实现IResponse接口，因此无法继承，只是复制
  *
- * @ClassName: BasicFuture
  * @Description:
  * @author shijianhang<772910474@qq.com>
  * @date 2017-12-30 6:43 PM
@@ -122,7 +121,7 @@ open class BasicFuture<T>(): Future<T?>, Cancellable, Callbackable<T>() {
      * @param result
      * @return
      */
-    public fun completed(result: T?): Boolean {
+    public open fun completed(result: T?): Boolean {
         synchronized(this) {
             if (this.completed) // 处理重入
                 return false
@@ -133,9 +132,7 @@ open class BasicFuture<T>(): Future<T?>, Cancellable, Callbackable<T>() {
             mutex.notifyAll()
         }
         // 回调
-        callbacks?.forEach {
-            it.completed(result)
-        }
+        callback?.completed(result)
         return true
     }
 
@@ -145,7 +142,7 @@ open class BasicFuture<T>(): Future<T?>, Cancellable, Callbackable<T>() {
      * @param exception
      * @return
      */
-    public fun failed(exception: Exception): Boolean {
+    public open fun failed(exception: Exception): Boolean {
         synchronized(this) {
             if (completed) // 处理重入
                 return false
@@ -156,9 +153,7 @@ open class BasicFuture<T>(): Future<T?>, Cancellable, Callbackable<T>() {
             mutex.notifyAll()
         }
         // 回调
-        callbacks?.forEach {
-            it.failed(exception)
-        }
+        callback?.failed(exception)
         return true
     }
 
@@ -179,9 +174,7 @@ open class BasicFuture<T>(): Future<T?>, Cancellable, Callbackable<T>() {
             mutex.notifyAll()
         }
         // 回调
-        callbacks?.forEach {
-            it.cancelled()
-        }
+        callback?.cancelled()
         return true
     }
 

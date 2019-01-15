@@ -3,7 +3,6 @@ package com.jkmvc.future
 /**
  * 已完成的异步结果，没有延迟
  *
- * @ClassName: CompletedFuture
  * @Description:
  * @author shijianhang<772910474@qq.com>
  * @date 2017-12-30 6:43 PM

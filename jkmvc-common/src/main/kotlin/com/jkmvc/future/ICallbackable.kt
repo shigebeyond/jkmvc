@@ -11,8 +11,7 @@ import java.util.*
 interface ICallbackable<T> {
 
     /**
-     * 添加回调
-     * @param callback
+     * 回调
      */
-    fun addCallback(callback: FutureCallback<T?>)
+    var callback: FutureCallback<T?>?
 }

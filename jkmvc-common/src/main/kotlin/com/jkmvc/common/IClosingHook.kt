@@ -5,7 +5,6 @@ import java.io.Closeable
 /**
  * 要关闭资源的事件钩子
  *
- * @ClassName: ShutdownHook
  * @Description:
  * @author shijianhang<772910474@qq.com>
  * @date 2017-12-16 3:48 PM

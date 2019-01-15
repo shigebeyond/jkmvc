@@ -13,15 +13,5 @@ abstract class Callbackable<T> : ICallbackable<T> {
     /**
      * 回调
      */
-    protected var callbacks: MutableList<FutureCallback<T?>>? = null
-
-    /**
-     * 添加回调
-     * @param callback
-     */
-    public override fun addCallback(callback: FutureCallback<T?>){
-        if(callbacks == null) // 延迟创建
-            callbacks = LinkedList()
-        callbacks!!.add(callback)
-    }
+    public override var callback: FutureCallback<T?>? = null
 }
