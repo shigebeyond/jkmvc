@@ -1,6 +1,7 @@
 package com.jkmvc.common
 
 import java.util.*
+import kotlin.collections.HashSet
 
 /**
  * 扫描指定包下的类
@@ -13,6 +14,11 @@ abstract class ClassScanner : IClassScanner {
      * 自动扫描的包
      */
     protected val packages: MutableList<String> = LinkedList();
+
+    /**
+     * 扫描过的类文件
+     */
+    protected val scanedFiles: MutableSet<String> = HashSet()
 
     /**
      * 添加单个包
@@ -57,8 +63,12 @@ abstract class ClassScanner : IClassScanner {
         for(url in urls){
             // 遍历某个资源下的文件
             url.travel { relativePath, isDir ->
-                // 收集类文件
-                collectClass(relativePath)
+                // 只处理未扫描过的类文件, 由于多个classes/jar中会有同名的类, 只处理第一个
+                if(!scanedFiles.contains(relativePath)) {
+                    scanedFiles.add(relativePath)
+                    // 收集类文件
+                    collectClass(relativePath)
+                }
             }
         }
     }
