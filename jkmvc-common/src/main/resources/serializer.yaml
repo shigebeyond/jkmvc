@@ -1,3 +1,6 @@
 # 序列器的类型
 jdk: com.jkmvc.serialize.JdkSerializer
 fst: com.jkmvc.serialize.FstSerializer
+kryo: com.jkmvc.serialize.KryoSerializer
+hessian: com.jkmvc.serialize.HessianSerializer
+protostuff: com.jkmvc.serialize.ProtostuffSerializer
