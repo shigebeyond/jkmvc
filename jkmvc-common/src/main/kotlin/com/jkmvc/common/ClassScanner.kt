@@ -65,6 +65,7 @@ abstract class ClassScanner : IClassScanner {
             url.travel { relativePath, isDir ->
                 // 只处理未扫描过的类文件, 由于多个classes/jar中会有同名的类, 只处理第一个
                 if(!scanedFiles.contains(relativePath)) {
+                    // 记录类文件
                     scanedFiles.add(relativePath)
                     // 收集类文件
                     collectClass(relativePath)

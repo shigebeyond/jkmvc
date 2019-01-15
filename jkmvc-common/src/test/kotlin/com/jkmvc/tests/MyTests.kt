@@ -152,12 +152,17 @@ class MyTests{
         println(str)*/
 
         // 去空格
-        println("hello world".trim())
-        println("hello world".replace(" ", ""))
+//        println("hello world".trim())
+//        println("hello world".replace(" ", ""))
     }
 
     @Test
     fun testFile(){
+        println(File.separator) // "/"
+        println(File.separatorChar) // "/"
+        println(File.pathSeparator) // ":"
+        println(File.pathSeparatorChar) // ":"
+
         /*val f = File("/home/shi/test/wiki.txt")
         val ms = "<span.*>([^<]*)</span>".toRegex().findAll(f.readText())
         for(m in ms){
@@ -182,11 +187,11 @@ class MyTests{
         }*/
 
         // 添加行号
-        val f = File("/home/shi/test/voice.txt")
+        /*val f = File("/home/shi/test/voice.txt")
         var i = 1
         f.forEachLine {
             println((i++).toString() + " " + it)
-        }
+        }*/
     }
 
     @Test

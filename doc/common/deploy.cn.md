@@ -2,7 +2,7 @@
 
 ## 1 设置生成环境
 
-vim src/main/resources/jkmvc.properties
+vim src/main/resources/application.properties
 
 ```
 # 环境：prod/dev/test

@@ -2,7 +2,7 @@
 
 ## 1 Setting up a production environment
 
-vim src/main/resources/jkmvc.properties
+vim src/main/resources/application.properties
 
 ```
 # environment: prod/dev/test
