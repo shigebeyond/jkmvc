@@ -114,13 +114,12 @@ public fun URL.travel(action:(relativePath:String, isDir:Boolean) -> Unit):Unit{
          * 文件相对路径=文件绝对路径-跟路径：om\jkmvc\szpower\controller\WorkInstructionController.class
          * => com变为om，少了一个c，导致根据文件相对路径来加载对应的class错误
          */
-        //val root = Thread.currentThread().contextClassLoader.getRootResource().path
-        val root = path
+        val root = Thread.currentThread().contextClassLoader.getRootResource().path
+        // println("classes根目录：" + root)
+        // println("当前目录：" + path)
         val os = System.getProperty("os.name")
-        // println("遍历资源")
         // println("操作系统：" + os)
-        // println("根路径：" + root)
-        File(root).travel {
+        File(path).travel {
             // println("文件绝对路径：" + it.path)
             val relativePath = if(os.startsWith("Windows", true))
                                     it.path.substring(root.length - 1)
