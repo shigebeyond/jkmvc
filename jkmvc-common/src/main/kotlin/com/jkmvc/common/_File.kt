@@ -94,6 +94,9 @@ public fun ClassLoader.getRootResource(): URL {
     return getResource(".") // cli环境
 }
 
+// 环境
+private val env = Config.instance("application", "properties").getString("environment")!!
+
 /**
  * 遍历url中的资源
  * @param action 访问者函数
@@ -107,24 +110,39 @@ public fun URL.travel(action:(relativePath:String, isDir:Boolean) -> Unit):Unit{
             action(entry.name, isDir);
         }
     }else{ // 遍历目录
+        val root = Thread.currentThread().contextClassLoader.getRootResource().path
+         // println("classLoader根目录：" + root)
+         // println("当前目录：" + path)
+        var rootLen = root.length
+
         /**
-         * fix bug: window下获得资源的相对路径错误
-         * 根路径：/C:/WebServer/tomcat0/webapps/ROOT/WEB-INF/classes/
-         * 文件绝对路径：C:\WebServer\tomcat0\webapps\ROOT\WEB-INF\classes\com\jkmvc\szpower\controller\WorkInstructionController.class
+         * fix bug: window下路径对不上
+         * classLoader根目录：/C:/Webclient/tomcat0/webapps/ROOT/WEB-INF/classes/
+         * 文件绝对路径：      C:\Webclient\tomcat0\webapps\ROOT\WEB-INF\classes\com\jkmvc\szpower\controller\WorkInstructionController.class
          * 文件相对路径=文件绝对路径-跟路径：om\jkmvc\szpower\controller\WorkInstructionController.class
          * => com变为om，少了一个c，导致根据文件相对路径来加载对应的class错误
          */
-        val root = Thread.currentThread().contextClassLoader.getRootResource().path
-        // println("classes根目录：" + root)
-        // println("当前目录：" + path)
         val os = System.getProperty("os.name")
         // println("操作系统：" + os)
+        if(os.startsWith("Windows", true))
+            rootLen--
+
+        /**
+         * fix bug: 测试环境下路径对不上
+         * classLoader根目录: /home/shi/code/java/java/jksoa/jksoa-client/out/test/classes/
+         * 文件绝对路径:       /home/shi/code/java/java/jksoa/jksoa-client/out/production/classes/com/jksoa/example/EchoService.class
+         * 参考: ClientTests.testScanClass()
+         */
+        // println("环境: $env")
+        if(env == "test")
+            rootLen = rootLen + 6
+
         File(path).travel {
             // println("文件绝对路径：" + it.path)
             val relativePath = if(os.startsWith("Windows", true))
-                                    it.path.substring(root.length - 1)
+                                    it.path.substring(rootLen)
                                 else
-                                    it.path.substring(root.length)
+                                    it.path.substring(rootLen)
             // println("文件相对路径：" + relativePath)
             action(relativePath, it.isDirectory)
         }
