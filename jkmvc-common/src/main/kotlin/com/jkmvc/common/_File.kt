@@ -94,9 +94,6 @@ public fun ClassLoader.getRootResource(): URL {
     return getResource(".") // cli环境
 }
 
-// 环境
-private val env = Config.instance("application", "properties").getString("environment")!!
-
 /**
  * 遍历url中的资源
  * @param action 访问者函数
@@ -133,8 +130,8 @@ public fun URL.travel(action:(relativePath:String, isDir:Boolean) -> Unit):Unit{
          * 文件绝对路径:       /home/shi/code/java/java/jksoa/jksoa-client/out/production/classes/com/jksoa/example/EchoService.class
          * 参考: ClientTests.testScanClass()
          */
-        // println("环境: $env")
-        if(env == "test")
+        //println("是否单元测试环境: " + Application.isJunitTest)
+        if(Application.isJunitTest)
             rootLen = rootLen + 6
 
         File(path).travel {

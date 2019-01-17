@@ -1,6 +1,5 @@
 package com.jkmvc.future
 
-import org.apache.http.concurrent.FutureCallback
 import java.util.*
 
 /**
@@ -11,7 +10,18 @@ import java.util.*
 abstract class Callbackable<T> : ICallbackable<T> {
 
     /**
-     * 回调
+     * 回调列表
      */
-    public override var callback: FutureCallback<T?>? = null
+    protected var callbacks: MutableList<IFutureCallback<T>>? = null
+
+    /**
+     * 添加回调
+     * @param callback
+     */
+    public override fun addCallback(callback: IFutureCallback<T>){
+        if(callbacks == null)
+            callbacks = LinkedList()
+
+        callbacks!!.add(callback)
+    }
 }

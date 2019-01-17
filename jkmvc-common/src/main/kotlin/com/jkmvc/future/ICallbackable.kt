@@ -1,8 +1,5 @@
 package com.jkmvc.future
 
-import org.apache.http.concurrent.FutureCallback
-import java.util.*
-
 /**
  * 可回调
  * @author shijianhang<772910474@qq.com>
@@ -11,7 +8,9 @@ import java.util.*
 interface ICallbackable<T> {
 
     /**
-     * 回调
+     * 添加回调
+     * @param callback
      */
-    var callback: FutureCallback<T?>?
+    fun addCallback(callback: IFutureCallback<T>)
+
 }

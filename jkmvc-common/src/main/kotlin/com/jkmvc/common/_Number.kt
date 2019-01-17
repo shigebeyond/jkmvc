@@ -13,6 +13,14 @@ public inline fun randomInt(bound: Int): Int {
 }
 
 /**
+ * 随机的long
+ * @return
+ */
+public inline fun randomLong(bound: Long): Long {
+    return ThreadLocalRandom.current().nextLong(bound)
+}
+
+/**
  * 随机的bool
  * @return
  */

@@ -30,7 +30,7 @@ data class Cell<T>(val hasNext: Boolean, val value: T?) {
      * @param default
      * @return
      */
-    public fun getOrException(ex: () -> Exception): T{
+    public fun getOrThrow(ex: () -> Exception): T{
         val value = get()
         return if(value == null) throw ex() else value!!
     }

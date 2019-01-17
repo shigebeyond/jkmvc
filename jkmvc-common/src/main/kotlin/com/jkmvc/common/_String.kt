@@ -280,6 +280,22 @@ public inline fun String.to(type: KType): Any{
     return this.to(type.classifier as KClass<*>)
 }
 
+/**
+ * 将任意值转为表达式
+ * @return
+ */
+public inline fun Any?.toExpr(): String {
+    if(this == null)
+        return "null"
+
+    return when(this){
+        is Long -> "${this}L"
+        is Float -> "${this}F"
+        is Date -> "Date(\"$this\")"
+        is String -> "\"$this\""
+        else -> this.toString()
+    }
+}
 
 /**
  * 将表达式转换为指定类型的非空值

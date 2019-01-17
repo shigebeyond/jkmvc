@@ -50,6 +50,19 @@ enum class NumType {
 class MyTests{
 
     @Test
+    fun testSys(){
+//        val prop = System.getenv()
+        val prop = System.getProperties()
+        printProps(prop)
+    }
+
+    fun printProps(props: Map<*, *>) {
+        println(props.entries.joinToString("\n\n") {
+            "${it.key}\n\t${it.value}"
+        })
+    }
+
+    @Test
     fun testBig(){
         println(-1%10)
 //        var a= BigDecimal("100")
@@ -435,6 +448,7 @@ class MyTests{
         } as Lambda
         println(f.javaClass)
         println(f.javaClass.kotlin)
+        println(f::class)
 //        println(f is KFunction<*>) // false
 //        println(f is KCallable<*>) // false
         println(f is Lambda) // true
