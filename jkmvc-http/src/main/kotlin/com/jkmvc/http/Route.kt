@@ -60,7 +60,7 @@ class Route(override val regex:String /* 原始正则: <controller>(\/<action>(\
 	 * 编译后正则: 将 <controller>(\/<action>(\/<id>)?)? 编译为 /([^\/]+)(\/([^\/]+)\/(\d+)?)?/
 	 *   其中参数对子正则的映射关系保存在 paramGroupMapping 中
 	 */
-	protected var compileRegex:String;
+	protected var compileRegex:Regex;
 
 	/**
 	 * 子正则的范围
@@ -85,11 +85,12 @@ class Route(override val regex:String /* 原始正则: <controller>(\/<action>(\
 		// 构建参数对子正则的映射
 		paramGroupMapping = buildParamGroupMapping()
 		// 编译参数正则: 将<参数>替换为对应的带参数的子正则
-		compileRegex = "<(\\w+)>".toRegex().replace(groupRegex){ result: MatchResult ->
+		var compileRegex = "<(\\w+)>".toRegex().replace(groupRegex){ result: MatchResult ->
 			val paramName = result.groups[1]!!.value; // 参数名
 			paramRegex.getOrDefault(paramName, REGEX_PARAM)!! // 替换参数正则
 		}
 		compileRegex = "^$compileRegex$" // 匹配开头与结尾
+		this.compileRegex = compileRegex.toRegex()
 	}
 
 	/**
@@ -151,7 +152,7 @@ class Route(override val regex:String /* 原始正则: <controller>(\/<action>(\
 	 */
 	public override fun match(uri:String):Map<String, String>?{
 		// 匹配uri
-		val matches:MatchResult? = compileRegex.toRegex().find(uri)
+		val matches:MatchResult? = compileRegex.find(uri)
 		if(matches == null)
 			return defaults;
 
