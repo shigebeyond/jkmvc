@@ -2,6 +2,7 @@ package com.jkmvc.common
 
 import org.nustaq.serialization.util.FSTUtil
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl
+import java.io.File
 import java.lang.reflect.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -21,6 +22,17 @@ public fun Any.forceClone():Any {
 
     val f:KFunction<*> = this::class.getFunction("clone")!!
     return f.call(this) as Any;
+}
+
+/**
+ * 类的相对路径转类
+ * @return
+ */
+public fun String.classPath2class(): Class<*> {
+    // 获得类名
+    val className = this.substringBefore(".class").replace(File.separatorChar, '.')
+    // 获得类
+    return Class.forName(className)
 }
 
 /**
