@@ -4,6 +4,7 @@ import com.dyuproject.protostuff.LinkedBuffer
 import com.dyuproject.protostuff.ProtostuffIOUtil
 import com.dyuproject.protostuff.Schema
 import com.dyuproject.protostuff.runtime.RuntimeSchema
+import com.jkmvc.common.getOrPutOnce
 import org.objenesis.ObjenesisStd
 import java.io.InputStream
 import java.util.concurrent.ConcurrentHashMap
@@ -23,7 +24,7 @@ class ProtostuffSerializer: ISerializer {
     private val schemaCache = ConcurrentHashMap<Class<*>, Schema<*>>()
 
     private fun getSchma(clazz: Class<Any>): Schema<Any> {
-        return schemaCache.getOrPut(clazz){
+        return schemaCache.getOrPutOnce(clazz){
             RuntimeSchema.createFrom(clazz)
         } as Schema<Any>
     }
