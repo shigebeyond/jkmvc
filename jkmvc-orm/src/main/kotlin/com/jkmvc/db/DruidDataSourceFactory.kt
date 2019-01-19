@@ -2,6 +2,7 @@ package com.jkmvc.db
 
 import com.alibaba.druid.pool.DruidDataSource
 import com.jkmvc.common.Config
+import com.jkmvc.common.getOrPutOnce
 import java.util.concurrent.ConcurrentHashMap
 import javax.sql.DataSource
 
@@ -26,7 +27,7 @@ class DruidDataSourceFactory : IDataSourceFactory {
      * @return
      */
     public override fun getDataSource(name: String): DataSource {
-        return dataSources.getOrPut(name){
+        return dataSources.getOrPutOnce(name){
             buildDruidDataSource(name)
         }
     }

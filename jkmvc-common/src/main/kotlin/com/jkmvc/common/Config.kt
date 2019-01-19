@@ -55,7 +55,7 @@ class Config(public override val props: Map<String, *>): IConfig(){
                 path = file.substring(i + 1)
             }
             // 获得文件的配置项
-            val config = configs.getOrPut(filename){
+            val config = configs.getOrPutOnce(filename){
                 Config("$filename.$type", type)
             }!!
             // 无子项

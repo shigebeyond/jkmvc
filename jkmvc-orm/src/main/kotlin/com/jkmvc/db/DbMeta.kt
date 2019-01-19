@@ -109,7 +109,7 @@ internal class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
             val column = rs.getString("COLUMN_NAME")!! // 列名
             // 添加表的列
             tables.getOrPut(table){
-                LinkedList<String>()
+                LinkedList()
             }.add(column);
         }
         tables

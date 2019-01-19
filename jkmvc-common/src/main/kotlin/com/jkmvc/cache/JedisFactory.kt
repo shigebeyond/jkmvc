@@ -1,6 +1,7 @@
 package com.jkmvc.cache
 
 import com.jkmvc.common.Config
+import com.jkmvc.common.getOrPutOnce
 import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPoolConfig
@@ -34,7 +35,7 @@ object JedisFactory {
      * @return
      */
     public fun getPool(name:String): JedisPool {
-        return pools.getOrPut(name){
+        return pools.getOrPutOnce(name){
             buildPool(name)
         }
     }

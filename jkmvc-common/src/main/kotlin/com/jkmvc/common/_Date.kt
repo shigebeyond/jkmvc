@@ -16,8 +16,7 @@ private val dateFormats: ConcurrentHashMap<String, SimpleDateFormat> = Concurren
  * @param pattern 格式
  * @return
  */
-public fun Date.format(pattern: String = "yyyy-MM-dd HH:mm:ss"): String
-{
+public fun Date.format(pattern: String = "yyyy-MM-dd HH:mm:ss"): String {
     return dateFormats.getOrPut(pattern){
                 SimpleDateFormat(pattern)
             }

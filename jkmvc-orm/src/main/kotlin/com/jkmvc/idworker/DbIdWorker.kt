@@ -1,5 +1,6 @@
 package com.jkmvc.idworker
 
+import com.jkmvc.common.getOrPutOnce
 import com.jkmvc.idworker.IIdWorker
 import com.jkmvc.db.Db
 import java.util.concurrent.ConcurrentHashMap
@@ -46,7 +47,7 @@ class DbIdWorker: IIdWorker {
     public override fun nextId(): Long {
         // TODO: module可通过参数指定
         val module = "default"
-        val seq = idSequences.getOrPut(module){
+        val seq = idSequences.getOrPutOnce(module){
             val item = IdSequenceModel()
             item.maxId = 0
             item.module = module

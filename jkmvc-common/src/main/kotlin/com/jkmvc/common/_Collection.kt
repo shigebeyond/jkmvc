@@ -2,6 +2,7 @@ package com.jkmvc.common
 
 import java.math.BigDecimal
 import java.util.*
+import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.ThreadLocalRandom
 
 /****************************** 扩展 Array + Collection *****************************/
@@ -263,6 +264,17 @@ public inline fun <K, V> Map<K, V>?.getOrDefault(key:K, default:V? = null): V? {
         default
     else
         value;
+}
+
+/**
+ * 改进 getOrPut(), 其中 defaultValue() 只调用一次, 用于减少大对象与资源(如db连接)创建的情况
+ */
+public inline fun <K, V> ConcurrentMap<K, V>.getOrPutOnce(key: K, defaultValue: () -> V): V {
+    return this.get(key) ?:
+        synchronized(this){
+            this.get(key) ?:
+                defaultValue().let { default -> this.putIfAbsent(key, default) ?: default }
+        }
 }
 
 /**

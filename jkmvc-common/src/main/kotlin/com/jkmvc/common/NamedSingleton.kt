@@ -28,7 +28,7 @@ abstract class NamedSingleton<T> : INamedSingleton<T> {
      * @return
      */
     public override fun instance(name: String): T{
-        return insts.getOrPut(name){
+        return insts.getOrPutOnce(name){
             Class.forName(instsConfig[name]!!).newInstance() as T
         }
     }
