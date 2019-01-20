@@ -1,10 +1,8 @@
 package com.jkmvc.session
 
-import com.jkmvc.common.RequestHandledHook
 import com.jkmvc.http.Request
 import com.jkmvc.session.token.ITokenManager
 import com.jkmvc.session.token.TokenManager
-import java.io.Closeable
 
 /**
  * 基于token认证用户 -- 使用token来保存登录用户的状态
@@ -14,7 +12,7 @@ import java.io.Closeable
  * @author shijianhang
  * @create 2017-10-04 下午3:40
  **/
-class TokenAuth : Auth(), Closeable {
+class TokenAuth : Auth() {
 
     /**
      * 登录用户缓存
@@ -32,10 +30,6 @@ class TokenAuth : Auth(), Closeable {
      * token管理器
      */
     protected val tokenManager: ITokenManager = TokenManager
-
-    init{
-        RequestHandledHook.addClosing(this)
-    }
 
     /**
      * 获得当前会话的token

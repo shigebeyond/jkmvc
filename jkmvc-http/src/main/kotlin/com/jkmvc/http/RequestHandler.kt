@@ -1,7 +1,7 @@
 package com.jkmvc.http
 
+import com.jkmvc.common.ClosingOnRequestEnd
 import com.jkmvc.common.Config
-import com.jkmvc.common.RequestHandledHook
 import com.jkmvc.common.ucFirst
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -72,7 +72,7 @@ object RequestHandler : IRequestHandler {
             return true
         }finally {
             // 请求处理后，关闭资源
-            RequestHandledHook.closeAll()
+            ClosingOnRequestEnd.triggerClosings()
         }
 
     }

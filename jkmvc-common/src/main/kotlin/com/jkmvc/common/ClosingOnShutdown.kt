@@ -15,9 +15,9 @@ abstract class ClosingOnShutdown : Closeable {
     companion object {
 
         /**
-         * 要关闭的资源
+         * 记录要关闭的资源
          */
-        protected val closings: MutableList<Closeable> = Vector()
+        protected val closings: MutableList<ClosingOnShutdown> = Vector()
 
         init {
             // 添加关机事件钩子
@@ -27,6 +27,8 @@ abstract class ClosingOnShutdown : Closeable {
                     // 关闭资源
                     for (c in closings)
                         c.close()
+                    // 清空记录
+                    closings.clear()
                 }
             })
         }

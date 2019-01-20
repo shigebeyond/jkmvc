@@ -19,7 +19,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
                                public override val dbMeta: IDbMeta = DbMeta.get(name) /* 元数据 */
 ) : IDb(), IDbMeta by dbMeta {
 
-    companion object:Closeable {
+    companion object {
 
         /**
          * 公共配置
@@ -61,39 +61,6 @@ class Db protected constructor(public override val name:String /* 标识 */,
             }
         }
 
-        /**
-         * 获得当前线程的所有db
-         */
-        public fun all(): Collection<Db> {
-            return dbs.get().values
-        }
-
-        /**
-         * 关闭当前线程的所有db
-         *    每个请求结束后, 要关闭该请求创建的db对象
-         *    谁使用，谁关闭
-         */
-        public override fun close():Unit{
-            for((name, db) in dbs.get())
-                db.close()
-        }
-
-        /**
-         * 在操作之后关闭db
-         * @param logging 是否打印异常日志，在定时任务中，不会自动打印异常，因此手动打印一下
-         * @param statement db操作过程
-         */
-        public inline fun closeAfter(logging: Boolean = true, statement: () -> Unit):Unit{
-            try {
-                statement()
-            }catch (e: Exception){
-                if(logging)
-                    dbLogger.error("db操作出错：${e.message}", e)
-                throw e
-            }finally{
-                close()
-            }
-        }
     }
 
     /**

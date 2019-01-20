@@ -1,5 +1,6 @@
 package com.jkmvc.db
 
+import com.jkmvc.common.ClosingOnRequestEnd
 import java.io.Closeable
 import java.sql.ResultSet
 import kotlin.reflect.KClass
@@ -13,7 +14,7 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-abstract class IDb: Closeable, IDbMeta, IDbValueQuoter, IDbIdentifierQuoter {
+abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter, ClosingOnRequestEnd() {
 
     /**
      * db元数据

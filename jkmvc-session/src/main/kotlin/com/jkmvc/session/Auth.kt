@@ -1,9 +1,6 @@
 package com.jkmvc.session
 
-import com.jkmvc.common.Config
-import com.jkmvc.common.IConfig
-import com.jkmvc.common.NamedSingleton
-import com.jkmvc.common.isSuperClass
+import com.jkmvc.common.*
 import com.jkmvc.db.dbLogger
 import com.jkmvc.orm.rowTransformer
 import com.jkmvc.orm.Orm
@@ -18,7 +15,7 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @create 2017-09-19 下午11:35
  **/
-abstract class Auth:IAuth {
+abstract class Auth: IAuth, ClosingOnRequestEnd() {
 
     companion object: NamedSingleton<Auth>() {
 
