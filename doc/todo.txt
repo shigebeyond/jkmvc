@@ -549,21 +549,4 @@ find< 改为 findModel<
 
 ------------
 
-完善校验器
-
-修改api, 不再返回那么多值
-直接返回结果, 如果有错, 则直接抛异常
-
-另外封装一个只有一个validate()方法的接口, 可以让开发者自己写lambda来校验
-
------------------
-
-
-validate重构
-
-包名: com.jkmvc.validate => com.jkmvc.validator
-类名: Validation => Validator
-     ValidationExpression => RuleValidator
-
-调整 OrmMeta / Request 中的rule
-将 IRuleMeta 换为 IValidator
+ClosingOnRequestEnd() 不要用了, 直接提供event bus, 支持请求事件, 如请求结束事件
