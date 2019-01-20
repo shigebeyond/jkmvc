@@ -13,12 +13,12 @@ abstract class Controller :IController {
     /**
      * 请求对象
      */
-    override lateinit var req: Request
+    override lateinit var req: HttpRequest
 
     /**
      * 响应对象
      */
-    override lateinit var res: Response
+    override lateinit var res: HttpResponse
 
     /**
      * 视图

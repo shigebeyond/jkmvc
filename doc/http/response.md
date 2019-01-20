@@ -1,10 +1,10 @@
 # Response object
 
-Response class is `com.jkmvc.http.Response`, which is implements `javax.servlet.http.HttpServletResponse`
+Response class is `com.jkmvc.http.HttpResponse`, which is implements `javax.servlet.http.HttpServletResponse`
 
 So, you can call all methods that inherited from `HttpServletResponse`
 
-Here is a list of the properties and methods special in `Response`
+Here is a list of the properties and methods special in `HttpResponse`
 
 1. Render methods
 
@@ -20,13 +20,13 @@ renderFile(file: String): Unit | render file
 
 method | usage
 --- | ---
-setCache(expires: Long): Response | set cache time
+setCache(expires: Long): HttpResponse | set cache time
 getCache(): String? | get cache time
 
 3. Cookie Manipulating methods
 
 method | usage
 --- | ---
-deleteCookie(name: String): Response | delete cookie
-setCookie(name: String, value: String, expiry: Int? = null): Response | set a cookie 
-setCookies(data: Map<String, String>, expiry: Int? = null): Response | set multiple cookies
+deleteCookie(name: String): HttpResponse | delete cookie
+setCookie(name: String, value: String, expiry: Int? = null): HttpResponse | set a cookie 
+setCookies(data: Map<String, String>, expiry: Int? = null): HttpResponse | set multiple cookies

@@ -45,11 +45,11 @@ controllerPackages:
 
 ## 3 `req` property
 
-Every controller has the `req` property which is the [Request](request.md) object and represents current request. 
+Every controller has the `req` property which is the [HttpRequest](request.md) object and represents current request. 
 
-Outside controler, you can get current request by `Request.current()`
+Outside controler, you can get current request by `HttpRequest.current()`
 
-Here is a partial list of the properties and methods available to `req`. See the [Request](request.md) class for more information on any of these.
+Here is a partial list of the properties and methods available to `req`. See the [HttpRequest](request.md) class for more information on any of these.
 
 Property/method | What it does
 --- | ---
@@ -59,7 +59,7 @@ req.routeParams | params which is defined in your route, including controller/ac
 
 ## 4 `res` property
 
-Every controller has the `res` property which is the [Response](response.md) object. 
+Every controller has the `res` property which is the [HttpResponse](response.md) object. 
 
 Property/method | What it does
 --- | ---

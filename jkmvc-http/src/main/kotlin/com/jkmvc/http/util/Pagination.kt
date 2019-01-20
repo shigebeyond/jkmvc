@@ -1,7 +1,7 @@
 package com.jkmvc.http.util
 
 import com.jkmvc.common.Config
-import com.jkmvc.http.Request
+import com.jkmvc.http.HttpRequest
 
 /**
  * 分页处理，主要用于数据库分页
@@ -26,7 +26,7 @@ open class Pagination(
          * 获得页码的请求参数
          */
         public fun getRequestPage():Int{
-            return Request.current().get(config["pageParameterName"]!!, 1)!! // 默认为第一页
+            return HttpRequest.current().get(config["pageParameterName"]!!, 1)!! // 默认为第一页
         }
     }
 

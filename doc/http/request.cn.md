@@ -1,6 +1,6 @@
 # 请求对象
 
-jkmvc的请求类是 `com.jkmvc.http.Request`
+jkmvc的请求类是 `com.jkmvc.http.HttpRequest`
 
 他是继承并代理 `javax.servlet.http.HttpServletRequest`
 

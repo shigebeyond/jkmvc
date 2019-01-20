@@ -101,7 +101,7 @@ user.values(values, expected)
 user.create()
 ```
 
-2. 从 `Request` 中赋值
+2. 从 `HttpRequest` 中赋值
 
 通常，我们要从请求中读取相关的属性值，只要使用 `com.jkmvc.http.valuesFromRequest` 方法即可。
 

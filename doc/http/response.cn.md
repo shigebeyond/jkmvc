@@ -1,6 +1,6 @@
 # 响应对象
 
-jkmvc的响应类是 `com.jkmvc.http.Response`
+jkmvc的响应类是 `com.jkmvc.http.HttpResponse`
 
 他是继承并代理 `javax.servlet.http.HttpServletResponse`
 
@@ -22,13 +22,13 @@ renderFile(file: String): Unit | 响应文件
 
 方法 | 作用
 --- | ---
-setCache(expires: Long): Response | 设置响应缓存
+setCache(expires: Long): HttpResponse | 设置响应缓存
 getCache(): String? | 获得缓存时间
 
 3. 操作cookie的方法
 
 方法 | 作用
 --- | ---
-deleteCookie(name: String): Response | 删除cookie
-setCookie(name: String, value: String, expiry: Int? = null): Response | 设置cookie值
-setCookies(data: Map<String, String>, expiry: Int? = null): Response | 设置cookie值
+deleteCookie(name: String): HttpResponse | 删除cookie
+setCookie(name: String, value: String, expiry: Int? = null): HttpResponse | 设置cookie值
+setCookies(data: Map<String, String>, expiry: Int? = null): HttpResponse | 设置cookie值

@@ -35,7 +35,7 @@ object RequestHandler : IRequestHandler {
      */
     public override fun handle(request: HttpServletRequest, response: HttpServletResponse):Boolean{
         //　构建请求对象
-        val req:Request = Request(request);
+        val req:HttpRequest = HttpRequest(request);
         if(debug){
             // 路由
             httpLogger.debug("请求uri: ${req.method} ${req.routeUri}")
@@ -50,7 +50,7 @@ object RequestHandler : IRequestHandler {
             return false;
 
         // 构建响应对象
-        val res:Response = Response(response);
+        val res:HttpResponse = HttpResponse(response);
 
         try{
             // 解析路由
@@ -83,7 +83,7 @@ object RequestHandler : IRequestHandler {
      * @param req
      * @param res
      */
-    private fun callController(req: Request, res: Response) {
+    private fun callController(req: HttpRequest, res: HttpResponse) {
         // 获得controller类
         val clazz:ControllerClass? = ControllerClassLoader.getControllerClass(req.controller);
         if (clazz == null)

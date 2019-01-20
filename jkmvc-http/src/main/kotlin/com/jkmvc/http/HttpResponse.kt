@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletResponse
  * @author shijianhang
  * @date 2016-10-7 下午11:32:07 
  */
-class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpServletResponse by res {
+class HttpResponse(protected val res:HttpServletResponse /* 响应对象 */): HttpServletResponse by res {
 
 	companion object{
 		/**
@@ -118,7 +118,7 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	 */
 	public fun renderView(file:String, data:MutableMap<String, Any?> = View.emptyMutableMap):Unit
 	{
-		renderView(View(Request.current(), this, file, data))
+		renderView(View(HttpRequest.current(), this, file, data))
 	}
 
 	/**
@@ -198,7 +198,7 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	 * @param expires 过期时间
 	 * @return
 	 */
-	public fun setCache(expires:Long): Response {
+	public fun setCache(expires:Long): HttpResponse {
 		// setter
 		if (expires > 0) { // 有过期时间, 则缓存
 			val now:Long =  System.currentTimeMillis()
@@ -226,7 +226,7 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	 * @param expiration 期限
 	 * @return
 	 */
-	public fun setCookie(name:String, value:String, expiry:Int? = null): Response {
+	public fun setCookie(name:String, value:String, expiry:Int? = null): HttpResponse {
 		val cookie: javax.servlet.http.Cookie = javax.servlet.http.Cookie(name, value);
 		// expiry
 		val maxAage:Int? = cookieConfig.getInt("expiry", expiry);
@@ -264,7 +264,7 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	 * @param expiration 期限
 	 * @return
 	 */
-	public fun setCookies(data:Map<String, String>, expiry:Int? = null): Response {
+	public fun setCookies(data:Map<String, String>, expiry:Int? = null): HttpResponse {
 		for((name, value) in data){
 			setCookie(name, value, expiry);
 		}
@@ -281,7 +281,7 @@ class Response(protected val res:HttpServletResponse /* 响应对象 */): HttpSe
 	 * @param  name   cookie名
 	 * @return
 	 */
-	public fun deleteCookie(name:String): Response {
+	public fun deleteCookie(name:String): HttpResponse {
 		setCookie(name, "", -86400) // 让他过期
 		return this;
 	}

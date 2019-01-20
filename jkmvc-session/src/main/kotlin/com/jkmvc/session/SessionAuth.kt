@@ -1,6 +1,6 @@
 package com.jkmvc.session
 
-import com.jkmvc.http.Request
+import com.jkmvc.http.HttpRequest
 import javax.servlet.http.HttpSession
 
 /**
@@ -20,7 +20,7 @@ class SessionAuth : Auth() {
      * @return
      */
     private fun getSession(create:Boolean = false): HttpSession {
-        return Request.current().getSession(create);
+        return HttpRequest.current().getSession(create);
     }
 
     /**

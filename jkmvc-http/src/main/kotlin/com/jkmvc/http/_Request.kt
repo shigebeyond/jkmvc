@@ -186,7 +186,7 @@ public inline fun isSafeUploadFile(uploadFile: File): Boolean {
  * @param expected 要设置的字段名的数组
  * @return
  */
-public fun Orm.valuesFromRequest(req: Request, expected: List<String>? = null): Orm {
+public fun Orm.valuesFromRequest(req: HttpRequest, expected: List<String>? = null): Orm {
     // 默认为请求中的所有列
     val columns = if (expected.isNullOrEmpty()) req.parameterNames.iterator() else expected!!.iterator()
 

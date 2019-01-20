@@ -2,7 +2,7 @@
 
 Jkmvc provides a very powerful routing system.  In essence, routes provide an interface between the urls and your controllers and actions.  With the correct routes you could make almost any url scheme correspond to almost any arrangement of controllers.
 
-As mentioned in the [Request Flow](flow.md) section, a request is handled by the `Request` class, which will look for a matching Route and load the appropriate controller to handle that request.
+As mentioned in the [Request Flow](flow.md) section, a request is handled by the `HttpRequest` class, which will look for a matching Route and load the appropriate controller to handle that request.
 
 [!!] It is important to understand that *routes are matched in the order they are added*, and as soon as a URL matches a route, routing is essentially "stopped" and *the remaining routes are never tried*.  Because the default route matches almost anything, including an empty url, new routes must be place before it.
 
@@ -42,7 +42,7 @@ Lets look at the default route again, the uri is `<controller>(/<action>(/<id>)?
 
 And a blank uri would match default controller and action (set by `defaults` configuration item) would be assumed resulting in the `WelcomeController` class being loaded and the `indexAction` method being called to handle the request.
 
-You can use any name you want for your keys, but the following keys have special meaning to the [Request](request.md) object, and will influence which controller and action are called:
+You can use any name you want for your keys, but the following keys have special meaning to the [HttpRequest](request.md) object, and will influence which controller and action are called:
 
  * **controller** - The controller that the request should execute.
  * **action** - The action method to call.
@@ -76,7 +76,7 @@ user/detail/1 | UserController#detailAction()，you can call `req.req.getIntRout
 
 ## 2 Get routing parameters
 
-The `controller` and `action` can be accessed from the [Request](request.md) as public properties like so:
+The `controller` and `action` can be accessed from the [HttpRequest](request.md) as public properties like so:
 
 ```
 	// From within a controller:
@@ -85,22 +85,22 @@ The `controller` and `action` can be accessed from the [Request](request.md) as 
 	req.directory;
 
 	// Can be used anywhere:
-	Request.current().action;
-	Request.current().controller;
-	Request.current().directory;
+	HttpRequest.current().action;
+	HttpRequest.current().controller;
+	HttpRequest.current().directory;
 ```
 
-All other keys specified in a route can be accessed via `Request::getRouteParameter(key)`:
+All other keys specified in a route can be accessed via `HttpRequest::getRouteParameter(key)`:
 
 ```
 	// From within a controller:
 	req.getRouteParameter('key_name');
 
 	// Can be used anywhere:
-	Request.current().getRouteParameter('key_name');
+	HttpRequest.current().getRouteParameter('key_name');
 ```
 
-The `Request.getRouteParameter(key, default)` method takes an optional second argument to specify a default return value in case the key is not set by the route. If no arguments are given, all keys are returned as an associative array.
+The `HttpRequest.getRouteParameter(key, default)` method takes an optional second argument to specify a default return value in case the key is not set by the route. If no arguments are given, all keys are returned as an associative array.
 
 For example, with the following route:
 

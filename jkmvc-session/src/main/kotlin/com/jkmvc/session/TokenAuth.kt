@@ -1,6 +1,6 @@
 package com.jkmvc.session
 
-import com.jkmvc.http.Request
+import com.jkmvc.http.HttpRequest
 import com.jkmvc.session.token.ITokenManager
 import com.jkmvc.session.token.TokenManager
 
@@ -36,7 +36,7 @@ class TokenAuth : Auth() {
      */
     public fun getToken(): String? {
         // web请求？
-        val req = Request.currentOrNull()
+        val req = HttpRequest.currentOrNull()
         if(req == null)
             return null
 
@@ -64,7 +64,7 @@ class TokenAuth : Auth() {
     protected override fun afterLogin(user: IAuthUserModel) {
         //生成登录token
         val token = tokenManager.createToken(user)
-        Request.currentOrNull()?.setAttribute("token", token);
+        HttpRequest.currentOrNull()?.setAttribute("token", token);
     }
 
     /**

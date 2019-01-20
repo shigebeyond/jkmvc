@@ -43,11 +43,11 @@ controllerPackages:
 
 ## 3 `req` 属性
 
-每个控制器都有一个 `req` 属性，他是 [Request](request.cn.md) 对象，代表当前请求。
+每个控制器都有一个 `req` 属性，他是 [HttpRequest](request.cn.md) 对象，代表当前请求。
 
-当然，在控制器之外，你也可以通过 `Request.current()` 来获得当前请求。
+当然，在控制器之外，你也可以通过 `HttpRequest.current()` 来获得当前请求。
 
-以下列出常用 `req` 的属性与方法。详情请参考 [Request](request.cn.md)
+以下列出常用 `req` 的属性与方法。详情请参考 [HttpRequest](request.cn.md)
 
 属性/方法 | 作用
 --- | ---
@@ -57,7 +57,7 @@ req.routeParams | 匹配路由的所有参数，包含 controller / action
 
 ## 4 `res` 属性
 
-每个控制器都有一个 `res` 属性，他是 [Response](response.cn.md) 对象。
+每个控制器都有一个 `res` 属性，他是 [HttpResponse](response.cn.md) 对象。
 
 属性/方法 | 作用
 --- | ---

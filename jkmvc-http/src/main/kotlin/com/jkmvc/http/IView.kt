@@ -11,12 +11,12 @@ interface IView
 	/**
 	* 请求对象
 	 */
-	val req: Request
+	val req: HttpRequest
 
 	/**
 	 * 响应对象
 	 */
-	val res: Response
+	val res: HttpResponse
 
 	/**
 	 * 视图文件

@@ -12,7 +12,7 @@ import java.util.*
  * @author shijianhang<772910474@qq.com>
  * @date 8/25/17 9:49 AM
  */
-class VelocityView(req: Request /* 请求对象 */, res: Response /* 响应对象 */, file:String/* 视图文件 */, data:MutableMap<String, Any?> /* 局部变量 */): View(req, res, file, data) {
+class VelocityView(req: HttpRequest /* 请求对象 */, res: HttpResponse /* 响应对象 */, file:String/* 视图文件 */, data:MutableMap<String, Any?> /* 局部变量 */): View(req, res, file, data) {
 
     /**
      * 渲染Velocity模板

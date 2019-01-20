@@ -99,7 +99,7 @@ user.values(values, expected)
 user.create()
 ```
 
-2. from `Request`
+2. from `HttpRequest`
 
 We usually get values from request, just use `com.jkmvc.http.valuesFromRequest` method.
 

@@ -15,12 +15,12 @@ interface IController{
     /**
      * 请求对象
      */
-    var req: Request
+    var req: HttpRequest
 
     /**
      * 响应对象
      */
-    var res: Response
+    var res: HttpResponse
 
     /**
      * 视图

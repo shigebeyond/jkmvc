@@ -14,13 +14,13 @@ import javax.servlet.http.HttpServletRequest
  * @date 2016-10-6 上午9:27:56
  *
  */
-class Request(req:HttpServletRequest):MultipartRequest(req)
+class HttpRequest(req:HttpServletRequest):MultipartRequest(req)
 {
 	companion object{
 		/**
 		 * 线程安全的请求对象缓存
 		 */
-		protected val reqs:ThreadLocal<Request> = ThreadLocal();
+		protected val reqs:ThreadLocal<HttpRequest> = ThreadLocal();
 
 		/**
 		 * 可信任的代理服务器ip
@@ -31,7 +31,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 		 * 获得当前请求
 		 */
 		@JvmStatic
-		public fun current(): Request {
+		public fun current(): HttpRequest {
 			return reqs.get()!!;
 		}
 
@@ -39,7 +39,7 @@ class Request(req:HttpServletRequest):MultipartRequest(req)
 		 * 获得当前请求
 		 */
 		@JvmStatic
-		public fun currentOrNull(): Request? {
+		public fun currentOrNull(): HttpRequest? {
 			return reqs.get();
 		}
 	}

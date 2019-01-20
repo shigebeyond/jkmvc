@@ -1,10 +1,10 @@
 # Request object
 
-Request class is `com.jkmvc.http.Request`, which is implements `javax.servlet.http.HttpServletRequest`
+Request class is `com.jkmvc.http.HttpRequest`, which is implements `javax.servlet.http.HttpServletRequest`
 
 So, you can call all methods that inherited from `HttpServletRequest`
 
-Here is a list of the properties and methods special in `Request`
+Here is a list of the properties and methods special in `HttpRequest`
 
 1. routing
 
