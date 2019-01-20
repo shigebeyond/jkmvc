@@ -248,16 +248,15 @@ class HttpRequest(req:HttpServletRequest):MultipartRequest(req)
 	public inline fun <reified T:Any> getAndValidate(key: String, rule: String, defaultValue: T? = null): T?
 	{
 		// 获得参数值
-		var value:String
-		if(routeParams.containsKey(key)) // 先取路由参数
-			value = routeParams[key]!!
-		else if(containsParameter(key)) // 再取get/post参数
-			value = getParameter(key)!!
-		else
-			return defaultValue;
+		var value:String? = if(routeParams.containsKey(key)) // 先取路由参数
+								routeParams[key]!!
+							else if(containsParameter(key)) // 再取get/post参数
+								getParameter(key)!!
+							else
+								defaultValue;
 
 		// 校验参数值
-		return validateValue(key, value, rule).to(T::class) as T
+		return validateValue(key, value, rule).toNullable(T::class)
 	}
 
 	/**
