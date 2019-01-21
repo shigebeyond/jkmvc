@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-
 /**
  * 缓存日期格式
  */
@@ -30,6 +29,13 @@ public fun Date.format(pattern: String = "yyyy-MM-dd HH:mm:ss"): String {
  */
 public fun Date.print():Unit{
     println(this.format("yyyy-MM-dd HH:mm:ss"))
+}
+
+/**
+ * 线程安全的日历对象
+ */
+private val calendars:ThreadLocal<GregorianCalendar> = ThreadLocal.withInitial {
+    GregorianCalendar()
 }
 
 /**
@@ -65,7 +71,7 @@ public fun Calendar.fullTime(): Calendar {
  * @return
  */
 public fun Date.add(field:Int, amount:Int): Date {
-    val calendar = GregorianCalendar()
+    val calendar = calendars.get()
     calendar.time = this
     calendar.add(field, amount)
     return calendar.time
@@ -78,7 +84,7 @@ public fun Date.add(field:Int, amount:Int): Date {
  *  @return
  */
 public fun Date.applyCalendar(block: Calendar.() -> Unit): Date? {
-    val calendar = GregorianCalendar()
+    val calendar = calendars.get()
     calendar.time = this
     calendar.block()
     return calendar.time
@@ -92,7 +98,7 @@ public fun Date.applyCalendar(block: Calendar.() -> Unit): Date? {
  * @return
  */
 public fun Date.get(field:Int): Int {
-    val calendar = GregorianCalendar()
+    val calendar = calendars.get()
     calendar.setTime(this)
     return calendar.get(field)
 }
