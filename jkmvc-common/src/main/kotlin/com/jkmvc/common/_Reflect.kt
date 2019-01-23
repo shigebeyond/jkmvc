@@ -3,7 +3,10 @@ package com.jkmvc.common
 import org.nustaq.serialization.util.FSTUtil
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl
 import java.io.File
-import java.lang.reflect.*
+import java.lang.reflect.Constructor
+import java.lang.reflect.Method
+import java.lang.reflect.Modifier
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -208,13 +211,32 @@ public fun Method.getSignature(): String {
 }
 
 /**
- * 获得当前类的方法哈系: <方法签名 to 方法>
+ * 类的方法缓存: <类 to <方法签名 to 方法>>
+ */
+private val class2methods: ConcurrentHashMap<String, Map<String, Method>> = ConcurrentHashMap();
+
+/**
+ * 获得当前类的方法哈希: <方法签名 to 方法>
  * @return
  */
-public fun Class<*>.getMethodMaps(): Map<String, Method> {
-    return methods.associate {
-        it.getSignature() to it
+public fun Class<*>.getMethodSignatureMaps(): Map<String, Method> {
+    return class2methods.getOrPut(name){
+        // 将该类的方法拼接成map
+        methods.associate {
+            it.getSignature() to it
+        }
     }
+}
+
+/**
+ * 根据方法签名来获得方法
+ *
+ * @param methodSignature
+ * @return
+ */
+public fun Class<*>.getMethodBySignature(methodSignature: String): Method?{
+    val methods = getMethodSignatureMaps()
+    return methods[methodSignature]
 }
 
 /**

@@ -40,7 +40,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     init{
         // 检查 model 类的默认构造函数
         if(model != GeneralModel::class && model.java.getConstructorOrNull() == null)
-            throw OrmException("Model Class [$model] has no no-arg constructor, without default way to create instance when ") // Model类${clazz}无默认构造函数
+            throw OrmException("Model Class [$model] has no no-arg constructor") // Model类${clazz}无默认构造函数
     }
 
     /**
