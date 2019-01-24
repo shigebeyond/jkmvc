@@ -88,7 +88,7 @@ class ValidateFunc(protected val func: KFunction<*> /* 方法 */) : IValidateFun
             // 调用函数
             val result = func.call(
                     ValidateFuncDefinition, // 对象
-                    convertValue(value, func.parameters[0].type), // 待校验的值
+                    convertValue(value, func.parameters[1].type), // 待校验的值
                     *otherParams // 其他参数
             )
 

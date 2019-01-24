@@ -55,8 +55,10 @@ class RuleValidator(public val label: String /* 值的标识, 如orm中的字段
 			val subRules = rule.split(" ")
 			return subRules.map { subRule ->
 				// 规则子表达式是函数调用, 格式为 a(1,2)
-				if(subRule.contains('(')){
-					val (func, params) = subRule.split('.');
+				val i = subRule.indexOf('(')
+				if(i > -1 && subRule.endsWith(')')){ // 包含()对
+					val func = subRule.substring(0, i)
+					val params = subRule.substring(i + 1, subRule.length - 1)
 					SubRule(func, compileParams(params))
 				}else{
 					SubRule(subRule, emptyArray())
@@ -76,7 +78,10 @@ class RuleValidator(public val label: String /* 值的标识, 如orm中的字段
 			for(m in matches)
 				result.add(m.groups[1]!!.value)
 
-			return result.toArray() as Array<String>
+			//return result.toArray() as Array<String> // java.lang.ClassCastException: [Ljava.lang.Object; cannot be cast to [Ljava.lang.String;
+			return Array<String>(result.size){i ->
+				result[i]
+			}
 		}
 	}
 
