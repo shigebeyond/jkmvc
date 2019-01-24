@@ -15,7 +15,9 @@ import java.util.concurrent.ConcurrentHashMap
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-class Config(public override val props: Map<String, *>): IConfig(){
+class Config(public override val props: Map<String, *> /* 配置项 */,
+             public override val file: String = "" /* 配置文件 */
+): IConfig(){
 
     companion object{
         /**
@@ -113,7 +115,7 @@ class Config(public override val props: Map<String, *>): IConfig(){
      * @param file the properties file's name in classpath or the sub directory of classpath
      * @param type properties | yaml
      */
-    public constructor(file: String, type: String = "properties"):this(buildProperties(file, type) as Map<String, *>){
+    public constructor(file: String, type: String = "properties"):this(buildProperties(file, type), file){
     }
 
     /**

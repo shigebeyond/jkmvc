@@ -13,6 +13,11 @@ import java.util.*
 abstract class IConfig {
 
     /**
+     * 配置文件
+     */
+    public abstract val file: String
+
+    /**
      * 配置项
      */
     public abstract val props: Map<String, *>;
