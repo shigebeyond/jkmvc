@@ -1,13 +1,14 @@
 package com.jkmvc.common
 
 /**
- * 有名字的单例池
+ * 名字可配的单例池
  *   可以动态的单例名来获得单例，但是需要实现配置单例名及其实现类
  *   如序列器的配置
  *   <code>
  *      jdk: com.jkmvc.serialize.JdkSerializer
  *      fst: com.jkmvc.serialize.FstSerializer
  *  </code>
+ *  一般用在枚举某个接口的实现类
  *
  * @author shijianhang
  * @create 2017-12-16 下午3:17
