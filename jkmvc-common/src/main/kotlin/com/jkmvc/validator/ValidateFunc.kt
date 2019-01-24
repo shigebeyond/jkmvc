@@ -68,12 +68,12 @@ class ValidateFunc(protected val func: KFunction<*> /* 方法 */) : IValidateFun
      *   如果是预言函数 + 预言失败, 则抛 ValidateException 异常
      *
      * @param value 待校验的值
-     * @param params 参数
+     * @param args 参数
      * @param variables 变量
      * @param label 值的标识, 如orm中的字段名, 如请求中的表单域名
      * @return 如果是预言函数, 返回原值, 否则返回执行结果
      */
-    public override fun execute(value:Any?, params:Array<String>, variables:Map<String, Any?>, label:String): Any? {
+    public override fun execute(value:Any?, args:Array<String>, variables:Map<String, Any?>, label:String): Any? {
         // 获得函数
         if(func == null)
             throw ValidateException("不存在校验方法${this.func}");
@@ -81,15 +81,15 @@ class ValidateFunc(protected val func: KFunction<*> /* 方法 */) : IValidateFun
         try{
             // 其他参数
             var i = 2 // 从第三个参数开始
-            val otherParams:Array<Any?>  = params.mapToArray{ param ->
-                convertParam(param, variables, func.parameters[i++].type)
+            val otherArgs:Array<Any?>  = args.mapToArray{ arg ->
+                convertArg(arg, variables, func.parameters[i++].type)
             }
 
             // 调用函数
             val result = func.call(
                     ValidateFuncDefinition, // 对象
                     convertValue(value, func.parameters[1].type), // 待校验的值
-                    *otherParams // 其他参数
+                    *otherArgs // 其他参数
             )
 
             // 如果是预言函数, 返回原值
@@ -97,7 +97,7 @@ class ValidateFunc(protected val func: KFunction<*> /* 方法 */) : IValidateFun
                 // 如果预言失败, 则抛 ValidateException 异常
                 if(result == false) {
                     val message: String = messages[name]!!
-                    throw ValidateException(label + message.replaces(params));
+                    throw ValidateException(label + message.replaces(args));
                 }
 
                 // 返回原值
@@ -107,7 +107,7 @@ class ValidateFunc(protected val func: KFunction<*> /* 方法 */) : IValidateFun
             // 否则返回执行结果
             return result
         }catch (e:Exception){
-            throw Exception("调用校验方法出错：" + name + "(" + params.joinToString(",") + ")", e)
+            throw Exception("调用校验方法出错：" + name + "(" + args.joinToString(",") + ")", e)
         }
     }
 
@@ -136,16 +136,16 @@ class ValidateFunc(protected val func: KFunction<*> /* 方法 */) : IValidateFun
     /**
      * 根据参数类型，转换参数值
      *
-     * @param param 字符串类型的参数值
+     * @param arg 字符串类型的参数值
      * @param variables 变量
      * @param type 参数类型
      * @return
      */
-    protected fun convertParam(param:String, variables: Map<String, Any?>, type: KType): Any? {
-        return if (param[0] == ':') // 变量: 从变量池中取值，都是正确类型，不需要转换类型
-                    variables[param.substring(1)];
+    protected fun convertArg(arg:String, variables: Map<String, Any?>, type: KType): Any? {
+        return if (arg[0] == ':') // 变量: 从变量池中取值，都是正确类型，不需要转换类型
+                    variables[arg.substring(1)];
                 else // 值：转换类型
-                    param.exprTo(type)
+                    arg.exprTo(type)
     }
 
 }

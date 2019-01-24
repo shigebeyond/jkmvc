@@ -63,6 +63,19 @@ class MyTests{
     }
 
     @Test
+    fun testExpr() {
+        println(1.1.toExpr())
+        println(1.1F.toExpr())
+        println(1.toExpr())
+        println(1L.toExpr())
+        println(1.1.toExpr().exprTo(Double::class))
+        println(1.1F.toExpr().exprTo(Float::class))
+        println(1.toExpr().exprTo(Int::class))
+        //println("1L".toLong()) // java.lang.NumberFormatException: For input string: "1L"
+        println(1L.toExpr().exprTo(Long::class))
+    }
+
+    @Test
     fun testBig(){
         println(-1%10)
 //        var a= BigDecimal("100")

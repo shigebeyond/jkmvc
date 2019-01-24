@@ -60,7 +60,7 @@ class Route(override val regex:String /* 原始正则: <controller>(\/<action>(\
 	 * 编译后正则: 将 <controller>(\/<action>(\/<id>)?)? 编译为 /([^\/]+)(\/([^\/]+)\/(\d+)?)?/
 	 *   其中参数对子正则的映射关系保存在 paramGroupMapping 中
 	 */
-	protected var compileRegex:Regex;
+	protected var compiledRegex:Regex;
 
 	/**
 	 * 子正则的范围
@@ -90,7 +90,7 @@ class Route(override val regex:String /* 原始正则: <controller>(\/<action>(\
 			paramRegex.getOrDefault(paramName, REGEX_PARAM)!! // 替换参数正则
 		}
 		compileRegex = "^$compileRegex$" // 匹配开头与结尾
-		this.compileRegex = compileRegex.toRegex()
+		this.compiledRegex = compileRegex.toRegex()
 	}
 
 	/**
@@ -152,7 +152,7 @@ class Route(override val regex:String /* 原始正则: <controller>(\/<action>(\
 	 */
 	public override fun match(uri:String):Map<String, String>?{
 		// 匹配uri
-		val matches:MatchResult? = compileRegex.find(uri)
+		val matches:MatchResult? = compiledRegex.find(uri)
 		if(matches == null)
 			return defaults;
 

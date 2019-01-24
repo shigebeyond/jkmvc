@@ -28,11 +28,6 @@ class RuleValidator(public val label: String /* 值的标识, 如orm中的字段
 	companion object{
 
 		/**
-		 * 函数参数的正则
-		 */
-		protected val REGEX_PARAM: Regex = ("([\\w\\d-:\"]+),?").toRegex();
-
-		/**
 		 * 缓存编译后的规则子表达式
 		 */
 		protected val compiledSubRules: ConcurrentHashMap<String, List<SubRule>> = ConcurrentHashMap();
@@ -56,31 +51,13 @@ class RuleValidator(public val label: String /* 值的标识, 如orm中的字段
 			return subRules.map { subRule ->
 				// 规则子表达式是函数调用, 格式为 a(1,2)
 				val i = subRule.indexOf('(')
-				if(i > -1 && subRule.endsWith(')')){ // 包含()对
+				if(i > -1){ // 包含()对
 					val func = subRule.substring(0, i)
-					val params = subRule.substring(i + 1, subRule.length - 1)
-					SubRule(func, compileParams(params))
+					val args = subRule.substring(i) // 包含()
+					SubRule(func, ArgsParser.parse(args) /* 有括号 */)
 				}else{
 					SubRule(subRule, emptyArray())
 				}
-			}
-		}
-
-		/**
-		 * 编译函数参数
-		 *
-		 * @param params
-		 * @return
-		 */
-		public fun compileParams(exp: String): Array<String> {
-			val matches: Sequence<MatchResult> = REGEX_PARAM.findAll(exp);
-			val result: ArrayList<String> = ArrayList();
-			for(m in matches)
-				result.add(m.groups[1]!!.value)
-
-			//return result.toArray() as Array<String> // java.lang.ClassCastException: [Ljava.lang.Object; cannot be cast to [Ljava.lang.String;
-			return Array<String>(result.size){i ->
-				result[i]
 			}
 		}
 	}
@@ -129,8 +106,8 @@ class RuleValidator(public val label: String /* 值的标识, 如orm中的字段
 	 */
 	protected fun executeSubRule(subRule: SubRule, value: Any?, variables: Map<String, Any?>, label: String): Any? {
 		// 获得 1 函数名 2 函数参数
-		val (func, params) = subRule
+		val (func, args) = subRule
 		// 调用校验方法
-		return ValidateFunc.get(func).execute(value, params, variables, label)
+		return ValidateFunc.get(func).execute(value, args, variables, label)
 	}
 }
