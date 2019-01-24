@@ -139,6 +139,20 @@ public inline fun <T, reified R> Array<T>.mapToArray(transform: (T) -> R): Array
 }
 
 /**
+ * 数组转数组
+ *   注: Array<R> 不能使用R作为泛型参数, 只能使用具体类
+ */
+public inline fun <T, reified R> Array<T>.mapIndexedToArray(transform: (i: Int, T) -> R): Array<R> {
+    val arr = arrayOfNulls<R?>(this.size);
+    var i = 0;
+    for (item in this) {
+        arr[i] = transform(i, item)
+        i++
+    }
+    return arr as Array<R>
+}
+
+/**
  * 获得数组的某个元素值，如果值为空，则给该元素赋值
  * @param index 元素索引
  * @param default 赋值回调

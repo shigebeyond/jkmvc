@@ -78,42 +78,29 @@ public inline fun String.lcFirst(): String {
  * 去掉两头的字符
  *
  * @param str 要去掉的字符串
+ * @param ignoreCase 是否忽略大小写
  * @return
  */
-public inline fun String.trim(str:String): String {
-    if(str.isEmpty())
-        return this
-
-    var start = if(startsWith(str))
-                    str.length
-                else
-                    0
-    var end = if(endsWith(str))
-                    length - str.length
-                else
-                    length
-
-    if(start == 0 && end == length)
-        return this;
-
-    return this.substring(start, end);
+public inline fun String.trim(str:String, ignoreCase: Boolean = false): String {
+    return trim(str, str, ignoreCase)
 }
 
 /**
  * 去掉两头的字符
  * @param preffix 头部要去掉的子字符串
  * @param suffix 尾部要去掉的子字符串
+ * @param ignoreCase 忽略大小写
  * @return
  */
-public inline fun String.trim(preffix:String, suffix:String = ""): String {
+public inline fun String.trim(preffix:String, suffix:String = "", ignoreCase: Boolean = false): String {
     if(preffix.isEmpty() && suffix.isEmpty())
         return this
 
-    var start = if(preffix.isNotEmpty() && this.startsWith(preffix))
+    var start = if(preffix.isNotEmpty() && this.startsWith(preffix, ignoreCase))
                     preffix.length
                 else
                     0
-    var end = if(suffix.isNotEmpty() && this.endsWith(suffix))
+    var end = if(suffix.isNotEmpty() && this.endsWith(suffix, ignoreCase))
                     length - suffix.length;
                 else
                     length
@@ -311,8 +298,16 @@ public inline fun <T: Any> String.exprTo(clazz: KClass<T>): T? {
         return this.trim("\"") as T
     }
 
+    var expr = this
+    if(clazz == Date::class)
+        expr = this.trim("Date\"", "\"", true)
+
+    // 对Long要去掉最后的L, 否则报错 java.lang.NumberFormatException: For input string: "1L"
+    if(clazz == Long::class)
+        expr = this.trim("", "L", true)
+
     // 值：转换类型
-    return this.to(clazz)
+    return expr.to(clazz)
 }
 
 /**
