@@ -2,7 +2,7 @@ package com.jkmvc.cache
 
 import com.jkmvc.common.Config
 import com.jkmvc.common.IConfig
-import com.jkmvc.common.NamedSingleton
+import com.jkmvc.common.NamedConfiguredSingletons
 
 /**
  * 缓存操作接口
@@ -13,7 +13,7 @@ import com.jkmvc.common.NamedSingleton
 interface ICache {
 
     // 可配置的单例
-    companion object: NamedSingleton<ICache>() {
+    companion object: NamedConfiguredSingletons<ICache>() {
         /**
          * 单例类的配置，内容是哈希 <单例名 to 单例类>
          */

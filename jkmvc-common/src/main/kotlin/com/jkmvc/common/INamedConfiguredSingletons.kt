@@ -1,9 +1,7 @@
 package com.jkmvc.common
 
-import java.util.concurrent.ConcurrentHashMap
-
 /**
- * 有名字的单例
+ * 有名字的单例池
  *   可以动态的单例名来获得单例，但是需要实现配置单例名及其实现类
  *   如序列器的配置
  *   <code>
@@ -14,12 +12,11 @@ import java.util.concurrent.ConcurrentHashMap
  * @author shijianhang
  * @create 2017-12-16 下午3:17
  **/
-abstract class NamedSingleton<T> : INamedSingleton<T> {
-
+interface INamedConfiguredSingletons<T> {
     /**
-     * 单例池
+     * 单例类的配置，内容是哈希 <单例名 to 单例类>
      */
-    public val insts: ConcurrentHashMap<String, T> = ConcurrentHashMap();
+    val instsConfig: IConfig
 
     /**
      * 根据单例名来获得单例
@@ -27,10 +24,5 @@ abstract class NamedSingleton<T> : INamedSingleton<T> {
      * @param name 单例名
      * @return
      */
-    public override fun instance(name: String): T{
-        return insts.getOrPutOnce(name){
-            Class.forName(instsConfig[name]!!).newInstance() as T
-        }
-    }
-
+    fun instance(name: String): T
 }
