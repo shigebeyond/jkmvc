@@ -54,7 +54,7 @@ class RuleValidator(public val label: String /* 值的标识, 如orm中的字段
 				if(i > -1){ // 包含()对
 					val func = subRule.substring(0, i)
 					val args = subRule.substring(i) // 包含()
-					SubRule(func, ArgsParser.parse(args) /* 有括号 */)
+					SubRule(func, ArgsParser.parse(args))
 				}else{
 					SubRule(subRule, emptyArray())
 				}

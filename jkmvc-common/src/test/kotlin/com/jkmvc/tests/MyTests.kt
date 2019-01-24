@@ -51,7 +51,7 @@ class MyTests{
 
     @Test
     fun testSys(){
-//        val prop = System.getenv()
+// val prop = System.getenv()
         val prop = System.getProperties()
         printProps(prop)
     }
@@ -78,12 +78,12 @@ class MyTests{
     @Test
     fun testBig(){
         println(-1%10)
-//        var a= BigDecimal("100")
-//        var b=BigDecimal("3")
-//        var c=a/b;
-//        println(c)
-//        var d=a.divide(b);
-//        println(d)
+// var a= BigDecimal("100")
+// var b=BigDecimal("3")
+// var c=a/b;
+// println(c)
+// var d=a.divide(b);
+// println(d)
     }
 
     @Test
@@ -155,15 +155,15 @@ class MyTests{
 
     @Test
     fun testString(){
-//        val m = "jdbc:mysql://[^/]+/([^\\?]+)".toRegex().find("jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8")
-//        if(m != null)
-//            println(m.groups[1]!!.value)
+// val m = "jdbc:mysql://[^/]+/([^\\?]+)".toRegex().find("jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8")
+// if(m != null)
+//     println(m.groups[1]!!.value)
         /*val funname = "indexAction"
         val name = funname.substring(0, funname.length - 6) // 去掉Action结尾
         println(name)*/
-//        println("my_favorite_food".underline2Camel())
-//        println("myFavoriteFood".camel2Underline())
-//        println("2017-09-27 08:47:04".to(Date::class))
+// println("my_favorite_food".underline2Camel())
+// println("myFavoriteFood".camel2Underline())
+// println("2017-09-27 08:47:04".to(Date::class))
         /*val str:Any? = null
         println(str.toString())//null
         println(arrayOf("a", "b").joinToString(", ", "(", ")") {
@@ -178,8 +178,8 @@ class MyTests{
         println(str)*/
 
         // 去空格
-//        println("hello world".trim())
-//        println("hello world".replace(" ", ""))
+// println("hello world".trim())
+// println("hello world".replace(" ", ""))
     }
 
     @Test
@@ -230,29 +230,29 @@ class MyTests{
         println(a > c)*/
 
         // 字符串转date
-//        "2016-12-21".toDate().print()
-//        "2016-12-21 12:00:06".toDate().print()
+// "2016-12-21".toDate().print()
+// "2016-12-21 12:00:06".toDate().print()
 
         // 获得一日/一周/一月/一年的开始与结束时间
-//        val c = GregorianCalendar()
-//        c.time.print() // 当前时间
+// val c = GregorianCalendar()
+// c.time.print() // 当前时间
         // 一日的时间
-//        c.dayStartTime.print()
-//        c.dayEndTime.print()
+// c.dayStartTime.print()
+// c.dayEndTime.print()
         // 一周的时间
-//        c.weekStartTime.print()
-//        c.weekEndTime.print()
-//        c.weekStartTime2.print()
-//        c.weekEndTime2.print()
+// c.weekStartTime.print()
+// c.weekEndTime.print()
+// c.weekStartTime2.print()
+// c.weekEndTime2.print()
         // 一月的时间
-//        c.monthStartTime.print()
-//        c.monthEndTime.print()
+// c.monthStartTime.print()
+// c.monthEndTime.print()
         // 一季度的时间
-//        c.quarterStartTime.print()
-//        c.quarterEndTime.print()
+// c.quarterStartTime.print()
+// c.quarterEndTime.print()
         // 一年的时间
-//        c.yearStartTime.print()
-//        c.yearEndTime.print()
+// c.yearStartTime.print()
+// c.yearEndTime.print()
 
         // 跨第2月的月份运算
         // 从01-29到01-31,加一个月后, 都是2017-02-28 00:00:00
@@ -270,9 +270,9 @@ class MyTests{
 
     @Test
     fun testLog(){
-//        testLogger.info("打信息日志")
-//        testLogger.debug("打调试日志")
-//        testLogger.error("打错误日志")
+// testLogger.info("打信息日志")
+// testLogger.debug("打调试日志")
+// testLogger.error("打错误日志")
 
         // 去掉短信的异常
         val dir = File("/home/shi/test/szdl/logs/cn")
@@ -295,9 +295,9 @@ class MyTests{
         val firstReg = "\\{\\s*\n\\s*\n".toRegex() // {下的第一个空行
        /*
        var content = File("/home/shi/code/java/szpower/szpower2/src/main/kotlin/com/jkmvc/szpower/controller/AlarmController.kt").readText()
-//        println(multipleReg.findAll(content).joinToString {
-//            it.value
-//        })
+// println(multipleReg.findAll(content).joinToString {
+//     it.value
+// })
         content = singleReg.replace(content, "\n")
         content = multipleReg.replace(content, "")
         println(content)
@@ -337,7 +337,7 @@ class MyTests{
             // 通过document对象获取根节点bookstore
             val bookStore = document.getRootElement();
             // 通过element对象的elementIterator方法获取迭代器
-            // 遍历迭代器，获取根节点中的信息（书籍）
+            // 遍历迭代器，获取根节点中的信息(书籍)
             for(ib in bookStore.elementIterator()){
                 val book = ib as Element
                 System.out.println("=====开始遍历某一本书=====");
@@ -371,7 +371,7 @@ class MyTests{
 
     @Test
     fun testSnowflakeId(){
-//        val idWorker = SnowflakeIdWorker(0, 0)
+// val idWorker = SnowflakeIdWorker(0, 0)
         val idWorker = SnowflakeIdWorker()
         for (i in 0..999) {
             val id = idWorker.nextId()
@@ -382,10 +382,10 @@ class MyTests{
 
     @Test
     fun testClass(){
-//        println(MyTests::class)
-//        println(this.javaClass)
-//        println(this.javaClass.kotlin)
-//        println(this::class)
+// println(MyTests::class)
+// println(this.javaClass)
+// println(this.javaClass.kotlin)
+// println(this::class)
        /* println(this::class.simpleName)
         println(this::class.qualifiedName)
         println(this::class.jvmName)
@@ -409,11 +409,11 @@ class MyTests{
         println(java === IConfig::class.java) // true
         println(java.isAssignableFrom(java)) // true*/
 
-//        val method = Config::class.java.getMethod("containsKey", String::class.java)
-//        println(method)
+// val method = Config::class.java.getMethod("containsKey", String::class.java)
+// println(method)
 
-//        val constructor = Config::class.java.getConstructorOrNull(String::class.java, String::class.java)
-//        println(constructor)
+// val constructor = Config::class.java.getConstructorOrNull(String::class.java, String::class.java)
+// println(constructor)
 
         //println(Config::class.java.isInterface)
         //println(IValidation::class.java.isInterface)
@@ -462,8 +462,8 @@ class MyTests{
         println(f.javaClass)
         println(f.javaClass.kotlin)
         println(f::class)
-//        println(f is KFunction<*>) // false
-//        println(f is KCallable<*>) // false
+// println(f is KFunction<*>) // false
+// println(f is KCallable<*>) // false
         println(f is Lambda) // true
         println(f.javaClass.superclass) // class kotlin.jvm.internal.Lambda
         println(f.javaClass.superclass.superclass) // Object
@@ -512,10 +512,35 @@ class MyTests{
 
     @Test
     fun testPattern(){
+        /*
         val reg = "^\\d+$".toRegex()
-//        println(reg.matches("123"));
-//        println(reg.matches("123#"));
+        println(reg.matches("123"));
+        println(reg.matches("123#"));
         println("hello".endsWith("")); // true
+        */
+
+        /*
+        // https://www.cnblogs.com/dplearning/p/5897316.html
+        // 前瞻： exp1(?=exp2)    查找exp2前面的exp1
+        // 后顾:  (?<=exp2)exp1   查找exp2后面的exp1
+        // 负前瞻:  exp1(?!exp2)   查找后面不是exp2的exp1
+        // 负后顾:  (?<!exp2)exp1   查找前面不是exp2的exp1
+        val str = "abcacad"
+        val reg = "a(?=b)".toRegex() // 只匹配后面接有b的a
+        println(str.replace(reg, "*") )// *bcacad
+
+        val reg2 = "(?<=c)a".toRegex() // 只匹配前面面接有c的a
+        println(str.replace(reg2, "*") )// abc*c*d
+        */
+
+        val argExpr = "(\"第0个分片的参数\"),(\"第1个分片的参数\"),(\"第2个分片的参数\")"
+        //val argses = argExpr.split("),(")
+        val reg = "(?<=\\)),(?=\\()".toRegex()
+        println(argExpr.replace(reg, "--------") )//
+        val argses = argExpr.split(reg)
+        for (args in argses){
+            println(args)
+        }
     }
 
     @Test
@@ -526,7 +551,7 @@ class MyTests{
 
     /**
      * 测试操作符
-     * 原来像支持如linq之类的dsl，但是在处理 where(a > b) 的时候，你是无法修改操作符 > 的语义，他本来的语义就是2个对象做对比（调用compareTo()），返回boolean，但是我却想让他做字符串拼接，返回string
+     * 原来像支持如linq之类的dsl，但是在处理 where(a > b) 的时候，你是无法修改操作符 > 的语义，他本来的语义就是2个对象做对比(调用compareTo())，返回boolean，但是我却想让他做字符串拼接，返回string
      * => 语法上就不支持，不可行
      */
     @Test
@@ -657,8 +682,8 @@ class MyTests{
     @Test
     fun testProp(){
         // 获得不了getter/setter方法
-//        println(MyTests::class.getFunction("getId")) // null
-//        println(MyTests::class.getFunction("setName")) // null
+// println(MyTests::class.getFunction("getId")) // null
+// println(MyTests::class.getFunction("setName")) // null
 
         // 获得属性
         val p = MyTests::class.getProperty("id")!!
@@ -671,20 +696,20 @@ class MyTests{
         println(p.getter.parameters[0])
 
         // 不能修改属性的访问权限
-//        val prop: KProperty1<B, *> = B::class.getProperty("name") as KProperty1<B, *>
-//        println(prop.get(B()))
+// val prop: KProperty1<B, *> = B::class.getProperty("name") as KProperty1<B, *>
+// println(prop.get(B()))
 
         // kotlin类
-//        val field:Field = B::class.java.getDeclaredField("name").apply { isAccessible = true } // 修改属性的访问权限
-//        println(field.get(B()))
+// val field:Field = B::class.java.getDeclaredField("name").apply { isAccessible = true } // 修改属性的访问权限
+// println(field.get(B()))
 
         // 试试java原生类
-//        for(f in LinkedList::class.java.declaredFields)
-//            println(f)
+// for(f in LinkedList::class.java.declaredFields)
+//     println(f)
 
-//        val field:Field = LinkedList::class.java.getDeclaredField("size").apply { isAccessible = true } // 修改属性的访问权限
-//        val o:LinkedList<String> = LinkedList()
-//        println(field.get(o))
+// val field:Field = LinkedList::class.java.getDeclaredField("size").apply { isAccessible = true } // 修改属性的访问权限
+// val o:LinkedList<String> = LinkedList()
+// println(field.get(o))
 
         println(System.currentTimeMillis() / 100)
 
