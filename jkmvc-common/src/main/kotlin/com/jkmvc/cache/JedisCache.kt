@@ -1,8 +1,10 @@
 package com.jkmvc.cache
 
 import com.jkmvc.common.Config
+import com.jkmvc.redis.ShardedJedisFactory
 import com.jkmvc.serialize.ISerializer
-import redis.clients.jedis.Jedis
+import redis.clients.jedis.ShardedJedis
+import java.lang.UnsupportedOperationException
 
 /**
  * redis做的缓存
@@ -24,9 +26,9 @@ class JedisCache(protected val configName: String = "default"):ICache{
     /**
      * redis连接
      */
-    protected val jedis: Jedis
+    protected val jedis: ShardedJedis
         get(){
-            return JedisFactory.instance(configName)
+            return ShardedJedisFactory.instance(configName)
         }
 
 
@@ -50,7 +52,7 @@ class JedisCache(protected val configName: String = "default"):ICache{
      * @param value 值
      * @param expires 过期时间（秒）
      */
-    public override fun put(key: Any, value: Any, expires:Int):Unit {
+    public override fun put(key: Any, value: Any, expires:Long):Unit {
         //jedis.set(key.toString(), value.toString(), "NX", "EX", expires)
         jedis.set(serializer.serialize(key), serializer.serialize(value), "NX".toByteArray(), "EX".toByteArray(), expires)
     }
@@ -67,7 +69,8 @@ class JedisCache(protected val configName: String = "default"):ICache{
      * 清空缓存
      */
     public override fun clear():Unit {
-        jedis.flushAll()
+        //jedis.flushAll()
+        throw UnsupportedOperationException("not implemented")
     }
 
 }

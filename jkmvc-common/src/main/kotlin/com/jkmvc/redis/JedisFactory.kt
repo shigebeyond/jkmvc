@@ -1,4 +1,4 @@
-package com.jkmvc.cache
+package com.jkmvc.redis
 
 import com.jkmvc.common.Config
 import com.jkmvc.common.getOrPutOnce
@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @author shijianhang
  * @create 2017-10-03 下午9:46
  **/
-object JedisFactory {
+object JedisFactory: IJedisFactory {
 
     /**
      * redis连接池
@@ -49,19 +49,15 @@ object JedisFactory {
     private fun buildPool(name: String): JedisPool {
         // 获得redis配置
         val config = Config.instance("redis.${name}", "yaml")
-        val host = config.getString("host")!!
-        val port = config.getInt("port", 6379)!!
+        val address = config.getString("address")!!
+        val (host, port) = address.split(':')
         val pass = config.getString("password")
 
         // 构建redis连接池配置
-        val poolConfig = JedisPoolConfig()
-        poolConfig.maxTotal = config.getInt("maxTotal", 100)!! // 最大连接数，与并发线程数一致
-        poolConfig.maxIdle = 5
-        poolConfig.maxWaitMillis = (1000 * 10).toLong()
-        //在borrow一个jedis实例时，是否提前进行validate操作；如果为true，则得到的jedis实例均是可用的；
-        poolConfig.testOnBorrow = true
+        val poolConfig = buildJedisPoolConfig(config)
 
-        return JedisPool(poolConfig, host, port, 10000, pass)
+        // 构建连接池
+        return JedisPool(poolConfig, host, port.toInt(), 10000, pass)
     }
 
     /**

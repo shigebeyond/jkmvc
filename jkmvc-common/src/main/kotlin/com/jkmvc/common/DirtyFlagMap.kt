@@ -47,7 +47,7 @@ class DirtyFlagMap<K, V> /* 非公开构造函数 */protected constructor(protec
     }
 
     public override fun putAll(from: Map<out K, V>): Unit{
-        // 检查插入的值是否已存在
+        // 检查插入的值是否已存在JedisPoolConfig
         var same = true
         for((k, v) in from){
             if(map[k] != v){

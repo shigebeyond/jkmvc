@@ -1,6 +1,5 @@
 default:
-    host: 127.0.0.1
-    port: 6379
+    address: 127.0.0.1:6379 # 可多个节点, 使用逗号分隔
     password:
     dbname:
     # 序列化类型

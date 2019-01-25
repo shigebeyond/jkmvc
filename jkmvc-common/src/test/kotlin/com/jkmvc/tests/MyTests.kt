@@ -1,6 +1,6 @@
 package com.jkmvc.tests
 
-import com.jkmvc.cache.JedisFactory
+import com.jkmvc.redis.JedisFactory
 import com.jkmvc.common.*
 import com.jkmvc.idworker.SnowflakeIdWorker
 import com.jkmvc.validator.ValidateFuncDefinition

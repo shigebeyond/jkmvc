@@ -39,7 +39,7 @@ class LRUCache(protected val maxSize:Int = 10000 /*最大个数*/):ICache {
      * @param expires 过期时间（秒）
      */
     @Synchronized
-    public override fun put(key: Any, value: Any, expires: Int):Unit {
+    public override fun put(key: Any, value: Any, expires: Long):Unit {
         storage.put(key, value)
     }
 

@@ -35,7 +35,7 @@ interface ICache {
      * @param value 值
      * @param expires 过期时间（秒）
      */
-    fun put(key: Any, value: Any, expires:Int):Unit
+    fun put(key: Any, value: Any, expires:Long):Unit
 
     /**
      * 删除指定的键的值
