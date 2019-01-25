@@ -2,9 +2,9 @@ package com.jkmvc.session
 
 import com.jkmvc.common.*
 import com.jkmvc.db.dbLogger
-import com.jkmvc.orm.rowTransformer
 import com.jkmvc.orm.Orm
 import com.jkmvc.orm.modelOrmMeta
+import com.jkmvc.orm.rowTransformer
 import kotlin.reflect.KClass
 
 /**
@@ -17,7 +17,7 @@ import kotlin.reflect.KClass
  **/
 abstract class Auth: IAuth, ClosingOnRequestEnd() {
 
-    companion object: NamedSingleton<Auth>() {
+    companion object: NamedConfiguredSingletons<Auth>() {
 
         /**
          * 会话配置
@@ -41,7 +41,7 @@ abstract class Auth: IAuth, ClosingOnRequestEnd() {
             dbLogger.error("会话相关的用户模型为：" + sessionConfig.getString("userModel"))
         }
 
-        /************************ NamedSingleton 的实现 *************************/
+        /************************ NamedConfiguredSingletons 的实现 *************************/
         /**
          * 单例类的配置，内容是哈希 <单例名 to 单例类>
          */
