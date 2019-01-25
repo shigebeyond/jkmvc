@@ -383,13 +383,15 @@ class MyTests{
 
     @Test
     fun testSnowflakeId(){
-// val idWorker = SnowflakeIdWorker(0, 0)
+        // val idWorker = SnowflakeIdWorker(0, 0)
         val idWorker = SnowflakeIdWorker()
         for (i in 0..999) {
             val id = idWorker.nextId()
             println(java.lang.Long.toBinaryString(id))
             println(id)
         }
+
+        println(generateId())
     }
 
     @Test

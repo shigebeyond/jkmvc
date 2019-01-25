@@ -1,5 +1,6 @@
 package com.jkmvc.common
 
+import com.jkmvc.idworker.IIdWorker
 import java.math.BigDecimal
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.reflect.KClass
@@ -26,6 +27,19 @@ public inline fun randomLong(bound: Long): Long {
  */
 public inline fun randomBoolean(): Boolean {
     return randomInt(2) == 1
+}
+
+/**
+ * id生成器
+ */
+private val idWorker: IIdWorker = IIdWorker.instance("snowflakeId")
+
+/**
+ * 生成唯一id
+ * @return
+ */
+public fun generateId(): Long {
+    return idWorker.nextId()
 }
 
 /**
