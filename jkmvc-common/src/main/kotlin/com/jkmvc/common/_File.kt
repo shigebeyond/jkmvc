@@ -117,7 +117,8 @@ public fun URL.travel(action:(relativePath:String, isDir:Boolean) -> Unit):Unit{
          * classLoader根目录：/C:/Webclient/tomcat0/webapps/ROOT/WEB-INF/classes/
          * 文件绝对路径：      C:\Webclient\tomcat0\webapps\ROOT\WEB-INF\classes\com\jkmvc\szpower\controller\WorkInstructionController.class
          * 文件相对路径=文件绝对路径-跟路径：om\jkmvc\szpower\controller\WorkInstructionController.class
-         * => com变为om，少了一个c，导致根据文件相对路径来加载对应的class错误
+         *
+         * => classLoader根目录开头多了一个/符号
          */
         val os = System.getProperty("os.name")
         // println("操作系统：" + os)
@@ -126,19 +127,23 @@ public fun URL.travel(action:(relativePath:String, isDir:Boolean) -> Unit):Unit{
 
         /**
          * fix bug: 测试环境下路径对不上
-         * classLoader根目录: /home/shi/code/java/java/jksoa/jksoa-client/out/test/classes/
-         * 文件绝对路径:       /home/shi/code/java/java/jksoa/jksoa-client/out/production/classes/com/jksoa/example/EchoService.class
+         * classLoader根目录1: /home/shi/code/java/java/jksoa/jksoa-client/out/test/classes/
+         * 文件绝对路径1:       /home/shi/code/java/java/jksoa/jksoa-client/out/production/classes/com/jksoa/example/EchoService.class
          * 参考: ClientTests.testScanClass()
+         *
+         * classLoader根目录1: /home/shi/code/java/jksoa/jksoa-job/out/test/classes/
+         * 文件绝对路径1:       /home/shi/code/java/jksoa/jksoa-common/out/production/classes/com/jksoa/example/ISystemService$DefaultImpls.class
+         * 参考: JobTests.testRpcJob()
+         *
+         * => 直接取classes/后面的部分
          */
         //println("是否单元测试环境: " + Application.isJunitTest)
-        if(Application.isJunitTest)
-            rootLen = rootLen + 6
 
         File(path).travel {
             // println("文件绝对路径：" + it.path)
-            val relativePath = if(os.startsWith("Windows", true))
-                                    it.path.substring(rootLen)
-                                else
+            val relativePath = if(Application.isJunitTest) // 测试环境下取classes/后面的部分
+                                    it.path.split("classes" + File.separatorChar)[1]
+                               else
                                     it.path.substring(rootLen)
             // println("文件相对路径：" + relativePath)
             action(relativePath, it.isDirectory)
