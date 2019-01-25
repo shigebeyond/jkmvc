@@ -1,5 +1,6 @@
-package com.jkmvc.db
+package com.jkmvc.query
 
+import com.jkmvc.db.*
 import kotlin.reflect.KClass
 
 /**
@@ -19,7 +20,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      * @param db 数据库连接
      * @return 编译好的sql
      */
-    public override fun compile(action:SqlType, db: IDb): CompiledSql {
+    public override fun compile(action: SqlType, db: IDb): CompiledSql {
         // 清空编译结果
         compiledSql.clear();
 
@@ -115,7 +116,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      * @param db 数据库连接
      * @return 影响行数|新增id
      */
-    public override fun execute(action:SqlType, params:List<Any?>, generatedColumn:String?, db: IDb):Int {
+    public override fun execute(action: SqlType, params:List<Any?>, generatedColumn:String?, db: IDb):Int {
         // 编译 + 执行
         return compile(action, db).execute(params, generatedColumn, db)
     }
@@ -129,7 +130,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      * @param db 数据库连接
      * @return
      */
-    public override fun batchExecute(action:SqlType, paramses: List<Any?>, paramSize:Int, db: IDb): IntArray {
+    public override fun batchExecute(action: SqlType, paramses: List<Any?>, paramSize:Int, db: IDb): IntArray {
         // 编译 + 执行
         return compile(action, db).batchExecute(paramses, paramSize, db)
     }

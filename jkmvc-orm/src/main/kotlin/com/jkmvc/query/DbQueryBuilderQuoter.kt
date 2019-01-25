@@ -1,7 +1,9 @@
-package com.jkmvc.db
+package com.jkmvc.query
+
+import com.jkmvc.db.IDb
 
 /**
- * 表名/字段名/值的转移器
+ * 表名/字段名/值的转义器
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-17 11:43 AM
  */

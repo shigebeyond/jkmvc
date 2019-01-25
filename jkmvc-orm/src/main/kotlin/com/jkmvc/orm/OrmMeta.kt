@@ -2,7 +2,7 @@ package com.jkmvc.orm
 
 import com.jkmvc.common.*
 import com.jkmvc.db.Db
-import com.jkmvc.db.GeneralModel
+import com.jkmvc.model.GeneralModel
 import com.jkmvc.db.IDb
 import com.jkmvc.validator.IValidator
 import java.util.*

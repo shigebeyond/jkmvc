@@ -1,4 +1,7 @@
-package com.jkmvc.db
+package com.jkmvc.query
+
+import com.jkmvc.db.IDb
+import com.jkmvc.db.Row
 
 /**
  * sql构建器 -- 动作子句: 由动态select/insert/update/delete来构建的子句
@@ -25,7 +28,7 @@ interface IDbQueryBuilderAction {
      * @param alias 别名
      * @return
      */
-    fun table(table:String, alias:String? = null):IDbQueryBuilder{
+    fun table(table:String, alias:String? = null): IDbQueryBuilder {
         return from(table, alias)
     }
 
@@ -44,7 +47,7 @@ interface IDbQueryBuilderAction {
      * @param alias 别名
      * @return
      */
-    fun from(table:String, alias:String? = null):IDbQueryBuilder{
+    fun from(table:String, alias:String? = null): IDbQueryBuilder {
         return from(DbExpr(table, alias))
     }
 
@@ -55,7 +58,7 @@ interface IDbQueryBuilderAction {
      * @param alias 别名
      * @return
      */
-    fun from(subquery: IDbQueryBuilder, alias:String): IDbQueryBuilder{
+    fun from(subquery: IDbQueryBuilder, alias:String): IDbQueryBuilder {
         return from(DbExpr(subquery, alias))
     }
 
@@ -65,7 +68,7 @@ interface IDbQueryBuilderAction {
      * @param column
      * @return
      */
-    fun insertColumns(vararg colums:String):IDbQueryBuilder;
+    fun insertColumns(vararg colums:String): IDbQueryBuilder;
 
     /**
      * 设置插入的单行值, insert时用
@@ -74,7 +77,7 @@ interface IDbQueryBuilderAction {
      * @param row
      * @return
      */
-    fun value(vararg row:Any?):IDbQueryBuilder;
+    fun value(vararg row:Any?): IDbQueryBuilder;
 
     /**
      * 设置插入的子查询, insert时用
@@ -90,7 +93,7 @@ interface IDbQueryBuilderAction {
      * @param row
      * @return
      */
-    fun value(row:Row):IDbQueryBuilder;
+    fun value(row: Row): IDbQueryBuilder;
 
     /**
      * 设置更新的单个值, update时用
@@ -99,7 +102,7 @@ interface IDbQueryBuilderAction {
      * @param value
      * @return
      */
-    fun set(column:String, value:Any?):IDbQueryBuilder;
+    fun set(column:String, value:Any?): IDbQueryBuilder;
 
     /**
      * 设置更新的单个值, update时用
@@ -109,7 +112,7 @@ interface IDbQueryBuilderAction {
      * @param isExpr 是否db表达式
      * @return
      */
-    fun set(column:String, value:String, isExpr: Boolean = false):IDbQueryBuilder;
+    fun set(column:String, value:String, isExpr: Boolean = false): IDbQueryBuilder;
 
     /**
      * 设置更新的多个值, update时用
@@ -117,7 +120,7 @@ interface IDbQueryBuilderAction {
      * @param row
      * @return
      */
-    fun sets(row:Row):IDbQueryBuilder;
+    fun sets(row: Row): IDbQueryBuilder;
 
     /**
      * 设置查询的字段, select时用
@@ -127,7 +130,7 @@ interface IDbQueryBuilderAction {
      * 				  如 arrayOf("name", "age", DbExpr("birthday", "birt"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
      * @return
      */
-    fun select(vararg columns:CharSequence):IDbQueryBuilder;
+    fun select(vararg columns:CharSequence): IDbQueryBuilder;
 
     /**
      * 设置查询结果是否去重唯一
@@ -135,11 +138,11 @@ interface IDbQueryBuilderAction {
      * @param value
      * @returnAction
      */
-    fun distinct(value:Boolean = true):IDbQueryBuilder;
+    fun distinct(value:Boolean = true): IDbQueryBuilder;
 
     /**
      * 清空条件
      * @return
      */
-    fun clear():IDbQueryBuilder;
+    fun clear(): IDbQueryBuilder;
 }

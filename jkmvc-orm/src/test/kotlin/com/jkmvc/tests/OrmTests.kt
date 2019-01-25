@@ -1,7 +1,7 @@
 package com.jkmvc.tests
 
 import com.jkmvc.db.Db
-import com.jkmvc.db.GeneralModel
+import com.jkmvc.model.GeneralModel
 import com.jkmvc.orm.*
 import com.jkmvc.tests.model.*
 import org.junit.Test

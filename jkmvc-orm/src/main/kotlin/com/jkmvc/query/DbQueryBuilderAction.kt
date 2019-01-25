@@ -1,6 +1,7 @@
-package com.jkmvc.db
+package com.jkmvc.query
 
 import com.jkmvc.common.*
+import com.jkmvc.db.*
 import java.util.*
 import kotlin.reflect.KFunction2
 
@@ -104,7 +105,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @param column
      * @return
      */
-    public override fun insertColumns(vararg colums:String):IDbQueryBuilder{
+    public override fun insertColumns(vararg colums:String): IDbQueryBuilder {
         insertRows.columns = colums as Array<String>
         return this;
     }
@@ -138,7 +139,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @param row
      * @return
      */
-    public override fun value(row:Row):IDbQueryBuilder{
+    public override fun value(row: Row): IDbQueryBuilder {
         insertRows.columns = row.keys.mapToArray {
             it
         }
@@ -166,7 +167,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @param isExpr 是否db表达式
      * @return
      */
-    public override fun set(column:String, value:String, isExpr: Boolean):IDbQueryBuilder{
+    public override fun set(column:String, value:String, isExpr: Boolean): IDbQueryBuilder {
         val realValue = if (isExpr) DbExpr(value, false) else value
         return this.set(column, realValue)
     }

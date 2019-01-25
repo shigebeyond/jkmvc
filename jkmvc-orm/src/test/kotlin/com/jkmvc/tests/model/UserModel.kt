@@ -2,8 +2,6 @@ package com.jkmvc.tests.model
 
 import com.jkmvc.orm.Orm
 import com.jkmvc.orm.OrmMeta
-import com.jkmvc.tests.AddressModel
-import com.jkmvc.tests.ParcelModel
 
 /**
  * 用户模型

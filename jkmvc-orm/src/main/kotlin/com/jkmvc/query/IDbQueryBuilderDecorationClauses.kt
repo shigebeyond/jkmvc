@@ -1,4 +1,6 @@
-package com.jkmvc.db
+package com.jkmvc.query
+
+import com.jkmvc.db.IDb
 
 /**
  * sql修饰子句的模拟构建
@@ -26,7 +28,7 @@ interface IDbQueryBuilderDecorationClauses<T> {
      * @param delimiter 当前子表达式的连接符
      * @return
      */
-    fun addSubexp(subexp:Array<Any?>, delimiter:String = ", "):IDbQueryBuilderDecorationClauses<T>;
+    fun addSubexp(subexp:Array<Any?>, delimiter:String = ", "): IDbQueryBuilderDecorationClauses<T>;
 
     /**
      * 编译一个子表达式
@@ -44,18 +46,18 @@ interface IDbQueryBuilderDecorationClauses<T> {
      * @param delimiter 连接符
      * @return
      */
-    fun open(delimiter:String):IDbQueryBuilderDecorationClauses<T>;
+    fun open(delimiter:String): IDbQueryBuilderDecorationClauses<T>;
 
     /**
      * 结束一个分组
      *
      * @return
      */
-    fun close():IDbQueryBuilderDecorationClauses<T>;
+    fun close(): IDbQueryBuilderDecorationClauses<T>;
 
     /**
      * 清空
      * @return
      */
-    fun clear():IDbQueryBuilderDecorationClauses<T>;
+    fun clear(): IDbQueryBuilderDecorationClauses<T>;
 }

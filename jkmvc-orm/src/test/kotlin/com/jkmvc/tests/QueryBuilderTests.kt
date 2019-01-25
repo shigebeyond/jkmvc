@@ -1,6 +1,10 @@
 package com.jkmvc.tests
 
 import com.jkmvc.db.*
+import com.jkmvc.query.DbExpr
+import com.jkmvc.query.DbQueryBuilder
+import com.jkmvc.query.IDbQueryBuilder
+import com.jkmvc.query.SqlType
 import org.junit.Test
 
 
@@ -36,7 +40,7 @@ class QueryBuilderTests{
     @Test
     fun testBatchInsert2(){
         // 初始化查询
-        val initQuery:(DbQueryBuilder)->DbQueryBuilder = { query:DbQueryBuilder ->
+        val initQuery:(DbQueryBuilder)-> DbQueryBuilder = { query: DbQueryBuilder ->
             query.clear().table("user").insertColumns("name", "age") as DbQueryBuilder;
         }
         val query = initQuery(DbQueryBuilder())
@@ -81,7 +85,7 @@ class QueryBuilderTests{
     @Test
     fun testFindPage(){
         val query: IDbQueryBuilder = DbQueryBuilder().table("user")
-        val counter:IDbQueryBuilder = query.clone() as IDbQueryBuilder // 克隆query builder
+        val counter: IDbQueryBuilder = query.clone() as IDbQueryBuilder // 克隆query builder
         val rows = query.orderBy("id").limit(10).findAllRows() // 查分页数据
         val count = counter.count() // 查总数
         println("查询user表：总数: " + count + ", 分页数据：" + rows)

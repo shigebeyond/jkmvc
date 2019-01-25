@@ -1,9 +1,5 @@
 package com.jkmvc.orm
 
-import com.jkmvc.common.getConstructor
-import com.jkmvc.common.getConstructorOrNull
-import com.jkmvc.common.newInstance
-import com.jkmvc.db.GeneralModel
 import com.jkmvc.db.Row
 import org.apache.commons.collections.iterators.AbstractIteratorDecorator
 import kotlin.reflect.KClass

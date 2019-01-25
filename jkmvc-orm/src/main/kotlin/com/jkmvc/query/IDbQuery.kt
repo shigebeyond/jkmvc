@@ -1,5 +1,8 @@
-package com.jkmvc.db
+package com.jkmvc.query
 
+import com.jkmvc.db.Cell
+import com.jkmvc.db.IDb
+import com.jkmvc.db.Row
 import com.jkmvc.orm.IOrm
 import com.jkmvc.orm.rowTransformer
 import org.apache.commons.collections.map.HashedMap
@@ -80,7 +83,7 @@ abstract class IDbQuery{
      * @param transform 转换函数
      * @return 一个数据
      */
-    public abstract fun <T:Any> find(params: List<Any?> = emptyList(),  db: IDb = defaultDb, transform: (Row) -> T): T?
+    public abstract fun <T:Any> find(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (Row) -> T): T?
 
     /**
      * 查找一个： select ... limit 1语句

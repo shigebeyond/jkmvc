@@ -4,10 +4,10 @@ import com.jkmvc.common.isArrayOrCollection
 import com.jkmvc.common.isNullOrEmpty
 import com.jkmvc.common.iteratorArrayOrCollection
 import com.jkmvc.common.map
-import com.jkmvc.db.DbExpr
-import com.jkmvc.db.DbQueryBuilder
+import com.jkmvc.query.DbExpr
+import com.jkmvc.query.DbQueryBuilder
 import com.jkmvc.db.IDb
-import com.jkmvc.db.IDbQueryBuilder
+import com.jkmvc.query.IDbQueryBuilder
 import com.jkmvc.db.Row
 import java.util.*
 import kotlin.collections.HashMap

@@ -1,6 +1,7 @@
-package com.jkmvc.db
+package com.jkmvc.query
 
 import com.jkmvc.common.isArrayOrCollection
+import com.jkmvc.db.IDb
 
 /**
  * sql构建器 -- 修饰子句: 由修饰词where/group by/order by/limit来构建的子句

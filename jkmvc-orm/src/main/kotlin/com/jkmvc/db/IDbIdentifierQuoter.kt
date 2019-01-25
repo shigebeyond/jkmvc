@@ -1,5 +1,7 @@
 package com.jkmvc.db
 
+import com.jkmvc.query.DbExpr
+
 /**
  * Db标识符(表名/字段名)转义器
  *

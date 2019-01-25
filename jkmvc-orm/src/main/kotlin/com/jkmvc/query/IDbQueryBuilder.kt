@@ -1,4 +1,6 @@
-package com.jkmvc.db
+package com.jkmvc.query
+
+import com.jkmvc.db.IDb
 
 /**
  * sql构建器
@@ -32,7 +34,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      * @param db 数据库连接
      * @return 编译好的sql
      */
-    public abstract fun compile(action:SqlType, db: IDb = defaultDb): CompiledSql;
+    public abstract fun compile(action: SqlType, db: IDb = defaultDb): CompiledSql;
 
     /**
      * 编译select语句
@@ -40,7 +42,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      * @param db 数据库连接
      * @return 编译好的sql
      */
-    public fun compileSelect(db: IDb = defaultDb): CompiledSql{
+    public fun compileSelect(db: IDb = defaultDb): CompiledSql {
         return compile(SqlType.SELECT, db)
     }
 
@@ -50,7 +52,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      * @param db 数据库连接
      * @return 编译好的sql
      */
-    public fun compileSelectOne(db: IDb = defaultDb): CompiledSql{
+    public fun compileSelectOne(db: IDb = defaultDb): CompiledSql {
         return limit(1).compile(SqlType.SELECT, db)
     }
 
@@ -60,7 +62,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      * @param db 数据库连接
      * @return 编译好的sql
      */
-    public fun compileCount(db: IDb = defaultDb): CompiledSql{
+    public fun compileCount(db: IDb = defaultDb): CompiledSql {
         return select(DbExpr("count(1)", "NUM", false) /* oracle会自动转为全大写 */).compile(SqlType.SELECT, db)
     }
 
@@ -70,7 +72,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      * @param db 数据库连接
      * @return 编译好的sql
      */
-    public fun compileInsert(db: IDb = defaultDb): CompiledSql{
+    public fun compileInsert(db: IDb = defaultDb): CompiledSql {
         return compile(SqlType.INSERT, db)
     }
 
@@ -80,7 +82,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      * @param db 数据库连接
      * @return 编译好的sql
      */
-    public fun compileUpdate(db: IDb = defaultDb): CompiledSql{
+    public fun compileUpdate(db: IDb = defaultDb): CompiledSql {
         return compile(SqlType.UPDATE, db)
     }
 
@@ -90,7 +92,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      * @param db 数据库连接
      * @return 编译好的sql
      */
-    public fun compileDelete(db: IDb = defaultDb): CompiledSql{
+    public fun compileDelete(db: IDb = defaultDb): CompiledSql {
         return compile(SqlType.DELETE, db)
     }
 
@@ -113,7 +115,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      * @param db 数据库连接
      * @return 影响行数|新增id
      */
-    public abstract fun execute(action:SqlType, params:List<Any?> = emptyList(), generatedColumn:String? = null, db: IDb = defaultDb):Int;
+    public abstract fun execute(action: SqlType, params:List<Any?> = emptyList(), generatedColumn:String? = null, db: IDb = defaultDb):Int;
 
     /**
      * 插入：insert语句
@@ -158,7 +160,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      * @param db 数据库连接
      * @return
      */
-    public abstract fun batchExecute(action:SqlType, paramses: List<Any?>, paramSize:Int, db: IDb = defaultDb): IntArray;
+    public abstract fun batchExecute(action: SqlType, paramses: List<Any?>, paramSize:Int, db: IDb = defaultDb): IntArray;
 
     /**
      * 批量插入

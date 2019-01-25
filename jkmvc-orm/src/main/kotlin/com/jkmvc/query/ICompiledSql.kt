@@ -1,5 +1,6 @@
-package com.jkmvc.db
+package com.jkmvc.query
 
+import com.jkmvc.db.IDb
 import java.util.*
 
 /**
@@ -73,7 +74,7 @@ abstract class ICompiledSql: IDbQuery() {
      * @param db 数据库连接
      * @return
      */
-    public abstract fun previewSql(dynamicParams:List<Any?> = emptyList(), fromIndex:Int = 0, db:IDb = defaultDb): String
+    public abstract fun previewSql(dynamicParams:List<Any?> = emptyList(), fromIndex:Int = 0, db: IDb = defaultDb): String
 
     /****************************** 执行sql *******************************/
     /**
@@ -83,7 +84,7 @@ abstract class ICompiledSql: IDbQuery() {
      * @param generatedColumn 返回的自动生成的主键名
      * @return 影响行数|新增id
      */
-    public abstract fun execute(params: List<Any?>, generatedColumn:String?, db:IDb):Int
+    public abstract fun execute(params: List<Any?>, generatedColumn:String?, db: IDb):Int
 
     /**
      * 批量更新有参数的sql
@@ -93,5 +94,5 @@ abstract class ICompiledSql: IDbQuery() {
      * @param paramSize 一次处理的参数个数
      * @return
      */
-    public abstract fun batchExecute(paramses: List<Any?>, paramSize:Int, db:IDb): IntArray
+    public abstract fun batchExecute(paramses: List<Any?>, paramSize:Int, db: IDb): IntArray
 }

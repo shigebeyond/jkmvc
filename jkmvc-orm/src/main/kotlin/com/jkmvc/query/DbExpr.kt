@@ -1,4 +1,6 @@
-package com.jkmvc.db
+package com.jkmvc.query
+
+import com.jkmvc.db.IDbIdentifierQuoter
 
 /**
  * Db表达式

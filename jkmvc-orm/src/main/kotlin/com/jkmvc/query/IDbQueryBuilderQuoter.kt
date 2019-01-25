@@ -1,7 +1,8 @@
-package com.jkmvc.db
+package com.jkmvc.query
 
 import com.jkmvc.common.iteratorArrayOrCollection
 import com.jkmvc.common.joinToString
+import com.jkmvc.db.IDb
 
 /**
  * 表名/字段名/值的转移器

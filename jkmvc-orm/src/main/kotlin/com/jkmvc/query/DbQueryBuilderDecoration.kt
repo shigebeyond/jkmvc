@@ -1,7 +1,10 @@
-package com.jkmvc.db
+package com.jkmvc.query
 
 import com.jkmvc.common.getOrPut
 import com.jkmvc.common.isArrayOrCollectionEmpty
+import com.jkmvc.db.DbException
+import com.jkmvc.db.DbType
+import com.jkmvc.db.IDb
 import java.util.*
 import kotlin.reflect.KFunction2
 
@@ -31,7 +34,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
     protected val whereClause: DbQueryBuilderDecorationClauses<*>
         get(){
             return clauses.getOrPut(ClauseType.WHERE.ordinal){
-                DbQueryBuilderDecorationClausesGroup("WHERE", arrayOf<KFunction2 <IDb, *, String>?>(this::quoteColumn, null, this::quote));
+                DbQueryBuilderDecorationClausesGroup("WHERE", arrayOf<KFunction2<IDb, *, String>?>(this::quoteColumn, null, this::quote));
             } as DbQueryBuilderDecorationClauses<*>
         }
 
@@ -42,7 +45,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
     protected val groupByClause: DbQueryBuilderDecorationClauses<*>
         get(){
             return clauses.getOrPut(ClauseType.GROUP_BY.ordinal){
-                DbQueryBuilderDecorationClausesSimple("GROUP BY", arrayOf<KFunction2 <IDb, *, String>?>(this::quoteColumn));
+                DbQueryBuilderDecorationClausesSimple("GROUP BY", arrayOf<KFunction2<IDb, *, String>?>(this::quoteColumn));
             } as DbQueryBuilderDecorationClauses<*>
         }
 
@@ -53,7 +56,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
     protected val havingClause: DbQueryBuilderDecorationClauses<*>
         get(){
             return clauses.getOrPut(ClauseType.HAVING.ordinal){
-                DbQueryBuilderDecorationClausesGroup("HAVING", arrayOf<KFunction2 <IDb, *, String>?>(this::quoteColumn, null, this::quote));
+                DbQueryBuilderDecorationClausesGroup("HAVING", arrayOf<KFunction2<IDb, *, String>?>(this::quoteColumn, null, this::quote));
             } as DbQueryBuilderDecorationClauses<*>
         }
 
@@ -64,7 +67,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
     protected val orderByClause: DbQueryBuilderDecorationClauses<*>
         get(){
             return clauses.getOrPut(ClauseType.ORDER_BY.ordinal){
-                DbQueryBuilderDecorationClausesSimple("ORDER BY", arrayOf<KFunction2 <IDb, *, String>?>(this::quoteColumn, this::quoteOrderDirection));
+                DbQueryBuilderDecorationClausesSimple("ORDER BY", arrayOf<KFunction2<IDb, *, String>?>(this::quoteColumn, this::quoteOrderDirection));
             } as DbQueryBuilderDecorationClauses<*>
         }
 
@@ -149,7 +152,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * @param sql 保存编译的sql
      * @return
      */
-    public override fun compileDecoration(db: IDb, sql: StringBuilder): IDbQueryBuilder{
+    public override fun compileDecoration(db: IDb, sql: StringBuilder): IDbQueryBuilder {
         sql.append(' ');
         // 逐个编译修饰表达式
         travelDecorationClauses { clause: IDbQueryBuilderDecorationClauses<*> ->
@@ -453,11 +456,11 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      */
     public override fun join(table: CharSequence, type: String): IDbQueryBuilder {
         // join　子句
-        val j = DbQueryBuilderDecorationClausesSimple("$type JOIN", arrayOf<KFunction2 <IDb, *, String>?>(this::quoteTable));
+        val j = DbQueryBuilderDecorationClausesSimple("$type JOIN", arrayOf<KFunction2<IDb, *, String>?>(this::quoteTable));
         j.addSubexp(arrayOf<Any?>(table));
 
         // on　子句 -- on总是追随最近的一个join
-        val on = DbQueryBuilderDecorationClausesGroup("ON", arrayOf<KFunction2 <IDb, *, String>?>(this::quoteColumn, null, this::quoteColumn));
+        val on = DbQueryBuilderDecorationClausesGroup("ON", arrayOf<KFunction2<IDb, *, String>?>(this::quoteColumn, null, this::quoteColumn));
 
         joinClause.add(j);
         joinClause.add(on);

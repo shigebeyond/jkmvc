@@ -1,7 +1,7 @@
 package com.jkmvc.orm
 
 import com.jkmvc.common.toArray
-import com.jkmvc.db.IDbQueryBuilder
+import com.jkmvc.query.IDbQueryBuilder
 import java.util.*
 
 /**
@@ -308,7 +308,7 @@ internal fun IDbQueryBuilder.where(columns: DbKeyNames, values: Any?): IDbQueryB
  * @param   values   column value
  * @return
  */
-internal fun IDbQueryBuilder.andWhere(columns: DbKeyNames, op: String, values: Any?): IDbQueryBuilder{
+internal fun IDbQueryBuilder.andWhere(columns: DbKeyNames, op: String, values: Any?): IDbQueryBuilder {
     columns.forEachNameValue(values){ name, value, i ->
         IDbQueryBuilder@this.andWhere(name, op, value)
     }
@@ -323,7 +323,7 @@ internal fun IDbQueryBuilder.andWhere(columns: DbKeyNames, op: String, values: A
  * @param   cols2  column name or DbExpr
  * @return
  */
-internal fun IDbQueryBuilder.on(cols1: DbKeyNames, op: String, cols2: DbKeyNames): IDbQueryBuilder{
+internal fun IDbQueryBuilder.on(cols1: DbKeyNames, op: String, cols2: DbKeyNames): IDbQueryBuilder {
     cols1.forEachColumnWith(cols2){ col1, col2, i ->
         IDbQueryBuilder@this.on(col1, op, col2)
     }
@@ -337,7 +337,7 @@ internal fun IDbQueryBuilder.on(cols1: DbKeyNames, op: String, cols2: DbKeyNames
  * @param values
  * @return
  */
-internal fun IDbQueryBuilder.set(columns:DbKeyNames, values:Any?):IDbQueryBuilder{
+internal fun IDbQueryBuilder.set(columns:DbKeyNames, values:Any?): IDbQueryBuilder {
     columns.forEachNameValue(values){ name, value, i ->
         IDbQueryBuilder@this.set(name, value)
     }
@@ -351,7 +351,7 @@ internal fun IDbQueryBuilder.set(columns:DbKeyNames, values:Any?):IDbQueryBuilde
  * @param row
  * @return
  */
-internal fun IDbQueryBuilder.insertValue(vararg row:Any?):IDbQueryBuilder{
+internal fun IDbQueryBuilder.insertValue(vararg row:Any?): IDbQueryBuilder {
     val vals = ArrayList<Any?>()
     row.forEach {
         if(it is DbKey<*>)

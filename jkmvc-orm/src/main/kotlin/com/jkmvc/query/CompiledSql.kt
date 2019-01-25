@@ -1,6 +1,6 @@
-package com.jkmvc.db
+package com.jkmvc.query
 
-import com.jkmvc.common.defaultValue
+import com.jkmvc.db.*
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
@@ -171,7 +171,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param db 数据库连接
      * @return
      */
-    public override fun previewSql(dynamicParams: List<Any?>, fromIndex: Int, db:IDb): String {
+    public override fun previewSql(dynamicParams: List<Any?>, fromIndex: Int, db: IDb): String {
         // 替换实参
         var i = 0 // 静态变量的迭代索引
         var j = fromIndex // 动态变量的迭代索引
@@ -191,7 +191,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param transform 转换函数
      * @return 列表
      */
-    public override fun <T:Any> findAll(params: List<Any?>, db:IDb, transform: (Row) -> T): List<T>{
+    public override fun <T:Any> findAll(params: List<Any?>, db: IDb, transform: (Row) -> T): List<T>{
         // 执行 select
         return db.queryRows<T>(sql, buildParams(params), transform)
     }
@@ -203,7 +203,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param transform 转换函数
      * @return 单个数据
      */
-    public override fun <T:Any> find(params: List<Any?>, db:IDb, transform: (Row) -> T): T?{
+    public override fun <T:Any> find(params: List<Any?>, db: IDb, transform: (Row) -> T): T?{
         return db.queryRow<T>(sql, buildParams(params), transform);
     }
 
@@ -213,7 +213,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param params 动态参数
      * @return
      */
-    public override fun <T:Any> findColumn(params: List<Any?>, clazz: KClass<T>?, db:IDb): List<T?> {
+    public override fun <T:Any> findColumn(params: List<Any?>, clazz: KClass<T>?, db: IDb): List<T?> {
         // 执行 select
         return db.queryColumn(sql, buildParams(params), clazz)
     }
@@ -224,7 +224,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param params 动态参数
      * @return
      */
-    public override fun <T:Any> findCell(params: List<Any?>, clazz: KClass<T>?, db:IDb): Cell<T>{
+    public override fun <T:Any> findCell(params: List<Any?>, clazz: KClass<T>?, db: IDb): Cell<T> {
         // 执行 select
         return db.queryCell(sql, buildParams(params), clazz);
     }
@@ -236,7 +236,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param generatedColumn 返回的自动生成的主键名
      * @return 影响行数|新增id
      */
-    public override fun execute(params: List<Any?>, generatedColumn:String?, db:IDb):Int {
+    public override fun execute(params: List<Any?>, generatedColumn:String?, db: IDb):Int {
         return db.execute(sql, buildParams(params), generatedColumn);
     }
 
@@ -248,7 +248,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param paramSize 一次处理的参数个数
      * @return
      */
-    public override fun batchExecute(paramses: List<Any?>, paramSize:Int, db:IDb): IntArray {
+    public override fun batchExecute(paramses: List<Any?>, paramSize:Int, db: IDb): IntArray {
         // 批量执行有参数sql
         return db.batchExecute(sql, buildBatchParamses(paramses, paramSize), staticParams.size);
     }
