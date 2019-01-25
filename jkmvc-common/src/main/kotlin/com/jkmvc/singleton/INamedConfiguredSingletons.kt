@@ -1,4 +1,6 @@
-package com.jkmvc.common
+package com.jkmvc.singleton
+
+import com.jkmvc.common.IConfig
 
 /**
  * 名字可配的单例池

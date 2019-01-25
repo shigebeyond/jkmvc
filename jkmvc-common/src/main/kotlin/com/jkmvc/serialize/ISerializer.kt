@@ -2,7 +2,7 @@ package com.jkmvc.serialize
 
 import com.jkmvc.common.Config
 import com.jkmvc.common.IConfig
-import com.jkmvc.common.NamedConfiguredSingletons
+import com.jkmvc.singleton.NamedConfiguredSingletons
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 

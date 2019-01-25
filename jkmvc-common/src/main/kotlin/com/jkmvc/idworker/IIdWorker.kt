@@ -2,7 +2,7 @@ package com.jkmvc.idworker
 
 import com.jkmvc.common.Config
 import com.jkmvc.common.IConfig
-import com.jkmvc.common.NamedConfiguredSingletons
+import com.jkmvc.singleton.NamedConfiguredSingletons
 
 /**
  * id生成器

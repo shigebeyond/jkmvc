@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject
 import com.jkmvc.common.Config
 import com.jkmvc.common.Http
 import com.jkmvc.common.IConfig
-import com.jkmvc.common.NamedConfiguredSingletons
+import com.jkmvc.singleton.NamedConfiguredSingletons
 
 /**
  * 授权者

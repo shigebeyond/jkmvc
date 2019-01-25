@@ -1,4 +1,4 @@
-package com.jkmvc.common
+package com.jkmvc.singleton
 
 /**
  * 名字可配的单例池

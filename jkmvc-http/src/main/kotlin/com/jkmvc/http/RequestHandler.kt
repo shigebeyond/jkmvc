@@ -1,6 +1,6 @@
 package com.jkmvc.http
 
-import com.jkmvc.common.ClosingOnRequestEnd
+import com.jkmvc.closing.ClosingOnRequestEnd
 import com.jkmvc.common.Config
 import com.jkmvc.common.ucFirst
 import javax.servlet.http.HttpServletRequest

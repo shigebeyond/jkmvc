@@ -1,4 +1,4 @@
-package com.jkmvc.common
+package com.jkmvc.closing
 
 import java.io.Closeable
 import java.util.*
