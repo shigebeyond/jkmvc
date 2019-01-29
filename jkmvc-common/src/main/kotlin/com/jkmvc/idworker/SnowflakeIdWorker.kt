@@ -76,7 +76,7 @@ class SnowflakeIdWorker : IIdWorker {
         // 1 同一毫秒
         if (lastTimestamp == timestamp) {
             //毫秒内序列自增
-            if (sequence.incrementAndGet() < SnowflakeId.maxSequence) // 无溢出
+            if (sequence.incrementAndGet() <= SnowflakeId.maxSequence) // 无溢出
                 return newId(timestamp)
 
             //溢出: 阻塞到下一个毫秒
