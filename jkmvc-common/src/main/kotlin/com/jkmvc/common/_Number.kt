@@ -1,46 +1,7 @@
 package com.jkmvc.common
 
-import com.jkmvc.idworker.IIdWorker
 import java.math.BigDecimal
-import java.util.concurrent.ThreadLocalRandom
 import kotlin.reflect.KClass
-
-/**
- * 随机的int
- * @return
- */
-public inline fun randomInt(bound: Int): Int {
-    return ThreadLocalRandom.current().nextInt(bound)
-}
-
-/**
- * 随机的long
- * @return
- */
-public inline fun randomLong(bound: Long): Long {
-    return ThreadLocalRandom.current().nextLong(bound)
-}
-
-/**
- * 随机的bool
- * @return
- */
-public inline fun randomBoolean(): Boolean {
-    return randomInt(2) == 1
-}
-
-/**
- * id生成器
- */
-private val idWorker: IIdWorker = IIdWorker.instance("snowflakeId")
-
-/**
- * 生成唯一id
- * @return
- */
-public fun generateId(): Long {
-    return idWorker.nextId()
-}
 
 /**
  * 将BigDecimal转换为指定类型的数值
