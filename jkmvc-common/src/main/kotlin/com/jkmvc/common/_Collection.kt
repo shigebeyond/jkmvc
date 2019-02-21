@@ -2,6 +2,7 @@ package com.jkmvc.common
 
 import java.math.BigDecimal
 import java.util.*
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.ThreadLocalRandom
 
@@ -263,6 +264,25 @@ class ItEnumeration<T>(val it: Iterator<T>) : Enumeration<T> {
  */
 public fun <T> Iterable<T>.enumeration(): ItEnumeration<T> {
     return ItEnumeration(iterator())
+}
+
+/****************************** 扩展 Queue *****************************/
+
+/**
+ * 从队列中抽取指定数目的元素
+ * @param c
+ * @param maxElements
+ * @return
+ */
+public fun <E> ConcurrentLinkedQueue<E>.drainTo(c: MutableCollection<E>, maxElements: Int): Int {
+    var n = this.size // 开始的大小
+    if(n > maxElements)
+        n = maxElements
+    for(i in 0 until n){
+        val item = this.peek()
+        c.add(item)
+    }
+    return n
 }
 
 /****************************** 扩展 Map *****************************/

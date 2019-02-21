@@ -18,17 +18,23 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import java.util.Calendar
 import java.util.GregorianCalendar
+import kotlin.reflect.full.declaredFunctions
+import kotlin.reflect.full.functions
 
-open class A() {}
+open class A() {
+    open fun echo(){}
+}
 class B():A() {
-    protected val name:String = "test";
+    /*override fun echo(){
+        println("Ah")
+    }*/
 }
 
-fun A.echo(){
+fun A.sayHi(){
     println("hi, I'm A")
 }
 
-fun B.echo(){
+fun B.sayHi(){
     println("hi, I'm B")
 }
 
@@ -486,13 +492,22 @@ class MyTests{
     }
 
     @Test
+    fun testSubClass(){
+        //val funs = B::class.declaredFunctions // 当前类实现的方法
+        val funs = B::class.functions // 当前类实现的方法
+        funs.forEach {
+            println(it)
+        }
+    }
+
+    @Test
     fun testExtend(){
         val a:A = A()
-        a.echo() // A
+        a.sayHi() // A
         val b:B = B()
-        b.echo() // B
+        b.sayHi() // B
         val c:A = B()
-        c.echo() // A
+        c.sayHi() // A
     }
 
     @Test

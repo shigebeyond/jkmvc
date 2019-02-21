@@ -27,7 +27,7 @@ data class SnowflakeId(public val timestamp: Long /* 开始时间截  */,
         public val workerIdBits: Int = 5
 
         /**
-         * 序列在id中占的位数: 微秒内序列号12位自增，并发4096
+         * 序列在id中占的位数: 毫秒内序列号12位自增，并发4096
          */
         public val sequenceBits: Int = 12
 
