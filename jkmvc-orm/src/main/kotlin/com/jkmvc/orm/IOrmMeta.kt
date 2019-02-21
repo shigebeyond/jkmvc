@@ -177,7 +177,6 @@ interface IOrmMeta {
      * @return
      */
     fun canHandleAnyEvent(events:String): Boolean{
-        println(processableEvents)
         return processableEvents.any { event ->
             events.contains(event)
         }

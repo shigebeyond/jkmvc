@@ -71,6 +71,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
 
     /**
      * 能处理的序列化事件
+     *   就是在子类中重写了事件处理函数
      */
     public override val processableEvents: List<String> by lazy{
         "beforeCreate|afterCreate|beforeUpdate|afterUpdate|beforeSave|afterSave|beforeDelete|afterDelete".split('|').filter { event ->
