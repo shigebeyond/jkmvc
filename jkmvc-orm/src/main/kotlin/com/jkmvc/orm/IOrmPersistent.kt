@@ -30,6 +30,7 @@ interface IOrmPersistent : IOrmValid {
 	 */
 	val oldPk:DbKeyValues
 
+	/************************************ 持久化处理 *************************************/
 	/**
 	 * 获得sql构建器
 	 * @return
@@ -108,10 +109,44 @@ interface IOrmPersistent : IOrmValid {
 	 */
 	fun incr(prop: String, step: Int): Boolean;
 
+	/************************************ 持久化事件 *************************************/
 	/**
-	 * 触发事件
-	 *
-	 * @param event 事件名
+	 * 处理create前置事件
 	 */
-	fun fireEvent(event:String)
+	fun beforeCreate(){}
+
+	/**
+	 * 处理create后置事件
+	 */
+	fun afterCreate(){}
+
+	/**
+	 * 处理update前置事件
+	 */
+	fun beforeUpdate(){}
+
+	/**
+	 * 处理update后置事件
+	 */
+	fun afterUpdate(){}
+
+	/**
+	 * 处理save前置事件
+	 */
+	fun beforeSave(){}
+
+	/**
+	 * 处理save后置事件
+	 */
+	fun afterSave(){}
+
+	/**
+	 * 处理delete前置事件
+	 */
+	fun beforeDelete(){}
+
+	/**
+	 * 处理delete后置事件
+	 */
+	fun afterDelete(){}
 }

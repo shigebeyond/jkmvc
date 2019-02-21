@@ -5,7 +5,6 @@ import com.jkmvc.validator.IValidator
 import com.jkmvc.validator.RuleValidator
 import com.jkmvc.validator.ValidateLambda
 import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
 
 /**
  * orm的元数据
@@ -79,11 +78,6 @@ interface IOrmMeta {
     val props: List<String>
 
     /**
-     * 事件处理器
-     */
-    val eventHandlers:Map<String, KFunction<Unit>?>
-
-    /**
      * 是否有某个关联关系
      * @param name
      * @return
@@ -148,29 +142,6 @@ interface IOrmMeta {
     }
 
     /**
-     * 获得事件处理器
-     * @param event 事件名
-     * @return
-     */
-    fun getEventHandler(event:String): KFunction<Unit>?;
-
-    /**
-     * 能否处理任一事件
-     * @param events 多个事件名，以|分隔，如 beforeCreate|afterCreate
-     * @return
-     */
-    fun canHandleAnyEvent(events:String): Boolean
-
-    /**
-     * 如果有要处理的事件，则开启事务
-     *
-     * @param events 多个事件名，以|分隔，如 beforeCreate|afterCreate
-     * @param statement
-     * @return
-     */
-    fun <T> transactionWhenHandlingEvent(events:String, statement: () -> T): T
-
-    /**
      * 智能转换字段值
      *    在不知字段类型的情况下，将string赋值给属性
      *    => 需要将string转换为属性类型
@@ -193,6 +164,33 @@ interface IOrmMeta {
      * @return 关联关系
      */
     fun joinRelated(query: OrmQueryBuilder, name: String, select: Boolean, columns: SelectColumnList?, lastName:String = this.name, path:String = ""): IRelationMeta
+
+    /************************************ 序列化事件 *************************************/
+    /**
+     * 能处理的序列化事件
+     */
+    val processableEvents: List<String>
+
+    /**
+     * 能否处理任一事件
+     * @param events 多个事件名，以|分隔，如 beforeCreate|afterCreate
+     * @return
+     */
+    fun canHandleAnyEvent(events:String): Boolean{
+        println(processableEvents)
+        return processableEvents.any { event ->
+            events.contains(event)
+        }
+    }
+
+    /**
+     * 如果有要处理的事件，则开启事务
+     *
+     * @param events 多个事件名，以|分隔，如 beforeCreate|afterCreate
+     * @param statement
+     * @return
+     */
+    fun <T> transactionWhenHandlingEvent(events:String, statement: () -> T): T
 
     /************************************ 添加关联关系: 复合主键版本, 主外键类型为 DbKeyNames *************************************/
     /**

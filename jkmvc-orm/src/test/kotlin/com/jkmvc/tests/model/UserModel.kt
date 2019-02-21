@@ -50,4 +50,60 @@ class UserModel(id:Int? = null): Orm(id) {
     public var parcelSenders:List<UserModel> by property();
 
     public var parcelReceivers:List<UserModel> by property();
+
+    /**
+     * 处理create前置事件
+     */
+    public override fun beforeCreate(){
+        println("处理 beforeCreate 事件")
+    }
+
+    /**
+     * 处理create后置事件
+     */
+    /*public override fun afterCreate(){
+        println("处理 afterCreate 事件")
+    }*/
+
+    /**
+     * 处理update前置事件
+     */
+    public override fun beforeUpdate(){
+        println("处理 beforeUpdate 事件")
+    }
+
+    /**
+     * 处理update后置事件
+     */
+    public override fun afterUpdate(){
+        println("处理 afterUpdate 事件")
+    }
+
+    /**
+     * 处理save前置事件
+     */
+    /*public override fun beforeSave(){
+        println("处理 beforeSave 事件")
+    }*/
+
+    /**
+     * 处理save后置事件
+     */
+    public override fun afterSave(){
+        println("处理 afterSave 事件")
+    }
+
+    /**
+     * 处理delete前置事件
+     */
+    public override fun beforeDelete(){
+        println("处理 beforeDelete 事件")
+    }
+
+    /**
+     * 处理delete后置事件
+     */
+    public override fun afterDelete(){
+        println("处理 afterDelete 事件")
+    }
 }

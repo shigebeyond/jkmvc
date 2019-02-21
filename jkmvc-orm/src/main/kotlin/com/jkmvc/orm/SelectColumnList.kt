@@ -14,8 +14,8 @@ val defaultSelectColumnList = SelectColumnList(emptyList())
  * @date 2017-10-10
  */
 data class SelectColumnList(
-        val myColumns: List<String> /* 本模型的字段 */,
-        val relatedColumns: List<Pair<String, SelectColumnList?>> = emptyList() /* 多个 关系名 + 关联模型的字段列表 */
+        public val myColumns: List<String> /* 本模型的字段 */,
+        public val relatedColumns: List<Pair<String, SelectColumnList?>> = emptyList() /* 多个 关系名 + 关联模型的字段列表 */
 ){
     companion object{
 

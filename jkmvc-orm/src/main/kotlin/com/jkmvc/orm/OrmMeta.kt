@@ -1,13 +1,15 @@
 package com.jkmvc.orm
 
-import com.jkmvc.common.*
+import com.jkmvc.common.getConstructorOrNull
+import com.jkmvc.common.getProperty
+import com.jkmvc.common.to
 import com.jkmvc.db.Db
-import com.jkmvc.model.GeneralModel
 import com.jkmvc.db.IDb
+import com.jkmvc.model.GeneralModel
 import com.jkmvc.validator.IValidator
 import java.util.*
+import kotlin.collections.set
 import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
 
 /**
  * orm的元数据
@@ -68,17 +70,13 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     };
 
     /**
-     * 事件处理器
+     * 能处理的序列化事件
      */
-    public override val eventHandlers:Map<String, KFunction<Unit>?> by lazy {
-        val handlers = HashMap<String, KFunction<Unit>?>()
-        // 遍历每个事件填充
-        for (event in events){
-            val handler = model.getFunction(event)  as KFunction<Unit>?
-            if(handler != null)
-                handlers[event] = handler
+    public override val processableEvents: List<String> by lazy{
+        "beforeCreate|afterCreate|beforeUpdate|afterUpdate|beforeSave|afterSave|beforeDelete|afterDelete".split('|').filter { event ->
+            val method = model.java.getMethod(event)
+            method.declaringClass != OrmEntity::class.java // 实际上事件处理方法是定义在 IOrmPersistent 接口, 但反射中获得声明类却是 OrmEntity 抽象类
         }
-        handlers
     }
 
     /**
@@ -148,26 +146,6 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     public override fun addRule(field: String, rule: IValidator): OrmMeta {
         rules[field] = rule;
         return this;
-    }
-
-    /**
-     * 获得事件处理器
-     * @param event 事件名
-     * @return
-     */
-    public override fun getEventHandler(event:String): KFunction<Unit>? {
-        return eventHandlers.getOrDefault(event, null)
-    }
-
-    /**
-     * 能否处理任一事件
-     * @param events 多个事件名，以|分隔，如 beforeCreate|afterCreate
-     * @return
-     */
-    public override fun canHandleAnyEvent(events:String): Boolean {
-        return eventHandlers.any { event, handler ->
-            events.contains(event)
-        }
     }
 
     /**

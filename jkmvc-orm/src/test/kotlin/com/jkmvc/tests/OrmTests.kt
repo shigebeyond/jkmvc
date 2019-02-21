@@ -6,7 +6,6 @@ import com.jkmvc.orm.*
 import com.jkmvc.tests.model.*
 import org.junit.Test
 
-
 class OrmTests{
 
     val id: Int by lazy {

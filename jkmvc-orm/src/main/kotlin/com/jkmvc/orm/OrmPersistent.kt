@@ -91,10 +91,9 @@ abstract class OrmPersistent : OrmValid() {
 
 		// 事务
 		return ormMeta.transactionWhenHandlingEvent("beforeCreate|afterCreate|beforeSave|afterSave") {
-
 			// 触发前置事件
-			fireEvent("beforeCreate")
-			fireEvent("beforeSave")
+			beforeCreate()
+			beforeSave()
 
 			// 插入数据库
 			// TODO: 单主键
@@ -107,8 +106,8 @@ abstract class OrmPersistent : OrmValid() {
 				data[ormMeta.primaryProp.first()] = pk; // 主键
 
 			// 触发后置事件
-			fireEvent("afterCreate")
-			fireEvent("afterSave")
+			afterCreate()
+			afterSave()
 
 			// 更新内部数据
 			loaded = true; // save事件据此来判定是新增与修改
@@ -160,15 +159,15 @@ abstract class OrmPersistent : OrmValid() {
 		// 事务
 		return ormMeta.transactionWhenHandlingEvent("beforeUpdate|afterUpdate|beforeSave|afterSave") {
 			// 触发前置事件
-			fireEvent("beforeUpdate")
-			fireEvent("beforeSave")
+			beforeUpdate()
+			beforeSave()
 
 			// 更新数据库
 			val result = queryBuilder().sets(buildDirtyData()).where(ormMeta.primaryKey, oldPk /* 原始主键，因为主键可能被修改 */).update();
 
 			// 触发后置事件
-			fireEvent("afterUpdate")
-			fireEvent("afterSave")
+			afterUpdate()
+			afterSave()
 
 			// 更新内部数据
 			dirty.clear() // update事件据此来获得变化的字段
@@ -193,13 +192,13 @@ abstract class OrmPersistent : OrmValid() {
 		// 事务
 		return ormMeta.transactionWhenHandlingEvent("beforeDelete|afterDelete") {
 			// 触发前置事件
-			fireEvent("beforeDelete")
+			beforeDelete()
 
 			// 删除数据
 			val result = queryBuilder().where(ormMeta.primaryKey, "=", pk).delete();
 
 			// 触发后置事件
-			fireEvent("afterDelete")
+			afterDelete()
 
 			// 更新内部数据
 			data.clear() // delete事件据此来获得删除前的数据
@@ -229,14 +228,4 @@ abstract class OrmPersistent : OrmValid() {
 		return queryBuilder().set(column, "$column + $step", true).where(ormMeta.primaryKey, pk).update();
 	}
 
-	/**
-	 * 触发事件
-	 *   通过反射来调用事件处理函数，纯属装逼
-	 *   其实可以显式调用，但是需要在Orm类中事先声明各个事件的处理函数
-	 *
-	 * @param event 事件名
-	 */
-	public override fun fireEvent(event:String){
-		ormMeta.getEventHandler(event)?.call(this)
-	}
 }

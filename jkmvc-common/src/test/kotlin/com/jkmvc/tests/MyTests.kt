@@ -20,6 +20,8 @@ import java.util.Calendar
 import java.util.GregorianCalendar
 import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.functions
+import kotlin.reflect.full.memberFunctions
+import kotlin.reflect.jvm.javaMethod
 
 open class A() {
     open fun echo(){}
@@ -493,10 +495,12 @@ class MyTests{
 
     @Test
     fun testSubClass(){
+        // 测试方法从属于子类还是父类
         //val funs = B::class.declaredFunctions // 当前类实现的方法
-        val funs = B::class.functions // 当前类实现的方法
+        val funs = B::class.memberFunctions // 当前类实现的方法
+        //val funs = B::class.functions // 当前类实现的方法
         funs.forEach {
-            println(it)
+            println(it.javaMethod!!.declaringClass)
         }
     }
 
