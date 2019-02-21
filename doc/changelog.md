@@ -14,3 +14,6 @@
 
 # 1.5
 读写分离, 多主键
+
+# 1.6
+优化orm的持久化事件(如beforeCreate/afterCreate等)

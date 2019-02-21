@@ -33,7 +33,7 @@ interface IAuthUserModel : IOrm {
     /**
      * create前置处理
      */
-    fun beforeCreate(){
+    override fun beforeCreate(){
         // 加密密码
         val field:String = sessionConfig["passwordField"]!!
         this[field] = hash(this[field])
