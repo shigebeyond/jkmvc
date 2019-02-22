@@ -1,6 +1,11 @@
 package com.jkmvc.http
 
 /**
+ * 路由参数 + 路由规则
+ */
+typealias ParamsAndRoute = Pair<Map<String, String>, Route>
+
+/**
  * 路由器
  *	1 加载路由规则
  *	2 解析路由：匹配规则
@@ -28,5 +33,5 @@ interface IRouter
 	 * @param uri
 	 * @return [路由参数, 路由规则]
 	 */
-	fun parse(uri:String):Pair<Map<String, String>, Route>?;
+	fun parse(uri:String):ParamsAndRoute?;
 }

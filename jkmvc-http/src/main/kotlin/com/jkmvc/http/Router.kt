@@ -60,14 +60,14 @@ object Router:IRouter
 	 * @param uri
 	 * @return [路由参数, 路由规则]
 	 */
-	public override fun parse(uri:String):Pair<Map<String, String>, Route>?
+	public override fun parse(uri:String):ParamsAndRoute?
 	{
 		// 逐个匹配路由规则
 		for((name, route) in routes){
 			//匹配路由规则
 			val params = route.match(uri);
 			if(params != null)
-				return Pair(params, route);
+				return Pair(params, route); // 路由参数 + 路由规则
 		}
 
 		return null;
