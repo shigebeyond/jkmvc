@@ -236,7 +236,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
         if(op == "IN" && trySplitInParams(column, op, value, true))
             return this;
 
-        whereClause.addSubexp(arrayOf<Any?>(column, prepareOperator(column, op, value), value), "AND");
+        whereClause.addSubexp(arrayOf(column, prepareOperator(column, op, value), value), "AND");
         return this;
     }
 
@@ -276,7 +276,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
         if(op == "IN" && trySplitInParams(column, op, value, false))
             return this;
 
-        whereClause.addSubexp(arrayOf<Any?>(column, prepareOperator(column, op, value), value), "OR");
+        whereClause.addSubexp(arrayOf(column, prepareOperator(column, op, value), value), "OR");
         return this;
 
     }
@@ -363,7 +363,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
         if(op == "IN" && trySplitInParams(column, op, value, true))
             return this;
 
-        havingClause.addSubexp(arrayOf<Any?>(column, prepareOperator(column, op, value), value), "AND");
+        havingClause.addSubexp(arrayOf(column, prepareOperator(column, op, value), value), "AND");
         return this;
     }
 
@@ -379,7 +379,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
         if(op == "IN" && trySplitInParams(column, op, value, false))
             return this;
 
-        havingClause.addSubexp(arrayOf<Any?>(column, prepareOperator(column, op, value), value), "OR");
+        havingClause.addSubexp(arrayOf(column, prepareOperator(column, op, value), value), "OR");
         return this;
     }
 
@@ -431,7 +431,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * @return
      */
     public override fun orderBy(column: String, direction: String?): IDbQueryBuilder {
-        orderByClause.addSubexp(arrayOf<Any?>(column, direction));
+        orderByClause.addSubexp(arrayOf(column, direction));
         return this;
     }
 
@@ -457,7 +457,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
     public override fun join(table: CharSequence, type: String): IDbQueryBuilder {
         // join　子句
         val j = DbQueryBuilderDecorationClausesSimple("$type JOIN", arrayOf<KFunction2<IDb, *, String>?>(this::quoteTable));
-        j.addSubexp(arrayOf<Any?>(table));
+        j.addSubexp(arrayOf(table));
 
         // on　子句 -- on总是追随最近的一个join
         val on = DbQueryBuilderDecorationClausesGroup("ON", arrayOf<KFunction2<IDb, *, String>?>(this::quoteColumn, null, this::quoteColumn));

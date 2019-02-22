@@ -4,6 +4,11 @@ import com.jkmvc.db.IDb
 import kotlin.reflect.KFunction2
 
 /**
+ * 单词+连接符
+ */
+typealias WordsAndDelimiter = Pair<Array<Any?>, String>
+
+/**
  * 简单的(sql修饰)子句
  *
  * 	在子表达式的拼接中，何时拼接连接符？
@@ -17,7 +22,7 @@ import kotlin.reflect.KFunction2
 class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如where/group by */,
                                             elementHandlers: Array<KFunction2 <IDb, *, String>?> /* 每个元素的处理器, 可视为列的处理*/,
                                             protected val afterGroup:Boolean = false /* 跟在分组 DbQueryBuilderDecorationClausesGroup 后面 */
-) : DbQueryBuilderDecorationClauses<Pair<Array<Any?>, String>>/* subexps 是子表达式+连接符(针对where子句，放子表达式前面) */(operator, elementHandlers) {
+) : DbQueryBuilderDecorationClauses<WordsAndDelimiter>/* subexps 是单词+连接符(针对where子句，放子表达式前面) */(operator, elementHandlers) {
     /**
      * 添加一个子表达式+连接符
      *
@@ -25,7 +30,7 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
      * @param delimiter 当前子表达式的连接符
      * @return
      */
-    public override fun addSubexp(subexp: Array<Any?>, delimiter: String): IDbQueryBuilderDecorationClauses<Pair<Array<Any?>, String>> {
+    public override fun addSubexp(subexp: Array<Any?>, delimiter: String): IDbQueryBuilderDecorationClauses<WordsAndDelimiter> {
         // 将连接符也记录到子表达式中, 忽略第一个子表达式的连接符 => 编译好子表达式直接拼接就行
         subexps.add(Pair(subexp, delimiter));
         return this;
@@ -39,7 +44,7 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
      * @param db 数据库连接
      * @param sql 保存编译的sql
      */
-    public override fun compileSubexp(subexp: Pair<Array<Any?>, String>, j:Int, db: IDb, sql: StringBuilder): Unit {
+    public override fun compileSubexp(subexp: WordsAndDelimiter, j:Int, db: IDb, sql: StringBuilder): Unit {
         val (exp, delimiter) = subexp;
 
         // 针对where子句，要在前面插入连接符
@@ -47,15 +52,15 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
         if(j != 0 || afterGroup)
             sql.append(delimiter).append(' ');
 
-        // 遍历处理器来处理对应元素, 没有处理的元素也直接拼接
+        // 遍历处理器来处理对应元素(单词), 没有处理的元素(单词)也直接拼接
         for (i in elementHandlers.indices) {
             val handler: KFunction2 <IDb, *, String>? = elementHandlers[i];
-            // 处理某个元素的值
+            // 处理某个元素(单词)的值
             var value: Any? = exp[i];
             if (exp.size > i && handler != null) {
                 value = handler.call(db, exp[i]); // 调用元素处理函数
             }
-            sql.append(value).append(' '); // // 用空格拼接多个元素
+            sql.append(value).append(' '); // 用空格拼接多个元素
         }
     }
 
@@ -65,7 +70,7 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
      * @param delimiter 连接符
      * @return
      */
-    public override fun open(delimiter: String): IDbQueryBuilderDecorationClauses<Pair<Array<Any?>, String>> {
+    public override fun open(delimiter: String): IDbQueryBuilderDecorationClauses<WordsAndDelimiter> {
         throw UnsupportedOperationException("not implemented")
     }
 
@@ -74,7 +79,7 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
      *
      * @return
      */
-    public override fun close(): IDbQueryBuilderDecorationClauses<Pair<Array<Any?>, String>> {
+    public override fun close(): IDbQueryBuilderDecorationClauses<WordsAndDelimiter> {
         throw UnsupportedOperationException("not implemented")
     }
 }

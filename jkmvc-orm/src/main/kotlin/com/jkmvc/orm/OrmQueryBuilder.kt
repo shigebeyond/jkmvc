@@ -113,7 +113,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * 可select具体字段的 withs()
      *     设置查询字段，如果是关联字段，则联查
      *
-     * @param columns 字段列表，其元素类型可以是 1 String 本模型字段名 2 Pair<String, List<String>> 关系名 + 关联模型的字段列表
+     * @param columns 字段列表，其元素类型可以是 1 String 本模型字段名 2 RelatedSelectColumnList = Pair<String, SelectColumnList?> 关系名 + 关联模型的字段列表
      *               如("id", "name", "dept" to listOf("id", "title")), 其中本模型要显示id与name字段，dept是关联模型，要显示id与title字段
      * @return
      */
