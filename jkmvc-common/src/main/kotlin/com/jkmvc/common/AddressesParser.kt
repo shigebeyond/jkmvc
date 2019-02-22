@@ -1,7 +1,11 @@
 package com.jkmvc.common
 
-import com.jkmvc.validator.ArgsParser
-import java.util.LinkedList
+import java.util.*
+
+/**
+ * ip+端口
+ */
+public typealias HostAndPort = Pair<String, Int>
 
 /**
  * 解析多地址
@@ -21,9 +25,9 @@ object AddressesParser {
      * @param addresses 地址表达式
      * @return
      */
-    fun parse(addresses: String): List<Pair<String, Int>> {
+    fun parse(addresses: String): List<HostAndPort> {
         val matches: Sequence<MatchResult> = REGEX_ADDRESS.findAll(addresses);
-        val result: LinkedList<Pair<String, Int>> = LinkedList();
+        val result: LinkedList<HostAndPort> = LinkedList();
         for(m in matches) {
             val host = m.groups[1]!!.value
             val port = m.groups[2]!!.value.toInt()

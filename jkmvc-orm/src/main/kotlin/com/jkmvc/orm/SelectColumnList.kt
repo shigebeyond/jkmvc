@@ -3,6 +3,11 @@ package com.jkmvc.orm
 import java.util.*
 
 /**
+ * 关系名 + 关联模型的字段列表
+ */
+typealias RelatedSelectColumnList = Pair<String, SelectColumnList?>
+
+/**
  * 默认的查询字段
  */
 val defaultSelectColumnList = SelectColumnList(emptyList())
@@ -15,7 +20,7 @@ val defaultSelectColumnList = SelectColumnList(emptyList())
  */
 data class SelectColumnList(
         public val myColumns: List<String> /* 本模型的字段 */,
-        public val relatedColumns: List<Pair<String, SelectColumnList?>> = emptyList() /* 多个 关系名 + 关联模型的字段列表 */
+        public val relatedColumns: List<RelatedSelectColumnList> = emptyList() /* 多个 关系名 + 关联模型的字段列表 */
 ){
     companion object{
 
@@ -24,13 +29,13 @@ data class SelectColumnList(
          *    解析出本模型的字段 + （关系名 + 关联模型的字段）
          *
          * @param sourceMeta 源模型元数据
-         * @param columns 字段列表，其元素类型可以是 1 String 本模型字段名 2 Pair<String, List<String>> 关系名 + 关联模型的字段列表
+         * @param columns 字段列表，其元素类型可以是 1 String 本模型字段名 2 RelatedSelectColumnList 关系名 + 关联模型的字段列表
          *               如listOf("id", "name", "dept" to listOf("id", "title")), 其中本模型要显示id与name字段，dept是关联模型，要显示id与title字段
          * @return
          */
         public fun parse(sourceMeta: IOrmMeta, columns:Iterator<Any>): SelectColumnList {
             val myColoumns = LinkedList<String>() // 本模型字段
-            val relatedColumns = LinkedList<Pair<String, SelectColumnList?>>() // 关系名 + 关联模型的字段
+            val relatedColumns = LinkedList<RelatedSelectColumnList>() // 关系名 + 关联模型的字段
             for (col in columns){
                 // 获得关系名
                 var subname:String // 关系名
@@ -44,7 +49,7 @@ data class SelectColumnList(
                         subname = col
                         subcolumns = null
                     }
-                    else -> throw IllegalArgumentException("查询字段参数类型必须是：1 String 本模型字段名 2 Pair<String, List<String>> 关系名 + 关联模型的字段列表")
+                    else -> throw IllegalArgumentException("查询字段参数类型必须是：1 String 本模型字段名 2 RelatedSelectColumnList 关系名 + 关联模型的字段列表")
                 }
 
                 // 检查关系
@@ -68,7 +73,7 @@ data class SelectColumnList(
          *    解析出本模型的字段 + （关系名 + 关联模型的字段）
          *
          * @param sourceMeta 源模型元数据
-         * @param fields 字段列表，其元素类型可以是 1 String 本模型字段名 2 Pair<String, List<String>> 关系名 + 关联模型的字段列表
+         * @param fields 字段列表，其元素类型可以是 1 String 本模型字段名 2 RelatedSelectColumnList 关系名 + 关联模型的字段列表
          *               如arrayOf("id", "name", "dept" to listOf("id", "title")), 其中本模型要显示id与name字段，dept是关联模型，要显示id与title字段
          * @return
          */
@@ -84,7 +89,7 @@ data class SelectColumnList(
          *    解析出本模型的字段 + （关系名 + 关联模型的字段）
          *
          * @param sourceMeta 源模型元数据
-         * @param fields 字段列表，其元素类型可以是 1 String 本模型字段名 2 Pair<String, List<String>> 关系名 + 关联模型的字段列表
+         * @param fields 字段列表，其元素类型可以是 1 String 本模型字段名 2 RelatedSelectColumnList 关系名 + 关联模型的字段列表
          *               如listOf("id", "name", "dept" to listOf("id", "title")), 其中本模型要显示id与name字段，dept是关联模型，要显示id与title字段
          * @return
          */
