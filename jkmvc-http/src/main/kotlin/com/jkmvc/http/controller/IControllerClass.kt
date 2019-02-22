@@ -1,4 +1,4 @@
-package com.jkmvc.http
+package com.jkmvc.http.controller
 
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction

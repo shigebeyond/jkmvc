@@ -1,7 +1,8 @@
 package com.jkmvc.oauth2
 
-import com.alibaba.fastjson.JSONObject
-import com.jkmvc.http.Controller
+import com.jkmvc.http.controller.Controller
+import com.jkmvc.oauth2.authorizer.IOauth2Authorizer
+import com.jkmvc.oauth2.authorizer.Oauth2User
 import java.util.*
 
 /**

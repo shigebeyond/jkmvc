@@ -1,4 +1,4 @@
-package com.jkmvc.oauth2
+package com.jkmvc.oauth2.authorizer
 
 /**
  * oauth2授权用户

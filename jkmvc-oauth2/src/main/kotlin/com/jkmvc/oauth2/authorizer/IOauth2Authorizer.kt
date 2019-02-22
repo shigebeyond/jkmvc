@@ -1,4 +1,4 @@
-package com.jkmvc.oauth2
+package com.jkmvc.oauth2.authorizer
 
 import com.alibaba.fastjson.JSONObject
 import com.jkmvc.common.Config

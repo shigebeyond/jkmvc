@@ -1,6 +1,8 @@
 package com.jkmvc.http
 
 import com.jkmvc.common.*
+import com.jkmvc.http.router.Route
+import com.jkmvc.http.router.Router
 import com.jkmvc.validator.RuleValidator
 import org.apache.commons.collections.map.CompositeMap
 import java.util.*
@@ -54,7 +56,7 @@ class HttpRequest(req:HttpServletRequest):MultipartRequest(req)
 	/**
 	 * 当前匹配的路由规则
 	 */
-	public lateinit var route:Route;
+	public lateinit var route: Route;
 
 	/**
 	 * 当前匹配的路由参数

@@ -1,4 +1,4 @@
-package com.jkmvc.http
+package com.jkmvc.http.router
 
 /**
  * 路由参数 + 路由规则
@@ -26,12 +26,12 @@ interface IRouter
 	 * @param name 路由名
 	 * @parma route 路由对象
 	 */
-	fun addRoute(name:String, route:Route): Router
+	fun addRoute(name:String, route: Route): Router
 
 	/**
 	 * 解析路由：匹配规则
 	 * @param uri
 	 * @return [路由参数, 路由规则]
 	 */
-	fun parse(uri:String):ParamsAndRoute?;
+	fun parse(uri:String): ParamsAndRoute?;
 }

@@ -1,13 +1,9 @@
 package com.jkmvc.tests
 
 import com.jkmvc.common.travel
-import com.jkmvc.http.ControllerClassLoader
+import com.jkmvc.http.controller.ControllerClassLoader
 import org.junit.Test
-import java.io.BufferedWriter
-import java.io.OutputStreamWriter
-import org.apache.velocity.app.Velocity
 import java.io.File
-import java.util.*
 
 
 class ControllerTests{

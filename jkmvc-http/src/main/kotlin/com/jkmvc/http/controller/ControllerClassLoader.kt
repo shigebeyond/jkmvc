@@ -1,7 +1,7 @@
-package com.jkmvc.http
+package com.jkmvc.http.controller
 
 import com.jkmvc.common.*
-import java.io.File
+import com.jkmvc.http.httpLogger
 import java.lang.reflect.Modifier
 
 /**

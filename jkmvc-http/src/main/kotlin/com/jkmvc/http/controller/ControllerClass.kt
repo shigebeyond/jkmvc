@@ -1,6 +1,7 @@
-package com.jkmvc.http
+package com.jkmvc.http.controller
 
 import com.jkmvc.common.getConstructorOrNull
+import com.jkmvc.http.router.RouteException
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -11,7 +12,7 @@ import kotlin.reflect.full.memberFunctions
  *   方便访问其构造函数与所有的action方法
  * Created by shi on 4/26/17.
  */
-class ControllerClass(public override val clazz: KClass<*> /* controller类 */):IControllerClass{
+class ControllerClass(public override val clazz: KClass<*> /* controller类 */): IControllerClass {
 
     /**
      * 所有action方法

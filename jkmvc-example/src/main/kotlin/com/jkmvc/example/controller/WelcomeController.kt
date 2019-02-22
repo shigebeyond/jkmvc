@@ -1,6 +1,6 @@
 package com.jkmvc.example.controller
 
-import com.jkmvc.http.Controller
+import com.jkmvc.http.controller.Controller
 
 /**
  * 主页

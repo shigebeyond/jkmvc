@@ -1,5 +1,7 @@
-package com.jkmvc.http
+package com.jkmvc.http.view
 
+import com.jkmvc.http.HttpRequest
+import com.jkmvc.http.HttpResponse
 import org.apache.velocity.VelocityContext
 import org.apache.velocity.io.VelocityWriter
 import org.apache.velocity.runtime.RuntimeInstance

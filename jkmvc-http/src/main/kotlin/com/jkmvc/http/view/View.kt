@@ -1,5 +1,7 @@
-package com.jkmvc.http
+package com.jkmvc.http.view
 
+import com.jkmvc.http.HttpRequest
+import com.jkmvc.http.HttpResponse
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -13,7 +15,7 @@ open class View(override val req: HttpRequest /* 请求对象 */,
                 override val res: HttpResponse /* 响应对象 */,
                 override val file:String/* 视图文件 */,
                 override var data:MutableMap<String, Any?> /* 局部变量 */
-):IView{
+): IView {
 
 	companion object{
 

@@ -1,8 +1,8 @@
-package com.jkmvc.oauth2.authorizer
+package com.jkmvc.oauth2.authorizer.impl
 
 import com.alibaba.fastjson.JSONObject
-import com.jkmvc.oauth2.IOauth2Authorizer
-import com.jkmvc.oauth2.Oauth2User
+import com.jkmvc.oauth2.authorizer.IOauth2Authorizer
+import com.jkmvc.oauth2.authorizer.Oauth2User
 
 /**
  * github授权处理

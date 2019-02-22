@@ -2,7 +2,7 @@ package com.jkmvc.example.controller
 
 import com.jkmvc.common.format
 import com.jkmvc.example.model.UserModel
-import com.jkmvc.http.Controller
+import com.jkmvc.http.controller.Controller
 import com.jkmvc.http.httpLogger
 import com.jkmvc.http.valuesFromRequest
 import com.jkmvc.orm.OrmQueryBuilder

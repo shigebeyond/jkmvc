@@ -1,8 +1,16 @@
-package com.jkmvc.http
+package com.jkmvc.http.handler
 
 import com.jkmvc.closing.ClosingOnRequestEnd
 import com.jkmvc.common.Config
 import com.jkmvc.common.ucFirst
+import com.jkmvc.http.HttpRequest
+import com.jkmvc.http.HttpResponse
+import com.jkmvc.http.controller.Controller
+import com.jkmvc.http.controller.ControllerClass
+import com.jkmvc.http.controller.ControllerClassLoader
+import com.jkmvc.http.httpLogger
+import com.jkmvc.http.isOptions
+import com.jkmvc.http.router.RouteException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import kotlin.reflect.KFunction
@@ -35,7 +43,7 @@ object RequestHandler : IRequestHandler {
      */
     public override fun handle(request: HttpServletRequest, response: HttpServletResponse):Boolean{
         //　构建请求对象
-        val req:HttpRequest = HttpRequest(request);
+        val req: HttpRequest = HttpRequest(request);
         if(debug){
             // 路由
             httpLogger.debug("请求uri: ${req.method} ${req.routeUri}")
@@ -50,7 +58,7 @@ object RequestHandler : IRequestHandler {
             return false;
 
         // 构建响应对象
-        val res:HttpResponse = HttpResponse(response);
+        val res: HttpResponse = HttpResponse(response);
 
         try{
             // 解析路由
@@ -85,19 +93,19 @@ object RequestHandler : IRequestHandler {
      */
     private fun callController(req: HttpRequest, res: HttpResponse) {
         // 获得controller类
-        val clazz:ControllerClass? = ControllerClassLoader.getControllerClass(req.controller);
+        val clazz: ControllerClass? = ControllerClassLoader.getControllerClass(req.controller);
         if (clazz == null)
-            throw RouteException ("Controller类不存在：" + req.controller);
+            throw RouteException("Controller类不存在：" + req.controller);
 
         // 获得action方法
         val action: KFunction<*>? = clazz.getActionMethod(req.action);
         if (action == null){
             val method = "action" + req.action.ucFirst()
-            throw RouteException ("控制器${req.controller}不存在方法：${method}()");
+            throw RouteException("控制器${req.controller}不存在方法：${method}()");
         }
 
         // 创建controller
-        val controller:Controller = clazz.javaClass.newInstance() as Controller;
+        val controller: Controller = clazz.javaClass.newInstance() as Controller;
 
         // 允许跨域
         if(config.getBoolean("allowCrossDomain", false)!!){

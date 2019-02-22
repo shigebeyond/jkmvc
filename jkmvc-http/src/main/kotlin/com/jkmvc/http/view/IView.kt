@@ -1,4 +1,7 @@
-package com.jkmvc.http
+package com.jkmvc.http.view
+
+import com.jkmvc.http.HttpRequest
+import com.jkmvc.http.HttpResponse
 
 /**
  * 视图

@@ -1,6 +1,7 @@
-package com.jkmvc.http
+package com.jkmvc.http.router
 
 import com.jkmvc.common.Config
+import com.jkmvc.http.httpLogger
 import java.util.*
 
 /**
@@ -12,7 +13,7 @@ import java.util.*
  * @date 2016-10-6 上午12:01:17
  *
  */
-object Router:IRouter
+object Router: IRouter
 {
 	/**
 	 * route配置
@@ -40,7 +41,7 @@ object Router:IRouter
 			// 参数正则
 			val defaults = item["defaults"] as Map<String, String>
 			// 添加路由规则
-			addRoute(name, Route(regex, paramRegex, defaults))
+            addRoute(name, Route(regex, paramRegex, defaults))
 		}
 	}
 
@@ -49,7 +50,7 @@ object Router:IRouter
 	 * @param name 路由名
 	 * @parma route 路由对象
 	 */
-	public override fun addRoute(name:String, route:Route): Router {
+	public override fun addRoute(name:String, route: Route): Router {
 		routes[name] = route;
 		httpLogger.info("添加路由[$name]: $route")
 		return this
@@ -60,7 +61,7 @@ object Router:IRouter
 	 * @param uri
 	 * @return [路由参数, 路由规则]
 	 */
-	public override fun parse(uri:String):ParamsAndRoute?
+	public override fun parse(uri:String): ParamsAndRoute?
 	{
 		// 逐个匹配路由规则
 		for((name, route) in routes){

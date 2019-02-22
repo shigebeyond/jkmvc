@@ -1,4 +1,8 @@
-package com.jkmvc.http
+package com.jkmvc.http.controller
+
+import com.jkmvc.http.HttpRequest
+import com.jkmvc.http.HttpResponse
+import com.jkmvc.http.view.View
 
 /**
  * 控制器
@@ -8,7 +12,7 @@ package com.jkmvc.http
  * @date 2016-10-8 下午8:02:47
  *
  */
-abstract class Controller :IController {
+abstract class Controller : IController {
 
     /**
      * 请求对象
@@ -26,7 +30,7 @@ abstract class Controller :IController {
      * @param data 视图变量
      * @return 视图
      */
-    public override fun view(file:String, data:MutableMap<String, Any?>):View
+    public override fun view(file:String, data:MutableMap<String, Any?>): View
     {
         return View(req, res, file, data);
     }
@@ -36,7 +40,7 @@ abstract class Controller :IController {
      * @param data 视图变量
      * @return 视图
      */
-    public override fun view(data:MutableMap<String, Any?>):View
+    public override fun view(data:MutableMap<String, Any?>): View
     {
         return view(req.controller + "/" + req.action, data)
     }

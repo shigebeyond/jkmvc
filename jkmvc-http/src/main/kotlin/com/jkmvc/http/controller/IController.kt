@@ -1,5 +1,8 @@
-package com.jkmvc.http
+package com.jkmvc.http.controller
 
+import com.jkmvc.http.HttpRequest
+import com.jkmvc.http.HttpResponse
+import com.jkmvc.http.view.View
 import java.util.*
 import kotlin.reflect.KFunction
 
@@ -28,14 +31,14 @@ interface IController{
      * @param data 视图变量
      * @return 视图
      */
-    fun view(file:String, data:MutableMap<String, Any?> = HashMap<String, Any?>()):View
+    fun view(file:String, data:MutableMap<String, Any?> = HashMap<String, Any?>()): View
 
     /**
      * 视图
      * @param data 视图变量
      * @return 视图
      */
-    fun view(data:MutableMap<String, Any?> = HashMap<String, Any?>()):View
+    fun view(data:MutableMap<String, Any?> = HashMap<String, Any?>()): View
 
     /**
      * 重定向到指定url

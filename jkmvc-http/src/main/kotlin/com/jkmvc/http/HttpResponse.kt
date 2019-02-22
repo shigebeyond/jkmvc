@@ -6,6 +6,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature
 import com.jkmvc.common.Config
 import com.jkmvc.http.util.AllPagination
 import com.jkmvc.http.util.Pagination
+import com.jkmvc.http.view.View
 import com.jkmvc.orm.IOrm
 import java.io.File
 import java.io.FileInputStream
@@ -105,7 +106,7 @@ class HttpResponse(protected val res:HttpServletResponse /* 响应对象 */): Ht
 	 *
 	 * @param view 视图
 	 */
-	public fun renderView(view:View):Unit
+	public fun renderView(view: View):Unit
 	{
 		view.render();
 	}
