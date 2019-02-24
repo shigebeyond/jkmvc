@@ -1,5 +1,6 @@
 package com.jkmvc.oauth2
 
+import com.jkmvc.common.generateUUID
 import com.jkmvc.http.controller.Controller
 import com.jkmvc.oauth2.authorizer.IOauth2Authorizer
 import com.jkmvc.oauth2.authorizer.Oauth2User
@@ -21,7 +22,7 @@ public abstract class Oauth2Controller : Controller() {
         val oauth2: IOauth2Authorizer = IOauth2Authorizer.instance(type)
 
         // 构建状态
-        val state = UUID.randomUUID().toString().replace("-", "")
+        val state = generateUUID().replace("-", "")
 
         // 保存状态
         req.session.setAttribute("oauth2_state", state)

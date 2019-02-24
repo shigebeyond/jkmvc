@@ -1,3 +1,0 @@
-# 缓存实现
-snowflakeId: com.jkmvc.idworker.SnowflakeIdWorker
-dbId: com.jkmvc.idworker.DbIdWorker

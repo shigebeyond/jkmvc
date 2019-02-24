@@ -418,7 +418,7 @@ class MyTests{
             println(id)
         }
 
-        println(generateId())
+        println(generateId("test"))
     }
 
     @Test
@@ -427,7 +427,7 @@ class MyTests{
         println("id: $id")
         //val l = id.toLong()
         for(i in 0..10) {
-            val l = generateId()
+            val l = generateId("test")
             println("long: $l")
             val id2 = SnowflakeId.fromLong(l)
             println("id2: $id2")

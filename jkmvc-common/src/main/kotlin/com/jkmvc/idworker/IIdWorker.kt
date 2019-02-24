@@ -11,14 +11,6 @@ import com.jkmvc.singleton.NamedConfiguredSingletons
  */
 interface IIdWorker {
 
-    // 可配置的单例
-    companion object: NamedConfiguredSingletons<IIdWorker>() {
-        /**
-         * 单例类的配置，内容是哈希 <单例名 to 单例类>
-         */
-        public override val instsConfig: IConfig = Config.instance("idworker", "yaml")
-    }
-
     /**
      * 获得下一个ID (该方法是线程安全的)
      * @return
