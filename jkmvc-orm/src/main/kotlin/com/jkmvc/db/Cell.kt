@@ -21,8 +21,7 @@ data class Cell<T>(val hasNext: Boolean, val value: T?) {
      * @return
      */
     public fun getOrDefault(default:T): T{
-        val value = get()
-        return if(value == null) default else value!!
+        return get() ?: default
     }
 
     /**
@@ -31,8 +30,7 @@ data class Cell<T>(val hasNext: Boolean, val value: T?) {
      * @return
      */
     public fun getOrThrow(ex: () -> Exception): T{
-        val value = get()
-        return if(value == null) throw ex() else value!!
+        return get() ?: throw ex()
     }
 
 }
