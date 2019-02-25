@@ -15,7 +15,7 @@ class AddressModel(id:Int? = null): Orm(id) {
             // add label and rule for field
             addRule("userId", "用户", "notEmpty");
             addRule("addr", "地址", "notEmpty");
-            addRule("tel", "电话", "notEmpty && digit");
+            addRule("tel", "电话", "notEmpty digit");
 
             // 添加关联关系
             // add relaction for other model
