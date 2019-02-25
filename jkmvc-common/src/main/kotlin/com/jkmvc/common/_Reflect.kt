@@ -1,4 +1,4 @@
-package com.jkmvc.common
+package net.jkcode.jkmvc.common
 
 import org.nustaq.serialization.util.FSTUtil
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl

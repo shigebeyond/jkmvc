@@ -1,4 +1,4 @@
-package com.jkmvc.common
+package net.jkcode.jkmvc.common
 
 /**
  * 扫描指定包下的类

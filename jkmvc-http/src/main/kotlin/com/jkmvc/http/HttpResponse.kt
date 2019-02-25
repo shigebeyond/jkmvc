@@ -1,13 +1,13 @@
-package com.jkmvc.http
+package net.jkcode.jkmvc.http
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.alibaba.fastjson.serializer.SerializerFeature
-import com.jkmvc.common.Config
-import com.jkmvc.http.util.AllPagination
-import com.jkmvc.http.util.Pagination
-import com.jkmvc.http.view.View
-import com.jkmvc.orm.IOrm
+import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.http.util.AllPagination
+import net.jkcode.jkmvc.http.util.Pagination
+import net.jkcode.jkmvc.http.view.View
+import net.jkcode.jkmvc.orm.IOrm
 import java.io.File
 import java.io.FileInputStream
 import java.io.PrintWriter

@@ -1,10 +1,10 @@
-package com.jkmvc.session.token
+package net.jkcode.jkmvc.session.token
 
-import com.jkmvc.cache.ICache
-import com.jkmvc.common.Config
-import com.jkmvc.common.generateId
-import com.jkmvc.session.Auth
-import com.jkmvc.session.IAuthUserModel
+import net.jkcode.jkmvc.cache.ICache
+import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.common.generateId
+import net.jkcode.jkmvc.session.Auth
+import net.jkcode.jkmvc.session.IAuthUserModel
 
 /**
  * 用缓存来管理token

@@ -1,9 +1,9 @@
-package com.jkmvc.orm
+package net.jkcode.jkmvc.orm
 
-import com.jkmvc.common.*
-import com.jkmvc.db.MutableRow
-import com.jkmvc.db.Row
-import com.jkmvc.serialize.ISerializer
+import net.jkcode.jkmvc.common.*
+import net.jkcode.jkmvc.db.MutableRow
+import net.jkcode.jkmvc.db.Row
+import net.jkcode.jkmvc.serialize.ISerializer
 import java.math.BigDecimal
 import java.util.*
 import kotlin.properties.ReadWriteProperty

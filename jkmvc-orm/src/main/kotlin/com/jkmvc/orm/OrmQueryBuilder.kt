@@ -1,14 +1,14 @@
-package com.jkmvc.orm
+package net.jkcode.jkmvc.orm
 
-import com.jkmvc.common.isArrayOrCollection
-import com.jkmvc.common.isNullOrEmpty
-import com.jkmvc.common.iteratorArrayOrCollection
-import com.jkmvc.common.map
-import com.jkmvc.query.DbExpr
-import com.jkmvc.query.DbQueryBuilder
-import com.jkmvc.db.IDb
-import com.jkmvc.query.IDbQueryBuilder
-import com.jkmvc.db.Row
+import net.jkcode.jkmvc.common.isArrayOrCollection
+import net.jkcode.jkmvc.common.isNullOrEmpty
+import net.jkcode.jkmvc.common.iteratorArrayOrCollection
+import net.jkcode.jkmvc.common.map
+import net.jkcode.jkmvc.query.DbExpr
+import net.jkcode.jkmvc.query.DbQueryBuilder
+import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkmvc.query.IDbQueryBuilder
+import net.jkcode.jkmvc.db.Row
 import java.util.*
 import kotlin.collections.HashMap
 

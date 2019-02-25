@@ -1,7 +1,7 @@
-package com.jkmvc.example.model 
+package net.jkcode.jkmvc.example.model 
 
-import com.jkmvc.orm.OrmMeta 
-import com.jkmvc.orm.Orm 
+import net.jkcode.jkmvc.orm.OrmMeta 
+import net.jkcode.jkmvc.orm.Orm 
 
 /**
  * 用户模型

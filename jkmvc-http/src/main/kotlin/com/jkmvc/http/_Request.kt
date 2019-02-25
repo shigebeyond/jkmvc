@@ -1,12 +1,12 @@
-package com.jkmvc.http
+package net.jkcode.jkmvc.http
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
-import com.jkmvc.common.isNullOrEmpty
-import com.jkmvc.orm.IRelationMeta
-import com.jkmvc.orm.Orm
-import com.jkmvc.orm.RelationType
+import net.jkcode.jkmvc.common.isNullOrEmpty
+import net.jkcode.jkmvc.orm.IRelationMeta
+import net.jkcode.jkmvc.orm.Orm
+import net.jkcode.jkmvc.orm.RelationType
 import com.oreilly.servlet.MultipartRequest
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -16,7 +16,7 @@ import java.util.*
 import javax.servlet.http.HttpServletRequest
 
 // http的日志
-val httpLogger = LoggerFactory.getLogger("com.jkmvc.db")
+val httpLogger = LoggerFactory.getLogger("net.jkcode.jkmvc.db")
 
 /****************************** HttpServletRequest扩展 *******************************/
 

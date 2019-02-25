@@ -1,6 +1,6 @@
 # Request object
 
-Request class is `com.jkmvc.http.HttpRequest`, which is implements `javax.servlet.http.HttpServletRequest`
+Request class is `net.jkcode.jkmvc.http.HttpRequest`, which is implements `javax.servlet.http.HttpServletRequest`
 
 So, you can call all methods that inherited from `HttpServletRequest`
 

@@ -1,7 +1,7 @@
-package com.jkmvc.common
+package net.jkcode.jkmvc.common
 
-import com.jkmvc.idworker.IIdWorker
-import com.jkmvc.idworker.SnowflakeIdWorker
+import net.jkcode.jkmvc.idworker.IIdWorker
+import net.jkcode.jkmvc.idworker.SnowflakeIdWorker
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 

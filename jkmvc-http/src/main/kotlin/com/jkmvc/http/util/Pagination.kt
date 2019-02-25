@@ -1,7 +1,7 @@
-package com.jkmvc.http.util
+package net.jkcode.jkmvc.http.util
 
-import com.jkmvc.common.Config
-import com.jkmvc.http.HttpRequest
+import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.http.HttpRequest
 
 /**
  * 分页处理，主要用于数据库分页

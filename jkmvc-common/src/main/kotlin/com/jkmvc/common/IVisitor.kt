@@ -1,4 +1,4 @@
-package com.jkmvc.common
+package net.jkcode.jkmvc.common
 
 /**
  * 访问者接口

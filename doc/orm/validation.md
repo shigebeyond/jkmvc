@@ -1,12 +1,12 @@
 # Validation
 
-Orm models are tightly integrated with the [Validation](../common/validation/validation.md) library which comes with a very flexible `com.jkmvc.validate.ValidationException` that helps you quickly handle validation errors from basic CRUD operations.
+Orm models are tightly integrated with the [Validation](../common/validation/validation.md) library which comes with a very flexible `net.jkcode.jkmvc.validate.ValidationException` that helps you quickly handle validation errors from basic CRUD operations.
 
 ## 1 Defining Rules
 
 Validation rules are defined in the `OrmMeta::rules` property. This property is the rules for each field to be executed by `Validation.execute(exp:String, value:Any, binds:Map<String, Any?>)` method.
 
-Each rule is `com.jkmvc.orm.RuleValidator` object, which has 2 properties:
+Each rule is `net.jkcode.jkmvc.orm.RuleValidator` object, which has 2 properties:
 1. `label`: A label is a human-readable version of the field name.
 2. `rule`: A validation expression
 
@@ -41,7 +41,7 @@ The method has actual parameter:
 
 ## 3 Automatic Validation
 
-All models automatically validate their own data by calling `Orm.validate()` when `Orm::save()`, `Orm::update()`, or `Orm::create()` is called. Because of this, you should always expect these methods to throw an `com.jkmvc.validate.ValidationException` when the model's data is invalid.
+All models automatically validate their own data by calling `Orm.validate()` when `Orm::save()`, `Orm::update()`, or `Orm::create()` is called. Because of this, you should always expect these methods to throw an `net.jkcode.jkmvc.validate.ValidationException` when the model's data is invalid.
 
 ```
 public fun createAction()

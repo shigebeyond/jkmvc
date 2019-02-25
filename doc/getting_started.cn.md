@@ -59,7 +59,7 @@ repositories {
 
 // 依赖
 dependencies {
-	compile "com.jkmvc:jkmvc-http:1.0-SNAPSHOT"
+	compile "net.jkcode.jkmvc:jkmvc-http:1.0-SNAPSHOT"
 }
 
 // 源码目录
@@ -107,7 +107,7 @@ vim src/main/webapp/WEB-INF/web.xml
 ```
 <filter>
     <filter-name>jkmvc</filter-name>
-    <filter-class>com.jkmvc.http.JkFilter</filter-class>
+    <filter-class>net.jkcode.jkmvc.http.JkFilter</filter-class>
 </filter>
 
 <filter-mapping>
@@ -122,9 +122,9 @@ vim src/main/webapp/WEB-INF/web.xml
 vim src/main/kotlin/com/jkmvc/example/controller/WelcomeController.kt
 
 ```
-package com.jkmvc.example.controller
+package net.jkcode.jkmvc.example.controller
 
-import com.jkmvc.http.Controller
+import net.jkcode.jkmvc.http.Controller
 
 /**
  * 主页
@@ -152,7 +152,7 @@ vim src/main/resources/http.yaml
 # controller类所在的包路径
 # controller classes's package paths
 controllerPackages:
-    - com.jkmvc.example.controller
+    - net.jkcode.jkmvc.example.controller
 ```
 
 ## 3 启动项目

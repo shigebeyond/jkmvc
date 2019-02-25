@@ -1,4 +1,4 @@
-package com.jkmvc.serialize
+package net.jkcode.jkmvc.serialize
 
 import org.nustaq.serialization.FSTConfiguration
 import java.io.InputStream

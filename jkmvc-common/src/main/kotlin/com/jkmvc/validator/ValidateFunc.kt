@@ -1,6 +1,6 @@
-package com.jkmvc.validator
+package net.jkcode.jkmvc.validator
 
-import com.jkmvc.common.*
+import net.jkcode.jkmvc.common.*
 import java.util.*
 import kotlin.collections.Map
 import kotlin.collections.MutableMap

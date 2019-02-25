@@ -1,6 +1,6 @@
-package com.jkmvc.db
+package net.jkcode.jkmvc.db
 
-import com.jkmvc.common.*
+import net.jkcode.jkmvc.common.*
 import java.io.Closeable
 import java.sql.Connection
 import java.sql.ResultSet

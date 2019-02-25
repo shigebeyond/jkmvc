@@ -1,9 +1,9 @@
-package com.jkmvc.orm
+package net.jkcode.jkmvc.orm
 
-import com.jkmvc.db.IDb
-import com.jkmvc.validator.IValidator
-import com.jkmvc.validator.RuleValidator
-import com.jkmvc.validator.ValidateLambda
+import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkmvc.validator.IValidator
+import net.jkcode.jkmvc.validator.RuleValidator
+import net.jkcode.jkmvc.validator.ValidateLambda
 import kotlin.reflect.KClass
 
 /**

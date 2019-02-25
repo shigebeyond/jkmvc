@@ -1,6 +1,6 @@
-package com.jkmvc.query
+package net.jkcode.jkmvc.query
 
-import com.jkmvc.db.IDb
+import net.jkcode.jkmvc.db.IDb
 
 /**
  * 表名/字段名/值的转义器

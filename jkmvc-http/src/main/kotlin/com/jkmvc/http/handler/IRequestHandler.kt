@@ -1,4 +1,4 @@
-package com.jkmvc.http.handler
+package net.jkcode.jkmvc.http.handler
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse

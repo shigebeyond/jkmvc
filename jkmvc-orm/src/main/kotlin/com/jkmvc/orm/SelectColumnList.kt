@@ -1,4 +1,4 @@
-package com.jkmvc.orm
+package net.jkcode.jkmvc.orm
 
 import java.util.*
 

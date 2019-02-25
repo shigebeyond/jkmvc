@@ -1,10 +1,10 @@
-package com.jkmvc.tests
+package net.jkcode.jkmvc.tests
 
-import com.jkmvc.redis.JedisFactory
-import com.jkmvc.common.*
-import com.jkmvc.idworker.SnowflakeId
-import com.jkmvc.idworker.SnowflakeIdWorker
-import com.jkmvc.validator.ValidateFuncDefinition
+import net.jkcode.jkmvc.redis.JedisFactory
+import net.jkcode.jkmvc.common.*
+import net.jkcode.jkmvc.idworker.SnowflakeId
+import net.jkcode.jkmvc.idworker.SnowflakeIdWorker
+import net.jkcode.jkmvc.validator.ValidateFuncDefinition
 import getIntranetHost
 //import kotlinx.coroutines.experimental.*
 import org.dom4j.Attribute

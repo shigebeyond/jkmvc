@@ -1,6 +1,6 @@
-package com.jkmvc.redis
+package net.jkcode.jkmvc.redis
 
-import com.jkmvc.common.Config
+import net.jkcode.jkmvc.common.Config
 import redis.clients.jedis.Jedis;
 
 /**

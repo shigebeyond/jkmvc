@@ -1,6 +1,6 @@
-package com.jkmvc.tests
+package net.jkcode.jkmvc.tests
 
-import com.jkmvc.db.*
+import net.jkcode.jkmvc.db.*
 import org.apache.commons.collections.map.HashedMap
 import org.junit.Test
 import java.io.File

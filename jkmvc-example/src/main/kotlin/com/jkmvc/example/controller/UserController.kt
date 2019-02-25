@@ -1,13 +1,13 @@
-package com.jkmvc.example.controller
+package net.jkcode.jkmvc.example.controller
 
-import com.jkmvc.common.format
-import com.jkmvc.example.model.UserModel
-import com.jkmvc.http.controller.Controller
-import com.jkmvc.http.httpLogger
-import com.jkmvc.http.valuesFromRequest
-import com.jkmvc.orm.OrmQueryBuilder
-import com.jkmvc.orm.isLoaded
-import com.jkmvc.session.Auth
+import net.jkcode.jkmvc.common.format
+import net.jkcode.jkmvc.example.model.UserModel
+import net.jkcode.jkmvc.http.controller.Controller
+import net.jkcode.jkmvc.http.httpLogger
+import net.jkcode.jkmvc.http.valuesFromRequest
+import net.jkcode.jkmvc.orm.OrmQueryBuilder
+import net.jkcode.jkmvc.orm.isLoaded
+import net.jkcode.jkmvc.session.Auth
 import java.util.*
 
 

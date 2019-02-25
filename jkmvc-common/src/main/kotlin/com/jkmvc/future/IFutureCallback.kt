@@ -1,4 +1,4 @@
-package com.jkmvc.future
+package net.jkcode.jkmvc.future
 
 /**
  * A callback interface that gets invoked upon completion of

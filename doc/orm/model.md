@@ -3,7 +3,7 @@
 ## 1 Creating your Model
 
 To create a model for the table `user` in your database, create the `UserModel` class with the following syntax:
-1. extends `com.jkmvc.orm.Orm` class
+1. extends `net.jkcode.jkmvc.orm.Orm` class
 2. define companion object as meta data 
 3. use `property()` to define delegate property
 
@@ -25,14 +25,14 @@ class UserModel(id:Int? = null): Orm(id) {
 
 Meta data is the database information about this model, including database name, table name, primary key, etc.
 
-Orm's meta data reprensents by class `com.jkmvc.orm.OrmMeta`, which has the follow properties:
+Orm's meta data reprensents by class `net.jkcode.jkmvc.orm.OrmMeta`, which has the follow properties:
 1. model class
 2. model label, default is model name
 3. table name, default is model name
 4. primary key, , default is `id`
 5. database name, which is defined in `database.yaml`, default is `default`
 
-When you create a `com.jkmvc.orm.OrmMeta` object, you must pass these properties, just like:
+When you create a `net.jkcode.jkmvc.orm.OrmMeta` object, you must pass these properties, just like:
 
 ```
 OrmMeta(UserModel::class /* model class */, "User Model" /* model label */, "user" /* table name */, "id" /* table primary key */, "default" /* database name */){}
@@ -48,10 +48,10 @@ companion object m: OrmMeta(UserModel::class, "User Model", "user", "id"){}
 
 ## 4 Auto generate model code
 
-Jkmvc provide `com.jkmvc.util.ModelGenerator` to generate model code
+Jkmvc provide `net.jkcode.jkmvc.util.ModelGenerator` to generate model code
 
 ```
-val generator = ModelGenerator("/home/shi/code/java/jkmvc/jkmvc-example/src/main/kotlin" /* code directory */, "com.jkmvc.example.model" /* package */, "default" /* database name */, "shijianhang" /* author */)
+val generator = ModelGenerator("/home/shi/code/java/jkmvc/jkmvc-example/src/main/kotlin" /* code directory */, "net.jkcode.jkmvc.example.model" /* package */, "default" /* database name */, "shijianhang" /* author */)
 generator.genenateModelFile("UserModel" /* model class name */, "用户模型" /* model label */, "user" /* table name */)
 ```
 

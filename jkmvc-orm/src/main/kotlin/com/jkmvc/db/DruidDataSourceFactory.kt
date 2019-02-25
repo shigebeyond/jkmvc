@@ -1,8 +1,8 @@
-package com.jkmvc.db
+package net.jkcode.jkmvc.db
 
 import com.alibaba.druid.pool.DruidDataSource
-import com.jkmvc.common.Config
-import com.jkmvc.common.getOrPutOnce
+import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.common.getOrPutOnce
 import java.util.concurrent.ConcurrentHashMap
 import javax.sql.DataSource
 

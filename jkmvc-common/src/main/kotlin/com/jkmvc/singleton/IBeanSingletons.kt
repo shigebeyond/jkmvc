@@ -1,4 +1,4 @@
-package com.jkmvc.singleton
+package net.jkcode.jkmvc.singleton
 
 /**
  * 全局的bean实例池

@@ -1,6 +1,6 @@
-package com.jkmvc.orm
+package net.jkcode.jkmvc.orm
 
-import com.jkmvc.common.toArray
+import net.jkcode.jkmvc.common.toArray
 
 /**
  * ORM

@@ -1,7 +1,7 @@
-package com.jkmvc.singleton
+package net.jkcode.jkmvc.singleton
 
-import com.jkmvc.common.getConstructorOrNull
-import com.jkmvc.common.getOrPutOnce
+import net.jkcode.jkmvc.common.getConstructorOrNull
+import net.jkcode.jkmvc.common.getOrPutOnce
 import java.util.concurrent.ConcurrentHashMap
 
 /**

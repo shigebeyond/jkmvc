@@ -55,7 +55,7 @@ orm的主键类型可以自定义
 
 ---------
 
-com.jkmvc.db.DruidDataSourceFactory
+net.jkcode.jkmvc.db.DruidDataSourceFactory
 适配oracle有问题
 => dataSourceFactory 可配置，系统创建实例
 /**
@@ -184,7 +184,7 @@ fun hasRelation(name: Any):Boolean{
 
 
 
-package com.jkmvc.szpower
+package net.jkcode.jkmvc.szpower
 
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.webapp.*

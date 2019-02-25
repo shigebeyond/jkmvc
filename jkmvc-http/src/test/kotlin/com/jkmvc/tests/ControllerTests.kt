@@ -1,7 +1,7 @@
-package com.jkmvc.tests
+package net.jkcode.jkmvc.tests
 
-import com.jkmvc.common.travel
-import com.jkmvc.http.controller.ControllerClassLoader
+import net.jkcode.jkmvc.common.travel
+import net.jkcode.jkmvc.http.controller.ControllerClassLoader
 import org.junit.Test
 import java.io.File
 
@@ -51,7 +51,7 @@ class ControllerTests{
 
     @Test
     fun testScanControllerClass(){
-        ControllerClassLoader.addPackage("com.jkmvc.example.controller");
+        ControllerClassLoader.addPackage("net.jkcode.jkmvc.example.controller");
         println(ControllerClassLoader.getControllerClass("user"))
     }
 }

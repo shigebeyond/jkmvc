@@ -1,6 +1,6 @@
 # 响应对象
 
-jkmvc的响应类是 `com.jkmvc.http.HttpResponse`
+jkmvc的响应类是 `net.jkcode.jkmvc.http.HttpResponse`
 
 他是继承并代理 `javax.servlet.http.HttpServletResponse`
 

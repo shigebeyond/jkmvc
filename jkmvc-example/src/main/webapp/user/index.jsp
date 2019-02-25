@@ -1,4 +1,4 @@
-<%@ page language="java" import="java.util.*,com.jkmvc.http.Request,com.jkmvc.example.model.UserModel" pageEncoding="UTF-8"%>
+<%@ page language="java" import="java.util.*,net.jkcode.jkmvc.http.Request,net.jkcode.jkmvc.example.model.UserModel" pageEncoding="UTF-8"%>
 <% Request req = (Request) request; %>
 
 <!DOCTYPE html>

@@ -1,6 +1,6 @@
-package com.jkmvc.orm
+package net.jkcode.jkmvc.orm
 
-import com.jkmvc.db.Row
+import net.jkcode.jkmvc.db.Row
 
 /**
  * ORM之关联对象操作

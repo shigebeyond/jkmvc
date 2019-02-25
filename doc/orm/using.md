@@ -101,12 +101,12 @@ user.create()
 
 2. from `HttpRequest`
 
-We usually get values from request, just use `com.jkmvc.http.valuesFromRequest` method.
+We usually get values from request, just use `net.jkcode.jkmvc.http.valuesFromRequest` method.
 
-But the data in the request is string, and  the model's property may not be string, so `com.jkmvc.http.valuesFromRequest` will intelligently convert the value in the request, and assigned to the model's property.
+But the data in the request is string, and  the model's property may not be string, so `net.jkcode.jkmvc.http.valuesFromRequest` will intelligently convert the value in the request, and assigned to the model's property.
 
 ```	
-import com.jkmvc.http.valuesFromRequest
+import net.jkcode.jkmvc.http.valuesFromRequest
 
 try
 {

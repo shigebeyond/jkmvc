@@ -31,7 +31,7 @@ You can configure multiple database, as long as you use a different database nam
 
 ## 2 Get `Db` object
 
-Database manipulation class is `com.jkmvc.db.Db`, there are 2 usage
+Database manipulation class is `net.jkcode.jkmvc.db.Db`, there are 2 usage
 1. Manage database connections
 2. Execute sql
 

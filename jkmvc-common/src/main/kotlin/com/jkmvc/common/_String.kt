@@ -1,4 +1,4 @@
-package com.jkmvc.common
+package net.jkcode.jkmvc.common
 
 import org.slf4j.LoggerFactory
 import java.io.PrintWriter
@@ -10,7 +10,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
 // common的日志
-val comLogger = LoggerFactory.getLogger("com.jkmvc.common")
+val comLogger = LoggerFactory.getLogger("net.jkcode.jkmvc.common")
 
 /****************************** 字符串扩展 *******************************/
 /**

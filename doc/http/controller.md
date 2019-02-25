@@ -4,18 +4,18 @@ A Controller stands in between the models and the views in an application. It pa
 
 Controllers then pass on the data of the model to the views where the data is used to render for the users.  Controllers essentially control the flow of the application.
 
-Controllers are called by the `com.jkmvc.http.HttpHandler#callController` function based on the Route that the url matched.  Be sure to read the [routing](routing.md) page to understand how to use routes to map urls to your controllers.
+Controllers are called by the `net.jkcode.jkmvc.http.HttpHandler#callController` function based on the Route that the url matched.  Be sure to read the [routing](routing.md) page to understand how to use routes to map urls to your controllers.
 
 ## 1 Create Controller
 
-Create a subclass that extends parent class `com.jkmvc.http.Controller`, with `Controller` postfix.
+Create a subclass that extends parent class `net.jkcode.jkmvc.http.Controller`, with `Controller` postfix.
 
 Now, we have our first Controller
 
 ```
-package com.jkmvc.example.controller
+package net.jkcode.jkmvc.example.controller
 
-import com.jkmvc.http.Controller
+import net.jkcode.jkmvc.http.Controller
 
 /**
  * home controller
@@ -40,7 +40,7 @@ vim src/main/resources/http.yaml
 ```
 # controller classes's package paths
 controllerPackages:
-    - com.jkmvc.example.controller
+    - net.jkcode.jkmvc.example.controller
 ```
 
 ## 3 `req` property

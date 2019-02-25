@@ -1,6 +1,6 @@
-package com.jkmvc.query
+package net.jkcode.jkmvc.query
 
-import com.jkmvc.db.IDb
+import net.jkcode.jkmvc.db.IDb
 
 /**
  * sql修饰子句的模拟构建

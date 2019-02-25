@@ -3,4 +3,4 @@ debug: true
 # controller类所在的包路径
 # controller classes's package paths
 controllerPackages:
-    - com.jkmvc.example.controller
+    - net.jkcode.jkmvc.example.controller

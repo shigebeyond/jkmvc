@@ -1,5 +1,5 @@
-package com.jkmvc.tests
+package net.jkcode.jkmvc.tests
 
 import org.slf4j.LoggerFactory
 
-val testLogger = LoggerFactory.getLogger("com.jkmvc.tests")
+val testLogger = LoggerFactory.getLogger("net.jkcode.jkmvc.tests")

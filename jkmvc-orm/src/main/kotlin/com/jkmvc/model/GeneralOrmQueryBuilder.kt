@@ -1,9 +1,9 @@
-package com.jkmvc.model
+package net.jkcode.jkmvc.model
 
-import com.jkmvc.db.IDb
-import com.jkmvc.db.Row
-import com.jkmvc.orm.IOrmMeta
-import com.jkmvc.orm.OrmQueryBuilder
+import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkmvc.db.Row
+import net.jkcode.jkmvc.orm.IOrmMeta
+import net.jkcode.jkmvc.orm.OrmQueryBuilder
 
 /**
  * 改写 OrmQueryBuilder, 查询 GeneralModel 后设置其 ormMeta

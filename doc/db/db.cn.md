@@ -31,7 +31,7 @@ default:
 
 ## 2 获得数据库操作对象
 
-数据库操作类是 `com.jkmvc.db.Db`，主要有2个作用
+数据库操作类是 `net.jkcode.jkmvc.db.Db`，主要有2个作用
 1. 管理数据库连接
 2. 执行sql
 

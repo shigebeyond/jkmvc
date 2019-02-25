@@ -1,9 +1,9 @@
-package com.jkmvc.http
+package net.jkcode.jkmvc.http
 
-import com.jkmvc.common.*
-import com.jkmvc.http.router.Route
-import com.jkmvc.http.router.Router
-import com.jkmvc.validator.RuleValidator
+import net.jkcode.jkmvc.common.*
+import net.jkcode.jkmvc.http.router.Route
+import net.jkcode.jkmvc.http.router.Router
+import net.jkcode.jkmvc.validator.RuleValidator
 import org.apache.commons.collections.map.CompositeMap
 import java.util.*
 import javax.servlet.http.Cookie

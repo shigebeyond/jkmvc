@@ -1,4 +1,4 @@
-package com.jkmvc.query
+package net.jkcode.jkmvc.query
 
 /**
  * 修饰子句的类型

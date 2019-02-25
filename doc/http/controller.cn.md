@@ -2,18 +2,18 @@
 
 控制器 Controller 是介于模型 Model 和视图 View 之间的负责协调的类。 他将请求数据传递给模型，以便由模型来读写数据。 然后把模型返回的数据，传递给视图来渲染，最终的输出到浏览器。 控制器负责控制web应用的流程。
 
-控制器在 `com.jkmvc.http.HttpHandler#callController` 中调用，只调用匹配路由的控制器。详情请阅读[routing](routing.cn.md)。
+控制器在 `net.jkcode.jkmvc.http.HttpHandler#callController` 中调用，只调用匹配路由的控制器。详情请阅读[routing](routing.cn.md)。
 
 ## 1 创建控制器
 
-创建一个继承 `com.jkmvc.http.Controller` 的子类，类名以`Controller`作为后缀。
+创建一个继承 `net.jkcode.jkmvc.http.Controller` 的子类，类名以`Controller`作为后缀。
 
 请看我们的第一个控制器类
 
 ```
-package com.jkmvc.example.controller
+package net.jkcode.jkmvc.example.controller
 
-import com.jkmvc.http.Controller
+import net.jkcode.jkmvc.http.Controller
 
 /**
  * 主页控制器
@@ -38,7 +38,7 @@ vim src/main/resources/http.yaml
 ```
 # controller类所在的包路径
 controllerPackages:
-    - com.jkmvc.example.controller
+    - net.jkcode.jkmvc.example.controller
 ```
 
 ## 3 `req` 属性

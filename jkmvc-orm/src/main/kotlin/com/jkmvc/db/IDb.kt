@@ -1,6 +1,6 @@
-package com.jkmvc.db
+package net.jkcode.jkmvc.db
 
-import com.jkmvc.closing.ClosingOnRequestEnd
+import net.jkcode.jkmvc.closing.ClosingOnRequestEnd
 import java.sql.ResultSet
 import kotlin.reflect.KClass
 

@@ -1,4 +1,4 @@
-package com.jkmvc.validator
+package net.jkcode.jkmvc.validator
 
 /**
  * 校验异常

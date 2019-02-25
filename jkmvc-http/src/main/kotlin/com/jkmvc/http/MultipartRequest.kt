@@ -1,7 +1,7 @@
-package com.jkmvc.http
+package net.jkcode.jkmvc.http
 
-import com.jkmvc.common.Config
-import com.jkmvc.common.convertBytes
+import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.common.convertBytes
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy
 import com.oreilly.servlet.multipart.FileRenamePolicy
 import java.io.File

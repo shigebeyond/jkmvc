@@ -1,4 +1,4 @@
-package com.jkmvc.orm
+package net.jkcode.jkmvc.orm
 
 /**
  * ORM之数据校验

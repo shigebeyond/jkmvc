@@ -1,4 +1,4 @@
-package com.jkmvc.db
+package net.jkcode.jkmvc.db
 
 /**
  * 封装一个单元格的值, 主要用于查询单个值的结果封装

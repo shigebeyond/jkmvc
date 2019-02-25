@@ -1,4 +1,4 @@
-package com.jkmvc.db
+package net.jkcode.jkmvc.db
 
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
@@ -8,7 +8,7 @@ import kotlin.reflect.KClass
 
 
 // db的日志
-val dbLogger = LoggerFactory.getLogger("com.jkmvc.db")
+val dbLogger = LoggerFactory.getLogger("net.jkcode.jkmvc.db")
 
 typealias Row = Map<String, Any?>
 typealias MutableRow = MutableMap<String, Any?>

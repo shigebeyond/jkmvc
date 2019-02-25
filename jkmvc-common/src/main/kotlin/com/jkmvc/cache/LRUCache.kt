@@ -1,4 +1,4 @@
-package com.jkmvc.cache
+package net.jkcode.jkmvc.cache
 
 import java.util.*
 

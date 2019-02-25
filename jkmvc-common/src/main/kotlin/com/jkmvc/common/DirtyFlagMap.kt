@@ -1,4 +1,4 @@
-package com.jkmvc.common
+package net.jkcode.jkmvc.common
 
 /**
  * 标记是否脏了(改动过数据)的map

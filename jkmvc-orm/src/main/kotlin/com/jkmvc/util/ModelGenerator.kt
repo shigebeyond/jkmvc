@@ -1,8 +1,8 @@
-package com.jkmvc.util
+package net.jkcode.jkmvc.util
 
-import com.jkmvc.common.Config
-import com.jkmvc.common.format
-import com.jkmvc.db.Db
+import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.common.format
+import net.jkcode.jkmvc.db.Db
 import org.apache.commons.collections.map.HashedMap
 import java.io.File
 import java.util.*
@@ -98,7 +98,7 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
         val code = StringBuilder()
         val date = Date().format()
         code.append("package $pck \n\n")
-        code.append("import com.jkmvc.orm.OrmMeta \nimport com.jkmvc.orm.Orm \nimport com.jkmvc.orm.toNotNullArray \n\n")
+        code.append("import net.jkcode.jkmvc.orm.OrmMeta \nimport net.jkcode.jkmvc.orm.Orm \nimport net.jkcode.jkmvc.orm.toNotNullArray \n\n")
         code.append("/**\n * $label\n *\n * @ClassName: $model\n * @Description:\n * @author shijianhang<772910474@qq.com>\n * @date $date\n */\n")
         // 2 类
         code.append("class $model(id:$pkType? = null): Orm(id) {\n")

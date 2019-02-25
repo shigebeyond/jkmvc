@@ -1,7 +1,7 @@
-package com.jkmvc.http.controller
+package net.jkcode.jkmvc.http.controller
 
-import com.jkmvc.common.getConstructorOrNull
-import com.jkmvc.http.router.RouteException
+import net.jkcode.jkmvc.common.getConstructorOrNull
+import net.jkcode.jkmvc.http.router.RouteException
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction

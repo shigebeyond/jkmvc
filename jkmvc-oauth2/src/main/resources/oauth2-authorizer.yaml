@@ -1,6 +1,6 @@
 # 授权类型
-github: com.jkmvc.oauth2.authorizer.impl.GithubAuthorizer
-oschina: com.jkmvc.oauth2.authorizer.impl.OSChinaAuthorizer
-qq: com.jkmvc.oauth2.authorizer.impl.QQAuthorizer
-wechat: com.jkmvc.oauth2.authorizer.impl.WechatAuthorizer
-weibo: com.jkmvc.oauth2.authorizer.impl.WeiboAuthorizer
+github: net.jkcode.jkmvc.oauth2.authorizer.impl.GithubAuthorizer
+oschina: net.jkcode.jkmvc.oauth2.authorizer.impl.OSChinaAuthorizer
+qq: net.jkcode.jkmvc.oauth2.authorizer.impl.QQAuthorizer
+wechat: net.jkcode.jkmvc.oauth2.authorizer.impl.WechatAuthorizer
+weibo: net.jkcode.jkmvc.oauth2.authorizer.impl.WeiboAuthorizer

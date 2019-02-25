@@ -1,8 +1,8 @@
-package com.jkmvc.cache
+package net.jkcode.jkmvc.cache
 
-import com.jkmvc.common.Config
-import com.jkmvc.common.IConfig
-import com.jkmvc.singleton.NamedConfiguredSingletons
+import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.common.IConfig
+import net.jkcode.jkmvc.singleton.NamedConfiguredSingletons
 
 /**
  * 缓存操作接口

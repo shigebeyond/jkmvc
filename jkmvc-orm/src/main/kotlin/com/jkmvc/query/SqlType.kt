@@ -1,4 +1,4 @@
-package com.jkmvc.query
+package net.jkcode.jkmvc.query
 
 /**
  * sql的动作类型

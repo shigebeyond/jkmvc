@@ -1,12 +1,12 @@
-package com.jkmvc.singleton
+package net.jkcode.jkmvc.singleton
 
 /**
  * 名字可配的单例池
  *   可以动态的单例名来获得单例，但是需要实现配置单例名及其实现类
  *   如序列器的配置
  *   <code>
- *      jdk: com.jkmvc.serialize.JdkSerializer
- *      fst: com.jkmvc.serialize.FstSerializer
+ *      jdk: net.jkcode.jkmvc.serialize.JdkSerializer
+ *      fst: net.jkcode.jkmvc.serialize.FstSerializer
  *  </code>
  *  一般用在枚举某个接口的实现类
  *

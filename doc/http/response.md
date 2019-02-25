@@ -1,6 +1,6 @@
 # Response object
 
-Response class is `com.jkmvc.http.HttpResponse`, which is implements `javax.servlet.http.HttpServletResponse`
+Response class is `net.jkcode.jkmvc.http.HttpResponse`, which is implements `javax.servlet.http.HttpServletResponse`
 
 So, you can call all methods that inherited from `HttpServletResponse`
 

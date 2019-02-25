@@ -1,4 +1,4 @@
-package com.jkmvc.validator
+package net.jkcode.jkmvc.validator
 
 // 校验lambda: 如果校验失败, 则抛 ValidateException 异常, 否则返回最终的值
 public typealias ValidateLambda = (value: Any?, variables: Map<String, Any?>) -> Any?;

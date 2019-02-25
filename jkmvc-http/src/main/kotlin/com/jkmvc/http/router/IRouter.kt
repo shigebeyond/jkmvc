@@ -1,4 +1,4 @@
-package com.jkmvc.http.router
+package net.jkcode.jkmvc.http.router
 
 /**
  * 路由参数 + 路由规则

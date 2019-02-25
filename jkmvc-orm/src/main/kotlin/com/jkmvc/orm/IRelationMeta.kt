@@ -1,6 +1,6 @@
-package com.jkmvc.orm
+package net.jkcode.jkmvc.orm
 
-import com.jkmvc.db.Row
+import net.jkcode.jkmvc.db.Row
 import kotlin.reflect.KClass
 
 /**

@@ -1,10 +1,10 @@
-package com.jkmvc.query
+package net.jkcode.jkmvc.query
 
-import com.jkmvc.db.Cell
-import com.jkmvc.db.IDb
-import com.jkmvc.db.Row
-import com.jkmvc.orm.IOrm
-import com.jkmvc.orm.rowTransformer
+import net.jkcode.jkmvc.db.Cell
+import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkmvc.db.Row
+import net.jkcode.jkmvc.orm.IOrm
+import net.jkcode.jkmvc.orm.rowTransformer
 import org.apache.commons.collections.map.HashedMap
 import kotlin.reflect.KClass
 

@@ -1,6 +1,6 @@
-package com.jkmvc.query
+package net.jkcode.jkmvc.query
 
-import com.jkmvc.db.DbException
+import net.jkcode.jkmvc.db.DbException
 
 /**
  * 要插入的数据

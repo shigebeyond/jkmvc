@@ -1,8 +1,8 @@
-package com.jkmvc.http.controller
+package net.jkcode.jkmvc.http.controller
 
-import com.jkmvc.http.HttpRequest
-import com.jkmvc.http.HttpResponse
-import com.jkmvc.http.view.View
+import net.jkcode.jkmvc.http.HttpRequest
+import net.jkcode.jkmvc.http.HttpResponse
+import net.jkcode.jkmvc.http.view.View
 import java.util.*
 import kotlin.reflect.KFunction
 

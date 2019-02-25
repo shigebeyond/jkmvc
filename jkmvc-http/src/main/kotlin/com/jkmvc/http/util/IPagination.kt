@@ -1,4 +1,4 @@
-package com.jkmvc.http.util
+package net.jkcode.jkmvc.http.util
 
 /**
  * 分页处理

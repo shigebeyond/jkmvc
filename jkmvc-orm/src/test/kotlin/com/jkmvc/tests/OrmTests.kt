@@ -1,9 +1,9 @@
-package com.jkmvc.tests
+package net.jkcode.jkmvc.tests
 
-import com.jkmvc.db.Db
-import com.jkmvc.model.GeneralModel
-import com.jkmvc.orm.*
-import com.jkmvc.tests.model.*
+import net.jkcode.jkmvc.db.Db
+import net.jkcode.jkmvc.model.GeneralModel
+import net.jkcode.jkmvc.orm.*
+import net.jkcode.jkmvc.tests.model.*
 import org.junit.Test
 
 class OrmTests{
@@ -16,15 +16,15 @@ class OrmTests{
 
     @Test
     fun testMeta(){
-//        println(UserModel.m::class.jvmName) // com.jkmvc.tests.MyTests$m
-//        println(UserModel.m::class.qualifiedName) // com.jkmvc.tests.UserModel.m -- dot
+//        println(UserModel.m::class.jvmName) // net.jkcode.jkmvc.tests.MyTests$m
+//        println(UserModel.m::class.qualifiedName) // net.jkcode.jkmvc.tests.UserModel.m -- dot
 //        println(UserModel.m::class.simpleName) // m
         println(UserModel.m::name) // m
         println(UserModel.m.name) // user
         println(UserModel::class.modelOrmMeta.name) // user
-//        println(UserModel.m::class.java.name) // com.jkmvc.tests.MyTests$m
-//        println(UserModel.m::class.java.typeName) // com.jkmvc.tests.MyTests$m
-//        println(UserModel.m::class.java.canonicalName) // com.jkmvc.tests.UserModel.m -- dot
+//        println(UserModel.m::class.java.name) // net.jkcode.jkmvc.tests.MyTests$m
+//        println(UserModel.m::class.java.typeName) // net.jkcode.jkmvc.tests.MyTests$m
+//        println(UserModel.m::class.java.canonicalName) // net.jkcode.jkmvc.tests.UserModel.m -- dot
 //        println(UserModel.m::class.java.simpleName) // m
     }
 

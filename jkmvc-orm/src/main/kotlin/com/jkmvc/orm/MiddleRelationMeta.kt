@@ -1,8 +1,8 @@
-package com.jkmvc.orm
+package net.jkcode.jkmvc.orm
 
-import com.jkmvc.query.DbExpr
-import com.jkmvc.query.DbQueryBuilder
-import com.jkmvc.query.IDbQueryBuilder
+import net.jkcode.jkmvc.query.DbExpr
+import net.jkcode.jkmvc.query.DbQueryBuilder
+import net.jkcode.jkmvc.query.IDbQueryBuilder
 import kotlin.reflect.KClass
 
 /**

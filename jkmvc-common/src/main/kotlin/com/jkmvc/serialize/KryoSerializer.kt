@@ -1,4 +1,4 @@
-package com.jkmvc.serialize
+package net.jkcode.jkmvc.serialize
 
 import com.esotericsoftware.kryo.Kryo
 import com.esotericsoftware.kryo.io.Input

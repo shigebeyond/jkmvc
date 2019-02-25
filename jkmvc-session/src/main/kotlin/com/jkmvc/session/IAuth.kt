@@ -1,4 +1,4 @@
-package com.jkmvc.session
+package net.jkcode.jkmvc.session
 
 /**
  * 认证用户

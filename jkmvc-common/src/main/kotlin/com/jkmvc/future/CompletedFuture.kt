@@ -1,4 +1,4 @@
-package com.jkmvc.future
+package net.jkcode.jkmvc.future
 
 import java.util.concurrent.Future
 

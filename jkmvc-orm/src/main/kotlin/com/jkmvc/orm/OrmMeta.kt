@@ -1,12 +1,12 @@
-package com.jkmvc.orm
+package net.jkcode.jkmvc.orm
 
-import com.jkmvc.common.getConstructorOrNull
-import com.jkmvc.common.getProperty
-import com.jkmvc.common.to
-import com.jkmvc.db.Db
-import com.jkmvc.db.IDb
-import com.jkmvc.model.GeneralModel
-import com.jkmvc.validator.IValidator
+import net.jkcode.jkmvc.common.getConstructorOrNull
+import net.jkcode.jkmvc.common.getProperty
+import net.jkcode.jkmvc.common.to
+import net.jkcode.jkmvc.db.Db
+import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkmvc.model.GeneralModel
+import net.jkcode.jkmvc.validator.IValidator
 import java.util.*
 import kotlin.collections.set
 import kotlin.reflect.KClass

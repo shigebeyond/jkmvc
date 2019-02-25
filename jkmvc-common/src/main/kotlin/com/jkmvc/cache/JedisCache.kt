@@ -1,8 +1,8 @@
-package com.jkmvc.cache
+package net.jkcode.jkmvc.cache
 
-import com.jkmvc.common.Config
-import com.jkmvc.redis.ShardedJedisFactory
-import com.jkmvc.serialize.ISerializer
+import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.redis.ShardedJedisFactory
+import net.jkcode.jkmvc.serialize.ISerializer
 import redis.clients.jedis.ShardedJedis
 import java.lang.UnsupportedOperationException
 

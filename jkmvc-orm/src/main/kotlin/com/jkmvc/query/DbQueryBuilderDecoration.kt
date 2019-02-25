@@ -1,10 +1,10 @@
-package com.jkmvc.query
+package net.jkcode.jkmvc.query
 
-import com.jkmvc.common.getOrPut
-import com.jkmvc.common.isArrayOrCollectionEmpty
-import com.jkmvc.db.DbException
-import com.jkmvc.db.DbType
-import com.jkmvc.db.IDb
+import net.jkcode.jkmvc.common.getOrPut
+import net.jkcode.jkmvc.common.isArrayOrCollectionEmpty
+import net.jkcode.jkmvc.db.DbException
+import net.jkcode.jkmvc.db.DbType
+import net.jkcode.jkmvc.db.IDb
 import java.util.*
 import kotlin.reflect.KFunction2
 

@@ -1,10 +1,10 @@
-package com.jkmvc.tests
+package net.jkcode.jkmvc.tests
 
-import com.jkmvc.db.*
-import com.jkmvc.query.DbExpr
-import com.jkmvc.query.DbQueryBuilder
-import com.jkmvc.query.IDbQueryBuilder
-import com.jkmvc.query.SqlType
+import net.jkcode.jkmvc.db.*
+import net.jkcode.jkmvc.query.DbExpr
+import net.jkcode.jkmvc.query.DbQueryBuilder
+import net.jkcode.jkmvc.query.IDbQueryBuilder
+import net.jkcode.jkmvc.query.SqlType
 import org.junit.Test
 
 

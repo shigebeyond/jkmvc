@@ -1,7 +1,7 @@
-package com.jkmvc.idworker
+package net.jkcode.jkmvc.idworker
 
-import com.jkmvc.common.Config
-import com.jkmvc.common.time
+import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.common.time
 import java.util.concurrent.atomic.AtomicLong
 
 

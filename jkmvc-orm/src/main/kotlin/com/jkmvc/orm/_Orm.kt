@@ -1,6 +1,6 @@
-package com.jkmvc.orm
+package net.jkcode.jkmvc.orm
 
-import com.jkmvc.db.Row
+import net.jkcode.jkmvc.db.Row
 import org.apache.commons.collections.iterators.AbstractIteratorDecorator
 import kotlin.reflect.KClass
 import kotlin.reflect.full.companionObjectInstance

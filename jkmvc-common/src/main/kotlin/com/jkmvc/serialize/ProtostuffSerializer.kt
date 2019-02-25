@@ -1,10 +1,10 @@
-package com.jkmvc.serialize
+package net.jkcode.jkmvc.serialize
 
 import com.dyuproject.protostuff.LinkedBuffer
 import com.dyuproject.protostuff.ProtostuffIOUtil
 import com.dyuproject.protostuff.Schema
 import com.dyuproject.protostuff.runtime.RuntimeSchema
-import com.jkmvc.common.getOrPutOnce
+import net.jkcode.jkmvc.common.getOrPutOnce
 import org.objenesis.ObjenesisStd
 import java.io.InputStream
 import java.util.concurrent.ConcurrentHashMap

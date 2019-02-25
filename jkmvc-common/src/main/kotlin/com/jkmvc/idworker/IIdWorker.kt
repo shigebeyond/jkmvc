@@ -1,8 +1,8 @@
-package com.jkmvc.idworker
+package net.jkcode.jkmvc.idworker
 
-import com.jkmvc.common.Config
-import com.jkmvc.common.IConfig
-import com.jkmvc.singleton.NamedConfiguredSingletons
+import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.common.IConfig
+import net.jkcode.jkmvc.singleton.NamedConfiguredSingletons
 
 /**
  * id生成器

@@ -1,8 +1,8 @@
-package com.jkmvc.validator
+package net.jkcode.jkmvc.validator
 
-import com.jkmvc.common.exprTo
-import com.jkmvc.common.mapIndexedToArray
-import com.jkmvc.common.trim
+import net.jkcode.jkmvc.common.exprTo
+import net.jkcode.jkmvc.common.mapIndexedToArray
+import net.jkcode.jkmvc.common.trim
 import java.lang.reflect.Method
 import java.util.*
 import kotlin.reflect.KFunction

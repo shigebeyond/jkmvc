@@ -1,4 +1,4 @@
-package com.jkmvc.common
+package net.jkcode.jkmvc.common
 
 import org.apache.http.Consts
 import org.apache.http.NameValuePair

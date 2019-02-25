@@ -1,8 +1,8 @@
-package com.jkmvc.model
+package net.jkcode.jkmvc.model
 
-import com.jkmvc.db.MutableRow
-import com.jkmvc.db.Row
-import com.jkmvc.orm.*
+import net.jkcode.jkmvc.db.MutableRow
+import net.jkcode.jkmvc.db.Row
+import net.jkcode.jkmvc.orm.*
 import java.util.*
 
 /**

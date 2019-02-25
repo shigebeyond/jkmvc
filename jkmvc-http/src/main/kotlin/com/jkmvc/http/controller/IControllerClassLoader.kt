@@ -1,4 +1,4 @@
-package com.jkmvc.http.controller
+package net.jkcode.jkmvc.http.controller
 
 /**
  * 加载Controller类

@@ -1,4 +1,4 @@
-package com.jkmvc.http.util
+package net.jkcode.jkmvc.http.util
 
 /**
  * 全量数据的分页处理，主要用于内存分页

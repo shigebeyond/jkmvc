@@ -1,8 +1,8 @@
-package com.jkmvc.redis
+package net.jkcode.jkmvc.redis
 
-import com.jkmvc.common.AddressesParser
-import com.jkmvc.common.Config
-import com.jkmvc.common.getOrPutOnce
+import net.jkcode.jkmvc.common.AddressesParser
+import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.common.getOrPutOnce
 import redis.clients.jedis.*
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap

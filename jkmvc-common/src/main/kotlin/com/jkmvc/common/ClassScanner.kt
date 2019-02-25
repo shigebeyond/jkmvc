@@ -1,4 +1,4 @@
-package com.jkmvc.common
+package net.jkcode.jkmvc.common
 
 import java.util.*
 import kotlin.collections.HashSet

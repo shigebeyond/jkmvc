@@ -1,9 +1,9 @@
-package com.jkmvc.oauth2
+package net.jkcode.jkmvc.oauth2
 
-import com.jkmvc.common.generateUUID
-import com.jkmvc.http.controller.Controller
-import com.jkmvc.oauth2.authorizer.IOauth2Authorizer
-import com.jkmvc.oauth2.authorizer.Oauth2User
+import net.jkcode.jkmvc.common.generateUUID
+import net.jkcode.jkmvc.http.controller.Controller
+import net.jkcode.jkmvc.oauth2.authorizer.IOauth2Authorizer
+import net.jkcode.jkmvc.oauth2.authorizer.Oauth2User
 import java.util.*
 
 /**

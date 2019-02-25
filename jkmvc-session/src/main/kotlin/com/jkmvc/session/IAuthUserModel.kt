@@ -1,7 +1,7 @@
-package com.jkmvc.session
+package net.jkcode.jkmvc.session
 
-import com.jkmvc.common.Config
-import com.jkmvc.orm.IOrm
+import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.orm.IOrm
 import org.apache.commons.codec.digest.DigestUtils
 
 /**

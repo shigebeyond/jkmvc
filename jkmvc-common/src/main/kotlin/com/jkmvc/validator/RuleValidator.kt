@@ -1,4 +1,4 @@
-package com.jkmvc.validator
+package net.jkcode.jkmvc.validator
 
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap

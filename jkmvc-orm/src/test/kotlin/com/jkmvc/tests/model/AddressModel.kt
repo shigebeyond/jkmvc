@@ -1,7 +1,7 @@
-package com.jkmvc.tests.model
+package net.jkcode.jkmvc.tests.model
 
-import com.jkmvc.orm.Orm
-import com.jkmvc.orm.OrmMeta
+import net.jkcode.jkmvc.orm.Orm
+import net.jkcode.jkmvc.orm.OrmMeta
 
 /**
  * 地址模型

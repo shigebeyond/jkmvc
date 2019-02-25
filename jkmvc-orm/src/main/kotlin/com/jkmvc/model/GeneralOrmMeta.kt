@@ -1,7 +1,7 @@
-package com.jkmvc.model
+package net.jkcode.jkmvc.model
 
-import com.jkmvc.orm.IOrmMeta
-import com.jkmvc.orm.OrmQueryBuilder
+import net.jkcode.jkmvc.orm.IOrmMeta
+import net.jkcode.jkmvc.orm.OrmQueryBuilder
 
 /**
  * 代理并改写元数据

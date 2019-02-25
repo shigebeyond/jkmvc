@@ -1,4 +1,4 @@
-package com.jkmvc.db
+package net.jkcode.jkmvc.db
 
 /**
  * 数据库类型

@@ -1,14 +1,14 @@
-package com.jkmvc.session
+package net.jkcode.jkmvc.session
 
-import com.jkmvc.closing.ClosingOnRequestEnd
-import com.jkmvc.common.Config
-import com.jkmvc.common.IConfig
-import com.jkmvc.common.isSuperClass
-import com.jkmvc.db.dbLogger
-import com.jkmvc.orm.Orm
-import com.jkmvc.orm.modelOrmMeta
-import com.jkmvc.orm.rowTransformer
-import com.jkmvc.singleton.NamedConfiguredSingletons
+import net.jkcode.jkmvc.closing.ClosingOnRequestEnd
+import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.common.IConfig
+import net.jkcode.jkmvc.common.isSuperClass
+import net.jkcode.jkmvc.db.dbLogger
+import net.jkcode.jkmvc.orm.Orm
+import net.jkcode.jkmvc.orm.modelOrmMeta
+import net.jkcode.jkmvc.orm.rowTransformer
+import net.jkcode.jkmvc.singleton.NamedConfiguredSingletons
 import kotlin.reflect.KClass
 
 /**
@@ -37,7 +37,7 @@ abstract class Auth: IAuth, ClosingOnRequestEnd() {
             val clazz = Class.forName(className).kotlin as KClass<out Orm>
             // 检查是否实现了 IAuthUserModel 接口
             if(!IAuthUserModel::class.java.isSuperClass(clazz.java))
-                throw IllegalArgumentException("无效用户模型的类[$className]，必须是实现[com.jkmvc.session.IAuthUserModel]接口");
+                throw IllegalArgumentException("无效用户模型的类[$className]，必须是实现[net.jkcode.jkmvc.session.IAuthUserModel]接口");
             clazz
         }
 

@@ -1,8 +1,8 @@
-package com.jkmvc.orm
+package net.jkcode.jkmvc.orm
 
 import java.math.BigDecimal
 import kotlin.properties.ReadWriteProperty
-import com.jkmvc.db.Row
+import net.jkcode.jkmvc.db.Row
 
 /**
  * ORM之实体对象

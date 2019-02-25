@@ -1,7 +1,7 @@
-package com.jkmvc.http
+package net.jkcode.jkmvc.http
 
 
-import com.jkmvc.http.handler.RequestHandler
+import net.jkcode.jkmvc.http.handler.RequestHandler
 import javax.servlet.*
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse

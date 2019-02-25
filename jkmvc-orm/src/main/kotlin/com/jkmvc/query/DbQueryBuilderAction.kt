@@ -1,7 +1,7 @@
-package com.jkmvc.query
+package net.jkcode.jkmvc.query
 
-import com.jkmvc.common.*
-import com.jkmvc.db.*
+import net.jkcode.jkmvc.common.*
+import net.jkcode.jkmvc.db.*
 import java.util.*
 import kotlin.reflect.KFunction2
 

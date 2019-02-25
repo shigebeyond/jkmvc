@@ -1,12 +1,12 @@
 ＃ 校验
 
-Orm模型与[Validation](../common/validation/validation.cn.md)库紧密集成，该库提供了异常类`com.jkmvc.validate.ValidationException`，来帮助您快速处理基本CRUD操作的验证错误。
+Orm模型与[Validation](../common/validation/validation.cn.md)库紧密集成，该库提供了异常类`net.jkcode.jkmvc.validate.ValidationException`，来帮助您快速处理基本CRUD操作的验证错误。
 
 ## 1 定义校验规则
 
 验证规则是定义在`OrmMeta::rules`属性中。 这个属性包含多个字段的规则，每个规则都是由`Validation.execute(exp:String, value:Any, binds:Map<String, Any?>)`来执行。
 
-每个规则是`com.jkmvc.orm.RuleValidator`对象，它有2个属性：
+每个规则是`net.jkcode.jkmvc.orm.RuleValidator`对象，它有2个属性：
 1. `label`：字段中文名
 2. `rule`：验证表达式
 
@@ -41,7 +41,7 @@ Jkmvc通过`Orm.validate（）`方法执行验证。
 
 ## 3自动验证
 
-当调用`Orm.validate()`/`Orm::save()`/`Orm::update()`方法时，模型都会自动调用`Orm.validate()`来验证自己的数据。 因此当发现模型的数据无效时，会抛出校验异常`com.jkmvc.validate.ValidationException`。
+当调用`Orm.validate()`/`Orm::save()`/`Orm::update()`方法时，模型都会自动调用`Orm.validate()`来验证自己的数据。 因此当发现模型的数据无效时，会抛出校验异常`net.jkcode.jkmvc.validate.ValidationException`。
 
 ```
 public fun createAction()

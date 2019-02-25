@@ -1,4 +1,4 @@
-<%@ page language="java" import="com.jkmvc.http.Request,com.jkmvc.example.model.UserModel,com.jkmvc.session.Auth" pageEncoding="UTF-8"%>
+<%@ page language="java" import="net.jkcode.jkmvc.http.Request,net.jkcode.jkmvc.example.model.UserModel,net.jkcode.jkmvc.session.Auth" pageEncoding="UTF-8"%>
 <%
     Request req = (Request) request;
     UserModel user = (UserModel)Auth.INSTANCE.getUser();

@@ -1,6 +1,6 @@
-package com.jkmvc.query
+package net.jkcode.jkmvc.query
 
-import com.jkmvc.db.IDb
+import net.jkcode.jkmvc.db.IDb
 import java.util.*
 import kotlin.reflect.KFunction2
 

@@ -2,7 +2,7 @@
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
 	<!--<filter>
 		<filter-name>jkmvc</filter-name>
-		<filter-class>com.jkmvc.http.JkFilter</filter-class>
+		<filter-class>net.jkcode.jkmvc.http.JkFilter</filter-class>
 		<init-param>
 			<param-name>baseUri</param-name>
 			<param-value>/jkmvc/</param-value>

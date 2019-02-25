@@ -1,6 +1,6 @@
-package com.jkmvc.query
+package net.jkcode.jkmvc.query
 
-import com.jkmvc.db.*
+import net.jkcode.jkmvc.db.*
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.reflect.KClass

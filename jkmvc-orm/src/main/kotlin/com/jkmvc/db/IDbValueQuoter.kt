@@ -1,7 +1,7 @@
-package com.jkmvc.db
+package net.jkcode.jkmvc.db
 
-import com.jkmvc.common.iteratorArrayOrCollection
-import com.jkmvc.common.joinToString
+import net.jkcode.jkmvc.common.iteratorArrayOrCollection
+import net.jkcode.jkmvc.common.joinToString
 
 /**
  * Db值转义器

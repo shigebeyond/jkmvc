@@ -16,7 +16,7 @@ vim src/main/webapp/WEB-INF/web.xml
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
 	<filter>
 		<filter-name>jkmvc</filter-name>
-		<filter-class>com.jkmvc.http.JkFilter</filter-class>
+		<filter-class>net.jkcode.jkmvc.http.JkFilter</filter-class>
 	</filter>
 
 	<filter-mapping>
@@ -33,9 +33,9 @@ Controller handles request, and render data to response.
 It has property `req` to represent request, `res` to represent response.
 
 ```
-package com.jkmvc.example.controller
+package net.jkcode.jkmvc.example.controller
 
-import com.jkmvc.http.Controller
+import net.jkcode.jkmvc.http.Controller
 
 /**
  * 主页
@@ -62,7 +62,7 @@ vim src/main/resources/http.yaml
 # controller类所在的包路径
 # controller classes's package paths
 controllerPackages:
-    - com.jkmvc.example.controller
+    - net.jkcode.jkmvc.example.controller
 ```
 
 ## 4 Run web server
@@ -82,9 +82,9 @@ visit http://localhost:8081/jkmvc-example/
 vim
 
 ```
-package com.jkmvc.example.controller
+package net.jkcode.jkmvc.example.controller
 
-import com.jkmvc.http.Controller
+import net.jkcode.jkmvc.http.Controller
 
 /**
  * 主页
@@ -192,10 +192,10 @@ CREATE TABLE `address` (
 use model, extends Orm
 
 ```
-package com.jkmvc.example.model
+package net.jkcode.jkmvc.example.model
 
-import com.jkmvc.orm.OrmMeta
-import com.jkmvc.orm.Orm
+import net.jkcode.jkmvc.orm.OrmMeta
+import net.jkcode.jkmvc.orm.Orm
 
 /**
  * 用户模型
@@ -241,10 +241,10 @@ class UserModel(id:Int? = null): Orm(id) {
 address model, extends Orm
 
 ```
-package com.jkmvc.example.model
+package net.jkcode.jkmvc.example.model
 
-import com.jkmvc.orm.OrmMeta
-import com.jkmvc.orm.Orm
+import net.jkcode.jkmvc.orm.OrmMeta
+import net.jkcode.jkmvc.orm.Orm
 
 /**
  * 地址模型
@@ -284,11 +284,11 @@ class AddressModel(id:Int? = null): Orm(id) {
 ## 3 Use Model in Controller
 
 ```
-package com.jkmvc.example.controller
+package net.jkcode.jkmvc.example.controller
 
-import com.jkmvc.example.model.UserModel
-import com.jkmvc.http.Controller
-import com.jkmvc.orm.isLoaded
+import net.jkcode.jkmvc.example.model.UserModel
+import net.jkcode.jkmvc.http.Controller
+import net.jkcode.jkmvc.orm.isLoaded
 import java.io.File
 
 /**

@@ -1,6 +1,6 @@
-package com.jkmvc.tests
+package net.jkcode.jkmvc.tests
 
-import com.jkmvc.validator.RuleValidator
+import net.jkcode.jkmvc.validator.RuleValidator
 import org.junit.Test
 
 class ValidationTests{

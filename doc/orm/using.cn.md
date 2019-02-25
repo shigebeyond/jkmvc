@@ -103,12 +103,12 @@ user.create()
 
 2. 从 `HttpRequest` 中赋值
 
-通常，我们要从请求中读取相关的属性值，只要使用 `com.jkmvc.http.valuesFromRequest` 方法即可。
+通常，我们要从请求中读取相关的属性值，只要使用 `net.jkcode.jkmvc.http.valuesFromRequest` 方法即可。
 
-当然，请求中的数据都是字符串类型，但是我们的属性却不一定是字符串类型的，`com.jkmvc.http.valuesFromRequest` 会智能转换请求中的值，并赋值给属性。
+当然，请求中的数据都是字符串类型，但是我们的属性却不一定是字符串类型的，`net.jkcode.jkmvc.http.valuesFromRequest` 会智能转换请求中的值，并赋值给属性。
 
 ```	
-import com.jkmvc.http.valuesFromRequest
+import net.jkcode.jkmvc.http.valuesFromRequest
 
 try
 {

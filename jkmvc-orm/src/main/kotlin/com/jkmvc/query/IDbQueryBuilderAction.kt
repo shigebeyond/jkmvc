@@ -1,7 +1,7 @@
-package com.jkmvc.query
+package net.jkcode.jkmvc.query
 
-import com.jkmvc.db.IDb
-import com.jkmvc.db.Row
+import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkmvc.db.Row
 
 /**
  * sql构建器 -- 动作子句: 由动态select/insert/update/delete来构建的子句

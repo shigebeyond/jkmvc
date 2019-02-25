@@ -1,4 +1,4 @@
-package com.jkmvc.common
+package net.jkcode.jkmvc.common
 
 import java.text.SimpleDateFormat
 import java.util.*
