@@ -20,6 +20,14 @@ abstract class ClosingOnRequestEnd : Closeable {
         protected val closings: MutableList<ClosingOnRequestEnd> = Vector()
 
         /**
+         * 添加要关闭的资源
+         * @param c
+         */
+        public fun addClosing(c: ClosingOnRequestEnd){
+            closings.add(c)
+        }
+
+        /**
          * 触发资源关闭
          *    在请求结束时调用, 如http请求/rpc请求
          */
@@ -42,6 +50,6 @@ abstract class ClosingOnRequestEnd : Closeable {
     protected val once: Boolean = false
 
     init {
-        closings.add(this)
+        addClosing(this)
     }
 }

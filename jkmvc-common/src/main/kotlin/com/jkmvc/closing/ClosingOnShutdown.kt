@@ -17,7 +17,15 @@ abstract class ClosingOnShutdown : Closeable {
         /**
          * 记录要关闭的资源
          */
-        protected val closings: MutableList<ClosingOnShutdown> = Vector()
+        protected val closings: MutableList<Closeable> = Vector()
+
+        /**
+         * 添加要关闭的资源
+         * @param c
+         */
+        public fun addClosing(c: Closeable){
+            closings.add(c)
+        }
 
         init {
             // 添加关机事件钩子
@@ -35,6 +43,6 @@ abstract class ClosingOnShutdown : Closeable {
     }
 
     init {
-        closings.add(this)
+        addClosing(this)
     }
 }
