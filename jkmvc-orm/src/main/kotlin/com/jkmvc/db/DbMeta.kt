@@ -237,6 +237,10 @@ internal class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
         if (value is Number)
             return value.toString();
 
+        // enum
+        if(value is Enum<*>)
+            return value.ordinal.toString()
+
         // string
         if (value is String)
             return "'$value'" // oracle字符串必须是''包含

@@ -611,6 +611,9 @@ class MyTests{
 
     @Test
     fun testEnum(){
+        val t = NumType.valueOf("Byte")
+        println(t)
+        println(t is Enum<*>)
         for (v in NumType.values())
             println("$v => ${v.ordinal}")
     }

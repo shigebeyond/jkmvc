@@ -39,7 +39,13 @@ public fun PreparedStatement.setParameters(params: List<Any?>, start:Int = 0, le
 
     // 设置参数
     for (i in 0..(length - 1)) {
-        var value = params[start + i] /* 实际参数从start开始 */
+        // 实际参数从start开始
+        var value = params[start + i]
+
+        // 枚举值: 转int
+        if(value is Enum<*>)
+            value = value.ordinal
+
         /**
          * fix bug: oracle执行sql报错： 无效的列类型
          * 原因：oracle的 DATE 类型字段，不能接受 java.util.Date 的值，只能接受 java.sql.Date 的值
@@ -48,6 +54,7 @@ public fun PreparedStatement.setParameters(params: List<Any?>, start:Int = 0, le
          */
         if(value is java.util.Date && value !is java.sql.Date && value !is java.sql.Timestamp && value !is java.sql.Time)
             value =  java.sql.Timestamp(value.time)
+
         setObject(1 + i /* sql参数从1开始 */, value)
     }
     return this
