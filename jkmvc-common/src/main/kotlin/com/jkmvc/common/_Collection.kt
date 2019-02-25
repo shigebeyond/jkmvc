@@ -279,7 +279,7 @@ public fun <E> ConcurrentLinkedQueue<E>.drainTo(c: MutableCollection<E>, maxElem
     if(n > maxElements)
         n = maxElements
     for(i in 0 until n){
-        val item = this.peek()
+        val item = this.poll()
         c.add(item)
     }
     return n
