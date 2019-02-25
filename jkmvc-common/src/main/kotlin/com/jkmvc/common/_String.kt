@@ -1,6 +1,8 @@
 package com.jkmvc.common
 
 import org.slf4j.LoggerFactory
+import java.io.PrintWriter
+import java.io.StringWriter
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -355,4 +357,22 @@ public inline fun Any.castTo(clazz: KClass<*>): Any{
  */
 public inline fun Any.castTo(type: KType): Any{
     return this.castTo(type.classifier as KClass<*>)
+}
+
+/**
+ * 获得异常堆栈
+ * @return
+ */
+public fun Exception.getStackTrace(): String {
+    try {
+        val sw = StringWriter()
+        PrintWriter(sw).use {
+            this.printStackTrace(it)
+        }
+        return sw.toString()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        return this.message ?: ""
+    }
+
 }
