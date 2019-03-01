@@ -29,9 +29,8 @@ class CounterRateLimiter(public val maxQps: Int /* 每秒最大请求数 */,
     protected var lastInterval: Long = -1L
 
     init {
-        if (maxQps <= 0) {
+        if (maxQps <= 0)
             throw IllegalArgumentException("maxQps must be positive!")
-        }
     }
 
     /**

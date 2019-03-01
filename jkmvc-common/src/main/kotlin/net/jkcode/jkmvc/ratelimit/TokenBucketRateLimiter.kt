@@ -29,9 +29,8 @@ class TokenBucketRateLimiter(public val bucketSize: Int /* 令牌桶大小 */,
     protected var lastInterval: Long = -1L
 
     init {
-        if (bucketSize <= 0) {
+        if (bucketSize <= 0)
             throw IllegalArgumentException("bucketSize must be positive!")
-        }
     }
 
     /**
@@ -56,6 +55,5 @@ class TokenBucketRateLimiter(public val bucketSize: Int /* 令牌桶大小 */,
         currentToken.compareAndSet(lastToken, bucketSize) // 注满令牌, 只有第一个成功
         return currentToken.getAndDecrement() > 0 // 继续扣令牌
     }
-
-
+    
 }

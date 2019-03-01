@@ -83,6 +83,8 @@ class SnowflakeIdWorker : IIdWorker {
 
             //溢出: 阻塞到下一个毫秒
             timestamp = blockUntilNextMillis(lastTimestamp)
+        }else{
+            this.lastTimestamp = timestamp
         }
 
         // 2 不同毫秒
@@ -90,9 +92,6 @@ class SnowflakeIdWorker : IIdWorker {
         val lastSequeue = sequence.get()
         if(!sequence.compareAndSet(lastSequeue, 0))
             sequence.incrementAndGet()
-
-        //记录时间截
-        this.lastTimestamp = timestamp
 
         // 返回新id
         return newId(timestamp)
