@@ -1,3 +1,0 @@
-# 缓存实现
-counter: net.jkcode.jkmvc.ratelimit.CounterRateLimiter # 计数器限流算法
-tokenBucket: net.jkcode.jkmvc.ratelimit.TokenBucketRateLimiter # 令牌桶限流算法

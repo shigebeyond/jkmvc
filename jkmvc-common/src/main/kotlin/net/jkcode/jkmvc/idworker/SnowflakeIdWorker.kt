@@ -60,6 +60,7 @@ class SnowflakeIdWorker : IIdWorker {
     /**
      * 上次生成ID的时间截
      */
+    @Volatile
     protected var lastTimestamp: Long = -1L
 
     /**
@@ -68,6 +69,7 @@ class SnowflakeIdWorker : IIdWorker {
      */
     public override fun nextId(): Long {
         var timestamp = time()
+        val lastTimestamp = this.lastTimestamp
 
         //如果当前时间小于上一次ID生成的时间戳，说明系统时钟回退过这个时候应当抛出异常
         if (timestamp < lastTimestamp)
@@ -90,7 +92,7 @@ class SnowflakeIdWorker : IIdWorker {
             sequence.incrementAndGet()
 
         //记录时间截
-        lastTimestamp = timestamp
+        this.lastTimestamp = timestamp
 
         // 返回新id
         return newId(timestamp)

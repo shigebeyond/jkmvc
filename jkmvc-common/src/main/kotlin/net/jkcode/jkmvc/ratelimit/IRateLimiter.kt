@@ -10,15 +10,7 @@ import net.jkcode.jkmvc.singleton.NamedConfiguredSingletons
  * @author shijianhang<772910474@qq.com>
  * @date 2019-03-01 9:56 AM
  */
-interface RateLimiter {
-
-    // 可配置的单例
-    companion object: NamedConfiguredSingletons<ICache>() {
-        /**
-         * 单例类的配置，内容是哈希 <单例名 to 单例类>
-         */
-        public override val instsConfig: IConfig = Config.instance("rate-limiter", "yaml")
-    }
+interface IRateLimiter {
 
     /**
      * 获得一次访问许可

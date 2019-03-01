@@ -8,17 +8,14 @@ import java.util.concurrent.atomic.AtomicInteger
  * @author shijianhang<772910474@qq.com>
  * @date 2019-03-01 10:16 AM
  */
-class CounterRateLimiter(public val maxQps: Int) : RateLimiter {
+class CounterRateLimiter(public val maxQps: Int /* 每秒最大请求数 */,
+                         public val intervalMillis: Int = 200 /* 重置的时间窗口时长, 单位毫秒 */
+) : IRateLimiter {
 
     /**
-     * 周期时长
+     * 每个时间窗口的最大请求数
      */
-    protected val periodMillis = 200
-
-    /**
-     * 每个周期的最大请求数
-     */
-    protected val maxReqPerInterval: Int = maxQps / (1000 / periodMillis)
+    protected val maxReqPerInterval: Int = maxQps / (1000 / intervalMillis)
 
     /**
      * 当前请求数
@@ -26,9 +23,10 @@ class CounterRateLimiter(public val maxQps: Int) : RateLimiter {
     protected val count = AtomicInteger(0)
 
     /**
-     * 上个周期
+     * 上个时间窗口
      */
-    protected var lastPeriod: Long = -1L
+    @Volatile
+    protected var lastInterval: Long = -1L
 
     init {
         if (maxQps <= 0) {
@@ -41,20 +39,20 @@ class CounterRateLimiter(public val maxQps: Int) : RateLimiter {
      * @return
      */
     public override fun acquire(): Boolean {
-
-        var period = time() / periodMillis
+        var interval = time() / intervalMillis
+        val lastInterval = this.lastInterval
 
         //如果当前时间小于上一次ID生成的时间戳，说明系统时钟回退过这个时候应当抛出异常
-        if (period < lastPeriod)
-            throw RuntimeException(String.format("Clock moved backwards.  Refusing to generate id for %d milliseconds", lastPeriod - period))
+        if (interval < lastInterval)
+            throw RuntimeException(String.format("Clock moved backwards.  Refusing to generate id for %d milliseconds", lastInterval - interval))
 
-        // 1 同一周期
-        if (lastPeriod == period)
+        // 1 同一时间窗口
+        if (lastInterval == interval)
             return count.getAndIncrement() <= maxReqPerInterval // 计数+1
 
-        // 2 不同周期
+        // 2 不同时间窗口
         val lastCount = count.get()
-        lastPeriod = period
+        this.lastInterval = interval
         count.compareAndSet(lastCount, 0) // 计数清零, 只有第一个成功
         return count.getAndIncrement() <= maxReqPerInterval // 计数+1
     }
