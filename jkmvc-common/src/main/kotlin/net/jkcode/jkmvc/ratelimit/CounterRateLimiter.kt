@@ -45,15 +45,18 @@ class CounterRateLimiter(public val maxQps: Int /* 每秒最大请求数 */,
         if (interval < lastInterval)
             throw RuntimeException(String.format("Clock moved backwards.  Refusing to generate id for %d milliseconds", lastInterval - interval))
 
+        //println("get " + count.get())
         // 1 同一时间窗口
         if (lastInterval == interval)
-            return count.getAndIncrement() <= maxReqPerInterval // 计数+1
+            return count.getAndIncrement() < maxReqPerInterval // 计数+1
 
         // 2 不同时间窗口
         val lastCount = count.get()
-        this.lastInterval = interval
-        count.compareAndSet(lastCount, 0) // 计数清零, 只有第一个成功
-        return count.getAndIncrement() <= maxReqPerInterval // 计数+1
+        if(count.compareAndSet(lastCount, 0)) { // 计数清零, 只有第一个成功
+            //println("set 0")
+            this.lastInterval = interval
+        }
+        return count.getAndIncrement() < maxReqPerInterval // 计数+1
     }
 
 }

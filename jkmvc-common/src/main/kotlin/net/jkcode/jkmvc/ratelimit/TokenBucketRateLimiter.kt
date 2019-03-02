@@ -20,7 +20,7 @@ class TokenBucketRateLimiter(public val bucketSize: Int /* 令牌桶大小 */,
     /**
      * 当前令牌数
      */
-    protected val currentToken: AtomicInteger = AtomicInteger(bucketSize)
+    protected val currentToken: AtomicInteger = AtomicInteger(tokenPerInterval)
 
     /**
      * 上个时间窗口
@@ -45,15 +45,15 @@ class TokenBucketRateLimiter(public val bucketSize: Int /* 令牌桶大小 */,
         if (interval < lastInterval)
             throw RuntimeException(String.format("Clock moved backwards.  Refusing to generate id for %d milliseconds", lastInterval - interval))
 
-        val lastToken = currentToken.get()
         // 1 同一时间窗口
         if (lastInterval == interval)
-            return lastToken > 0 && currentToken.getAndDecrement() > 0 // 直接扣令牌
+            return currentToken.get() > 0 && currentToken.getAndDecrement() > 0 // 直接扣令牌
 
         // 2 不同时间窗口
-        this.lastInterval = interval
-        currentToken.compareAndSet(lastToken, bucketSize) // 注满令牌, 只有第一个成功
-        return currentToken.getAndDecrement() > 0 // 继续扣令牌
+        val lastToken = currentToken.get()
+        if(currentToken.compareAndSet(lastToken, tokenPerInterval)) // 注满令牌, 只有第一个成功
+            this.lastInterval = interval
+        return currentToken.get() > 0 && currentToken.getAndDecrement() > 0 // 继续扣令牌
     }
-    
+
 }
