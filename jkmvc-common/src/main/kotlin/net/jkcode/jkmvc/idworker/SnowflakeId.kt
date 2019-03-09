@@ -4,6 +4,8 @@ import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.common.time
 
 /**
+ * Snowflake算法的id
+ *    通过 `val timestamp = (id shr 22) + startTimestamp` 可大致知道请求时间
  *
  * @author shijianhang<772910474@qq.com>
  * @date 2019-01-29 3:22 PM

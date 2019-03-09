@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Twitter的Snowflake的id算法
- * 参考 https://blog.csdn.net/hnhygkx/article/details/78084909
+ * 参考+改进 https://blog.csdn.net/hnhygkx/article/details/78084909
  *
  * id构成元素如下(每部分用-分开):
  *   0 - 0000000000 0000000000 0000000000 0000000000 0 - 00000 - 00000 - 000000000000
