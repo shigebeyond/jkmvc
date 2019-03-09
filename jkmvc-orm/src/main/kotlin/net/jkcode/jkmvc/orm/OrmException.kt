@@ -1,5 +1,7 @@
 package net.jkcode.jkmvc.orm
 
+import net.jkcode.jkmvc.common.JkException
+
 /**
  * orm操作异常
  *
@@ -7,7 +9,7 @@ package net.jkcode.jkmvc.orm
  * @date 2016-10-21 下午5:16:59  
  *
  */
-class OrmException : RuntimeException {
+class OrmException : JkException {
     public constructor(message: String) : super(message) {
     }
 

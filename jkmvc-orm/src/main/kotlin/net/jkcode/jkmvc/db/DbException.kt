@@ -1,9 +1,11 @@
 package net.jkcode.jkmvc.db
 
+import net.jkcode.jkmvc.common.JkException
+
 /**
  * db异常
  */
-class DbException : RuntimeException {
+class DbException : JkException {
     public constructor(message: String) : super(message) {
     }
 

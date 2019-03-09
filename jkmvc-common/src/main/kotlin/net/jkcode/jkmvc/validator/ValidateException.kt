@@ -1,9 +1,11 @@
 package net.jkcode.jkmvc.validator
 
+import net.jkcode.jkmvc.common.JkException
+
 /**
  * 校验异常
  */
-class ValidateException : RuntimeException {
+class ValidateException : JkException {
     public constructor(message: String) : super(message) {
     }
 

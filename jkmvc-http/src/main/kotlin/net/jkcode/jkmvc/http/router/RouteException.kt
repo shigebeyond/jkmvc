@@ -1,9 +1,11 @@
 package net.jkcode.jkmvc.http.router
 
+import net.jkcode.jkmvc.common.JkException
+
 /**
  * 路由异常
  */
-class RouteException : RuntimeException {
+class RouteException : JkException {
     public constructor(message: String) : super(message) {
     }
 
