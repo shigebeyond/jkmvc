@@ -326,9 +326,10 @@ public inline fun <reified T:Any>  Map<*, *>.getAndConvert(key:String, defaultVa
     if(value is T)
         return value
     // 要转换
-    if(value !is String)
-        throw ClassCastException("Fail to convert [$value] to type [${T::class}]")
-    return (value as String).to(T::class)
+    if(value is String)
+        return value.to(T::class)
+
+    throw ClassCastException("Fail to convert [$value] to type [${T::class}]")
 }
 
 /**
