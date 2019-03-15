@@ -112,7 +112,10 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * 数据的工厂
      */
     public override val dataFactory: FixedKeyMapFactory by lazy{
-        FixedKeyMapFactory(*props.toTypedArray())
+        val keys = ArrayList<String>(props.size + relations.size)
+        keys.addAll(props) // 对象属性
+        keys.addAll(relations.keys) // 关联属性
+        FixedKeyMapFactory(*keys.toTypedArray())
     }
 
     /**
