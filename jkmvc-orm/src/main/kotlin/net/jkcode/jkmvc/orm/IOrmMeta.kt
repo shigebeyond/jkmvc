@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.orm
 
+import net.jkcode.jkmvc.common.FixedKeyMapFactory
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.validator.IValidator
 import net.jkcode.jkmvc.validator.RuleValidator
@@ -76,6 +77,11 @@ interface IOrmMeta {
      * 对象属性
      */
     val props: List<String>
+
+    /**
+     * 数据的工厂
+     */
+    val dataFactory: FixedKeyMapFactory
 
     /**
      * 是否有某个关联关系

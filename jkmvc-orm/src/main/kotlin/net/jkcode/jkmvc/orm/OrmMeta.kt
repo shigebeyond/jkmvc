@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.orm
 
+import net.jkcode.jkmvc.common.FixedKeyMapFactory
 import net.jkcode.jkmvc.common.getConstructorOrNull
 import net.jkcode.jkmvc.common.getProperty
 import net.jkcode.jkmvc.common.to
@@ -105,6 +106,13 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
         columns.map {
             column2Prop(it)
         }
+    }
+
+    /**
+     * 数据的工厂
+     */
+    public override val dataFactory: FixedKeyMapFactory by lazy{
+        FixedKeyMapFactory(*props.toTypedArray())
     }
 
     /**
