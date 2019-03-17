@@ -1,12 +1,15 @@
 
 dependencies {
     // kotlin
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+    compile 'org.jetbrains.kotlin:kotlin-reflect'
     //compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
 
     // collection
     compile 'commons-collections:commons-collections:3.2.1'
+
+    // guava
+    compile 'com.google.guava:guava:27.0.1-jre'
 
     // xml
     compile 'dom4j:dom4j:1.6.1'

@@ -1,9 +1,6 @@
 //gradle脚本自身需要使用的资源
 buildscript {
     repositories {
-		maven {
-            url 'http://oss.jfrog.org/artifactory/oss-snapshot-local'
-        }
         maven {
             url 'http://maven.aliyun.com/nexus/content/repositories/snapshots'
         }
@@ -16,10 +13,16 @@ buildscript {
         maven {
             url 'https://dl.bintray.com/kotlin/kotlin-eap'
         }
+        maven {
+            url 'http://oss.jfrog.org/artifactory/oss-snapshot-local'
+        }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlin_version"
+
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokka_version}"
+
         classpath 'org.gretty:gretty:2.3.0'
     }
 }
@@ -49,7 +52,19 @@ subprojects{
         outputDirectory = "$buildDir/dokkaJavadoc"
     }
 
-    sourceCompatibility = 1.5
+    sourceCompatibility = 1.8
+    compileKotlin {
+        kotlinOptions {
+            freeCompilerArgs = ["-Xjvm-default=enable"]
+            jvmTarget = jvm_version
+        }
+    }
+    compileTestKotlin {
+        kotlinOptions {
+            freeCompilerArgs = ["-Xjvm-default=enable"]
+            jvmTarget = jvm_version
+        }
+    }
 
     repositories {
         maven {
