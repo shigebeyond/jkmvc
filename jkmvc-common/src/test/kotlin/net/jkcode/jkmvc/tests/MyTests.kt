@@ -86,6 +86,15 @@ class MyTests{
     }
 
     @Test
+    fun testNumber(){
+        //val io:Integer = 1
+        //val i:Int = io
+        val map = mapOf("a" to 111)
+        val i:Int = map["a"]!!
+        val io:Integer = map["a"]!! as Integer
+    }
+
+    @Test
     fun testBig(){
         println(-1%10)
         // var a= BigDecimal("100")
@@ -113,6 +122,15 @@ class MyTests{
         for((k, v) in map){
             println("$k = $v")
         }
+    }
+
+    @Test
+    fun testFixedKeyMap(){
+        val mf = FixedKeyMapFactory("name", "id")
+        val map = mf.createMap()
+        map["name"] = "shi"
+        map["id"] = 1
+        println(map)
     }
 
     @Test
