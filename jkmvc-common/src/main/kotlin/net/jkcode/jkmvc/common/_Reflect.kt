@@ -3,6 +3,8 @@ package net.jkcode.jkmvc.common
 import org.nustaq.serialization.util.FSTUtil
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl
 import java.io.File
+import java.lang.invoke.MethodHandle
+import java.lang.invoke.MethodHandles
 import java.lang.reflect.Constructor
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
@@ -250,4 +252,30 @@ public inline fun <T> Class<T>.getConstructorOrNull(vararg parameterTypes: Class
     }catch (e: NoSuchMethodException){
         return null
     }
+}
+
+/**
+ * loop缓存: <类 to MethodHandles.Lookup>
+ */
+private val class2lookups: ConcurrentHashMap<Class<*>, MethodHandles.Lookup> = ConcurrentHashMap();
+
+/**
+ * 获得类对应的MethodHandles.Lookup对象
+ * @return
+ */
+public fun Class<*>.getLookup(): MethodHandles.Lookup {
+    return class2lookups.getOrPut(this) {
+        // 反射调用 MethodHandles.Lookup 的私有构造方法
+        val constructor = MethodHandles.Lookup::class.java.getDeclaredConstructor(this.javaClass)
+        constructor.isAccessible = true
+        constructor.newInstance(this)
+    }
+}
+
+/**
+ * 获得方法对应的MethodHandle对象
+ * @return
+ */
+public fun Method.getMethodHandle(): MethodHandle {
+    return declaringClass.getLookup().unreflectSpecial(this, declaringClass)
 }
