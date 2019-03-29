@@ -1,7 +1,7 @@
 package net.jkcode.jkmvc.idworker
 
 import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.time
+import net.jkcode.jkmvc.common.currMillis
 import java.util.concurrent.atomic.AtomicLong
 
 
@@ -68,7 +68,7 @@ class SnowflakeIdWorker : IIdWorker {
      * @return
      */
     public override fun nextId(): Long {
-        var timestamp = time()
+        var timestamp = currMillis()
         val lastTimestamp = this.lastTimestamp
 
         //如果当前时间小于上一次ID生成的时间戳，说明系统时钟回退过这个时候应当抛出异常
@@ -112,9 +112,9 @@ class SnowflakeIdWorker : IIdWorker {
      * @return 当前时间戳
      */
     protected fun blockUntilNextMillis(lastTimestamp: Long): Long {
-        var timestamp = time()
+        var timestamp = currMillis()
         while (timestamp <= lastTimestamp)
-            timestamp = time()
+            timestamp = currMillis()
         return timestamp
     }
 }

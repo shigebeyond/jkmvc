@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap
  * 获得以毫秒为单位的当前时间
  * @return
  */
-public inline fun time(): Long {
+public inline fun currMillis(): Long {
     return System.currentTimeMillis()
 }
 

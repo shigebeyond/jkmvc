@@ -18,8 +18,6 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import java.util.Calendar
 import java.util.GregorianCalendar
-import kotlin.reflect.full.declaredFunctions
-import kotlin.reflect.full.functions
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.jvm.javaMethod
 
@@ -186,18 +184,18 @@ class MyTests{
 
     @Test
     fun testPerform(){
-        val start = time()
+        val start = currMillis()
         val n = 1000000
         val map = HashMap<String, Long>(n, 0.75f)
         val sb = StringBuilder(100)
 
 
         for (i in 0..n - 1) {
-            val time = time()
+            val time = currMillis()
             map.put(sb.append(i).append("_").append(time).toString(), time)
             sb.delete(0, sb.length)
         }
-        println((time() - start) / 1000.0)
+        println((currMillis() - start) / 1000.0)
         Thread.sleep(150000)
     }
 
@@ -441,7 +439,7 @@ class MyTests{
 
     @Test
     fun testSnowflakeIdParse(){
-        val id = SnowflakeId(time(), 1, 2, 3)
+        val id = SnowflakeId(currMillis(), 1, 2, 3)
         println("id: $id")
         //val l = id.toLong()
         for(i in 0..10) {
@@ -798,7 +796,7 @@ class MyTests{
         // val o:LinkedList<String> = LinkedList()
         // println(field.get(o))
 
-        println(time() / 100)
+        println(currMillis() / 100)
 
     }
 

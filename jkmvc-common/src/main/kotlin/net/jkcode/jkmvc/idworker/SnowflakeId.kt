@@ -1,7 +1,6 @@
 package net.jkcode.jkmvc.idworker
 
 import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.time
 
 /**
  * Snowflake算法的id
