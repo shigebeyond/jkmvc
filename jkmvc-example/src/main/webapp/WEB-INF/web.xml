@@ -14,7 +14,8 @@
 	<!--静态请求-->
 	<servlet>
 		<servlet-name>default</servlet-name>
-		<servlet-class>org.mortbay.jetty.servlet.DefaultServlet</servlet-class>
+		<!-- <servlet-class>org.mortbay.jetty.servlet.DefaultServlet</servlet-class> -->
+		<servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
 		<init-param>
 			<param-name>aliases</param-name>
 			<param-value>false</param-value>

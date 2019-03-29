@@ -42,7 +42,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
         /**
          * 线程安全的db缓存
          *    每个线程有多个db, 一个名称各一个db对象
-         *    每个请求都创建新的db对象
+         *    每个请求都创建新的db对象, 请求结束要调用 close() 来删除db对象
          */
         protected val dbs:ThreadLocal<HashMap<String, Db>> = ThreadLocal.withInitial {
             HashMap<String, Db>();
@@ -51,7 +51,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
         /**
          * 获得db(线程安全)
          *    获得当前线程下的指定名字的db, 没有则创建新db
-         *    每个请求都创建新的db对象
+         *    每个请求都创建新的db对象, 请求结束要调用 close() 来删除db对象
          * @param name
          * @return
          */
@@ -376,9 +376,9 @@ class Db protected constructor(public override val name:String /* 标识 */,
      * 关闭
      */
     public override fun close():Unit{
-        // 删除当前线程的引用
+        // 删除当前线程的db对象
         if(dbs.get().remove(name) == null)
-            throw DbException("当前线程并没有[${name}]连接，无法关闭")
+            return // 当前线程并没有db对象
 
         // 关闭连接
         if(connUsed and 1 > 0)

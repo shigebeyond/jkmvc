@@ -43,7 +43,7 @@ object RequestHandler : IRequestHandler {
      */
     public override fun handle(request: HttpServletRequest, response: HttpServletResponse):Boolean{
         //　构建请求对象
-        val req: HttpRequest = HttpRequest(request);
+        val req = HttpRequest(request);
         if(debug){
             // 路由
             httpLogger.debug("请求uri: ${req.method} ${req.routeUri}")
@@ -58,7 +58,7 @@ object RequestHandler : IRequestHandler {
             return false;
 
         // 构建响应对象
-        val res: HttpResponse = HttpResponse(response);
+        val res = HttpResponse(response);
 
         try{
             // 解析路由
@@ -105,7 +105,7 @@ object RequestHandler : IRequestHandler {
         }
 
         // 创建controller
-        val controller: Controller = clazz.javaClass.newInstance() as Controller;
+        val controller: Controller = clazz.clazz.java.newInstance() as Controller;
 
         // 允许跨域
         if(config.getBoolean("allowCrossDomain", false)!!){
