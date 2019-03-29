@@ -86,7 +86,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param dynamicParamses 动态参数
      * @return
      */
-    public override fun buildParams(dynamicParams:List<Any?>):List<Any?>{
+    public override fun buildParams(dynamicParams: List<Any?>):List<Any?>{
         if(dynamicParams.isEmpty())
             return staticParams;
 

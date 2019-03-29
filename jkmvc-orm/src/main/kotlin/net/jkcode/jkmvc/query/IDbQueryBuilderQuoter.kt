@@ -23,11 +23,15 @@ interface IDbQueryBuilderQuoter {
         val itr = value?.iteratorArrayOrCollection()
         if(itr != null){
             return itr.joinToString(", ", "(", ")") {
-                quote(db, it)
+                quoteSingleValue(db, it)
             }
         }
 
-        // 2 单值
+        // 2 两值, 一般是 where between 的值
+        if (value is Pair<*, *>)
+            return quoteSingleValue(db, value.first) + " AND " + quoteSingleValue(db, value.second)
+
+        // 3 单值
         return quoteSingleValue(db, value)
     }
 
