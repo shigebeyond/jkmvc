@@ -1,6 +1,8 @@
+jkmvc.iml
 .idea/
 build/
 .gradle
-gradle.log
+*.log
 out/
 upload/
+jkmvc-example/jetty/
