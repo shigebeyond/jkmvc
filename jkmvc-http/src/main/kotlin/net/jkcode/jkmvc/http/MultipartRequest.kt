@@ -4,6 +4,7 @@ import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.common.convertBytes
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy
 import com.oreilly.servlet.multipart.FileRenamePolicy
+import net.jkcode.jkmvc.common.prepareDirectory
 import java.io.File
 import java.util.*
 import javax.servlet.http.HttpServletRequest
@@ -78,10 +79,8 @@ abstract class MultipartRequest(protected val req:HttpServletRequest /* 请求�
         var path:String = uploadConfig.getString("uploadDirectory") + File.separatorChar
         if(uploadSubdir != "")
             path = path + uploadSubdir + File.separatorChar
-        val dir = File(path);
         // 如果目录不存在，则创建
-        if(!dir.exists())
-            dir.mkdirs();
+        path.prepareDirectory()
         return path
     }
 

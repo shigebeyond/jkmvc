@@ -47,7 +47,7 @@ object ControllerClassLoader : IControllerClassLoader, ClassScanner() {
         // 过滤Controller子类
         if(Controller::class.java.isSuperClass(clazz) /* 继承Controller */ && !Modifier.isAbstract(modifiers) /* 非抽象类 */ && !Modifier.isInterface(modifiers) /* 非接口 */){
             // 收集controller的构造函数+所有action方法
-            httpLogger.debug("收集controller: " + clazz.name)
+            httpLogger.debug("收集controller: {}", clazz.name)
             controllerClasses[getControllerName(clazz.name)] = ControllerClass(clazz.kotlin)
         }
     }

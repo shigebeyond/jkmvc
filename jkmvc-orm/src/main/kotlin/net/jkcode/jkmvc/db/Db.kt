@@ -265,7 +265,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
         try{
             return masterConn.execute(sql, params, generatedColumn);
         }catch (e:Exception){
-            dbLogger.error("出错[${e.message}] sql: " + previewSql(sql, params))
+            dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
             throw  e
         }
     }
@@ -282,7 +282,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
         try{
             return masterConn.batchExecute(sql, paramses, paramSize)
         }catch (e:Exception){
-            dbLogger.error("出错[${e.message}], sql=$sql, params=$paramses ")
+            dbLogger.error("出错[{}], sql={}, params={}", e.message, sql, paramses)
             throw  e
         }
     }
@@ -299,7 +299,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
         try{
             return conn.queryResult(sql, params, action)
         }catch (e:Exception){
-            dbLogger.error("出错[${e.message}] sql: " + previewSql(sql, params))
+            dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
             throw  e
         }
     }
@@ -316,7 +316,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
         try{
             return conn.queryRow(sql, params, transform);
         }catch (e:Exception){
-            dbLogger.error("出错[${e.message}] sql: " + previewSql(sql, params))
+            dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
             throw  e
         }
     }
@@ -333,7 +333,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
         try{
             return conn.queryRows(sql, params, transform);
         }catch (e:Exception){
-            dbLogger.error("出错[${e.message}] sql: " + previewSql(sql, params))
+            dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
             throw  e
         }
     }
@@ -350,7 +350,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
         try{
             return conn.queryColumn(sql, params);
         }catch (e:Exception){
-            dbLogger.error("出错[${e.message}] sql: " + previewSql(sql, params))
+            dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
             throw  e
         }
     }
@@ -367,7 +367,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
         try{
             return conn.queryCell(sql, params, clazz);
         }catch (e:Exception){
-            dbLogger.error("出错[${e.message}] sql: " + previewSql(sql, params))
+            dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
             throw  e
         }
     }

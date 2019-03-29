@@ -42,7 +42,7 @@ abstract class Auth: IAuth, ClosingOnRequestEnd() {
         }
 
         init{
-            dbLogger.error("会话相关的用户模型为：" + sessionConfig.getString("userModel"))
+            dbLogger.error("会话相关的用户模型为：{}", sessionConfig.getString("userModel"))
         }
 
         /************************ NamedConfiguredSingletons 的实现 *************************/
