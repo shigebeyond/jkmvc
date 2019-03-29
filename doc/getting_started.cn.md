@@ -167,9 +167,9 @@ controllerPackages:
 ### 3.1 启动web server
 
 ```
-gradle :jkmvc-example:appRun -x test
+gradle appRun -x test
 ```
 
 ### 3.2 访问网页
 
-在浏览器中访问　http://localhost:8081/
+在浏览器中访问　http://localhost:8081/myproj
