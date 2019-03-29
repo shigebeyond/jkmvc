@@ -51,7 +51,7 @@ class HttpRequest(req:HttpServletRequest):MultipartRequest(req)
 	 *   1 去掉头部的contextPath
 	 *   2 去掉末尾的/
 	 */
-	public val routeUri:String = requestURI.trim(contextPath + '/', "/")
+	public val routeUri:String = requestURI.trim(if(contextPath == null) "/" else "$contextPath/", "/")
 
 	/**
 	 * 当前匹配的路由规则
