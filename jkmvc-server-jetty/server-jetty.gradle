@@ -1,0 +1,13 @@
+dependencies{
+    // other project
+    compile project(':jkmvc-session')
+
+    // jetty
+    compile "org.eclipse.jetty:jetty-server:${jetty_version}"
+    compile "org.eclipse.jetty:jetty-servlet:${jetty_version}"
+    compile "org.eclipse.jetty:jetty-webapp:${jetty_version}"
+    compile "org.eclipse.jetty:jetty-servlets:${jetty_version}"
+    compile "org.eclipse.jetty:jetty-jsp:${jetty_jsp_version}"
+}
+
+
