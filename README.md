@@ -79,8 +79,6 @@ visit http://localhost:8081/jkmvc-example/
 
 ## 1 Render View in Controller
 
-vim
-
 ```
 package net.jkcode.jkmvc.example.controller
 
@@ -152,7 +150,7 @@ you can use operator `[]` to visit orm object's property, and also use property 
 
 2.2 method
 
-`query_builder()` return a query builder to query data from table
+`queryBuilder()` return a query builder to query data from table
 
 `create()` create data
 

@@ -19,4 +19,5 @@
 优化id生成, 完善orm校验, 支持orm的持久化事件(如`beforeCreate/afterCreate`等), 优化redis client类性能(使用`ShardedJedisPool`)
 
 # 1.7
-调整包名, 将包`com.jkmvc`重命名为`net.jkcode.jkmvc`
+1. 调整包名, 将包`com.jkmvc`重命名为`net.jkcode.jkmvc`
+2. 添加限流算法

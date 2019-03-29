@@ -1,12 +1,12 @@
 //gradle脚本自身需要使用的资源
 buildscript {
     repositories {
+        // china area
         maven {
             url 'http://maven.aliyun.com/nexus/content/repositories/snapshots'
         }
         jcenter()
         mavenCentral()
-        
         maven {
             url "http://dl.bintray.com/kotlin/kotlin"
         }
@@ -23,7 +23,7 @@ buildscript {
 
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokka_version}"
 
-        classpath 'org.gretty:gretty:2.3.0'
+        classpath "org.akhikhl.gretty:gretty:${gretty_version}"
     }
 }
 
@@ -67,6 +67,7 @@ subprojects{
     }
 
     repositories {
+        // china area
         maven {
             url 'http://maven.aliyun.com/nexus/content/repositories/snapshots'
         }

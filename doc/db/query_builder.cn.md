@@ -49,7 +49,7 @@ query.from("user").where("username", "=", "john").orWhere("username", "=", "jane
 query.from("user").where("logins", "<=", 1);
 query.from("user").where("logins", ">", 50);
 query.from("user").where("username", "IN", arrayOf("john","mark","matt"));
-query.from("user").where("joindate", "BETWEEN", arrayOf(then, now));
+query.from("user").where("joindate", "BETWEEN", Pair(then, now));
 ```
 
 ### 2.3 `select` 字段名

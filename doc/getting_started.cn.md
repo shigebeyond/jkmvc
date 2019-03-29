@@ -26,16 +26,24 @@ buildscript {
         maven {
             url "http://dl.bintray.com/kotlin/kotlin"
         }
+        maven {
+            url 'http://oss.jfrog.org/artifactory/oss-snapshot-local'
+        }
     }
 
     // 依赖
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlin_version"
+
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokka_version}"
+
+        classpath "org.akhikhl.gretty:gretty:${gretty_version}"
     }
 }
 
 // 工程标识
-group 'com.jksoa'
+group 'net.jkcode.jkmvc'
 version '1.0-SNAPSHOT'
 name 'myproj'
 
@@ -43,7 +51,7 @@ name 'myproj'
 apply plugin: 'java'
 apply plugin: 'kotlin'
 apply plugin: 'maven'
-apply plugin: 'jetty'
+apply plugin: 'org.akhikhl.gretty'
 
 // 工程需要使用的资源
 // 仓库
@@ -83,12 +91,11 @@ sourceSets {
 }
 
 // 启动jetty
-jettyRun{
-    webAppSourceDirectory file("$projectDir/src/main/webapp")
+gretty{
+    inplaceMode "hard" // 资源目录 src/main/webapp
     httpPort 8080
     contextPath project.name
-    scanIntervalSeconds 1 // jetty 热部署，当值为0时，不扫描新class，不热部署
-    reload "automatic"
+    scanInterval 1 // jetty 热部署，当值为0时，不扫描新class，不热部署
 }
 ```
 
@@ -160,9 +167,9 @@ controllerPackages:
 ### 3.1 启动web server
 
 ```
-gradle jettyRun
+gradle :jkmvc-example:appRun -x test
 ```
 
 ### 3.2 访问网页
 
-在浏览器中访问　http://localhost:8081/mypro/
+在浏览器中访问　http://localhost:8081/
