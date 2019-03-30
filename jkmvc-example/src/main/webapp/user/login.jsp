@@ -1,7 +1,7 @@
-<%@ page language="java" import="net.jkcode.jkmvc.http.HttpRequest,net.jkcode.jkmvc.example.model.UserModel,net.jkcode.jkmvc.session.Auth" pageEncoding="UTF-8"%>
+<%@ page language="java" import="java.util.*,net.jkcode.jkmvc.http.HttpRequest,net.jkcode.jkmvc.example.model.UserModel,net.jkcode.jkmvc.session.Auth" pageEncoding="UTF-8"%>
 <%
-    Request req = (Request) request;
-    UserModel user = (UserModel)Auth.INSTANCE.getUser();
+    HttpRequest req = (HttpRequest) request;
+    UserModel user = (UserModel)Auth.instance().getUser();
     String username = user == null ? "" : user.getUsername();
 %>
 <!DOCTYPE html>
