@@ -1,7 +1,8 @@
 package net.jkcode.jkmvc.example.model 
 
 import net.jkcode.jkmvc.orm.OrmMeta 
-import net.jkcode.jkmvc.orm.Orm 
+import net.jkcode.jkmvc.orm.Orm
+import net.jkcode.jkmvc.session.IAuthUserModel
 
 /**
  * 用户模型
@@ -11,7 +12,7 @@ import net.jkcode.jkmvc.orm.Orm
  * @author shijianhang<772910474@qq.com>
  * @date 2017-09-29 6:56 PM
  */
-class UserModel(id:Int? = null): Orm(id) {
+class UserModel(id:Int? = null): Orm(id), IAuthUserModel {
 	// 伴随对象就是元数据
  	companion object m: OrmMeta(UserModel::class, "用户模型", "user", "id"){}
 

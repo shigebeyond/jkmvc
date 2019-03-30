@@ -55,6 +55,7 @@ abstract class Auth: IAuth, ClosingOnRequestEnd() {
          * 根据单例名来获得单例
          * @return
          */
+        @JvmStatic
         public fun instance(): Auth{
             return instance(sessionConfig["authType"]!!)
         }
