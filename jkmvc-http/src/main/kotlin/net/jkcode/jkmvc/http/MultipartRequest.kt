@@ -7,6 +7,7 @@ import com.oreilly.servlet.multipart.FileRenamePolicy
 import net.jkcode.jkmvc.common.prepareDirectory
 import java.io.File
 import java.util.*
+import javax.servlet.ServletRequestWrapper
 import javax.servlet.http.HttpServletRequest
 
 /**
@@ -15,7 +16,7 @@ import javax.servlet.http.HttpServletRequest
  * @author shijianhang<772910474@qq.com>
  * @date 6/23/17 7:58 PM
  */
-abstract class MultipartRequest(protected val req:HttpServletRequest /* 请求对象 */): HttpServletRequest by req{
+abstract class MultipartRequest(req:HttpServletRequest /* 请求对象 */): ServletRequestWrapper(req), HttpServletRequest by req{
 
     companion object{
         /**
@@ -39,6 +40,12 @@ abstract class MultipartRequest(protected val req:HttpServletRequest /* 请求�
          */
         protected val uploadPolicy: FileRenamePolicy = DefaultFileRenamePolicy()
     }
+
+    /**
+     * 请求对象
+     */
+    protected val req: HttpServletRequest
+        get() = request as HttpServletRequest
 
     /**
      * 服务器的url
