@@ -2,6 +2,8 @@ package net.jkcode.jkmvc.http.view
 
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
+import net.jkcode.jkmvc.http.router.RouteException
+import java.io.FileNotFoundException
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -63,7 +65,12 @@ open class View(override val req: HttpRequest /* 请求对象 */,
 		req.setAttributes(data)
 
 		// 渲染jsp
-		req.getRequestDispatcher("/" + file + ".jsp").forward(req, res)
+		val jsp = "/" + file + ".jsp"
+		val reqDispatcher = req.getRequestDispatcher(jsp)
+		if(reqDispatcher == null)
+			throw FileNotFoundException("RequestDispatcher for resource [$jsp] is null")
+		// 在 org.akhikhl.gretty 运行环境中只能使用原始的请求与响应
+		reqDispatcher.forward(req.request, res.response)
 	}
 
 }

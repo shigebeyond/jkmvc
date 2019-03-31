@@ -2,10 +2,13 @@ package net.jkcode.jkmvc.http
 
 import net.jkcode.jkmvc.common.*
 import net.jkcode.jkmvc.http.router.Route
+import net.jkcode.jkmvc.http.router.RouteException
 import net.jkcode.jkmvc.http.router.Router
 import net.jkcode.jkmvc.validator.RuleValidator
 import org.apache.commons.collections.map.CompositeMap
 import java.util.*
+import javax.servlet.RequestDispatcher
+import javax.servlet.ServletContext
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 
@@ -16,9 +19,16 @@ import javax.servlet.http.HttpServletRequest
  * @date 2016-10-6 上午9:27:56
  *
  */
-class HttpRequest(req:HttpServletRequest):MultipartRequest(req)
+class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 {
 	companion object{
+
+		/**
+		 * 全局的ServletContext
+		 *   fix bug: jetty异步请求后 req.contextPath/req.servletContext 居然为null, 因此直接在 JkFilter.init() 时记录ServletContext(包含contextPath), 反正他是全局不变的
+		 */
+		public lateinit var globalServletContext: ServletContext
+
 		/**
 		 * 线程安全的请求对象缓存
 		 */
@@ -47,11 +57,30 @@ class HttpRequest(req:HttpServletRequest):MultipartRequest(req)
 	}
 
 	/**
+	 * 改写 contextPath
+	 *   fix bug: jetty异步请求后 req.contextPath 居然为null, 直接使用全局 contextPath
+	 */
+	public override fun getContextPath(): String{
+		return globalServletContext.contextPath
+	}
+
+	/**
+	 * 改写 getRequestDispatcher()
+	 *   fix bug: jetty异步请求后的 req.servletContext 是 null, 因此 req.getRequestDispatcher() 也是 null, 因为他内部调用 req.servletContext => 直接使用全局 servletContext
+	 */
+	public override fun getRequestDispatcher(path: String): RequestDispatcher{
+		return globalServletContext.getRequestDispatcher(path)
+	}
+
+	/**
 	 * 获得要解析的uri
 	 *   1 去掉头部的contextPath
 	 *   2 去掉末尾的/
 	 */
-	public val routeUri:String = requestURI.trim(if(contextPath == null) "/" else "$contextPath/", "/")
+	public val routeUri:String = if(contextPath == null)
+									throw RouteException("req.contextPath is null!!")
+								else
+									requestURI.trim(contextPath + '/', "/")
 
 	/**
 	 * 当前匹配的路由规则
