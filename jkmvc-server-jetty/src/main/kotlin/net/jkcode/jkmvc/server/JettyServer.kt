@@ -47,7 +47,7 @@ class JettyServer : Closeable{
         server.setHandler(createHandlers()) // 处理器
         server.setStopAtShutdown(true)
         server.start()
-        httpLogger.info("启动jetty, 监听端口 {}, 请访问 http://localhost:{}", config["port"], config["port"])
+        httpLogger.info("启动jetty, 监听端口 {}, 请访问 http://localhost:{}{}", config["port"], config["port"], config["contextPath"])
         server.join()
     }
 
@@ -77,8 +77,8 @@ class JettyServer : Closeable{
         val handlerCollection = HandlerCollection()
         handlerCollection.setHandlers(arrayOf(
                 createServletContextHandler(),
-                createLogHandler(),
-                GzipHandler()
+                createLogHandler()
+                //GzipHandler()
         ))
         return handlerCollection
     }
@@ -88,8 +88,7 @@ class JettyServer : Closeable{
      */
     protected fun createLogHandler(): RequestLogHandler {
         val logDir: String = config["logDir"]!!
-        // 准备好目录
-        logDir.prepareDirectory()
+        logDir.prepareDirectory() // 准备好目录
 
         val requestLog = NCSARequestLog()
         requestLog.setFilename("$logDir/jetty.log")
@@ -110,16 +109,21 @@ class JettyServer : Closeable{
      * 创建servlet上下文的处理器
      */
     protected fun createServletContextHandler(): WebAppContext {
-        // 准备好目录
-        val tempDir: String = config["tempDir"]!!
-        tempDir.prepareDirectory()
-        val webDir: String = config["webDir"]!!
-        //webDir.prepareDirectory()
-
         val context = WebAppContext()
         context.setContextPath(config["contextPath"])
+        val webDir: String = config["webDir"]!!
         context.setWar(webDir)
+        context.setDescriptor("$webDir/WEB-INF/web.xml");
+        context.setResourceBase(webDir);
+        context.setDisplayName("jetty");
+        context.setClassLoader(Thread.currentThread().getContextClassLoader());
+        context.setConfigurationDiscovered(true);
+        context.setParentLoaderPriority(true);
+
+        val tempDir: String = config["tempDir"]!!
+        tempDir.prepareDirectory() // 准备好目录
         context.setTempDirectory(File(tempDir))
+        
         return context
     }
 

@@ -52,7 +52,7 @@ object Router: IRouter
 	 */
 	public override fun addRoute(name:String, route: Route): Router {
 		routes[name] = route;
-		httpLogger.info("添加路由[$name]: $route")
+		httpLogger.info("添加路由[{}]: {}", name, route)
 		return this
 	}
 

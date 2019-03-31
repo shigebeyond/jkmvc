@@ -46,7 +46,7 @@ object RequestHandler : IRequestHandler {
         val req = HttpRequest(request);
         if(debug){
             // 路由
-            httpLogger.debug("请求uri: ${req.method} ${req.routeUri}")
+            httpLogger.debug("请求uri: {} {}, contextPath: {}", req.method, req.routeUri, req.contextPath)
 
             // curl命令
             if(!req.isUpload()) // 上传请求，要等到设置了上传子目录，才能访问请求参数
@@ -64,6 +64,9 @@ object RequestHandler : IRequestHandler {
             // 解析路由
             if (!req.parseRoute())
                 throw RouteException("当前uri没有匹配路由：" + req.requestURI);
+
+            if(debug)
+                httpLogger.debug("当前uri匹配路由: controller=[{}], action=[{}]", req.controller, req.action)
 
             // 调用路由对应的controller与action
             callController(req, res);
