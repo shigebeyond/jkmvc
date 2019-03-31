@@ -14,11 +14,14 @@ apply plugin: 'org.akhikhl.gretty'
 // 启动jetty
 gretty{
     // server 配置
-    //jvmArgs ['-Xdebug', '-Xrunjdwp:transport=dt_socket,address=5005,suspend=n,server=y'] // 不用配, 直接使用 gradle appStartDebug
     servletContainer 'jetty9' // 'tomcat8'
     httpPort 8080
     managedClassReload true // 热部署
     scanInterval 1 // 热部署的扫描间隔，当值为0时，不扫描新class，不热部署
+
+    // 调试: gradle appRunDebug
+    debugPort 5006 // 区别于运行gradle的jvm的调试端口
+    debugSuspend true
 
     // webapp 配置
     contextPath "/${project.name}"
