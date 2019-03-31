@@ -12,6 +12,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.PrintWriter
 import java.net.URLEncoder
+import javax.servlet.ServletResponseWrapper
 import javax.servlet.http.HttpServletResponse
 
 /**
@@ -20,7 +21,7 @@ import javax.servlet.http.HttpServletResponse
  * @author shijianhang
  * @date 2016-10-7 下午11:32:07 
  */
-class HttpResponse(protected val res:HttpServletResponse /* 响应对象 */): HttpServletResponse by res {
+class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseWrapper(res), HttpServletResponse by res {
 
 	companion object{
 		/**
@@ -89,6 +90,12 @@ class HttpResponse(protected val res:HttpServletResponse /* 响应对象 */): Ht
 				509 to "Bandwidth Limit Exceeded"
 		);
 	}
+
+	/**
+	 * 响应对象
+	 */
+	protected val res:HttpServletResponse
+		get() = response as HttpServletResponse
 
 	/**
 	 * 获得writer
