@@ -210,7 +210,7 @@ private fun Orm.setFromRequest(column: String, value: Any?) {
     val relation = ormMeta.getRelation(column)
 
     // 1 普通属性, 智能设置string值
-    if (relation != null) {
+    if (relation == null) {
         setIntelligent(column, value as String)
         return
     }
