@@ -34,6 +34,15 @@ public fun String.isAbsolutePath(): Boolean {
     return startsWith("/") || indexOf(":") > 0;
 }
 
+/**
+ * 准备目录
+ */
+public fun String.prepareDirectory(){
+    val dir = File(this)
+    if(!dir.exists())
+        dir.mkdirs()
+}
+
 /****************************** 文本处理 *******************************/
 /**
  * 整个文件替换文本内容
