@@ -19,6 +19,13 @@ class DirtyFlagMap<K, V> /* 非公开构造函数 */protected constructor(protec
     public var dirty: Boolean = false
             protected set
 
+    /**
+     * 标记为干净
+     */
+    public fun cleanDirty(){
+        dirty = false
+    }
+
     public override fun put(key: K, value: V): V?{
         // 检查插入的值是否已存在
         if(map[key] == value)
