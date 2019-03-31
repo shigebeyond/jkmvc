@@ -172,7 +172,10 @@ public class FixedKeyMapFactory {
 
         @Override
         public void clear() {
-            throw new UnsupportedOperationException();
+            //throw new UnsupportedOperationException();
+            // Orm.delete()中需要调用该clear()方法,不能直接抛异常
+            for(int i = 0; i < _values.length; i++)
+                _values[i] = null;
         }
 
         @Override
