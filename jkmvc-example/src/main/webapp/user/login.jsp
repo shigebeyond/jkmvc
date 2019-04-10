@@ -1,6 +1,6 @@
 <%@ page language="java" import="java.util.*,net.jkcode.jkmvc.http.HttpRequest,net.jkcode.jkmvc.example.model.UserModel,net.jkcode.jkmvc.session.Auth" pageEncoding="UTF-8"%>
 <%
-    HttpRequest req = (HttpRequest) request;
+    HttpRequest req = HttpRequest.current();
     UserModel user = (UserModel)Auth.instance().getUser();
     String username = user == null ? "" : user.getUsername();
 %>
