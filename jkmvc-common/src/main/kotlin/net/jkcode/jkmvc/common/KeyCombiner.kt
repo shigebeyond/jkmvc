@@ -4,45 +4,45 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * 值的持有者
+ * 结果的持有者
  */
-class ValueHolder{
+class ResultHolder{
 
     /**
-     * 值
+     * 结果值
      */
     public var value: Any? = null
 
     /**
-     * 等待人数
+     * 等待数
      */
     public val waiterNum: AtomicInteger = AtomicInteger(0)
 }
 
 /**
- * 请求合并者
+ * 针对每个key合并操作
  *
  * @author shijianhang<772910474@qq.com>
  * @date 2019-04-10 9:47 AM
  */
-class MultiKeyCombiner {
+class KeyCombiner {
 
     /**
-     * <键 to 值>
+     * <键 to 结果>
      */
-    protected val valueHolders: ConcurrentHashMap<Any, ValueHolder> by lazy {
-        ConcurrentHashMap<Any, ValueHolder>()
+    protected val resultHolders: ConcurrentHashMap<Any, ResultHolder> by lazy {
+        ConcurrentHashMap<Any, ResultHolder>()
     }
 
     /**
-     * 等待加锁, 锁不住要等待
+     * 针对当前key合并操作
      * @param key
-     * @param block
+     * @param action
      * @return
      */
-    public fun <T> waitLock(key: Any, block: () -> T): T {
-        val holder = valueHolders.getOrPutOnce(key){
-            ValueHolder()
+    public fun <T> combine(key: Any, action: () -> T): T {
+        val holder = resultHolders.getOrPutOnce(key){
+            ResultHolder()
         }
         if(holder.waiterNum.getAndIncrement() > 0 && holder.value != null)
             return holder.value as T
@@ -50,7 +50,7 @@ class MultiKeyCombiner {
         return synchronized(holder){
             try{
                 if(holder.value == null)
-                    holder.value = block()
+                    holder.value = action()
                 holder.value as T
             }finally {
                 if(holder.waiterNum.decrementAndGet() == 0)
