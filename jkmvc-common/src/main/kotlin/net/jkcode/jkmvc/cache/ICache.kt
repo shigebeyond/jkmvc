@@ -29,6 +29,16 @@ interface ICache {
     operator fun get(key: Any): Any?
 
     /**
+     * 根据键获得值
+     *
+     * @param key 键
+     * @param expires 过期时间（秒）
+     * @param defaultValue 回源值的函数
+     * @return
+     */
+    fun getOrPut(key: Any, expires:Long, defaultValue: () -> Any): Any?
+
+    /**
      * 设置键值
      *
      * @param key 键

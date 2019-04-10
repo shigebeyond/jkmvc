@@ -16,7 +16,7 @@ private val idWorkers: ConcurrentHashMap<String, IIdWorker> = ConcurrentHashMap(
  * @return
  */
 public fun generateId(module: String): Long {
-    val idWorker = idWorkers.getOrPutOnce(module) {
+    val idWorker = idWorkers.getOrPut(module) {
         SnowflakeIdWorker()
     }
     return idWorker.nextId()

@@ -305,10 +305,10 @@ public inline fun <K, V> Map<K, V>?.getOrDefault(key:K, default:V? = null): V? {
  */
 public inline fun <K, V> ConcurrentMap<K, V>.getOrPutOnce(key: K, defaultValue: () -> V): V {
     return this.get(key) ?:
-        synchronized(this){
-            this.get(key) ?:
-                defaultValue().let { default -> this.putIfAbsent(key, default) ?: default }
-        }
+                synchronized(this){
+                    this.get(key) ?:
+                        this.putIfAbsent(key, defaultValue())!!
+                }
 }
 
 /**

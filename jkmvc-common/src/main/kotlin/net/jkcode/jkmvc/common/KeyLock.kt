@@ -25,7 +25,7 @@ class KeyLock {
      * @return
      */
     public fun <T> quickLock(key: Any, block: () -> T): T? {
-        val lock = locks.getOrPutOnce(key){
+        val lock = locks.getOrPut(key){
             AtomicBoolean(false)
         }
         if(lock.compareAndSet(false, true)) // 加锁
