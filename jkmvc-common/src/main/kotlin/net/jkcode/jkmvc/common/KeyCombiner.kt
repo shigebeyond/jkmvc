@@ -36,11 +36,12 @@ class KeyCombiner<T> {
 
     /**
      * 针对当前key合并操作
+     *    同一个key的操作会争锁, 只有获得锁的第一个线程的操作才执行,其他线程只是使用第一个线程的操作结果
      * @param key
-     * @param defaultValue 操作
+     * @param valueAction 操作
      * @return
      */
-    public fun combine(key: Any, defaultValue: () -> T): T {
+    public fun combine(key: Any, valueAction: () -> T): T {
         val holder = resultHolders.getOrPut(key){
             ResultHolder()
         }
@@ -52,7 +53,7 @@ class KeyCombiner<T> {
             // 加锁执行操作, 并缓存结果
             return synchronized(holder) {
                     if (holder.value == null)
-                        holder.value = defaultValue()
+                        holder.value = valueAction()
                     holder.value!!
             }
         } finally {
