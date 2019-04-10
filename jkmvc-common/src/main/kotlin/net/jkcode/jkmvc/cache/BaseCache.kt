@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.cache
 
-import net.jkcode.jkmvc.common.MultiKeyLock
+import net.jkcode.jkmvc.common.KeyLock
 
 /**
  * 基础缓存类
@@ -12,7 +12,7 @@ abstract class BaseCache: ICache {
     /**
      * 对key的锁, 防止并发回源
      */
-    protected val lock: MultiKeyLock = MultiKeyLock()
+    protected val lock: KeyLock = KeyLock()
 
     /**
      * 根据键获得值

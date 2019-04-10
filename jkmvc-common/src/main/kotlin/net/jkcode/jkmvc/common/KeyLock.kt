@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @author shijianhang<772910474@qq.com>
  * @date 2019-03-06 8:54 AM
  */
-class MultiKeyLock {
+class KeyLock {
 
     /**
      * <键 to 锁>
