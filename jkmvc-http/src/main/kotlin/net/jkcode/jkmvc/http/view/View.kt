@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.http.view
 
+import net.jkcode.jkmvc.common.LazyAllocatedMap
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.router.RouteException
@@ -22,9 +23,9 @@ open class View(override val req: HttpRequest /* 请求对象 */,
 	companion object{
 
 		/**
-		 * 空map
+		 * 空的map, 用在函数 HttpResponse.renderView(String, MutableMap) 的参数默认值中
 		 */
-		public val emptyMutableMap:MutableMap<String, Any?> = HashMap()
+		internal val emptyData: MutableMap<String, Any?> = LazyAllocatedMap()
 
 		/**
 		 * 全局变量

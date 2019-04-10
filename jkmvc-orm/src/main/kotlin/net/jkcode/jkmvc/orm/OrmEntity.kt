@@ -57,9 +57,7 @@ abstract class OrmEntity : IOrm {
      * 变化的字段值：<字段名 to 原始字段值>
      *     一般只读，lazy创建，节省内存
      */
-    protected val dirty: MutableRow by lazy {
-        HashMap<String, Any?>()
-    };
+    protected val dirty: MutableRow = LazyAllocatedMap<String, Any?>()
 
     /**
      * 获得属性代理

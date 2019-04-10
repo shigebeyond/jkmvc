@@ -124,7 +124,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseW
 	 * @param file 视图文件
 	 * @param data 局部变量
 	 */
-	public fun renderView(file:String, data:MutableMap<String, Any?> = View.emptyMutableMap):Unit
+	public fun renderView(file:String, data:MutableMap<String, Any?> = View.emptyData):Unit
 	{
 		renderView(View(HttpRequest.current(), this, file, data))
 	}
