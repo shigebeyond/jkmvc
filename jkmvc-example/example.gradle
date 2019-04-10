@@ -20,7 +20,7 @@ gretty{
     scanInterval 1 // 热部署的扫描间隔，当值为0时，不扫描新class，不热部署
 
     // 调试: gradle appRunDebug
-    debugPort 5006 // 区别于运行gradle的jvm的调试端口
+    debugPort 5006 // 运行jetty的jvm独立于运行gradle的jvm, 因此也使用独立的调试端口
     debugSuspend true
 
     // webapp 配置
