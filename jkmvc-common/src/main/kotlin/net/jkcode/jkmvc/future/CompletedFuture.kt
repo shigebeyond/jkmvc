@@ -1,7 +1,5 @@
 package net.jkcode.jkmvc.future
 
-import java.util.concurrent.Future
-
 /**
  * 已完成的异步结果，没有延迟
  *
@@ -9,7 +7,7 @@ import java.util.concurrent.Future
  * @author shijianhang<772910474@qq.com>
  * @date 2017-12-30 6:43 PM
  */
-open class CompletedFuture<T>(protected open val result: T): Future<T> {
+open class CompletedFuture<T>(protected open val result: T): ICallbackableFuture<T> {
     /**
      * 任务是否完成
      * @return
@@ -50,6 +48,15 @@ open class CompletedFuture<T>(protected open val result: T): Future<T> {
      */
     public override fun get(): T {
         return result
+    }
+
+    /**
+     * 添加回调
+     *   立即执行
+     * @param
+     */
+    public override fun addCallback(callback: IFutureCallback<T>) {
+        callback.completed(result)
     }
 
 }
