@@ -11,7 +11,7 @@ import java.lang.UnsupportedOperationException
  * @author shijianhang
  * @create 2018-02-27 下午7:24
  **/
-class JedisCache(protected val configName: String = "default"):ICache{
+class JedisCache(protected val configName: String = "default") : BaseCache(){
 
     /**
      * redis配置

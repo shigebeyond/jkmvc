@@ -8,7 +8,7 @@ import java.util.*
  * @author shijianhang
  * @create 2018-02-27 下午8:49
  **/
-class LRUCache(protected val maxSize:Int = 10000 /*最大个数*/):ICache {
+class LRUCache(protected val maxSize:Int = 10000 /*最大个数*/) : BaseCache() {
 
     /**
      * 存储数据的map
