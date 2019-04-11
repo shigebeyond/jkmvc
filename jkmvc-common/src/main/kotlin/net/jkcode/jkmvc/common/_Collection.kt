@@ -270,17 +270,24 @@ public fun <T> Iterable<T>.enumeration(): ItEnumeration<T> {
 
 /**
  * 从队列中抽取指定数目的元素
+ *    注意: ConcurrentLinkedQueue 中元素不能为null, 同时size() 是遍历性能慢, 尽量使用 isEmpty()
+ *
  * @param c
  * @param maxElements
  * @return
  */
 public fun <E> ConcurrentLinkedQueue<E>.drainTo(c: MutableCollection<E>, maxElements: Int): Int {
-    var n = this.size // 开始的大小
-    if(n > maxElements)
-        n = maxElements
-    for(i in 0 until n){
+    var n = 0
+    for(i in 0 until maxElements){
+        // 元素出队
         val item = this.poll()
+        // 如元素为null, 则队列为空
+        if(item == null)
+            break;
+
+        // 记录出队元素
         c.add(item)
+        n++
     }
     return n
 }
