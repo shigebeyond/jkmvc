@@ -1,12 +1,14 @@
 package net.jkcode.jkmvc.tests
 
+import com.google.common.util.concurrent.RateLimiter
+import com.google.common.util.concurrent.Uninterruptibles
+import net.jkcode.jkmvc.common.currMillis
 import net.jkcode.jkmvc.ratelimit.CounterRateLimiter
 import net.jkcode.jkmvc.ratelimit.IRateLimiter
 import net.jkcode.jkmvc.ratelimit.TokenBucketRateLimiter
-import net.jkcode.jkmvc.validator.RuleValidator
 import org.junit.Test
 import java.util.concurrent.Executors
-import java.util.concurrent.ForkJoinPool
+import java.util.concurrent.TimeUnit
 
 class RateLimiterTests{
 
@@ -50,7 +52,21 @@ class RateLimiterTests{
     }
 
     fun getTime(): Long {
-        return System.currentTimeMillis() / intervalMillis
+        return currMillis() / intervalMillis
+    }
+
+    @Test
+    fun testFuck(){
+        val l = RateLimiter.create(1.0);
+        System.out.println("time: " + getTime() + ", acquire: " + l.acquire());
+        //Thread.sleep(1000L);
+        // guava的 RateLimiter.acquire() 返回的是等待时间,其内部也调用 Uninterruptibles.sleepUninterruptibly() 来休眠线程
+        Uninterruptibles.sleepUninterruptibly(100, TimeUnit.SECONDS)
+
+        println("time: " + getTime() + ", acquire: " + l.acquire())
+        println("time: " + getTime() + ", acquire: " + l.acquire())
+        println("time: " + getTime() + ", acquire: " + l.acquire())
+        println("time: " + getTime() + ", acquire: " + l.acquire())
     }
 
 }

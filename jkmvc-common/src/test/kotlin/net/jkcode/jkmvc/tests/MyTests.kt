@@ -1,12 +1,11 @@
 package net.jkcode.jkmvc.tests
 
-import net.jkcode.jkmvc.redis.JedisFactory
+import getIntranetHost
 import net.jkcode.jkmvc.common.*
 import net.jkcode.jkmvc.idworker.SnowflakeId
 import net.jkcode.jkmvc.idworker.SnowflakeIdWorker
+import net.jkcode.jkmvc.redis.JedisFactory
 import net.jkcode.jkmvc.validator.ValidateFuncDefinition
-import getIntranetHost
-//import kotlinx.coroutines.experimental.*
 import org.dom4j.Attribute
 import org.dom4j.DocumentException
 import org.dom4j.Element
@@ -16,9 +15,6 @@ import java.io.File
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
-import java.util.Calendar
-import java.util.GregorianCalendar
-import java.util.concurrent.CompletableFuture
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.jvm.javaMethod
 
@@ -88,9 +84,19 @@ class MyTests{
     fun testNumber(){
         //val io:Integer = 1
         //val i:Int = io
-        val map = mapOf("a" to 111)
-        val i:Int = map["a"]!!
-        val io:Integer = map["a"]!! as Integer
+//        val map = mapOf("a" to 111)
+//        val i:Int = map["a"]!!
+//        val io:Integer = map["a"]!! as Integer
+
+        // 外部的i vs 内部的i, 虽同名, 但不是同一个变量
+        var i = 0
+        for(i in 0 until 10){
+            if(i == 5) {
+                println(i) // 5
+                break
+            }
+        }
+        println(i) // 0
     }
 
     @Test
@@ -809,82 +815,6 @@ class MyTests{
         println(jedis.get("name"))
     }
 
-    @Test
-    fun testFuture() {
-        val start = System.currentTimeMillis()
-        // 结果集
-        val list = ArrayList<String>()
-
-        //val taskList = listOf(2, 1, 3, 4, 5, 6, 7, 8, 9, 10)
-        val taskList = listOf(2)
-        // 全流式处理转换成CompletableFuture[]+组装成一个无返回值CompletableFuture，join等待执行完毕。返回结果whenComplete获取
-        val cfs = taskList.stream()
-                .map<Any> { integer ->
-                    CompletableFuture.supplyAsync({ calc(integer) })
-                            .thenApply({ h -> Integer.toString(h.toInt()) })
-                            .whenComplete({ s, e ->
-                                println("任务" + s + "完成!result=" + s + "，异常 e=" + e + "," + Date())
-                                list.add(s)
-                            })
-                }
-                .toArray(){
-                    arrayOfNulls<CompletableFuture<String>>(it)
-                }
-        // 封装后无返回值，必须自己whenComplete()获取
-        CompletableFuture.allOf(*cfs).join()
-        println("list=" + list + ",耗时=" + (System.currentTimeMillis() - start))
-    }
-
-    fun calc(i: Int?): Int {
-        try {
-            if (i == 1) {
-                Thread.sleep(3000)//任务1耗时3秒
-            } else if (i == 5) {
-                Thread.sleep(5000)//任务5耗时5秒
-            } else {
-                Thread.sleep(1000)//其它任务耗时1秒
-            }
-            println("task线程：" + Thread.currentThread().name
-                    + "任务i=" + i + ",完成！+" + Date())
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
-        }
-
-        return i!!
-    }
-
-    /*@Test
-    fun testCoroutine(){
-        val mainThread = Thread.currentThread()
-        println("Start")
-
-        // Start a coroutine
-        launch(CommonPool) {
-            val coroutineThead = Thread.currentThread()
-            println("Same Thread: " + (coroutineThead === mainThread))
-
-            delay(1000)
-            println("Hello")
-        }
-
-        Thread.sleep(2000) // wait for 2 seconds
-        println("Stop")
-    }
-
-    @Test
-    fun testAsync(){
-        val deferred = (1..10).map { n ->
-            async (CommonPool) {
-                n
-            }
-        }
-        println(deferred)
-
-    }
-
-    suspend fun doSomething(): Int {
-        return 10;
-    }*/
 }
 
 
