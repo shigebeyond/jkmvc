@@ -1,4 +1,4 @@
-package net.jkcode.jkmvc.common
+package net.jkcode.jkmvc.lock
 
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean

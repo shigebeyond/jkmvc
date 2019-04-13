@@ -12,7 +12,7 @@ import redis.clients.jedis.Jedis
  * @author shijianhang<772910474@qq.com>
  * @date 2019-01-11 12:24 PM
  */
-class RedisKeyLock : IDistributedKeyLock() {
+class JedisKeyLock : IDistributedKeyLock() {
 
     companion object {
 
