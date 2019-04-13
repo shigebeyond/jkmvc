@@ -11,6 +11,7 @@ import net.jkcode.jkmvc.http.controller.ControllerClassLoader
 import net.jkcode.jkmvc.http.httpLogger
 import net.jkcode.jkmvc.http.isOptions
 import net.jkcode.jkmvc.http.router.RouteException
+import java.util.concurrent.CompletableFuture
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import kotlin.reflect.KFunction
@@ -59,6 +60,7 @@ object RequestHandler : IRequestHandler {
 
         // 构建响应对象
         val res = HttpResponse(response);
+        var result: Any? = null
 
         try{
             // 解析路由
@@ -69,14 +71,15 @@ object RequestHandler : IRequestHandler {
                 httpLogger.debug("当前uri匹配路由: controller=[{}], action=[{}]", req.controller, req.action)
 
             // 调用路由对应的controller与action
-            callController(req, res);
+            result = callController(req, res);
             return true;
         }
         /* catch (e：RouteException)
         {
             // 输出404响应
             res.setStatus(404).send();
-        }  */
+            return true
+        } */
         catch (e: Exception) {
             e.printStackTrace(res.prepareWriter())
             httpLogger.debug("处理uri[${req.routeUri}]出错", e)
@@ -84,6 +87,16 @@ object RequestHandler : IRequestHandler {
         }finally {
             // 请求处理后，关闭资源
             ClosingOnRequestEnd.triggerClosings()
+
+            // 如果是异步操作, 则需要关闭异步响应
+            if(req.isAsyncStarted){
+                if(result is CompletableFuture<*>) // 异步关闭
+                    result.whenComplete{ r, e ->
+                        req.asyncContext.complete()
+                    }
+                else // 同步关闭
+                    req.asyncContext.complete()
+            }
         }
 
     }
@@ -93,8 +106,9 @@ object RequestHandler : IRequestHandler {
      *
      * @param req
      * @param res
+     * @return
      */
-    private fun callController(req: HttpRequest, res: HttpResponse) {
+    private fun callController(req: HttpRequest, res: HttpResponse): Any? {
         // 获得controller类
         val clazz: ControllerClass? = ControllerClassLoader.getControllerClass(req.controller);
         if (clazz == null)
@@ -116,7 +130,7 @@ object RequestHandler : IRequestHandler {
             res.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS,PUT,DELETE,HEAD");
             res.setHeader("Access-Control-Allow-Headers", "origin,cache-control,content-type,accept,hash-referer,x-requested-with,token");// 跨域验证登录用户，要用到请求头中的token
             if(req.isOptions())
-                return;
+                return null;
         }
 
         // 设置req/res属性
@@ -124,6 +138,6 @@ object RequestHandler : IRequestHandler {
         controller.res = res;
 
         // 调用controller的action方法
-        controller.callActionMethod(action)
+        return controller.callActionMethod(action)
     }
 }

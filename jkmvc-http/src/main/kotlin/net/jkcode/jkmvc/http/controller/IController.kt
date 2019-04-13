@@ -51,15 +51,17 @@ interface IController{
      *   注意：为了区别业务action，该方法不能命名为callAction
      * @param action action方法
      */
-    public fun callActionMethod(action: KFunction<*>) {
+    public fun callActionMethod(action: KFunction<*>): Any? {
         // 前置处理
         before()
 
         // 执行真正的处理方法
-        action.call(this);
+        val result = action.call(this);
 
         // 后置处理
         after()
+
+        return result
     }
 
     /**

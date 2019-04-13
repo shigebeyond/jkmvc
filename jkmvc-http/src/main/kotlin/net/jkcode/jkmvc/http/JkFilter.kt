@@ -1,15 +1,18 @@
 package net.jkcode.jkmvc.http
 
-
 import net.jkcode.jkmvc.http.handler.RequestHandler
 import java.util.concurrent.ForkJoinPool
 import javax.servlet.*
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
+/**
+ * web入口
+ *
+ * @author shijianhang
+ * @date 2019-4-13 上午9:27:56
+ */
 open class JkFilter : Filter {
-
-
 
     override fun init(filterConfig: FilterConfig) {
         // fix bug: jetty异步请求后 req.contextPath/req.servletContext 居然为null, 因此直接在 JkFilter.init() 时记录 contextPath, 反正他是全局不变的
@@ -18,28 +21,14 @@ open class JkFilter : Filter {
 
     override fun doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) {
         // 1 异步处理
-        httpLogger.info("before - req.servletContext is null : " + (req.servletContext == null))
-        httpLogger.info("before - req.servletContext == filterConfig.servletContext : " + (req.servletContext == HttpRequest.globalServletContext))
-        httpLogger.info("before - req.getRequestDispatcher(jsp) is null : " + (req.getRequestDispatcher("/user/index.jsp") == null))
-
         if(req.isAsyncSupported) {
-            // 异步上下文
+            // 异步上下文, 在完成异步操作后, 需要调用 actx.complete() 来关闭异步响应, 调用下放到 RequestHandler.handle()
             val actx = req.startAsync(req, res)
 
             // 异步处理请求
             //actx.start { // web server线程池
             ForkJoinPool.commonPool().execute { // 其他线程池
-                try {
-                    httpLogger.info("after - req.servletContext is null : " + (req.servletContext == null))
-                    httpLogger.info("after - req.servletContext == filterConfig.servletContext : " + (req.servletContext == HttpRequest.globalServletContext))
-                    httpLogger.info("after - req.getRequestDispatcher(jsp) is null : " + (req.getRequestDispatcher("/user/index.jsp") == null))
-
-                    handleRequest(actx.request, actx.response, chain) // wrong: req.contextPath is null
-                    //handleRequest(req, res, chain)
-                } finally {
-                    // 完成异步操作, 关闭异步响应
-                    actx.complete()
-                }
+                handleRequest(actx.request, actx.response, chain)
             }
             return;
         }
