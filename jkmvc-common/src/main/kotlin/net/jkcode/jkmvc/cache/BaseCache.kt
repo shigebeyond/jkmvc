@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.cache
 
-import net.jkcode.jkmvc.common.KeyLock
+import net.jkcode.jkmvc.lock.IKeyLock
+import net.jkcode.jkmvc.lock.LocalKeyLock
 
 /**
  * 基础缓存类
@@ -12,7 +13,7 @@ abstract class BaseCache: ICache {
     /**
      * 对key的锁, 防止并发回源
      */
-    protected val lock: KeyLock = KeyLock()
+    protected val lock: IKeyLock = IKeyLock.instance("jedis")
 
     /**
      * 根据键获得值
@@ -28,7 +29,7 @@ abstract class BaseCache: ICache {
             return v
 
         // 锁住key, 防止并发回源
-        return lock.quickLock(key){
+        return lock.quickLockCleanly(key){
             val default = defaultValue()
             this.put(key, default, expires)
             default
