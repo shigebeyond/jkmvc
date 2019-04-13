@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.idworker
 
 import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.common.currMillis
 
 /**
  * Snowflake算法的id
@@ -9,10 +10,10 @@ import net.jkcode.jkmvc.common.Config
  * @author shijianhang<772910474@qq.com>
  * @date 2019-01-29 3:22 PM
  */
-data class SnowflakeId(public val timestamp: Long /* 开始时间截  */,
-                       public val datacenterId: Long /* 数据中心ID(0~31)  */,
-                       public val workerId: Long /* 工作机器ID(0~31)  */,
-                       public val sequence: Long /* 毫秒内序列(0~4095)  */
+data class SnowflakeId(public val sequence: Long /* 毫秒内序列(0~4095)  */,
+                       public val timestamp: Long = currMillis()/* 开始时间截  */,
+                       public val datacenterId: Long = config["datacenterId"]!! /* 数据中心ID(0~31)  */,
+                       public val workerId: Long = config["workerId"]!! /* 工作机器ID(0~31)  */
 ){
     companion object {
 
@@ -103,7 +104,7 @@ data class SnowflakeId(public val timestamp: Long /* 开始时间截  */,
             val workerId = (id shr workerIdShift) and workerIdMask
             val datacenterId = (id shr datacenterIdShift) and datacenterIdMask
             val timestamp = (id shr timestampLeftShift) + startTimestamp
-            return SnowflakeId(timestamp, datacenterId, workerId, sequence)
+            return SnowflakeId(sequence, timestamp, datacenterId, workerId)
         }
 
         /**

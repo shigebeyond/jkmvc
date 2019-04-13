@@ -266,6 +266,14 @@ public fun <T> Iterable<T>.enumeration(): ItEnumeration<T> {
     return ItEnumeration(iterator())
 }
 
+/**
+ * Returns a list containing the results of applying the given [transform] function
+ * to each element in the original set.
+ */
+public inline fun <T, R> Iterable<T>.mapToSet(transform: (T) -> R): Set<R> {
+    return mapTo(HashSet<R>(), transform)
+}
+
 /****************************** 扩展 Queue *****************************/
 
 /**
