@@ -1,6 +1,9 @@
 package net.jkcode.jkmvc.tests
 
 import getIntranetHost
+import io.netty.util.HashedWheelTimer
+import io.netty.util.Timeout
+import io.netty.util.TimerTask
 import net.jkcode.jkmvc.common.*
 import net.jkcode.jkmvc.idworker.SnowflakeId
 import net.jkcode.jkmvc.idworker.SnowflakeIdWorker
@@ -12,11 +15,17 @@ import org.dom4j.Element
 import org.dom4j.io.SAXReader
 import org.junit.Test
 import java.io.File
+import java.lang.reflect.ParameterizedType
 import java.util.*
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.jvm.javaMethod
+import kotlin.reflect.jvm.javaType
+import kotlin.reflect.jvm.reflect
 
 open class A() {
     open fun echo(){}
@@ -116,6 +125,19 @@ class MyTests{
         val a: Array<Any> = s as Array<Any>
         val b: Array<String> = a as Array<String>
         println(b)
+    }
+
+    @Test
+    fun testPair(){
+        println(Pair("a", "b") == Pair("a", "b")) // true
+        println(Pair(1, 2) == Pair(1, 2)) // true
+        println(Pair(Integer(1), String(charArrayOf('a'))) == Pair(Integer(1), String(charArrayOf('a')))) // true
+
+        val map = HashMap<Pair<Integer, String>, String>()
+        var k = Pair(Integer(1), String(charArrayOf('a')))
+        map[k] = "test"
+        k = Pair(Integer(1), String(charArrayOf('a')))
+        println(map[k]) // test
     }
 
     @Test
@@ -447,7 +469,7 @@ class MyTests{
 
     @Test
     fun testSnowflakeIdParse(){
-        val id = SnowflakeId(currMillis(), 1, 2, 3)
+        val id = SnowflakeId(0, currMillis(), 1, 2)
         println("id: $id")
         //val l = id.toLong()
         for(i in 0..10) {
@@ -545,7 +567,7 @@ class MyTests{
 
     @Test
     fun testFunc(){
-        val f: Lambda = { it:String ->
+        /*val f: Lambda = { it:String ->
             it
         } as Lambda
         println(f.javaClass)
@@ -556,11 +578,31 @@ class MyTests{
         println(f is Lambda) // true
         println(f.javaClass.superclass) // class kotlin.jvm.internal.Lambda
         println(f.javaClass.superclass.superclass) // Object
+        */
+        val s = mutableListOf<Int>(1, 2)
+        // 检查无返回值的函数调用的结果
+        val f = s::clear
+        val r = f.invoke()
+        println(r)
+    }
+
+    @Test
+    fun testFuncReflect(){
+        val f = { it:String ->
+            it
+        }
+        println(f)
+        val r = f.reflect()!!.returnType
+        println(r) // kotlin.String
+        println(r.classifier as KClass<*>) // class kotlin.String
+        println((r.classifier as KClass<*>).java) // class java.lang.String
+        // println(r.javaClass) // class kotlin.reflect.jvm.internal.KTypeImpl
+        // println(r.javaType) // 报错: kotlin.reflect.jvm.internal.KotlinReflectionInternalError: Introspecting local functions, lambdas, anonymous functions and local variables is not yet fully supported in Kotlin reflection
     }
 
     @Test
     fun testMember(){
-        // kotlin.reflect.jvm.internal.KotlinReflectionInternalError: Reflection on built-in Kotlin types is not yet fully supported. No metadata found for public open val length: kotlin.Int defined in kotlin.String
+        // 报错: kotlin.reflect.jvm.internal.KotlinReflectionInternalError: Reflection on built-in Kotlin types is not yet fully supported. No metadata found for public open val length: kotlin.Int defined in kotlin.String
         /*
         for(m in  String::class.declaredFunctions)
             println(m.name)
@@ -813,6 +855,83 @@ class MyTests{
         println(jedis.get("name"))
         jedis.set("name", "shi")
         println(jedis.get("name"))
+    }
+
+    @Test
+    fun testTimer(){
+        //val timer = CommonMilliTimer
+        val timer = HashedWheelTimer(1, TimeUnit.SECONDS, 3 /* 内部会调用normalizeTicksPerWheel()转为2的次幂, 如3转为4 */)
+        timer.newTimeout(object : TimerTask {
+            override fun run(timeout: Timeout) {
+                println("定时处理: " + Date().format())
+                timer.newTimeout(this, 3, TimeUnit.SECONDS)
+            }
+        }, 3, TimeUnit.SECONDS)
+
+        // HashedWheelTimer 是独立的线程, 需要在当前线程中等待他执行
+        try {
+            Thread.sleep(300L * 1000L)
+        } catch (e: Exception) {
+        }
+    }
+
+    @Test
+    fun testTimer2(){
+        newTimer()
+        Thread.sleep(100000)
+    }
+
+    private fun newTimer() {
+        val span: Long = 1000
+        CommonMilliTimer.newTimeout(object : TimerTask {
+            override fun run(timeout: Timeout) {
+                println("每隔 $span ms执行一次")
+
+                newTimer()
+            }
+        }, span, TimeUnit.MILLISECONDS)
+    }
+
+    @Test
+    fun testGenericSuperclass(){
+        val obj = ArrayList<String>()
+        val clazz = obj.javaClass
+
+//        println(clazz.getSuperClassGenricType())
+
+        //getSuperclass()获得该类的父类
+        println(clazz.getSuperclass())
+        //getGenericSuperclass()获得带有泛型的父类
+        //Type是 Java 编程语言中所有类型的公共高级接口。它们包括原始类型、参数化类型、数组类型、类型变量和基本类型。
+        val type = clazz.getGenericSuperclass()
+        System.out.println(type)
+        //ParameterizedType参数化类型，即泛型
+        val p = type as ParameterizedType
+        //getActualTypeArguments获取参数化类型的数组，泛型可能有多个
+        val c = p.actualTypeArguments[0]
+        println(c)
+    }
+
+    @Test
+    fun testConcurrentLinkedQueue(){
+        val q = ConcurrentLinkedQueue<Int>()
+        for(i in 0..1000){
+            q.add(i)
+        }
+        println("全部: " + q)
+
+        val run: () -> Unit ={
+            while(q.isNotEmpty()){
+                val list = ArrayList<Int>()
+                q.drainTo(list, 10)
+                println("出队:"  + list)
+            }
+        }
+        for(i in 0..2)
+            Thread(run).start()
+
+        println("全部: " + q)
+        Thread.sleep(100000)
     }
 
 }

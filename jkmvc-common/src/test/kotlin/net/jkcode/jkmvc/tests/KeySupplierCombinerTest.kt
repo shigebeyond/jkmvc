@@ -10,17 +10,16 @@ class KeySupplierCombinerTest{
 
     @Test
     fun testAdd(){
-        val c = KeySupplierCombiner()
+        val combiner = KeySupplierCombiner()
         val key = "test"
         var i = AtomicInteger(0)
 
         val run: () -> Unit ={
-            val r = c.add(key, this::supplyInt).get()
+            val r = combiner.add(key, this::supplyInt).get()
             println("第${i.getAndIncrement()}个调用者: $r")
         }
-        Thread(run).start()
-        Thread(run).start()
-        Thread(run).start()
+        for(i in 0..2)
+            Thread(run).start()
 
         Thread.sleep(2000)
     }
@@ -28,20 +27,20 @@ class KeySupplierCombinerTest{
 
     @Test
     fun testAddFuture(){
-        val c = KeySupplierCombiner()
+        val combiner = KeySupplierCombiner()
         val key = "test"
         var i = AtomicInteger(0)
 
         val run: () -> Unit = {
-            val f = c.add(key, this::supplyIntFuture)
+            val f = combiner.add(key, this::supplyIntFuture)
             f.thenAccept {
                 println("第${i.getAndIncrement()}个调用者: " + it.get())
             }
 
         }
-        Thread(run).start()
-        Thread(run).start()
-        Thread(run).start()
+
+        for(i in 0..2)
+            Thread(run).start()
 
         Thread.sleep(2000)
     }
