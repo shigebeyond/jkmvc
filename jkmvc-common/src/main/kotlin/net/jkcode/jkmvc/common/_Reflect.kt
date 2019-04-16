@@ -8,6 +8,7 @@ import java.lang.invoke.MethodHandles
 import java.lang.reflect.Constructor
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
+import java.lang.reflect.ParameterizedType
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -278,4 +279,27 @@ public fun Class<*>.getLookup(): MethodHandles.Lookup {
  */
 public fun Method.getMethodHandle(): MethodHandle {
     return declaringClass.getLookup().unreflectSpecial(this, declaringClass)
+}
+
+/**
+ * 通过反射, 获得定义 Class 时声明的父类的泛型参数的类型
+ *
+ * @param index
+ * @return
+ */
+fun Class<*>.getSuperClassGenricType(index: Int = 0): Class<*> {
+    val genType = this.genericSuperclass
+
+    if (genType !is ParameterizedType)
+        return Any::class.java
+
+    val params = genType.getActualTypeArguments()
+
+    if (index >= params.size || index < 0)
+        return Any::class.java
+
+    if (params[index] !is Class<*>)
+        return Any::class.java
+
+    return params[index] as Class<*>
 }
