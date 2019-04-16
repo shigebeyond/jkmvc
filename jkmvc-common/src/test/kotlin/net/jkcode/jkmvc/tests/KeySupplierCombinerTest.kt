@@ -9,13 +9,13 @@ import java.util.concurrent.atomic.AtomicInteger
 class KeySupplierCombinerTest{
 
     @Test
-    fun testCombine(){
+    fun testAdd(){
         val c = KeySupplierCombiner()
         val key = "test"
         var i = AtomicInteger(0)
 
         val run: () -> Unit ={
-            val r = c.combine(key, this::supplyInt)
+            val r = c.add(key, this::supplyInt).get()
             println("第${i.getAndIncrement()}个调用者: $r")
         }
         Thread(run).start()
@@ -25,34 +25,15 @@ class KeySupplierCombinerTest{
         Thread.sleep(2000)
     }
 
+
     @Test
-    fun testCombineAsync(){
+    fun testAddFuture(){
         val c = KeySupplierCombiner()
         val key = "test"
         var i = AtomicInteger(0)
 
         val run: () -> Unit = {
-            val f = c.combineAsync(key, this::supplyInt)
-            f.thenAccept {
-                println("第${i.getAndIncrement()}个调用者: $it")
-            }
-
-        }
-        Thread(run).start()
-        Thread(run).start()
-        Thread(run).start()
-
-        Thread.sleep(2000)
-    }
-
-    @Test
-    fun testCombineFuture(){
-        val c = KeySupplierCombiner()
-        val key = "test"
-        var i = AtomicInteger(0)
-
-        val run: () -> Unit = {
-            val f = c.combineAsync(key, this::supplyIntFuture)
+            val f = c.add(key, this::supplyIntFuture)
             f.thenAccept {
                 println("第${i.getAndIncrement()}个调用者: " + it.get())
             }

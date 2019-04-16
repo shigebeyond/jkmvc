@@ -77,24 +77,13 @@ class KeySupplierCombiner {
     protected val resultHolders: ConcurrentHashMap<Any, ResultHolder> = ConcurrentHashMap()
 
     /**
-     * 针对当前key合并取值操作, 同步
-     *
-     * @param key
-     * @param supplier 取值操作, 如果返回值类型是 CompletableFuture, 则直接调用作为源异步结果
-     * @return
-     */
-    public inline fun <reified T> combine(key: Any, noinline supplier: () -> T): T {
-        return combineAsync(key, supplier).get()
-    }
-
-    /**
      * 针对当前key合并取值操作, 异步
      *
      * @param key
      * @param supplier 取值操作, 如果返回值类型是 CompletableFuture, 则直接调用作为源异步结果
      * @return
      */
-    public inline fun <reified T> combineAsync(key: Any, noinline supplier: () -> T): CompletableFuture<T> {
+    public inline fun <reified T> add(key: Any, noinline supplier: () -> T): CompletableFuture<T> {
         val holder = resultHolders.getOrPut(key){
             ResultHolder()
         }
