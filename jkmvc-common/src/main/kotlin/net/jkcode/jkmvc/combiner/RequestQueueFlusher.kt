@@ -50,14 +50,14 @@ abstract class RequestQueueFlusher<RequestArgumentType, ResponseType> (
         CommonMilliTimer.newTimeout(object : TimerTask {
             override fun run(timeout: Timeout) {
                 // 刷盘
-                flush()
+                flush(){
+                    // 空: 停止启动定时
+                    if(reqQueue.isEmpty() && state.decrementAndGet() == 0)
+                        return@flush
 
-                // 空: 停止启动定时
-                if(reqQueue.isEmpty() && state.decrementAndGet() == 0)
-                    return
-
-                // 非空: 继续启动定时
-                start()
+                    // 非空: 继续启动定时
+                    start()
+                }
             }
         }, flushTimeoutMillis, TimeUnit.MILLISECONDS)
     }
@@ -85,23 +85,30 @@ abstract class RequestQueueFlusher<RequestArgumentType, ResponseType> (
      * 将队列中的请求刷掉
      * @param byTimeout 是否定时触发 or 定量触发
      */
-    protected fun flush(byTimeout: Boolean = true){
+    protected fun flush(byTimeout: Boolean = true, callback: (()->Unit)? = null){
         CommonThreadPool.execute{
             val reqs = tmpReqs.get()
             try {
-                println((if(byTimeout) "定时触发" else "定量触发") + "flush(), 队列是否为空: " + reqQueue.isEmpty())
-                // 取出请求
-                reqQueue.drainTo(reqs, flushSize)
+                println((if(byTimeout) "定时触发" else "定量触发") + "flush()")
 
-                // 处理刷盘
-                val args = reqs.map { it.first } // 收集请求参数
-                handleFlush(args, reqs)
+                while(reqQueue.isNotEmpty()) {
+                    // 取出请求
+                    val num = reqQueue.drainTo(reqs, flushSize)
+                    println("出队个数: $num")
 
-                // 如果 ResponseType == Void, 则框架帮设置异步响应
-                if(this.javaClass.getSuperClassGenricType(1) == Void::class.java)
-                    reqs.forEach {
-                        it.second.complete(null)
-                    }
+                    // 处理刷盘
+                    val args = reqs.map { it.first } // 收集请求参数
+                    handleFlush(args, reqs)
+
+                    // 如果 ResponseType == Void, 则框架帮设置异步响应
+                    if (this.javaClass.getSuperClassGenricType(1) == Void::class.java)
+                        reqs.forEach {
+                            it.second.complete(null)
+                        }
+                }
+
+                // 调用回调
+                callback?.invoke()
             }catch (e: Exception){
                 e.printStackTrace()
             }finally {
