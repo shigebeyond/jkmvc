@@ -41,4 +41,7 @@ dependencies {
     // test
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testCompile 'junit:junit:4.11'
+
+    // netty -- 用到 HashedWheelTimer
+    compile "io.netty:netty-all:$netty_version"
 }
