@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.tests
 
 import net.jkcode.jkmvc.combiner.GroupSupplierCombiner
+import net.jkcode.jkmvc.common.print
 import net.jkcode.jkmvc.common.randomInt
 import net.jkcode.jkmvc.common.randomLong
 import net.jkcode.jkmvc.common.randomString
@@ -24,14 +25,6 @@ class GroupSupplierCombinerTest{
                 println("添加参数: ${arg.incrementAndGet()}")
                 c.add(arg.get())!!
             }
-        }
-
-        fun waitPrintFutures(futures: ArrayList<CompletableFuture<*>>) {
-            val f: CompletableFuture<Void> = CompletableFuture.allOf(*futures.toTypedArray())
-            f.get() // 等待
-            println(futures.joinToString(", ", "结果: [", "]") {
-                it.get().toString()
-            })
         }
     }
 
@@ -60,7 +53,7 @@ class GroupSupplierCombinerTest{
     fun testAddMany(){
         val futures = ArrayList<CompletableFuture<String>>()
         futures.addAll(addArgs(combiner)) // 添加请求
-        waitPrintFutures(futures)
+        futures.print()
         Thread.sleep(10000)
     }
 
@@ -75,7 +68,7 @@ class GroupSupplierCombinerTest{
         Thread.sleep(10000)
 
         threads.forEach {
-            waitPrintFutures(it.futures)
+            it.futures.print()
         }
     }
 

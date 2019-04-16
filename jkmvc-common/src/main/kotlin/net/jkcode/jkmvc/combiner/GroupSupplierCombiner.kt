@@ -32,8 +32,9 @@ class GroupSupplierCombiner<RequestArgumentType /* 请求参数类型 */, Respon
      *     如果 ResponseType != Void, 则需要你主动设置异步响应
      * @param args
      * @param reqs
+     * @return 是否处理完毕, 同步处理返回true, 异步处理返回false
      */
-    protected override fun handleFlush(args: List<RequestArgumentType>, reqs: ArrayList<Pair<RequestArgumentType, CompletableFuture<ResponseType>>>) {
+    protected override fun handleFlush(args: List<RequestArgumentType>, reqs: ArrayList<Pair<RequestArgumentType, CompletableFuture<ResponseType>>>): Boolean {
         // 1 执行批量操作
         val batchResult: List<BatchItemType> = batchSupplier.invoke(args)
 
@@ -43,7 +44,7 @@ class GroupSupplierCombiner<RequestArgumentType /* 请求参数类型 */, Respon
             reqs.forEach {
                 it.second.complete(null)
             }
-            return
+            return true
         }
 
         // 非空响应
@@ -73,7 +74,7 @@ class GroupSupplierCombiner<RequestArgumentType /* 请求参数类型 */, Respon
             val resp = arg2resp.getOrDefault(it.first, defaultReps) as ResponseType
             it.second.complete(resp)
         }
-
+        return false
     }
 
     /**
