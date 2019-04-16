@@ -1,0 +1,3 @@
+# 缓存实现
+local: net.jkcode.jkmvc.lock.LocalKeyLock
+redis: net.jkcode.jksoa.lock.JedisKeyLock
