@@ -20,7 +20,7 @@ class FutureHolder<RequestArgumentType /* 请求参数类型 */, ResponseType /*
     protected var future: CompletableFuture<ResponseType>? = null
 
     init {
-        println("----- create FutureHolder")
+        // println("----- create FutureHolder")
     }
 
     /**
@@ -40,7 +40,7 @@ class FutureHolder<RequestArgumentType /* 请求参数类型 */, ResponseType /*
         synchronized(this) {
             // 第一个线程才异步调用取值操作
             if (future == null) {
-                println("----- first future")
+                // println("----- first future")
                 future = futureSupplier.invoke(key)
             }
         }
@@ -55,7 +55,7 @@ class FutureHolder<RequestArgumentType /* 请求参数类型 */, ResponseType /*
      */
     protected fun cloneThenDeleteSrcFuture(): CompletableFuture<ResponseType> {
         return future!!.thenApplyAsync {
-            println("----- then")
+            // println("----- then")
             // 减少等待数, 同时在等待数为0(所有线程消费完)后, 删除异步结果, 以便下一个轮回
             if (waitNum.decrementAndGet() == 0)
                 future = null
