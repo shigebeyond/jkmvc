@@ -115,4 +115,12 @@ class CompletableFutureTests{
         Thread(run).startAndJoin()
         Thread(run).startAndJoin()
     }
+
+    @Test
+    fun testCompleted(){
+        CompletableFuture.completedFuture(1)
+                .whenComplete{ r, e->
+                    println("结果=" + r + "，异常=" + e)
+                }
+    }
 }

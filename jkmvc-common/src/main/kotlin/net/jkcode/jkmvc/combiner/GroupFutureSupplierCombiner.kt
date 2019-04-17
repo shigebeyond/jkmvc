@@ -88,7 +88,7 @@ open class GroupFutureSupplierCombiner<RequestArgumentType /* 请求参数类型
                 item as T
             }
 
-        if (Map::class.java.isSuperClass(clazz)) {
+        if (Map::class.java.isAssignableFrom(clazz)) {
             return { item: Any ->
                 (item as Map<*, *>)[field] as T
             }
