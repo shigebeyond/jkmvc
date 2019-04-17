@@ -195,6 +195,8 @@ public fun Class<*>.isSubClass(superClass: Class<*>): Boolean {
 
 /**
  * 检查当前类 是否是 指定类的父类
+ *     isSuperClass() 不包含当前类
+ *     isAssignableFrom() 包含当前类
  *
  * @param subClass 子类
  * @return
