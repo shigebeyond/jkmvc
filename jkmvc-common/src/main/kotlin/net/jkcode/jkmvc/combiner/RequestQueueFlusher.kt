@@ -22,21 +22,14 @@ import java.util.concurrent.atomic.AtomicInteger
  * @date 2019-02-12 5:52 PM
  */
 abstract class RequestQueueFlusher<RequestArgumentType, ResponseType> (
-        protected val flushTimeoutMillis: Long /* 触发刷盘的定时时间 */,
-        protected val flushSize: Int /* 触发刷盘的队列大小 */
+        protected val flushSize: Int /* 触发刷盘的队列大小 */,
+        protected val flushTimeoutMillis: Long /* 触发刷盘的定时时间 */
 ) {
     /**
      * 请求队列
      *   单个请求 = 请求参数 + 异步响应
      */
     protected val reqQueue: ConcurrentLinkedQueue<Pair<RequestArgumentType, CompletableFuture<ResponseType>>> = ConcurrentLinkedQueue()
-
-    /**
-     * 全局共享的可复用的用于存储临时请求的 List 对象
-     */
-    protected val tmpReqs:ThreadLocal<ArrayList<Pair<RequestArgumentType, CompletableFuture<ResponseType>>>> = ThreadLocal.withInitial {
-        ArrayList<Pair<RequestArgumentType, CompletableFuture<ResponseType>>>()
-    }
 
     /**
      * 定时器状态: 0: 已停止 / 非0: 进行中
@@ -74,16 +67,20 @@ abstract class RequestQueueFlusher<RequestArgumentType, ResponseType> (
      * @return 返回异步响应, 如果入队失败, 则返回null
      */
     public fun add(arg: RequestArgumentType): CompletableFuture<ResponseType>? {
-        if((timerState.get() == 0 || reqQueue.isEmpty()) && timerState.getAndIncrement() == 0) // 空 -> 非空: 启动定时
-            start()
-
+        // 1 添加
         val resFuture = CompletableFuture<ResponseType>()
         val result = reqQueue.offer(arg to resFuture)
         if(!result)
             return null
 
-        if(flushState.get() == 0 && reqQueue.size >= flushSize) // 定量刷盘
+        // 2 空 -> 非空: 启动定时
+        if((timerState.get() == 0 || reqQueue.isEmpty()) && timerState.getAndIncrement() == 0)
+            start()
+
+        // 3 定量刷盘
+        if(flushState.get() == 0 && reqQueue.size >= flushSize)
             flush(false)
+
         return resFuture
     }
 
@@ -96,21 +93,23 @@ abstract class RequestQueueFlusher<RequestArgumentType, ResponseType> (
             return
 
         CommonThreadPool.execute{
-            val reqs = tmpReqs.get()
             try {
                 //val msg = if(byTimeout) "定时刷盘" else "定量刷盘"
                 while(reqQueue.isNotEmpty()) {
                     // 取出请求
-                    reqs.clear()
+                    val reqs = ArrayList<Pair<RequestArgumentType, CompletableFuture<ResponseType>>>()
                     val num = reqQueue.drainTo(reqs, flushSize)
+                    if(num == 0)
+                        break;
+
                     val args = reqs.map { it.first } // 收集请求参数
                     //println("$msg, 出队请求: $num 个, 请求参数为: $args")
 
                     // 处理刷盘
-                    handleFlush(args, reqs)
+                    val result = handleFlush(args, reqs)
 
-                    // 如果 ResponseType == Void, 则框架帮设置异步响应
-                    if (this.javaClass.getSuperClassGenricType(1) == Void::class.java)
+                    // 在处理完成后, 如果 ResponseType == Void, 则框架帮设置异步响应
+                    if (result && this.javaClass.getSuperClassGenricType(1) == Void::class.java)
                         reqs.forEach {
                             it.second.complete(null)
                         }
@@ -131,7 +130,8 @@ abstract class RequestQueueFlusher<RequestArgumentType, ResponseType> (
      *     如果 ResponseType != Void, 则需要你主动设置异步响应
      * @param args
      * @param reqs
+     * @return 是否处理完毕, 同步处理返回true, 异步处理返回false
      */
-    protected abstract fun handleFlush(args: List<RequestArgumentType>, reqs: ArrayList<Pair<RequestArgumentType, CompletableFuture<ResponseType>>>)
+    protected abstract fun handleFlush(args: List<RequestArgumentType>, reqs: ArrayList<Pair<RequestArgumentType, CompletableFuture<ResponseType>>>): Boolean
 
 }
