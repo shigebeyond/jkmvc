@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.ratelimit
 
-import net.jkcode.jkmvc.common.time
+import net.jkcode.jkmvc.common.currMillis
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -38,7 +38,7 @@ class CounterRateLimiter(public val maxQps: Int /* 每秒最大请求数 */,
      * @return
      */
     public override fun acquire(): Boolean {
-        var interval = time() / intervalMillis
+        var interval = currMillis() / intervalMillis
         val lastInterval = this.lastInterval
 
         //如果当前时间小于上一次ID生成的时间戳，说明系统时钟回退过这个时候应当抛出异常
