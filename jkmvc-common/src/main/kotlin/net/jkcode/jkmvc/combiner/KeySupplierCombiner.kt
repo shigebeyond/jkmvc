@@ -28,7 +28,7 @@ class ResultHolder{
      * @param supplier 取值操作, 如果返回值类型是 CompletableFuture, 则直接调用作为源异步结果
      * @return
      */
-    public inline fun <reified T> supplyAsyncOnce(noinline supplier: () -> T): CompletableFuture<T>{
+    public inline fun <reified T> supplyAsyncOnce(noinline supplier: () -> CompletableFuture<T>): CompletableFuture<T>{
         // 增加等待数, 防止结果被删除
         if (waitNum.getAndIncrement() > 0 && resultFuture != null)
             return cloneThenDeleteSrcFuture()
@@ -37,10 +37,7 @@ class ResultHolder{
         return synchronized(this) {
             // 第一个线程才异步调用取值操作
             if (resultFuture == null) {
-                if (CompletableFuture::class.java.isSuperClass(T::class.java)) // 如果异步取值操作, 主要是针对rpc的取值操作, 因为rpc调用是异步的, 调用完不是返回结果值, 而是返回future
-                    resultFuture = supplier.invoke() as CompletableFuture<Any>
-                else
-                    resultFuture = CompletableFuture.supplyAsync(supplier)
+                resultFuture = supplier.invoke() as CompletableFuture<Any>
             }
             // 其他线程直接使用异步结果
             cloneThenDeleteSrcFuture()
@@ -69,8 +66,10 @@ class ResultHolder{
  * @author shijianhang<772910474@qq.com>
  * @date 2019-04-10 9:47 AM
  */
-class KeySupplierCombiner {
+class KeySupplierCombiner<T>(public val supplier: () -> CompletableFuture<T>) {
 
+    // CompletableFuture.supplyAsync(supplier)
+    
     /**
      * <键 to 结果>
      */
@@ -83,7 +82,7 @@ class KeySupplierCombiner {
      * @param supplier 取值操作, 如果返回值类型是 CompletableFuture, 则直接调用作为源异步结果
      * @return
      */
-    public inline fun <reified T> add(key: Any, noinline supplier: () -> T): CompletableFuture<T> {
+    public fun add(key: Any): CompletableFuture<T> {
         val holder = resultHolders.getOrPut(key){
             ResultHolder()
         }
