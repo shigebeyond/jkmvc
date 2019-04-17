@@ -928,10 +928,9 @@ class MyTests{
             }
         }
         for(i in 0..2)
-            Thread(run).start()
+            Thread(run).startAndJoin()
 
         println("全部: " + q)
-        Thread.sleep(100000)
     }
 
 }

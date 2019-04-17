@@ -28,7 +28,7 @@ class GroupSupplierCombinerTest{
         }
     }
 
-    val combiner = GroupSupplierCombiner<Int, String, Map<String, Any>>("key", "value", true, this::batchSupplyInt)
+    val combiner = GroupSupplierCombiner<Int, String, Map<String, Any>>("key", "value", true, 100, 100, this::batchSupplyInt)
 
     /**
      * 批量supplier

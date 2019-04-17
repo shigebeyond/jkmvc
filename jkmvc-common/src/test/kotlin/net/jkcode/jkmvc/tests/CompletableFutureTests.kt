@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.tests
 
 import net.jkcode.jkmvc.common.randomBoolean
 import net.jkcode.jkmvc.common.randomInt
+import net.jkcode.jkmvc.common.startAndJoin
 import net.jkcode.jkmvc.validator.RuleValidator
 import org.junit.Test
 import java.util.*
@@ -49,12 +50,12 @@ class CompletableFutureTests{
         val cfs = taskList.stream()
                 .map<Any> { i ->
                     CompletableFuture.supplyAsync{
-                        Thread.sleep(1000L* randomInt(5))
-                        println("task线程：" + Thread.currentThread().name
-                                + "任务i=" + i + ",完成！+" + Date())
-                        i
-                    }
-                            .thenApply{
+                                Thread.sleep(1000L* randomInt(5))
+                                println("task线程：" + Thread.currentThread().name
+                                        + "任务i=" + i + ",完成！+" + Date())
+                                i
+                            }
+                            .thenApplyAsync{
                                 Integer.toString(it.toInt())
                             }
                             .whenComplete{ r, e ->
@@ -111,9 +112,7 @@ class CompletableFutureTests{
         val run = {
             println("第${i.getAndIncrement()}个等待者: ${f.get()}")
         }
-        Thread(run).start()
-        Thread(run).start()
-
-        Thread.sleep(2000)
+        Thread(run).startAndJoin()
+        Thread(run).startAndJoin()
     }
 }
