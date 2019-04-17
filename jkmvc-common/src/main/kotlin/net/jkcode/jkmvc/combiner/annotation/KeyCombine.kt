@@ -7,4 +7,4 @@ package net.jkcode.jksoa.client.combiner.annotation
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class KeyCombination()
+annotation class KeyCombine()
