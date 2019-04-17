@@ -2,8 +2,7 @@ package net.jkcode.jkmvc.common
 
 import net.jkcode.jkmvc.closing.ClosingOnShutdown
 import io.netty.util.HashedWheelTimer
-import java.util.concurrent.ForkJoinPool
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.*
 
 /**
  * 公共的毫秒级定时器
@@ -25,7 +24,8 @@ public val CommonSecondTimer by lazy{
  * 公共的线程池
  *   执行任务时要处理好异常
  */
-public val CommonThreadPool: ForkJoinPool = ForkJoinPool.commonPool()
+//public val CommonThreadPool: ExecutorService = ForkJoinPool.commonPool()
+public val CommonThreadPool: ExecutorService = Executors.newFixedThreadPool(8)
 
 /**
  * 关闭定时器与线程池
@@ -45,4 +45,12 @@ public val closer = object: ClosingOnShutdown(){
         CommonThreadPool.awaitTermination(1, TimeUnit.DAYS) // 等长一点 = 死等
     }
 
+}
+
+/**
+ * 启动+等待
+ */
+public fun Thread.startAndJoin(){
+    start()
+    join()
 }
