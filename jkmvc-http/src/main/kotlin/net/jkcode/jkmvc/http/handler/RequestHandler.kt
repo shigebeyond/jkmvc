@@ -85,19 +85,28 @@ object RequestHandler : IRequestHandler {
             httpLogger.debug("处理uri[${req.routeUri}]出错", e)
             return true
         }finally {
-            // 请求处理后，关闭资源
-            ClosingOnRequestEnd.triggerClosings()
-
-            // 如果是异步操作, 则需要关闭异步响应
-            if(req.isAsyncStarted){
-                if(result is CompletableFuture<*>) // 异步关闭
-                    result.whenComplete{ r, e ->
-                        req.asyncContext.complete()
-                    }
-                else // 同步关闭
-                    req.asyncContext.complete()
-            }
+            // 关闭请求
+            if (result is CompletableFuture<*>) // 异步关闭
+                result.whenComplete { r, e ->
+                    endRequest(req)
+                }
+            else // 同步关闭
+                endRequest(req)
         }
+
+    }
+
+    /**
+     * 关闭请求
+     * @param req
+     */
+    private fun endRequest(req: HttpRequest) {
+        // 请求处理后，关闭资源
+        ClosingOnRequestEnd.triggerClosings()
+
+        // 如果是异步操作, 则需要关闭异步响应
+        if (req.isAsyncStarted)
+            req.asyncContext.complete()
 
     }
 
