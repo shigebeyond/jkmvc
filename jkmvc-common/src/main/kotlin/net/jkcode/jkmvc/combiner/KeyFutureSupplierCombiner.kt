@@ -54,7 +54,7 @@ class FutureHolder<RequestArgumentType /* 请求参数类型 */, ResponseType /*
      * @return
      */
     protected fun cloneThenDeleteSrcFuture(): CompletableFuture<ResponseType> {
-        return future!!.thenApplyAsync {
+        return future!!.thenApply {
             // println("----- then")
             // 减少等待数, 同时在等待数为0(所有线程消费完)后, 删除异步结果, 以便下一个轮回
             if (waitNum.decrementAndGet() == 0)
