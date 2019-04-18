@@ -15,3 +15,12 @@ annotation class GroupCombine(
     public val flushSize: Int = 100 /* 触发刷盘的队列大小 */,
     public val flushTimeoutMillis: Long = 100 /* 触发刷盘的定时时间 */
 )
+
+/**
+ * 是否无值操作
+ * @return
+ */
+/*
+public fun GroupCombine.isApply(): Boolean {
+    return reqArgField.isEmpty()
+}*/

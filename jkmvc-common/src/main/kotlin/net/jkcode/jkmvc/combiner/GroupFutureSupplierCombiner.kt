@@ -24,7 +24,7 @@ open class GroupFutureSupplierCombiner<RequestArgumentType /* 请求参数类型
 
     /**
      * 处理刷盘的请求
-     *     如果 ResponseType != Void, 则需要你主动设置异步响应
+     *     如果 同步 + ResponseType != Void, 则需要你主动设置异步响应
      * @param args
      * @param reqs
      * @return 是否处理完毕, 同步处理返回true, 异步处理返回false
