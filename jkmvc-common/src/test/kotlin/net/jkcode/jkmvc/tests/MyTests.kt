@@ -1,9 +1,6 @@
 package net.jkcode.jkmvc.tests
 
 import getIntranetHost
-import io.netty.util.HashedWheelTimer
-import io.netty.util.Timeout
-import io.netty.util.TimerTask
 import net.jkcode.jkmvc.common.*
 import net.jkcode.jkmvc.idworker.SnowflakeId
 import net.jkcode.jkmvc.idworker.SnowflakeIdWorker
@@ -17,10 +14,7 @@ import org.junit.Test
 import java.io.File
 import java.lang.reflect.ParameterizedType
 import java.util.*
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
 import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
@@ -859,41 +853,6 @@ class MyTests{
     }
 
     @Test
-    fun testTimer(){
-        //val timer = CommonMilliTimer
-        val timer = HashedWheelTimer(1, TimeUnit.SECONDS, 3 /* 内部会调用normalizeTicksPerWheel()转为2的次幂, 如3转为4 */)
-        timer.newTimeout(object : TimerTask {
-            override fun run(timeout: Timeout) {
-                println("定时处理: " + Date().format())
-                timer.newTimeout(this, 3, TimeUnit.SECONDS)
-            }
-        }, 3, TimeUnit.SECONDS)
-
-        // HashedWheelTimer 是独立的线程, 需要在当前线程中等待他执行
-        try {
-            Thread.sleep(300L * 1000L)
-        } catch (e: Exception) {
-        }
-    }
-
-    @Test
-    fun testTimer2(){
-        newTimer()
-        Thread.sleep(100000)
-    }
-
-    private fun newTimer() {
-        val span: Long = 1000
-        CommonMilliTimer.newTimeout(object : TimerTask {
-            override fun run(timeout: Timeout) {
-                println("每隔 $span ms执行一次")
-
-                newTimer()
-            }
-        }, span, TimeUnit.MILLISECONDS)
-    }
-
-    @Test
     fun testGenericSuperclass(){
         val obj = ArrayList<String>()
         val clazz = obj.javaClass
@@ -931,98 +890,6 @@ class MyTests{
         makeThreads(3, run)
 
         println("全部: " + q)
-    }
-
-    @Volatile
-    private lateinit var msgs: ThreadLocal<String>
-
-    /**
-     * ThreadLocal
-     *   父子互不影响
-     */
-    @Test
-    fun testThreadLocalInChildThread(){
-        msgs = ThreadLocal<String>()
-
-        msgs.set("a")
-        println("mainThread: " + msgs.get()) // a
-        makeThreads(1) {
-            println("childThread: " + msgs.get()) // null
-            msgs.set("b")
-            println("childThread: " + msgs.get()) // b
-        }
-        println("mainThread: " + msgs.get()) // a
-    }
-
-    /**
-     * InheritableThreadLocal
-     *   单向: 父 写 子, 但子 不能写 父
-     */
-    @Test
-    fun testInheritableThreadLocalInChildThread(){
-        msgs = InheritableThreadLocal<String>()
-
-        msgs.set("a")
-        println("mainThread: " + msgs.get()) // a
-        makeThreads(1) {
-            println("childThread: " + msgs.get()) // a
-            msgs.set("b")
-            println("childThread: " + msgs.get()) // b
-        }
-        println("mainThread: " + msgs.get()) // a
-    }
-
-    /**
-     * 在无关的线程中测试
-     */
-    @Test
-    fun testInheritableThreadLocalInOtherThread(){
-        msgs = InheritableThreadLocal<String>()
-
-        msgs.set("a")
-        println("mainThread: " + msgs.get()) // a
-        // 线程池的中的线程也是当前线程创建的
-        CommonThreadPool.execute {
-            println("otherThread: " + msgs.get()) // a
-            msgs.set("b")
-            println("otherThread: " + msgs.get()) // b
-
-            makeThreads(1) {
-                println("childThread: " + msgs.get()) // b
-                msgs.set("b")
-                println("childThread: " + msgs.get()) // b
-            }
-        }
-        Thread.sleep(1000)
-        println("mainThread: " + msgs.get()) // a
-    }
-
-    /**
-     * 在无关的线程中测试
-     */
-    @Test
-    fun testInheritableThreadLocalIn() {
-        msgs = InheritableThreadLocal<String>()
-        msgs.set("0")
-        println("mainThread: " + msgs.get()) // 0
-
-        val run: () -> Unit = {
-            val srcTid = Thread.currentThread().id.toString()
-            val step = AtomicInteger(0)
-            val stepRun = {
-                step.incrementAndGet()
-                val destTid = Thread.currentThread().id.toString()
-                println("srcTid=$srcTid, destTid=$destTid, step=$step: " + msgs.get()) //
-                msgs.set(step.toString())
-                println("srcTid=$srcTid, destTid=$destTid, step=$step: " + msgs.get()) //
-            }
-            CompletableFuture.runAsync(stepRun)
-                    .thenRun(stepRun)
-                    .thenRun(stepRun)
-        }
-        makeThreads(1, run)
-        Thread.sleep(1000)
-        println("mainThread: " + msgs.get()) // 0
     }
 
 }
