@@ -1,7 +1,7 @@
 package net.jkcode.jkmvc.http
 
+import net.jkcode.jkmvc.common.ThreadLocalInheritableThreadPool
 import net.jkcode.jkmvc.http.handler.RequestHandler
-import java.util.concurrent.ForkJoinPool
 import javax.servlet.*
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -17,6 +17,9 @@ open class JkFilter : Filter {
     override fun init(filterConfig: FilterConfig) {
         // fix bug: jetty异步请求后 req.contextPath/req.servletContext 居然为null, 因此直接在 JkFilter.init() 时记录 contextPath, 反正他是全局不变的
         HttpRequest.globalServletContext = filterConfig.servletContext
+
+        // 将公共线程池应用到 CompletableFuture.asyncPool
+        ThreadLocalInheritableThreadPool.applyCommonPoolToCompletableFuture()
     }
 
     override fun doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) {
@@ -27,7 +30,7 @@ open class JkFilter : Filter {
 
             // 异步处理请求
             //actx.start { // web server线程池
-            ForkJoinPool.commonPool().execute { // 其他线程池
+            ThreadLocalInheritableThreadPool.commonPool.execute { // 其他线程池
                 handleRequest(actx.request, actx.response, chain)
             }
             return;
