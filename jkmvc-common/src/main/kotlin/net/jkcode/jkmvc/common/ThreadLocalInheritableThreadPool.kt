@@ -73,19 +73,19 @@ class ThreadLocalInheritableThreadPool(protected val pool: ExecutorService): Exe
 
         // 调用被代理的线程池
         pool.execute(){
-            // 在执行之前, 继承(直接引用) caller thread 的ThreadLocal对象, 因为是同一个ThreadLocal对象, 因此 caller thread 与 worker thread 都能看到批次的改动
+            // 3 在执行之前, 继承(直接引用) caller thread 的ThreadLocal对象, 因为是同一个ThreadLocal对象, 因此 caller thread 与 worker thread 都能看到批次的改动
             val worker = Thread.currentThread()
             threadLocalProp.set(worker, value)
             inheritableThreadLocalProp.set(worker, inheritableValue)
-            println("[${worker.name}] 继承 [${caller.name}] 的ThreadLocal对象")
+            //println("[${worker.name}] 继承 [${caller.name}] 的ThreadLocal对象")
 
-            // 执行
+            // 4 执行
             command.run()
 
-            // 在执行结束后, 清理
+            // 5 在执行结束后, 清理
             threadLocalProp.set(worker, null)
             inheritableThreadLocalProp.set(worker, null)
-            println("[${worker.name}] 清理ThreadLocal对象")
+            //println("[${worker.name}] 清理ThreadLocal对象")
         }
     }
 
