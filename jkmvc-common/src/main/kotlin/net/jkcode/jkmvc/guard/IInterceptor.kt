@@ -5,7 +5,7 @@ package net.jkcode.jkmvc.guard
  * @author shijianhang<772910474@qq.com>
  * @date 2019-03-01 11:39 AM
  */
-interface Interceptor<T> {
+interface IInterceptor<T> {
 
     /**
      * 前置处理请求
