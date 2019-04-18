@@ -5,18 +5,13 @@ import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl
 import java.io.File
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
-import java.lang.reflect.Constructor
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
-import java.lang.reflect.ParameterizedType
+import java.lang.reflect.*
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
-import kotlin.reflect.KParameter
-import kotlin.reflect.KProperty1
+import kotlin.reflect.*
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.staticFunctions
+import kotlin.reflect.full.staticProperties
 import kotlin.reflect.jvm.javaType
 
 /**
@@ -133,6 +128,17 @@ public fun KClass<*>.getConstructor(vararg paramTypes:Class<*>): KFunction<*>?{
  */
 public fun KClass<*>.getProperty(name:String): KProperty1<*, *>?{
     return this.declaredMemberProperties.find {
+        it.name == name;
+    }
+}
+
+/**
+ * 查找静态属性
+ * @param name 属性名
+ * @return
+ */
+public fun KClass<*>.getStaticProperty(name:String): KProperty0<*>? {
+    return this.staticProperties.find {
         it.name == name;
     }
 }
@@ -304,4 +310,24 @@ fun Class<*>.getSuperClassGenricType(index: Int = 0): Class<*> {
         return Any::class.java
 
     return params[index] as Class<*>
+}
+
+/**
+ * 获得final的属性, 并使其可写
+ * @param name 属性名
+ * @return
+ */
+public fun Class<*>.getWritableFinalField(name: String): Field {
+    val field = getDeclaredField(name)
+
+    // 去掉final
+    val modifiersField = Field::class.java!!.getDeclaredField("modifiers")
+    modifiersField.setAccessible(true) //Field 的 modifiers 是私有的
+    modifiersField.setInt(field, field.modifiers and Modifier.FINAL.inv())
+
+    // 开放访问
+    if (!field.isAccessible)
+        field.isAccessible = true
+
+    return field
 }
