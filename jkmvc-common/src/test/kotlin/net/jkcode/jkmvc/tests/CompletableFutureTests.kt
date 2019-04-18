@@ -1,9 +1,8 @@
 package net.jkcode.jkmvc.tests
 
+import net.jkcode.jkmvc.common.makeThreads
 import net.jkcode.jkmvc.common.randomBoolean
 import net.jkcode.jkmvc.common.randomInt
-import net.jkcode.jkmvc.common.startAndJoin
-import net.jkcode.jkmvc.validator.RuleValidator
 import org.junit.Test
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -112,8 +111,8 @@ class CompletableFutureTests{
         val run = {
             println("第${i.getAndIncrement()}个等待者: ${f.get()}")
         }
-        Thread(run).startAndJoin()
-        Thread(run).startAndJoin()
+
+        makeThreads(3, run)
     }
 
     @Test

@@ -17,14 +17,15 @@ import org.junit.Test
 import java.io.File
 import java.lang.reflect.ParameterizedType
 import java.util.*
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.jvm.javaMethod
-import kotlin.reflect.jvm.javaType
 import kotlin.reflect.jvm.reflect
 
 open class A() {
@@ -927,10 +928,101 @@ class MyTests{
                 println("出队:"  + list)
             }
         }
-        for(i in 0..2)
-            Thread(run).startAndJoin()
+        makeThreads(3, run)
 
         println("全部: " + q)
+    }
+
+    @Volatile
+    private lateinit var msgs: ThreadLocal<String>
+
+    /**
+     * ThreadLocal
+     *   父子互不影响
+     */
+    @Test
+    fun testThreadLocalInChildThread(){
+        msgs = ThreadLocal<String>()
+
+        msgs.set("a")
+        println("mainThread: " + msgs.get()) // a
+        makeThreads(1) {
+            println("childThread: " + msgs.get()) // null
+            msgs.set("b")
+            println("childThread: " + msgs.get()) // b
+        }
+        println("mainThread: " + msgs.get()) // a
+    }
+
+    /**
+     * InheritableThreadLocal
+     *   单向: 父 写 子, 但子 不能写 父
+     */
+    @Test
+    fun testInheritableThreadLocalInChildThread(){
+        msgs = InheritableThreadLocal<String>()
+
+        msgs.set("a")
+        println("mainThread: " + msgs.get()) // a
+        makeThreads(1) {
+            println("childThread: " + msgs.get()) // a
+            msgs.set("b")
+            println("childThread: " + msgs.get()) // b
+        }
+        println("mainThread: " + msgs.get()) // a
+    }
+
+    /**
+     * 在无关的线程中测试
+     */
+    @Test
+    fun testInheritableThreadLocalInOtherThread(){
+        msgs = InheritableThreadLocal<String>()
+
+        msgs.set("a")
+        println("mainThread: " + msgs.get()) // a
+        // 线程池的中的线程也是当前线程创建的
+        CommonThreadPool.execute {
+            println("otherThread: " + msgs.get()) // a
+            msgs.set("b")
+            println("otherThread: " + msgs.get()) // b
+
+            makeThreads(1) {
+                println("childThread: " + msgs.get()) // b
+                msgs.set("b")
+                println("childThread: " + msgs.get()) // b
+            }
+        }
+        Thread.sleep(1000)
+        println("mainThread: " + msgs.get()) // a
+    }
+
+    /**
+     * 在无关的线程中测试
+     */
+    @Test
+    fun testInheritableThreadLocalIn() {
+        msgs = InheritableThreadLocal<String>()
+        msgs.set("0")
+        println("mainThread: " + msgs.get()) // 0
+
+        val run: () -> Unit = {
+            val srcTid = Thread.currentThread().id.toString()
+            val step = AtomicInteger(0)
+            val stepRun = {
+                step.incrementAndGet()
+                val destTid = Thread.currentThread().id.toString()
+                println("srcTid=$srcTid, destTid=$destTid, step=$step: " + msgs.get()) //
+                msgs.set(step.toString())
+                println("srcTid=$srcTid, destTid=$destTid, step=$step: " + msgs.get()) //
+            }
+            CompletableFuture.runAsync(stepRun)
+                    .thenRun(stepRun)
+                    .thenRun(stepRun)
+        }
+        makeThreads(1, run)
+        Thread.sleep(1000)
+        println("mainThread: " + msgs.get()) // 0
     }
 
 }
