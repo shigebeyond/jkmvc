@@ -213,10 +213,18 @@ public fun Class<*>.isSuperClass(subClass: Class<*>): Boolean {
 
 /**
  * 获得方法签名
+ * @param withClass
  * @return
  */
-public fun Method.getSignature(): String {
-    return this.parameterTypes.joinTo(StringBuilder(this.name), ",", "(", ")"){
+public fun Method.getSignature(withClass: Boolean = false): String {
+    val buffer = StringBuilder()
+    // 类名
+    if(withClass)
+        buffer.append(this.declaringClass.name).append('.')
+    // 方法名
+    buffer.append(this.name)
+    // 参数类型
+    return this.parameterTypes.joinTo(buffer, ",", "(", ")"){
         it.name
     }.toString().replace("java.lang.", "")
 }
