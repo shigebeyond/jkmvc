@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.http.handler
 
 import net.jkcode.jkmvc.closing.ClosingOnRequestEnd
 import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.common.trySupplier
 import net.jkcode.jkmvc.common.ucFirst
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
@@ -58,56 +59,11 @@ object RequestHandler : IRequestHandler {
         if(req.isStaticFile())
             return false;
 
-        // 构建响应对象
         val res = HttpResponse(response);
-        var result: Any? = null
-
-        try{
-            // 解析路由
-            if (!req.parseRoute())
-                throw RouteException("当前uri没有匹配路由：" + req.requestURI);
-
-            if(debug)
-                httpLogger.debug("当前uri匹配路由: controller=[{}], action=[{}]", req.controller, req.action)
-
-            // 调用路由对应的controller与action
-            result = callController(req, res);
-            return true;
+        trySupplier( {callController(req, res)} /* 调用路由对应的controller与action */){ v, r ->
+            endRequest(req) // 关闭请求
         }
-        /* catch (e：RouteException)
-        {
-            // 输出404响应
-            res.setStatus(404).send();
-            return true
-        } */
-        catch (e: Exception) {
-            e.printStackTrace(res.prepareWriter())
-            httpLogger.debug("处理uri[${req.routeUri}]出错", e)
-            return true
-        }finally {
-            // 关闭请求
-            if (result is CompletableFuture<*>) // 异步关闭
-                result.whenComplete { r, e ->
-                    endRequest(req)
-                }
-            else // 同步关闭
-                endRequest(req)
-        }
-
-    }
-
-    /**
-     * 关闭请求
-     * @param req
-     */
-    private fun endRequest(req: HttpRequest) {
-        // 请求处理后，关闭资源
-        ClosingOnRequestEnd.triggerClosings()
-
-        // 如果是异步操作, 则需要关闭异步响应
-        if (req.isAsyncStarted)
-            req.asyncContext.complete()
-
+        return true
     }
 
     /**
@@ -118,6 +74,13 @@ object RequestHandler : IRequestHandler {
      * @return
      */
     private fun callController(req: HttpRequest, res: HttpResponse): Any? {
+        // 解析路由
+        if (!req.parseRoute())
+            throw RouteException("当前uri没有匹配路由：" + req.requestURI);
+
+        if(debug)
+            httpLogger.debug("当前uri匹配路由: controller=[{}], action=[{}]", req.controller, req.action)
+
         // 获得controller类
         val clazz: ControllerClass? = ControllerClassLoader.getControllerClass(req.controller);
         if (clazz == null)
@@ -149,4 +112,18 @@ object RequestHandler : IRequestHandler {
         // 调用controller的action方法
         return controller.callActionMethod(action)
     }
+
+    /**
+     * 关闭请求
+     * @param req
+     */
+    private fun endRequest(req: HttpRequest) {
+        // 请求处理后，关闭资源
+        ClosingOnRequestEnd.triggerClosings()
+
+        // 如果是异步操作, 则需要关闭异步响应
+        if (req.isAsyncStarted)
+            req.asyncContext.complete()
+    }
+
 }

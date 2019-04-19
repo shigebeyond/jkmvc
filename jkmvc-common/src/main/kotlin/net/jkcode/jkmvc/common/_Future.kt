@@ -39,12 +39,12 @@ public fun <RequestArgumentType, ResponseType> toFutureSupplier(supplier: (Reque
  * @param supplier 取值函数
  * @param complete 完成后的回调函数, 接收2个参数: 1 结果值 2 异常
  */
-public fun <T> trySupplier(supplier: Supplier<T>, complete: BiConsumer<T?, Throwable?>){
+public inline fun <T> trySupplier(supplier: () -> T, noinline complete: (T?, Throwable?) -> Unit){
     var result:T? = null
     var rh: Throwable? = null
     try{
         // 调用取值函数
-        result = supplier.get()
+        result = supplier.invoke()
         // 异步结果
         if(result is CompletableFuture<*>)
             (result as CompletableFuture<T>).whenComplete(complete) // 完成后回调
@@ -53,6 +53,6 @@ public fun <T> trySupplier(supplier: Supplier<T>, complete: BiConsumer<T?, Throw
     }finally {
         // 同步结果
         if(result !is CompletableFuture<*>)
-            complete.accept(result, rh) // 完成后回调
+            complete.invoke(result, rh) // 完成后回调
     }
 }
