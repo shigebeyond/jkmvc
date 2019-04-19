@@ -24,10 +24,14 @@ class CompletableFutureTests{
         f.thenAccept {
             println("成功了有结果: $it")
         }
-        f.exceptionally {
+        val newFuture = f.exceptionally {
             println("失败了有异常: $it")
-            null
+            -1 // 发生异常后, 可以返回新的成功值, 但是只限于新future
+        }.thenAccept {
+            println("异常依旧返回结果: $it")
         }
+
+        // 对上一行的异常捕获, 并返回新的值, 不会影响旧的future
         f.whenComplete{ r, e ->
             println("最后汇总: 结果=" + r + "，异常=" + e)
         }

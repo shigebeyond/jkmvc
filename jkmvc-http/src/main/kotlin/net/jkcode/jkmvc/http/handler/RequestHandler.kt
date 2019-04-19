@@ -2,7 +2,7 @@ package net.jkcode.jkmvc.http.handler
 
 import net.jkcode.jkmvc.closing.ClosingOnRequestEnd
 import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.trySupplier
+import net.jkcode.jkmvc.common.trySupplierFinally
 import net.jkcode.jkmvc.common.ucFirst
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
@@ -60,7 +60,7 @@ object RequestHandler : IRequestHandler {
             return false;
 
         val res = HttpResponse(response);
-        trySupplier( {callController(req, res)} /* 调用路由对应的controller与action */){ v, r ->
+        trySupplierFinally( {callController(req, res)} /* 调用路由对应的controller与action */){ v, r ->
             endRequest(req) // 关闭请求
         }
         return true
