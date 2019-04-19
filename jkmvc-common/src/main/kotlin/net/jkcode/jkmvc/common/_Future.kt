@@ -21,12 +21,14 @@ public fun Array<CompletableFuture<*>>.print() {
 }
 
 /**
- * 转为future工厂
+ * 将(单参数)的方法调用 转为future工厂
+ * @param supplier
+ * @return
  */
 public fun <RequestArgumentType, ResponseType> toFutureSupplier(supplier: (RequestArgumentType) -> ResponseType):(RequestArgumentType) -> CompletableFuture<ResponseType> {
-    return { arg ->
+    return { singleArg ->
         CompletableFuture.supplyAsync({
-            supplier.invoke(arg)
+            supplier.invoke(singleArg)
         })
     }
 }
@@ -62,7 +64,7 @@ public inline fun trySupplierFinally(supplier: () -> Any?, noinline complete: (A
  * @param catch 异常回调函数
  * @return
  */
-public inline fun trySupplierCatch(supplier: () -> Any?, noinline catch: (Throwable?) -> Any?): Any?{
+public inline fun <T> trySupplierCatch(supplier: () -> T, noinline catch: (Throwable) -> Any?): T{
     
     var result:Any?
     var rh: Throwable? = null
@@ -71,10 +73,10 @@ public inline fun trySupplierCatch(supplier: () -> Any?, noinline catch: (Throwa
         result = supplier.invoke()
         // 异步结果, 返回新的 CompletableFuture
         if(result is CompletableFuture<*>)
-            return (result as CompletableFuture<Any?>).exceptionally(catch) // 异常回调
+            return (result as CompletableFuture<Any>).exceptionally(catch) as T // 异常回调
 
         return result
     }catch (r: Throwable){
-        return catch.invoke(r) // 异常回调
+        return catch.invoke(r) as T // 异常回调
     }
 }
