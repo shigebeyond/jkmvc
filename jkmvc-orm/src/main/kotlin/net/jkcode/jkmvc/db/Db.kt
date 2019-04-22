@@ -11,6 +11,7 @@ import kotlin.reflect.KClass
 /**
  * 封装db操作
  *   ThreadLocal保证的线程安全, 每个请求都创建新的db对象
+ *   db对象的生命周期是请求级
  *
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
@@ -65,6 +66,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
 
     /**
      * 是否强制使用主库
+     *    db对象的生命周期是请求级
      */
     public var forceMaster: Boolean = false;
 
@@ -263,6 +265,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
      */
     public override fun execute(sql: String, params: List<Any?>, generatedColumn:String?): Int {
         try{
+            // forceMaster = true // 更新后, 让后续操作走主库
             return masterConn.execute(sql, params, generatedColumn);
         }catch (e:Exception){
             dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
@@ -280,6 +283,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
      */
     public override fun batchExecute(sql: String, paramses: List<Any?>, paramSize:Int): IntArray {
         try{
+            // forceMaster = true // 更新后, 让后续操作走主库
             return masterConn.batchExecute(sql, paramses, paramSize)
         }catch (e:Exception){
             dbLogger.error("出错[{}], sql={}, params={}", e.message, sql, paramses)

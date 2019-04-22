@@ -108,6 +108,22 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
     }
 
     /**
+     * 自增
+     *
+     * @param params 参数
+     * @param db 数据库连接
+     * @return
+     */
+    public override fun incr(column: String, step: Int, params: List<Any?>, db: IDb): Boolean {
+        // 1 编译
+        set(column, DbExpr("$column + $step", false)) // Equals: set(column, "$column + $step", true)
+        val csql = compile(SqlType.UPDATE, db);
+
+        // 2 执行 update
+        return csql.execute(params, null, db) > 0
+    }
+
+    /**
      * 编译 + 执行
      *
      * @param action sql动作：select/insert/update/delete
