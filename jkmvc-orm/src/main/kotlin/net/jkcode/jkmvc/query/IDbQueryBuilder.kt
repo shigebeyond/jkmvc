@@ -152,6 +152,15 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
     }
 
     /**
+     * 自增
+     *
+     * @param params 参数
+     * @param db 数据库连接
+     * @return
+     */
+    public abstract fun incr(column: String, step: Int = 1, params: List<Any?> = emptyList(), db: IDb = defaultDb): Boolean
+
+    /**
      * 批量更新有参数的sql
      *
      * @param action sql动作：select/insert/update/delete
