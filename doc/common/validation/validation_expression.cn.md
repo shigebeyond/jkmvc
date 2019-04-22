@@ -8,7 +8,7 @@
 
 ### 1.1 函数
 
-在子表达式中调用的所有函数，都是定义在类`net.jkcode.jkmvc.validate.Validation` 中的方法，我们将方法分成2类
+在子表达式中调用的所有函数，都是定义在类`net.jkcode.jkmvc.validator.Validation` 中的方法，我们将方法分成2类
 
 1. 校验值的函数
 方法 | 作用

@@ -7,7 +7,7 @@
 2. `value`: 待校验的值
 3. `variables`: 校验表达式中需要的其他变量
 
-返回值类型是 `net.jkcode.jkmvc.validate.ValidationResult`，它有3个属性:
+返回值类型是 `net.jkcode.jkmvc.validator.ValidationResult`，它有3个属性:
 1. `result`: 执行结果
 1. `unit`: 最后一个校验单元（函数调用）
 1. `lastValue`: 最后的累积的值

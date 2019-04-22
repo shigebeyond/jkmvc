@@ -92,10 +92,19 @@ sourceSets {
 
 // 启动jetty
 gretty{
-    inplaceMode "hard" // 资源目录 src/main/webapp
+    // server 配置
+    servletContainer 'jetty9' // 'tomcat8'
     httpPort 8080
-    contextPath project.name
-    scanInterval 1 // jetty 热部署，当值为0时，不扫描新class，不热部署
+    managedClassReload true // 热部署
+    scanInterval 1 // 热部署的扫描间隔，当值为0时，不扫描新class，不热部署
+
+    // 调试: gradle appRunDebug
+    debugPort 5006 // 运行jetty的jvm独立于运行gradle的jvm, 因此也使用独立的调试端口
+    debugSuspend true
+
+    // webapp 配置
+    contextPath "/${project.name}"
+    inplaceMode "hard" // 资源目录 src/main/webapp
 }
 ```
 
@@ -115,6 +124,8 @@ vim src/main/webapp/WEB-INF/web.xml
 <filter>
     <filter-name>jkmvc</filter-name>
     <filter-class>net.jkcode.jkmvc.http.JkFilter</filter-class>
+    <!-- 支持servlet3.0的异步servlet -->
+    <async-supported>true</async-supported>
 </filter>
 
 <filter-mapping>
@@ -122,6 +133,7 @@ vim src/main/webapp/WEB-INF/web.xml
     <url-pattern>/*</url-pattern>
 </filter-mapping>
 ```
+
 ## 2 编写代码
 
 ### 2.1 创建第一个Controller类

@@ -1,6 +1,6 @@
 # 数据库操作
 
-## 1 数据库配置
+## 1 数据库配置, 支持读写分离
 
 vim src/main/resources/database.yaml
 

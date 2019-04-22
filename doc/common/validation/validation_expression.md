@@ -8,7 +8,7 @@ The sub-expression is a function call expression, in the form of `a(1,2)`
 
 ### 1.1 Functions
 
-Functions in sub-expression are defined in `net.jkcode.jkmvc.validate.Validation`. We divide the functions into two categories:
+Functions in sub-expression are defined in `net.jkcode.jkmvc.validator.Validation`. We divide the functions into two categories:
 
 1. Functions to test a value
 

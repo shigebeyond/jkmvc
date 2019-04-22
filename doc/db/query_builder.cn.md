@@ -315,11 +315,11 @@ SELECT  * FROM `user` WHERE ( `id` IN (1, 2, 3, 5)  AND ( `lastLogin` <= 1511069
 
 在 `DbQueryBuilder` 的 `insert/update` 语句中，要保存的字段值总是要被转义 `Db::quote(value:Any?)`。但是有时候字段值是一个原生的表达式与函数调用，此时是不需要转义的。
 
-因此，我们需要数据库表达式 `DbExpression`，用于添加不转义的字段值，表示要保存的字段值是一个sql表达式，如 now() / column1 + 1
+因此，我们需要数据库表达式 `DbExpr`，用于添加不转义的字段值，表示要保存的字段值是一个sql表达式，如 now() / column1 + 1
 
 ```
 DbQueryBuilder().table("user")
-    .set("login_count", DbExpression("login_count + 1")) // 等价于 .set("login_count", "login_count + 1", true)
+    .set("login_count", DbExpr("login_count + 1")) // 等价于 .set("login_count", "login_count + 1", true)
     .where("id", "=", 45)
     .update();
 ```
@@ -330,7 +330,7 @@ DbQueryBuilder().table("user")
 UPDATE `user` SET `login_count` = `login_count` + 1 WHERE `id` = 45
 ```
 
-[!!] 你必须要事先保证：创建`DbExpression(input:String)` 时传递的表达式是有效并且已转义过的。
+[!!] 你必须要事先保证：创建`DbExpr(input:String)` 时传递的表达式是有效并且已转义过的。
 
 ## 7 例子
 

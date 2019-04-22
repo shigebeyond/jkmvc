@@ -1,6 +1,6 @@
 ＃ 校验
 
-Orm模型与[Validation](../common/validation/validation.cn.md)库紧密集成，该库提供了异常类`net.jkcode.jkmvc.validate.ValidationException`，来帮助您快速处理基本CRUD操作的验证错误。
+Orm模型与[Validation](../common/validation/validation.cn.md)库紧密集成，该库提供了异常类`net.jkcode.jkmvc.validator.ValidateException`，来帮助您快速处理基本CRUD操作的验证错误。
 
 ## 1 定义校验规则
 
@@ -41,7 +41,7 @@ Jkmvc通过`Orm.validate（）`方法执行验证。
 
 ## 3自动验证
 
-当调用`Orm.validate()`/`Orm::save()`/`Orm::update()`方法时，模型都会自动调用`Orm.validate()`来验证自己的数据。 因此当发现模型的数据无效时，会抛出校验异常`net.jkcode.jkmvc.validate.ValidationException`。
+当调用`Orm.validate()`/`Orm::save()`/`Orm::update()`方法时，模型都会自动调用`Orm.validate()`来验证自己的数据。 因此当发现模型的数据无效时，会抛出校验异常`net.jkcode.jkmvc.validator.ValidateException`。
 
 ```
 public fun createAction()
@@ -52,7 +52,7 @@ public fun createAction()
 		user.username = 'invalid username';
 		user.save();
 	}
-	catch (e: ValidationException)
+	catch (e: ValidateException)
 	{
 		// 处理校验异常
 	}

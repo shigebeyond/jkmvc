@@ -7,6 +7,7 @@
     <filter>
         <filter-name>jkmvc</filter-name>
         <filter-class>net.jkcode.jkmvc.http.JkFilter</filter-class>
+        <!-- 支持servlet3.0的异步servlet -->
         <async-supported>true</async-supported>
     </filter>
 

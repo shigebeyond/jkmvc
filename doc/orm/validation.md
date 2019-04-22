@@ -1,6 +1,6 @@
 # Validation
 
-Orm models are tightly integrated with the [Validation](../common/validation/validation.md) library which comes with a very flexible `net.jkcode.jkmvc.validate.ValidationException` that helps you quickly handle validation errors from basic CRUD operations.
+Orm models are tightly integrated with the [Validation](../common/validation/validation.md) library which comes with a very flexible `net.jkcode.jkmvc.validator.ValidateException` that helps you quickly handle validation errors from basic CRUD operations.
 
 ## 1 Defining Rules
 
@@ -41,7 +41,7 @@ The method has actual parameter:
 
 ## 3 Automatic Validation
 
-All models automatically validate their own data by calling `Orm.validate()` when `Orm::save()`, `Orm::update()`, or `Orm::create()` is called. Because of this, you should always expect these methods to throw an `net.jkcode.jkmvc.validate.ValidationException` when the model's data is invalid.
+All models automatically validate their own data by calling `Orm.validate()` when `Orm::save()`, `Orm::update()`, or `Orm::create()` is called. Because of this, you should always expect these methods to throw an `net.jkcode.jkmvc.validator.ValidateException` when the model's data is invalid.
 
 ```
 public fun createAction()
@@ -52,7 +52,7 @@ public fun createAction()
 		user.username = 'invalid username';
 		user.save();
 	}
-	catch (e: ValidationException)
+	catch (e: ValidateException)
 	{
 		// handle exception
 	}

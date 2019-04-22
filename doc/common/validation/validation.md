@@ -7,7 +7,7 @@ It needs 3 paramters:
 2. `value`: value to validate 
 3. `variables`: other values used as validate paramerters
 
-The return type is `net.jkcode.jkmvc.validate.ValidationResult`, it has 3 properties:
+The return type is `net.jkcode.jkmvc.validator.ValidationResult`, it has 3 properties:
 1. `result`: the execution result
 1. `unit`: the last validation unit(function call)
 1. `lastValue`: the accumulate value 

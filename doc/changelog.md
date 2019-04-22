@@ -20,5 +20,7 @@
 
 # 1.7
 1. 调整包名, 将包`com.jkmvc`重命名为`net.jkcode.jkmvc`
-2. 添加限流算法
-3. 支持请求合并: 可根据key或group来合并请求, 可用于合并cache/rpc请求
+
+2. 支持servlet3.0, 即异步servlet
+
+3. 支持action方法返回 CompletableFuture
