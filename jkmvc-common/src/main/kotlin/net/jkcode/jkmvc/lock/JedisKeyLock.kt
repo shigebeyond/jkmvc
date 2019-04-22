@@ -22,16 +22,11 @@ class JedisKeyLock : IDistributedKeyLock() {
         public val KeyPrefix: String = "lock/"
 
         /**
-         * 配置
-         */
-        public val config: IConfig = Config.instance("dlock", "yaml")
-
-        /**
          * redis连接
          */
         protected val jedis: Jedis
             get(){
-                return JedisFactory.instance(config["redisConfigName"]!!)
+                return JedisFactory.instance()
             }
     }
 

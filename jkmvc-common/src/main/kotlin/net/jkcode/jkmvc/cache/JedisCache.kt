@@ -38,7 +38,7 @@ class JedisCache(protected val configName: String = "default") : BaseCache(){
      * @param key 键
      * @return
      */
-    public override fun get(key: Any): Any? {
+    public override fun doGet(key: Any): Any? {
         val value = jedis.get(serializer.serialize(key))
         if(value == null)
             return null
@@ -50,11 +50,11 @@ class JedisCache(protected val configName: String = "default") : BaseCache(){
      *
      * @param key 键
      * @param value 值
-     * @param expires 过期时间（秒）
+     * @param expireSencond 过期秒数
      */
-    public override fun put(key: Any, value: Any, expires:Long):Unit {
+    public override fun doPut(key: Any, value: Any, expireSencond:Long):Unit {
         //jedis.set(key.toString(), value.toString(), "NX", "EX", expires)
-        jedis.set(serializer.serialize(key), serializer.serialize(value), "NX".toByteArray(), "EX".toByteArray(), expires)
+        jedis.set(serializer.serialize(key), serializer.serialize(value), "NX".toByteArray(), "EX".toByteArray(), expireSencond)
     }
 
     /**

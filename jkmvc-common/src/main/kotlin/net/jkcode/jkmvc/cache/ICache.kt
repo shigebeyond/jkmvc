@@ -3,6 +3,7 @@ package net.jkcode.jkmvc.cache
 import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.common.IConfig
 import net.jkcode.jkmvc.singleton.NamedConfiguredSingletons
+import java.util.concurrent.CompletableFuture
 
 /**
  * 缓存操作接口
@@ -26,26 +27,27 @@ interface ICache {
      * @param key 键
      * @return
      */
-    operator fun get(key: Any): Any?
+    fun get(key: Any): Any?
 
     /**
      * 根据键获得值
      *
      * @param key 键
-     * @param expires 过期时间（秒）
-     * @param defaultValue 回源值的函数
+     * @param expireSeconds 过期秒数
+     * @param waitMillis 等待的毫秒数
+     * @param dataLoader 回源函数, 兼容函数返回类型是CompletableFuture
      * @return
      */
-    fun getOrPut(key: Any, expires:Long, defaultValue: () -> Any): Any?
+    fun getOrPut(key: Any, expireSeconds:Long, waitMillis:Long = 200, dataLoader: () -> Any?): CompletableFuture<Any?>
 
     /**
      * 设置键值
      *
      * @param key 键
      * @param value 值
-     * @param expires 过期时间（秒）
+     * @param expireSencond 过期秒数
      */
-    fun put(key: Any, value: Any, expires:Long):Unit
+    fun put(key: Any, value: Any?, expireSencond:Long):Unit
 
     /**
      * 删除指定的键的值

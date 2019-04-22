@@ -124,6 +124,7 @@ class MyTests{
 
     @Test
     fun testPair(){
+        println(Pair("a", "b"))
         println(Pair("a", "b") == Pair("a", "b")) // true
         println(Pair(1, 2) == Pair(1, 2)) // true
         println(Pair(Integer(1), String(charArrayOf('a'))) == Pair(Integer(1), String(charArrayOf('a')))) // true

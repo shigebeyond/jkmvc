@@ -1,7 +1,12 @@
 package net.jkcode.jkmvc.cache
 
+import io.netty.util.Timeout
+import io.netty.util.TimerTask
+import net.jkcode.jkmvc.common.CommonMilliTimer
+import net.jkcode.jkmvc.common.trySupplierFinally
 import net.jkcode.jkmvc.lock.IKeyLock
-import net.jkcode.jkmvc.lock.LocalKeyLock
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
 
 /**
  * 基础缓存类
@@ -19,21 +24,79 @@ abstract class BaseCache: ICache {
      * 根据键获得值
      *
      * @param key 键
-     * @param expires 过期时间（秒）
-     * @param defaultValue 回源值的函数
      * @return
      */
-    public override fun getOrPut(key: Any, expires:Long, defaultValue: () -> Any): Any? {
-        val v = this.get(key)
-        if (v != null)
-            return v
+    public override fun get(key: Any): Any?{
+        val v = doGet(key)
+        return if(v == Unit) null else v
+    }
 
-        // 锁住key, 防止并发回源
-        return lock.quickLockCleanly(key){
-            val default = defaultValue()
-            this.put(key, default, expires)
-            default
+    /**
+     * 根据键获得值
+     *
+     * @param key 键
+     * @return
+     */
+    public abstract fun doGet(key: Any): Any?
+
+    /**
+     * 设置键值
+     *
+     * @param key 键
+     * @param value 值
+     * @param expireSencond 过期秒数
+     */
+    public override fun put(key: Any, value: Any?, expireSencond:Long):Unit{
+        doPut(key, value ?: Unit, expireSencond)
+    }
+
+    /**
+     * 设置键值
+     *
+     * @param key 键
+     * @param value 值
+     * @param expireSencond 过期秒数
+     */
+    public abstract fun doPut(key: Any, value: Any, expireSencond:Long):Unit
+
+    /**
+     * 根据键获得值
+     *
+     * @param key 键
+     * @param expireSeconds 过期秒数
+     * @param waitMillis 等待的毫秒数
+     * @param dataLoader 回源函数, 兼容函数返回类型是CompletableFuture
+     * @return
+     */
+    public override fun getOrPut(key: Any, expireSeconds:Long, waitMillis:Long, dataLoader: () -> Any?): CompletableFuture<Any?> {
+        // 1 尝试读缓存
+        val v = doGet(key)
+        if (v != null)
+            return CompletableFuture.completedFuture(if(v == Unit) null else v)
+
+        // 2 无缓存, 则回源
+        val result = CompletableFuture<Any?>()
+        // 2.1 锁住key, 则回源, 防止并发回源
+        val locked = lock.quickLockCleanly(key){
+            // 回源
+            trySupplierFinally(dataLoader){ v, t ->
+                // 写缓存
+                this.put(key, v, expireSeconds)
+                result.complete(v)
+            }
         }
+        // 2.2 锁不住key, 则等待指定毫秒数后读缓存
+        if(!locked){
+            CommonMilliTimer.newTimeout(object : TimerTask {
+                override fun run(timeout: Timeout) {
+                    // 读缓存
+                    val v = get(key)
+                    result.complete(v)
+                }
+            }, waitMillis, TimeUnit.MILLISECONDS)
+        }
+
+        return result
     }
 
 }

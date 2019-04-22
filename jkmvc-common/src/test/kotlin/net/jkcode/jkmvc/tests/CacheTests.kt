@@ -8,10 +8,12 @@ class CacheTests{
 
     @Test
     fun testGetOrPut(){
-        ICache.instance("jedis").getOrPut("test", 60){
-            Thread.sleep(1000)
-            randomInt(100)
+        val data = ICache.instance("jedis").getOrPut("test", 15){
+            val v = randomInt(100)
+            println("set cache: $v")
+            v
         }
+        println("get cache: " + data.get())
     }
 
 

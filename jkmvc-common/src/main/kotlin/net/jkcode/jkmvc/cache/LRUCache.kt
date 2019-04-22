@@ -27,7 +27,7 @@ class LRUCache(protected val maxSize:Int = 10000 /*最大个数*/) : BaseCache()
      * @return
      */
     @Synchronized
-    public override fun get(key: Any): Any? {
+    public override fun doGet(key: Any): Any? {
         return storage.get(key)
     }
 
@@ -36,10 +36,10 @@ class LRUCache(protected val maxSize:Int = 10000 /*最大个数*/) : BaseCache()
      *
      * @param key 键
      * @param value 值
-     * @param expires 过期时间（秒）
+     * @param expireSencond 过期秒数
      */
     @Synchronized
-    public override fun put(key: Any, value: Any, expires: Long):Unit {
+    public override fun doPut(key: Any, value: Any, expireSencond: Long):Unit {
         storage.put(key, value)
     }
 

@@ -43,14 +43,17 @@ interface IKeyLock {
      *
      * @param expireSeconds 锁的过期时间, 单位秒
      * @param block 处理
+     * @return 是否加锁成功
      */
-    public fun quickLockCleanly(key: Any, expireSeconds: Int = 5, block: () -> Unit){
-        if(quickLock(key, expireSeconds)){
+    public fun quickLockCleanly(key: Any, expireSeconds: Int = 5, block: () -> Unit): Boolean {
+        val locked = quickLock(key, expireSeconds)
+        if(locked){
             try{
                 block()
             }finally {
                 unlock(key)
             }
         }
+        return locked
     }
 }
