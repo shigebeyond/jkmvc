@@ -23,9 +23,9 @@ import kotlin.collections.HashMap
  *
  */
 open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
-                      protected var convertingValue: Boolean = false /* 查询时是否智能转换字段值 */,
-                      protected var convertingColumn: Boolean = false /* 查询时是否智能转换字段名 */,
-                      protected var withSelect: Boolean = true /* with()联查时自动select关联表的字段 */
+                          protected var convertingValue: Boolean = false /* 查询时是否智能转换字段值 */,
+                          protected var convertingColumn: Boolean = false /* 查询时是否智能转换字段名 */,
+                          protected var withSelect: Boolean = true /* with()联查时自动select关联表的字段 */
 ) : DbQueryBuilder(ormMeta.db) {
 
     init {

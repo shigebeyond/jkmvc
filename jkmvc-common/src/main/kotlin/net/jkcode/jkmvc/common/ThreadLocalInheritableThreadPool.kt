@@ -3,7 +3,6 @@ package net.jkcode.jkmvc.common
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.ForkJoinPool
-import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.jvm.javaField
 
@@ -22,8 +21,8 @@ class ThreadLocalInheritableThreadPool(protected val pool: ExecutorService): Exe
 
         // 预先创建2个 ThreadLocal 对象
         // 主要是给 caller thread 调用以便初始化 threadLocals/inheritableThreadLocals 2个属性
-        protected val local = ThreadLocal<Any>()
-        protected val inheritableLocal = InheritableThreadLocal<Any>()
+        protected val localObj = ThreadLocal<Any>()
+        protected val inheritableLocalObj = InheritableThreadLocal<Any>()
 
         // ThreadLocal 2个相关属性
         // Thread.threadLocals 属性
@@ -62,9 +61,9 @@ class ThreadLocalInheritableThreadPool(protected val pool: ExecutorService): Exe
         // 1 初始化 threadLocals/inheritableThreadLocals 2个属性
         // 如果 caller thread 没有使用 ThreadLocal对象(即相关的2个属性为null)，而 worker thread 可能用到ThreadLocal对象，这就要求预先创建 ThreadLocal对象
         if (threadLocalProp.get(caller) == null)
-            local.get()
+            localObj.get()
         if (inheritableThreadLocalProp.get(caller) == null)
-            inheritableLocal.get()
+            inheritableLocalObj.get()
 
         // 2 先拿住2个属性, 解决在单线程的线程池中嵌套提交异步任务而导致ThreadLocal对象丢失的情况
         // 如 caller thread 提交任务(传递ThreadLocal对象) -> worker thread 执行任务(清理ThreadLocal对象) -> worker thread 嵌套提交任务(丢失ThreadLocal对象)
