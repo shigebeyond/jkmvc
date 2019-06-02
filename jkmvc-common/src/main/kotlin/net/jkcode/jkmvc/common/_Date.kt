@@ -3,13 +3,26 @@ package net.jkcode.jkmvc.common
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+
+// 记录当前毫秒
+private var currMs:Long = 0
+// 是否启动定时更新当前毫秒
+private val started: AtomicBoolean = AtomicBoolean(false)
 
 /**
  * 获得以毫秒为单位的当前时间
  * @return
  */
-public inline fun currMillis(): Long {
-    return System.currentTimeMillis()
+public fun currMillis(): Long {
+    if(!started.get()){ // 未启动定时
+        if(started.compareAndSet(false, true))
+            CommonMilliTimer.newPeriodic({ currMs = System.currentTimeMillis()}, 1, TimeUnit.MILLISECONDS)
+        else
+            currMs = System.currentTimeMillis()
+    }
+    return currMs
 }
 
 /**

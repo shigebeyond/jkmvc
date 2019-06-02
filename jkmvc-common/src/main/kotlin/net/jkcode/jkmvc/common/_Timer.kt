@@ -1,6 +1,8 @@
 package net.jkcode.jkmvc.common
 
 import io.netty.util.HashedWheelTimer
+import io.netty.util.Timeout
+import io.netty.util.TimerTask
 import net.jkcode.jkmvc.closing.ClosingOnShutdown
 import java.util.concurrent.TimeUnit
 
@@ -18,6 +20,26 @@ public val CommonMilliTimer by lazy{
  */
 public val CommonSecondTimer by lazy{
     HashedWheelTimer(200, TimeUnit.MILLISECONDS, 64 /* 2的次幂 */)
+}
+
+/**
+ * 添加周期性任务
+ * @param task 任务
+ * @param period 周期时间
+ * @param unit 时间单位
+ * @return
+ */
+public fun HashedWheelTimer.newPeriodic(task: () -> Unit, period: Long, unit: TimeUnit): Timeout{
+    // 定时触发
+    return newTimeout(object : TimerTask {
+        override fun run(timeout: Timeout) {
+            // 执行任务
+            task.invoke()
+
+            // 递归
+            newTimeout(this, period, unit)
+        }
+    }, period, unit)
 }
 
 /**

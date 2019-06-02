@@ -1,5 +1,8 @@
 package net.jkcode.jkmvc.tests
 
+import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.JSONObject
+import com.alibaba.fastjson.serializer.SerializerFeature
 import getIntranetHost
 import net.jkcode.jkmvc.common.*
 import net.jkcode.jkmvc.idworker.SnowflakeId
@@ -82,6 +85,14 @@ class MyTests{
         println(1.toExpr().exprTo(Int::class))
         //println("1L".toLong()) // java.lang.NumberFormatException: For input string: "1L"
         println(1L.toExpr().exprTo(Long::class))
+    }
+
+    @Test
+    fun testMath(){
+        println(Math.pow(3.0, 2.0)) // 9
+        println(Math.pow(3.0, 3.0)) // 27
+        println(Math.sqrt(4.0)) // 2
+        println(Math.sqrt(9.0)) // 3
     }
 
     @Test
@@ -256,6 +267,12 @@ class MyTests{
         // 去空格
         // println("hello world".trim())
         // println("hello world".replace(" ", ""))
+
+        var str = "\"hello\""
+        println(str) // 输出  "hello"
+
+        str = "\\\"hello\\\""
+        println(str) // 输出  \"hello\"
     }
 
     @Test
@@ -404,6 +421,21 @@ class MyTests{
         // 不能识别正则，如 jkmvc.*
         val res = Thread.currentThread().contextClassLoader.getResource("jkmvc.properties")
         println(res)
+    }
+
+    @Test
+    fun testJson(){
+        val o = HashMap<String, Any?>()
+        o["notify_url"] = "http://baidu.com" // 原始值
+        var json = JSON.toJSONString(o)
+        println(json) // 输出 {"notify_url":"http://baidu.com"}
+
+        json = JSON.toJSONString(o, SerializerFeature.WriteSlashAsSpecial)
+        println(json) // 输出: {"notify_url":"http:\/\/baidu.com"}
+
+        val o2 = JSONObject.parse(json) as JSONObject
+        println(o2["notify_url"])
+
     }
 
     @Test
