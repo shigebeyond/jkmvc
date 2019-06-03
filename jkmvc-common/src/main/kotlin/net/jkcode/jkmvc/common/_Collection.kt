@@ -165,6 +165,43 @@ public inline fun <T> Array<T>.getOrPut(index: Int, defaultValue: (Int) -> T): T
     return this[index];
 }
 
+/****************************** progression *****************************/
+/**
+ * 大小
+ */
+public val IntProgression.size: Int
+    get() = (last - first) / step
+
+/**
+ * 大小
+ */
+public val LongProgression.size: Int
+    get() = ((last - first) / step).toInt()
+
+/**
+ * IntProgression转数组
+ *   注: Array<R> 不能使用R作为泛型参数, 只能使用具体类
+ */
+public inline fun <reified R> IntProgression.mapToArray(transform: (Int) -> R): Array<R> {
+    val arr = arrayOfNulls<R?>(this.size);
+    var i = 0;
+    for (item in this)
+        arr[i++] = transform(item)
+    return arr as Array<R>
+}
+
+/**
+ * LongProgression转数组
+ *   注: Array<R> 不能使用R作为泛型参数, 只能使用具体类
+ */
+public inline fun <reified R> LongProgression.mapToArray(transform: (Long) -> R): Array<R> {
+    val arr = arrayOfNulls<R?>(this.size);
+    var i = 0;
+    for (item in this)
+        arr[i++] = transform(item)
+    return arr as Array<R>
+}
+
 /****************************** query string *****************************/
 /**
  * 请求参数转query string

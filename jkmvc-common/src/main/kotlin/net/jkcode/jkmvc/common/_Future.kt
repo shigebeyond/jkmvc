@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.common
 
+import java.lang.Exception
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -37,9 +38,10 @@ public fun <RequestArgumentType, ResponseType> toFutureSupplier(supplier: (Reque
  * 对supplier包装try/finally, 兼容结果值是 CompletableFuture 的情况
  *
  * @param supplier 取值函数
+ * @param exceptionBubbling 是否向上抛异常
  * @param complete 完成后的回调函数, 接收2个参数: 1 结果值 2 异常
  */
-public inline fun trySupplierFinally(supplier: () -> Any?, noinline complete: (Any?, Throwable?) -> Unit){
+public inline fun <T> trySupplierFinally(supplier: () -> T, exceptionBubbling: Boolean, noinline complete: (Any?, Throwable?) -> Unit): T{
     var result:Any? = null
     var rh: Throwable? = null
     try{
@@ -48,8 +50,14 @@ public inline fun trySupplierFinally(supplier: () -> Any?, noinline complete: (A
         // 异步结果
         if(result is CompletableFuture<*>)
             result.whenComplete(complete) // 完成后回调
+
+        return result
     }catch (r: Throwable){
         rh = r
+        if(exceptionBubbling)
+            throw r
+        else
+            return null as T
     }finally {
         // 同步结果
         if(result !is CompletableFuture<*>)

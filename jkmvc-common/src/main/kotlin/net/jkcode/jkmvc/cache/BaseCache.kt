@@ -79,7 +79,7 @@ abstract class BaseCache: ICache {
         // 2.1 锁住key, 则回源, 防止并发回源
         val locked = lock.quickLockCleanly(key){
             // 回源
-            trySupplierFinally(dataLoader){ v, t ->
+            trySupplierFinally(dataLoader, true){ v, t ->
                 // 写缓存
                 this.put(key, v, expireSeconds)
                 result.complete(v)
