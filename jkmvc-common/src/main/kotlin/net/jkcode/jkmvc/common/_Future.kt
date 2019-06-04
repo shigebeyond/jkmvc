@@ -38,30 +38,36 @@ public fun <RequestArgumentType, ResponseType> toFutureSupplier(supplier: (Reque
  * 对supplier包装try/finally, 兼容结果值是 CompletableFuture 的情况
  *
  * @param supplier 取值函数
- * @param exceptionBubbling 是否向上抛异常
  * @param complete 完成后的回调函数, 接收2个参数: 1 结果值 2 异常
  */
-public inline fun <T> trySupplierFinally(supplier: () -> T, exceptionBubbling: Boolean, noinline complete: (Any?, Throwable?) -> Unit): T{
+public inline fun <T> trySupplierFinally(supplier: () -> T, noinline complete: (Any?, Throwable?) -> Any?): T{
     var result:Any? = null
     var rh: Throwable? = null
     try{
         // 调用取值函数
         result = supplier.invoke()
         // 异步结果
-        if(result is CompletableFuture<*>)
-            result.whenComplete(complete) // 完成后回调
-
-        return result
+        if(result is CompletableFuture<*>) {
+            val result2 = CompletableFuture<Any?>()
+            // return result.whenComplete(complete) -> //完成后回调
+            result.whenComplete{ r, e -> //完成后回调
+                try{
+                    val r2 = complete.invoke(r, e) // 回调执行依然会抛异常
+                    result2.complete(r2)
+                }catch (ex: Throwable){
+                    result2.completeExceptionally(ex)
+                }
+            }
+            result = result2
+        }
     }catch (r: Throwable){
         rh = r
-        if(exceptionBubbling)
-            throw r
-        else
-            return null as T
     }finally {
         // 同步结果
         if(result !is CompletableFuture<*>)
-            complete.invoke(result, rh) // 完成后回调
+            result = complete.invoke(result, rh) // 完成后回调
+
+        return result as T
     }
 }
 

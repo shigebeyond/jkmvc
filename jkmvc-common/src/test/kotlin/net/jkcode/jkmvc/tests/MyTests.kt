@@ -190,6 +190,23 @@ class MyTests{
     }
 
     @Test
+    fun testFinally(){
+        fun getMsg(): String {
+            try{
+                throw IllegalArgumentException("fuck")
+            }catch (e: Exception){
+                e.printStackTrace()
+                return "fuck"
+            }finally {
+                // finally 代码块中的 return 会直接替换 try / catch 代码块中的 return
+                return "hello"
+            }
+        }
+
+        println(getMsg())
+    }
+
+    @Test
     fun testIp(){
         // 127.0.1.1
         //val addr = InetAddress.getLocalHost().hostAddress
