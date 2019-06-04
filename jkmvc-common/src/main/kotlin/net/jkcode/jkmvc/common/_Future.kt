@@ -38,7 +38,7 @@ public fun <RequestArgumentType, ResponseType> toFutureSupplier(supplier: (Reque
  * 对supplier包装try/finally, 兼容结果值是 CompletableFuture 的情况
  *
  * @param supplier 取值函数
- * @param complete 完成后的回调函数, 接收2个参数: 1 结果值 2 异常
+ * @param complete 完成后的回调函数, 接收2个参数: 1 结果值 2 异常, 返回新结果
  */
 public inline fun <T> trySupplierFinally(supplier: () -> T, noinline complete: (Any?, Throwable?) -> Any?): T{
     var result:Any? = null
@@ -52,7 +52,8 @@ public inline fun <T> trySupplierFinally(supplier: () -> T, noinline complete: (
             // return result.whenComplete(complete) -> //完成后回调
             result.whenComplete{ r, e -> //完成后回调
                 try{
-                    val r2 = complete.invoke(r, e) // 回调执行依然会抛异常
+                    // 回调执行依然会抛异常
+                    val r2 = complete.invoke(r, e)
                     result2.complete(r2)
                 }catch (ex: Throwable){
                     result2.completeExceptionally(ex)
