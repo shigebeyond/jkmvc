@@ -170,13 +170,13 @@ public inline fun <T> Array<T>.getOrPut(index: Int, defaultValue: (Int) -> T): T
  * 大小
  */
 public val IntProgression.size: Int
-    get() = (last - first) / step
+    get() = (last - first) / step + 1
 
 /**
  * 大小
  */
 public val LongProgression.size: Int
-    get() = ((last - first) / step).toInt()
+    get() = ((last - first) / step + 1).toInt()
 
 /**
  * IntProgression转数组
@@ -309,6 +309,17 @@ public fun <T> Iterable<T>.enumeration(): ItEnumeration<T> {
  */
 public inline fun <T, R> Iterable<T>.mapToSet(transform: (T) -> R): Set<R> {
     return mapTo(HashSet<R>(), transform)
+}
+
+/**
+ * Returns the sum of all values produced by [selector] function applied to each element in the collection.
+ */
+public inline fun <T> Iterable<T>.sumByLong(selector: (T) -> Long): Long {
+    var sum: Long = 0
+    for (element in this) {
+        sum += selector(element)
+    }
+    return sum
 }
 
 /****************************** 扩展 Queue *****************************/
