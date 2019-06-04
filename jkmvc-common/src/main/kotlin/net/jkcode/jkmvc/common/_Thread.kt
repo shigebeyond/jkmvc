@@ -31,32 +31,48 @@ public val threadPoolCloser = object: ClosingOnShutdown(){
 
 /**
  * 单个线程的启动+等待
+ * @param join 是否等待线程结束
  * @return
  */
-public fun Thread.startAndJoin(): Thread {
+public fun Thread.start(join: Boolean = true): Thread {
     start()
-    join()
+    if(join)
+        join()
     return this
 }
 
 /**
  * 多个个线程的启动+等待
+ * @param join 是否等待线程结束
  * @return
  */
-public fun List<Thread>.startAndJoin(): List<Thread> {
+public fun List<Thread>.start(join: Boolean = true): List<Thread> {
     for(t in this)
         t.start()
-    for(t in this)
-        t.join()
+    if(join)
+        for(t in this)
+            t.join()
     return this
 }
 
 /**
  * 创建线程
  * @param num 线程数
+ * @param join 是否等待线程结束
  * @param runnable 线程体
  * @return
  */
-public fun makeThreads(num: Int, runnable: () -> Unit): List<Thread> {
-    return (0 until num).map { Thread(runnable, "thread_$it") }.startAndJoin()
+public fun makeThreads(num: Int, join: Boolean = true, runnable: () -> Unit): List<Thread> {
+    return (0 until num).map { Thread(runnable, "thread_$it") }.start(join)
+}
+
+/**
+ * 创建线程
+ * @param num 线程数
+ * @param join 是否等待线程结束
+ * @param runnable 线程体
+ * @return
+ */
+public fun makeThreads(num: Int, runnable: () -> Unit): List<Thread>{
+    return makeThreads(num, true, runnable)
 }
