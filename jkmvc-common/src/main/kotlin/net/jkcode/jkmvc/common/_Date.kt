@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
 // 记录当前毫秒
+@Volatile
 private var currMs:Long = 0
 // 是否启动定时更新当前毫秒
 private val started: AtomicBoolean = AtomicBoolean(false)
