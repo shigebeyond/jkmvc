@@ -119,7 +119,7 @@ db.transaction {
         """);
 
     // insert
-    // val id = db.execute("insert into user(name, age) values(?, ?)" /*sql*/, listOf("shi", 1)/*sql paramters*/, "id"/*auto-increment id, as the return value*/) // return the generated id
+    // val id = db.execute("insert into user(name, age) values(?, ?)" /*sql*/, listOf("shi", 1)/*sql paramters*/, "id"/*auto-increment id, as the return value*/) // return the auto generated id
     println("insert a user：" + id)
 
     // select single row

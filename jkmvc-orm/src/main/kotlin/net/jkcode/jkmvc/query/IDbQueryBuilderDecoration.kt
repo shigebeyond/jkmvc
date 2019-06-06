@@ -87,6 +87,28 @@ interface IDbQueryBuilderDecoration{
     }
 
     /**
+     * Creates a new "WHERE BETWEEN" condition for the query.
+     *
+     * @param   column  column name or DbExpr
+     * @param   value   column value
+     * @return
+     */
+    fun whereBetween(column: String, value: Pair<Any, Any>): IDbQueryBuilder {
+        return where(column, "BETWEEN", value)
+    }
+
+    /**
+     * Creates a new "OR WHERE BETWEEN" condition for the query.
+     *
+     * @param   column  column name or DbExpr
+     * @param   value   column value
+     * @return
+     */
+    fun orWhereBetween(column: String, value: Pair<Any, Any>): IDbQueryBuilder {
+        return orWhere(column, "BETWEEN", value)
+    }
+
+    /**
      * Multiple Where
      *
      * @param   conditions

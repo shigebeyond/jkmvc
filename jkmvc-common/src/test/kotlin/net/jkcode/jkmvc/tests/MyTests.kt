@@ -50,8 +50,9 @@ enum class NumType {
 }
 
 class Lambda {
-
 }
+
+data class Man(val name: String, val age: Int)
 
 /**
  * 基本测试
@@ -403,7 +404,7 @@ class MyTests{
     }
 
     @Test
-        fun testCode(){
+    fun testCode(){
         val singleReg = "(?!property\\(\\) )//.*\\n".toRegex() // 单行注释
         val multipleReg = "/\\*.+?\\*/".toRegex(setOf(RegexOption.DOT_MATCHES_ALL)) // 单行注释
         val blank2Reg = "\n\\s*\n\\s*\n".toRegex() // 双空行
@@ -684,6 +685,28 @@ class MyTests{
         println(b)
         val f:Float? = to("1.23")
         println(f)
+    }
+
+    @Test
+    fun testLambda(){
+        val l = { it: String ->
+            println(it)
+        }
+        println(l::class)
+        println(l.javaClass)
+    }
+
+    @Test
+    fun testDataClass(){
+        var m = Man("shi", 1)
+        var i = 0
+        println("${++i}: m=$m")
+        m = m.copy()
+        println("${++i}: m=$m")
+        m = m.copy(age = 12)
+        println("${++i}: m=$m")
+        m = m.copy(name = "li")
+        println("${++i}: m=$m")
     }
 
     @Test
