@@ -1,6 +1,5 @@
 package net.jkcode.jkmvc.common
 
-import java.lang.Exception
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -54,6 +53,7 @@ public inline fun <T> trySupplierFinally(supplier: () -> T, noinline complete: (
                 try{
                     // 回调执行依然会抛异常
                     val r2 = complete.invoke(r, e)
+                    // 回调结果作为最终结果
                     result2.complete(r2)
                 }catch (ex: Throwable){
                     result2.completeExceptionally(ex)
@@ -66,7 +66,7 @@ public inline fun <T> trySupplierFinally(supplier: () -> T, noinline complete: (
     }finally {
         // 同步结果
         if(result !is CompletableFuture<*>)
-            result = complete.invoke(result, rh) // 完成后回调
+            result = complete.invoke(result, rh) // 完成后回调, 同时回调结果作为最终结果
 
         return result as T
     }

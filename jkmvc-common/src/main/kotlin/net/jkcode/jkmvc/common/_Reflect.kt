@@ -321,6 +321,21 @@ fun Class<*>.getSuperClassGenricType(index: Int = 0): Class<*> {
 }
 
 /**
+ * 获得private的属性, 并使其可读
+ * @param name 属性名
+ * @return
+ */
+public fun Class<*>.getReadableFinalField(name: String): Field {
+    val field = getDeclaredField(name)
+
+    // 开放访问
+    if (!field.isAccessible)
+        field.isAccessible = true
+
+    return field
+}
+
+/**
  * 获得final的属性, 并使其可写
  * @param name 属性名
  * @return

@@ -242,7 +242,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @param buffer 记录编译后的sql
      * @return
      */
-    public override fun compileAction(db: IDb, buffer: StringBuilder): IDbQueryBuilder {
+    public override fun compileAction(db: IDb, buffer: StringBuilder): DbQueryBuilderAction {
         if (action == null)
             throw DbException("未设置sql动作");
 

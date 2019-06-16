@@ -27,9 +27,10 @@ class ThreadTests {
         msgs.set("a")
         println("mainThread: " + msgs.get()) // a
         makeThreads(1) {
-            println("childThread: " + msgs.get()) // null
+            val name = Thread.currentThread().name
+            println("childThread($name): " + msgs.get()) // null
             msgs.set("b")
-            println("childThread: " + msgs.get()) // b
+            println("childThread($name): " + msgs.get()) // b
         }
         println("mainThread: " + msgs.get()) // a
     }
@@ -45,9 +46,10 @@ class ThreadTests {
         msgs.set("a")
         println("mainThread: " + msgs.get()) // a
         makeThreads(1) {
-            println("childThread: " + msgs.get()) // a
+            val name = Thread.currentThread().name
+            println("childThread($name): " + msgs.get()) // a
             msgs.set("b")
-            println("childThread: " + msgs.get()) // b
+            println("childThread($name): " + msgs.get()) // b
         }
         println("mainThread: " + msgs.get()) // a
     }
@@ -63,14 +65,15 @@ class ThreadTests {
         println("mainThread: " + msgs.get()) // a
         // 线程池的中的线程也是当前线程创建的
         ForkJoinPool.commonPool().execute {
-            println("otherThread: " + msgs.get()) // a
+            val name = Thread.currentThread().name
+            println("otherThread($name): " + msgs.get()) // a
             msgs.set("b")
-            println("otherThread: " + msgs.get()) // b
+            println("otherThread($name): " + msgs.get()) // b
 
             makeThreads(1) {
-                println("childThread: " + msgs.get()) // b
+                println("childThread($name): " + msgs.get()) // b
                 msgs.set("c")
-                println("childThread: " + msgs.get()) // c
+                println("childThread($name): " + msgs.get()) // c
             }
         }
         Thread.sleep(1000)
@@ -78,12 +81,13 @@ class ThreadTests {
     }
 
     /**
-     * 在无关的线程中测试
+     * 测试 CompletableFuture 是否继承 ThreadLocal
+     *   发起 runAsync() 与 完成 complete() 都是在 ThreadLocalInheritableThreadPool.commonPool 触发
      */
     @Test
     fun testInheritableThreadLocalInCompletableFuture() {
-        // 应用线程池
-        ThreadLocalInheritableThreadPool.applyCommonPoolToCompletableFuture()
+        // 修改 CompletableFuture.asyncPool 属性为 ThreadLocalInheritableThreadPool.commonPool
+        // ThreadLocalInheritableThreadPool.applyCommonPoolToCompletableFuture()
 
         val msgs = InheritableThreadLocal<String>()
         msgs.set("0")
@@ -91,28 +95,78 @@ class ThreadTests {
 
         val runid = AtomicInteger(0)
         val step = AtomicInteger(0)
+        // 读写 ThreadLocal
         val run: () -> Unit = {
             val id = runid.getAndIncrement()
-            val srcTid = Thread.currentThread().name
+            val srcTname = Thread.currentThread().name
             val stepRun = {
                 step.incrementAndGet()
-                val destTid = Thread.currentThread().name
-                println("rid=$id, srcTid=$srcTid, destTid=$destTid, step=$step - before : " + msgs.get()) //
+                val destTname = Thread.currentThread().name
+                println("rid=$id, srcTname=$srcTname, destTname=$destTname, step=$step - before : " + msgs.get()) //
                 msgs.set(step.toString())
-                println("rid=$id, srcTid=$srcTid, destTid=$destTid, step=$step - after : " + msgs.get()) //
+                println("rid=$id, srcTname=$srcTname, destTname=$destTname, step=$step - after : " + msgs.get()) //
             }
+
+            // 完成 complete() 在 ThreadLocalInheritableThreadPool.commonPool 触发
             CompletableFuture.runAsync(stepRun)
                     .thenRunAsync(stepRun)
                     .thenRunAsync(stepRun)
         }
+
+        // 多线程发起
         // 没有经过 ThreadLocalInheritableThreadPool, 是不能继承 ThreadLocal 的
         //makeThreads(3, run)
 
+        // 发起 runAsync() 在 ThreadLocalInheritableThreadPool.commonPool 触发
         CommonThreadPool.execute(run)
         CommonThreadPool.execute(run)
         CommonThreadPool.execute(run)
 
         Thread.sleep(3000)
+        println("mainThread: " + msgs.get()) // 0
+    }
+
+    /**
+     * 测试 CompletableFuture 是否继承 ThreadLocal
+     *    完成 complete() 在 ThreadLocalInheritableThreadPool.commonPool 之外的其他线程触发
+     */
+    @Test
+    fun testInheritableThreadLocalInCompletableFuture2() {
+        // 修改 CompletableFuture.asyncPool 属性为 ThreadLocalInheritableThreadPool.commonPool
+        // ThreadLocalInheritableThreadPool.applyCommonPoolToCompletableFuture()
+
+        val msgs = InheritableThreadLocal<String>()
+        msgs.set("0")
+        println("mainThread: " + msgs.get()) // 0
+
+        val runid = AtomicInteger(0)
+        val step = AtomicInteger(0)
+        // 读写 ThreadLocal
+        val run: () -> Unit = {
+            val id = runid.getAndIncrement()
+            step.incrementAndGet()
+            val name = Thread.currentThread().name
+            println("rid=$id, Tname=$name, step=$step - before : " + msgs.get()) //
+            msgs.set(step.toString())
+            println("rid=$id, Tname=$name, step=$step - after : " + msgs.get()) //
+        }
+
+        //
+        val f = CompletableFuture<Unit>() // 当前 ThreadLocal 应该是 msgs = 0, 但是由于 complete() 在其他线程改变了 ThreadLocal 变为 msgs = 1,
+        f.thenRunAsync(run)
+         .thenRunAsync(run)
+
+        // 完成 complete() 在其他线程
+        // 没有经过 ThreadLocalInheritableThreadPool, 是不能继承 ThreadLocal 的
+        makeThreads(1){
+            run()
+            f.complete(null)
+            val name = Thread.currentThread().name
+            println("completeThread($name)")
+            //当前 ThreadLocal 变成 msgs = 1
+        }
+
+        Thread.sleep(300000)
         println("mainThread: " + msgs.get()) // 0
     }
 
@@ -152,9 +206,10 @@ class ThreadTests {
         println("mainThread: " + msgs.get()) // a
         // 线程池的中的线程也是当前线程创建的
         pool.execute {
-            println("otherThread: " + msgs.get()) // a
+            val name = Thread.currentThread().name
+            println("otherThread($name): " + msgs.get()) // a
             msgs.set("b")
-            println("otherThread: " + msgs.get()) // b
+            println("otherThread($name): " + msgs.get()) // b
 
             // 没有经过 ThreadLocalInheritableThreadPool, 是不能继承 ThreadLocal 的
             makeThreads(1) {

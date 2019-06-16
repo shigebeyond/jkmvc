@@ -63,7 +63,7 @@ public fun List<Thread>.start(join: Boolean = true): List<Thread> {
  * @return
  */
 public fun makeThreads(num: Int, join: Boolean = true, runnable: () -> Unit): List<Thread> {
-    return (0 until num).map { Thread(runnable, "thread_$it") }.start(join)
+    return (0 until num).map { Thread(runnable, "test-thread_$it") }.start(join)
 }
 
 /**
