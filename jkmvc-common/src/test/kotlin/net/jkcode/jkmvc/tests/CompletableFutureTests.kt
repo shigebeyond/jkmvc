@@ -124,4 +124,25 @@ class CompletableFutureTests{
                     println("结果=" + r + "，异常=" + e)
                 }
     }
+
+    @Test
+    fun testSynAsyn(){
+        val f = CompletableFuture<Unit>()
+        f.thenRun{
+            val name = Thread.currentThread().name
+            println("同步then: $name")
+        }
+        /*f.thenRunAsync{
+            val name = Thread.currentThread().name
+            println("异步then: $name")
+        }*/
+
+        makeThreads(1){
+            val name = Thread.currentThread().name
+            println("complete: $name")
+            f.complete(null)
+        }
+
+        Thread.sleep(3000)
+    }
 }
