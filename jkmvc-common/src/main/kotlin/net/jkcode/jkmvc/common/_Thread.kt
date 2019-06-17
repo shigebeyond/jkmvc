@@ -62,8 +62,12 @@ public fun List<Thread>.start(join: Boolean = true): List<Thread> {
  * @param runnable 线程体
  * @return
  */
-public fun makeThreads(num: Int, join: Boolean = true, runnable: () -> Unit): List<Thread> {
-    return (0 until num).map { Thread(runnable, "test-thread_$it") }.start(join)
+public fun makeThreads(num: Int, join: Boolean = true, runnable: (Int) -> Unit): List<Thread> {
+    return (0 until num).map { i ->
+        Thread({
+            runnable.invoke(i)
+        }, "test-thread_$i")
+    }.start(join)
 }
 
 /**
@@ -73,6 +77,6 @@ public fun makeThreads(num: Int, join: Boolean = true, runnable: () -> Unit): Li
  * @param runnable 线程体
  * @return
  */
-public fun makeThreads(num: Int, runnable: () -> Unit): List<Thread>{
+public fun makeThreads(num: Int, runnable: (Int) -> Unit): List<Thread>{
     return makeThreads(num, true, runnable)
 }

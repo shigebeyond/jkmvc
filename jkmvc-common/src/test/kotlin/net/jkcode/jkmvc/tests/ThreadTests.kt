@@ -133,7 +133,7 @@ class ThreadTests {
     @Test
     fun testInheritableThreadLocalInCompletableFuture2() {
         // 修改 CompletableFuture.asyncPool 属性为 ThreadLocalInheritableThreadPool.commonPool
-        // ThreadLocalInheritableThreadPool.applyCommonPoolToCompletableFuture()
+        ThreadLocalInheritableThreadPool.applyCommonPoolToCompletableFuture()
 
         val msgs = InheritableThreadLocal<String>()
         msgs.set("0")
@@ -152,21 +152,25 @@ class ThreadTests {
         }
 
         //
-        val f = CompletableFuture<Unit>() // 当前 ThreadLocal 应该是 msgs = 0, 但是由于 complete() 在其他线程改变了 ThreadLocal 变为 msgs = 1,
-        f.thenRunAsync(run)
-         .thenRunAsync(run)
+        val num = 3
+        val futures = (0 until num).map{
+            val f = CompletableFuture<Unit>() // 当前 ThreadLocal 应该是 msgs = 0, 但是由于 complete() 在其他线程改变了 ThreadLocal 变为 msgs = 1 => 没办法,
+                f.thenRunAsync(run)
+                .thenRunAsync(run)
+            f
+        }
 
         // 完成 complete() 在其他线程
         // 没有经过 ThreadLocalInheritableThreadPool, 是不能继承 ThreadLocal 的
-        makeThreads(1){
+        makeThreads(num){i ->
             run()
-            f.complete(null)
+            futures[i].complete(null)
             val name = Thread.currentThread().name
             println("completeThread($name)")
             //当前 ThreadLocal 变成 msgs = 1
         }
 
-        Thread.sleep(300000)
+        Thread.sleep(30000)
         println("mainThread: " + msgs.get()) // 0
     }
 

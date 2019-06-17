@@ -112,11 +112,9 @@ class CompletableFutureTests{
         }
 
         var i = AtomicInteger(0)
-        val run = {
+        makeThreads(3){
             println("第${i.getAndIncrement()}个等待者: ${f.get()}")
         }
-
-        makeThreads(3, run)
     }
 
     @Test
