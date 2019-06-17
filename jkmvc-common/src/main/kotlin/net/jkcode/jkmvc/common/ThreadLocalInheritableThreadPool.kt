@@ -46,7 +46,7 @@ class ThreadLocalInheritableThreadPool(
      *    在执行之前继承一下 ThreadLocal对象, 在执行后就清理一下 ThreadLocal对象
      */
     public override fun execute(command: Runnable) {
-        execute(ThreadLocalInheritableInterceptor(cleaning).intercept(command))
+        pool.execute(ThreadLocalInheritableInterceptor(cleaning).intercept(command))
     }
 
 }
