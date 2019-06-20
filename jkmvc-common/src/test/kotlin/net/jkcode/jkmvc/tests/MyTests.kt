@@ -986,7 +986,7 @@ class MyTests{
 
     @Test
     fun testConsistentHash(){
-        val ch = ConsistentHash(listOf("server1", "server2", "server3"), 2, 10)
+        val ch = ConsistentHash(2, 10, listOf("server1", "server2", "server3"))
         ch.add("server4")
 
         ch.dumpVirtualNodes()
