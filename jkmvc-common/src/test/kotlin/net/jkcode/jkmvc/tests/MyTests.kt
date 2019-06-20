@@ -984,6 +984,20 @@ class MyTests{
         println("全部: " + q)
     }
 
+    @Test
+    fun testConsistentHash(){
+        val ch = ConsistentHash(listOf("server1", "server2", "server3"), 2, 10)
+        ch.add("server4")
+
+        ch.dumpVirtualNodes()
+
+        println("虚拟节点个数: " + ch.size)
+        (0..9).forEach {
+            val key = randomString(4)
+            println("key[$key]命中节点: " + ch.get(key))
+        }
+    }
+
 }
 
 

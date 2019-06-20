@@ -1,9 +1,13 @@
 package net.jkcode.jkmvc.common
 
+import io.netty.util.concurrent.EventExecutor
+import io.netty.util.concurrent.MultithreadEventExecutorGroup
+import io.netty.util.concurrent.SingleThreadEventExecutor
 import net.jkcode.jkmvc.closing.ClosingOnShutdown
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.ForkJoinPool
 import java.util.concurrent.TimeUnit
+import kotlin.reflect.KProperty1
+import kotlin.reflect.jvm.javaField
 
 /**
  * 公共的线程池
@@ -79,4 +83,44 @@ public fun makeThreads(num: Int, join: Boolean = true, runnable: (Int) -> Unit):
  */
 public fun makeThreads(num: Int, runnable: (Int) -> Unit): List<Thread>{
     return makeThreads(num, true, runnable)
+}
+
+/****************************** 每个线程有独立任务队列 的线程池 *****************************/
+/**
+ * MultithreadEventExecutorGroup.children 属性
+ */
+private val childrenProp: KProperty1<MultithreadEventExecutorGroup, Array<EventExecutor>> by lazy{
+    val prop = MultithreadEventExecutorGroup::class.getProperty("children") as KProperty1<MultithreadEventExecutorGroup, Array<EventExecutor>>
+    prop.javaField!!.isAccessible = true
+    prop
+}
+
+// 获得子执行器个数: executorGroup.executorCount()
+// 使用某个子子执行器来执行任务: executorGroup.getExecutor(i).execute(runnable)
+/**
+ * 获得某个子执行器(单线程)
+ * @param index 子执行器下标
+ * @return
+ */
+public fun MultithreadEventExecutorGroup.getExecutor(index: Int): SingleThreadEventExecutor {
+    val children: Array<EventExecutor> = childrenProp.get(this)
+    return children.get(index) as SingleThreadEventExecutor
+}
+
+/**
+ * 根据 arg 来选择一个固定的线程
+ * @param arg
+ * @return
+ */
+public fun MultithreadEventExecutorGroup.selectExecutor(arg: Any): SingleThreadEventExecutor {
+    return selectExecutor(arg.hashCode())
+}
+
+/**
+ * 根据 arg 来选择一个固定的线程
+ * @param arg
+ * @return
+ */
+public fun MultithreadEventExecutorGroup.selectExecutor(arg: Int): SingleThreadEventExecutor {
+    return getExecutor(arg % executorCount())
 }

@@ -363,7 +363,7 @@ public inline fun Any.castTo(type: KType): Any{
  * 获得异常堆栈的字符串
  * @return
  */
-public fun Exception.stringifyStackTrace(): String {
+public fun Throwable.stringifyStackTrace(): String {
     try {
         val sw = StringWriter()
         PrintWriter(sw).use {
