@@ -286,11 +286,17 @@ class MyTests{
         // println("hello world".trim())
         // println("hello world".replace(" ", ""))
 
+      /*
         var str = "\"hello\""
         println(str) // 输出  "hello"
 
         str = "\\\"hello\\\""
         println(str) // 输出  \"hello\"
+        */
+
+        var i: Any? = null
+        println(i.hashCode())
+        println("server-Jt0H".hashCode() and Integer.MAX_VALUE)
     }
 
     @Test
@@ -986,15 +992,18 @@ class MyTests{
 
     @Test
     fun testConsistentHash(){
-        val ch = ConsistentHash(2, 10, listOf("server1", "server2", "server3"))
+        val servers = (0..10).map {
+            "server-${randomString(4)}"
+        }
+        val ch = ConsistentHash(2, 100, servers)
         ch.add("server4")
 
         ch.dumpVirtualNodes()
 
         println("虚拟节点个数: " + ch.size)
         (0..9).forEach {
-            val key = randomString(4)
-            println("key[$key]命中节点: " + ch.get(key))
+            val key = randomString(5)
+            println("key[$key]哈希[${key.hashCode()}]命中节点: " + ch.get(key))
         }
     }
 
