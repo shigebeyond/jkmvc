@@ -12,6 +12,18 @@ import kotlin.reflect.KType
 // common的日志
 val comLogger = LoggerFactory.getLogger("net.jkcode.jkmvc.common")
 
+/**
+ * 合并哈希码
+ * @param args
+ * @return
+ */
+public fun joinHashCode(vararg args:String): Int {
+    var hash = 0
+    for(arg in args)
+        hash = hash * Math.pow(31.0, arg.length.toDouble()).toInt() + arg.hashCode()
+    return hash
+}
+
 /****************************** 字符串扩展 *******************************/
 /**
  * 根据Unicode编码完美的判断中文汉字和符号

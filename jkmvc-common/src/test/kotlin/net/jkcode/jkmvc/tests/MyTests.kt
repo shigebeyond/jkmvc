@@ -294,9 +294,13 @@ class MyTests{
         println(str) // 输出  \"hello\"
         */
 
-        var i: Any? = null
-        println(i.hashCode())
-        println("server-Jt0H".hashCode() and Integer.MAX_VALUE)
+//        var i: Any? = null
+//        println(i.hashCode())
+//        println("server-Jt0H".hashCode() and Integer.MAX_VALUE)
+
+        val strs = arrayOf("abcdefg", "hijkmn")
+        println(joinHashCode(*strs))
+        println(strs.joinToString("").hashCode())
     }
 
     @Test
