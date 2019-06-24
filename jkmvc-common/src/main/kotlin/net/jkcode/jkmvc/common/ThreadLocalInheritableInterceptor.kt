@@ -70,7 +70,7 @@ class ThreadLocalInheritableInterceptor(protected val cleaning: Boolean = true /
             // 4 执行
             return action.invoke()
         }finally {
-            // 5 在执行结束后, 清理
+            // 5 在执行结束后, 清理ThreadLocal对象
             afterExecute()
         }
     }

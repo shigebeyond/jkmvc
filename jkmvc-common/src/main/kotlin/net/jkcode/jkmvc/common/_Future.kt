@@ -39,7 +39,7 @@ public fun <RequestArgumentType, ResponseType> toFutureSupplier(supplier: (Reque
  * @param supplier 取值函数
  * @param complete 完成后的回调函数, 接收2个参数: 1 结果值 2 异常, 返回新结果
  */
-public inline fun <T> trySupplierFinally(supplier: () -> T, noinline complete: (Any?, Throwable?) -> Any?): T{
+public inline fun <T> trySupplierFinally(supplier: () -> T, crossinline complete: (Any?, Throwable?) -> Any?): T{
     var result:Any? = null
     var rh: Throwable? = null
     try{
