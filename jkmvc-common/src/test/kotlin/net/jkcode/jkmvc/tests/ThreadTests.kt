@@ -135,7 +135,7 @@ class ThreadTests {
         // 修改 CompletableFuture.asyncPool 属性为 ThreadLocalInheritableThreadPool.commonPool
         ThreadLocalInheritableThreadPool.applyCommonPoolToCompletableFuture()
 
-        val msgs = InheritableThreadLocal<String>()
+        val msgs = ThreadLocal<String>()
         msgs.set("0")
         println("mainThread: " + msgs.get()) // 0
 
@@ -152,11 +152,11 @@ class ThreadTests {
         }
 
         //
-        val num = 3
+        val num = 2
         val futures = (0 until num).map{
             val f = CompletableFuture<Unit>() // 当前 ThreadLocal 应该是 msgs = 0, 但是由于 complete() 在其他线程改变了 ThreadLocal 变为 msgs = 1 => 没办法,
                 f.thenRunAsync(run)
-                .thenRunAsync(run)
+                //.thenRunAsync(run)
             f
         }
 

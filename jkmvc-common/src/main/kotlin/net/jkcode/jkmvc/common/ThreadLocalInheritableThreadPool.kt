@@ -37,7 +37,8 @@ class ThreadLocalInheritableThreadPool(
 
         // 将公共线程池应用到 CompletableFuture.asyncPool
         public fun applyCommonPoolToCompletableFuture(){
-            asyncPoolProp.set(null, completableFuturePool)
+            if(asyncPoolProp.get(null) != completableFuturePool)
+                asyncPoolProp.set(null, completableFuturePool)
         }
     }
 

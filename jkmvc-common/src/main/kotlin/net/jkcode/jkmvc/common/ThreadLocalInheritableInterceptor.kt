@@ -63,22 +63,22 @@ class ThreadLocalInheritableInterceptor(protected val cleaning: Boolean = true /
      * @return
      */
     public inline fun <T> wrap(action:() -> T): T {
-        // 3 在执行之前, 继承(直接引用) caller thread 的ThreadLocal对象, 因为是同一个ThreadLocal对象, 因此 caller thread 与 worker thread 都能看到批次的改动
-        before()
+        try {
+            // 3 在执行之前, 继承(直接引用) caller thread 的ThreadLocal对象, 因为是同一个ThreadLocal对象, 因此 caller thread 与 worker thread 都能看到批次的改动
+            beforeExecute()
 
-        // 4 执行
-        val result = action.invoke()
-
-        // 5 在执行结束后, 清理
-        after()
-
-        return result
+            // 4 执行
+            return action.invoke()
+        }finally {
+            // 5 在执行结束后, 清理
+            afterExecute()
+        }
     }
 
     /**
      * 在执行之前, 继承(直接引用) caller thread 的ThreadLocal对象, 因为是同一个ThreadLocal对象, 因此 caller thread 与 worker thread 都能看到批次的改动
      */
-    protected fun before() {
+    public fun beforeExecute() {
         val worker = Thread.currentThread()
         threadLocalProp.set(worker, value)
         inheritableThreadLocalProp.set(worker, inheritableValue)
@@ -88,7 +88,7 @@ class ThreadLocalInheritableInterceptor(protected val cleaning: Boolean = true /
     /**
      * 在执行结束后, 清理ThreadLocal对象
      */
-    protected fun after() {
+    public fun afterExecute() {
         if(cleaning) {
             val worker = Thread.currentThread()
             threadLocalProp.set(worker, null)
