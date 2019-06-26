@@ -1,4 +1,4 @@
-package net.jkcode.jkmvc.session
+package net.jkcode.jkmvc.http.session
 
 import net.jkcode.jkmvc.closing.ClosingOnRequestEnd
 import net.jkcode.jkmvc.common.Config
@@ -56,7 +56,7 @@ abstract class Auth: IAuth, ClosingOnRequestEnd() {
          * @return
          */
         @JvmStatic
-        public fun instance(): Auth{
+        public fun instance(): Auth {
             return instance(sessionConfig["authType"]!!)
         }
     }

@@ -1,6 +1,6 @@
 dependencies{
     // other project
-    compile project(':jkmvc-session')
+    compile project(':jkmvc-http')
 
     // server
     compile project(':jkmvc-server-jetty')

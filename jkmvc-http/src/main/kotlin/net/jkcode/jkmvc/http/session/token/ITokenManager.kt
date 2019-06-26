@@ -1,6 +1,6 @@
-package net.jkcode.jkmvc.session.token
+package net.jkcode.jkmvc.http.session.token
 
-import net.jkcode.jkmvc.session.IAuthUserModel
+import net.jkcode.jkmvc.http.session.IAuthUserModel
 
 /**
  * 管理会话的token

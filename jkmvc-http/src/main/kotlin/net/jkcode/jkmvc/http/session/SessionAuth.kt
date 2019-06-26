@@ -1,4 +1,4 @@
-package net.jkcode.jkmvc.session
+package net.jkcode.jkmvc.http.session
 
 import net.jkcode.jkmvc.http.HttpRequest
 import javax.servlet.http.HttpSession

@@ -1,4 +1,4 @@
-package net.jkcode.jkmvc.session
+package net.jkcode.jkmvc.http.session
 
 /**
  * 认证用户

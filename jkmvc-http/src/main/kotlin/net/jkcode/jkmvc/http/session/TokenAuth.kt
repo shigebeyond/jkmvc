@@ -1,8 +1,8 @@
-package net.jkcode.jkmvc.session
+package net.jkcode.jkmvc.http.session
 
 import net.jkcode.jkmvc.http.HttpRequest
-import net.jkcode.jkmvc.session.token.ITokenManager
-import net.jkcode.jkmvc.session.token.TokenManager
+import net.jkcode.jkmvc.http.session.token.ITokenManager
+import net.jkcode.jkmvc.http.session.token.TokenManager
 
 /**
  * 基于token认证用户 -- 使用token来保存登录用户的状态

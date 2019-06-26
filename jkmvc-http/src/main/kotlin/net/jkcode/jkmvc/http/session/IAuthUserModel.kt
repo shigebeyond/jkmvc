@@ -1,4 +1,4 @@
-package net.jkcode.jkmvc.session
+package net.jkcode.jkmvc.http.session
 
 import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.orm.IOrm
