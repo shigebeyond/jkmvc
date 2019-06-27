@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.db.Row
 import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
 /**
  * ORM之实体对象
@@ -12,10 +13,30 @@ import kotlin.properties.ReadWriteProperty
  */
 interface IOrmEntity {
 
+    companion object{
+
+        /**
+         * 缓存属性代理
+         */
+        public val prop = (object : ReadWriteProperty<IOrmEntity, Any?> {
+            // 获得属性
+            public override operator fun getValue(thisRef: IOrmEntity, property: KProperty<*>): Any? {
+                return thisRef[property.name]
+            }
+
+            // 设置属性
+            public override operator fun setValue(thisRef: IOrmEntity, property: KProperty<*>, value: Any?) {
+                thisRef[property.name] = value
+            }
+        })
+    }
+
     /**
      * 获得属性代理
      */
-    fun <T> property(): ReadWriteProperty<IOrmEntity, T>;
+    fun <T> property(): ReadWriteProperty<IOrmEntity, T> {
+        return prop as ReadWriteProperty<IOrmEntity, T>;
+    }
 
     /**
      * 判断是否有某字段

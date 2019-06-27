@@ -6,9 +6,7 @@ import net.jkcode.jkmvc.db.Row
 import net.jkcode.jkmvc.serialize.ISerializer
 import java.math.BigDecimal
 import java.util.*
-import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KMutableProperty1
-import kotlin.reflect.KProperty
 
 /**
  * ORM之实体对象
@@ -30,37 +28,13 @@ open class OrmEntity : IOrmEntity {
          * 序列化
          */
         public val serializer: ISerializer = ISerializer.instance(config["serializeType"]!!)
-
-        /**
-         * 缓存属性代理
-         */
-        public val prop = (object : ReadWriteProperty<IOrmEntity, Any?> {
-            // 获得属性
-            public override operator fun getValue(thisRef: IOrmEntity, property: KProperty<*>): Any? {
-                return thisRef[property.name]
-            }
-
-            // 设置属性
-            public override operator fun setValue(thisRef: IOrmEntity, property: KProperty<*>, value: Any?) {
-                thisRef[property.name] = value
-            }
-        })
     }
 
     /**
      * 最新的字段值：<字段名 to 最新字段值>
      *     子类会改写
      */
-    protected open val data: MutableRow by lazy{
-        HashMap<String, Any?>()
-    }
-
-    /**
-     * 获得属性代理
-     */
-    public override fun <T> property(): ReadWriteProperty<IOrmEntity, T> {
-        return prop as ReadWriteProperty<IOrmEntity, T>;
-    }
+    protected open val data: MutableRow = HashMap<String, Any?>()
 
     /**
      * 判断是否有某字段

@@ -17,7 +17,7 @@ abstract class OrmValid : IOrm, OrmEntity() {
      * 最新的字段值：<字段名 to 最新字段值>
      */
     //protected val data: MutableRow = HashMap()
-    protected override val data: MutableRow = ormMeta.dataFactory.createMap()
+    override val data: MutableRow = ormMeta.dataFactory.createMap()
 
     /**
      * 变化的字段值：<字段名 to 原始字段值>
