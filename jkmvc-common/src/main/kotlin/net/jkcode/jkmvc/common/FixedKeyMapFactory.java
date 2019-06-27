@@ -29,21 +29,6 @@ public class FixedKeyMapFactory {
     protected final int[] _keyHashCodes;
 
     /**
-     * key集
-     */
-    protected final Set<String> _keySet = new AbstractSet<String>() {
-        @Override
-        public Iterator<String> iterator() {
-            return new KeysIterator();
-        }
-
-        @Override
-        public int size() {
-            return _keys.length;
-        }
-    };
-
-    /**
      * 构造函数
      * @param keys
      */
@@ -103,6 +88,27 @@ public class FixedKeyMapFactory {
         protected final Object[] _values;
 
         /**
+         * 被修改的key的标记, 就是标记被修改的key对应的index
+         */
+        protected final BitSet _dirtyBits = new BitSet(_keys.length);
+
+        /**
+         * key集
+         */
+        protected transient Set<String> _keySet;
+
+        /**
+         * value集
+         */
+        protected transient Collection<Object> _vals;
+
+        /**
+         * entry集
+         */
+        protected transient Set<Entry<String, Object>> _entrySet;
+
+
+        /**
          * 构造函数
          * @param values
          */
@@ -110,6 +116,11 @@ public class FixedKeyMapFactory {
             _values = values;
         }
 
+        /**
+         * 根据key获得value
+         * @param key
+         * @return
+         */
         @Override
         public Object get(final Object key) {
             int i = indexOf(key);
@@ -119,11 +130,20 @@ public class FixedKeyMapFactory {
             return _values[i];
         }
 
+        /**
+         * 检查是否没有元素
+         * @return
+         */
         @Override
         public boolean isEmpty() {
-            return false;
+            return _dirtyBits.isEmpty();
         }
 
+        /**
+         * 检查是否包含value
+         * @param value
+         * @return
+         */
         @Override
         public boolean containsValue(final Object value) {
             // null
@@ -142,12 +162,23 @@ public class FixedKeyMapFactory {
             return false;
         }
 
+        /**
+         * 检查是否包含key
+         * @param key
+         * @return
+         */
         @Override
         public boolean containsKey(final Object key) {
             int i = indexOf(key);
-            return i > -1;
+            return i > -1 && _dirtyBits.get(i);
         }
 
+        /**
+         * 添加单个元素
+         * @param key
+         * @param value
+         * @return
+         */
         @Override
         public Object put(final String key, final Object value) {
             int i = indexOf(key);
@@ -155,107 +186,160 @@ public class FixedKeyMapFactory {
                 throw new IllegalArgumentException("Unkown key: " + key);
 
             Object oldValue = _values[i];
+
             _values[i] = value;
+            _dirtyBits.set(i);
             return oldValue;
         }
 
+        /**
+         * 删除key对应的元素
+         * @param key
+         * @return
+         */
         @Override
         public Object remove(final Object key) {
-            throw new UnsupportedOperationException();
+            int i = indexOf(key);
+            return remove(i);
         }
 
+        /**
+         * 删除位置对应的元素
+         * @param i
+         * @return
+         */
+        public Object remove(int i) {
+            Object oldValue = _values[i];
+
+            _values[i] = null;
+            _dirtyBits.clear(i);
+            return oldValue;
+        }
+
+        /**
+         * 添加多个元素
+         * @param m
+         */
         @Override
         public void putAll(final Map<? extends String, ?> m) {
             for (Map.Entry<? extends String, ?> e : m.entrySet())
                 put(e.getKey(), e.getValue());
         }
 
+        /**
+         * 清除所有元素
+         */
         @Override
         public void clear() {
             //throw new UnsupportedOperationException();
             // Orm.delete()中需要调用该clear()方法,不能直接抛异常
             for(int i = 0; i < _values.length; i++)
                 _values[i] = null;
-        }
 
-        @Override
-        public Set<String> keySet() {
-            return _keySet;
-        }
-
-        @Override
-        public Collection<Object> values() {
-            return Arrays.asList(_values);
-        }
-
-        @Override
-        public int size() {
-            return _values.length;
-        }
-
-        @Override
-        public Set<Entry<String, Object>> entrySet() {
-            return new EntrySet();
-        }
-
-        protected class EntrySet extends AbstractSet<Entry<String, Object>> {
-            @Override
-            public Iterator<Entry<String, Object>> iterator() {
-                return new EntrySetIterator();
-            }
-
-            @Override
-            public int size() {
-                return _keys.length;
-            }
+            _dirtyBits.clear();
         }
 
         /**
-         * 键值对的迭代器
+         * 获得元素个数
+         * @return
          */
-        protected class EntrySetIterator implements Iterator<Entry<String, Object>> {
-            protected int _position = 0;
+        @Override
+        public int size() {
+            return _dirtyBits.cardinality();
+        }
 
-            public boolean hasNext() {
-                return _position < _keys.length;
+        /********************* KeySet ************************/
+        @Override
+        public Set<String> keySet() {
+            if (_keySet == null)
+                _keySet = new KeySet();
+
+            return _keySet;
+        }
+
+        protected class KeySet extends IBitSet<String>{
+
+            public KeySet() {
+                super(_dirtyBits);
             }
 
-            public Entry<String, Object> next() {
+            @Override
+            public String getElement(int index) {
                 try {
-                    final String key = _keys[_position];
-                    final Object value = _values[_position++];
-                    return new DefaultMapEntry(key, value);
+                    return _keys[index];
                 } catch (ArrayIndexOutOfBoundsException e) {
                     throw new NoSuchElementException();
                 }
             }
 
-            public void remove() {
-                throw new UnsupportedOperationException();
+            @Override
+            public boolean removeElement(int index) {
+                return FixedKeyMap.this.remove(index) != null;
+            }
+        };
+
+        /*********************** Values ************************/
+        @Override
+        public Collection<Object> values() {
+            if(this._vals == null)
+                _vals = new Values();
+            return _vals;
+        }
+
+        final class Values extends IBitCollection<Object> {
+
+            public Values() {
+                super(_dirtyBits);
+            }
+
+            @Override
+            public Object getElement(int index) {
+                try{
+                    return _values[index];
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    throw new NoSuchElementException();
+                }
+            }
+
+            @Override
+            public boolean removeElement(int index) {
+                return FixedKeyMap.this.remove(index) != null;
             }
         }
-    }
 
-    /**
-     * key的迭代器
-     */
-    protected class KeysIterator implements Iterator<String> {
-        protected int _position = 0;
-
-        public boolean hasNext() {
-            return _position < _keys.length;
+        /*********************** EntrySet ************************/
+        @Override
+        public Set<Entry<String, Object>> entrySet() {
+            if(_entrySet == null)
+                _entrySet = new EntrySet();
+            return _entrySet;
         }
 
-        public String next() {
-            try {
-                return _keys[_position++];
-            } catch (ArrayIndexOutOfBoundsException e) {
-                throw new NoSuchElementException();
+        protected class EntrySet extends IBitSet<Entry<String, Object>> {
+
+            public EntrySet() {
+                super(_dirtyBits);
+            }
+
+            @Override
+            public Entry<String, Object> getElement(int index) {
+                try{
+                    return new DefaultMapEntry(_keys[index], _values[index]);
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    throw new NoSuchElementException();
+                }
+            }
+
+            @Override
+            public boolean removeElement(int index) {
+                return FixedKeyMap.this.remove(index) != null;
             }
         }
 
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
     }
+
 }
+
+
+
+
