@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.alibaba.fastjson.serializer.SerializerFeature
 import getIntranetHost
+import net.jkcode.jkmvc.bit.BitIterator
 import net.jkcode.jkmvc.common.*
 import net.jkcode.jkmvc.idworker.SnowflakeId
 import net.jkcode.jkmvc.idworker.SnowflakeIdWorker
@@ -97,6 +98,28 @@ class MyTests{
     }
 
     @Test
+    fun testBit(){
+        val bs = BitSet(10)
+        bs.set(0)
+        bs.set(5)
+        println(bs.size()) // 此 BitSet 表示位值时实际使用空间的位数
+        println(bs.length()) // 此 BitSet 的“逻辑大小”：BitSet 中最高设置位的索引加 1 -- 6
+        println(bs.cardinality()) // 此 BitSet 中设置为 true 的位数 -- 2
+
+        println("迭代1: ")
+        var i = bs.nextSetBit(0)
+        while (i >= 0) {
+            println(i)
+            i = bs.nextSetBit(i + 1)
+        }
+
+        println("迭代2: ")
+        for(j in  BitIterator(bs)){
+            println(j)
+        }
+    }
+
+    @Test
     fun testNumber(){
         //val io:Integer = 1
         //val i:Int = io
@@ -162,11 +185,32 @@ class MyTests{
 
     @Test
     fun testFixedKeyMap(){
-        val mf = FixedKeyMapFactory("name", "id")
+        val mf = FixedKeyMapFactory("name", "id", "age")
         val map = mf.createMap()
         map["name"] = "shi"
         map["id"] = 1
+        map["age"] = 13
         println(map)
+
+        println("\nremove: ")
+        println(map.remove("age"))
+        println(map)
+
+        println("\ncontainskey: ")
+        println(map.containsKey("id")) // true
+        println(map.containsKey("sex")) // false
+
+        println("\ncontainsvalue: ")
+        println(map.containsValue("shi")) // true
+        println(map.containsValue(1)) // true
+        println(map.containsValue(2)) // false
+        println(map.containsValue(null)) // false
+
+        println("\ntravel: ")
+        for((k, v) in map){
+            println("$k = $v")
+        }
+
     }
 
     @Test
