@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.util
 
 import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.common.format
+import net.jkcode.jkmvc.common.prepareDirectory
 import net.jkcode.jkmvc.db.Db
 import org.apache.commons.collections.map.HashedMap
 import java.io.File
@@ -64,12 +65,23 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
      * @param model 模型名
      * @param label 标题
      * @param table 表名
+     * @return
      */
-    public fun genenateModelFile(model:String, label:String, table: String): Unit {
-        val file = "$srcDir/$pck/$model".replace('.', '/') + ".kt"
+    public fun genenateModelFile(model:String, label:String, table: String): Boolean {
+        val dir = "$srcDir/$pck".replace('.', '/')
+        dir.prepareDirectory()
+        val path = "$dir/$model.kt"
+        val f = File(path)
+        if(f.exists()){
+            println("生成${model}模型文件失败: $path 文件已存在")
+            return false
+        }
+
         val code = genenateModelClass(model, label, table)
-        File(file).writeText(code)
-        println("生成${model}模型文件: $file")
+        f.createNewFile()
+        f.writeText(code)
+        println("生成${model}模型文件: $path")
+        return true
     }
 
     /**
@@ -98,7 +110,7 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
         val code = StringBuilder()
         val date = Date().format()
         code.append("package $pck \n\n")
-        code.append("import net.jkcode.jkmvc.orm.OrmMeta \nimport net.jkcode.jkmvc.orm.Orm \nimport net.jkcode.jkmvc.orm.toNotNullArray \n\n")
+        code.append("import net.jkcode.jkmvc.orm.OrmMeta \nimport net.jkcode.jkmvc.orm.Orm \n\n")
         code.append("/**\n * $label\n *\n * @ClassName: $model\n * @Description:\n * @author shijianhang<772910474@qq.com>\n * @date $date\n */\n")
         // 2 类
         code.append("class $model(id:$pkType? = null): Orm(id) {\n")
