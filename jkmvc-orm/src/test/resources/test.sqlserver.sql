@@ -15,3 +15,21 @@ create table address
 	addr varchar(50),
 	tel varchar(50) default ''
 );
+
+-- 包裹表
+create table parcel
+(
+	id int identity(1,1),
+	sender_id int default 0 ,
+	receiver_id int default 0 ,
+	content varchar(50) default ''
+);
+
+-- 消息表
+create table "message"
+(
+    id int identity(1,1),
+    from_uid int default 0 ,
+    to_uid int default 0 ,
+    content varchar(50) default ''
+);
