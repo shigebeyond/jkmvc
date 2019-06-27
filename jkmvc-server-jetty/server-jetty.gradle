@@ -1,4 +1,7 @@
 dependencies{
+    // other project
+    compile project(':jkmvc-http')
+
     // jetty
     compile "org.eclipse.jetty:jetty-server:${jetty_version}"
     compile "org.eclipse.jetty:jetty-servlet:${jetty_version}"
