@@ -52,11 +52,10 @@ abstract class OrmRelated : OrmPersistent() {
      *    要做字段转换：db字段名 -> 对象属性名
      *
      * @param data
-     * @return
      */
-    public override fun setOriginal(orgn: Row): IOrm {
+    public override fun setOriginal(orgn: Row): Unit {
         if(orgn.isEmpty())
-            return this
+            return
 
         // 设置属性值
         for ((column, value) in orgn) {
@@ -85,8 +84,6 @@ abstract class OrmRelated : OrmPersistent() {
             if(name in data)
                 (data[name] as Orm).loaded = true
         }
-
-        return this;
     }
 
     /**

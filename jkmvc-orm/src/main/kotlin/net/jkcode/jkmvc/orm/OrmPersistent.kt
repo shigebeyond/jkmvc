@@ -59,15 +59,13 @@ abstract class OrmPersistent : OrmValid() {
 	 *   如果是复合主键, 则参数按 ormMeta.primaryKey 中定义的字段的属性来传值
 	 *
 	 * @param pk
-	 * @return
 	 */
-	public override fun loadByPk(vararg pk: Any): IOrm {
+	public override fun loadByPk(vararg pk: Any): Unit {
 		if(pk.isNotEmpty())
 			queryBuilder().where(ormMeta.primaryKey, DbKeyValues(pk)).find(){
 				this.setOriginal(it)
+				this
 			}
-
-		return this
 	}
 
 	/**

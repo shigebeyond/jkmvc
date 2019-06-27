@@ -39,7 +39,8 @@ public val <T:IOrm> KClass<T>.rowTransformer: (Row) -> T
             val obj = java.newInstance() as IOrm
 
             // 设置字段值
-            obj.setOriginal(it) as T
+            obj.setOriginal(it)
+                    obj as T
         }
     }
 

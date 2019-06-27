@@ -15,9 +15,8 @@ interface IOrmRelated : IOrmPersistent
 	 * 设置原始的字段值
 	 *
 	 * @param orgn
-	 * @return
 	 */
-	fun setOriginal(orgn: Row): IOrm;
+	fun setOriginal(orgn: Row): Unit
 
 	/**
 	 * 获得关联对象

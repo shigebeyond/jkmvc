@@ -42,9 +42,8 @@ interface IOrmPersistent : IOrmValid {
 	 *   如果是复合主键, 则参数按 ormMeta.primaryKey 中定义的字段的属性来传值
 	 *
 	 * @param pk
-	 * @return
 	 */
-	fun loadByPk(vararg pk: Any): IOrm
+	fun loadByPk(vararg pk: Any): Unit
 
 	/**
 	 * 保存数据
