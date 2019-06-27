@@ -24,7 +24,7 @@ abstract class OrmRelated : OrmPersistent() {
             data[column] = value;
             // 如果关联的是主表，则更新从表的外键
             if (relation.type == RelationType.BELONGS_TO)
-                sets(relation.foreignKey, (value as Orm).pk); // 更新字段
+                sets(relation.foreignProp, (value as Orm).pk); // 更新字段
             return;
         }
 
@@ -82,9 +82,8 @@ abstract class OrmRelated : OrmPersistent() {
         loaded = true;
         // 只标记一层，防止递归死循环
         for((name, relation) in ormMeta.relations){
-            if(name in data){
-                (data[name]  as Orm).loaded = true
-            }
+            if(name in data)
+                (data[name] as Orm).loaded = true
         }
 
         return this;

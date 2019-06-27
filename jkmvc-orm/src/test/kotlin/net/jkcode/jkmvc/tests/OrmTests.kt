@@ -30,7 +30,7 @@ class OrmTests{
 
     @Test
     fun testFind(){
-        val user = UserModel.queryBuilder().where("id", 1).findModel<UserModel>()
+        val user = UserModel.queryBuilder().where("id", id).findModel<UserModel>()
 //        val user = UserModel(id)
         println("查找用户: $user" )
     }
@@ -40,7 +40,7 @@ class OrmTests{
 //        val users = UserModel.queryBuilder().findAllModels<UserModel>()
 //        val users = UserModel.queryBuilder().where("id", "=", 6).findAllModels<UserModel>()
 //        val users = UserModel.queryBuilder().where("id", "IN", arrayOf(6, 7)).findAllModels<UserModel>()
-        val users = UserModel.queryBuilder(true).where("id", "IN", arrayOf("6", "7")).findAllModels<UserModel>()
+        val users = UserModel.queryBuilder(true).where("id", "IN", arrayOf("6", "100")).findAllModels<UserModel>()
         println("查找所有用户: $users" )
     }
 
@@ -51,7 +51,7 @@ class OrmTests{
         user.age = 12
         val id = user.create();
 
-        println("创建用户: $user")
+        println("创建用户[$id]: $user")
     }
 
     @Test

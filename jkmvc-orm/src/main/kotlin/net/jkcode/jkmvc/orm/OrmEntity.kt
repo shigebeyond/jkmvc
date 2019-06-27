@@ -17,7 +17,7 @@ import kotlin.reflect.KProperty
  * @date 2016-10-10 上午12:52:34
  *
  */
-abstract class OrmEntity : IOrm {
+open class OrmEntity : IOrmEntity {
 
     companion object{
 
@@ -34,14 +34,14 @@ abstract class OrmEntity : IOrm {
         /**
          * 缓存属性代理
          */
-        public val prop = (object : ReadWriteProperty<IOrm, Any?> {
+        public val prop = (object : ReadWriteProperty<IOrmEntity, Any?> {
             // 获得属性
-            public override operator fun getValue(thisRef: IOrm, property: KProperty<*>): Any? {
+            public override operator fun getValue(thisRef: IOrmEntity, property: KProperty<*>): Any? {
                 return thisRef[property.name]
             }
 
             // 设置属性
-            public override operator fun setValue(thisRef: IOrm, property: KProperty<*>, value: Any?) {
+            public override operator fun setValue(thisRef: IOrmEntity, property: KProperty<*>, value: Any?) {
                 thisRef[property.name] = value
             }
         })
@@ -49,21 +49,17 @@ abstract class OrmEntity : IOrm {
 
     /**
      * 最新的字段值：<字段名 to 最新字段值>
+     *     子类会改写
      */
-    //protected val data: MutableRow = HashMap()
-    protected val data: MutableRow = ormMeta.dataFactory.createMap()
-
-    /**
-     * 变化的字段值：<字段名 to 原始字段值>
-     *     一般只读，lazy创建，节省内存
-     */
-    protected val dirty: MutableRow = LazyAllocatedMap<String, Any?>()
+    protected open val data: MutableRow by lazy{
+        HashMap<String, Any?>()
+    }
 
     /**
      * 获得属性代理
      */
-    public override fun <T> property(): ReadWriteProperty<IOrm, T> {
-        return prop as ReadWriteProperty<IOrm, T>;
+    public override fun <T> property(): ReadWriteProperty<IOrmEntity, T> {
+        return prop as ReadWriteProperty<IOrmEntity, T>;
     }
 
     /**
@@ -78,29 +74,13 @@ abstract class OrmEntity : IOrm {
 
     /**
      * 设置对象字段值
+     *    子类会改写
      *
      * @param column 字段名
      * @param  value  字段值
      */
     public override operator fun set(column: String, value: Any?) {
-        if (!hasColumn(column))
-            throw OrmException("类 ${this.javaClass} 没有字段 $column");
-
-        // 记录变化的字段名 + 原始值
-        if(!dirty.containsKey(column)
-                //&& value != data[column])
-                && !equalsValue(data[column], value))
-            dirty[column] = data[column];
-
         data[column] = value;
-    }
-
-    /**
-     * 显式标记字段有变化
-     * @param column 字段名
-     */
-    public override fun setDirty(column: String){
-        dirty[column] = data[column];
     }
 
     /**
@@ -164,7 +144,7 @@ abstract class OrmEntity : IOrm {
      * @param expected 要设置的字段名的数组
      * @return
      */
-    public override fun values(values: Row, expected: List<String>?): IOrm {
+    public override fun values(values: Row, expected: List<String>?): IOrmEntity {
         if(values.isEmpty())
             return this
 
@@ -258,4 +238,22 @@ abstract class OrmEntity : IOrm {
         return data[template].toString()
     }
 
+    /**
+     * 获得字段值
+     *     子类会改写
+     * @return
+     */
+    public override fun toMap(): Map<String, Any?> {
+        return data
+    }
+
+    /**
+     * 从map中设置字段值
+     *    子类会改写
+     * @param data
+     */
+    public override fun fromMap(data: Map<String, Any?>) {
+        for((column, value) in data)
+            set(column, value)
+    }
 }

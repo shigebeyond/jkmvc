@@ -1,8 +1,7 @@
 package net.jkcode.jkmvc.orm
 
-import java.math.BigDecimal
-import kotlin.properties.ReadWriteProperty
 import net.jkcode.jkmvc.db.Row
+import kotlin.properties.ReadWriteProperty
 
 /**
  * ORM之实体对象
@@ -16,7 +15,7 @@ interface IOrmEntity {
     /**
      * 获得属性代理
      */
-    fun <T> property(): ReadWriteProperty<IOrm, T>;
+    fun <T> property(): ReadWriteProperty<IOrmEntity, T>;
 
     /**
      * 判断是否有某字段
@@ -42,12 +41,6 @@ interface IOrmEntity {
      * @param  value  字段值
      */
     operator fun set(column: String, value: Any?);
-
-    /**
-     * 显式标记字段有变化
-     * @param column 字段名
-     */
-    fun setDirty(column: String)
 
     /**
      * 智能设置属性
@@ -80,7 +73,7 @@ interface IOrmEntity {
      * @param expected 要设置的字段名的数组
      * @return
      */
-    fun values(values: Row, expected: List<String>? = null): IOrm;
+    fun values(values: Row, expected: List<String>? = null): IOrmEntity;
 
     /**
      * 获得字段值
@@ -94,6 +87,15 @@ interface IOrmEntity {
      * @param data
      */
     fun fromMap(data: Map<String, Any?>): Unit;
+
+    /**
+     * 从其他实体对象中设置字段值
+     *
+     * @param data
+     */
+    fun from(other: IOrmEntity): Unit{
+        fromMap(other.toMap())
+    }
 
     /**
      * 序列化
