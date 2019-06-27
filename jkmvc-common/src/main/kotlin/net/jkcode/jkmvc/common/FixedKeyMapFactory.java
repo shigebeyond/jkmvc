@@ -10,9 +10,6 @@ import java.util.*;
  *    1. 存储从jdbc结果集中读取的行数据
  *    2. OrmEntity 中的 data 属性的类型
  *
- * 参考 qpid-java-old 的 org.apache.qpid.server.util.FixedKeyMapCreator
- * https://github.com/moazbaghdadi/qpid-java-old/blob/b266b647c8525d531b1dfbacd56757977dacd38b/broker-core/src/main/java/org/apache/qpid/server/util/FixedKeyMapCreator.java
- *
  * @author shijianhang<772910474@qq.com>
  * @date 2019-03-12 8:22 PM
  */
@@ -26,26 +23,26 @@ public class FixedKeyMapFactory {
     /**
      * 缓存key的哈希码, 加速key对比
      */
-    protected final int[] _keyHashCodes;
+    protected final int[] _keyHashs;
 
     /**
      * 构造函数
      * @param keys
      */
     public FixedKeyMapFactory(final String... keys) {
-        _keys = keys;
-        _keyHashCodes = new int[keys.length];
-
         // 检查key是否有重复
-        Set<String> uniqueKeys = new HashSet(Arrays.asList(keys));
+        _keys = keys;
+        List<String> allKeys = Arrays.asList(keys);
+        Set<String> uniqueKeys = new HashSet(allKeys);
         if (uniqueKeys.size() != keys.length) {
-            List<String> duplicateKeys = new ArrayList(Arrays.asList(keys));
-            duplicateKeys.removeAll(uniqueKeys);
-            throw new IllegalArgumentException("The supplied keys must be unique, but the following keys are duplicated: " + duplicateKeys);
+            allKeys.removeAll(uniqueKeys);
+            throw new IllegalArgumentException("The supplied keys must be unique, but the following keys are duplicated: " + allKeys);
         }
 
+        // 计算key的哈希码
+        _keyHashs = new int[keys.length];
         for (int i = 0; i < keys.length; i++)
-            _keyHashCodes[i] = keys[i].hashCode();
+            _keyHashs[i] = keys[i].hashCode();
     }
 
     /**
@@ -71,7 +68,7 @@ public class FixedKeyMapFactory {
     public int indexOf(final Object key){
         int keyHashCode = key.hashCode();
         for (int i = 0; i < _keys.length; i++)
-            if (_keyHashCodes[i] == keyHashCode && _keys[i].equals(key))
+            if (_keyHashs[i] == keyHashCode && _keys[i].equals(key))
                 return i;
 
         return -1;
@@ -238,7 +235,6 @@ public class FixedKeyMapFactory {
                 return FixedKeyMap.this.remove(index) != null;
             }
         }
-
     }
 
 }
