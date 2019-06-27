@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.common;
 
+import net.jkcode.jkmvc.bit.IBitSet;
 import org.apache.commons.collections.keyvalue.DefaultMapEntry;
 
 import java.util.*;
@@ -147,7 +148,10 @@ public class FixedKeyMapFactory {
             // 遍历位
             for (int i = _dirtyBits.nextSetBit(0); i >= 0; i = _dirtyBits.nextSetBit(i+1)) {
                 Object o = _values[i];
-                if(value == null && o == null || value.equals(o))
+                if(value == null){
+                    if(o == null)
+                        return true;
+                } else if(value.equals(o))
                     return true;
             }
             return false;
@@ -238,7 +242,3 @@ public class FixedKeyMapFactory {
     }
 
 }
-
-
-
-
