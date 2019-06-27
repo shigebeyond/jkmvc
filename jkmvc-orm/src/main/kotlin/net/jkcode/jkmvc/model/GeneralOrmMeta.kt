@@ -1,15 +1,29 @@
 package net.jkcode.jkmvc.model
 
-import net.jkcode.jkmvc.orm.IOrmMeta
-import net.jkcode.jkmvc.orm.OrmQueryBuilder
+import net.jkcode.jkmvc.orm.*
+import kotlin.reflect.KClass
 
 /**
- * 代理并改写元数据
+ * 通用模型的元数据
+ *    改写 queryBuilder(), 返回 GeneralOrmQueryBuilder
  *
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-17 3:38 PM
  */
-internal open class GeneralOrmMeta(val source: IOrmMeta): IOrmMeta by source{
+internal open class GeneralOrmMeta(model: KClass<out IOrm> /* 模型类 */,
+                                   label: String = model.modelName /* 模型中文名 */,
+                                   table: String = model.modelName /* 表名，假定model类名, 都是以"Model"作为后缀 */,
+                                   primaryKey:DbKeyNames = DbKeyNames("id") /* 主键 */,
+                                   dbName: String = "default" /* 数据库名 */
+): OrmMeta(model, label, table, primaryKey, dbName){
+
+    public constructor(
+            model: KClass<out IOrm> /* 模型类 */,
+            label: String /* 模型中文名 */,
+            table: String /* 表名，假定model类名, 都是以"Model"作为后缀 */,
+            primaryKey: String /* 主键 */,
+            dbName: String = "default" /* 数据库名 */
+    ) : this(model, label, table, DbKeyNames(primaryKey), dbName)
 
     /**
      * 改写 queryBuilder(), 返回 GeneralOrmQueryBuilder
