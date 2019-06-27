@@ -93,16 +93,6 @@ public class FixedKeyMapFactory {
         protected final BitSet _dirtyBits = new BitSet(_keys.length);
 
         /**
-         * key集
-         */
-        protected transient Set<String> _keySet;
-
-        /**
-         * value集
-         */
-        protected transient Collection<Object> _vals;
-
-        /**
          * entry集
          */
         protected transient Set<Entry<String, Object>> _entrySet;
@@ -140,29 +130,6 @@ public class FixedKeyMapFactory {
         }
 
         /**
-         * 检查是否包含value
-         * @param value
-         * @return
-         */
-        @Override
-        public boolean containsValue(final Object value) {
-            // null
-            if (value == null) {
-                for (Object o : _values)
-                    if (o == null)
-                        return true;
-
-                return false;
-            }
-
-            // 非null
-            for (Object o : _values)
-                if (value.equals(o))
-                    return true;
-            return false;
-        }
-
-        /**
          * 检查是否包含key
          * @param key
          * @return
@@ -171,6 +138,22 @@ public class FixedKeyMapFactory {
         public boolean containsKey(final Object key) {
             int i = indexOf(key);
             return i > -1 && _dirtyBits.get(i);
+        }
+
+        /**
+         * 检查是否包含value
+         * @param value
+         * @return
+         */
+        @Override
+        public boolean containsValue(final Object value) {
+            // 遍历位
+            for (int i = _dirtyBits.nextSetBit(0); i >= 0; i = _dirtyBits.nextSetBit(i+1)) {
+                Object o = _values[i];
+                if(value == null && o == null || value.equals(o))
+                    return true;
+            }
+            return false;
         }
 
         /**
@@ -217,94 +200,14 @@ public class FixedKeyMapFactory {
         }
 
         /**
-         * 添加多个元素
-         * @param m
-         */
-        @Override
-        public void putAll(final Map<? extends String, ?> m) {
-            for (Map.Entry<? extends String, ?> e : m.entrySet())
-                put(e.getKey(), e.getValue());
-        }
-
-        /**
          * 清除所有元素
          */
         @Override
         public void clear() {
-            //throw new UnsupportedOperationException();
-            // Orm.delete()中需要调用该clear()方法,不能直接抛异常
             for(int i = 0; i < _values.length; i++)
                 _values[i] = null;
 
             _dirtyBits.clear();
-        }
-
-        /**
-         * 获得元素个数
-         * @return
-         */
-        @Override
-        public int size() {
-            return _dirtyBits.cardinality();
-        }
-
-        /********************* KeySet ************************/
-        @Override
-        public Set<String> keySet() {
-            if (_keySet == null)
-                _keySet = new KeySet();
-
-            return _keySet;
-        }
-
-        protected class KeySet extends IBitSet<String>{
-
-            public KeySet() {
-                super(_dirtyBits);
-            }
-
-            @Override
-            public String getElement(int index) {
-                try {
-                    return _keys[index];
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    throw new NoSuchElementException();
-                }
-            }
-
-            @Override
-            public boolean removeElement(int index) {
-                return FixedKeyMap.this.remove(index) != null;
-            }
-        };
-
-        /*********************** Values ************************/
-        @Override
-        public Collection<Object> values() {
-            if(this._vals == null)
-                _vals = new Values();
-            return _vals;
-        }
-
-        final class Values extends IBitCollection<Object> {
-
-            public Values() {
-                super(_dirtyBits);
-            }
-
-            @Override
-            public Object getElement(int index) {
-                try{
-                    return _values[index];
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    throw new NoSuchElementException();
-                }
-            }
-
-            @Override
-            public boolean removeElement(int index) {
-                return FixedKeyMap.this.remove(index) != null;
-            }
         }
 
         /*********************** EntrySet ************************/
