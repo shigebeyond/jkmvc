@@ -230,4 +230,8 @@ open class OrmEntity : IOrmEntity {
         for((column, value) in data)
             set(column, value)
     }
+
+    public override fun toString(): String {
+        return "${this.javaClass}: " + data.toString()
+    }
 }

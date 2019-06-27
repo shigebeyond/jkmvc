@@ -27,8 +27,4 @@ abstract class Orm(pk: Array<Any> /* 主键值, 非null */) : OrmRelated() {
         if(pk.isNotEmpty())
             loadByPk(*pk)
     }
-
-    public override fun toString(): String {
-        return "${this.javaClass}: " + data.toString()
-    }
 }
