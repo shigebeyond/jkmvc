@@ -1,8 +1,6 @@
 dependencies{
     // other project
     compile project(':jkmvc-http')
-
-    // server
     compile project(':jkmvc-server-jetty')
 
     // jdbc
