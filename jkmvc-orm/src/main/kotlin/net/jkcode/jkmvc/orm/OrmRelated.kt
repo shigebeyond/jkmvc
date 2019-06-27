@@ -115,6 +115,22 @@ abstract class OrmRelated : OrmPersistent() {
     }
 
     /**
+     * 从其他实体对象中设置字段值
+     *
+     * @param data
+     */
+    public override fun from(other: IOrmEntity): Unit{
+        for((column, value) in (other as OrmEntity).data) {
+            var realValue: Any? = value // Any? / Orm / List / Map
+            if(value is IOrmEntity){ // 如果是IOrmEntity，则为关联对象
+                realValue = related(column, true) // 创建关联对象
+                (realValue as Orm).from(value) // 递归设置关联对象的字段值
+            }else
+                set(column, value)
+        }
+    }
+
+    /**
      * 从map中设置字段值
      *
      * @param data

@@ -13,7 +13,7 @@ import net.jkcode.jkmvc.tests.entity.Message
  * @author shijianhang<772910474@qq.com>
  * @date 2019-06-27 14:51:51
  */
-class MessageModel(): Message(), IOrm by GeneralModel(m) {
+class MessageModel: Message(), IOrm by GeneralModel(m) {
 
 	// 伴随对象就是元数据
  	companion object m: OrmMeta(MessageModel::class, "消息", "message", "id"){}

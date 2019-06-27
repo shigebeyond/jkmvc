@@ -7,7 +7,7 @@ class ModelGeneratorTests{
 
     @Test
     fun testCodeModel() {
-        val generator = ModelGenerator("/home/shi/code/java/jksoa/jksoa-tracer/src/main/kotlin", "net.jkcode.jksoa.tracer.model", "default", "shijianhang")
+        val generator = ModelGenerator("/home/shi/code/java/jksoa/jksoa-tracer/src/main/kotlin", "net.jkcode.jksoa.tracer.collector.model", "default", "shijianhang")
         // 生成model文件
 //        generator.genenateModelFile("UserModel", "用户", "user")
 //        generator.genenateModelFile("AddressModel", "地址", "address")

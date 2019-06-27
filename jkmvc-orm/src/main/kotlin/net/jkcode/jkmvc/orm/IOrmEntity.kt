@@ -5,6 +5,10 @@ import kotlin.properties.ReadWriteProperty
 
 /**
  * ORM之实体对象
+ *  1. 本来想继承 MutableMap<String, Any?>, 但是得不偿失, 不值得做
+ *    仅仅需要的是get()/put()
+ *    可有可无的是size()/isEmpty()/containsKey()/containsValue()
+ *    完全不需要的是remove()/clear()/keys/values/entries/MutableEntry
  *
  * @author shijianhang
  * @date 2016-10-10 上午12:52:34
