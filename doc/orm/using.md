@@ -89,30 +89,30 @@ user.delete();
 
 1. from `Map`
 
-To set multiple values at once, use `Orm::values(values: Map<String, Any?>, expected: List<String>? = null)`
+To set multiple values at once, use `Orm::fromMap(values: Map<String, Any?>, expected: List<String> = emptyList())`
 
 ```
 val user = UserModel(20)
 val values = mapOf("username" to "shi", "password" to "123456")
 val expected = listOf("username","password")
-user.values(values, expected)
+user.fromMap(values, expected)
 user.create()
 ```
 
 2. from `HttpRequest`
 
-We usually get values from request, just use `net.jkcode.jkmvc.http.valuesFromRequest` method.
+We usually get values from request, just use `net.jkcode.jkmvc.http.fromRequest` method.
 
-But the data in the request is string, and  the model's property may not be string, so `net.jkcode.jkmvc.http.valuesFromRequest` will intelligently convert the value in the request, and assigned to the model's property.
+But the data in the request is string, and  the model's property may not be string, so `net.jkcode.jkmvc.http.fromRequest` will intelligently convert the value in the request, and assigned to the model's property.
 
 ```	
-import net.jkcode.jkmvc.http.valuesFromRequest
+import net.jkcode.jkmvc.http.fromRequest
 
 try
 {
     val user = UserModel(20);
     val expected = listOf("username","password")
-    user.valuesFromRequest(req, expected)
+    user.fromRequest(req, expected)
     user.update();
 }
 catch (e: OrmException)

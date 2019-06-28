@@ -49,8 +49,8 @@ class OrmTests{
         val user = UserModel()
         user.name = "shi";
         user.age = 12
+        //user.fromMap(mapOf("name" to "li", "age" to 13))
         val id = user.create();
-
         println("创建用户[$id]: $user")
     }
 

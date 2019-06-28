@@ -3,14 +3,12 @@ package net.jkcode.jkmvc.http
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
-import net.jkcode.jkmvc.common.isNullOrEmpty
+import com.oreilly.servlet.MultipartRequest
 import net.jkcode.jkmvc.orm.IRelationMeta
 import net.jkcode.jkmvc.orm.Orm
 import net.jkcode.jkmvc.orm.RelationType
-import com.oreilly.servlet.MultipartRequest
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.lang.StringBuilder
 import java.lang.reflect.Field
 import java.util.*
 import javax.servlet.http.HttpServletRequest
@@ -184,16 +182,14 @@ public inline fun isSafeUploadFile(uploadFile: File): Boolean {
  *
  * @param values   字段值的数组：<字段名 to 字段值>
  * @param expected 要设置的字段名的数组
- * @return
  */
-public fun Orm.valuesFromRequest(req: HttpRequest, expected: List<String>? = null): Orm {
+public fun Orm.fromRequest(req: HttpRequest, expected: List<String> = emptyList()): Unit {
     // 默认为请求中的所有列
-    val columns = if (expected.isNullOrEmpty()) req.parameterNames.iterator() else expected!!.iterator()
+    val columns = if (expected.isEmpty()) req.parameterNames.iterator() else expected!!.iterator()
 
     // 取得请求中的指定参数
     for (column in columns)
         setFromRequest(column, req.getParameter(column))
-    return this;
 }
 
 /**

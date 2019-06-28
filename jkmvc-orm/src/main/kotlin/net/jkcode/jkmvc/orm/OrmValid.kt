@@ -2,7 +2,6 @@ package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.common.LazyAllocatedMap
 import net.jkcode.jkmvc.db.MutableRow
-import net.jkcode.jkmvc.db.Row
 
 /**
  * ORM之数据校验
@@ -45,17 +44,6 @@ abstract class OrmValid : IOrm, OrmEntity() {
             dirty[column] = data[column];
 
         super.set(column, value)
-    }
-
-    /**
-     * 设置多个字段值
-     *     返回值类型由 IOrmEntity 扩大为 IOrm
-     * @param values   字段值的数组：<字段名 to 字段值>
-     * @param expected 要设置的字段名的数组
-     * @return
-     */
-    public override fun values(values: Row, expected: List<String>?): IOrm{
-        return super.values(values, expected) as IOrm
     }
 
     /**

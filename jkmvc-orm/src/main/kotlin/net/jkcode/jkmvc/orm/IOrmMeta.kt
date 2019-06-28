@@ -409,7 +409,7 @@ interface IOrmMeta {
      * @param conditions 关联查询条件
      * @return
      */
-    fun belongsTo(name:String, relatedModel: KClass<out IOrm>, foreignKey:String = relatedModel.modelOrmMeta.defaultForeignKey.first() /* 主表_主键 = 关联表_主键 */, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
+    fun belongsTo(name:String, relatedModel: KClass<out IOrm>, foreignKey:String, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
         return belongsTo(name, relatedModel, foreignKey, relatedModel.modelOrmMeta.primaryKey.first() /* 关联表的主键 */, conditions)
     }
 

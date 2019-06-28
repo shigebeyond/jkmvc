@@ -88,16 +88,16 @@ abstract class OrmRelated : OrmPersistent() {
 
     /**
      * 获得字段值 -- 转为Map
+     * @param to
+     * @param expected 要设置的字段名的列表
      * @return
      */
-    public override fun toMap(): Map<String, Any?> {
-        val result = HashMap<String, Any?>()
-
+    public override fun toMap(to: MutableMap<String, Any?>, expected: List<String>): Map<String, Any?> {
         // 转关联对象
         for((name, relation) in ormMeta.relations){
             val value = data[name]
             if(value != null){
-                result[name] = when(value){
+                to[name] = when(value){
                     is Collection<*> -> (value as Collection<IOrm>).itemToMap() // 有多个
                     is Orm -> value.toMap()  // 有一个
                     else -> value
@@ -107,15 +107,37 @@ abstract class OrmRelated : OrmPersistent() {
 
         // 转当前对象：由于关联对象联查时不处理null值, 因此关联对象会缺少null值的字段，这里要补上
         for(prop in ormMeta.props){
-            if(!result.containsKey(prop))
-                result[prop] = null
+            if(!to.containsKey(prop))
+                to[prop] = null
         }
 
-        return result;
+        return to;
+    }
+
+    /**
+     * 从map中设置字段值
+     *    对于关联对象字段值的设置: 只考虑一对一的关联对象, 不考虑一对多的关联对象
+     *
+     * @param from   字段值的哈希：<字段名 to 字段值>
+     * @param expected 要设置的字段名的列表
+     */
+    public override fun fromMap(from: Map<String, Any?>, expected: List<String>): Unit {
+        val columns = completedExpectedColumns(expected, from)
+
+        for(column in columns){
+            val value = from[column]
+            var realValue: Any? = value // Any? / Orm / List / Map
+            if(value is Map<*, *>){ // 如果是map，则为关联对象
+                realValue = related(column, true) // 创建关联对象
+                (realValue as Orm).fromMap(value as Map<String, Any?>) // 递归设置关联对象的字段值
+            }else
+                set(column, value)
+        }
     }
 
     /**
      * 从其他实体对象中设置字段值
+     *    对于关联对象字段值的设置: 只考虑一对一的关联对象, 不考虑一对多的关联对象
      *
      * @param data
      */
@@ -125,22 +147,6 @@ abstract class OrmRelated : OrmPersistent() {
             if(value is IOrmEntity){ // 如果是IOrmEntity，则为关联对象
                 realValue = related(column, true) // 创建关联对象
                 (realValue as Orm).from(value) // 递归设置关联对象的字段值
-            }else
-                set(column, value)
-        }
-    }
-
-    /**
-     * 从map中设置字段值
-     *
-     * @param data
-     */
-    public override fun fromMap(data: Map<String, Any?>): Unit{
-        for((column, value) in data) {
-            var realValue: Any? = value // Any? / Orm / List / Map
-            if(value is Map<*, *>){ // 如果是map，则为关联对象
-                realValue = related(column, true) // 创建关联对象
-                (realValue as Orm).fromMap(value as Map<String, Any?>) // 递归设置关联对象的字段值
             }else
                 set(column, value)
         }

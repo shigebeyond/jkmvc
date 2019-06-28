@@ -91,30 +91,30 @@ user.delete();
 
 1. 从 `Map` 中赋值
 
-如果你要批量赋值，请使用 `Orm::values(values: Map<String, Any?>, expected: List<String>? = null)`
+如果你要批量赋值，请使用 `Orm::fromMap(values: Map<String, Any?>, expected: List<String> = emptyList())`
 
 ```
 val user = UserModel(20)
 val values = mapOf("username" to "shi", "password" to "123456")
 val expected = listOf("username","password")
-user.values(values, expected)
+user.fromMap(values, expected)
 user.create()
 ```
 
 2. 从 `HttpRequest` 中赋值
 
-通常，我们要从请求中读取相关的属性值，只要使用 `net.jkcode.jkmvc.http.valuesFromRequest` 方法即可。
+通常，我们要从请求中读取相关的属性值，只要使用 `net.jkcode.jkmvc.http.fromRequest` 方法即可。
 
-当然，请求中的数据都是字符串类型，但是我们的属性却不一定是字符串类型的，`net.jkcode.jkmvc.http.valuesFromRequest` 会智能转换请求中的值，并赋值给属性。
+当然，请求中的数据都是字符串类型，但是我们的属性却不一定是字符串类型的，`net.jkcode.jkmvc.http.fromRequest` 会智能转换请求中的值，并赋值给属性。
 
 ```	
-import net.jkcode.jkmvc.http.valuesFromRequest
+import net.jkcode.jkmvc.http.fromRequest
 
 try
 {
     val user = UserModel(20);
     val expected = listOf("username","password")
-    user.valuesFromRequest(req, expected)
+    user.fromRequest(req, expected)
     user.update();
 }
 catch (e: OrmException)

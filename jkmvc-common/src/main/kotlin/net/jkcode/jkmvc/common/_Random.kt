@@ -29,17 +29,30 @@ public inline fun randomBoolean(): Boolean {
 
 /**
  * 随机字符串
+ *
+ * @param length
+ * @param base
  * @return
  */
-public fun randomString(length: Int): String {
-    val str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+public fun randomString(length: Int, base: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"): String {
     val random = ThreadLocalRandom.current()
     val sb = StringBuffer()
     for (i in 0 until length) {
         // 随机选个字符
-        val j = random.nextInt(str.length)
-        sb.append(str[j])
+        val j = random.nextInt(base.length)
+        sb.append(base[j])
     }
     //将承载的字符转换成字符串
     return sb.toString()
+}
+
+/**
+ * 随机数字字符串
+ *
+ * @param length
+ * @param base
+ * @return
+ */
+public fun randomNumberString(length: Int): String {
+    return randomString(length, "0123456789")
 }

@@ -2,7 +2,6 @@ package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.common.*
 import net.jkcode.jkmvc.db.MutableRow
-import net.jkcode.jkmvc.db.Row
 import net.jkcode.jkmvc.serialize.ISerializer
 import java.math.BigDecimal
 import java.util.*
@@ -127,7 +126,7 @@ open class OrmEntity : IOrmEntity {
      * @param defaultValue
      * @return
      */
-    public inline fun getOrPut(key: String, defaultValue: () -> Any?): Any? {
+    public fun getOrPut(key: String, defaultValue: () -> Any?): Any? {
         // 获得字段值
         val value = data[key]
         if (value != null)
@@ -140,25 +139,53 @@ open class OrmEntity : IOrmEntity {
     }
 
     /**
-     * 设置多个字段值
-     *
-     * @param values   字段值的数组：<字段名 to 字段值>
-     * @param expected 要设置的字段名的数组
+     * 从map中设置字段值
+     *   子类会改写
+     * @param from   字段值的哈希：<字段名 to 字段值>
+     * @param expected 要设置的字段名的列表
+     */
+    public override fun fromMap(from: Map<String, Any?>, expected: List<String>): Unit {
+        copyMap(from, data, expected)
+    }
+
+    /**
+     * 获得字段值 -- 转为Map
+     *     子类会改写
+     * @param to
+     * @param expected 要设置的字段名的列表
      * @return
      */
-    public override fun values(values: Row, expected: List<String>?): IOrmEntity {
-        if(values.isEmpty())
-            return this
+    public override fun toMap(to: MutableMap<String, Any?>, expected: List<String>): Map<String, Any?> {
+        return copyMap(data, to, expected)
+    }
 
-        val columns = if (expected.isNullOrEmpty())
-            values.keys
-        else
-            expected!!;
+    /**
+     * 从from中复制字段值到to
+     *
+     * @param from 源map
+     * @param to 目标map
+     * @param expected 要设置的字段名的列表
+     * @return
+     */
+    protected fun copyMap(from: Map<String, Any?>, to: MutableMap<String, Any?>, expected: List<String>): Map<String, Any?> {
+        val columns = completedExpectedColumns(expected, from)
 
         for (column in columns)
-            this[column] = values[column];
+            to[column] = from[column]
 
-        return this;
+        return to
+    }
+
+    /**
+     * 完善要设置的字段名的列表
+     * @param from 源map
+     * @param expected 要设置的字段名的列表
+     */
+    protected fun completedExpectedColumns(expected: List<String>, from: Map<String, Any?>): Collection<String> {
+        return if (expected.isEmpty())
+                    from.keys
+                else
+                    expected
     }
 
     /**
@@ -238,25 +265,6 @@ open class OrmEntity : IOrmEntity {
 
         // 2 输出单个字段
         return data[template].toString()
-    }
-
-    /**
-     * 获得字段值
-     *     子类会改写
-     * @return
-     */
-    public override fun toMap(): Map<String, Any?> {
-        return data
-    }
-
-    /**
-     * 从map中设置字段值
-     *    子类会改写
-     * @param data
-     */
-    public override fun fromMap(data: Map<String, Any?>) {
-        for((column, value) in data)
-            set(column, value)
     }
 
     public override fun toString(): String {

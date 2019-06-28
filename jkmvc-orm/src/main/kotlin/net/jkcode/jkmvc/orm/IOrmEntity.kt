@@ -1,8 +1,5 @@
 package net.jkcode.jkmvc.orm
 
-import net.jkcode.jkmvc.db.Row
-import kotlin.properties.ReadWriteProperty
-
 /**
  * ORM之实体对象
  *  1. 本来想继承 MutableMap<String, Any?>, 但是得不偿失, 不值得做
@@ -66,26 +63,20 @@ interface IOrmEntity {
     fun setIntelligent(column:String, value:String):Boolean
 
     /**
-     * 设置多个字段值
-     *
-     * @param values   字段值的数组：<字段名 to 字段值>
-     * @param expected 要设置的字段名的数组
-     * @return
-     */
-    fun values(values: Row, expected: List<String>? = null): IOrmEntity;
-
-    /**
-     * 获得字段值
-     * @return
-     */
-    fun toMap(): Map<String, Any?>;
-
-    /**
      * 从map中设置字段值
      *
-     * @param data
+     * @param from   字段值的哈希：<字段名 to 字段值>
+     * @param expected 要设置的字段名的列表
      */
-    fun fromMap(data: Map<String, Any?>): Unit;
+    fun fromMap(from: Map<String, Any?>, expected: List<String> = emptyList()): Unit;
+
+    /**
+     * 获得字段值 -- 转为Map
+     * @param to
+     * @param expected 要设置的字段名的列表
+     * @return
+     */
+    fun toMap(to: MutableMap<String, Any?> = HashMap(), expected: List<String> = emptyList()): Map<String, Any?>;
 
     /**
      * 从其他实体对象中设置字段值

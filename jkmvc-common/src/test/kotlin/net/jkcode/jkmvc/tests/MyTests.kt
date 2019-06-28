@@ -1039,6 +1039,16 @@ class MyTests{
     }
 
     @Test
+    fun testRandom() {
+        val start = "curl 'http://www.shibiantian.com/coupon/exchange_coupon_code' -H 'Cookie: Hm_lvt_792d6c5d77fe8d4bc5dccb134f9ab44f=1561691832; shibiantian_uid=466; ci_session=a%3A12%3A%7Bs%3A10%3A%22session_id%22%3Bs%3A32%3A%222df26e42a079a4848292d8e4ac9d3712%22%3Bs%3A10%3A%22ip_address%22%3Bs%3A13%3A%22192.168.10.35%22%3Bs%3A10%3A%22user_agent%22%3Bs%3A104%3A%22Mozilla%2F5.0+%28X11%3B+Linux+x86_64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F70.0.3538.77+Safari%2F537.36%22%3Bs%3A13%3A%22last_activity%22%3Bi%3A1561697041%3Bs%3A9%3A%22user_data%22%3Bs%3A0%3A%22%22%3Bs%3A3%3A%22uid%22%3Bs%3A3%3A%22466%22%3Bs%3A8%3A%22nickname%22%3Bs%3A11%3A%22shigebeyond%22%3Bs%3A5%3A%22phone%22%3Bs%3A11%3A%2213471156021%22%3Bs%3A10%3A%22hide_phone%22%3Bs%3A11%3A%22134%2A%2A%2A%2A6021%22%3Bs%3A6%3A%22uc_uid%22%3Bi%3A2091194700%3Bs%3A8%3A%22cart_num%22%3Bi%3A0%3Bs%3A11%3A%22message_num%22%3Bi%3A19%3B%7D27b6cdbd2071537fa4fb04ab0d69cbfc4fb2098e; Hm_lpvt_792d6c5d77fe8d4bc5dccb134f9ab44f=1561697309' -H 'Origin: http://www.shibiantian.com' -H 'Accept-Encoding: gzip, deflate' -H 'Accept-Language: zh-CN,zh;q=0.9' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36' -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' -H 'Accept: application/json, text/javascript, */*; q=0.01' -H 'Referer: http://www.shibiantian.com/coupon/user_coupon' -H 'X-Requested-With: XMLHttpRequest' -H 'Connection: keep-alive' --data 'cuopon_code=YHQ"
+        val end = "' --compressed"
+        val sb = StringBuffer()
+        for (i in 0..1000)
+            sb.appendln(start + randomNumberString(18) + end);
+        File("/home/shi/test/shibiantian.txt").writeText(sb.toString())
+    }
+
+    @Test
     fun testConsistentHash(){
         val servers = (0..10).map {
             "server-${randomString(4)}"
