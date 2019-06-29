@@ -73,7 +73,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      * @param db 数据库连接
      * @return
      */
-    public override fun <T:Any> findColumn(params: List<Any?>, clazz: KClass<T>?, db: IDb): List<T?>{
+    public override fun <T:Any> findColumn(params: List<Any?>, clazz: KClass<T>?, db: IDb): List<T>{
         // 编译 + 执行
         return compile(SqlType.SELECT, db).findColumn(params, clazz, db)
     }

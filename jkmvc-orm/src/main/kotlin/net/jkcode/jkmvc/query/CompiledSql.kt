@@ -193,7 +193,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      */
     public override fun <T:Any> findAll(params: List<Any?>, db: IDb, transform: (Row) -> T): List<T>{
         // 执行 select
-        return db.queryRows<T>(sql, buildParams(params), transform)
+        return db.queryRows(sql, buildParams(params), transform)
     }
 
     /**
@@ -204,7 +204,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @return 单个数据
      */
     public override fun <T:Any> find(params: List<Any?>, db: IDb, transform: (Row) -> T): T?{
-        return db.queryRow<T>(sql, buildParams(params), transform);
+        return db.queryRow(sql, buildParams(params), transform);
     }
 
     /**
@@ -213,7 +213,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param params 动态参数
      * @return
      */
-    public override fun <T:Any> findColumn(params: List<Any?>, clazz: KClass<T>?, db: IDb): List<T?> {
+    public override fun <T:Any> findColumn(params: List<Any?>, clazz: KClass<T>?, db: IDb): List<T> {
         // 执行 select
         return db.queryColumn(sql, buildParams(params), clazz)
     }

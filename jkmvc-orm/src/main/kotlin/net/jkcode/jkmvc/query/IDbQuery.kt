@@ -104,7 +104,7 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return
      */
-    public abstract fun <T:Any> findColumn(params: List<Any?> = emptyList(), clazz: KClass<T>? = null, db: IDb = defaultDb): List<T?>
+    public abstract fun <T:Any> findColumn(params: List<Any?> = emptyList(), clazz: KClass<T>? = null, db: IDb = defaultDb): List<T>
 
     /**
      * 查询一列（多行）
@@ -113,7 +113,7 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return
      */
-    public inline fun <reified T:Any> findColumn(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<T?> {
+    public inline fun <reified T:Any> findColumn(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<T> {
         return findColumn(params, T::class, db)
     }
 
