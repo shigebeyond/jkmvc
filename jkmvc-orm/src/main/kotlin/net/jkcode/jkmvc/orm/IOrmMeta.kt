@@ -84,6 +84,14 @@ interface IOrmMeta {
     val dataFactory: FixedKeyMapFactory
 
     /**
+     * 校验orm对象数据
+     * @param item
+     * @return
+     */
+    fun validate(item: IOrmEntity): Boolean
+
+
+    /**
      * 是否有某个关联关系
      * @param name
      * @return

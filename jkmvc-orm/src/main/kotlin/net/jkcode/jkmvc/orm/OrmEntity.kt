@@ -54,7 +54,7 @@ open class OrmEntity : IOrmEntity {
      * 最新的字段值：<字段名 to 最新字段值>
      *     子类会改写
      */
-    open internal val data: MutableRow = HashMap<String, Any?>()
+    protected open val data: MutableRow = HashMap<String, Any?>()
 
     /**
      * 获得属性代理
@@ -139,6 +139,23 @@ open class OrmEntity : IOrmEntity {
     }
 
     /**
+     * 暴露data属性, 仅限orm模块使用
+     * @return
+     */
+    internal fun getData(): MutableRow {
+        return data
+    }
+
+    /**
+     * 从其他实体对象中设置字段值
+     *   子类会改写
+     * @param from
+     */
+    public override fun from(from: IOrmEntity): Unit{
+        from.toMap(data)
+    }
+
+    /**
      * 从map中设置字段值
      *   子类会改写
      * @param from   字段值的哈希：<字段名 to 字段值>
@@ -155,7 +172,7 @@ open class OrmEntity : IOrmEntity {
      * @param expected 要设置的字段名的列表
      * @return
      */
-    public override fun toMap(to: MutableMap<String, Any?>, expected: List<String>): Map<String, Any?> {
+    public override fun toMap(to: MutableMap<String, Any?>, expected: List<String>): MutableMap<String, Any?> {
         return copyMap(data, to, expected)
     }
 
@@ -167,25 +184,16 @@ open class OrmEntity : IOrmEntity {
      * @param expected 要设置的字段名的列表
      * @return
      */
-    protected fun copyMap(from: Map<String, Any?>, to: MutableMap<String, Any?>, expected: List<String>): Map<String, Any?> {
-        val columns = completedExpectedColumns(expected, from)
+    protected fun copyMap(from: Map<String, Any?>, to: MutableMap<String, Any?>, expected: List<String>): MutableMap<String, Any?> {
+        val columns = if (expected.isEmpty())
+                        from.keys
+                    else
+                        expected
 
         for (column in columns)
             to[column] = from[column]
 
         return to
-    }
-
-    /**
-     * 完善要设置的字段名的列表
-     * @param from 源map
-     * @param expected 要设置的字段名的列表
-     */
-    protected fun completedExpectedColumns(expected: List<String>, from: Map<String, Any?>): Collection<String> {
-        return if (expected.isEmpty())
-                    from.keys
-                else
-                    expected
     }
 
     /**

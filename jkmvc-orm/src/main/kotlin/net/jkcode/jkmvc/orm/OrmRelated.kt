@@ -10,6 +10,19 @@ import net.jkcode.jkmvc.db.Row
  *
  */
 abstract class OrmRelated : OrmPersistent() {
+
+    /**
+     * 默认要设置的字段名
+     */
+    protected val defaultExpectedProps: List<String> by lazy{
+        val columns = ArrayList<String>()
+        // 本模型的字段
+        columns.addAll(ormMeta.props)
+        // 关联对象
+        columns.addAll(ormMeta.relations.keys)
+        columns
+    }
+
     /**
      * 设置对象字段值
      *
@@ -92,8 +105,8 @@ abstract class OrmRelated : OrmPersistent() {
      * @param expected 要设置的字段名的列表
      * @return
      */
-    public override fun toMap(to: MutableMap<String, Any?>, expected: List<String>): Map<String, Any?> {
-        // 转关联对象
+    public override fun toMap(to: MutableMap<String, Any?>, expected: List<String>): MutableMap<String, Any?> {
+        // 1 转关联对象
         for((name, relation) in ormMeta.relations){
             val value = data[name]
             if(value != null){
@@ -105,7 +118,7 @@ abstract class OrmRelated : OrmPersistent() {
             }
         }
 
-        // 转当前对象：由于关联对象联查时不处理null值, 因此关联对象会缺少null值的字段，这里要补上
+        // 2 转当前对象：由于关联对象联查时不处理null值, 因此关联对象会缺少null值的字段，这里要补上
         for(prop in ormMeta.props){
             if(!to.containsKey(prop))
                 to[prop] = null
@@ -122,7 +135,10 @@ abstract class OrmRelated : OrmPersistent() {
      * @param expected 要设置的字段名的列表
      */
     public override fun fromMap(from: Map<String, Any?>, expected: List<String>): Unit {
-        val columns = completedExpectedColumns(expected, from)
+        val columns = if (expected.isEmpty())
+                            defaultExpectedProps
+                        else
+                            expected
 
         for(column in columns){
             val value = from[column]
@@ -139,10 +155,11 @@ abstract class OrmRelated : OrmPersistent() {
      * 从其他实体对象中设置字段值
      *    对于关联对象字段值的设置: 只考虑一对一的关联对象, 不考虑一对多的关联对象
      *
-     * @param data
+     * @param from
      */
-    public override fun from(other: IOrmEntity): Unit{
-        for((column, value) in (other as OrmEntity).data) {
+    public override fun from(from: IOrmEntity): Unit{
+        for(column in defaultExpectedProps) {
+            val value:Any? = from[column]
             var realValue: Any? = value // Any? / Orm / List / Map
             if(value is IOrmEntity){ // 如果是IOrmEntity，则为关联对象
                 realValue = related(column, true) // 创建关联对象

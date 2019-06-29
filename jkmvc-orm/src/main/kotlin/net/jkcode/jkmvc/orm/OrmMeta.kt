@@ -123,6 +123,28 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     }
 
     /**
+     * 校验orm对象数据
+     * @param item
+     * @return
+     */
+    public override fun validate(item: IOrmEntity): Boolean {
+        // 逐个属性校验
+        for ((field, rule) in rules) {
+            // 获得属性值
+            val value: Any = item[field];
+
+            // 校验单个属性: 属性值可能被修改
+            val newValue = rule.validate(value, (item as OrmEntity).getData())
+
+            // 更新被修改的属性值
+            if (value !== newValue)
+                item[field] = newValue;
+        }
+
+        return true;
+    }
+
+    /**
      * 是否有某个关联关系
      * @param name
      * @return
