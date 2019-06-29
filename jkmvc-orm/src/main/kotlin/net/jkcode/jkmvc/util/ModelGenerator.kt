@@ -111,7 +111,7 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
         val date = Date().format()
         code.append("package $pck \n\n")
         code.append("import net.jkcode.jkmvc.orm.OrmMeta \nimport net.jkcode.jkmvc.orm.Orm \n\n")
-        code.append("/**\n * $label\n *\n * @ClassName: $model\n * @Description:\n * @author shijianhang<772910474@qq.com>\n * @date $date\n */\n")
+        code.append("/**\n * $label\n *\n * @author shijianhang<772910474@qq.com>\n * @date $date\n */\n")
         // 2 类
         code.append("class $model(id:$pkType? = null): Orm(id) {\n")
         // 3 元数据
