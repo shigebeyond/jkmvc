@@ -350,7 +350,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
      * @param clazz 值类型
      * @return
      */
-    public override fun <T:Any> queryColumn(sql: String, params: List<Any?>, clazz: KClass<T>?): List<T?> {
+    public override fun <T:Any> queryColumn(sql: String, params: List<Any?>, clazz: KClass<T>?): List<T> {
         try{
             return conn.queryColumn(sql, params);
         }catch (e:Exception){

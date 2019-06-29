@@ -199,11 +199,11 @@ public fun <T> Connection.queryRows(sql: String, params: List<Any?> = emptyList(
  * @param transform 结果转换函数
  * @return
  */
-public fun <T:Any> Connection.queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): List<T?> {
+public fun <T:Any> Connection.queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): List<T> {
     return queryResult(sql, params){ rs: ResultSet ->
         // 处理查询结果
-        val result = LinkedList<T?>()
-        rs.forEachCell(1, clazz) { cell: T? ->
+        val result = LinkedList<T>()
+        rs.forEachCell(1, clazz) { cell: T ->
             result.add(cell);
         }
         result;
@@ -379,7 +379,7 @@ public inline fun <T:Any> ResultSet.nextCell(i:Int, clazz: KClass<T>? = null): C
  * @param action 处理函数
  * @return
  */
-public inline fun <T:Any> ResultSet.forEachCell(i:Int, clazz: KClass<T>? = null, action: (T?) -> Unit): Unit {
+public inline fun <T:Any> ResultSet.forEachCell(i:Int, clazz: KClass<T>? = null, action: (T) -> Unit): Unit {
     while(true){
         // 获得一行某列
         val (hasNext, value) = nextCell(i, clazz)
@@ -387,6 +387,6 @@ public inline fun <T:Any> ResultSet.forEachCell(i:Int, clazz: KClass<T>? = null,
             break;
 
         // 处理一行某列
-        action(value)
+        action(value as T)
     }
 }

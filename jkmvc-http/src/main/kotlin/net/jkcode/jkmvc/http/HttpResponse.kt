@@ -8,6 +8,7 @@ import net.jkcode.jkmvc.http.util.AllPagination
 import net.jkcode.jkmvc.http.util.Pagination
 import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jkmvc.orm.IOrm
+import net.jkcode.jkmvc.orm.itemToMap
 import java.io.File
 import java.io.FileInputStream
 import java.io.PrintWriter
@@ -298,6 +299,15 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseW
 	/**************************************** 渲染json结果 ************************************************/
 	/**
 	 * 渲染任意对象
+	 * @param data
+	 */
+	public fun renderJson(data: Any) {
+		//renderString(data.toJSONString())
+		renderString(JSON.toJSONString(normalizeData(data), SerializerFeature.WriteDateUseDateFormat /* Date格式化 */, SerializerFeature.WriteMapNullValue /* 输出null值 */))
+	}
+
+	/**
+	 * 渲染标准3属性响应
 	 *
 	 * @param code 错误码，0是成功，非0是失败
 	 * @param msg 消息
@@ -312,13 +322,12 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseW
 		val obj = JSONObject()
 		obj["code"] = code
 		obj["msg"] = msg
-		obj["data"] = if (data is IOrm) data.toMap() else data // 对orm对象要转map
-		//renderString(obj.toJSONString())
-		renderString(JSON.toJSONString(obj, SerializerFeature.WriteDateUseDateFormat /* Date格式化 */, SerializerFeature.WriteMapNullValue /* 输出null值 */))
+		obj["data"] = normalizeData(data)
+		renderJson(obj)
 	}
 
 	/**
-	 * 渲染orm列表，支持分页
+	 * 渲染标准3属性响应: 数据是orm列表，支持分页
 	 *
 	 * @param code 错误码，0是成功，非0是失败
 	 * @param msg 消息
@@ -334,18 +343,16 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseW
 		val obj = JSONObject()
 		obj["code"] = code
 		obj["msg"] = msg
-		obj["data"] = items
+		obj["data"] = normalizeData(items)
 
 		// 构造分页json
 		if(pagination != null)
 			obj["pagination"] = buildPaginationJson(pagination)
-
-		//renderString(obj.toJSONString())
-		renderString(JSON.toJSONString(obj, SerializerFeature.WriteDateUseDateFormat /* Date格式化 */, SerializerFeature.WriteMapNullValue /* 输出null值 */))
+		renderJson(obj)
 	}
 
 	/**
-	 * 渲染orm列表，全量分页
+	 * 渲染标准3属性响应: 数据是orm列表，全量分页
 	 *
 	 * @param code 错误码，0是成功，非0是失败
 	 * @param msg 消息
@@ -356,16 +363,35 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseW
 	}
 
 	/**
+	 * 标准化数据
+	 *    对orm对象要转map
+	 * @param data
+	 * @return
+	 */
+	protected fun normalizeData(data: Any?): Any? {
+		// 对orm对象要转map
+		if (data is IOrm)
+			return data.toMap()
+
+		// 对orm列表要转map
+		if(data is List<*> && data.first() is IOrm)
+			return (data as List<IOrm>).itemToMap()
+
+		return data
+	}
+
+	/**
 	 * 构造分页json
 	 *
 	 * @param pagination 分页
 	 * @return json
 	 */
-	private fun buildPaginationJson(pagination: Pagination): JSONObject {
+	protected fun buildPaginationJson(pagination: Pagination): JSONObject {
 		val data = JSONObject()
 		data["page"] = pagination.page
 		data["total"] = pagination.total
 		data["totalPages"] = pagination.totalPages
 		return data
 	}
+
 }

@@ -132,7 +132,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter, ClosingOnReque
      * @param clazz 值类型
      * @return
      */
-    public abstract fun <T:Any> queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>?): List<T?>
+    public abstract fun <T:Any> queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): List<T>
 
     /**
      * 查询一行一列
@@ -142,7 +142,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter, ClosingOnReque
      * @param clazz 值类型
      * @return
      */
-    public abstract fun <T:Any> queryCell(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>?): Cell<T>
+    public abstract fun <T:Any> queryCell(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): Cell<T>
 
     /**
      * 查询一行一列
