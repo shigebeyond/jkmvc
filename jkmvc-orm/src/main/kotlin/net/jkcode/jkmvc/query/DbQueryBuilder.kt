@@ -1,6 +1,9 @@
 package net.jkcode.jkmvc.query
 
-import net.jkcode.jkmvc.db.*
+import net.jkcode.jkmvc.db.Cell
+import net.jkcode.jkmvc.db.Db
+import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkmvc.db.Row
 import kotlin.reflect.KClass
 
 /**
@@ -142,12 +145,11 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      *
      * @param action sql动作：select/insert/update/delete
      * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
-     * @param paramSize 一次处理的参数个数
      * @param db 数据库连接
      * @return
      */
-    public override fun batchExecute(action: SqlType, paramses: List<Any?>, paramSize:Int, db: IDb): IntArray {
+    public override fun batchExecute(action: SqlType, paramses: List<Any?>, db: IDb): IntArray {
         // 编译 + 执行
-        return compile(action, db).batchExecute(paramses, paramSize, db)
+        return compile(action, db).batchExecute(paramses, db)
     }
 }

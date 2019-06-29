@@ -79,60 +79,14 @@ interface IOrmMeta {
     val props: List<String>
 
     /**
+     * 默认要设置的字段名
+     */
+    val defaultExpectedProps: List<String>
+
+    /**
      * 数据的工厂
      */
     val dataFactory: FixedKeyMapFactory
-
-    /**
-     * 校验orm对象数据
-     * @param item
-     * @return
-     */
-    fun validate(item: IOrmEntity): Boolean
-
-
-    /**
-     * 是否有某个关联关系
-     * @param name
-     * @return
-     */
-    fun hasRelation(name:String):Boolean;
-
-    /**
-     * 获得某个关联关系
-     * @param name
-     * @return
-     */
-    fun getRelation(name:String): IRelationMeta?;
-
-    /**
-     * 获得orm查询构建器
-     *
-     * @param convertingValue 查询时是否智能转换字段值
-     * @param convertingColumn 查询时是否智能转换字段名
-     * @param withSelect with()联查时自动select关联表的字段
-     * @return
-     */
-    fun queryBuilder(convertingValue: Boolean = false, convertingColumn: Boolean = false, withSelect: Boolean = true): OrmQueryBuilder;
-
-    /**
-     * 添加规则
-     * @param field
-     * @param label
-     * @param rule
-     * @return
-     */
-    fun addRule(field: String, label:String, rule: String = "", otherRule: ValidateLambda? = null): OrmMeta{
-        return addRule(field, RuleValidator(label, rule).combile(otherRule))
-    }
-
-    /**
-     * 添加规则
-     * @param field
-     * @param rule
-     * @return
-     */
-    fun addRule(field: String, rule: IValidator): OrmMeta;
 
     /**
      * 根据对象属性名，获得db字段名 -- 单个字段
@@ -166,6 +120,80 @@ interface IOrmMeta {
      */
     fun convertIntelligent(column:String, value:String):Any?
 
+    /************************************ 事件 *************************************/
+    /**
+     * 校验orm对象数据
+     * @param item
+     * @return
+     */
+    fun validate(item: IOrmEntity): Boolean
+
+    /**
+     * 添加规则
+     * @param field
+     * @param label
+     * @param rule
+     * @return
+     */
+    fun addRule(field: String, label:String, rule: String = "", otherRule: ValidateLambda? = null): OrmMeta{
+        return addRule(field, RuleValidator(label, rule).combile(otherRule))
+    }
+
+    /**
+     * 添加规则
+     * @param field
+     * @param rule
+     * @return
+     */
+    fun addRule(field: String, rule: IValidator): OrmMeta;
+
+    /************************************ query builder *************************************/
+    /**
+     * 获得orm查询构建器
+     *
+     * @param convertingValue 查询时是否智能转换字段值
+     * @param convertingColumn 查询时是否智能转换字段名
+     * @param withSelect with()联查时自动select关联表的字段
+     * @return
+     */
+    fun queryBuilder(convertingValue: Boolean = false, convertingColumn: Boolean = false, withSelect: Boolean = true): OrmQueryBuilder;
+
+    /**
+     * 批量插入
+     *   一般用于批量插入 OrmEntity 对象, 而不是 Orm 对象, 因此也不会触发 Orm 中的前置后置事件
+     *
+     * @param items
+     * @return
+     */
+    fun batchInsert(items: List<IOrmEntity>): IntArray
+
+    /**
+     * 批量更新
+     *   一般用于批量更新 OrmEntity 对象, 而不是 Orm 对象, 因此也不会触发 Orm 中的前置后置事件
+     *
+     * @param items
+     * @return
+     */
+    fun batchUpdate(items: List<IOrmEntity>): IntArray
+
+    /**
+     * 批量删除
+     *
+     * @param pks 主键值列表, 主键值可能是单主键(Any), 也可能是多主键(DbKey)
+     * @return
+     */
+    fun batchDelete(vararg pks: Any): IntArray
+
+    /**
+     * 批量删除
+     *
+     * @param pks 主键值列表, 主键值可能是单主键(Any), 也可能是多主键(DbKey)
+     * @return
+     */
+    fun batchDelete(vararg pks: DbKeyValues): IntArray{
+        return batchDelete(*(pks as Array<Any>))
+    }
+
     /**
      * 联查关联表
      *
@@ -179,9 +207,10 @@ interface IOrmMeta {
      */
     fun joinRelated(query: OrmQueryBuilder, name: String, select: Boolean, columns: SelectColumnList?, lastName:String = this.name, path:String = ""): IRelationMeta
 
-    /************************************ 序列化事件 *************************************/
+
+    /************************************ 事件 *************************************/
     /**
-     * 能处理的序列化事件
+     * 能处理的事件
      */
     val processableEvents: List<String>
 
@@ -204,6 +233,21 @@ interface IOrmMeta {
      * @return
      */
     fun <T> transactionWhenHandlingEvent(events:String, statement: () -> T): T
+
+    /************************************ 关联关系 *************************************/
+    /**
+     * 是否有某个关联关系
+     * @param name
+     * @return
+     */
+    fun hasRelation(name:String):Boolean;
+
+    /**
+     * 获得某个关联关系
+     * @param name
+     * @return
+     */
+    fun getRelation(name:String): IRelationMeta?;
 
     /************************************ 添加关联关系: 复合主键版本, 主外键类型为 DbKeyNames *************************************/
     /**

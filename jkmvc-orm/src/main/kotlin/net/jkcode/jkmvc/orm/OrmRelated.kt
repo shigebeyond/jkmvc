@@ -12,18 +12,6 @@ import net.jkcode.jkmvc.db.Row
 abstract class OrmRelated : OrmPersistent() {
 
     /**
-     * 默认要设置的字段名
-     */
-    protected val defaultExpectedProps: List<String> by lazy{
-        val columns = ArrayList<String>()
-        // 本模型的字段
-        columns.addAll(ormMeta.props)
-        // 关联对象
-        columns.addAll(ormMeta.relations.keys)
-        columns
-    }
-
-    /**
      * 设置对象字段值
      *
      * @param column 字段名
@@ -136,7 +124,7 @@ abstract class OrmRelated : OrmPersistent() {
      */
     public override fun fromMap(from: Map<String, Any?>, expected: List<String>): Unit {
         val columns = if (expected.isEmpty())
-                            defaultExpectedProps
+                            ormMeta.defaultExpectedProps
                         else
                             expected
 
@@ -158,7 +146,7 @@ abstract class OrmRelated : OrmPersistent() {
      * @param from
      */
     public override fun from(from: IOrmEntity): Unit{
-        for(column in defaultExpectedProps) {
+        for(column in ormMeta.defaultExpectedProps) {
             val value:Any? = from[column]
             var realValue: Any? = value // Any? / Orm / List / Map
             if(value is IOrmEntity){ // 如果是IOrmEntity，则为关联对象

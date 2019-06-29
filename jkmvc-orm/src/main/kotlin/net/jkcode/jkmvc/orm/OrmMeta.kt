@@ -1,12 +1,12 @@
 package net.jkcode.jkmvc.orm
 
-import net.jkcode.jkmvc.common.FixedKeyMapFactory
-import net.jkcode.jkmvc.common.getConstructorOrNull
-import net.jkcode.jkmvc.common.getProperty
-import net.jkcode.jkmvc.common.to
+import net.jkcode.jkmvc.common.*
 import net.jkcode.jkmvc.db.Db
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.model.GeneralModel
+import net.jkcode.jkmvc.query.DbExpr
+import net.jkcode.jkmvc.query.DbQueryBuilder
+import net.jkcode.jkmvc.query.SqlType
 import net.jkcode.jkmvc.validator.IValidator
 import java.util.*
 import kotlin.collections.set
@@ -109,6 +109,18 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     }
 
     /**
+     * 默认要设置的字段名
+     */
+    public override val defaultExpectedProps: List<String> by lazy{
+        val columns = ArrayList<String>()
+        // 本模型的字段
+        columns.addAll(props)
+        // 关联对象
+        columns.addAll(relations.keys)
+        columns
+    }
+
+    /**
      * 数据的工厂
      */
     public override val dataFactory: FixedKeyMapFactory by lazy{
@@ -120,6 +132,50 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
                 keys.addAll(relation.middleForeignProp.columns)
         }
         FixedKeyMapFactory(*keys.toTypedArray())
+    }
+
+    /**
+     * 智能转换字段值
+     *    在不知字段类型的情况下，将string赋值给属性
+     *    => 需要将string转换为属性类型
+     *    => 需要显式声明属性
+     *
+     * @param column
+     * @param value 字符串
+     * @return
+     */
+    public override fun convertIntelligent(column:String, value:String):Any?
+    {
+        // 1 获得属性
+        val prop = model.getProperty(column)
+        if(prop == null)
+            throw OrmException("类 ${model} 没有属性: $column");
+
+        // 2 转换类型
+        return value.to(prop.getter.returnType)
+    }
+
+    /**
+     * 如果有要处理的事件，则开启事务
+     *
+     * @param events 多个事件名，以|分隔，如 beforeCreate|afterCreate
+     * @param statement
+     * @return
+     */
+    public override fun <T> transactionWhenHandlingEvent(events:String, statement: () -> T): T{
+        return db.transaction(!canHandleAnyEvent(events), statement)
+    }
+
+    /********************************* 校验 **************************************/
+    /**
+     * 添加规则
+     * @param field
+     * @param rule
+     * @return
+     */
+    public override fun addRule(field: String, rule: IValidator): OrmMeta {
+        rules[field] = rule;
+        return this;
     }
 
     /**
@@ -144,6 +200,171 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
         return true;
     }
 
+    /********************************* query builder **************************************/
+    /**
+     * 获得orm查询构建器
+     *
+     * @param convertingValue 查询时是否智能转换字段值
+     * @param convertingColumn 查询时是否智能转换字段名
+     * @param withSelect with()联查时自动select关联表的字段
+     * @return
+     */
+    public override fun queryBuilder(convertingValue: Boolean, convertingColumn: Boolean, withSelect: Boolean): OrmQueryBuilder {
+        return OrmQueryBuilder(this, convertingValue, convertingColumn, withSelect);
+    }
+
+    /**
+     * 批量插入
+     *   一般用于批量插入 OrmEntity 对象, 而不是 Orm 对象, 因此也不会触发 Orm 中的前置后置事件
+     *
+     * @param items
+     * @return
+     */
+    public override fun batchInsert(items: List<IOrmEntity>): IntArray {
+        if(items.isEmpty())
+            throw OrmException("No data to insert"); // 没有要插入的数据
+
+        // 校验
+        for (item in items)
+            validate(item)
+
+        // 构建insert语句
+        // insert字段
+        val props = (items.first() as OrmEntity).getData().keys
+        val columns = props.mapToArray { prop ->
+            prop2Column(prop)
+        }
+        // value字段值
+        val values = DbExpr.question.repeateToArray(columns.size)
+        val query = queryBuilder().insertColumns(*columns).value(values)
+
+        // 构建参数
+        val params:ArrayList<Any?> = ArrayList()
+        for (item in items){
+            for(prop in props) {
+                params.add(item[prop])
+            }
+        }
+
+        // 批量插入
+        return query.batchInsert(params)
+    }
+
+    /**
+     * 批量更新
+     *   一般用于批量更新 OrmEntity 对象, 而不是 Orm 对象, 因此也不会触发 Orm 中的前置后置事件
+     *
+     * @param items
+     * @return
+     */
+    public override fun batchUpdate(items: List<IOrmEntity>): IntArray {
+        if(items.isEmpty())
+            throw OrmException("No data to insert"); // 没有要插入的数据
+
+        // 校验
+        for (item in items)
+            validate(item)
+
+        // 构建update语句
+        val query = queryBuilder()
+        // set属性
+        val props = (items.first() as OrmEntity).getData().keys
+        props.removeAll(primaryProp.columns)
+        for(prop in props) {
+            if(!primaryProp.columns.contains(prop)) // 不包含主键
+                query.set(prop2Column(prop), DbExpr.question)
+        }
+        // where主键
+        query.where(primaryKey, DbExpr.question)
+
+        // 构建参数
+        val params:ArrayList<Any?> = ArrayList()
+        for (item in items){
+            // 属性值
+            for(prop in props)
+                params.add(item[prop])
+            // 主键值
+            for(pk in primaryProp.columns)
+                params.add(item[pk])
+        }
+
+        // 批量更新
+        return query.batchUpdate(params);
+    }
+
+    /**
+     * 批量删除
+     *
+     * @param pks 主键值列表, 主键值可能是单主键(Any), 也可能是多主键(DbKey)
+     * @return
+     */
+    public override fun batchDelete(vararg pks: Any): IntArray {
+        // 构建delete语句
+        val query = queryBuilder().where(primaryKey, DbExpr.question)
+
+        // 构建参数
+        val params:ArrayList<Any?> = ArrayList()
+        for (pk in pks){
+            if(pk is DbKey<*>)
+                params.addAll(pk.columns)
+            else
+                params.add(pk)
+        }
+
+        return query.batchDelete(params)
+    }
+
+    /**
+     * 联查关联表
+     *
+     * @param query 查询构建器
+     * @param name 关联关系名
+     * @param select 是否select关联字段
+     * @param columns 关联字段列表
+     * @param lastName 上一级关系名
+     * @param path 列名父路径
+     * @return 关联关系
+     */
+    public override fun joinRelated(query: OrmQueryBuilder, name: String, select: Boolean, columns: SelectColumnList?, lastName:String, path:String): IRelationMeta {
+        // 获得当前关联关系
+        val relation = getRelation(name)!!;
+        // 1 非hasMany关系：只处理一层
+        if(relation.type == RelationType.HAS_MANY){
+            // 单独处理hasMany关系，不在一个sql中联查，而是单独查询
+            query.withMany(name, columns)
+            return relation;
+        }
+
+        // 2 非hasMany关系
+        // join关联表
+        if (relation.type == RelationType.BELONGS_TO) { // belongsto: join 主表
+            query.joinMaster(this, lastName, relation, name);
+        }else{ // hasxxx: join 从表
+            if(relation is MiddleRelationMeta) // 有中间表
+                query.joinSlaveThrough(this, lastName, relation, name);
+            else // 无中间表
+                query.joinSlave(this, lastName, relation, name);
+        }
+
+        //列名父路径
+        val path2 = if(path == "")
+            name
+        else
+            path + ":" + name
+
+        // 递归联查子关系
+        columns?.forEachRelatedColumns { subname: String, subcolumns: SelectColumnList? ->
+            relation.ormMeta.joinRelated(query, subname, select, subcolumns, name, path2)
+        }
+
+        // 查询当前关系字段
+        if(select)
+            query.selectRelated(relation, name, columns?.myColumns /* 若字段为空，则查全部字段 */, path2);
+
+        return relation;
+    }
+
+    /********************************* 关联关系 **************************************/
     /**
      * 是否有某个关联关系
      * @param name
@@ -162,41 +383,6 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     public override fun getRelation(name: String): IRelationMeta? {
         return relations.get(name);
     }
-
-    /**
-     * 获得orm查询构建器
-     *
-     * @param convertingValue 查询时是否智能转换字段值
-     * @param convertingColumn 查询时是否智能转换字段名
-     * @param withSelect with()联查时自动select关联表的字段
-     * @return
-     */
-    public override fun queryBuilder(convertingValue: Boolean, convertingColumn: Boolean, withSelect: Boolean): OrmQueryBuilder {
-        return OrmQueryBuilder(this, convertingValue, convertingColumn, withSelect);
-    }
-
-    /**
-     * 添加规则
-     * @param field
-     * @param rule
-     * @return
-     */
-    public override fun addRule(field: String, rule: IValidator): OrmMeta {
-        rules[field] = rule;
-        return this;
-    }
-
-    /**
-     * 如果有要处理的事件，则开启事务
-     *
-     * @param events 多个事件名，以|分隔，如 beforeCreate|afterCreate
-     * @param statement
-     * @return
-     */
-    public override fun <T> transactionWhenHandlingEvent(events:String, statement: () -> T): T{
-        return db.transaction(!canHandleAnyEvent(events), statement)
-    }
-
 
     /**
      * 生成属性代理 + 设置关联关系(belongs to)
@@ -292,77 +478,6 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
         }
 
         return this;
-    }
-
-    /**
-     * 智能转换字段值
-     *    在不知字段类型的情况下，将string赋值给属性
-     *    => 需要将string转换为属性类型
-     *    => 需要显式声明属性
-     *
-     * @param column
-     * @param value 字符串
-     * @return
-     */
-    public override fun convertIntelligent(column:String, value:String):Any?
-    {
-        // 1 获得属性
-        val prop = model.getProperty(column)
-        if(prop == null)
-            throw OrmException("类 ${model} 没有属性: $column");
-
-        // 2 转换类型
-        return value.to(prop.getter.returnType)
-    }
-
-    /**
-     * 联查关联表
-     *
-     * @param query 查询构建器
-     * @param name 关联关系名
-     * @param select 是否select关联字段
-     * @param columns 关联字段列表
-     * @param lastName 上一级关系名
-     * @param path 列名父路径
-     * @return 关联关系
-     */
-    public override fun joinRelated(query: OrmQueryBuilder, name: String, select: Boolean, columns: SelectColumnList?, lastName:String, path:String): IRelationMeta {
-        // 获得当前关联关系
-        val relation = getRelation(name)!!;
-        // 1 非hasMany关系：只处理一层
-        if(relation.type == RelationType.HAS_MANY){
-            // 单独处理hasMany关系，不在一个sql中联查，而是单独查询
-            query.withMany(name, columns)
-            return relation;
-        }
-
-        // 2 非hasMany关系
-        // join关联表
-        if (relation.type == RelationType.BELONGS_TO) { // belongsto: join 主表
-            query.joinMaster(this, lastName, relation, name);
-        }else{ // hasxxx: join 从表
-            if(relation is MiddleRelationMeta) // 有中间表
-                query.joinSlaveThrough(this, lastName, relation, name);
-            else // 无中间表
-                query.joinSlave(this, lastName, relation, name);
-        }
-
-        //列名父路径
-        val path2 = if(path == "")
-                        name
-                      else
-                        path + ":" + name
-
-        // 递归联查子关系
-        columns?.forEachRelatedColumns { subname: String, subcolumns: SelectColumnList? ->
-            relation.ormMeta.joinRelated(query, subname, select, subcolumns, name, path2)
-        }
-
-        // 查询当前关系字段
-        if(select)
-            query.selectRelated(relation, name, columns?.myColumns /* 若字段为空，则查全部字段 */, path2);
-
-        return relation;
     }
 
 }

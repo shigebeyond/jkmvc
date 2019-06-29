@@ -61,10 +61,9 @@ abstract class ICompiledSql: IDbQuery() {
      * 构建实际参数 = 静态参数 + 动态参数
      *
      * @param dynamicParamses 多次处理的动态参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
-     * @param paramSize 一次处理的参数个数
      * @return
      */
-    public abstract fun buildBatchParamses(dynamicParamses: List<Any?>, paramSize: Int):List<Any?>;
+    public abstract fun buildBatchParamses(dynamicParamses: List<Any?>):List<Any?>;
 
     /**
      * 预览sql
@@ -91,8 +90,7 @@ abstract class ICompiledSql: IDbQuery() {
      *
      * @param action sql动作：select/insert/update/delete
      * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
-     * @param paramSize 一次处理的参数个数
      * @return
      */
-    public abstract fun batchExecute(paramses: List<Any?>, paramSize:Int, db: IDb): IntArray
+    public abstract fun batchExecute(paramses: List<Any?>, db: IDb): IntArray
 }

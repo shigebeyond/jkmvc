@@ -44,11 +44,9 @@ class CompiledSql : Cloneable, ICompiledSql() {
      */
     public override val dynamicParamsSize:Int
         get(){
-            var size = 0;
-            for(param in staticParams)
-                if(param == DbExpr.question)
-                    size++;
-            return size
+            return staticParams.count { param ->
+                param == DbExpr.question
+            }
         }
 
     /**
@@ -132,32 +130,27 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * 构建实际参数 = 静态参数 + 动态参数
      *
      * @param dynamicParamses 多次处理的动态参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
-     * @param paramSize 一次处理的参数个数
      * @return
      */
-    public override fun buildBatchParamses(dynamicParamses: List<Any?>, paramSize: Int):List<Any?>{
-        // 检查动态参数个数
+    public override fun buildBatchParamses(dynamicParamses: List<Any?>):List<Any?>{
+        // 检查动态参数个数, 即一次处理的参数个数
         val size = dynamicParamsSize;
-        if(paramSize != size)
-            throw IllegalArgumentException("动态参数个数不对：需要 $size 个，传递 $paramSize ");
 
         // 检查批处理的次数
-        if(paramSize <= 0)
-            throw IllegalArgumentException("参数个数只能为正整数，但实际为 $paramSize");
-        if(dynamicParamses.size % paramSize > 0)
-            throw IllegalArgumentException("paramses 的大小必须是指定参数个数 $paramSize 的整数倍");
+        if(dynamicParamses.size % size > 0)
+            throw IllegalArgumentException("paramses 的大小必须是指定参数个数 $size 的整数倍");
 
         // 全都是动态参数
         if(staticParams.size == size)
             return dynamicParamses;
 
         // 批处理的次数
-        val batchNum:Int = dynamicParamses.size / paramSize
+        val batchNum:Int = dynamicParamses.size / size
 
         // 构建实际参数：将静态参数中?，替换为动态参数
         val realParams = ArrayList<Any?>(staticParams.size * batchNum)
         for(i in 0..(batchNum - 1)){
-            collectParams(realParams, dynamicParamses, i * paramSize)
+            collectParams(realParams, dynamicParamses, i * size)
         }
 
         return realParams;
@@ -245,12 +238,11 @@ class CompiledSql : Cloneable, ICompiledSql() {
      *
      * @param action sql动作：select/insert/update/delete
      * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
-     * @param paramSize 一次处理的参数个数
      * @return
      */
-    public override fun batchExecute(paramses: List<Any?>, paramSize:Int, db: IDb): IntArray {
+    public override fun batchExecute(paramses: List<Any?>, db: IDb): IntArray {
         // 批量执行有参数sql
-        return db.batchExecute(sql, buildBatchParamses(paramses, paramSize), staticParams.size);
+        return db.batchExecute(sql, buildBatchParamses(paramses), staticParams.size);
     }
 
 }

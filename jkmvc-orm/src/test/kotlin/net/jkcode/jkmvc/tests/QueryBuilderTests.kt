@@ -66,8 +66,7 @@ class QueryBuilderTests{
         }
 
         // 批量插入
-        //DbQueryBuilder().table("user").insertColumns("name", "age").value("?", "?").batchExecute(SqlType.INSERT, params, 2)// 每次只处理2个参数
-        DbQueryBuilder().table("user").insertColumns("name", "age").value(DbExpr.question, DbExpr.question).batchInsert(params, 2)// 每次只处理2个参数
+        DbQueryBuilder().table("user").insertColumns("name", "age").value(DbExpr.question, DbExpr.question).batchInsert(params)
     }
 
     @Test
@@ -127,7 +126,7 @@ class QueryBuilderTests{
                 .set("name", DbExpr.question)
                 .set("age", DbExpr.question)
                 .where("id", "=", DbExpr.question)
-                .batchExecute(SqlType.UPDATE, params, 3)// 每次只处理3个参数
+                .batchExecute(SqlType.UPDATE, params)
     }
 
     @Test
@@ -148,7 +147,7 @@ class QueryBuilderTests{
         }
 
         // 批量插入
-        DbQueryBuilder().table("user").where("id", "=", DbExpr.question).batchDelete(params, 1)// 每次只处理1个参数
+        DbQueryBuilder().table("user").where("id", "=", DbExpr.question).batchDelete(params)
     }
 
     /**

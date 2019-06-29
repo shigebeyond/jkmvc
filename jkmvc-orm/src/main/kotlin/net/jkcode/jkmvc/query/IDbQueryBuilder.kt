@@ -165,45 +165,41 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      *
      * @param action sql动作：select/insert/update/delete
      * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
-     * @param paramSize 一次处理的参数个数
      * @param db 数据库连接
      * @return
      */
-    public abstract fun batchExecute(action: SqlType, paramses: List<Any?>, paramSize:Int, db: IDb = defaultDb): IntArray;
+    public abstract fun batchExecute(action: SqlType, paramses: List<Any?>, db: IDb = defaultDb): IntArray;
 
     /**
      * 批量插入
      *
      * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
-     * @param paramSize 一次处理的参数个数
      * @param db 数据库连接
      * @return
      */
-    public fun batchInsert(paramses: List<Any?>, paramSize:Int, db: IDb = defaultDb): IntArray {
-        return batchExecute(SqlType.INSERT, paramses, paramSize, db)
+    public fun batchInsert(paramses: List<Any?>, db: IDb = defaultDb): IntArray {
+        return batchExecute(SqlType.INSERT, paramses, db)
     }
 
     /**
      * 批量更新
      *
      * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
-     * @param paramSize 一次处理的参数个数
      * @param db 数据库连接
      * @return
      */
-    public fun batchUpdate(paramses: List<Any?>, paramSize:Int, db: IDb = defaultDb): IntArray {
-        return batchExecute(SqlType.UPDATE, paramses, paramSize, db)
+    public fun batchUpdate(paramses: List<Any?>, db: IDb = defaultDb): IntArray {
+        return batchExecute(SqlType.UPDATE, paramses, db)
     }
 
     /**
      * 批量插入
      *
      * @param paramses 多次处理的参数的汇总，一次处理取 paramSize 个参数，必须保证他的大小是 paramSize 的整数倍
-     * @param paramSize 一次处理的参数个数
      * @param db 数据库连接
      * @return
      */
-    public fun batchDelete(paramses: List<Any?>, paramSize:Int, db: IDb = defaultDb): IntArray {
-        return batchExecute(SqlType.DELETE, paramses, paramSize, db)
+    public fun batchDelete(paramses: List<Any?>, db: IDb = defaultDb): IntArray {
+        return batchExecute(SqlType.DELETE, paramses, db)
     }
 }

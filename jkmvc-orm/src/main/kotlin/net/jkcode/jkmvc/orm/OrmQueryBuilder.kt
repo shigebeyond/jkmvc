@@ -11,6 +11,15 @@ import net.jkcode.jkmvc.query.DbQueryBuilder
 import net.jkcode.jkmvc.query.IDbQueryBuilder
 import java.util.*
 import kotlin.collections.HashMap
+import kotlin.collections.List
+import kotlin.collections.MutableList
+import kotlin.collections.MutableMap
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.emptyList
+import kotlin.collections.first
+import kotlin.collections.iterator
+import kotlin.collections.set
 
 /**
  * 面向orm对象的sql构建器
@@ -64,40 +73,6 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         this.convertingColumn = convertingColumn
         this.convertingValue = convertingValue
         return this
-    }
-
-    /********************************* 批量操作 **************************************/
-
-    /**
-     * 批量插入
-     *   一般用于批量插入 OrmEntity 对象, 而不是 Orm 对象, 因此也不会触发 Orm 中的前置后置事件
-     *
-     * @param items
-     * @return
-     */
-    public fun batchInsert(items: List<IOrmEntity>){
-        if(items.isEmpty())
-            throw OrmException("No data to insert"); // 没有要插入的数据
-
-        // 校验
-        for (item in items)
-            ormMeta.validate(item)
-
-        // 构建字段名
-        val columns = (items.first() as OrmEntity).getData().keys.map {prop ->
-            ormMeta.prop2Column(prop)
-        }
-
-        // 构建参数
-        val params:ArrayList<Any?> = ArrayList()
-        for (item in items)
-            for (j in 1..10){
-                params.add("shi-$j")
-                params.add(j)
-            }
-        }
-
-        DbQueryBuilder().table("user").insertColumns("name", "age").value(DbExpr.question, DbExpr.question).batchInsert(params, 2)// 每次只处理2个参数
     }
 
     /********************************* with系列方法，用于实现关联对象查询 **************************************/
