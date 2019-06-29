@@ -4,7 +4,6 @@ import java.math.BigDecimal
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ConcurrentMap
-import java.util.concurrent.ThreadLocalRandom
 
 /****************************** 扩展 Array + Collection *****************************/
 /**
@@ -14,6 +13,26 @@ import java.util.concurrent.ThreadLocalRandom
  */
 public inline fun <T> toArray(vararg params:T): Array<T> {
     return params as Array<T>
+}
+
+/**
+ * 构建重复元素的数组
+ *
+ * @param times 重复次数
+ * @return
+ */
+public fun Any.repeateToArray(times: Int): Array<Any> {
+    return (1..times).mapToArray { this }
+}
+
+/**
+ * 构建重复元素的列表
+ *
+ * @param times 重复次数
+ * @return
+ */
+public fun Any.repeateToList(times: Int): List<Any> {
+    return (1..times).map { this }
 }
 
 /**

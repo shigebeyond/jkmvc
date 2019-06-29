@@ -3,7 +3,6 @@ package net.jkcode.jkmvc.tests
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.alibaba.fastjson.serializer.SerializerFeature
-import getIntranetHost
 import net.jkcode.jkmvc.bit.BitIterator
 import net.jkcode.jkmvc.common.*
 import net.jkcode.jkmvc.idworker.SnowflakeId
@@ -185,16 +184,25 @@ class MyTests{
 
     @Test
     fun testFixedKeyMap(){
-        val mf = FixedKeyMapFactory("name", "id", "age")
+        val mf = FixedKeyMapFactory("name", "id", "age", "sex")
         val map = mf.createMap()
         map["name"] = "shi"
         map["id"] = 1
         map["age"] = 13
+        map["sex"] = 1
         println(map)
 
         println("\nremove: ")
         println(map.remove("age"))
         println(map)
+
+        println("\nkeys: ")
+        val keys = map.keys
+        println(keys)
+
+        println("\nremovekey: ")
+        println(keys.remove("sex"))
+        println(keys)
 
         println("\ncontainskey: ")
         println(map.containsKey("id")) // true
