@@ -236,7 +236,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
         }
         // value字段值
         val values = DbExpr.question.repeateToArray(columns.size)
-        val query = queryBuilder().insertColumns(*columns).value(values)
+        val query = queryBuilder().insertColumns(*columns).value(*values)
 
         // 构建参数
         val params:ArrayList<Any?> = ArrayList()
