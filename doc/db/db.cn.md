@@ -71,7 +71,7 @@ isInTransaction(): Boolean | 是否在事务中
 方法 | 作用
 --- | ---
 execute(sql: String, params: List<Any?> = emptyList(), generatedColumn: String? = null): Int | 执行更新
-batchExecute(sql: String, paramses: List<Any?>, paramSize: Int): IntArray | 批量更新: 每次更新sql参数不一样
+batchExecute(sql: String, paramses: List<Any?>): IntArray | 批量更新: 每次更新sql参数不一样
 
 ### 3.4 执行查询sql的方法
 
