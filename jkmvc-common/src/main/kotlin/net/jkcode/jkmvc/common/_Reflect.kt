@@ -126,7 +126,7 @@ public fun KClass<*>.getConstructor(vararg paramTypes:Class<*>): KFunction<*>?{
  * @param name 属性名
  * @return
  */
-public fun KClass<*>.getProperty(name:String): KProperty1<*, *>?{
+public fun <T: Any> KClass<T>.getProperty(name:String): KProperty1<T, *>?{
     return this.declaredMemberProperties.find {
         it.name == name;
     }
@@ -137,7 +137,7 @@ public fun KClass<*>.getProperty(name:String): KProperty1<*, *>?{
  * @param name 属性名
  * @return
  */
-public fun KClass<*>.getStaticProperty(name:String): KProperty0<*>? {
+public fun <T: Any> KClass<T>.getStaticProperty(name:String): KProperty0<*>? {
     return this.staticProperties.find {
         it.name == name;
     }
@@ -174,6 +174,18 @@ public fun <T: Any> KClass<T>.newInstance(needInit: Boolean = true): Any? {
     }
 
     return java.newInstance()
+}
+
+
+public fun <T: Any> KClass<T>.getGetter(prop: String): KProperty1.Getter<T, Any?>? {
+    return getProperty(prop)?.getter
+}
+
+
+public fun <T: Any> KClass<T>.getAllGetters(): Map<String, KProperty1.Getter<T, Any?>> {
+    return declaredMemberProperties.associate { prop ->
+        prop.name to prop.getter
+    }
 }
 
 /****************************** java反射扩展: Class *******************************/

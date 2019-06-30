@@ -4,6 +4,8 @@ import java.util.*;
 
 /**
  * 延迟申请内存的map
+ *    线程不安全, 尽量在单线程中使用
+ *
  * @author shijianhang<772910474@qq.com>
  * @date 2019-03-31 9:43 PM
  */
