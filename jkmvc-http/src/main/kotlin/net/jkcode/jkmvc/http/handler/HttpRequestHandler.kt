@@ -1,19 +1,12 @@
 package net.jkcode.jkmvc.http.handler
 
 import net.jkcode.jkmvc.closing.ClosingOnRequestEnd
-import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.ThreadLocalInheritableInterceptor
-import net.jkcode.jkmvc.common.trySupplierFinally
-import net.jkcode.jkmvc.common.ucFirst
-import net.jkcode.jkmvc.http.HttpRequest
-import net.jkcode.jkmvc.http.HttpResponse
+import net.jkcode.jkmvc.common.*
+import net.jkcode.jkmvc.http.*
 import net.jkcode.jkmvc.http.controller.Controller
 import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
-import net.jkcode.jkmvc.http.httpLogger
-import net.jkcode.jkmvc.http.isOptions
 import net.jkcode.jkmvc.http.router.RouteException
-import java.util.concurrent.CompletableFuture
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import kotlin.reflect.KFunction
@@ -25,12 +18,17 @@ import kotlin.reflect.KFunction
  * @date 2016-10-6 上午9:27:56
  *
  */
-object RequestHandler : IRequestHandler {
+object HttpRequestHandler : IHttpRequestHandler {
 
     /**
      * http配置
      */
     public val config = Config.instance("http", "yaml")
+
+    /**
+     * 拦截器
+     */
+    public override val interceptors: List<IHttpInterceptor> = IHttpInterceptor.load(config)
 
     /**
      * 是否调试
@@ -60,10 +58,21 @@ object RequestHandler : IRequestHandler {
         if(req.isStaticFile())
             return false;
 
+        // 构建响应对象
         val res = HttpResponse(response);
-        trySupplierFinally(
+
+        // 允许跨域
+        if(config.getBoolean("allowCrossDomain", false)!!){
+            res.setHeader("Access-Control-Allow-Origin", "*");
+            res.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS,PUT,DELETE,HEAD");
+            res.setHeader("Access-Control-Allow-Headers", "origin,cache-control,content-type,accept,hash-referer,x-requested-with,token");// 跨域验证登录用户，要用到请求头中的token
+            if(req.isOptions())
+                return true;
+        }
+
+        IInterceptor.trySupplierFinallyAroundInterceptor(interceptors, req,
             {callController(req, res)}, // 调用路由对应的controller与action
-            ThreadLocalInheritableInterceptor().intercept{ r, e -> endRequest(req) } // 继承ThreadLocal + 关闭请求(ThreadLocal中的资源)
+            ThreadLocalInheritableInterceptor().intercept{ r, e -> endRequest(req, e) } // 继承ThreadLocal + 关闭请求(ThreadLocal中的资源)
         )
         return true
     }
@@ -76,10 +85,9 @@ object RequestHandler : IRequestHandler {
      * @return
      */
     private fun callController(req: HttpRequest, res: HttpResponse): Any? {
-        // 解析路由
+        // 1 解析路由
         if (!req.parseRoute())
             throw RouteException("当前uri没有匹配路由：" + req.requestURI);
-
         if(debug)
             httpLogger.debug("当前uri匹配路由: controller=[{}], action=[{}]", req.controller, req.action)
 
@@ -95,35 +103,27 @@ object RequestHandler : IRequestHandler {
             throw RouteException("控制器${req.controller}不存在方法：${method}()");
         }
 
-        // 创建controller
+        // 2 创建controller
         val controller: Controller = clazz.clazz.java.newInstance() as Controller;
-
-        // 允许跨域
-        if(config.getBoolean("allowCrossDomain", false)!!){
-            res.setHeader("Access-Control-Allow-Origin", "*");
-            res.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS,PUT,DELETE,HEAD");
-            res.setHeader("Access-Control-Allow-Headers", "origin,cache-control,content-type,accept,hash-referer,x-requested-with,token");// 跨域验证登录用户，要用到请求头中的token
-            if(req.isOptions())
-                return null;
-        }
 
         // 设置req/res属性
         controller.req = req;
         controller.res = res;
 
-        // 调用controller的action方法
+        // 3 调用controller的action方法
         return controller.callActionMethod(action)
     }
 
     /**
      * 关闭请求(资源)
      * @param req
+     * @param ex
      */
-    private fun endRequest(req: HttpRequest) {
-        // 请求处理后，关闭资源
+    private fun endRequest(req: HttpRequest, ex: Throwable?) {
+        // 1 请求处理后，关闭资源
         ClosingOnRequestEnd.triggerClosings()
 
-        // 如果是异步操作, 则需要关闭异步响应
+        // 2 如果是异步操作, 则需要关闭异步响应
         if (req.isAsyncStarted)
             req.asyncContext.complete()
     }

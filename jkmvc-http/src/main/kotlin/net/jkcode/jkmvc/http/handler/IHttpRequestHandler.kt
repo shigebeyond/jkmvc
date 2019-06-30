@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.http.handler
 
+import net.jkcode.jkmvc.http.IHttpInterceptor
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -10,7 +11,12 @@ import javax.servlet.http.HttpServletResponse
  * @date 2016-10-6 上午9:27:56
  *
  */
-interface IRequestHandler {
+interface IHttpRequestHandler {
+
+    /**
+     * 拦截器
+     */
+    val interceptors: List<IHttpInterceptor>
 
     /**
      * 处理请求
@@ -19,6 +25,6 @@ interface IRequestHandler {
      * @param HttpServletResponse res
      * @return 是否处理，如果没有处理（如静态文件请求），则交给下一个filter/默认servlet来处理
      */
-    public fun handle(request: HttpServletRequest, response: HttpServletResponse): Boolean
+    fun handle(request: HttpServletRequest, response: HttpServletResponse): Boolean
 
 }
