@@ -24,7 +24,7 @@ abstract class OrmRelated : OrmPersistent() {
             // 设置关联对象
             data[column] = value;
             // 如果关联的是主表，则更新从表的外键
-            if (relation.type == RelationType.BELONGS_TO)
+            if (value != null && relation.type == RelationType.BELONGS_TO)
                 sets(relation.foreignProp, (value as Orm).pk); // 更新字段
             return;
         }
