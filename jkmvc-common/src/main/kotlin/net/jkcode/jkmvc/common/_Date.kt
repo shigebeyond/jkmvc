@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
-// 记录当前毫秒
+// 缓存当前毫秒
 @Volatile
 private var currMs:Long = 0
 // 是否启动定时更新当前毫秒
@@ -14,9 +14,12 @@ private val started: AtomicBoolean = AtomicBoolean(false)
 
 /**
  * 获得以毫秒为单位的当前时间
+ *   优化原生api `System.currentTimeMillis()`, 频繁调用消耗大, 因此使用 currMs 来缓存当前毫秒, 并由 CommonMilliTimer 来定时刷新
+ *   但是不精准, 不能用于精确毫秒的场景, 如SnowflakeIdWorker, 他使用currMillis()会导致生成id为负数
  * @return
  */
 public fun currMillis(): Long {
+//    return System.currentTimeMillis()
     if(!started.get()){ // 未启动定时
         if(started.compareAndSet(false, true))
             CommonMilliTimer.newPeriodic({ currMs = System.currentTimeMillis()}, 1, TimeUnit.MILLISECONDS)
