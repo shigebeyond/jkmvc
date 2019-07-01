@@ -107,13 +107,12 @@ abstract class OrmRelated : OrmPersistent() {
         }
 
         // 2 转当前对象：由于关联对象联查时不处理null值, 因此关联对象会缺少null值的字段，这里要补上
-        for(prop in ormMeta.props){
-            if(!to.containsKey(prop))
-                to[prop] = null
-        }
+        for(prop in ormMeta.props)
+            to[prop] = data[prop]
 
         return to;
     }
+
 
     /**
      * 从map中设置字段值
