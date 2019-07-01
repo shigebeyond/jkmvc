@@ -229,14 +229,14 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
             validate(item)
 
         // 构建insert语句
-        // insert字段
-        val props = (items.first() as OrmEntity).getData().keys
+        // insert字段 -- 取全部字段, 不能取第一个元素的字段, 因为每个元素可能修改的字段都不一样, 这样会导致其他元素漏掉更新某些字段
+        /*val props = (items.first() as OrmEntity).getData().keys
         val columns = props.mapToArray { prop ->
             prop2Column(prop)
-        }
+        }*/
         // value字段值
         val values = DbExpr.question.repeateToArray(columns.size)
-        val query = queryBuilder().insertColumns(*columns).value(*values)
+        val query = queryBuilder().insertColumns(*columns.toTypedArray()).value(*values)
 
         // 构建参数
         val params:ArrayList<Any?> = ArrayList()
@@ -267,13 +267,13 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
 
         // 构建update语句
         val query = queryBuilder()
-        // set属性
-        val props = (items.first() as OrmEntity).getData().keys
+        // set字段: 取全部字段, 不能取第一个元素的字段, 因为每个元素可能修改的字段都不一样, 这样会导致其他元素漏掉更新某些字段
+        //val props = (items.first() as OrmEntity).getData().keys
+        val props = ArrayList(this.props)
         props.removeAll(primaryProp.columns)
-        for(prop in props) {
-            if(!primaryProp.columns.contains(prop)) // 不包含主键
-                query.set(prop2Column(prop), DbExpr.question)
-        }
+        for(prop in props)
+            query.set(prop2Column(prop), DbExpr.question)
+
         // where主键
         query.where(primaryKey, DbExpr.question)
 

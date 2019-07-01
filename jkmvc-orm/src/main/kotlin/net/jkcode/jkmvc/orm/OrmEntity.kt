@@ -2,7 +2,6 @@ package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.common.*
 import net.jkcode.jkmvc.db.MutableRow
-import net.jkcode.jkmvc.model.GeneralModel
 import net.jkcode.jkmvc.serialize.ISerializer
 import java.math.BigDecimal
 import java.util.*
@@ -26,7 +25,7 @@ import kotlin.reflect.KProperty
  *      XXXEntity: open class MessageEntity: OrmEntity()
  *      XXXModel: class MessageModel: MessageEntity(), IOrm by GeneralModel(m)
  *      而 XXXModel 继承于 XXXEntity 是为了继承与复用其声明的属性, 但是 IOrm 的方法全部交由 GeneralModel 代理来改写, 也就对应改写掉 XXXEntity/OrmEntity 中与 IOrm 重合的方法(即 IOrmEntity 的方法)
- *      但是某些方法与属性是 XXXEntity/OrmEntity 特有的, 没有归入 IOrm 接口, 也就是说 GeneralModel 不能改写这些方法与属性
+ *      但是注意某些方法与属性是 XXXEntity/OrmEntity 特有的, 没有归入 IOrm 接口, 也就是说 GeneralModel 不能改写这些方法与属性
  *      如 data 是内部属性无法被 IOrm 接口暴露
  *
  * @author shijianhang
@@ -278,32 +277,7 @@ open class OrmEntity : IOrmEntity {
      * @return
      */
     public override fun toString(): String {
-        val clazz = this.javaClass
-        val delegate = getGeneralModelDelegate()
-        if(delegate != null)
-            return delegate.toString()
-
-        return "$clazz: $data"
-    }
-
-    /**
-     * 在实体类 XXXEntity 与模型类 XXXModel 分离的场景下, 获得 GeneralModel 的代理
-     * @return
-     */
-    protected fun getGeneralModelDelegate(): GeneralModel? {
-        val clazz = this.javaClass
-        // 实体类 XXXEntity 与模型类 XXXModel 分离: 没有继承Orm, 而是通过 GeneralModel 代理实现 IOrm
-        if(IOrm::class.java.isSuperClass(clazz) && !Orm::class.java.isSuperClass(clazz)) {
-            // 获得代理属性
-            val delegateField = clazz.getReadableFinalField("\$\$delegate_0")
-            if (delegateField != null) {
-                // 获得代理对象
-                val delegate = delegateField.get(this)
-                if (delegate is GeneralModel)
-                    return delegate
-            }
-        }
-        return null
+        return "${this.javaClass}: $data"
     }
 
 }
