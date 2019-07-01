@@ -1,5 +1,7 @@
 package net.jkcode.jkmvc.orm
 
+import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.serializer.SerializerFeature
 import net.jkcode.jkmvc.db.Row
 import org.apache.commons.collections.iterators.AbstractIteratorDecorator
 import kotlin.reflect.KClass
@@ -139,4 +141,32 @@ class ColumnIterator(iterator: Iterator<out IOrm>, protected val keyField:String
         val item = super.next() as IOrm
         return item[keyField]
     }
+}
+
+
+/**
+ * 标准化orm数据
+ *    对orm对象要转map
+ * @param data
+ * @return
+ */
+public fun normalizeOrmData(data: Any?): Any? {
+    // 对orm对象要转map
+    if (data is IOrm)
+        return data.toMap()
+
+    // 对orm列表要转map
+    if(data is List<*> && data.first() is IOrm)
+        return (data as List<IOrm>).itemToMap()
+
+    return data
+}
+
+/**
+ * 对象转json
+ * @return
+ */
+public fun Any.toJson(): String {
+    //data.toJSONString()
+    return JSON.toJSONString(normalizeOrmData(this), SerializerFeature.WriteDateUseDateFormat /* Date格式化 */, SerializerFeature.WriteMapNullValue /* 输出null值 */)
 }

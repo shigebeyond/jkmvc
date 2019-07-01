@@ -1,14 +1,12 @@
 package net.jkcode.jkmvc.http
 
-import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
-import com.alibaba.fastjson.serializer.SerializerFeature
 import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.http.util.AllPagination
 import net.jkcode.jkmvc.http.util.Pagination
 import net.jkcode.jkmvc.http.view.View
-import net.jkcode.jkmvc.orm.IOrm
-import net.jkcode.jkmvc.orm.itemToMap
+import net.jkcode.jkmvc.orm.normalizeOrmData
+import net.jkcode.jkmvc.orm.toJson
 import java.io.File
 import java.io.FileInputStream
 import java.io.PrintWriter
@@ -302,8 +300,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseW
 	 * @param data
 	 */
 	public fun renderJson(data: Any) {
-		//renderString(data.toJSONString())
-		renderString(JSON.toJSONString(normalizeData(data), SerializerFeature.WriteDateUseDateFormat /* Date格式化 */, SerializerFeature.WriteMapNullValue /* 输出null值 */))
+		renderString(data.toJson())
 	}
 
 	/**
@@ -322,7 +319,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseW
 		val obj = JSONObject()
 		obj["code"] = code
 		obj["msg"] = msg
-		obj["data"] = normalizeData(data)
+		obj["data"] = normalizeOrmData(data)
 		renderJson(obj)
 	}
 
@@ -343,7 +340,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseW
 		val obj = JSONObject()
 		obj["code"] = code
 		obj["msg"] = msg
-		obj["data"] = normalizeData(items)
+		obj["data"] = normalizeOrmData(items)
 
 		// 构造分页json
 		if(pagination != null)
@@ -360,24 +357,6 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseW
 	 */
 	public fun renderJson(code:Int, msg:String?, pagination: AllPagination<*>){
 		renderJson(code, msg, pagination.pageItems, pagination)
-	}
-
-	/**
-	 * 标准化数据
-	 *    对orm对象要转map
-	 * @param data
-	 * @return
-	 */
-	protected fun normalizeData(data: Any?): Any? {
-		// 对orm对象要转map
-		if (data is IOrm)
-			return data.toMap()
-
-		// 对orm列表要转map
-		if(data is List<*> && data.first() is IOrm)
-			return (data as List<IOrm>).itemToMap()
-
-		return data
 	}
 
 	/**
