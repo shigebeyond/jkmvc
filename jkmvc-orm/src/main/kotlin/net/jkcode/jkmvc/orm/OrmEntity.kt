@@ -5,6 +5,7 @@ import net.jkcode.jkmvc.db.MutableRow
 import net.jkcode.jkmvc.serialize.ISerializer
 import java.math.BigDecimal
 import java.util.*
+import java.io.Serializable
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty
@@ -32,7 +33,7 @@ import kotlin.reflect.KProperty
  * @date 2016-10-10 上午12:52:34
  *
  */
-open class OrmEntity : IOrmEntity {
+open class OrmEntity : IOrmEntity, Serializable {
 
     companion object{
 

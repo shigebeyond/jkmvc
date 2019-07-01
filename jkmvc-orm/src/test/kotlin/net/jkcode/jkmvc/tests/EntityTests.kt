@@ -1,6 +1,8 @@
 package net.jkcode.jkmvc.tests
 
 import net.jkcode.jkmvc.common.randomInt
+import net.jkcode.jkmvc.orm.OrmEntity
+import net.jkcode.jkmvc.serialize.ISerializer
 import net.jkcode.jkmvc.tests.entity.MessageEntity
 import net.jkcode.jkmvc.tests.model.MessageModel
 import org.junit.Test
@@ -21,8 +23,16 @@ class EntityTests{
         return msg
     }
 
+    private fun buildModel(): MessageModel {
+        var msg = MessageModel()
+        msg.fromUid = randomInt(10)
+        msg.toUid = randomInt(10)
+        msg.content = "hello orm"
+        return msg
+    }
+
     @Test
-    fun testOrmPersist(){
+    fun testModelPersist(){
         var msg = MessageModel()
         msg.fromUid = randomInt(10)
         msg.toUid = randomInt(10)
@@ -42,20 +52,34 @@ class EntityTests{
 //        println("delete: " + id)
     }
 
+    /**
+     * Orm与db相关, 尽量不使用 ISerializer 来序列化, 只序列化OrmEntity就好
+     */
     @Test
-    fun testOrmSerialize(){
-        var msg = MessageModel()
-        msg.fromUid = randomInt(10)
-        msg.toUid = randomInt(10)
-        msg.content = "hello orm"
+    fun testModelSerialize(){
+        var msg = buildModel()
         // toString()
         println(msg.toString())
+
         // toMap()
         println(msg.toMap())
     }
 
     @Test
-    fun testOrmFromEntity(){
+    fun testEntitySerialize(){
+        var msg = buildEntity()
+        println(msg)
+
+        val instance = ISerializer.instance("fst")
+        val bs = instance.serialize(msg)
+        if(bs != null) {
+            val msg2 = instance.unserizlize(bs!!)
+            println(msg2)
+        }
+    }
+
+    @Test
+    fun testModelFromEntity(){
         val entity = buildEntity()
         val orm = MessageModel()
         orm.from(entity)
