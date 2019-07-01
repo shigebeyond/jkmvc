@@ -1,7 +1,6 @@
 package net.jkcode.jkmvc.idworker
 
 import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.currMillis
 import java.util.concurrent.atomic.AtomicLong
 
 
@@ -19,6 +18,9 @@ import java.util.concurrent.atomic.AtomicLong
  *
  * 优点
  *   整体上按照时间自增排序，并且整个分布式系统内不会产生ID碰撞(由数据中心ID和机器ID作区分)，并且效率较高，经测试，SnowFlake每秒能够产生26万ID左右。
+ *
+ * 注意:
+ *    由于currMillis()的不精准会导致生成id为负数, 因此改用原生的 System.currentTimeMillis()
  *
  * @author shijianhang
  * @date 2017-10-8 下午8:02:47
@@ -68,7 +70,7 @@ class SnowflakeIdWorker : IIdWorker {
      * @return
      */
     public override fun nextId(): Long {
-        var timestamp = currMillis()
+        var timestamp = System.currentTimeMillis()
         val lastTimestamp = this.lastTimestamp
 
         //如果当前时间小于上一次ID生成的时间戳: 时钟回拨, 直接抛异常
@@ -112,9 +114,10 @@ class SnowflakeIdWorker : IIdWorker {
      * @return 当前时间戳
      */
     protected fun blockUntilNextMillis(lastTimestamp: Long): Long {
-        var timestamp = currMillis()
+        // 由于currMillis()的不精准会导致生成id为负数, 因此改用原生的 System.currentTimeMillis()
+        var timestamp = System.currentTimeMillis()
         while (timestamp <= lastTimestamp)
-            timestamp = currMillis()
+            timestamp = System.currentTimeMillis()
         return timestamp
     }
 }
