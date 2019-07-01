@@ -8,6 +8,7 @@ import net.jkcode.jkmvc.common.*
 import net.jkcode.jkmvc.idworker.SnowflakeId
 import net.jkcode.jkmvc.idworker.SnowflakeIdWorker
 import net.jkcode.jkmvc.redis.JedisFactory
+import net.jkcode.jkmvc.serialize.ISerializer
 import net.jkcode.jkmvc.validator.ValidateFuncDefinition
 import org.dom4j.Attribute
 import org.dom4j.DocumentException
@@ -86,6 +87,25 @@ class MyTests{
         println(1.toExpr().exprTo(Int::class))
         //println("1L".toLong()) // java.lang.NumberFormatException: For input string: "1L"
         println(1L.toExpr().exprTo(Long::class))
+    }
+
+    @Test
+    fun testTime(){
+        for(i in 0..10000){
+            println(currMillis())
+            Thread.sleep(1)
+        }
+    }
+
+    @Test
+    fun testSerialize(){
+        val msg = "hello world"
+        val instance = ISerializer.instance("fst")
+        val bs = instance.serialize(msg)
+        if(bs != null) {
+            val msg2 = instance.unserizlize(bs!!)
+            println(msg2)
+        }
     }
 
     @Test
@@ -566,13 +586,13 @@ class MyTests{
     fun testSnowflakeId(){
         // val idWorker = SnowflakeIdWorker(0, 0)
         val idWorker = SnowflakeIdWorker()
-        for (i in 0..999) {
+        for (i in 0..40) {
             val id = idWorker.nextId()
-            println(java.lang.Long.toBinaryString(id))
+            //println(java.lang.Long.toBinaryString(id))
             println(id)
         }
 
-        println(generateId("test"))
+        //println(generateId("test"))
     }
 
     @Test
@@ -625,6 +645,23 @@ class MyTests{
 
         //println(Config::class.java.isInterface)
         //println(IValidation::class.java.isInterface)
+    }
+
+    @Test
+    fun testField(){
+        val map = HashMap<String, String>()
+        map["a"] = "b"
+        // 获得字段
+        val f = map.javaClass.getReadableFinalField("table") // transient Node<K,V>[] table
+        println(f)
+        println(f.declaringClass) // HashMap
+        println(f.name) // table
+        println(f.modifiers) // transient
+        println(f.type) // HashMap$Node
+        println(f.declaredAnnotations)
+
+        // 获得字段值
+        println(f.get(map))
     }
 
     @Test
@@ -1074,8 +1111,4 @@ class MyTests{
     }
 
 }
-
-
-
-
 

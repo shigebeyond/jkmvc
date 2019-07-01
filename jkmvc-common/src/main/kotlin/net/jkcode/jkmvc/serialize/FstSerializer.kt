@@ -15,7 +15,7 @@ class FstSerializer: ISerializer {
     /**
      * 配置
      */
-    public var conf = FSTConfiguration.createDefaultConfiguration()
+    public val conf = FSTConfiguration.createDefaultConfiguration()
 
     /**
      * 序列化

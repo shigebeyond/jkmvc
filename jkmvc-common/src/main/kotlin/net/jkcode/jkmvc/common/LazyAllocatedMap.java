@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.common;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -9,7 +10,7 @@ import java.util.*;
  * @author shijianhang<772910474@qq.com>
  * @date 2019-03-31 9:43 PM
  */
-public class LazyAllocatedMap<K, V> extends AbstractMap<K, V> {
+public class LazyAllocatedMap<K, V> extends AbstractMap<K, V> implements Serializable {
 
     /**
      * 被代理的map
