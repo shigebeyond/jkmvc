@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.common.*
 import net.jkcode.jkmvc.db.MutableRow
+import net.jkcode.jkmvc.model.GeneralModel
 import net.jkcode.jkmvc.serialize.ISerializer
 import java.math.BigDecimal
 import java.util.*
@@ -15,6 +16,18 @@ import kotlin.reflect.KProperty
  *    仅仅需要的是get()/put()
  *    可有可无的是size()/isEmpty()/containsKey()/containsValue()
  *    完全不需要的是remove()/clear()/keys/values/entries/MutableEntry
+ *
+ *  2. data 属性的改写
+ *  2.1 子类 OrmValid 中改写
+ *      改写为 net.jkcode.jkmvc.common.FixedKeyMapFactory.FixedKeyMap
+ *      由于是直接继承 OrmEntity 来改写的, 因此直接覆写 data 属性, 因此能够应用到依赖 data 属性的方法
+ *
+ *  2.2 在实体类 XXXEntity 与模型类 XXXModel 分离的场景下改写, 如:
+ *      XXXEntity: open class MessageEntity: OrmEntity()
+ *      XXXModel: class MessageModel: MessageEntity(), IOrm by GeneralModel(m)
+ *      而 XXXModel 继承于 XXXEntity 是为了继承与复用其声明的属性, 但是 IOrm 的方法全部交由 GeneralModel 代理来改写, 也就对应改写掉 XXXEntity/OrmEntity 中与 IOrm 重合的方法(即 IOrmEntity 的方法)
+ *      但是某些方法与属性是 XXXEntity/OrmEntity 特有的, 没有归入 IOrm 接口, 也就是说 GeneralModel 不能改写这些方法与属性
+ *      如 data 是内部属性无法被 IOrm 接口暴露
  *
  * @author shijianhang
  * @date 2016-10-10 上午12:52:34
@@ -52,9 +65,12 @@ open class OrmEntity : IOrmEntity {
 
     /**
      * 最新的字段值：<字段名 to 最新字段值>
-     *     子类会改写
+     * 1 子类会改写
+     * 2 延迟加载, 对于子类改写是没有意义的, 但针对实体类 XXXEntity 与模型类 XXXModel 分离的场景下是有意义的, 也就是IOrm 的方法全部交由 GeneralModel 代理来改写, 也就用不到该类的 data 属性
      */
-    protected open val data: MutableRow = HashMap<String, Any?>()
+    protected open val data: MutableRow by lazy{
+        HashMap<String, Any?>()
+    }
 
     /**
      * 获得属性代理
@@ -107,6 +123,7 @@ open class OrmEntity : IOrmEntity {
 
     /**
      * 获得对象字段
+     *    子类会改写
      *
      * @param column 字段名
      * @param defaultValue 默认值
@@ -117,25 +134,6 @@ open class OrmEntity : IOrmEntity {
             throw OrmException("类 ${this.javaClass} 没有字段 $column");
 
         return (data[column] ?: defaultValue) as T
-    }
-
-    /**
-     * 获得或设置字段值
-     *
-     * @param key
-     * @param defaultValue
-     * @return
-     */
-    public fun getOrPut(key: String, defaultValue: () -> Any?): Any? {
-        // 获得字段值
-        val value = data[key]
-        if (value != null)
-            return value
-
-        // 设置字段值
-        val answer = defaultValue()
-        set(key, answer)
-        return answer
     }
 
     /**
@@ -275,7 +273,37 @@ open class OrmEntity : IOrmEntity {
         return data[template].toString()
     }
 
+    /**
+     * 转字符串
+     * @return
+     */
     public override fun toString(): String {
-        return "${this.javaClass}: " + data.toString()
+        val clazz = this.javaClass
+        val delegate = getGeneralModelDelegate()
+        if(delegate != null)
+            return delegate.toString()
+
+        return "$clazz: $data"
     }
+
+    /**
+     * 在实体类 XXXEntity 与模型类 XXXModel 分离的场景下, 获得 GeneralModel 的代理
+     * @return
+     */
+    protected fun getGeneralModelDelegate(): GeneralModel? {
+        val clazz = this.javaClass
+        // 实体类 XXXEntity 与模型类 XXXModel 分离: 没有继承Orm, 而是通过 GeneralModel 代理实现 IOrm
+        if(IOrm::class.java.isSuperClass(clazz) && !Orm::class.java.isSuperClass(clazz)) {
+            // 获得代理属性
+            val delegateField = clazz.getReadableFinalField("\$\$delegate_0")
+            if (delegateField != null) {
+                // 获得代理对象
+                val delegate = delegateField.get(this)
+                if (delegate is GeneralModel)
+                    return delegate
+            }
+        }
+        return null
+    }
+
 }

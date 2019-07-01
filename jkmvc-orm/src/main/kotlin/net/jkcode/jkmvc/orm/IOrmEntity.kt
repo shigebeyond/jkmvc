@@ -31,6 +31,25 @@ interface IOrmEntity {
     operator fun <T> get(column: String, defaultValue: T? = null): T;
 
     /**
+     * 获得或设置字段值
+     *
+     * @param key
+     * @param defaultValue
+     * @return
+     */
+    fun getOrPut(key: String, defaultValue: () -> Any?): Any? {
+        // 获得字段值
+        val value: Any? = get(key)
+        if (value != null)
+            return value
+
+        // 设置字段值
+        val answer = defaultValue()
+        set(key, answer)
+        return answer
+    }
+
+    /**
      * 设置对象字段值
      *
      * @param column 字段名
