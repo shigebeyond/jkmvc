@@ -1,7 +1,7 @@
 package net.jkcode.jkmvc.tests
 
 import net.jkcode.jkmvc.common.randomInt
-import net.jkcode.jkmvc.tests.entity.Message
+import net.jkcode.jkmvc.tests.entity.MessageEntity
 import net.jkcode.jkmvc.tests.model.MessageModel
 import org.junit.Test
 
@@ -13,8 +13,8 @@ class EntityTests{
         println(msg)
     }
 
-    private fun buildEntity(): Message {
-        val msg = Message()
+    private fun buildEntity(): MessageEntity {
+        val msg = MessageEntity()
         msg.fromUid = randomInt(10)
         msg.toUid = randomInt(10)
         msg.content = "hello entity"
@@ -22,7 +22,7 @@ class EntityTests{
     }
 
     @Test
-    fun testOrm(){
+    fun testOrmPersist(){
         var msg = MessageModel()
         msg.fromUid = randomInt(10)
         msg.toUid = randomInt(10)
@@ -42,6 +42,17 @@ class EntityTests{
 //        println("delete: " + id)
     }
 
+    @Test
+    fun testOrmSerialize(){
+        var msg = MessageModel()
+        msg.fromUid = randomInt(10)
+        msg.toUid = randomInt(10)
+        msg.content = "hello orm"
+        // toString()
+        println(msg.toString())
+        // toMap()
+        println(msg.toMap())
+    }
 
     @Test
     fun testOrmFromEntity(){

@@ -7,7 +7,7 @@ import net.jkcode.jkmvc.orm.OrmEntity
  * @author shijianhang<772910474@qq.com>
  * @date 2019-06-27 2:53 PM
  */
-open class Message: OrmEntity() {
+open class MessageEntity: OrmEntity() {
 
     // 代理属性读写
     public var id:Int by property() // 消息id
