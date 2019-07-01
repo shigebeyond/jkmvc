@@ -366,3 +366,58 @@ public fun Class<*>.getWritableFinalField(name: String): Field {
 
     return field
 }
+
+/**
+ * 获得实现某接口的代理属性
+ *    如类定义如下:
+ *    <code>class Test: CharSequence by "", IIdWorker by SnowflakeIdWorker()</code>
+ *
+ *    而kotlin编译代码如下, 他为代理对象生成的属性名为 $$delegate_0 / $$delegate_1/... 之类
+ *    <code>
+ *    public final class Test implements CharSequence, IIdWorker{
+ *    	private final /* synthetic */ String $$delegate_0;
+ *    	private final /* synthetic */ SnowflakeIdWorker $$delegate_1;
+ *
+ *    	public Test2() {
+ *    		this.$$delegate_0 = "";
+ *    		this.$$delegate_1 = new SnowflakeIdWorker();
+ *    	}
+ *		...
+ *    }
+ *    </code>
+ * @param delegateInterface 被代理的接口
+ * @return 代理属性
+ */
+public fun Class<*>.getDelegateField(delegateInterface: Class<*>): Field? {
+    // 获得代理属性: 属性名为 $$delegate_0 / $$delegate_1/..., 逐个去试
+    var i = 0
+    while(true) {
+        // 获得下一个代理属性
+        val name = "\$\$delegate_" + i++
+        val delegateField = this.getReadableFinalField(name)
+        // 没有了就中断
+        if (delegateField == null)
+            return null
+
+        // 有就匹配类型
+        if(delegateInterface.isAssignableFrom(delegateField.type))
+            return delegateField
+    }
+
+    return null
+}
+
+/**
+ * 获得实现某接口的代理属性
+ *    泛型T就是接口, 当前类使用代理对象来实现某接口
+ * @return 代理对象
+ */
+public inline fun <reified T> Any.getDelegate(): T? {
+    // 获得代理属性
+    val delegateField = this.javaClass.getDelegateField(T::class.java)
+    if(delegateField == null)
+        return null
+
+    // 获得代理对象
+    return delegateField.get(this) as T
+}
