@@ -17,6 +17,11 @@ object Application {
     public val config = Config.instance("application", "properties")
 
     /**
+     * 应用名
+     */
+    public val name: String = config["name"]!!
+
+    /**
      * 环境
      */
     public val env: String = config["environment"]!!
