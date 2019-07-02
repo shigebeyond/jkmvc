@@ -1,12 +1,17 @@
 package net.jkcode.jkmvc.http.handler
 
 import net.jkcode.jkmvc.closing.ClosingOnRequestEnd
-import net.jkcode.jkmvc.common.*
+import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.common.IInterceptor
+import net.jkcode.jkmvc.common.ThreadLocalInheritableInterceptor
+import net.jkcode.jkmvc.common.ucFirst
 import net.jkcode.jkmvc.http.*
 import net.jkcode.jkmvc.http.controller.Controller
 import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
 import net.jkcode.jkmvc.http.router.RouteException
+import javax.servlet.ServletRequest
+import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import kotlin.reflect.KFunction
@@ -42,9 +47,9 @@ object HttpRequestHandler : IHttpRequestHandler {
      * @param res
      * @return 是否处理，如果没有处理（如静态文件请求），则交给下一个filter/默认servlet来处理
      */
-    public override fun handle(request: HttpServletRequest, response: HttpServletResponse):Boolean{
+    public override fun handle(request: ServletRequest, response: ServletResponse):Boolean{
         //　构建请求对象
-        val req = HttpRequest(request);
+        val req = HttpRequest(request as HttpServletRequest);
         if(debug){
             // 路由
             httpLogger.debug("请求uri: {} {}, contextPath: {}", req.method, req.routeUri, req.contextPath)
@@ -54,12 +59,8 @@ object HttpRequestHandler : IHttpRequestHandler {
                 httpLogger.debug(req.buildCurlCommand())
         }
 
-        //　如果是静态文件请求，则跳过路由解析
-        if(req.isStaticFile())
-            return false;
-
         // 构建响应对象
-        val res = HttpResponse(response);
+        val res = HttpResponse(response as HttpServletResponse);
 
         // 允许跨域
         if(config.getBoolean("allowCrossDomain", false)!!){
@@ -120,6 +121,10 @@ object HttpRequestHandler : IHttpRequestHandler {
      * @param ex
      */
     private fun endRequest(req: HttpRequest, ex: Throwable?) {
+        // 0 打印异常
+        if(ex != null)
+            ex.printStackTrace()
+
         // 1 请求处理后，关闭资源
         ClosingOnRequestEnd.triggerClosings()
 

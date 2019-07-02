@@ -145,14 +145,6 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 
 	/*************************** 路由解析 *****************************/
 	/**
-	 * 是否是静态文件请求，如果是则不进行路由解析
-	 * @return
-	 */
-	public fun isStaticFile(): Boolean {
-		return Router.staticFileRegex.toRegex(RegexOption.IGNORE_CASE).matches(routeUri)
-	}
-
-	/**
 	 * 解析路由
 	 * @return
 	 */

@@ -4,7 +4,6 @@ import net.jkcode.jkmvc.common.ThreadLocalInheritableThreadPool
 import net.jkcode.jkmvc.http.handler.HttpRequestHandler
 import javax.servlet.*
 import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 /**
  * web入口
@@ -13,6 +12,11 @@ import javax.servlet.http.HttpServletResponse
  * @date 2019-4-13 上午9:27:56
  */
 open class JkFilter : Filter {
+
+    /**
+     * 静态文件uri的正则
+     */
+    protected val staticFileRegex: Regex = ".*\\.(gif|jpg|jpeg|png|bmp|ico|swf|js|css|eot|ttf|woff)$".toRegex(RegexOption.IGNORE_CASE)
 
     override fun init(filterConfig: FilterConfig) {
         // fix bug: jetty异步请求后 req.contextPath/req.servletContext 居然为null, 因此直接在 JkFilter.init() 时记录 contextPath, 反正他是全局不变的
@@ -23,6 +27,12 @@ open class JkFilter : Filter {
     }
 
     override fun doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) {
+        //　静态文件请求，则交给下一个filter来使用默认servlet来处理
+        if(staticFileRegex.matches((req as HttpServletRequest).requestURI)) {
+            chain.doFilter(req, res)
+            return;
+        }
+
         // 1 异步处理
         if(req.isAsyncSupported) {
             // 异步上下文, 在完成异步操作后, 需要调用 actx.complete() 来关闭异步响应, 调用下放到 RequestHandler.handle()
@@ -49,10 +59,10 @@ open class JkFilter : Filter {
      */
     protected fun handleRequest(req: ServletRequest, res: ServletResponse, chain: FilterChain) {
         // 处理请求
-        val handled = HttpRequestHandler.handle(req as HttpServletRequest, res as HttpServletResponse)
+        val handled = HttpRequestHandler.handle(req, res)
 
-        //　如果没有处理（如静态文件请求），则交给下一个filter来使用默认servlet来处理
-        // if not handled（eg request static file）, we delegate to next filter to use the default servlets
+        //　如果没有处理，则交给下一个filter来使用默认servlet来处理
+        // if not handled, we delegate to next filter to use the default servlets
         if (!handled)
             chain.doFilter(req, res)
     }

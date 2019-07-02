@@ -17,11 +17,6 @@ typealias ParamsAndRoute = Pair<Map<String, String>, Route>
 interface IRouter
 {
 	/**
-	 * 静态文件uri的正则
-	 */
-	var staticFileRegex: String
-
-	/**
 	 * 添加路由
 	 * @param name 路由名
 	 * @parma route 路由对象

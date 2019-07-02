@@ -25,11 +25,6 @@ object Router: IRouter
 	 */
 	private val routes:MutableMap<String, Route> = HashMap();
 
-	/**
-	 * 静态文件uri的正则
-	 */
-	public override var staticFileRegex: String = ".*\\.(gif|jpg|jpeg|png|bmp|ico|swf|js|css|eot|ttf|woff)$"
-
 	init {
 	    // 加载配置的路由
 		val props = config.props as Map<String, Map<String, *>>

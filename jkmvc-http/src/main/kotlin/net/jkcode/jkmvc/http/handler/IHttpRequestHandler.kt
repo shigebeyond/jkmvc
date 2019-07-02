@@ -1,8 +1,8 @@
 package net.jkcode.jkmvc.http.handler
 
 import net.jkcode.jkmvc.http.IHttpInterceptor
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import javax.servlet.ServletRequest
+import javax.servlet.ServletResponse
 
 /**
  * http请求处理者
@@ -25,6 +25,6 @@ interface IHttpRequestHandler {
      * @param HttpServletResponse res
      * @return 是否处理，如果没有处理（如静态文件请求），则交给下一个filter/默认servlet来处理
      */
-    fun handle(request: HttpServletRequest, response: HttpServletResponse): Boolean
+    fun handle(request: ServletRequest, response: ServletResponse): Boolean
 
 }
