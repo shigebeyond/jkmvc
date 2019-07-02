@@ -62,7 +62,7 @@ open class OrmEntity : IOrmEntity, Serializable {
      * 获得属性代理
      */
     public fun <T> property(): ReadWriteProperty<IOrmEntity, T> {
-        return OrmProp as ReadWriteProperty<IOrmEntity, T>;
+        return OrmPropDelegater as ReadWriteProperty<IOrmEntity, T>;
     }
 
     /**

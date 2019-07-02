@@ -13,7 +13,7 @@ import kotlin.reflect.full.companionObjectInstance
 /**
  * orm属性代理
  */
-object OrmProp: ReadWriteProperty<IOrmEntity, Any?>, Serializable {
+object OrmPropDelegater: ReadWriteProperty<IOrmEntity, Any?>, Serializable {
     // 获得属性
     public override operator fun getValue(thisRef: IOrmEntity, property: KProperty<*>): Any? {
         return thisRef[property.name]
