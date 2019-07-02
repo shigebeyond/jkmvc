@@ -31,7 +31,11 @@ open class JkFilter : Filter {
             // 异步处理请求
             //actx.start { // web server线程池
             ThreadLocalInheritableThreadPool.commonPool.execute { // 其他线程池
-                handleRequest(actx.request, actx.response, chain)
+                try {
+                    handleRequest(actx.request, actx.response, chain)
+                }catch (e: Exception){
+                    e.printStackTrace()
+                }
             }
             return;
         }
