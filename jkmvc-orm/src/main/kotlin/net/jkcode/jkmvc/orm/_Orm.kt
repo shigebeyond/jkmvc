@@ -4,8 +4,26 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.serializer.SerializerFeature
 import net.jkcode.jkmvc.db.Row
 import org.apache.commons.collections.iterators.AbstractIteratorDecorator
+import java.io.Serializable
+import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
 import kotlin.reflect.full.companionObjectInstance
+
+/**
+ * orm属性代理
+ */
+object OrmProp: ReadWriteProperty<IOrmEntity, Any?>, Serializable {
+    // 获得属性
+    public override operator fun getValue(thisRef: IOrmEntity, property: KProperty<*>): Any? {
+        return thisRef[property.name]
+    }
+
+    // 设置属性
+    public override operator fun setValue(thisRef: IOrmEntity, property: KProperty<*>, value: Any?) {
+        thisRef[property.name] = value
+    }
+}
 
 /**
  * 检查数据是否存在于db

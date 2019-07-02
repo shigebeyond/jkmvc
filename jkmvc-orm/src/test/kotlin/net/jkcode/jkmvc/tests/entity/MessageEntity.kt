@@ -7,7 +7,6 @@ import net.jkcode.jkmvc.orm.OrmEntity
  * @author shijianhang<772910474@qq.com>
  * @date 2019-06-27 2:53 PM
  */
-@org.nustaq.serialization.annotations.Transient
 open class MessageEntity: OrmEntity() {
 
     // 代理属性读写

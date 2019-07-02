@@ -67,14 +67,15 @@ class EntityTests{
 
     @Test
     fun testEntitySerialize(){
-        var msg = buildEntity()
+        var msg: MessageEntity = buildEntity()
         println(msg)
 
         val instance = ISerializer.instance("fst")
         val bs = instance.serialize(msg)
         if(bs != null) {
-            val msg2 = instance.unserizlize(bs!!)
+            val msg2: MessageEntity = instance.unserizlize(bs!!) as MessageEntity
             println(msg2)
+            println("" + msg2.fromUid + " => " + msg2.toUid + " : " + msg2.content)
         }
     }
 
