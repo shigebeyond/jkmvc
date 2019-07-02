@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.tests
 
-import net.jkcode.jkmvc.common.randomInt
+import net.jkcode.jkmvc.common.*
+import net.jkcode.jkmvc.orm.IOrm
 import net.jkcode.jkmvc.orm.OrmEntity
 import net.jkcode.jkmvc.serialize.ISerializer
 import net.jkcode.jkmvc.tests.entity.MessageEntity
@@ -86,6 +87,38 @@ class EntityTests{
         orm.from(entity)
         orm.save()
         println(orm)
+    }
+
+    /**
+     * 测试实现接口的代理
+     */
+    @Test
+    fun testInterfaceDelegate(){
+        val fs = MessageModel::class.java.getInterfaceDelegateFields()
+        println(fs)
+
+        val f = MessageModel::class.java.getInterfaceDelegateField(IOrm::class.java)
+        println(f)
+
+        val model = MessageModel()
+        val dele = model.getInterfaceDelegate(IOrm::class.java)
+        println(dele)
+    }
+
+    /**
+     * 测试实现属性读写的代理
+     */
+    @Test
+    fun testPropDelegate(){
+        val fs = MessageEntity::class.java.getPropDelegateFields()
+        println(fs)
+
+        val f = MessageEntity::class.java.getPropoDelegateField("id")
+        println(f)
+
+        val model = MessageEntity()
+        val dele = model.getPropDelegate("id")
+        println(dele)
     }
 
 }

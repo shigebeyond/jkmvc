@@ -77,6 +77,13 @@ class MyTests{
     }
 
     @Test
+    fun testNullSafe() {
+        val field = String::class.java.getReadableField("test")
+        val b = field?.type == String::class.java
+        println(b) // false
+    }
+
+    @Test
     fun testExpr() {
         println(1.1.toExpr())
         println(1.1F.toExpr())
@@ -652,7 +659,7 @@ class MyTests{
         val map = HashMap<String, String>()
         map["a"] = "b"
         // 获得字段
-        val f = map.javaClass.getReadableFinalField("table") // transient Node<K,V>[] table
+        val f = map.javaClass.getReadableField("table")!! // transient Node<K,V>[] table
         println(f)
         println(f.declaringClass) // HashMap
         println(f.name) // table

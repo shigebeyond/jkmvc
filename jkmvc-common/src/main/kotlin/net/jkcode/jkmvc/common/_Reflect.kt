@@ -7,6 +7,7 @@ import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
 import java.lang.reflect.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.*
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.memberFunctions
@@ -176,13 +177,20 @@ public fun <T: Any> KClass<T>.newInstance(needInit: Boolean = true): Any? {
     return java.newInstance()
 }
 
-
+/**
+ * 获得指定属性的getter
+ * @param prop
+ * @return
+ */
 public fun <T: Any> KClass<T>.getGetter(prop: String): KProperty1.Getter<T, Any?>? {
     return getProperty(prop)?.getter
 }
 
-
-public fun <T: Any> KClass<T>.getAllGetters(): Map<String, KProperty1.Getter<T, Any?>> {
+/**
+ * 获得所有属性的getter
+ * @return
+ */
+public fun <T: Any> KClass<T>.getGetters(): Map<String, KProperty1.Getter<T, Any?>> {
     return declaredMemberProperties.associate { prop ->
         prop.name to prop.getter
     }
@@ -337,14 +345,18 @@ fun Class<*>.getSuperClassGenricType(index: Int = 0): Class<*> {
  * @param name 属性名
  * @return
  */
-public fun Class<*>.getReadableFinalField(name: String): Field {
-    val field = getDeclaredField(name)
+public fun Class<*>.getReadableField(name: String): Field? {
+    try {
+        val field = getDeclaredField(name)
 
-    // 开放访问
-    if (!field.isAccessible)
-        field.isAccessible = true
+        // 开放访问
+        if (!field.isAccessible)
+            field.isAccessible = true
 
-    return field
+        return field
+    }catch (e: NoSuchFieldException){
+        return null
+    }
 }
 
 /**
@@ -367,12 +379,13 @@ public fun Class<*>.getWritableFinalField(name: String): Field {
     return field
 }
 
+/****************************** 代理实现接口 *******************************/
 /**
- * 获得实现某接口的代理属性
+ * 实现某接口的代理字段的迭代器
  *    如类定义如下:
  *    <code>class Test: CharSequence by "", IIdWorker by SnowflakeIdWorker()</code>
  *
- *    而kotlin编译代码如下, 他为代理对象生成的属性名为 $$delegate_0 / $$delegate_1/... 之类
+ *    而kotlin编译代码如下, 他为代理对象生成的字段名为 $$delegate_0 / $$delegate_1/... 之类
  *    <code>
  *    public final class Test implements CharSequence, IIdWorker{
  *    	private final /* synthetic */ String $$delegate_0;
@@ -385,39 +398,161 @@ public fun Class<*>.getWritableFinalField(name: String): Field {
  *		...
  *    }
  *    </code>
- * @param delegateInterface 被代理的接口
- * @return 代理属性
  */
-public fun Class<*>.getDelegateField(delegateInterface: Class<*>): Field? {
-    // 获得代理属性: 属性名为 $$delegate_0 / $$delegate_1/..., 逐个去试
-    var i = 0
-    while(true) {
-        // 获得下一个代理属性
-        val name = "\$\$delegate_" + i++
-        val delegateField = this.getReadableFinalField(name)
-        // 没有了就中断
-        if (delegateField == null)
-            return null
+class InterfaceDelegateFieldIterator(protected val clazz: Class<*>) : Iterator<Field> {
 
-        // 有就匹配类型
-        if(delegateInterface.isAssignableFrom(delegateField.type))
-            return delegateField
+    protected var curr = -1
+
+    override fun hasNext(): Boolean {
+        return getInterfaceDelegateField(curr + 1) != null
     }
+
+    override fun next(): Field {
+        return getInterfaceDelegateField(++curr)!!
+    }
+
+    /**
+     * 获得代理字段
+     *    字段名为 $$delegate_0 / $$delegate_1/..., 逐个去试
+     */
+    protected fun getInterfaceDelegateField(i: Int): Field? {
+        val name = "\$\$delegate_" + i
+        return clazz.getReadableField(name)
+    }
+}
+
+/**
+ * 获得实现某接口的代理字段
+ * @param `interface` 被代理的接口
+ * @return 代理字段
+ */
+public fun Class<*>.getInterfaceDelegateField(`interface`: Class<*>): Field? {
+    // 遍历代理字段
+    for(field in InterfaceDelegateFieldIterator(this))
+    // 匹配类型
+        if(`interface`.isAssignableFrom(field.type))
+            return field
 
     return null
 }
 
 /**
- * 获得实现某接口的代理属性
+ * 获得所有的实现接口的代理字段
+ * @return 代理字段
+ */
+public fun Class<*>.getInterfaceDelegateFields(): Collection<Field> {
+    return InterfaceDelegateFieldIterator(this).map { it }
+}
+
+/**
+ * 获得实现某接口的代理字段
  *    泛型T就是接口, 当前类使用代理对象来实现某接口
  * @return 代理对象
  */
-public inline fun <reified T> Any.getDelegate(): T? {
-    // 获得代理属性
-    val delegateField = this.javaClass.getDelegateField(T::class.java)
-    if(delegateField == null)
+public inline fun <reified T> Any.getInterfaceDelegate(): T? {
+    return getInterfaceDelegate(T::class.java)
+}
+
+/**
+ * 获得实现某接口的代理字段
+ *    泛型T就是接口, 当前类使用代理对象来实现某接口
+ * @return 代理对象
+ */
+public fun <T> Any.getInterfaceDelegate(`interface`: Class<T>): T? {
+    // 获得代理字段
+    val field = this.javaClass.getInterfaceDelegateField(`interface`)
+    if(field == null)
         return null
 
     // 获得代理对象
-    return delegateField.get(this) as T
+    return field.get(this) as T
+}
+
+/****************************** 代理实现属性读写 *******************************/
+
+/**
+ * 实现属性读写的代理字段的迭代器
+ *    如属性定义如下:
+ *    <code>public var id:Int by property()</code>
+ *
+ *    而kotlin编译代码如下, 他为代理对象生成的字段名为: "属性名$delegate"
+ *    <code>
+ *    private final ReadWriteProperty id$delegate;
+ *
+ *    public final int getId() {
+ *        return ((Number)this.id$delegate.getValue((Object)this, MessageEntity.$$delegatedProperties[0])).intValue();
+ *    }
+ *
+ *    public final void setId(final int <set-?>) {
+ *        this.id$delegate.setValue((Object)this, MessageEntity.$$delegatedProperties[0], (Object)<set-?>);
+ *    }
+ *
+ *    // 构造函数
+ *    public MessageEntity() {
+ *        this.id$delegate = this.property();
+ *    }
+ *    </code>
+ */
+class PropDelegateFieldIterator(protected val clazz: Class<*>) : Iterator<Field> {
+
+    // kotlin属性
+    protected val props = clazz.kotlin.declaredMemberProperties
+
+    protected var curr = -1
+
+    override fun hasNext(): Boolean {
+        return getPropDelegateField(curr + 1) != null
+    }
+
+    override fun next(): Field {
+        return getPropDelegateField(++curr)!!
+    }
+
+    /**
+     * 获得代理字段
+     *    字段名为: "属性名$delegate"
+     */
+    protected fun getPropDelegateField(i: Int): Field? {
+        if(i >= props.size)
+            return null
+
+        return clazz.getPropoDelegateField(props[i].name)
+    }
+}
+
+/**
+ * 获得实现属性读写的代理字段
+ * @param prop 属性名
+ * @return 代理字段
+ */
+public fun Class<*>.getPropoDelegateField(prop: String): Field? {
+    val name = prop + "\$delegate"
+    val field = this.getReadableField(name)
+    if(field?.type == ReadWriteProperty::class.java)
+        return field
+
+    return null
+}
+
+/**
+ * 获得所有的实现属性读写的代理字段
+ * @return 代理字段
+ */
+public fun Class<*>.getPropDelegateFields(): Collection<Field> {
+    return PropDelegateFieldIterator(this).map { it }
+}
+
+/**
+ * 获得实现属性读写的代理字段
+ * @param prop 属性名
+ * @return 代理对象
+ */
+public fun Any.getPropDelegate(prop: String): ReadWriteProperty<*, *>? {
+    // 获得代理字段
+    val field = this.javaClass.getPropoDelegateField(prop)
+    if(field == null)
+        return null
+
+    // 获得代理对象
+    return field.get(this) as ReadWriteProperty<*, *>?
 }
