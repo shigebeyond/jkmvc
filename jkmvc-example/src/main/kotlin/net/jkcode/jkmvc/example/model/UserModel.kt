@@ -1,8 +1,8 @@
 package net.jkcode.jkmvc.example.model 
 
-import net.jkcode.jkmvc.orm.OrmMeta 
+import net.jkcode.jkmvc.http.session.IAuthUserModel
+import net.jkcode.jkmvc.orm.OrmMeta
 import net.jkcode.jkmvc.orm.Orm
-import net.jkcode.jkmvc.session.IAuthUserModel
 
 /**
  * 用户模型
