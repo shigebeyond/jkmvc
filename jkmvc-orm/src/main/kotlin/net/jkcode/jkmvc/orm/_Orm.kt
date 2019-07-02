@@ -174,7 +174,7 @@ public fun normalizeOrmData(data: Any?): Any? {
         return data.toMap()
 
     // 对orm列表要转map
-    if(data is List<*> && data.first() is IOrm)
+    if(data is List<*> && data.isNotEmpty() && data.first() is IOrm)
         return (data as List<IOrm>).itemToMap()
 
     return data
