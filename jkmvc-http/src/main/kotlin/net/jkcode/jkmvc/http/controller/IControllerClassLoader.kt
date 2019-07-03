@@ -13,12 +13,12 @@ interface IControllerClassLoader {
      * @param controller名
      * @return
      */
-    fun getControllerClass(name: String): ControllerClass?
+    fun get(name: String): ControllerClass?
 
     /**
      * 获得所有的controller类
      *
      * @return
      */
-    fun getControllerClasses(): Collection<ControllerClass>
+    fun getAll(): Collection<ControllerClass>
 }

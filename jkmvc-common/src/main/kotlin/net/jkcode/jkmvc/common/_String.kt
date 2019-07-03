@@ -6,6 +6,8 @@ import java.io.StringWriter
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
@@ -22,6 +24,25 @@ public fun joinHashCode(vararg args:String): Int {
     for(arg in args)
         hash = hash * Math.pow(31.0, arg.length.toDouble()).toInt() + arg.hashCode()
     return hash
+}
+
+/**
+ * 缓存字符串的64位哈希码
+ */
+private val longHashCodes = ConcurrentHashMap<String, Long>()
+
+/**
+ * 获得字符串64位哈希码
+ * @return
+ */
+public fun String.longHashCode(): Long{
+    return longHashCodes.getOrPut(this){
+        var h = 0L
+        for(ch in this){
+            h = 31 * h + ch.toLong()
+        }
+        h
+    }
 }
 
 /****************************** 字符串扩展 *******************************/

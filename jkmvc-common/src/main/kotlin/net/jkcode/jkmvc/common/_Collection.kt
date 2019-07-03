@@ -6,6 +6,16 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ConcurrentMap
 
 /****************************** 扩展 Array + Collection *****************************/
+
+private val iarr = IntArray(0)
+/**
+ * 空数组
+ * @return
+ */
+public fun emptyIntArray(): IntArray {
+    return iarr
+}
+
 /**
  * 非空参数转为array, 仅用于在 DbKey/Orm 的构造函数中转参数
  * @param params

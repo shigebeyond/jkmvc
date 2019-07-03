@@ -365,21 +365,32 @@ class MyTests{
         // println("hello world".trim())
         // println("hello world".replace(" ", ""))
 
-      /*
         var str = "\"hello\""
         println(str) // 输出  "hello"
 
         str = "\\\"hello\\\""
         println(str) // 输出  \"hello\"
-        */
+    }
 
+    @Test
+    fun testHashCode(){
 //        var i: Any? = null
 //        println(i.hashCode())
 //        println("server-Jt0H".hashCode() and Integer.MAX_VALUE)
 
-        val strs = arrayOf("abcdefg", "hijkmn")
-        println(joinHashCode(*strs))
-        println(strs.joinToString("").hashCode())
+//        val strs = arrayOf("abcdefg", "hijkmn")
+//        println(joinHashCode(*strs))
+//        println(strs.joinToString("").hashCode())
+
+        val str1 = "ABCDEa123abc"
+        val str2 = "ABCDFB123abc"
+        println(str1.hashCode());  // 165374702
+        println(str1.longHashCode()) // 1707477902391208686
+        println(str1.longHashCode().toInt()) // 165374702
+
+        println(str2.hashCode()); //  165374702
+        println(str2.longHashCode()) // 1707477902391208686
+        println(str2.longHashCode().toInt())
     }
 
     @Test
@@ -621,18 +632,20 @@ class MyTests{
         // println(this.javaClass)
         // println(this.javaClass.kotlin)
         // println(this::class)
-       /* println(this::class.simpleName)
-        println(this::class.qualifiedName)
-        println(this::class.jvmName)
-        println(this.javaClass.name)
-        println(this.javaClass.canonicalName)
-        println(this.javaClass.simpleName)
-        println(this.javaClass.typeName)
+
+       println(this::class.simpleName) // MyTests
+        println(this::class.qualifiedName) // net.jkcode.jkmvc.tests.MyTests
+        //println(this::class.jvmName)
+
+        println(this.javaClass.name) // net.jkcode.jkmvc.tests.MyTests
+        println(this.javaClass.canonicalName) // net.jkcode.jkmvc.tests.MyTests
+        println(this.javaClass.simpleName) // MyTests
+        println(this.javaClass.typeName) // net.jkcode.jkmvc.tests.MyTests
 
         println(MyTests::class.qualifiedName)
         println(Int::class.qualifiedName)
         println(String::class.qualifiedName)
-        */
+
         //val m = this.javaClass.getModifiers()
        /* val m = IConfig::class.java.modifiers
         println(Modifier.isAbstract(m))

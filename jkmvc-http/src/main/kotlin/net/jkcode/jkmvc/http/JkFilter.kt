@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.http
 
+import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.common.ThreadLocalInheritableThreadPool
 import net.jkcode.jkmvc.http.handler.HttpRequestHandler
 import javax.servlet.*
@@ -18,14 +19,28 @@ open class JkFilter : Filter {
      */
     protected val staticFileRegex: Regex = ".*\\.(gif|jpg|jpeg|png|bmp|ico|swf|js|css|eot|ttf|woff)$".toRegex(RegexOption.IGNORE_CASE)
 
+    /**
+     * http配置
+     */
+    public val config: Config = Config.instance("http", "yaml")
+
+    /**
+     * 初始化
+     */
     override fun init(filterConfig: FilterConfig) {
         // fix bug: jetty异步请求后 req.contextPath/req.servletContext 居然为null, 因此直接在 JkFilter.init() 时记录 contextPath, 反正他是全局不变的
         HttpRequest.globalServletContext = filterConfig.servletContext
 
         // 将公共线程池应用到 CompletableFuture.asyncPool
         ThreadLocalInheritableThreadPool.applyCommonPoolToCompletableFuture()
+
+        // 预先加载server端的拦截器组件, 让其一开始就做好组件初始化
+        httpLogger.info("预先加载server端interceptors: {}", HttpRequestHandler.interceptors)
     }
 
+    /**
+     * 执行过滤
+     */
     override fun doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) {
         //　静态文件请求，则交给下一个filter来使用默认servlet来处理
         if(staticFileRegex.matches((req as HttpServletRequest).requestURI)) {

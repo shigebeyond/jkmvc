@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.http.handler
 
-import net.jkcode.jkmvc.http.IHttpInterceptor
+import net.jkcode.jkmvc.http.IHttpRequestInterceptor
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 
@@ -14,9 +14,9 @@ import javax.servlet.ServletResponse
 interface IHttpRequestHandler {
 
     /**
-     * 拦截器
+     * http请求处理的拦截器
      */
-    val interceptors: List<IHttpInterceptor>
+    val interceptors: List<IHttpRequestInterceptor>
 
     /**
      * 处理请求

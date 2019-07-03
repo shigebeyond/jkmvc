@@ -17,11 +17,10 @@ interface IInterceptor<T> {
          * @param prop
          * @return
          */
-        public fun <T> load(config: IConfig, prop: String = "interceptors"): List<IInterceptor<T>>{
+        public fun <T> load(config: IConfig, prop: String): List<IInterceptor<T>>{
             val classes: List<String>? = config[prop]
             if(classes.isNullOrEmpty())
                 return emptyList()
-
 
             return classes!!.map { clazz ->
                 BeanSingletons.instance(clazz) as IInterceptor<T>

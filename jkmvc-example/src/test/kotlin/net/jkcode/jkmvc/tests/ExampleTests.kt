@@ -1,10 +1,18 @@
 package net.jkcode.jkmvc.tests
 
+import net.jkcode.jkmvc.server.JettyServer
 import net.jkcode.jkmvc.util.ModelGenerator
 import org.junit.Test
 
 
 class ExampleTests {
+
+    // right: 直接启动 JettyServerLauncher 类, 并设置 module 为 jkmvc-example_main
+    @Test
+    fun testJettyServer() {
+        // wrong: 无法加载 jkmvc-example/src/main/webapp
+        JettyServer().start()
+    }
 
     @Test
     fun testCodeModel() {

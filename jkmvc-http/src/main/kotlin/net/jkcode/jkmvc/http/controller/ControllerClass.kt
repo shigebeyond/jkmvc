@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.http.controller
 
 import net.jkcode.jkmvc.common.getConstructorOrNull
+import net.jkcode.jkmvc.common.lcFirst
 import net.jkcode.jkmvc.http.router.RouteException
 import java.util.*
 import kotlin.reflect.KClass
@@ -13,6 +14,15 @@ import kotlin.reflect.full.memberFunctions
  * Created by shi on 4/26/17.
  */
 class ControllerClass(public override val clazz: KClass<*> /* controller类 */): IControllerClass {
+
+    /**
+     * 根据类名获得controller名
+     */
+    public val name: String by lazy{
+        val name = clazz.simpleName!!
+        val end = name.length - 10
+        name.substring(0, end).lcFirst() /* 首字母小写 */
+    }
 
     /**
      * 所有action方法

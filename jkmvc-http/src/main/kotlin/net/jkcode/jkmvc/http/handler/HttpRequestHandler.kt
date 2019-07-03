@@ -31,9 +31,9 @@ object HttpRequestHandler : IHttpRequestHandler {
     public val config = Config.instance("http", "yaml")
 
     /**
-     * 拦截器
+     * http请求处理的拦截器
      */
-    public override val interceptors: List<IHttpInterceptor> = IHttpInterceptor.load(config)
+    public override val interceptors: List<IHttpRequestInterceptor> = IHttpRequestInterceptor.load(config, "requestInterceptors")
 
     /**
      * 是否调试
@@ -93,7 +93,7 @@ object HttpRequestHandler : IHttpRequestHandler {
             httpLogger.debug("当前uri匹配路由: controller=[{}], action=[{}]", req.controller, req.action)
 
         // 获得controller类
-        val clazz: ControllerClass? = ControllerClassLoader.getControllerClass(req.controller);
+        val clazz: ControllerClass? = ControllerClassLoader.get(req.controller);
         if (clazz == null)
             throw RouteException("Controller类不存在：" + req.controller);
 

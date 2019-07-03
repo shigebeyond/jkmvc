@@ -24,3 +24,19 @@
 2. 支持servlet3.0, 即异步servlet
 
 3. 支持action方法返回 CompletableFuture
+
+4. 支持 ThreadLocalInheritableThreadPool 可继承ThreadLocal的线程池
+
+5. 支持 ConsistentHash
+
+6. 扩展 BitSet 相关的集合处理, 并优化 FixedKeyMapFactory 支持map的完整语义(遍历与删除)
+
+7. 将session模块合并到http模块中
+
+8. 完善model代码生成
+
+9. 独立 OrmEntity, 不继承 IOrm, 支持 Entity 与 Model 的分离, 适用场景如rpc, Entity只管数据不管存储, Model继承Entity还管存储, rpc中参数只使用Entity即可
+
+10. 优化 GeneralOrmMeta, 在 Entity 与 Model 分离的场景下, Model既要继承Entity, 也要实现IOrm, 则使用 GeneralOrmMeta 来代理实现 IOrm
+
+11. 支持 Entity 的序列化, 用在rpc中

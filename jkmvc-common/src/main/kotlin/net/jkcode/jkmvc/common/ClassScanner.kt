@@ -21,7 +21,7 @@ abstract class ClassScanner : IClassScanner {
     protected val scanedFiles: MutableSet<String> = HashSet()
 
     /**
-     * 添加单个包
+     * 添加单个包: 做了去重
      *
      * @param pck 包名
      */
@@ -37,13 +37,14 @@ abstract class ClassScanner : IClassScanner {
     }
 
     /**
-     * 添加多个包
+     * 添加多个包: 做了去重
      *
      * @param pcks 包名
      */
     public override fun addPackages(pcks: Collection<String>): Unit {
         // 逐个添加包
         for (pck in pcks)
+            // 扫描包: 做了去重
             addPackage(pck)
     }
 

@@ -52,6 +52,6 @@ class ControllerTests{
     @Test
     fun testScanControllerClass(){
         ControllerClassLoader.addPackage("net.jkcode.jkmvc.example.controller");
-        println(ControllerClassLoader.getControllerClass("user"))
+        println(ControllerClassLoader.get("user"))
     }
 }
