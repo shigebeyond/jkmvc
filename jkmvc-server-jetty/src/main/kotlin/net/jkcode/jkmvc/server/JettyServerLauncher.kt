@@ -1,4 +1,4 @@
-package net.jkcode.jkmvc.example.server
+package net.jkcode.jkmvc.server
 
 import net.jkcode.jkmvc.server.JettyServer
 
@@ -8,7 +8,7 @@ import net.jkcode.jkmvc.server.JettyServer
  * @author shijianhang<772910474@qq.com>
  * @date 2019-03-29 5:01 PM
  */
-object JettyServerLaunch {
+object JettyServerLauncher {
 
     @JvmStatic
     fun main(args: Array<String>) {

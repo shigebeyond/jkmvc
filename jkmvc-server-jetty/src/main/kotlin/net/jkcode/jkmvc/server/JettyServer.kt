@@ -10,7 +10,6 @@ import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.handler.HandlerCollection
 import org.eclipse.jetty.server.handler.RequestLogHandler
-import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.webapp.WebAppContext
 import java.io.Closeable
@@ -48,6 +47,7 @@ class JettyServer : Closeable{
         server.setStopAtShutdown(true)
         server.start()
         httpLogger.info("启动jetty, 监听端口 {}, 请访问 http://localhost:{}{}", config["port"], config["port"], config["contextPath"])
+
         server.join()
     }
 
