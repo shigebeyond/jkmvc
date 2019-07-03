@@ -222,7 +222,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      */
     public override fun batchInsert(items: List<IOrmEntity>): IntArray {
         if(items.isEmpty())
-            throw OrmException("No data to insert"); // 没有要插入的数据
+            return emptyIntArray()
 
         // 校验
         for (item in items)
@@ -259,7 +259,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      */
     public override fun batchUpdate(items: List<IOrmEntity>): IntArray {
         if(items.isEmpty())
-            throw OrmException("No data to insert"); // 没有要插入的数据
+            return emptyIntArray()
 
         // 校验
         for (item in items)
@@ -291,6 +291,8 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
         // 批量更新
         return query.batchUpdate(params);
     }
+
+
 
     /**
      * 批量删除
