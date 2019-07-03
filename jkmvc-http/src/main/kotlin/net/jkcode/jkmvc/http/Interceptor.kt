@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.http
 
-import net.jkcode.jkmvc.common.IInterceptor
+import net.jkcode.jkmvc.common.IRequestInterceptor
 
 // http请求处理的拦截器
-typealias IHttpRequestInterceptor = IInterceptor<HttpRequest>
+typealias IHttpRequestInterceptor = IRequestInterceptor<HttpRequest>

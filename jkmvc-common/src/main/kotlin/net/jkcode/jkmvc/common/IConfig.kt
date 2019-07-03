@@ -136,4 +136,11 @@ abstract class IConfig {
      * @return
      */
     public abstract fun pathProperties(path: String): Properties
+
+    /**
+     * 配置项是类的列表, 对应返回实例列表
+     * @param prop
+     * @return
+     */
+    public abstract fun <T> classes2Instances(prop: String): List<T>
 }

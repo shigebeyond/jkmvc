@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.common
 
 
 import com.alibaba.fastjson.JSONObject
+import net.jkcode.jkmvc.singleton.BeanSingletons
 import org.yaml.snakeyaml.Yaml
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -264,4 +265,18 @@ class Config(public override val props: Map<String, *> /* 配置项 */,
         }
     }
 
+    /**
+     * 配置项是类的列表, 对应返回实例列表
+     * @param prop
+     * @return
+     */
+    public override fun <T> classes2Instances(prop: String): List<T>{
+        val classes: List<String>? = this[prop]
+        if(classes.isNullOrEmpty())
+            return LinkedList() // 空也返回可写的list, 外面可能要用到, 特别是对配置的插件/拦截器列表而言
+
+        return classes!!.map { clazz ->
+            BeanSingletons.instance(clazz) as T
+        }
+    }
 }

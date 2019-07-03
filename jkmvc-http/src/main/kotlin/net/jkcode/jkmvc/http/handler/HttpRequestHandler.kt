@@ -2,7 +2,7 @@ package net.jkcode.jkmvc.http.handler
 
 import net.jkcode.jkmvc.closing.ClosingOnRequestEnd
 import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.IInterceptor
+import net.jkcode.jkmvc.common.IRequestInterceptor
 import net.jkcode.jkmvc.common.ThreadLocalInheritableInterceptor
 import net.jkcode.jkmvc.common.ucFirst
 import net.jkcode.jkmvc.http.*
@@ -33,7 +33,7 @@ object HttpRequestHandler : IHttpRequestHandler {
     /**
      * http请求处理的拦截器
      */
-    public override val interceptors: List<IHttpRequestInterceptor> = IHttpRequestInterceptor.load(config, "requestInterceptors")
+    public override val interceptors: List<IHttpRequestInterceptor> = config.classes2Instances("requestInterceptors")
 
     /**
      * 是否调试
@@ -71,7 +71,7 @@ object HttpRequestHandler : IHttpRequestHandler {
                 return true;
         }
 
-        IInterceptor.trySupplierFinallyAroundInterceptor(interceptors, req,
+        IRequestInterceptor.trySupplierFinallyAroundInterceptor(interceptors, req,
             {callController(req, res)}, // 调用路由对应的controller与action
             ThreadLocalInheritableInterceptor().intercept{ r, e -> endRequest(req, e) } // 继承ThreadLocal + 关闭请求(ThreadLocal中的资源)
         )

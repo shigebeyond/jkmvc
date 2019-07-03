@@ -1,31 +1,13 @@
 package net.jkcode.jkmvc.common
 
-import net.jkcode.jkmvc.singleton.BeanSingletons
-
 /**
- * 拦截器
+ * 请求拦截器
  * @author shijianhang<772910474@qq.com>
  * @date 2019-03-01 11:39 AM
  */
-interface IInterceptor<T> {
+interface IRequestInterceptor<T> {
 
     companion object {
-
-        /**
-         * 从配置文件中加载对应的拦截器实例
-         * @param config
-         * @param prop
-         * @return
-         */
-        public fun <T> load(config: IConfig, prop: String): List<IInterceptor<T>>{
-            val classes: List<String>? = config[prop]
-            if(classes.isNullOrEmpty())
-                return emptyList()
-
-            return classes!!.map { clazz ->
-                BeanSingletons.instance(clazz) as IInterceptor<T>
-            }
-        }
 
         /**
          * 对supplier包装try/finally, 并加入拦截器处理
@@ -33,7 +15,7 @@ interface IInterceptor<T> {
          * @param supplier 取值函数
          * @param complete 完成后的回调函数, 接收2个参数: 1 结果值 2 异常, 返回新结果
          */
-        public inline fun <T, R> trySupplierFinallyAroundInterceptor(interceptors: List<IInterceptor<T>>, req:T, supplier: () -> R, crossinline complete: (Any?, Throwable?) -> Any?): R{
+        public inline fun <T, R> trySupplierFinallyAroundInterceptor(interceptors: List<IRequestInterceptor<T>>, req:T, supplier: () -> R, crossinline complete: (Any?, Throwable?) -> Any?): R{
             return trySupplierFinally(
                     { // 1 supplier
                         //调用拦截器前置处理

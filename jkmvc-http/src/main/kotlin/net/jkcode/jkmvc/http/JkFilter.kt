@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.http
 
 import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.common.IPlugin
 import net.jkcode.jkmvc.common.ThreadLocalInheritableThreadPool
 import net.jkcode.jkmvc.http.handler.HttpRequestHandler
 import javax.servlet.*
@@ -12,7 +13,7 @@ import javax.servlet.http.HttpServletRequest
  * @author shijianhang
  * @date 2019-4-13 上午9:27:56
  */
-open class JkFilter : Filter {
+open class JkFilter() : Filter {
 
     /**
      * 静态文件uri的正则
@@ -25,6 +26,11 @@ open class JkFilter : Filter {
     public val config: Config = Config.instance("http", "yaml")
 
     /**
+     * 插件列表
+     */
+    public val plugins: List<IPlugin> = config.classes2Instances("plugins")
+
+    /**
      * 初始化
      */
     override fun init(filterConfig: FilterConfig) {
@@ -34,8 +40,9 @@ open class JkFilter : Filter {
         // 将公共线程池应用到 CompletableFuture.asyncPool
         ThreadLocalInheritableThreadPool.applyCommonPoolToCompletableFuture()
 
-        // 预先加载server端的拦截器组件, 让其一开始就做好组件初始化
-        httpLogger.info("预先加载server端interceptors: {}", HttpRequestHandler.interceptors)
+        // 初始化插件
+        for(p in plugins)
+            p.start()
     }
 
     /**
@@ -83,5 +90,8 @@ open class JkFilter : Filter {
     }
 
     override fun destroy() {
+        // 关闭插件
+        for(p in plugins)
+            p.close()
     }
 }
