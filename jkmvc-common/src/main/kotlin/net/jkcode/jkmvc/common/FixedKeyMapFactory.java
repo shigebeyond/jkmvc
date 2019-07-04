@@ -238,6 +238,10 @@ public class FixedKeyMapFactory {
             public boolean removeElement(int index) {
                 return FixedKeyMap.this.remove(index) != null;
             }
+
+            public int getElementSize() {
+                return _keys.length;
+            }
         }
     }
 
