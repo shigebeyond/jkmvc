@@ -100,7 +100,7 @@ abstract class OrmRelated : OrmPersistent() {
             if(value != null){
                 to[name] = when(value){
                     is Collection<*> -> (value as Collection<IOrm>).itemToMap() // 有多个
-                    is Orm -> value.toMap()  // 有一个
+                    is IOrm -> value.toMap()  // 有一个
                     else -> value
                 }
             }
