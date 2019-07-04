@@ -1,6 +1,8 @@
 package net.jkcode.jkmvc.http
 
 import net.jkcode.jkmvc.common.*
+import net.jkcode.jkmvc.http.controller.ControllerClass
+import net.jkcode.jkmvc.http.controller.ControllerClassLoader
 import net.jkcode.jkmvc.http.router.Route
 import net.jkcode.jkmvc.http.router.RouteException
 import net.jkcode.jkmvc.http.router.Router
@@ -303,6 +305,13 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 */
 	public val controller: String
 		get() = getRouteParameter("controller")!!
+
+	/**
+	 * 获得当前controller类
+	 * @return
+	 */
+	public val controllerClass: ControllerClass
+		get() = ControllerClassLoader.get(controller)!!
 
 	/**
 	 * 获得当前action
