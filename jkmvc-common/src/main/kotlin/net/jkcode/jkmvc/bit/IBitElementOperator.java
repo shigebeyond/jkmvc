@@ -21,4 +21,10 @@ public interface IBitElementOperator<E> {
      * @return
      */
     boolean removeElement(int index);
+
+    /**
+     * 获得元素个数
+     * @return
+     */
+    int getElementSize();
 }

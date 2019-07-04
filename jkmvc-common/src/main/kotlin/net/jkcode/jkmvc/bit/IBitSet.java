@@ -6,6 +6,9 @@ import java.util.Iterator;
 
 /**
  * BitSet相关集合
+ *   直接根据 BitSet 来修改 Set 的语义
+ *   可用于实现 FixedKeyMap 的 EntrySet
+ *
  * @author shijianhang
  * @date 2019-06-27 12:00 PM
  */
@@ -32,6 +35,6 @@ public abstract class IBitSet<E> extends AbstractSet<E> implements IBitElementOp
      */
     @Override
     public Iterator<E> iterator() {
-        return new BitElementIterator(bits,this);
+        return new SetBitElementIterator(bits,this);
     }
 }

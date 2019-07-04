@@ -9,7 +9,7 @@ import java.util.Iterator;
  * @author shijianhang
  * @date 2019-06-27 11:58 AM
  */
-public class BitElementIterator<E> implements Iterator<E> {
+public class SetBitElementIterator<E> implements Iterator<E> {
 
     protected BitSet bits;
 
@@ -17,7 +17,7 @@ public class BitElementIterator<E> implements Iterator<E> {
 
     protected int curr = -1;
 
-    public BitElementIterator(BitSet bits, IBitElementOperator<E> op) {
+    public SetBitElementIterator(BitSet bits, IBitElementOperator<E> op) {
         this.bits = bits;
         this.op = op;
     }
@@ -35,7 +35,9 @@ public class BitElementIterator<E> implements Iterator<E> {
 
     @Override
     public void remove() {
-        if (curr != -1)
-            op.removeElement(curr);
+        if (curr != -1) {
+            op.removeElement(curr); // 删除元素
+            bits.clear(curr); // 清空比特 -- 在 FixedKeyMap.remove(int) 实现中也调用了这行, 从而导致重复执行, 无所谓
+        }
     }
 }

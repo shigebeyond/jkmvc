@@ -8,13 +8,13 @@ import java.util.Iterator;
  * @author shijianhang
  * @date 2019-06-27 11:59 AM
  */
-public class BitIterator implements Iterator<Integer> {
+public class SetBitIterator implements Iterator<Integer> {
 
     protected BitSet bits;
 
     protected int curr = -1;
 
-    public BitIterator(BitSet bits) {
+    public SetBitIterator(BitSet bits) {
         this.bits = bits;
     }
 
