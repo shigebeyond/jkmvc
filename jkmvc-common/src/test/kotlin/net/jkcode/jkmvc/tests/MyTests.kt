@@ -3,7 +3,7 @@ package net.jkcode.jkmvc.tests
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.alibaba.fastjson.serializer.SerializerFeature
-import net.jkcode.jkmvc.bit.BitIterator
+import net.jkcode.jkmvc.bit.SetBitIterator
 import net.jkcode.jkmvc.common.*
 import net.jkcode.jkmvc.idworker.SnowflakeId
 import net.jkcode.jkmvc.idworker.SnowflakeIdWorker
@@ -140,9 +140,30 @@ class MyTests{
         }
 
         println("迭代2: ")
-        for(j in  BitIterator(bs)){
+        for(j in SetBitIterator(bs)){
             println(j)
         }
+    }
+
+    @Test
+    fun testDoneFlagList(){
+        val list = DoneFlagList<Int>()
+        list.add(1)
+        list.add(2)
+        list.add(3)
+
+        list.setDone(0, true)
+        list.setDone(2, true)
+
+        // 迭代已完成
+        println("迭代已完成")
+        for(done in list.doneIterator(true))
+            println(done)
+
+        // 迭代未完成
+        println("迭代未完成")
+        for(undone in list.doneIterator(false))
+            println(undone)
     }
 
     @Test
@@ -250,23 +271,26 @@ class MyTests{
 
     @Test
     fun testList(){
-        val list:MutableList<String> = LinkedList()
+        val list = listOf<Int>(1, 2, 3)
+        println(list.javaClass) // ArrayList
+
+        /*val list:MutableList<String> = LinkedList()
         list.add("a")
         list += "a"
         list.add("b")
         list.add("c")
-        println(list)
+        println(list)*/
         /*list.remove("c")
         println(list)
         list.add(0, "d")
         println(list)*/
 
-        var n = list.size
+        /*var n = list.size
         val it = list.iterator()
         while (--n > 0){
             it.next()
         }
-        println(it.next())
+        println(it.next())*/
     }
 
     @Test
