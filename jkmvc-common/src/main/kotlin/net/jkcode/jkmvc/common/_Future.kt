@@ -63,6 +63,7 @@ public inline fun <T> trySupplierFinally(supplier: () -> T, crossinline complete
         }
     }catch (r: Throwable){
         rh = r
+        r.printStackTrace()
     }finally {
         // 同步结果
         if(result !is CompletableFuture<*>)
