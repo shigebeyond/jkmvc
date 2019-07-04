@@ -15,6 +15,14 @@ interface IPlugin: Closeable {
     /**
      * 初始化
      */
-    fun start()
+    fun start(){
+        commonLogger.debug(" ------ plugin: {} ------ ", this.javaClass)
+        doStart()
+    }
+
+    /**
+     * 初始化
+     */
+    fun doStart()
 
 }

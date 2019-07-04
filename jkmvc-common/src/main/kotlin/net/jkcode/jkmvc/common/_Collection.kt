@@ -17,6 +17,14 @@ public fun emptyIntArray(): IntArray {
 }
 
 /**
+ * 清空数据
+ */
+public fun Array<Any?>.clear() {
+    for(i in 0 until size)
+        this[i] = null
+}
+
+/**
  * 非空参数转为array, 仅用于在 DbKey/Orm 的构造函数中转参数
  * @param params
  * @return
