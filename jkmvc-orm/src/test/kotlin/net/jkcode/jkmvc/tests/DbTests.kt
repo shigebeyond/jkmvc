@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.tests
 
 import net.jkcode.jkmvc.db.*
+import net.jkcode.jkmvc.orm.DbKey
 import org.apache.commons.collections.map.HashedMap
 import org.junit.Test
 
@@ -18,6 +19,16 @@ class DbTests{
     fun testDbMeta(){
         println("database type: " + db.dbType)
         println("database schema: " + db.schema)
+    }
+
+    @Test
+    fun testDbKey(){
+        val k1 = DbKey("a")
+        val k2 = DbKey("a")
+        println(k1 == k2) // false
+        println(k1.columns.equals(k2.columns)) // false
+        println(k1.columns.contentEquals(k2.columns)) // true
+        println(k1.columns.first() == k2.columns.first()) // true
     }
 
     @Test

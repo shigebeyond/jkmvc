@@ -114,6 +114,20 @@ data class DbKey<T>(val columns: Array<T>) {
         return columns[i]
     }
 
+    /**
+     * 检查相等
+     *    在 OrmQueryBuilder.setHasManyProp() 中用于匹配一对多的外键来设置关联属性
+     */
+    public override fun equals(o: Any?): Boolean {
+        if(o == null)
+            return false
+
+        if(o !is DbKey<*>)
+            return false
+
+        return columns.contentEquals(o.columns)
+    }
+
     public override fun toString(): String{
         return columns.joinToString(", ", "DbKey[", "]")
     }

@@ -277,7 +277,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     public override fun <T:Any> find(params: List<Any?>, db: IDb, transform: (Row) -> T): T?{
         val result = super.find(params, db, transform);
         // 联查hasMany
-        if(result is Orm){
+        if(result is IOrm){
             // 遍历每个hasMany关系的查询结果
             forEachManyQuery(result){ name:String, relation:IRelationMeta, relatedItems:List<IOrm> ->
                 // 设置关联属性
@@ -300,7 +300,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
             return result
 
         // 联查hasMany
-        if(result.first() is Orm){
+        if(result.first() is IOrm){
             val items = result as List<IOrm>
 
             // 遍历每个hasMany关系的查询结果
@@ -349,7 +349,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                 // hasMany关系的匹配：主表.主键 = 从表.外键
                 val pk:DbKeyValues = item.gets(primaryProp) // 主表.主键
                 val fk:DbKeyValues = relatedItem.gets(foreignProp) // 从表.外键
-                if (pk == fk) // DbKey.equals()
+                if (pk.equals(fk)) // DbKey.equals()
                     myRelated.add(relatedItem)
             }
             item[name] = myRelated
