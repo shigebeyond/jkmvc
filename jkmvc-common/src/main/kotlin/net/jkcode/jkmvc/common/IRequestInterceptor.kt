@@ -23,7 +23,7 @@ interface IRequestInterceptor<P> {
          */
         public inline fun <T, R> trySupplierFinallyAroundInterceptor(interceptors: List<IRequestInterceptor<T>>, req:T, supplier: () -> R, crossinline complete: (Any?, Throwable?) -> Any?): R{
             // 缓存前置处理结果
-            val beforeResults = ArrayList<Any?>(interceptors.size)
+            val beforeResults = arrayOfNulls<Any?>(interceptors.size)
             return trySupplierFinally(
                     { // 1 supplier
                         //调用拦截器前置处理
