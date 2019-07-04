@@ -71,6 +71,13 @@ object HttpRequestHandler : IHttpRequestHandler {
                 return true;
         }
 
+        // 1 先解析路由: 因为interceptors可能依赖路由信息
+        if (!req.parseRoute())
+            throw RouteException("当前uri没有匹配路由：" + req.requestURI);
+        if(debug)
+            httpLogger.debug("当前uri匹配路由: controller=[{}], action=[{}]", req.controller, req.action)
+
+        // 2 调用controller与action
         IRequestInterceptor.trySupplierFinallyAroundInterceptor(interceptors, req,
             {callController(req, res)}, // 调用路由对应的controller与action
             ThreadLocalInheritableInterceptor().intercept{ r, e -> endRequest(req, e) } // 继承ThreadLocal + 关闭请求(ThreadLocal中的资源)
@@ -86,12 +93,6 @@ object HttpRequestHandler : IHttpRequestHandler {
      * @return
      */
     private fun callController(req: HttpRequest, res: HttpResponse): Any? {
-        // 1 解析路由
-        if (!req.parseRoute())
-            throw RouteException("当前uri没有匹配路由：" + req.requestURI);
-        if(debug)
-            httpLogger.debug("当前uri匹配路由: controller=[{}], action=[{}]", req.controller, req.action)
-
         // 获得controller类
         val clazz: ControllerClass? = ControllerClassLoader.get(req.controller);
         if (clazz == null)
@@ -104,14 +105,14 @@ object HttpRequestHandler : IHttpRequestHandler {
             throw RouteException("控制器${req.controller}不存在方法：${method}()");
         }
 
-        // 2 创建controller
+        // 创建controller
         val controller: Controller = clazz.clazz.java.newInstance() as Controller;
 
         // 设置req/res属性
         controller.req = req;
         controller.res = res;
 
-        // 3 调用controller的action方法
+        // 调用controller的action方法
         return controller.callActionMethod(action)
     }
 
