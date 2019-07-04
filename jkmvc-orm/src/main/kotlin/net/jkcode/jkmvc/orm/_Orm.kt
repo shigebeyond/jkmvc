@@ -5,18 +5,36 @@ import com.alibaba.fastjson.serializer.SerializerFeature
 import net.jkcode.jkmvc.db.Row
 import org.apache.commons.collections.iterators.AbstractIteratorDecorator
 import java.io.Serializable
+import java.util.*
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.full.companionObjectInstance
 
 /**
- * orm属性代理
+ * orm普通属性代理
  */
 object OrmPropDelegater: ReadWriteProperty<IOrmEntity, Any?>, Serializable {
     // 获得属性
     public override operator fun getValue(thisRef: IOrmEntity, property: KProperty<*>): Any? {
         return thisRef[property.name]
+    }
+
+    // 设置属性
+    public override operator fun setValue(thisRef: IOrmEntity, property: KProperty<*>, value: Any?) {
+        thisRef[property.name] = value
+    }
+}
+
+/**
+ * orm列表属性代理
+ */
+object OrmListPropDelegater: ReadWriteProperty<IOrmEntity, Any?>, Serializable {
+    // 获得属性
+    public override operator fun getValue(thisRef: IOrmEntity, property: KProperty<*>): Any? {
+        return thisRef.getOrPut(property.name){
+            LinkedList<Any?>()
+        }
     }
 
     // 设置属性

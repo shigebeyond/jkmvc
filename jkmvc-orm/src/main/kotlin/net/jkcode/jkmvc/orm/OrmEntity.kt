@@ -66,6 +66,13 @@ open class OrmEntity : IOrmEntity, Serializable {
     }
 
     /**
+     * 获得列表属性代理
+     */
+    public fun <T: List<*>> listProperty(): ReadWriteProperty<IOrmEntity, T> {
+        return OrmListPropDelegater as ReadWriteProperty<IOrmEntity, T>;
+    }
+
+    /**
      * 判断是否有某字段
      *
      * @param column
