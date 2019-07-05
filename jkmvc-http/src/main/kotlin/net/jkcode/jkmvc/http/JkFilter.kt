@@ -63,11 +63,8 @@ open class JkFilter() : Filter {
             // 异步处理请求
             //actx.start { // web server线程池
             ThreadLocalInheritableThreadPool.commonPool.execute { // 其他线程池
-                try {
-                    handleRequest(actx.request, actx.response, chain)
-                }catch (e: Exception){
-                    e.printStackTrace()
-                }
+                handleRequest(actx.request, actx.response, chain)
+
             }
             return;
         }
@@ -80,13 +77,17 @@ open class JkFilter() : Filter {
      * 处理请求
      */
     protected fun handleRequest(req: ServletRequest, res: ServletResponse, chain: FilterChain) {
-        // 处理请求
-        val handled = HttpRequestHandler.handle(req, res)
+        try{
+            // 处理请求
+            val handled = HttpRequestHandler.handle(req, res)
 
-        //　如果没有处理，则交给下一个filter来使用默认servlet来处理
-        // if not handled, we delegate to next filter to use the default servlets
-        if (!handled)
-            chain.doFilter(req, res)
+            //　如果没有处理，则交给下一个filter来使用默认servlet来处理
+            // if not handled, we delegate to next filter to use the default servlets
+            if (!handled)
+                chain.doFilter(req, res)
+        }catch (e: Exception){
+            e.printStackTrace()
+        }
     }
 
     override fun destroy() {
