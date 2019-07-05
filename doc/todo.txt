@@ -30,3 +30,8 @@ query builder中如果in参数超过1000个，则拆分
 -------
 
 ClosingOnRequestEnd() 不要用了, 直接提供event bus, 支持请求事件, 如请求结束事件
+
+给一个统一的方法来做事件
+interface event{
+	fun pushEvent(name: String, data: Any?)
+}

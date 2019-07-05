@@ -4,6 +4,8 @@ import io.netty.util.concurrent.EventExecutor
 import io.netty.util.concurrent.MultithreadEventExecutorGroup
 import io.netty.util.concurrent.SingleThreadEventExecutor
 import net.jkcode.jkmvc.closing.ClosingOnShutdown
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.TimeUnit
 import kotlin.reflect.KProperty1
@@ -30,7 +32,15 @@ public val threadPoolCloser = object: ClosingOnShutdown(){
         // 等待任务完成
         CommonThreadPool.awaitTermination(1, TimeUnit.DAYS) // 等长一点 = 死等
     }
+}
 
+/**
+ * 异步执行, 并返回异步结果
+ * @param runnable
+ * @return
+ */
+public fun ExecutorService.runAsync(runnable: () -> Unit): CompletableFuture<Void> {
+    return CompletableFuture.runAsync(runnable)
 }
 
 /**

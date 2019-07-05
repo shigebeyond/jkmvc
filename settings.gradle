@@ -1,7 +1,3 @@
 include 'jkmvc-common', 'jkmvc-orm', 'jkmvc-http', 'jkmvc-example', 'jkmvc-oauth2', 'jkmvc-server-jetty'
 
 rootProject.name = 'jkmvc'
-
-rootProject.children.each {
-    it.buildFileName = it.name + '.gradle' - 'jkmvc-'
-}
