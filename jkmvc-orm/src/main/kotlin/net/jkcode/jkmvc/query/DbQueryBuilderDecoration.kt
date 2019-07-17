@@ -101,10 +101,10 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
         if(limitParams == null)
             return
 
-        val (start, offset) = limitParams!!
+        val (limit, offset) = limitParams!!
         if(db.dbType == DbType.Oracle) { // oracle
-            // select * from ( select t1_.*, rownum rownum_ from ( select * from USER ) t1_ where rownum <  $end ) t2_ where t2_.rownum_ >=  $start
-            sql.insert(0, "SELECT t1_.*, rownum rownum_ FROM ( ").append(") t1_ WHERE rownum <  ").append(start + offset)
+            // select * from ( select t1_.*, rownum rownum_ from ( select * from USER ) t1_ where rownum <  $end ) t2_ where t2_.rownum_ >=  $limit
+            sql.insert(0, "SELECT t1_.*, rownum rownum_ FROM ( ").append(") t1_ WHERE rownum <  ").append(limit + offset)
             if(offset > 0)
                 sql.insert(0, "SELECT * FROM ( ").append(" ) t2_ WHERE t2_.rownum_ >=  ").append(offset)
             return
@@ -113,8 +113,8 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
         if(db.dbType == DbType.SqlServer) { // sqlserver
             val iSelect = "SELECT".length
             if(offset == 0) {
-                //select top $start * from user
-                sql.insert(iSelect, " TOP $start") // 在 select 之后插入 top
+                //select top $limit * from user
+                sql.insert(iSelect, " TOP $limit") // 在 select 之后插入 top
             }else{
                 // 截取 order by 子句
                 val iOrderBy = sql.indexOf("ORDER BY")
@@ -123,8 +123,8 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
                     orderBy = sql.substring(iOrderBy)
                     sql.delete(iOrderBy, sql.length)
                 }
-                // SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY name) as rownum_, * FROM "user" ) a WHERE rownum_ >= $start and rownum_ < $end;
-                sql.insert(iSelect, "* FROM ( SELECT ROW_NUMBER() OVER ( $orderBy ) as rownum_, ").append(") t_ WHERE rownum_ >= ").append(start).append(" AND rownum_ < ").append(offset + start)
+                // SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY name) as rownum_, * FROM "user" ) a WHERE rownum_ >= $limit and rownum_ < $end;
+                sql.insert(iSelect, "* FROM ( SELECT ROW_NUMBER() OVER ( $orderBy ) as rownum_, ").append(") t_ WHERE rownum_ >= ").append(limit).append(" AND rownum_ < ").append(offset + limit)
             }
 
             return
@@ -132,7 +132,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
 
         if(db.dbType == DbType.Postgresql) { // psql
             // select * from user limit $limit  offset $offset;
-            sql.append(" LIMIT ").append(start)
+            sql.append(" LIMIT ").append(limit)
             if(offset > 0)
                 sql.append(" OFFSET ").append(offset)
             return
@@ -141,9 +141,9 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
         // 其他：mysql / sqlite
         // select * from user limit $offset, $limit;
         if(offset == 0)
-            sql.append(" LIMIT ").append(start)
+            sql.append(" LIMIT ").append(limit)
         else
-            sql.append(" LIMIT ").append(offset).append(", ").append(start)
+            sql.append(" LIMIT ").append(offset).append(", ").append(limit)
     }
 
     /**
@@ -438,12 +438,12 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
     /**
      * Return up to "LIMIT ..." results
      *
-     * @param   start
+     * @param   limit
      * @param   offset
      * @return
      */
-    public override fun limit(start: Int, offset: Int): IDbQueryBuilder {
-        limitParams = Pair(start, offset)
+    public override fun limit(limit: Int, offset: Int): IDbQueryBuilder {
+        limitParams = Pair(limit, offset)
         return this;
     }
 

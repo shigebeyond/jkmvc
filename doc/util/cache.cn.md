@@ -17,8 +17,8 @@ default:
     address: 127.0.0.1:6379 # 可多个节点, 使用逗号分隔
     password:
     dbname:
-    # 序列化类型
-    serializeType: jdk
+    # 序列器类型
+    serializer: jdk
 ```
 ## 获得缓存实例
 

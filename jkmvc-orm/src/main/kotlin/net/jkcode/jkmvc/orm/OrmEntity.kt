@@ -42,10 +42,9 @@ open class OrmEntity : IOrmEntity, Serializable {
         public val config: Config = Config.instance("orm")
 
         /**
-         * 序列化
+         * 序列器
          */
-        public val serializer: ISerializer = ISerializer.instance(config["serializeType"]!!)
-
+        public val serializer: ISerializer = ISerializer.instance(config["serializer"]!!)
 
     }
 

@@ -347,7 +347,7 @@ interface IDbQueryBuilderDecoration{
      * @param  offset
      * @return
      */
-    fun limit(start: Int, offset: Int = 0): IDbQueryBuilder;
+    fun limit(limit: Int, offset: Int = 0): IDbQueryBuilder;
 
     /**
      * Adds addition tables to "JOIN ...".

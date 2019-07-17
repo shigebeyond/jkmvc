@@ -19,9 +19,9 @@ class JedisCache(protected val configName: String = "default") : BaseCache(){
     public val config = Config.instance("redis.${configName}", "yaml")
 
     /**
-     * 序列化
+     * 序列器
      */
-    public val serializer: ISerializer = ISerializer.instance(config["serializeType"]!!)
+    public val serializer: ISerializer = ISerializer.instance(config["serializer"]!!)
 
     /**
      * redis连接

@@ -202,6 +202,19 @@ public inline fun <T> Array<T>.getOrPut(index: Int, defaultValue: (Int) -> T): T
     return this[index];
 }
 
+/**
+ * 统计个数
+ */
+public inline fun <T, K> Iterable<T>.groupCount(keySelector: (T) -> K): Map<K, Int> {
+    val counter = HashMap<K, Int>()
+    for (element in this) {
+        val key = keySelector(element)
+        val count = counter[key]
+        counter[key] = if(count == null) 1 else count + 1
+    }
+    return counter
+}
+
 /****************************** progression *****************************/
 /**
  * 大小

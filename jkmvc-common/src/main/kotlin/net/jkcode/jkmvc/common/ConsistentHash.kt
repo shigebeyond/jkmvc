@@ -110,7 +110,7 @@ class ConsistentHash<T: Any>(public val virtualNodeMultiple: Int,// 虚拟节点
         if(virtualNodes.containsKey(index))
             return virtualNodes[index]
 
-        // 2 没有命中节点, 则顺时针方向查找下一个节点
+        // 2 没有命中节点, 则顺时针方向顺序查找下一个节点
         val entry = virtualNodes.ceilingEntry(index)
         if (entry != null)
             return entry.value

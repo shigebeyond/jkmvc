@@ -21,14 +21,14 @@ open class JkFilter() : Filter {
     protected val staticFileRegex: Regex = ".*\\.(gif|jpg|jpeg|png|bmp|ico|swf|js|css|eot|ttf|woff)$".toRegex(RegexOption.IGNORE_CASE)
 
     /**
-     * http配置
+     * 插件配置
      */
-    public val config: Config = Config.instance("http", "yaml")
+    public val pluginConfig: Config = Config.instance("plugin", "yaml")
 
     /**
      * 插件列表
      */
-    public val plugins: List<IPlugin> = config.classes2Instances("plugins")
+    public val plugins: List<IPlugin> = pluginConfig.classes2Instances("httpServerPlugins")
 
     /**
      * 初始化
