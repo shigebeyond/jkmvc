@@ -43,10 +43,10 @@ abstract class CounterFlusher(
      * @param num
      * @return
      */
-    public fun add(num: Long): CompletableFuture<Unit> {
+    public fun add(num: Int): CompletableFuture<Unit> {
         // 1 添加计数
         val i = if(switch.get()) 1 else 0
-        if(counters[i].addAndGet(num) > flushSize)
+        if(counters[i].addAndGet(num.toLong()) > flushSize)
             flush(false)
 
         // 2 空 -> 非空: 启动定时
@@ -77,6 +77,8 @@ abstract class CounterFlusher(
 
             // 执行flush
             handleFlush()
+
+            // future完成
             oldFuture.complete(null)
         }
 
@@ -86,6 +88,7 @@ abstract class CounterFlusher(
 
     /**
      * 处理刷盘
+     * @return 是否处理完毕, 同步处理返回true, 异步处理返回false
      */
     protected abstract fun handleFlush(): Boolean
 

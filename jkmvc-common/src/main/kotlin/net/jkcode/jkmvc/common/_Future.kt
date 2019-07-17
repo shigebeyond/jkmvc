@@ -3,6 +3,12 @@ package net.jkcode.jkmvc.common
 import java.util.concurrent.CompletableFuture
 
 /**
+ * 空的future
+ */
+public val VoidFuture: CompletableFuture<Void> = CompletableFuture.completedFuture(null)
+public val UnitFuture: CompletableFuture<Unit> = CompletableFuture.completedFuture(null)
+
+/**
  * 等待并输出异步结果
  */
 public fun List<CompletableFuture<*>>.print() {
