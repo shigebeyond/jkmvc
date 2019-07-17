@@ -8,6 +8,7 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.HashMap
 
 /**
  * 配置数据，用于加载配置文件，并读取配置数据
@@ -93,6 +94,11 @@ class Config(public override val props: Map<String, *> /* 配置项 */,
             if(inputStream == null)
                 throw IllegalArgumentException("配置输入流为空")
 
+            // 无内容则返回空map
+            if(inputStream.available() == 0)
+                return emptyMap<String, Any?>()
+
+            // 解析内容
             return inputStream.use {
                 when(type){
                     "properties" -> Properties().apply { load(InputStreamReader(inputStream, "UTF-8")) } // 加载 properties 文件
