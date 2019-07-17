@@ -926,11 +926,8 @@ class MyTests{
     }
 
     @Test
-    fun testFileSizeUnit(){
-        println('K'.convertBytes())
-        println('M'.convertBytes())
-        println('G'.convertBytes())
-        println('T'.convertBytes())
+    fun testFileSiz(){
+        println(fileSize2Bytes("1K"))
     }
 
     @Test
@@ -949,7 +946,7 @@ class MyTests{
     @Test
     fun testTravelFile(){
 
-        val dir = File("/home/shi/code/java/szpower/szpower/jkmvc-szpower/src/main/kotlin/com/jkmvc/szpower/controller")
+        val dir = File("/home/shi/test")
         dir.travel { f ->
             println("处理文件: " + f.name)
             f.forEachLine { l ->

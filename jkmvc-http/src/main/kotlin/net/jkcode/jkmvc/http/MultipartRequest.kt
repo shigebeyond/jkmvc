@@ -1,9 +1,9 @@
 package net.jkcode.jkmvc.http
 
-import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.convertBytes
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy
 import com.oreilly.servlet.multipart.FileRenamePolicy
+import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.common.fileSize2Bytes
 import net.jkcode.jkmvc.common.prepareDirectory
 import java.io.File
 import java.util.*
@@ -27,13 +27,8 @@ abstract class MultipartRequest(req:HttpServletRequest /* 请求对象 */): Serv
         /**
          * 上传文件的最大size
          */
-        protected val maxPostSize:Int
-            get(){
-                val sizeStr:String = uploadConfig["maxPostSize"]!!;
-                val size:Int = sizeStr.substring(0, sizeStr.length - 1).toInt() // 大小
-                val unit:Char = sizeStr[sizeStr.length - 1] // 单位
-                return size * unit.convertBytes();
-            }
+        protected val maxPostSize:Int = fileSize2Bytes(uploadConfig["maxPostSize"]!!).toInt()
+
 
         /**
          * 上传文件重命名的策略

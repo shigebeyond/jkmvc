@@ -16,7 +16,6 @@ import java.util.concurrent.ConcurrentLinkedQueue
  *         2 请求出队要线程安全, 直接由 HashedWheelTimer 单线程来调用, 简单
  *         3 请求处理则扔到线程池
  *    TODO: 请求出队不消耗 HashedWheelTimer 的线程
- *          定时与定量同时触发, 并发问题
  *
  * @Description:
  * @author shijianhang<772910474@qq.com>
@@ -34,7 +33,7 @@ abstract class RequestQueueFlusher<RequestArgumentType, ResponseType> (
     protected val reqQueue: ConcurrentLinkedQueue<Pair<RequestArgumentType, CompletableFuture<ResponseType>>> = ConcurrentLinkedQueue()
 
     /**
-     * 限制flush()并发的锁
+     * 限制定时+定量并发调用flush()的锁
      */
     protected val lock: AtomicLock = AtomicLock()
 

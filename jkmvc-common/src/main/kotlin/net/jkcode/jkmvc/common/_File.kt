@@ -3,7 +3,9 @@ package net.jkcode.jkmvc.common
 import java.io.File
 import java.net.JarURLConnection
 import java.net.URL
+import java.text.DecimalFormat
 import java.util.*
+
 
 /****************************** 文件大小 *******************************/
 /**
@@ -13,15 +15,41 @@ import java.util.*
 private val fileSizeUnits: String = "BKMGT";
 
 /**
- * 其他大小单位换算为字节数
+ * 文件大小单位换算为字节数
+ * @param unit
  * @return Int
  */
-public fun Char.convertBytes():Int{
-    val i:Int = fileSizeUnits.indexOf(this);
+public fun fileSizeUnit2Bytes(unit: Char): Long {
+    val i:Int = fileSizeUnits.indexOf(unit);
     if(i == -1)
-        throw IllegalArgumentException("无效文件大小单位: $this");
+        throw IllegalArgumentException("无效文件大小单位: $unit");
 
-    return Math.pow(1024.toDouble(), i.toDouble()).toInt()
+    return Math.pow(1024.0, i.toDouble()).toLong()
+}
+
+/**
+ * 文件大小字符串换算为字节数
+ * @param sizeStr
+ * @return Int
+ */
+public fun fileSize2Bytes(sizeStr: String): Long {
+    val size: Int = sizeStr.substring(0, sizeStr.length - 1).toInt() // 大小
+    val unit: Char = sizeStr[sizeStr.length - 1] // 单位
+    return size * fileSizeUnit2Bytes(unit)
+}
+
+/**
+ * 字节数换算为文件大小字符串
+ * @param size
+ * @return
+ */
+public fun bytes2FileSize(size: Long): String {
+    if (size <= 0)
+        return "0B"
+
+    val digitGroups = (Math.log10(size.toDouble()) / Math.log10(1024.0)).toInt()
+    return DecimalFormat("#,##0.#").format(size / Math.pow(1024.0, digitGroups.toDouble())) +
+            " " + fileSizeUnits[digitGroups]
 }
 
 /****************************** 文件路径 *******************************/
