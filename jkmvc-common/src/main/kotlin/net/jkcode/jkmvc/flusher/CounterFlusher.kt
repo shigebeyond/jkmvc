@@ -30,12 +30,28 @@ abstract class CounterFlusher(
     protected val counters = arrayOf(AtomicLong(0), AtomicLong(0))
 
     /**
+     * 获得当前索引
+     * @return
+     */
+    protected fun currIndex(): Int {
+        return if (switch.get()) 1 else 0
+    }
+
+    /**
+     * 获得请求计数
+     * @return
+     */
+    public fun requestCount(): Long {
+        val i = currIndex()
+        return counters[i].get()
+    }
+
+    /**
      * 请求是否为空
      * @return
      */
     public override fun isRequestEmpty(): Boolean {
-        val i = if(switch.get()) 1 else 0
-        return counters[i].get() == 0L
+        return requestCount() == 0L
     }
 
     /**
@@ -43,20 +59,16 @@ abstract class CounterFlusher(
      * @param num
      * @return
      */
-    public fun add(num: Int): CompletableFuture<Unit> {
-        // 1 添加计数
-        val i = if(switch.get()) 1 else 0
-        if(counters[i].addAndGet(num.toLong()) > flushSize)
+    public fun add(num: Int = 1): CompletableFuture<Unit> {
+        // 1 添加计数 + 定量刷盘
+        val i = currIndex()
+        val f = futures[i]
+        if(counters[i].addAndGet(num.toLong()) >= flushSize)
             flush(false)
 
         // 2 空 -> 非空: 启动定时
         touchTimer()
-
-        // 3 定量刷盘
-        if(counters[i].get() >= flushSize)
-            flush(false)
-
-        return futures[i]
+        return f
     }
 
     /**
@@ -66,17 +78,19 @@ abstract class CounterFlusher(
      */
     public override fun flush(byTimeout: Boolean, timerCallback: (() -> Unit)?) {
         val oldSwitch = switch.get()
-        val oldI = if(oldSwitch) 1 else 0
+        val oldI = currIndex()
         // 切换开关
         if(switch.compareAndSet(oldSwitch, !oldSwitch)){
+            //println("CounterFlusher.flush() : switch from [$oldSwitch] to [${!oldSwitch}]")
             val oldFuture = futures[oldI]
             futures[oldI] = CompletableFuture() // 换一个新的future
 
             val oldCounter = counters[oldI]
+            val oldCount = oldCounter.get()
             oldCounter.set(0) // 换一个新的计数
 
             // 执行flush
-            handleFlush()
+            handleFlush(oldCount)
 
             // future完成
             oldFuture.complete(null)
@@ -88,8 +102,9 @@ abstract class CounterFlusher(
 
     /**
      * 处理刷盘
+     * @param reqCount 请求计数
      * @return 是否处理完毕, 同步处理返回true, 异步处理返回false
      */
-    protected abstract fun handleFlush(): Boolean
+    protected abstract fun handleFlush(reqCount: Long): Boolean
 
 }

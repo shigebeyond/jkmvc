@@ -66,6 +66,27 @@ abstract class RequestQueueFlusher<RequestArgumentType, ResponseType> (
     }
 
     /**
+     * 多个请求入队
+     * @param args
+     * @return 返回异步响应, 如果入队失败, 则返回null
+     */
+    public fun addAll(args: List<RequestArgumentType>): CompletableFuture<ResponseType> {
+        // 1 添加
+        val resFuture = CompletableFuture<ResponseType>()
+        for(arg in args)
+            reqQueue.offer(arg to resFuture) // 多个请求使用同一个future, 因为future.complete(result)是幂等的, 多次调用但实际只完成一次
+
+        // 2 空 -> 非空: 启动定时
+        touchTimer()
+
+        // 3 定量刷盘
+        if(reqQueue.size >= flushSize)
+            flush(false)
+
+        return resFuture
+    }
+
+    /**
      * 将队列中的请求刷掉
      * @param byTimeout 是否定时触发 or 定量触发
      * @param timerCallback 定时刷盘的回调, 会调用 startTimer() 来继续下一轮定时
