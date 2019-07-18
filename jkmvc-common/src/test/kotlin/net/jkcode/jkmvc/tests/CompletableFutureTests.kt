@@ -145,4 +145,26 @@ class CompletableFutureTests{
 
         Thread.sleep(3000)
     }
+
+    /**
+     * 测试多次完成, 看看then回调会调用几次?  => 1次
+     */
+    @Test
+    fun testMultipleComplete(){
+        val f = CompletableFuture<Unit>()
+        val thenCounter = AtomicInteger(0)
+        // 结果: 回调1次
+        f.thenRun {
+            println("回调" + thenCounter.incrementAndGet() + "次")
+        }
+
+        val completeCounter = AtomicInteger(0)
+        for(i in 0..30) {
+            f.complete(null)
+            println("完成" + completeCounter.incrementAndGet() + "次")
+        }
+
+        f.get()
+        Thread.sleep(3000)
+    }
 }

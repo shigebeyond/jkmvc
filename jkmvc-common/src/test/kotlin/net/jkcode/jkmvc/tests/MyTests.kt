@@ -18,6 +18,7 @@ import org.junit.Test
 import java.io.File
 import java.lang.reflect.ParameterizedType
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
@@ -102,6 +103,16 @@ class MyTests{
             println(currMillis())
             Thread.sleep(1)
         }
+    }
+
+    @Test
+    fun testConcurrentHashMap(){
+        val map = ConcurrentHashMap<String, Int>()
+        map["a"] = 1
+        map["b"] = 2
+        println(map)
+        println(map.keys) // keySet()
+        println(map.values) // values()
     }
 
     @Test
