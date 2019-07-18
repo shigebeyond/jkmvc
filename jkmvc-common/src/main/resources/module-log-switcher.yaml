@@ -1,0 +1,6 @@
+# 按模块来切换启用日志
+rpc: true
+job: true
+guard: true
+tracer: true
+mq: true
