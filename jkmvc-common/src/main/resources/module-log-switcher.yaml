@@ -1,4 +1,5 @@
 # 按模块来切换启用日志
+common: true
 rpc: true
 job: true
 guard: true
