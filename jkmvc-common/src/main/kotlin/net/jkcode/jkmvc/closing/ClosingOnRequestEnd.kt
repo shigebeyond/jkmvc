@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.closing
 
+import net.jkcode.jkmvc.common.commonLogger
 import java.io.Closeable
 import java.util.*
 
@@ -32,7 +33,7 @@ abstract class ClosingOnRequestEnd : Closeable {
          *    在请求结束时调用, 如http请求/rpc请求
          */
         public fun triggerClosings() {
-            println("--- Request End --- ")
+            commonLogger.debug("--- Request End --- ")
             for (c in closings) {
                 // 关闭资源
                 c.close()

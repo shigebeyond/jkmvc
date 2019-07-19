@@ -117,12 +117,17 @@ class MyTests{
 
     @Test
     fun testSerialize(){
-        val msg = "hello world"
+        //val obj = "hello world"
+        //val words = LongArray(3)
+        //val obj = BitSet.valueOf(words)
+        val obj = BitSet()
+        obj.set(100)
+        println(obj)
         val instance = ISerializer.instance("fst")
-        val bs = instance.serialize(msg)
+        val bs = instance.serialize(obj)
         if(bs != null) {
-            val msg2 = instance.unserizlize(bs!!)
-            println(msg2)
+            val obj2 = instance.unserizlize(bs!!)
+            println(obj2)
         }
     }
 
@@ -231,14 +236,24 @@ class MyTests{
 
     @Test
     fun testMap(){
-        //val map = HashMap<Int, String>() // {1=a, 2=b}
-        /*val map = TreeMap<Int, String>() // {1=a, 2=b}
+        val map = HashMap<Int, String>() // {1=a, 2=b}
+        //val map = TreeMap<Int, String>() // {1=a, 2=b}
         map[2] = "a"
         map[1] = "b"
         for((k, v) in map){
             println("$k = $v")
-        }*/
-        println( emptyMap<String, Any?>() as MutableMap<String, Any?>)
+        }
+
+        // 边遍历, 边删除:
+        // 1 HashMap 抛异常 ConcurrentModificationException
+        // 2 ConcurrentHashMap 成功
+        for(k in map.keys) {
+            val v = map.remove(k)
+            println("$k = $v")
+        }
+
+        println(map)
+        //println( emptyMap<String, Any?>() as MutableMap<String, Any?>)
     }
 
     @Test
