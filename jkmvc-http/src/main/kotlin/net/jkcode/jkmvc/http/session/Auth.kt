@@ -4,7 +4,7 @@ import net.jkcode.jkmvc.closing.ClosingOnRequestEnd
 import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.common.IConfig
 import net.jkcode.jkmvc.common.isSuperClass
-import net.jkcode.jkmvc.db.dbLogger
+import net.jkcode.jkmvc.common.dbLogger
 import net.jkcode.jkmvc.orm.Orm
 import net.jkcode.jkmvc.orm.modelOrmMeta
 import net.jkcode.jkmvc.orm.rowTransformer

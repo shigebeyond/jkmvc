@@ -3,6 +3,7 @@ package net.jkcode.jkmvc.db
 import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.common.mapToArray
 import net.jkcode.jkmvc.common.randomInt
+import net.jkcode.jkmvc.common.dbLogger
 import java.sql.Connection
 import java.sql.ResultSet
 import java.util.*

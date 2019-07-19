@@ -4,7 +4,7 @@ import net.jkcode.jkmvc.common.ClassScanner
 import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.common.classPath2class
 import net.jkcode.jkmvc.common.isSuperClass
-import net.jkcode.jkmvc.http.httpLogger
+import net.jkcode.jkmvc.common.httpLogger
 import java.lang.reflect.Modifier
 import kotlin.collections.Collection
 import kotlin.collections.HashMap

@@ -3,7 +3,7 @@ package net.jkcode.jkmvc.server
 import net.jkcode.jkmvc.closing.ClosingOnShutdown
 import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.common.prepareDirectory
-import net.jkcode.jkmvc.http.httpLogger
+import net.jkcode.jkmvc.common.httpLogger
 import org.eclipse.jetty.server.NCSARequestLog
 import org.eclipse.jetty.server.NetworkConnector
 import org.eclipse.jetty.server.Server

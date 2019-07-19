@@ -11,9 +11,6 @@ import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
-// common的日志
-val comLogger = LoggerFactory.getLogger("net.jkcode.jkmvc.common")
-
 /**
  * 合并哈希码
  * @param args

@@ -54,7 +54,7 @@ abstract class ClassScanner : IClassScanner {
      * @param pck 包名
      */
     public override fun scan(pck: String): Unit {
-        comLogger.debug("扫描包[{}]下的类", pck)
+        commonLogger.debug("扫描包[{}]下的类", pck)
         // 获得类加载器
         val cld = Thread.currentThread().contextClassLoader
         // 获得该包的所有资源

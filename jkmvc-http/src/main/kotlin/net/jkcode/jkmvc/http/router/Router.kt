@@ -1,7 +1,7 @@
 package net.jkcode.jkmvc.http.router
 
 import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.http.httpLogger
+import net.jkcode.jkmvc.common.httpLogger
 import java.util.*
 
 /**

@@ -7,14 +7,10 @@ import com.oreilly.servlet.MultipartRequest
 import net.jkcode.jkmvc.orm.IRelationMeta
 import net.jkcode.jkmvc.orm.Orm
 import net.jkcode.jkmvc.orm.RelationType
-import org.slf4j.LoggerFactory
 import java.io.File
 import java.lang.reflect.Field
 import java.util.*
 import javax.servlet.http.HttpServletRequest
-
-// http的日志
-val httpLogger = LoggerFactory.getLogger("net.jkcode.jkmvc.db")
 
 /****************************** HttpServletRequest扩展 *******************************/
 

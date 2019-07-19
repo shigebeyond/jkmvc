@@ -2,7 +2,7 @@ package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.common.associate
 import net.jkcode.jkmvc.db.MutableRow
-import net.jkcode.jkmvc.db.dbLogger
+import net.jkcode.jkmvc.common.dbLogger
 
 /**
  * ORM之持久化，主要是负责数据库的增删改查
