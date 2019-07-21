@@ -239,7 +239,7 @@ public class FixedKeyMapFactory {
                 return FixedKeyMap.this.remove(index) != null;
             }
 
-            public int getElementSize() {
+            public int size() {
                 return _keys.length;
             }
         }

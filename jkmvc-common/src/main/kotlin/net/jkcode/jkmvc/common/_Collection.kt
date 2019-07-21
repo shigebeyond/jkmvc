@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.common
 
+import org.apache.commons.collections.iterators.AbstractIteratorDecorator
 import java.math.BigDecimal
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -351,6 +352,21 @@ class ItEnumeration<T>(val it: Iterator<T>) : Enumeration<T> {
  */
 public fun <T> Iterable<T>.enumeration(): ItEnumeration<T> {
     return ItEnumeration(iterator())
+}
+
+/**
+ * 包装迭代器
+ * @param iterator 被包装的迭代器
+ * @param 元素转换器
+ * @return 新的迭代器
+ */
+fun <T, R> decorateIterator(iterator: Iterator<T>, transform: (T) -> R): Iterator<R> {
+    return object: AbstractIteratorDecorator(iterator){
+        override fun next(): Any? {
+            val ele = super.next() as T
+            return transform.invoke(ele)
+        }
+    } as Iterator<R>
 }
 
 /**

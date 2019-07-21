@@ -2,8 +2,8 @@ package net.jkcode.jkmvc.orm
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.serializer.SerializerFeature
+import net.jkcode.jkmvc.common.decorateIterator
 import net.jkcode.jkmvc.db.Row
-import org.apache.commons.collections.iterators.AbstractIteratorDecorator
 import java.io.Serializable
 import java.util.*
 import kotlin.properties.ReadWriteProperty
@@ -166,19 +166,11 @@ public fun Collection<out IOrm>.columnIterator(key:String):Iterator<Any?>{
     if(this.isEmpty())
         return org.apache.commons.collections.iterators.EmptyIterator.INSTANCE
 
-    return ColumnIterator(this.iterator(), key)
-}
-
-/**
- * 列的迭代器
- */
-class ColumnIterator(iterator: Iterator<out IOrm>, protected val keyField:String): AbstractIteratorDecorator(iterator){
-    override fun next(): Any {
-        val item = super.next() as IOrm
-        return item[keyField]
+    return decorateIterator(this.iterator()){
+        //it[key] as Any
+        it.get<Any?>(key)
     }
 }
-
 
 /**
  * 标准化orm数据

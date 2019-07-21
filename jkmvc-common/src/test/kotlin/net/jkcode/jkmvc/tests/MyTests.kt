@@ -5,8 +5,13 @@ import com.alibaba.fastjson.JSONObject
 import com.alibaba.fastjson.serializer.SerializerFeature
 import net.jkcode.jkmvc.bit.SetBitIterator
 import net.jkcode.jkmvc.common.*
+import net.jkcode.jkmvc.elements.ElementArray
+import net.jkcode.jkmvc.elements.ElementCollection
 import net.jkcode.jkmvc.idworker.SnowflakeId
 import net.jkcode.jkmvc.idworker.SnowflakeIdWorker
+import net.jkcode.jkmvc.iterator.ArrayFilteredIterator
+import net.jkcode.jkmvc.iterator.CollectionFilteredIterator
+import net.jkcode.jkmvc.iterator.CollectionFilteredTransformedIterator
 import net.jkcode.jkmvc.redis.JedisFactory
 import net.jkcode.jkmvc.serialize.ISerializer
 import net.jkcode.jkmvc.validator.ValidateFuncDefinition
@@ -137,6 +142,25 @@ class MyTests{
         println(Math.pow(3.0, 3.0)) // 27
         println(Math.sqrt(4.0)) // 2
         println(Math.sqrt(9.0)) // 3
+    }
+
+    @Test
+    fun testElements(){
+        //val eles = ElementArray(arrayOf(1, 2, 3))
+        val eles = ElementCollection(listOf(1, 2, 3))
+        for(i in 0 until eles.size())
+            println(eles.getElement(i))
+    }
+
+    @Test
+    fun testIterator(){
+        val itr = object: ArrayFilteredIterator<Int>(arrayOf(1, 2, 3)){
+        //val itr = object: CollectionFilteredIterator<Int>(listOf(1, 2, 3)){
+            override fun filter(ele: Int): Boolean {
+                return ele > 1
+            }
+        }
+        println(itr)
     }
 
     @Test

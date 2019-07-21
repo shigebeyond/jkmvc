@@ -1,5 +1,7 @@
 package net.jkcode.jkmvc.bit;
 
+import net.jkcode.jkmvc.elements.IElements;
+
 import java.util.AbstractSet;
 import java.util.BitSet;
 import java.util.Iterator;
@@ -12,7 +14,7 @@ import java.util.Iterator;
  * @author shijianhang
  * @date 2019-06-27 12:00 PM
  */
-public abstract class IBitSet<E> extends AbstractSet<E> implements IBitElementOperator<E> {
+public abstract class IBitSet<E> extends AbstractSet<E> implements IElements<E> {
 
     protected BitSet bits;
 

@@ -1,5 +1,7 @@
 package net.jkcode.jkmvc.bit;
 
+import net.jkcode.jkmvc.elements.IElements;
+
 import java.util.BitSet;
 import java.util.Iterator;
 
@@ -13,11 +15,11 @@ public class SetBitElementIterator<E> implements Iterator<E> {
 
     protected BitSet bits;
 
-    protected IBitElementOperator<E> op;
+    protected IElements<E> op;
 
     protected int curr = -1;
 
-    public SetBitElementIterator(BitSet bits, IBitElementOperator<E> op) {
+    public SetBitElementIterator(BitSet bits, IElements<E> op) {
         this.bits = bits;
         this.op = op;
     }

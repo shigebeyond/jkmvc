@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.common
 
-import net.jkcode.jkmvc.common.MutablePair
+import net.jkcode.jkmvc.iterator.CollectionFilteredTransformedIterator
 import java.util.*
 
 /**
@@ -68,42 +68,15 @@ class DoneFlagList<T>(val list: MutableList<MutablePair<T, Boolean>> = LinkedLis
     /**
      * 已完成/未完成元素的迭代器
      */
-    protected inner class DoneIterator(protected val done: Boolean /* 是否已完成 */) : Iterator<Pair<Int, T>> {
-        protected var _curr = -1 // 当前序号
-        protected var _next = -1 // 下一序号
-
-        // 准备下一序号
-        protected fun prepareNext() {
-            if (_curr == _next) {
-                var i = _curr
-                while (++i < list.size) {
-                    if (list[i].second == done) // done
-                        break
-                }
-                _next = i
-            }
+    protected inner class DoneIterator(protected val done: Boolean /* 是否已完成 */) : CollectionFilteredTransformedIterator<MutablePair<T, Boolean>, Pair<Int, T>>(list){
+        override fun filter(ele: MutablePair<T, Boolean>): Boolean {
+            return ele.second == done // done
         }
 
-        public override fun hasNext(): Boolean {
-            if(_next == list.size)
-                return false
-
-            // 准备下一序号
-            prepareNext()
-            return _next < list.size
+        override fun transform(ele: MutablePair<T, Boolean>, i: Int): Pair<Int, T> {
+            return i to ele.first
         }
 
-        public  override fun next(): Pair<Int, T> {
-            try {
-                // 准备下一序号
-                if(_next < list.size)
-                    prepareNext()
-                _curr = _next
-                return _curr to list[_curr].first
-            } catch (e: ArrayIndexOutOfBoundsException) {
-                throw NoSuchElementException()
-            }
-        }
     }
 
 }
