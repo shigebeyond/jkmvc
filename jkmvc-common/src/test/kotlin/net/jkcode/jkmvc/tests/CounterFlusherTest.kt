@@ -26,7 +26,7 @@ class CounterFlusherTest {
     fun testAdd(){
         val futures = LinkedList<CompletableFuture<*>>()
         for(i in 0 until 100){
-            val future = counter.add()
+            val future = counter.add(1)
             futures.add(future)
         }
         CompletableFuture.allOf(*futures.toTypedArray()).get()
@@ -38,7 +38,7 @@ class CounterFlusherTest {
         val futures = LinkedList<CompletableFuture<*>>()
         makeThreads(10){i ->
             for(j in 0 until 100) {
-                val future = counter.add()
+                val future = counter.add(1)
                 futures.add(future)
                 Thread.sleep(100)
             }

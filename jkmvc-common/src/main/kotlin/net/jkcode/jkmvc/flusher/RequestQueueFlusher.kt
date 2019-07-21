@@ -21,10 +21,10 @@ import java.util.concurrent.ConcurrentLinkedQueue
  * @author shijianhang<772910474@qq.com>
  * @date 2019-02-12 5:52 PM
  */
-abstract class RequestQueueFlusher<RequestArgumentType, ResponseType> (
+abstract class RequestQueueFlusher<RequestArgumentType /* 请求参数类型 */, ResponseType /* 返回值类型 */> (
         protected val flushSize: Int /* 触发刷盘的队列大小 */,
         flushTimeoutMillis: Long /* 触发刷盘的定时时间 */
-): PeriodicFlusher(flushTimeoutMillis) {
+): PeriodicFlusher<RequestArgumentType, ResponseType>(flushTimeoutMillis) {
 
     /**
      * 请求队列
@@ -50,7 +50,7 @@ abstract class RequestQueueFlusher<RequestArgumentType, ResponseType> (
      * @param arg
      * @return 返回异步响应, 如果入队失败, 则返回null
      */
-    public fun add(arg: RequestArgumentType): CompletableFuture<ResponseType> {
+    public override fun add(arg: RequestArgumentType): CompletableFuture<ResponseType> {
         // 1 添加
         val resFuture = CompletableFuture<ResponseType>()
         reqQueue.offer(arg to resFuture) // 返回都是true
@@ -67,14 +67,19 @@ abstract class RequestQueueFlusher<RequestArgumentType, ResponseType> (
 
     /**
      * 多个请求入队
+     *    只有无返回值时才支持批量请求入队
+     *
      * @param args
      * @return 返回异步响应, 如果入队失败, 则返回null
      */
-    public fun addAll(args: List<RequestArgumentType>): CompletableFuture<ResponseType> {
+    public override fun addAll(args: List<RequestArgumentType>): CompletableFuture<ResponseType> {
+        if(!isNoResponse())
+            throw UnsupportedOperationException("只有无返回值时才支持批量请求入队")
+
         // 1 添加
         val resFuture = CompletableFuture<ResponseType>()
         for(arg in args)
-            reqQueue.offer(arg to resFuture) // 多个请求使用同一个future, 因为future.complete(result)是幂等的, 多次调用但实际只完成一次
+            reqQueue.offer(arg to resFuture) // 多个请求使用同一个future, 因为无返回值, 则future.complete(result)是幂等的, 多次调用但实际只完成一次
 
         // 2 空 -> 非空: 启动定时
         touchTimer()
@@ -114,8 +119,8 @@ abstract class RequestQueueFlusher<RequestArgumentType, ResponseType> (
 
                         // 1.2.2 在处理完成后, 如果 ResponseType == Void/Unit, 则框架帮设置异步响应, 否则开发者自行在 handleFlush() 中设置
                         if (done) {
-                            val responseType = this.javaClass.getSuperClassGenricType(1)
-                            if (responseType == Void::class.java || responseType == Unit::class.java)
+                            // 无返回值: 返回值值类型为 Void / Unit
+                            if (isNoResponse())
                                 reqs.forEach { (arg, resFuture) ->
                                     resFuture.complete(null)
                                 }

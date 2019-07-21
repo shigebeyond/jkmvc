@@ -12,26 +12,13 @@ import java.util.concurrent.atomic.AtomicInteger
  * @author shijianhang<772910474@qq.com>
  * @date 2019-07-17 8:27 AM
  */
-abstract class PeriodicFlusher(protected val flushTimeoutMillis: Long /* 触发刷盘的定时时间 */) {
+abstract class PeriodicFlusher<RequestArgumentType /* 请求参数类型 */, ResponseType /* 返回值类型 */>(protected val flushTimeoutMillis: Long /* 触发刷盘的定时时间 */) : IFlusher<RequestArgumentType, ResponseType> {
 
     /**
      * 定时器状态: 0: 已停止 / 非0: 进行中
      *   用于控制是否停止定时器
      */
     protected val timerState: AtomicInteger = AtomicInteger(0)
-
-    /**
-     * 请求是否为空
-     * @return
-     */
-    public abstract fun isRequestEmpty(): Boolean
-
-    /**
-     * 将积累的请求刷掉
-     * @param byTimeout 是否定时触发 or 定量触发
-     * @param timerCallback 定时刷盘的回调, 会调用 startTimer() 来继续下一轮定时
-     */
-    public abstract fun flush(byTimeout: Boolean = true, timerCallback: (() -> Unit)? = null)
 
     /**
      * 空 -> 非空: 启动定时

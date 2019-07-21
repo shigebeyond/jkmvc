@@ -5,14 +5,14 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 
 /**
- * 定时刷盘 + 定量刷盘
+ * 计数来刷盘
  *
  * @author shijianhang<772910474@qq.com>
  * @date 2019-07-17 8:27 AM
  */
 abstract class CounterFlusher(
         protected val flushSize: Int /* 触发刷盘的计数大小 */,
-        flushTimeoutMillis: Long /* 触发刷盘的定时时间 */) : PeriodicFlusher(flushTimeoutMillis) {
+        flushTimeoutMillis: Long /* 触发刷盘的定时时间 */) : PeriodicFlusher<Int, Unit>(flushTimeoutMillis) {
 
     /**
      * 开关, 2值的轮换
@@ -59,7 +59,7 @@ abstract class CounterFlusher(
      * @param num
      * @return
      */
-    public fun add(num: Int = 1): CompletableFuture<Unit> {
+    public override fun add(num: Int): CompletableFuture<Unit> {
         // 1 添加计数 + 定量刷盘
         val i = currIndex()
         val f = futures[i]
@@ -69,6 +69,16 @@ abstract class CounterFlusher(
         // 2 空 -> 非空: 启动定时
         touchTimer()
         return f
+    }
+
+    /**
+     * 添加多个计数
+     *
+     * @param args
+     * @return 返回异步响应, 如果入队失败, 则返回null
+     */
+    public override fun addAll(args: List<Int>): CompletableFuture<Unit>{
+        return add(args.sum())
     }
 
     /**
