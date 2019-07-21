@@ -333,6 +333,14 @@ public fun <T> Iterator<T>.joinTo(buffer: StringBuilder, separator: CharSequence
 }
 
 /**
+ * 转字符串
+ * @return
+ */
+public fun Iterator<*>.toDesc(): String {
+    return this.joinToString(", ",javaClass.name + "(", ")")
+}
+
+/**
  * Iterator转Enumeration
  */
 class ItEnumeration<T>(val it: Iterator<T>) : Enumeration<T> {

@@ -33,4 +33,5 @@ public class SetBitIterator implements Iterator<Integer> {
         if (curr != -1)
             bits.clear(curr);
     }
+
 }

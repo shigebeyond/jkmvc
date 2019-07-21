@@ -160,7 +160,7 @@ class MyTests{
                 return ele > 1
             }
         }
-        println(itr)
+        println(itr.toDesc())
     }
 
     @Test

@@ -66,8 +66,4 @@ abstract class ElementsFilteredTransformedIterator<E, R>: Iterator<R>, IElements
         return transform(getElement(curr), curr)
     }
 
-    public override fun toString(): String {
-        return this.joinToString(", ","ElementsFilteredTransformedIterator(", ")")
-    }
-
 }
