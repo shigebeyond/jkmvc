@@ -15,10 +15,9 @@ class CounterFlusherTest {
 
     val counter = object: CounterFlusher(90, 100) {
         // 处理刷盘
-        override fun handleFlush(reqCount: Long): Boolean {
+        override fun handleRequests(reqCount: Int) {
             print(if(reqCount < flushSize) "定时" else "定量")
             println("sync, 请求计数 from [$reqCount] to [${requestCount()}] ")
-            return true
         }
     }
 

@@ -1,163 +1,112 @@
 package net.jkcode.jkmvc.flusher
 
-import net.jkcode.jkmvc.common.CommonThreadPool
-import net.jkcode.jkmvc.common.drainTo
+import net.jkcode.jkmvc.common.VoidFuture
+import net.jkcode.jkmvc.common.decorateCollection
 import net.jkcode.jkmvc.common.getSuperClassGenricType
-import net.jkcode.jkmvc.common.runAsync
-import net.jkcode.jkmvc.lock.AtomicLock
-import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentLinkedQueue
+
+/**
+ * 请求队列
+ *    单个请求 = 请求参数 + 异步响应
+ */
+typealias RequestQueue<RequestType, ResponseType> = ConcurrentLinkedQueue<Pair<RequestType, CompletableFuture<ResponseType>>>
 
 /**
  * 请求队列刷盘器
  *    定时刷盘 + 定量刷盘
  *    注意: 1 使用 ConcurrentLinkedQueue 来做队列, 其 size() 是遍历性能慢, 尽量使用 isEmpty()
- *         2 请求出队要线程安全, 直接由 HashedWheelTimer 单线程来调用, 简单
- *         3 请求处理则扔到线程池
- *    TODO: 请求出队不消耗 HashedWheelTimer 的线程
+ *         2 doFlush()直接换新的队列, 而处理旧的队列
  *
  * @Description:
  * @author shijianhang<772910474@qq.com>
  * @date 2019-02-12 5:52 PM
  */
-abstract class RequestQueueFlusher<RequestArgumentType /* 请求参数类型 */, ResponseType /* 返回值类型 */> (
-        protected val flushSize: Int /* 触发刷盘的队列大小 */,
-        flushTimeoutMillis: Long /* 触发刷盘的定时时间 */
-): PeriodicFlusher<RequestArgumentType, ResponseType>(flushTimeoutMillis) {
+abstract class RequestQueueFlusher<RequestType /* 请求类型 */, ResponseType /* 响应值类型 */> (
+        flushSize: Int, // 触发刷盘的计数大小
+        flushTimeoutMillis: Long // 触发刷盘的定时时间
+): ITimeFlusher<RequestType, ResponseType>(flushSize, flushTimeoutMillis) {
 
     /**
-     * 请求队列
-     *   单个请求 = 请求参数 + 异步响应
+     * 2个请求队列来轮换
+     *    单个请求 = 请求参数 + 异步响应
      */
-    protected val reqQueue: ConcurrentLinkedQueue<Pair<RequestArgumentType, CompletableFuture<ResponseType>>> = ConcurrentLinkedQueue()
+    protected val queues: Array<RequestQueue<RequestType, ResponseType>> = arrayOf(RequestQueue(), RequestQueue())
 
     /**
-     * 限制定时+定量并发调用flush()的锁
-     */
-    protected val lock: AtomicLock = AtomicLock()
-
-    /**
-     * 请求是否为空
+     * 获得请求计数
      * @return
      */
-    public override fun isRequestEmpty(): Boolean {
-        return reqQueue.isEmpty()
+    public override fun requestCount(): Int {
+        val index = currIndex()
+        return queues[index].size
     }
 
     /**
      * 单个请求入队
-     * @param arg
-     * @return 返回异步响应, 如果入队失败, 则返回null
+     * @param req
+     * @return
      */
-    public override fun add(arg: RequestArgumentType): CompletableFuture<ResponseType> {
-        // 1 添加
+    public override fun add(req: RequestType): CompletableFuture<ResponseType> {
+        val index = currIndex()
+        val queue = queues[index]
+
+        // 添加请求
         val resFuture = CompletableFuture<ResponseType>()
-        reqQueue.offer(arg to resFuture) // 返回都是true
+        queue.offer(req to resFuture) // 返回都是true
 
-        // 2 空 -> 非空: 启动定时
-        touchTimer()
-
-        // 3 定量刷盘
-        if(reqQueue.size >= flushSize)
-            flush(false)
-
+        // 尝试定量刷盘
+        tryFlushWhenAdd(queue.size)
         return resFuture
     }
 
-    /**
-     * 多个请求入队
-     *    只有无返回值时才支持批量请求入队
-     *
-     * @param args
-     * @return 返回异步响应, 如果入队失败, 则返回null
-     */
-    public override fun addAll(args: List<RequestArgumentType>): CompletableFuture<ResponseType> {
-        if(!isNoResponse())
-            throw UnsupportedOperationException("只有无返回值时才支持批量请求入队")
-
-        // 1 添加
-        val resFuture = CompletableFuture<ResponseType>()
-        for(arg in args)
-            reqQueue.offer(arg to resFuture) // 多个请求使用同一个future, 因为无返回值, 则future.complete(result)是幂等的, 多次调用但实际只完成一次
-
-        // 2 空 -> 非空: 启动定时
-        touchTimer()
-
-        // 3 定量刷盘
-        if(reqQueue.size >= flushSize)
-            flush(false)
-
-        return resFuture
-    }
 
     /**
-     * 将队列中的请求刷掉
-     * @param byTimeout 是否定时触发 or 定量触发
-     * @param timerCallback 定时刷盘的回调, 会调用 startTimer() 来继续下一轮定时
+     * 处理旧索引的请求
+     * @param oldIndex 旧的索引, 因为新的索引已切换, 现在要处理旧的索引的数据
+     * @return
      */
-    public override fun flush(byTimeout: Boolean, timerCallback: (() -> Unit)?){
-        // 1 锁住了: 处理请求
-        val locked = lock.quickLockCleanly {
-            //val msg = if(byTimeout) "定时刷盘" else "定量刷盘"
-            val futures: MutableList<CompletableFuture<*>>? = if(timerCallback == null) null else LinkedList()
-            while(reqQueue.isNotEmpty()) {
-                // 1.1 请求出队, 要线程安全, 直接由 HashedWheelTimer 单线程来调用, 简单
-                val reqs = ArrayList<Pair<RequestArgumentType, CompletableFuture<ResponseType>>>()
-                val num = reqQueue.drainTo(reqs, flushSize)
-                if(num == 0)
-                    break;
+    protected override fun doFlush(oldIndex: Int): CompletableFuture<*> {
+        val oldQueue = queues[oldIndex]
+        queues[oldIndex] = RequestQueue() // 换一个新的请求队列
 
-                // 1.2 请求处理, 扔到线程池
-                val future = CommonThreadPool.runAsync{
-                    try {
-                        val args = reqs.map { it.first } // 收集请求参数
-                        //println("$msg, 出队请求: $num 个, 请求参数为: $args")
+        // 无请求要处理
+        if(oldQueue.isEmpty())
+            return VoidFuture
 
-                        // 1.2.1 处理刷盘
-                        val done = handleFlush(args, reqs)
+        // 收集请求+响应
+        val reqs = decorateCollection(oldQueue){ it.first }
 
-                        // 1.2.2 在处理完成后, 如果 ResponseType == Void/Unit, 则框架帮设置异步响应, 否则开发者自行在 handleFlush() 中设置
-                        if (done) {
-                            // 无返回值: 返回值值类型为 Void / Unit
-                            if (isNoResponse())
-                                reqs.forEach { (arg, resFuture) ->
-                                    resFuture.complete(null)
-                                }
-
-                            // 清空请求列表, 释放内存
-                            reqs.clear()
-                        }
-                    }catch (e: Exception){
-                        e.printStackTrace()
-                    }
-                }
-                // 记录future, 用于在请求处理完成后调用回调
-                futures?.add(future)
-            }
-
-            // 1.3 在请求处理完成后调用回调
-            if(futures != null && futures.isNotEmpty())
-                CompletableFuture.allOf(*futures.toTypedArray()).thenRun {
-                    // 调用回调
-                    timerCallback?.invoke()
-                    futures.clear()
+        // 处理刷盘
+        return handleRequests(reqs, oldQueue).whenComplete { r, e ->
+            // 无响应值: 响应值值类型为 Void / Unit, 则框架帮设置异步响应
+            if (isNoResponse())
+                oldQueue.forEach { (req, resFuture) ->
+                    resFuture.complete(null)
                 }
 
+            // 清空请求列表, 释放内存
+            oldQueue.clear()
         }
+    }
 
-        // 2 锁不住: 如果是定时刷盘, 主动调用回调
-        if(!locked && byTimeout == true)
-            timerCallback?.invoke()
+    /**
+     * 是否无响应值
+     *    即响应值值类型为 Void / Unit
+     * @return
+     */
+    protected fun isNoResponse(): Boolean {
+        val responseType = this.javaClass.getSuperClassGenricType(1)
+        return responseType == Void::class.java || responseType == Unit::class.java
     }
 
     /**
      * 处理刷盘的请求
-     *     如果 同步 + ResponseType != Void/Unit, 则需要你主动设置异步响应
-     * @param args
+     *     如果 ResponseType != Void/Unit, 则需要你主动设置异步响应
      * @param reqs
-     * @return 是否处理完毕, 同步处理返回true, 异步处理返回false
+     * @param req2ResFuture
+     * @return
      */
-    protected abstract fun handleFlush(args: List<RequestArgumentType>, reqs: ArrayList<Pair<RequestArgumentType, CompletableFuture<ResponseType>>>): Boolean
+    protected abstract fun handleRequests(reqs: Collection<RequestType>, req2ResFuture: Collection<Pair<RequestType, CompletableFuture<ResponseType>>>): CompletableFuture<*>
 
 }

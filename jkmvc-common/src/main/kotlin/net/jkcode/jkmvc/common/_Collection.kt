@@ -122,7 +122,7 @@ public fun Any.iteratorArrayOrCollection(): Iterator<*>? {
  * 检查集合是否为空
  * @return
  */
-public fun <T> Collection<T>?.isNullOrEmpty(): Boolean {
+public fun <E> Collection<E>?.isNullOrEmpty(): Boolean {
     return this === null || this.isEmpty()
 }
 
@@ -134,7 +134,7 @@ public fun <T> Collection<T>?.isNullOrEmpty(): Boolean {
  * @throws IndexOutOfBoundsException if the index is out of range
  * (<tt>index &lt; 0 || index &gt;= size()</tt>)
  */
-public operator fun <T> Collection<T>.get(index: Int): T {
+public operator fun <E> Collection<E>.get(index: Int): E {
     if(index < 0 || index > size)
         throw IndexOutOfBoundsException("Index: $index, Size: $size")
 
@@ -157,7 +157,7 @@ public operator fun <T> Collection<T>.get(index: Int): T {
  * 集合转数组
  *   注: Array<R> 不能使用R作为泛型参数, 只能使用具体类
  */
-public inline fun <T, reified R> Collection<T>.mapToArray(transform: (T) -> R): Array<R> {
+public inline fun <E, reified R> Collection<E>.mapToArray(transform: (E) -> R): Array<R> {
     val arr = arrayOfNulls<R?>(this.size);
     var i = 0;
     for (item in this)
@@ -368,13 +368,23 @@ public fun <T> Iterable<T>.enumeration(): ItEnumeration<T> {
  * @param 元素转换器
  * @return 新的迭代器
  */
-fun <T, R> decorateIterator(iterator: Iterator<T>, transform: (T) -> R): Iterator<R> {
+public fun <T, R> decorateIterator(iterator: Iterator<T>, transform: (T) -> R): Iterator<R> {
     return object: AbstractIteratorDecorator(iterator){
         override fun next(): Any? {
             val ele = super.next() as T
             return transform.invoke(ele)
         }
     } as Iterator<R>
+}
+
+/**
+ * 包装迭代器
+ * @param col 被包装的迭代器
+ * @param 元素转换器
+ * @return 新的迭代器
+ */
+public fun <T, R> decorateCollection(col: Collection<T>, transform: (T) -> R): Collection<R> {
+    return CollectionDecorator(col, transform)
 }
 
 /**

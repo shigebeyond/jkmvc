@@ -12,7 +12,10 @@ import java.util.concurrent.atomic.AtomicInteger
  * @author shijianhang<772910474@qq.com>
  * @date 2019-07-17 8:27 AM
  */
-abstract class PeriodicFlusher<RequestArgumentType /* 请求参数类型 */, ResponseType /* 返回值类型 */>(protected val flushTimeoutMillis: Long /* 触发刷盘的定时时间 */) : IFlusher<RequestArgumentType, ResponseType> {
+abstract class ITimeFlusher<RequestType /* 请求类型 */, ResponseType /* 响应值类型 */>(
+        flushSize: Int, // 触发刷盘的计数大小
+        protected val flushTimeoutMillis: Long // 触发刷盘的定时时间
+) : IQuotaFlusher<RequestType, ResponseType>(flushSize) {
 
     /**
      * 定时器状态: 0: 已停止 / 非0: 进行中
@@ -23,9 +26,15 @@ abstract class PeriodicFlusher<RequestArgumentType /* 请求参数类型 */, Res
     /**
      * 空 -> 非空: 启动定时
      *   在添加请求时调用
+     *
+     * @param currRequestCount
      */
-    protected fun touchTimer() {
-        if ((timerState.get() == 0 || isRequestEmpty()) && timerState.getAndIncrement() == 0)
+    protected override fun tryFlushWhenAdd(currRequestCount: Int){
+        // 调用父类实现: 尝试定量刷盘
+        super.tryFlushWhenAdd(currRequestCount)
+
+        // 启动定时
+        if (timerState.get() == 0 && timerState.getAndIncrement() == 0)
             startTimer()
     }
 
@@ -36,14 +45,7 @@ abstract class PeriodicFlusher<RequestArgumentType /* 请求参数类型 */, Res
         CommonMilliTimer.newTimeout(object : TimerTask {
             override fun run(timeout: Timeout) {
                 // 刷盘
-                flush(){
-                    // 空: 停止定时
-                    if(isRequestEmpty() && timerState.decrementAndGet() == 0)
-                        return@flush
-
-                    // 非空: 继续启动定时
-                    startTimer()
-                }
+                flush(true)
             }
         }, flushTimeoutMillis, TimeUnit.MILLISECONDS)
     }
