@@ -1,7 +1,6 @@
 package net.jkcode.jkmvc.flusher
 
 import net.jkcode.jkmvc.common.VoidFuture
-import net.jkcode.jkmvc.common.decorateCollection
 import net.jkcode.jkmvc.common.getSuperClassGenricType
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -74,8 +73,9 @@ abstract class RequestQueueFlusher<RequestType /* 请求类型 */, ResponseType 
         if(oldQueue.isEmpty())
             return VoidFuture
 
-        // 收集请求+响应
-        val reqs = decorateCollection(oldQueue){ it.first }
+        // 收集请求
+        //val reqs = decorateCollection(oldQueue){ it.first } // 批量操作可能会涉及到序列化存库, 因此不要用 CollectionDecorator
+        val reqs = oldQueue.map { it.first }
 
         // 处理刷盘
         return handleRequests(reqs, oldQueue).whenComplete { r, e ->
@@ -107,6 +107,6 @@ abstract class RequestQueueFlusher<RequestType /* 请求类型 */, ResponseType 
      * @param req2ResFuture
      * @return
      */
-    protected abstract fun handleRequests(reqs: Collection<RequestType>, req2ResFuture: Collection<Pair<RequestType, CompletableFuture<ResponseType>>>): CompletableFuture<*>
+    protected abstract fun handleRequests(reqs: List<RequestType>, req2ResFuture: Collection<Pair<RequestType, CompletableFuture<ResponseType>>>): CompletableFuture<*>
 
 }

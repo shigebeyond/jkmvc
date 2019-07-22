@@ -8,6 +8,8 @@ import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * 定时刷盘
+ *    使用 startTimernewTimeout() 即 newTimeout() 来设置一次定时flush(), 但是不需要递归调用, 因为flush()会清理所有当前所有请求, 也就暂时没有再来 startTimer() 即 newTimeout() 的必要
+ *    以后只要调用 add() 添加请求, 就主动触发定时器, 参考 tryFlushWhenAdd(), 这样就很节省定时器资源, 虽然说定时不及时
  *
  * @author shijianhang<772910474@qq.com>
  * @date 2019-07-17 8:27 AM

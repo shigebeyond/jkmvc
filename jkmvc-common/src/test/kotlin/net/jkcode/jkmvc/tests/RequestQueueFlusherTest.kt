@@ -14,7 +14,7 @@ class RequestQueueFlusherTest{
      */
     protected val queue: RequestQueueFlusher<Int, Void> = object: RequestQueueFlusher<Int, Void>(100, 100){
         // 处理刷盘的元素
-        override fun handleRequests(ids: Collection<Int>, resFutures: Collection<Pair<Int, CompletableFuture<Void>>>):CompletableFuture<*> {
+        override fun handleRequests(ids: List<Int>, resFutures: Collection<Pair<Int, CompletableFuture<Void>>>):CompletableFuture<*> {
             println("批量处理请求: $ids")
             return VoidFuture
         }
