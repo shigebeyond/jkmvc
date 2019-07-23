@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.flusher
 
 import net.jkcode.jkmvc.common.VoidFuture
 import net.jkcode.jkmvc.common.getSuperClassGenricType
+import net.jkcode.jkmvc.common.trySupplierFinally
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -78,7 +79,7 @@ abstract class RequestQueueFlusher<RequestType /* 请求类型 */, ResponseType 
         val reqs = oldQueue.map { it.first }
 
         // 处理刷盘
-        return handleRequests(reqs, oldQueue).whenComplete { r, e ->
+        return trySupplierFinally({ handleRequests(reqs, oldQueue) }){ r, e ->
             // 无响应值: 响应值值类型为 Void / Unit, 则框架帮设置异步响应
             if (isNoResponse())
                 oldQueue.forEach { (req, resFuture) ->
@@ -92,7 +93,7 @@ abstract class RequestQueueFlusher<RequestType /* 请求类型 */, ResponseType 
 
     /**
      * 是否无响应值
-     *    即响应值值类型为 Void / Unit
+     *    即响应值值类型为 Void / Unit, 则框架帮设置异步响应
      * @return
      */
     protected fun isNoResponse(): Boolean {
