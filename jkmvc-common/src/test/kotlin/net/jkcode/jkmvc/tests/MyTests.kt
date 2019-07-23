@@ -5,16 +5,14 @@ import com.alibaba.fastjson.JSONObject
 import com.alibaba.fastjson.serializer.SerializerFeature
 import net.jkcode.jkmvc.bit.SetBitIterator
 import net.jkcode.jkmvc.common.*
-import net.jkcode.jkmvc.elements.ElementArray
 import net.jkcode.jkmvc.elements.ElementCollection
 import net.jkcode.jkmvc.idworker.SnowflakeId
 import net.jkcode.jkmvc.idworker.SnowflakeIdWorker
 import net.jkcode.jkmvc.iterator.ArrayFilteredIterator
-import net.jkcode.jkmvc.iterator.CollectionFilteredIterator
-import net.jkcode.jkmvc.iterator.CollectionFilteredTransformedIterator
 import net.jkcode.jkmvc.redis.JedisFactory
 import net.jkcode.jkmvc.serialize.ISerializer
 import net.jkcode.jkmvc.validator.ValidateFuncDefinition
+import org.apache.commons.pool2.impl.GenericObjectPool
 import org.dom4j.Attribute
 import org.dom4j.DocumentException
 import org.dom4j.Element
@@ -150,6 +148,33 @@ class MyTests{
         val eles = ElementCollection(listOf(1, 2, 3))
         for(i in 0 until eles.size())
             println(eles.getElement(i))
+    }
+
+    @Test
+    fun testPool(){
+        val pool = SimpleObjectPool(){
+            ArrayList<Int>()
+        }
+        pool.printIdleObjects()
+        makeThreads(100){
+            var list: ArrayList<Int>? = null
+            try{
+                list = pool.borrowObject()
+                //pool.printIdleObjects()
+                list.add(it)
+                //println("list: " + System.identityHashCode(list)+ " - " + list)
+            }finally {
+                if(list != null) {
+                    //list.clear()
+                    pool.returnObject(list)
+                    pool.printIdleObjects()
+                }
+            }
+        }
+        Thread.sleep(10000)
+        println("-----------")
+        pool.printIdleObjects()
+
     }
 
     @Test

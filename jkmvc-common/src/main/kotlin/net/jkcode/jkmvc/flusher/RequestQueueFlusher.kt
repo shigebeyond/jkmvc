@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.flusher
 
+import net.jkcode.jkmvc.common.SimpleObjectPool
 import net.jkcode.jkmvc.common.VoidFuture
 import net.jkcode.jkmvc.common.getSuperClassGenricType
 import net.jkcode.jkmvc.common.trySupplierFinally
@@ -28,10 +29,26 @@ abstract class RequestQueueFlusher<RequestType /* 请求类型 */, ResponseType 
 ): ITimeFlusher<RequestType, ResponseType>(flushSize, flushTimeoutMillis) {
 
     /**
+     * 队列池
+     */
+    protected val queuePool = SimpleObjectPool(){
+        RequestQueue<RequestType, ResponseType>()
+    }
+
+    /**
+     * 列表池, 用于在doFlush()将队列请求转为List, 方便用户处理
+     */
+    protected val listPool = SimpleObjectPool(){
+        ArrayList<RequestType>()
+    }
+
+    /**
      * 2个请求队列来轮换
      *    单个请求 = 请求参数 + 异步响应
      */
-    protected val queues: Array<RequestQueue<RequestType, ResponseType>> = arrayOf(RequestQueue(), RequestQueue())
+    protected val queues: Array<RequestQueue<RequestType, ResponseType>> = Array(2){
+        queuePool.borrowObject()
+    }
 
     /**
      * 获得请求计数
@@ -68,15 +85,15 @@ abstract class RequestQueueFlusher<RequestType /* 请求类型 */, ResponseType 
      */
     protected override fun doFlush(oldIndex: Int): CompletableFuture<*> {
         val oldQueue = queues[oldIndex]
-        queues[oldIndex] = RequestQueue() // 换一个新的请求队列
+        queues[oldIndex] = queuePool.borrowObject() // 换一个新的请求队列
 
         // 无请求要处理
         if(oldQueue.isEmpty())
             return VoidFuture
 
-        // 收集请求
+        // 收集请求, 转为List, 方便用户处理
         //val reqs = decorateCollection(oldQueue){ it.first } // 批量操作可能会涉及到序列化存库, 因此不要用 CollectionDecorator
-        val reqs = oldQueue.map { it.first }
+        val reqs = oldQueue.mapTo(listPool.borrowObject()) { it.first }
 
         // 处理刷盘
         return trySupplierFinally({ handleRequests(reqs, oldQueue) }){ r, e ->
@@ -86,8 +103,13 @@ abstract class RequestQueueFlusher<RequestType /* 请求类型 */, ResponseType 
                     resFuture.complete(null)
                 }
 
-            // 清空请求列表, 释放内存
+            // 清空+归还队列
             oldQueue.clear()
+            queuePool.returnObject(oldQueue)
+
+            // 清空+归还列表
+            reqs.clear()
+            listPool.returnObject(reqs)
         }
     }
 
