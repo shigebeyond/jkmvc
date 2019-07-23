@@ -53,7 +53,7 @@ abstract class CounterFlusher(
      * 处理旧索引的请求
      * @param oldIndex 旧的索引, 因为新的索引已切换, 现在要处理旧的索引的数据
      */
-    protected override fun doFlush(oldIndex: Int): CompletableFuture<*> {
+    protected override fun doFlush(oldIndex: Int) {
         val oldFuture = futures[oldIndex]
         futures[oldIndex] = CompletableFuture() // 换一个新的future
 
@@ -63,14 +63,13 @@ abstract class CounterFlusher(
 
         // 无请求要处理
         if(oldCount == 0)
-            return VoidFuture
+            return
 
         // 处理刷盘的请求
         handleRequests(oldCount)
 
         // future完成
         oldFuture.complete(null)
-        return VoidFuture
     }
 
     /**

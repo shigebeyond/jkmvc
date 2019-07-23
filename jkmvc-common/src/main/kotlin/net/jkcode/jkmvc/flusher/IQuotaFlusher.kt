@@ -76,8 +76,7 @@ abstract class IQuotaFlusher<RequestType /* 请求类型 */, ResponseType /* 响
     /**
      * 处理旧索引的请求
      * @param oldIndex 旧索引, 因为新索引已切换, 现在要处理旧索引的请求
-     * @return
      */
-    protected abstract fun doFlush(oldIndex: Int): CompletableFuture<*>
+    protected abstract fun doFlush(oldIndex: Int)
 
 }

@@ -81,9 +81,8 @@ abstract class RequestQueueFlusher<RequestType /* 请求类型 */, ResponseType 
     /**
      * 处理旧索引的请求
      * @param oldIndex 旧的索引, 因为新的索引已切换, 现在要处理旧的索引的数据
-     * @return
      */
-    protected override fun doFlush(oldIndex: Int): CompletableFuture<*> {
+    protected override fun doFlush(oldIndex: Int){
         val oldQueue = queues[oldIndex]
         queues[oldIndex] = queuePool.borrowObject() // 换一个新的请求队列
 
@@ -91,7 +90,7 @@ abstract class RequestQueueFlusher<RequestType /* 请求类型 */, ResponseType 
         if(oldQueue.isEmpty()) {
             // 归还队列
             queuePool.returnObject(oldQueue)
-            return VoidFuture
+            return
         }
 
         // 收集请求, 转为List, 方便用户处理
@@ -99,7 +98,7 @@ abstract class RequestQueueFlusher<RequestType /* 请求类型 */, ResponseType 
         val reqs = oldQueue.mapTo(listPool.borrowObject()) { it.first }
 
         // 处理刷盘
-        return trySupplierFinally({ handleRequests(reqs, oldQueue) }){ r, e ->
+        trySupplierFinally({ handleRequests(reqs, oldQueue) }){ r, e ->
             // 无响应值: 响应值值类型为 Void / Unit, 则框架帮设置异步响应
             if (isNoResponse())
                 oldQueue.forEach { (req, resFuture) ->
