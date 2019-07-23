@@ -88,8 +88,11 @@ abstract class RequestQueueFlusher<RequestType /* 请求类型 */, ResponseType 
         queues[oldIndex] = queuePool.borrowObject() // 换一个新的请求队列
 
         // 无请求要处理
-        if(oldQueue.isEmpty())
+        if(oldQueue.isEmpty()) {
+            // 归还队列
+            queuePool.returnObject(oldQueue)
             return VoidFuture
+        }
 
         // 收集请求, 转为List, 方便用户处理
         //val reqs = decorateCollection(oldQueue){ it.first } // 批量操作可能会涉及到序列化存库, 因此不要用 CollectionDecorator
