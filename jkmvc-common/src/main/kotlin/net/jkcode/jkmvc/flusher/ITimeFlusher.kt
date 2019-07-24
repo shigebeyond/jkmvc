@@ -35,7 +35,7 @@ abstract class ITimeFlusher<RequestType /* 请求类型 */, ResponseType /* 响�
         // 调用父类实现: 尝试定量刷盘
         super.tryFlushWhenAdd(currRequestCount)
 
-        // 启动定时
+        // 空 -> 非空: 启动定时
         if (timerState.get() == 0 && timerState.getAndIncrement() == 0)
             startTimer()
     }
@@ -48,6 +48,10 @@ abstract class ITimeFlusher<RequestType /* 请求类型 */, ResponseType /* 响�
             override fun run(timeout: Timeout) {
                 // 刷盘
                 flush(true)
+
+                // 非空: 继续定时
+                if(timerState.decrementAndGet() > 0)
+                    startTimer()
             }
         }, flushTimeoutMillis, TimeUnit.MILLISECONDS)
     }
