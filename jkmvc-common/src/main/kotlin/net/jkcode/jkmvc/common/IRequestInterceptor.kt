@@ -1,5 +1,7 @@
 package net.jkcode.jkmvc.common
 
+import java.util.concurrent.CompletableFuture
+
 /**
  * 请求拦截器
  *    1. 泛型 P 是请求参数类型, BR 是before()方法的返回值类型
@@ -16,35 +18,50 @@ interface IRequestInterceptor<P> {
     companion object {
 
         /**
+         * 前置处理结果列表池
+         */
+        public val beforeResultListPool = SimpleObjectPool(){
+            ArrayList<Any?>()
+        }
+
+        /**
          * 对supplier包装try/finally, 并加入拦截器处理
          *
          * @param supplier 取值函数
          * @param complete 完成后的回调函数, 接收2个参数: 1 结果值 2 异常, 返回新结果
          */
-        public inline fun <T, R> trySupplierFinallyAroundInterceptor(interceptors: List<IRequestInterceptor<T>>, req:T, supplier: () -> R, crossinline complete: (Any?, Throwable?) -> Any?): R{
+        public inline fun <T, R> trySupplierFinallyAroundInterceptor(interceptors: List<IRequestInterceptor<T>>, req:T, supplier: () -> R): CompletableFuture<out Any> {
+            // test
+            // 1 前置处理: 如果抛异常直接中断
             // 缓存前置处理结果
-            val beforeResults = arrayOfNulls<Any?>(interceptors.size)
-            return trySupplierFinally(
-                    { // 1 supplier
-                        //调用拦截器前置处理
-                        for (i in 0 until interceptors.size)
-                            beforeResults[i] = interceptors[i].before(req)
+            val beforeResults = beforeResultListPool.borrowObject()
+            //调用拦截器前置处理
+            try {
+                for (i in 0 until interceptors.size)
+                    beforeResults[i] = interceptors[i].before(req)
+            }catch (r: Throwable){
+                // 清空+归还前置处理结果
+                beforeResults.clear()
+                beforeResultListPool.returnObject(beforeResults)
 
-                        // 取值
-                        supplier.invoke()
-                    },
-                    { r, e -> // 2 complete
-                        //调用拦截器后置处理
-                        for (i in 0 until interceptors.size)
-                            interceptors[i].after(req, beforeResults[i], r, e)
+                throw r
+            }
 
-                        // 清空前置处理结果
-                        beforeResults.clear()
+            // 2 取值
+            val future = trySupplierFuture{
+                supplier.invoke()
+            }
 
-                        // 完成后的回调
-                        complete.invoke(r, e)
-                    }
-            );
+            // 3 后置处理
+            return future.whenComplete { r, ex -> // 2 complete
+                //调用拦截器后置处理
+                for (i in 0 until interceptors.size)
+                    interceptors[i].after(req, beforeResults[i], r, ex)
+
+                // 清空+归还前置处理结果
+                beforeResults.clear()
+                beforeResultListPool.returnObject(beforeResults)
+            }
         }
 
     }

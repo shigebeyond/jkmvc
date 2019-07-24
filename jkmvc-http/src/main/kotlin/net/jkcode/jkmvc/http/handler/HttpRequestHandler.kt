@@ -2,10 +2,13 @@ package net.jkcode.jkmvc.http.handler
 
 import net.jkcode.jkmvc.closing.ClosingOnRequestEnd
 import net.jkcode.jkmvc.common.*
-import net.jkcode.jkmvc.http.*
+import net.jkcode.jkmvc.http.HttpRequest
+import net.jkcode.jkmvc.http.HttpResponse
+import net.jkcode.jkmvc.http.IHttpRequestInterceptor
 import net.jkcode.jkmvc.http.controller.Controller
 import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
+import net.jkcode.jkmvc.http.isOptions
 import net.jkcode.jkmvc.http.router.RouteException
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
@@ -75,10 +78,17 @@ object HttpRequestHandler : IHttpRequestHandler {
             httpLogger.debug("当前uri匹配路由: controller=[{}], action=[{}]", req.controller, req.action)
 
         // 2 调用controller与action
-        IRequestInterceptor.trySupplierFinallyAroundInterceptor(interceptors, req,
-            {callController(req, res)}, // 调用路由对应的controller与action
-            ThreadLocalInheritableInterceptor().intercept{ r, e -> endRequest(req, e) } // 继承ThreadLocal + 关闭请求(ThreadLocal中的资源)
-        )
+        val future = IRequestInterceptor.trySupplierFinallyAroundInterceptor(interceptors, req) {
+            callController(req, res)
+        }
+
+        // 3 关闭请求(资源)
+        val threadLocalItct = ThreadLocalInheritableInterceptor()
+        future.whenComplete{ r, ex ->
+            threadLocalItct.beforeExecute() // 继承 ThreadLocal
+            endRequest(req, ex) // 关闭请求(资源)
+            threadLocalItct.afterExecute() // 清理 ThreadLocal
+        }
         return true
     }
 

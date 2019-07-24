@@ -3,7 +3,7 @@ package net.jkcode.jkmvc.cache
 import io.netty.util.Timeout
 import io.netty.util.TimerTask
 import net.jkcode.jkmvc.common.CommonMilliTimer
-import net.jkcode.jkmvc.common.trySupplierFinally
+import net.jkcode.jkmvc.common.trySupplierFuture
 import net.jkcode.jkmvc.lock.IKeyLock
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
@@ -79,15 +79,15 @@ abstract class BaseCache: ICache {
         // 2.1 锁住key, 则回源, 防止并发回源
         val locked = lock.quickLockCleanly(key){
             // 回源
-            trySupplierFinally(dataLoader){ v, t ->
-                if(t != null) {
-                    result.completeExceptionally(t)
-                    throw t
+            trySupplierFuture(dataLoader).whenComplete { r, ex ->
+                if(ex != null) {
+                    result.completeExceptionally(ex)
+                    throw ex
                 }
 
                 // 写缓存
-                this.put(key, v, expireSeconds)
-                result.complete(v)
+                this.put(key, r, expireSeconds)
+                result.complete(r)
             }
         }
         // 2.2 锁不住key, 则等待指定毫秒数后读缓存

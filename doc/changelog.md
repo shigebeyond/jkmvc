@@ -40,3 +40,13 @@
 10. 优化 GeneralOrmMeta, 在 Entity 与 Model 分离的场景下, Model既要继承Entity, 也要实现IOrm, 则使用 GeneralOrmMeta 来代理实现 IOrm
 
 11. 支持 Entity 的序列化, 用在rpc中
+
+12. 添加 TreeJsonFactory, 支持orm列表转树节点
+
+13. 添加BitSet的工具类, 支持比特的迭代
+
+14. 支持http server的拦截器
+
+15. 添加 ArrayFilteredTransformedIterator / CollectionFilteredTransformedIterator, 支持对数组或集合进行有过滤条件有转换元素的迭代
+
+16. 完善 IFlusher 类族体系, 支持 CounterFlusher 与 RequestQueueFlusher

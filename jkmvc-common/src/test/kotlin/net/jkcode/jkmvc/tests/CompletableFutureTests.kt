@@ -32,8 +32,8 @@ class CompletableFutureTests{
         }
 
         // 对上一行的异常捕获, 并返回新的值, 不会影响旧的future
-        f.whenComplete{ r, e ->
-            println("最后汇总: 结果=" + r + "，异常=" + e)
+        f.whenComplete{ r, ex ->
+            println("最后汇总: 结果=" + r + "，异常=" + ex)
         }
         Thread.sleep(10000)
     }
@@ -61,8 +61,8 @@ class CompletableFutureTests{
                             .thenApplyAsync{
                                 Integer.toString(it.toInt())
                             }
-                            .whenComplete{ r, e ->
-                                println("任务" + r + "完成!result=" + r + "，异常 e=" + e + "," + Date())
+                            .whenComplete{ r, ex ->
+                                println("任务" + r + "完成!result=" + r + "，异常 e=" + ex + "," + Date())
                                 list.add(r)
                             }
                 }
@@ -119,10 +119,13 @@ class CompletableFutureTests{
 
     @Test
     fun testCompleted(){
-        CompletableFuture.completedFuture(1)
-                .whenComplete{ r, e->
-                    println("结果=" + r + "，异常=" + e)
-                }
+        val future = CompletableFuture.completedFuture(1)
+        future.whenComplete{ r, ex->
+            println("结果=" + r + "，异常=" + ex)
+        }
+        future.thenRun {
+            println("run")
+        }
     }
 
     @Test
@@ -151,16 +154,16 @@ class CompletableFutureTests{
      */
     @Test
     fun testMultipleComplete(){
-        val f = CompletableFuture<Unit>()
+        val f = CompletableFuture<Int>()
         val thenCounter = AtomicInteger(0)
         // 结果: 回调1次
         f.thenRun {
-            println("回调" + thenCounter.incrementAndGet() + "次")
+            println("回调" + thenCounter.incrementAndGet() + "次, 结果: " + f.get())
         }
 
         val completeCounter = AtomicInteger(0)
         for(i in 0..30) {
-            f.complete(null)
+            f.complete(i)
             println("完成" + completeCounter.incrementAndGet() + "次")
         }
 

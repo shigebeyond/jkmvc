@@ -1,9 +1,6 @@
 package net.jkcode.jkmvc.flusher
 
-import net.jkcode.jkmvc.common.SimpleObjectPool
-import net.jkcode.jkmvc.common.VoidFuture
-import net.jkcode.jkmvc.common.getSuperClassGenricType
-import net.jkcode.jkmvc.common.trySupplierFinally
+import net.jkcode.jkmvc.common.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -97,8 +94,10 @@ abstract class RequestQueueFlusher<RequestType /* 请求类型 */, ResponseType 
         //val reqs = decorateCollection(oldQueue){ it.first } // 批量操作可能会涉及到序列化存库, 因此不要用 CollectionDecorator
         val reqs = oldQueue.mapTo(listPool.borrowObject()) { it.first }
 
-        // 处理刷盘
-        trySupplierFinally({ handleRequests(reqs, oldQueue) }){ r, e ->
+        trySupplierFuture {
+            // 处理刷盘
+            handleRequests(reqs, oldQueue)
+        }.whenComplete { r, ex ->
             // 无响应值: 响应值值类型为 Void / Unit, 则框架帮设置异步响应
             if (isNoResponse())
                 oldQueue.forEach { (req, resFuture) ->

@@ -40,6 +40,34 @@ public fun <RequestArgumentType, ResponseType> toFutureSupplier(supplier: (Reque
 }
 
 /**
+ * 对supplier包装try/catch, 并包装异步结果, 兼容结果值是 CompletableFuture 的情况
+ *
+ * @param supplier 取值函数
+ * @return
+ */
+public inline fun trySupplierFuture(supplier: () -> Any?): CompletableFuture<*>{
+    try{
+        // 调用取值函数
+        val result = supplier.invoke()
+
+        // 异步结果
+        if(result is CompletableFuture<*>)
+            return result
+
+        // 空结果
+        if(result == null || result == Unit)
+            return UnitFuture
+
+        // 非空结果
+        return CompletableFuture.completedFuture(result)
+    }catch (r: Throwable){
+        val result2 = CompletableFuture<Any?>()
+        result2.completeExceptionally(r)
+        return result2
+    }
+}
+
+/**
  * 对supplier包装try/finally, 兼容结果值是 CompletableFuture 的情况
  *
  * @param supplier 取值函数
@@ -55,10 +83,10 @@ public inline fun <T> trySupplierFinally(supplier: () -> T, crossinline complete
         if(result is CompletableFuture<*>) {
             val result2 = CompletableFuture<Any?>()
             // return result.whenComplete(complete) -> //完成后回调
-            result.whenComplete{ r, e -> //完成后回调
+            result.whenComplete{ r, ex -> //完成后回调
                 try{
                     // 回调执行依然会抛异常
-                    val r2 = complete.invoke(r, e)
+                    val r2 = complete.invoke(r, ex)
                     // 回调结果作为最终结果
                     result2.complete(r2)
                 }catch (ex: Throwable){

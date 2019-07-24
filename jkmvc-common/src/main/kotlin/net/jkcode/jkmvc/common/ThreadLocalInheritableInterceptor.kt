@@ -177,8 +177,8 @@ class ThreadLocalInheritableInterceptor(protected val cleaning: Boolean = true /
      * 拦截 complete lambda
      */
     public fun intercept(complete: (Any?, Throwable?) -> Any?): ((Any?, Throwable?) -> Any?) {
-        return { r, e ->
-            wrap{ complete.invoke(r, e) }
+        return { r, ex ->
+            wrap{ complete.invoke(r, ex) }
         }
     }
 
