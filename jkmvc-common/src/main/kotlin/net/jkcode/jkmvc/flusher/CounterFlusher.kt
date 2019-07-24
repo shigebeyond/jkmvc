@@ -61,12 +61,9 @@ abstract class CounterFlusher(
         val oldCount = oldCounter.get()
         oldCounter.set(0) // 换一个新的计数
 
-        // 无请求要处理
-        if(oldCount == 0)
-            return
-
         // 处理刷盘的请求
-        handleRequests(oldCount)
+        if(oldCount > 0)
+            handleRequests(oldCount)
 
         // future完成
         oldFuture.complete(null)
