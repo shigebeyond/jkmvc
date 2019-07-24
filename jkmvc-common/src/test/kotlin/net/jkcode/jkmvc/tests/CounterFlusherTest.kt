@@ -27,6 +27,7 @@ class CounterFlusherTest {
         for(i in 0 until 100){
             val future = counter.add(1)
             futures.add(future)
+            Thread.sleep(110)
         }
         CompletableFuture.allOf(*futures.toTypedArray()).get()
         println("over")

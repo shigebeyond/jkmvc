@@ -7,6 +7,9 @@ import org.apache.commons.pool2.impl.GenericObjectPool
 
 /**
  * 使用lambda实现的对象池
+ *    用来优化某些频繁调用的方法中的对象创建, 如ArrayList/HashMap/ConcurrentLinkedQueue对象的频繁创建, 而且这些对象自身也会占用大量的内存(如ArrayList/HashMap在操作大量元素时会创建大数组)
+ *    使用对象池中的对象, 必须是先借对象 borrowObject() 后归还对象 returnObject(), 这一般在同一个方法中, 这带来一个限制:
+ *    就是借来的对象不能溢出该方法, 如果对象溢出了(如作为方法的返回值被调用方使用), 则对象的控制权不在该方法中, 也就无法归还对象
  *
  * @author shijianhang<772910474@qq.com>
  * @date 2019-07-23 11:03 AM
