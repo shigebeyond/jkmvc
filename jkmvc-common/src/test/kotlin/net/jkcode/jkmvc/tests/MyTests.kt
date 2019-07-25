@@ -3,6 +3,7 @@ package net.jkcode.jkmvc.tests
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.alibaba.fastjson.serializer.SerializerFeature
+import javassist.ClassPool
 import net.jkcode.jkmvc.bit.SetBitIterator
 import net.jkcode.jkmvc.common.*
 import net.jkcode.jkmvc.elements.ElementCollection
@@ -785,10 +786,14 @@ class MyTests{
 
     @Test
     fun testParamName(){
-        /*val method = Config::class.java.findMethod("containsKey", arrayListOf(String::class.java))
+        val method = Config::class.java.getMethod("containsKey", String::class.java)
         // 获得方法的参数名
         val clazz = method.getDeclaringClass()
         val methodName = method.getName()
+        for(p in method.parameters)
+            println(p.name)
+
+        /*
         val pool = ClassPool.getDefault()
         pool.insertClassPath(ClassClassPath(clazz))
         val cc = pool.get(clazz.getName())
@@ -800,6 +805,7 @@ class MyTests{
         for (i in paramNames.indices)
             println(codeAttribute.getAttribute(LocalVariableAttribute.tag).variableName(i + pos))
         */
+
     }
 
     @Test

@@ -45,18 +45,18 @@ public fun <RequestArgumentType, ResponseType> toFutureSupplier(supplier: (Reque
  * @param supplier 取值函数
  * @return
  */
-public inline fun trySupplierFuture(supplier: () -> Any?): CompletableFuture<*>{
+public inline fun trySupplierFuture(supplier: () -> Any?): CompletableFuture<Any?>{
     try{
         // 调用取值函数
         val result = supplier.invoke()
 
         // 异步结果
         if(result is CompletableFuture<*>)
-            return result
+            return result as CompletableFuture<Any?>
 
         // 空结果
         if(result == null || result == Unit)
-            return UnitFuture
+            return UnitFuture as CompletableFuture<Any?>
 
         // 非空结果
         return CompletableFuture.completedFuture(result)

@@ -4,7 +4,7 @@ import net.jkcode.jkmvc.common.CommonThreadPool
 import net.jkcode.jkmvc.common.commonLogger
 import net.jkcode.jkmvc.common.runAsync
 import net.jkcode.jkmvc.lock.AtomicLock
-import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ExecutorService
 
 /**
  * 定量刷盘
@@ -15,6 +15,11 @@ import java.util.concurrent.CompletableFuture
 abstract class IQuotaFlusher<RequestType /* 请求类型 */, ResponseType /* 响应值类型 */>(
         protected val flushSize: Int // 触发刷盘的计数大小
 ): IFlusher<RequestType, ResponseType> {
+
+    /**
+     * 执行线程(池)
+     */
+    protected open val executor: ExecutorService = CommonThreadPool
 
     /**
      * 限制定时+定量并发调用flush()的锁
@@ -63,7 +68,7 @@ abstract class IQuotaFlusher<RequestType /* 请求类型 */, ResponseType /* 响
             commonLogger.debug("PeriodicFlusher.flush() : switch from [$oldSwitch] to [${!oldSwitch}]")
 
             //处理旧索引的请求, 扔到线程池
-            CommonThreadPool.runAsync {
+            executor.runAsync {
                 try{
                     doFlush(oldIndex)
                 }catch (e: Exception){

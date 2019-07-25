@@ -30,7 +30,7 @@ interface IRequestInterceptor<P> {
          * @param supplier 取值函数
          * @param complete 完成后的回调函数, 接收2个参数: 1 结果值 2 异常, 返回新结果
          */
-        public inline fun <T, R> trySupplierFinallyAroundInterceptor(interceptors: List<IRequestInterceptor<T>>, req:T, supplier: () -> R): CompletableFuture<out Any> {
+        public inline fun <T, R> trySupplierFinallyAroundInterceptor(interceptors: List<IRequestInterceptor<T>>, req:T, supplier: () -> R): CompletableFuture<Any?> {
             // test
             // 1 前置处理: 如果抛异常直接中断
             // 缓存前置处理结果
