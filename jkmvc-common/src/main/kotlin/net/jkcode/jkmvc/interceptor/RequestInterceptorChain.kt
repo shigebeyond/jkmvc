@@ -1,5 +1,6 @@
-package net.jkcode.jkmvc.common
+package net.jkcode.jkmvc.interceptor
 
+import net.jkcode.jkmvc.common.trySupplierFuture
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -8,13 +9,8 @@ import java.util.concurrent.CompletableFuture
  * @date 2019-07-26 3:25 PM
  */
 class RequestInterceptorChain<R>(
-        protected val chain: MutableList<IRequestInterceptor<R>> // 链表
-): IRequestInterceptor<R>{
-
-    /**
-     * 倒序的链表
-     */
-    protected val reversedChain = chain.asReversed()
+        protected val chain: List<IRequestInterceptor<R>> // 链表
+): IRequestInterceptor<R> {
 
     /**
      * 拦截action, 插入前置后置处理
@@ -25,14 +21,14 @@ class RequestInterceptorChain<R>(
      */
     public override fun intercept(req: R, action: () -> Any?): CompletableFuture<Any?> {
         // 1 无链表, 直接调用action
-        if(reversedChain.isEmpty())
+        if(chain.isEmpty())
             return trySupplierFuture(action)
 
         // 2 有链表, 链式倒序包装拦截处理
         // 当前处理
         var curr: () -> Any? = action
         // 倒序包装拦截器
-        for (interceptor in reversedChain) {
+        for (interceptor in chain.asReversed()) {
             // 下一个处理, 倒序嘛
             val next = curr
             // 包装拦截处理

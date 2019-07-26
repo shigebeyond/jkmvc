@@ -40,7 +40,7 @@ public fun <RequestArgumentType, ResponseType> toFutureSupplier(supplier: (Reque
 }
 
 /**
- * 对supplier包装try/catch, 并包装异步结果, 兼容结果值是 CompletableFuture 的情况
+ * 对supplier包装try/catch, 并包装与返回异步结果, 兼容supplier结果值是 CompletableFuture 的情况
  *
  * @param supplier 取值函数
  * @return

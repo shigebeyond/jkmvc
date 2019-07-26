@@ -10,6 +10,7 @@ import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
 import net.jkcode.jkmvc.http.isOptions
 import net.jkcode.jkmvc.http.router.RouteException
+import net.jkcode.jkmvc.interceptor.RequestInterceptorChain
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
@@ -34,6 +35,11 @@ object HttpRequestHandler : IHttpRequestHandler {
      * http请求处理的拦截器
      */
     public override val interceptors: List<IHttpRequestInterceptor> = config.classes2Instances("requestInterceptors")
+
+    /**
+     * http请求处理的拦截器链表
+     */
+    private val interceptorChain = RequestInterceptorChain(interceptors)
 
     /**
      * 是否调试
@@ -78,7 +84,7 @@ object HttpRequestHandler : IHttpRequestHandler {
             httpLogger.debug("当前uri匹配路由: controller=[{}], action=[{}]", req.controller, req.action)
 
         // 2 调用controller与action
-        val future = IRequestInterceptor.trySupplierFinallyAroundInterceptor(interceptors, req) {
+        val future = interceptorChain.intercept(req) {
             callController(req, res)
         }
 
