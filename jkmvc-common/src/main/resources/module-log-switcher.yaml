@@ -1,4 +1,4 @@
-# 按模块来切换启用日志
+# 按组件来切换启用日志
 common: false
 rpc: false
 job: true

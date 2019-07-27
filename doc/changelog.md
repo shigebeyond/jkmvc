@@ -1,6 +1,8 @@
 # 1.1 
 1. 实现一些公共的类, 如Config等
+
 2. 实现http路由
+
 3. 实现自动扫描controller类, 并注册
 
 # 1.2 
@@ -13,7 +15,13 @@
 接入实际项目，支持缓存, 完善会话, 支持多数据库(如mysql+oracle), 支持自动生成代码, 修复bug
 
 # 1.5
-支持读写分离, 支持多主键, 重构orm校验, 抽取公共的模型`GeneralModel`,
+1. 支持读写分离
+
+2. 支持多主键
+
+3. 重构orm校验
+
+4. 抽取公共的模型`GeneralModel`
 
 # 1.6
 优化id生成, 完善orm校验, 支持orm的持久化事件(如`beforeCreate/afterCreate`等), 优化redis client类性能(使用`ShardedJedisPool`)
@@ -21,9 +29,9 @@
 # 1.7
 1. 调整包名, 将包`com.jkmvc`重命名为`net.jkcode.jkmvc`
 
-2. 支持servlet3.0, 即异步servlet
+2. 支持servlet3.0, 即异步servlet, 从而实现servlet级别的异步
 
-3. 支持action方法返回 CompletableFuture
+3. 支持action方法返回 CompletableFuture, 从而实现action方法级别的异步
 
 4. 支持 ThreadLocalInheritableThreadPool 可继承ThreadLocal的线程池
 
@@ -50,3 +58,12 @@
 15. 添加 ArrayFilteredTransformedIterator / CollectionFilteredTransformedIterator, 支持对数组或集合进行有过滤条件有转换元素的迭代
 
 16. 完善 IFlusher 类族体系, 支持 CounterFlusher 与 RequestQueueFlusher
+
+17. 重构拦截器, 由原来的before()/after()优化为链式包装拦截处理
+
+18. 改进 trySupplierFinally(), 用 trySupplierFuture() 代替
+
+19. HttpRequestHandler 支持 method guard, 但是暂时不开放
+
+20. IQuotaFlusher 暴露open属性 executor 来让子类可以修改执行线程, 主要是给 TopicMessagesExector 使用, 用于控制消息消费的并发或串行.
+
