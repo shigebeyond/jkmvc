@@ -1,7 +1,10 @@
 package net.jkcode.jkmvc.http.handler
 
 import net.jkcode.jkmvc.closing.ClosingOnRequestEnd
-import net.jkcode.jkmvc.common.*
+import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.common.ThreadLocalInheritableInterceptor
+import net.jkcode.jkmvc.common.httpLogger
+import net.jkcode.jkmvc.common.ucFirst
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.IHttpRequestInterceptor
@@ -16,6 +19,7 @@ import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import kotlin.reflect.KFunction
+import kotlin.reflect.jvm.javaMethod
 
 /**
  * http请求处理者
@@ -24,7 +28,7 @@ import kotlin.reflect.KFunction
  * @date 2016-10-6 上午9:27:56
  *
  */
-object HttpRequestHandler : IHttpRequestHandler {
+object HttpRequestHandler : IHttpRequestHandler/*, MethodGuardInvoker()*/ {
 
     /**
      * http配置
@@ -126,7 +130,8 @@ object HttpRequestHandler : IHttpRequestHandler {
         controller.res = res;
 
         // 调用controller的action方法
-        return controller.callActionMethod(action)
+        return controller.callActionMethod(action.javaMethod!!)
+        //return guardInvoke(action.javaMethod!!, controller, emptyArray())
     }
 
     /**
@@ -146,5 +151,30 @@ object HttpRequestHandler : IHttpRequestHandler {
         if (req.isAsyncStarted)
             req.asyncContext.complete()
     }
+
+    /**
+     * 获得调用的对象
+     * @param method
+     * @return
+     */
+    /*public override fun getCombineInovkeObject(method: Method): Any{
+        return Controller.current()
+    }*/
+
+    /**
+     * 守护之后真正的调用
+     *    调用controller的action方法
+     *
+     * @param action 方法
+     * @param controller 对象
+     * @param args 参数
+     * @return
+     */
+    /*public override fun invokeAfterGuard(action: Method, controller: Any, args: Array<Any?>): CompletableFuture<Any?> {
+        return trySupplierFuture {
+            // 调用controller的action方法
+            (controller as Controller).callActionMethod(action)
+        }
+    }*/
 
 }

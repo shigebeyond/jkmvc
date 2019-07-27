@@ -3,7 +3,6 @@ package net.jkcode.jkmvc.tests
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.alibaba.fastjson.serializer.SerializerFeature
-import javassist.ClassPool
 import net.jkcode.jkmvc.bit.SetBitIterator
 import net.jkcode.jkmvc.common.*
 import net.jkcode.jkmvc.elements.ElementCollection
@@ -13,7 +12,6 @@ import net.jkcode.jkmvc.iterator.ArrayFilteredIterator
 import net.jkcode.jkmvc.redis.JedisFactory
 import net.jkcode.jkmvc.serialize.ISerializer
 import net.jkcode.jkmvc.validator.ValidateFuncDefinition
-import org.apache.commons.pool2.impl.GenericObjectPool
 import org.dom4j.Attribute
 import org.dom4j.DocumentException
 import org.dom4j.Element
@@ -287,8 +285,12 @@ class MyTests{
     @Test
     fun testMap(){
         val map = HashMap<Int, String>() // {1=a, 2=b}
+        val tableField = HashMap::class.java.getReadableField("table")!!
+        println(tableField.get(map))
+
         //val map = TreeMap<Int, String>() // {1=a, 2=b}
         map[2] = "a"
+        println(tableField.get(map))
         map[1] = "b"
         for((k, v) in map){
             println("$k = $v")

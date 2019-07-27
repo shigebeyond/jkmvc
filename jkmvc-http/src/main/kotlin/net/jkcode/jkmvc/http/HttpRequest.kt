@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.http
 
 import net.jkcode.jkmvc.common.*
+import net.jkcode.jkmvc.http.controller.Controller
 import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
 import net.jkcode.jkmvc.http.router.Route
@@ -32,11 +33,6 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		public lateinit var globalServletContext: ServletContext
 
 		/**
-		 * 线程安全的请求对象缓存
-		 */
-		protected val reqs:ThreadLocal<HttpRequest> = ThreadLocal();
-
-		/**
 		 * 可信任的代理服务器ip
 		 */
 		public val proxyips = arrayOf("127.0.0.1", "localhost", "localhost.localdomain");
@@ -46,7 +42,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		 */
 		@JvmStatic
 		public fun current(): HttpRequest {
-			return reqs.get()!!;
+			return currentOrNull()!!
 		}
 
 		/**
@@ -54,7 +50,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		 */
 		@JvmStatic
 		public fun currentOrNull(): HttpRequest? {
-			return reqs.get();
+			return Controller.currentOrNull()?.req
 		}
 	}
 
@@ -142,7 +138,6 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	init{
 		// 中文编码
 		req.characterEncoding = "UTF-8";
-		reqs.set(this);
 	}
 
 	/*************************** 路由解析 *****************************/

@@ -3,8 +3,8 @@ package net.jkcode.jkmvc.http.controller
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.view.View
+import java.lang.reflect.Method
 import java.util.*
-import kotlin.reflect.KFunction
 
 /**
  * 控制器
@@ -51,12 +51,12 @@ interface IController{
      *   注意：为了区别业务action，该方法不能命名为callAction
      * @param action action方法
      */
-    public fun callActionMethod(action: KFunction<*>): Any? {
+    public fun callActionMethod(action: Method): Any? {
         // 前置处理
         before()
 
         // 执行真正的处理方法
-        val result = action.call(this);
+        val result = action.invoke(this);
 
         // 后置处理
         after()

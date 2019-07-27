@@ -3,6 +3,7 @@ apply plugin: 'war'
 dependencies{
     // other project
     compile project(':jkmvc-orm')
+    compile project(':jksoa-guard')
 
     // upload
     compile 'servlets.com:cos:05Nov2002'

@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.http.controller
 
+import net.jkcode.jkmvc.common.ICurrentHolder
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.view.View
@@ -14,6 +15,8 @@ import net.jkcode.jkmvc.http.view.View
  */
 abstract class Controller : IController {
 
+    companion object: ICurrentHolder<Controller>()
+
     /**
      * 请求对象
      */
@@ -23,6 +26,10 @@ abstract class Controller : IController {
      * 响应对象
      */
     override lateinit var res: HttpResponse
+
+    init {
+        setCurrent(this)
+    }
 
     /**
      * 视图
