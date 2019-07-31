@@ -1,9 +1,7 @@
 package net.jkcode.jkmvc.http.view
 
-import net.jkcode.jkmvc.common.LazyAllocatedMap
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
-import net.jkcode.jkmvc.http.router.RouteException
 import java.io.FileNotFoundException
 import java.util.concurrent.ConcurrentHashMap
 
@@ -25,7 +23,7 @@ open class View(override val req: HttpRequest /* 请求对象 */,
 		/**
 		 * 空的map, 用在函数 HttpResponse.renderView(String, MutableMap) 的参数默认值中
 		 */
-		internal val emptyData: MutableMap<String, Any?> = LazyAllocatedMap()
+		internal val emptyData: MutableMap<String, Any?> = HashMap()
 
 		/**
 		 * 全局变量

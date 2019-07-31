@@ -1,6 +1,5 @@
 package net.jkcode.jkmvc.orm
 
-import net.jkcode.jkmvc.common.LazyAllocatedMap
 import net.jkcode.jkmvc.db.MutableRow
 
 /**
@@ -29,7 +28,7 @@ abstract class OrmValid : IOrm, OrmEntity() {
      * 变化的字段值：<字段名 to 原始字段值>
      *     一般只读，lazy创建，节省内存
      */
-    protected val dirty: MutableRow = LazyAllocatedMap<String, Any?>()
+    protected val dirty: MutableRow = HashMap<String, Any?>()
 
     /**
      * 设置对象字段值
