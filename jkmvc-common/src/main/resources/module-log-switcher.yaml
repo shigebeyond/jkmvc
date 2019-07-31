@@ -1,6 +1,6 @@
 # 按组件来切换启用日志
-common: false
-rpc: false
+common: true
+rpc: true
 job: true
 guard: false
 tracer: true

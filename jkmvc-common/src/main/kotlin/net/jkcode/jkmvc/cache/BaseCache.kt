@@ -65,7 +65,7 @@ abstract class BaseCache: ICache {
      * @param key 键
      * @param expireSeconds 过期秒数
      * @param waitMillis 等待的毫秒数
-     * @param dataLoader 回源函数, 兼容函数返回类型是CompletableFuture
+     * @param dataLoader 回源函数, 兼容函数返回类型是CompletableFuture, 同一个key的并发下只调用一次
      * @return
      */
     public override fun getOrPut(key: Any, expireSeconds:Long, waitMillis:Long, dataLoader: () -> Any?): CompletableFuture<Any?> {

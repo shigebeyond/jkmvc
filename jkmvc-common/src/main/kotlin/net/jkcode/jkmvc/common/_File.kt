@@ -169,7 +169,7 @@ public fun URL.travel(action:(relativePath:String, isDir:Boolean) -> Unit):Unit{
          * 参考: ClientTests.testScanClass()
          *
          * classLoader根目录1: /home/shi/code/java/jksoa/jksoa-job/out/test/classes/
-         * 文件绝对路径1:       /home/shi/code/java/jksoa/jksoa-common/out/production/classes/com/jksoa/example/ISystemService$DefaultImpls.class
+         * 文件绝对路径1:       /home/shi/code/java/jksoa/jksoa-common/out/production/classes/com/jksoa/example/ISimpleService$DefaultImpls.class
          * 参考: JobTests.testRpcJob()
          *
          * => 直接取classes/后面的部分

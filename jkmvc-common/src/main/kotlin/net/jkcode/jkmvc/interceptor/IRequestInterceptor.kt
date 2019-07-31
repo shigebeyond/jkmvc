@@ -16,7 +16,7 @@ interface IRequestInterceptor<R> {
      *
      * @param req
      * @param action 被拦截的处理
-     * @return
+     * @return 返回CompletableFuture: 1是给业务方调用, 让他能设置回调, 2是给拦截器链表的下一个拦截器调用, 让他能够更准确的确定后置处理的调用时机
      */
     fun intercept(req: R, action: () -> Any?): CompletableFuture<Any?>
     /*{

@@ -22,7 +22,7 @@ public fun getIntranetHost(): String {
 // IRpcServer类
 private val serverClass: Class<*>? by lazy {
     try {
-        Class.forName("net.jkcode.jksoa.server.IRpcServer")
+        Class.forName("net.jkcode.jksoa.rpc.server.IRpcServer")
     } catch (e: ClassNotFoundException) {
         null
     }

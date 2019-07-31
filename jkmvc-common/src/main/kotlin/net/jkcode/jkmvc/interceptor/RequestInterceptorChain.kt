@@ -13,7 +13,9 @@ class RequestInterceptorChain<R>(
 ): IRequestInterceptor<R> {
 
     /**
-     * 拦截action, 插入前置后置处理
+     * 拦截action, 插入链表上所有拦截器的前置后置处理
+     *    链式倒序包装拦截处理
+     *    倒序是指将链表从后往前一层层包装拦截器, 这样前面的拦截器就在外层, 其前置先调用, 其后置处理后调用
      *
      * @param req
      * @param action 被拦截的处理

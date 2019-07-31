@@ -9,8 +9,8 @@ import java.lang.reflect.Proxy
 /**
  * 按组件来切换启用日志
  *    本项目中有多个组件, 如rpc/job/tracer/mq等, 组件之间会相互依赖, 如mq依赖rpc
- *    我在开发某个组件时, 只对该组件日志感兴趣, 对其他组件日志不感兴趣, 这就需要禁用该组件日志
- *    但一个组件会配置有多个logger(如rpc有register/client/server等几个logger), 禁用该组件日志, 要禁用这多个logger, 很繁琐
+ *    我在开发某个组件时, 只对该组件日志感兴趣, 对其他组件日志不感兴趣, 这就需要禁用这些组件日志
+ *    但一个组件会配置有多个logger(如rpc有register/client/server等几个logger), 禁用该组件日志, 要禁用这多个logger的 `log4j.properties` 配置, 很繁琐
  *    => 直接在组件级别来控制是否启用日志
  *
  * @author shijianhang<772910474@qq.com>
