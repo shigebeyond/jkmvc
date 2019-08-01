@@ -14,6 +14,15 @@ abstract class UnitRequestQueueFlusher<RequestType /* 请求类型 */>(
 ): RequestQueueFlusher<RequestType, Unit>(flushSize, flushTimeoutMillis) {
 
     /**
+     * 是否无响应值
+     *    即响应值值类型为 Void / Unit, 则框架帮设置异步响应
+     * @return
+     */
+    protected override fun isNoResponse(): Boolean{
+        return true
+    }
+
+    /**
      * 多个请求入队
      * @param reqs
      * @return
