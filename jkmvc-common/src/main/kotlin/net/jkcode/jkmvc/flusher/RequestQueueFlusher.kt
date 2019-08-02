@@ -99,7 +99,7 @@ abstract class RequestQueueFlusher<RequestType /* 请求类型 */, ResponseType 
             handleRequests(reqs, oldQueue)
         }.whenComplete { r, ex ->
             // 无响应值: 响应值值类型为 Void / Unit, 则框架帮设置异步响应
-            if (isNoResponse())
+            if (noResponse)
                 oldQueue.forEach { (req, resFuture) ->
                     resFuture.complete(null)
                 }
@@ -117,16 +117,15 @@ abstract class RequestQueueFlusher<RequestType /* 请求类型 */, ResponseType 
     /**
      * 是否无响应值
      *    即响应值值类型为 Void / Unit, 则框架帮设置异步响应
-     * @return
      */
-    protected open fun isNoResponse(): Boolean {
-        // 由于后代类继承太深, 其中子类UnitRequestQueueFlusher抹掉了第二个泛型, 导致UnitRequestQueueFlusher子类获得第二个泛型出错
-        //val responseType = this.javaClass.getSuperClassGenricType(1)
-        //return responseType == Void::class.java || responseType == Unit::class.java
+    protected open val noResponse: Boolean = false
+        /*get() {
+            // wrong: 由于后代类继承太深, 其中子类UnitRequestQueueFlusher抹掉了第二个泛型, 导致UnitRequestQueueFlusher子类获得第二个泛型出错
+            val responseType = this.javaClass.getSuperClassGenricType(1)
+            return responseType == Void::class.java || responseType == Unit::class.java
 
-        // 直接在子类改写
-        return false
-    }
+            // right 直接在子类改写
+        }*/
 
     /**
      * 处理刷盘的请求
