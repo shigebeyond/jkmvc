@@ -101,7 +101,10 @@ abstract class RequestQueueFlusher<RequestType /* 请求类型 */, ResponseType 
             // 无响应值: 响应值值类型为 Void / Unit, 则框架帮设置异步响应
             if (noResponse)
                 oldQueue.forEach { (req, resFuture) ->
-                    resFuture.complete(null)
+                    if(ex == null)
+                        resFuture.complete(null)
+                    else
+                        resFuture.completeExceptionally(ex)
                 }
 
             // 清空+归还队列
