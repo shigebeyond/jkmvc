@@ -39,8 +39,8 @@ public val threadPoolCloser = object: ClosingOnShutdown(){
  * @param runnable
  * @return
  */
-public fun ExecutorService.runAsync(runnable: () -> Unit): CompletableFuture<Void> {
-    return CompletableFuture.runAsync(runnable)
+public fun ExecutorService.runAsync(runnable: Runnable): CompletableFuture<Void> {
+    return CompletableFuture.runAsync(runnable, this)
 }
 
 /**
@@ -132,5 +132,5 @@ public fun MultithreadEventExecutorGroup.selectExecutor(arg: Any): SingleThreadE
  * @return
  */
 public fun MultithreadEventExecutorGroup.selectExecutor(arg: Int): SingleThreadEventExecutor {
-    return getExecutor(arg % executorCount())
+    return getExecutor(Math.abs(arg) % executorCount())
 }
