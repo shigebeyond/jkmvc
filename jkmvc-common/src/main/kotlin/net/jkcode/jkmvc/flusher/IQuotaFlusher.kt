@@ -2,9 +2,7 @@ package net.jkcode.jkmvc.flusher
 
 import net.jkcode.jkmvc.common.CommonThreadPool
 import net.jkcode.jkmvc.common.commonLogger
-import net.jkcode.jkmvc.common.runAsync
 import net.jkcode.jkmvc.lock.AtomicLock
-import java.lang.IllegalArgumentException
 import java.util.concurrent.ExecutorService
 
 /**
@@ -73,8 +71,8 @@ abstract class IQuotaFlusher<RequestType /* 请求类型 */, ResponseType /* 响
             switch = !oldSwitch
             commonLogger.debug("PeriodicFlusher.flush() : switch from [$oldSwitch] to [${!oldSwitch}]")
 
-            //处理旧索引的请求, 扔到线程池
-            executor.runAsync {
+            //处理旧索引的请求, 扔到线程(池)执行
+            executor.execute {
                 try{
                     doFlush(oldIndex)
                 }catch (e: Exception){
