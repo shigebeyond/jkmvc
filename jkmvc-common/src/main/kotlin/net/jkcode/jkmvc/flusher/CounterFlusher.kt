@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.flusher
 
 import net.jkcode.jkmvc.common.VoidFuture
+import net.jkcode.jkmvc.common.trySupplierFuture
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -13,9 +14,9 @@ import java.util.concurrent.atomic.AtomicInteger
  * @date 2019-07-17 8:27 AM
  */
 abstract class CounterFlusher(
-        flushSize: Int, // 触发刷盘的计数大小
+        flushQuota: Int, // 触发刷盘的计数大小
         flushTimeoutMillis: Long // 触发刷盘的定时时间
-) : ITimeFlusher<Int, Unit>(flushSize, flushTimeoutMillis) {
+) : ITimeFlusher<Int, Unit>(flushQuota, flushTimeoutMillis) {
 
     /**
      * 2个future来轮换
@@ -61,18 +62,30 @@ abstract class CounterFlusher(
         val oldCount = oldCounter.get()
         oldCounter.set(0) // 换一个新的计数
 
-        // 处理刷盘的请求
-        if(oldCount > 0)
-            handleRequests(oldCount)
+        // 无请求要处理
+        if(oldCount <= 0) {
+            // 设置异步结果
+            oldFuture.complete(null)
+            return
+        }
 
-        // future完成
-        oldFuture.complete(null)
+        // 处理刷盘的请求
+        trySupplierFuture {
+            handleRequests(oldCount)
+        }.whenComplete { r, ex ->
+            // 设置异步结果
+            if(ex == null)
+                oldFuture.complete(null)
+            else
+                oldFuture.completeExceptionally(ex)
+        }
     }
 
     /**
      * 处理刷盘的请求
      * @param reqCount 请求计数
+     * @return
      */
-    protected abstract fun handleRequests(reqCount: Int)
+    protected abstract fun handleRequests(reqCount: Int): CompletableFuture<Void>
 
 }

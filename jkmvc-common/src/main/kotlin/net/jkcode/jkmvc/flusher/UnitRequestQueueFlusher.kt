@@ -9,9 +9,9 @@ import java.util.concurrent.CompletableFuture
  * @date 2019-07-22 4:24 PM
  */
 abstract class UnitRequestQueueFlusher<RequestType /* 请求类型 */>(
-        flushSize: Int, // 触发刷盘的计数大小
+        flushQuota: Int, // 触发刷盘的计数大小
         flushTimeoutMillis: Long // 触发刷盘的定时时间
-): RequestQueueFlusher<RequestType, Unit>(flushSize, flushTimeoutMillis) {
+): RequestQueueFlusher<RequestType, Unit>(flushQuota, flushTimeoutMillis) {
 
     /**
      * 是否无响应值

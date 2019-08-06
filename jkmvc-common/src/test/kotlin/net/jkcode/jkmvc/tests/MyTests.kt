@@ -497,10 +497,11 @@ class MyTests{
 
     @Test
     fun testFile(){
-        println(File.separator) // "/"
+        /*println(File.separator) // "/"
         println(File.separatorChar) // "/"
         println(File.pathSeparator) // ":"
         println(File.pathSeparatorChar) // ":"
+        */
 
         /*val f = File("/home/shi/test/wiki.txt")
         val ms = "<span.*>([^<]*)</span>".toRegex().findAll(f.readText())
@@ -526,11 +527,30 @@ class MyTests{
         }*/
 
         // 添加行号
-        /*val f = File("/home/shi/test/voice.txt")
+        val f = File("/home/shi/test/voice.txt")
         var i = 1
-        f.forEachLine {
-            println((i++).toString() + " " + it)
-        }*/
+        f.forEachLine { line ->
+            if(needLineNo(line))
+                println((i++).toString() + ". " + line)
+            else
+                println(line)
+        }
+    }
+
+    fun needLineNo(line: String): Boolean {
+        // 空行
+        if(line.isBlank())
+            return false
+
+        // 标题
+        if(line.startsWith("#"))
+            return false
+
+        // 已有行号
+        if("^\\d+".toRegex().matches(line))
+            return false
+
+        return true
     }
 
     @Test

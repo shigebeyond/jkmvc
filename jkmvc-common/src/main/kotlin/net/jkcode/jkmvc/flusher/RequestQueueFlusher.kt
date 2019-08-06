@@ -21,9 +21,9 @@ typealias RequestQueue<RequestType, ResponseType> = ConcurrentLinkedQueue<Pair<R
  * @date 2019-02-12 5:52 PM
  */
 abstract class RequestQueueFlusher<RequestType /* 请求类型 */, ResponseType /* 响应值类型 */> (
-        flushSize: Int, // 触发刷盘的计数大小
+        flushQuota: Int, // 触发刷盘的计数大小
         flushTimeoutMillis: Long // 触发刷盘的定时时间
-): ITimeFlusher<RequestType, ResponseType>(flushSize, flushTimeoutMillis) {
+): ITimeFlusher<RequestType, ResponseType>(flushQuota, flushTimeoutMillis) {
 
     /**
      * 队列池
@@ -94,8 +94,8 @@ abstract class RequestQueueFlusher<RequestType /* 请求类型 */, ResponseType 
         //val reqs = decorateCollection(oldQueue){ it.first } // 批量操作可能会涉及到序列化存库, 因此不要用 CollectionDecorator
         val reqs = oldQueue.mapTo(listPool.borrowObject()) { it.first }
 
+        // 处理刷盘请求
         trySupplierFuture {
-            // 处理刷盘
             handleRequests(reqs, oldQueue)
         }.whenComplete { r, ex ->
             // 无响应值: 响应值值类型为 Void / Unit, 则框架帮设置异步响应

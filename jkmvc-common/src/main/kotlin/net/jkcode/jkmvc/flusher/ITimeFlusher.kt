@@ -3,6 +3,7 @@ package net.jkcode.jkmvc.flusher
 import io.netty.util.Timeout
 import io.netty.util.TimerTask
 import net.jkcode.jkmvc.common.CommonMilliTimer
+import java.lang.IllegalArgumentException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -15,15 +16,20 @@ import java.util.concurrent.atomic.AtomicInteger
  * @date 2019-07-17 8:27 AM
  */
 abstract class ITimeFlusher<RequestType /* 请求类型 */, ResponseType /* 响应值类型 */>(
-        flushSize: Int, // 触发刷盘的计数大小
+        flushQuota: Int, // 触发刷盘的计数大小
         protected val flushTimeoutMillis: Long // 触发刷盘的定时时间
-) : IQuotaFlusher<RequestType, ResponseType>(flushSize) {
+) : IQuotaFlusher<RequestType, ResponseType>(flushQuota) {
 
     /**
      * 定时器状态: 0: 已停止 / 非0: 进行中
      *   用于控制是否停止定时器
      */
     protected val timerState: AtomicInteger = AtomicInteger(0)
+
+    init {
+        if(flushTimeoutMillis <= 0)
+            throw IllegalArgumentException("flushTimeoutMillis 属性值不是正整数: $flushTimeoutMillis")
+    }
 
     /**
      * 空 -> 非空: 启动定时

@@ -1,5 +1,6 @@
 package net.jkcode.jksoa.guard
 
+import net.jkcode.jkmvc.common.VoidFuture
 import net.jkcode.jkmvc.common.makeThreads
 import net.jkcode.jkmvc.flusher.CounterFlusher
 import org.junit.Test
@@ -15,9 +16,10 @@ class CounterFlusherTest {
 
     val counter = object: CounterFlusher(90, 100) {
         // 处理刷盘
-        override fun handleRequests(reqCount: Int) {
-            print(if(reqCount < flushSize) "定时" else "定量")
+        override fun handleRequests(reqCount: Int): CompletableFuture<Void> {
+            print(if(reqCount < flushQuota) "定时" else "定量")
             println("sync, 请求计数 from [$reqCount] to [${requestCount()}] ")
+            return VoidFuture
         }
     }
 

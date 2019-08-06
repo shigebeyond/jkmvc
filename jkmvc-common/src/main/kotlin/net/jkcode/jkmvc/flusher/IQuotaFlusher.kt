@@ -4,6 +4,7 @@ import net.jkcode.jkmvc.common.CommonThreadPool
 import net.jkcode.jkmvc.common.commonLogger
 import net.jkcode.jkmvc.common.runAsync
 import net.jkcode.jkmvc.lock.AtomicLock
+import java.lang.IllegalArgumentException
 import java.util.concurrent.ExecutorService
 
 /**
@@ -13,7 +14,7 @@ import java.util.concurrent.ExecutorService
  * @date 2019-07-22 3:37 PM
  */
 abstract class IQuotaFlusher<RequestType /* 请求类型 */, ResponseType /* 响应值类型 */>(
-        protected val flushSize: Int // 触发刷盘的计数大小
+        protected val flushQuota: Int // 触发刷盘的计数大小
 ): IFlusher<RequestType, ResponseType> {
 
     /**
@@ -32,6 +33,11 @@ abstract class IQuotaFlusher<RequestType /* 请求类型 */, ResponseType /* 响
     @Volatile
     protected var switch: Boolean = false
 
+    init {
+        if(flushQuota <= 0)
+            throw IllegalArgumentException("flushQuota 属性值不是正整数: $flushQuota")
+    }
+
     /**
      * 获得当前索引
      * @return
@@ -48,7 +54,7 @@ abstract class IQuotaFlusher<RequestType /* 请求类型 */, ResponseType /* 响
      */
     protected open fun tryFlushWhenAdd(currRequestCount: Int) {
         // 定量刷盘
-        if (currRequestCount >= flushSize)
+        if (currRequestCount >= flushQuota)
             flush(false)
     }
 
