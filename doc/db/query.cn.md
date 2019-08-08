@@ -2,7 +2,7 @@
 
 有2种方式来构建查询
 
-1. [Db](db.cn.md) 方法
+1. [Db](getting_started.cn.md) 方法
 
 ```
 Db::execute()

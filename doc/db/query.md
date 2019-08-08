@@ -2,7 +2,7 @@
 
 There are two different ways to make queries. 
 
-1. [Db](db.md) methods
+1. [Db](getting_started.md) methods
 
 ```
 Db::execute()
