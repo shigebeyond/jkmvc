@@ -467,11 +467,7 @@ class MyTests{
         // println("hello world".trim())
         // println("hello world".replace(" ", ""))
 
-        var str = "\"hello\""
-        println(str) // 输出  "hello"
-
-        str = "\\\"hello\\\""
-        println(str) // 输出  \"hello\"
+        println("a/b/c".substringBeforeLast('/'))
     }
 
     @Test
