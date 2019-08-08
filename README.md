@@ -3,7 +3,11 @@ Jkmvc is an elegant, powerful and lightweight MVC web framework built using kotl
 
 Inspired by 2 php frameworks: [kohana](https://github.com/kohana/kohana) and [skmvc](https://github.com/shigebeyond/skmvc)
 
-# usage - web
+[Document](#Document)
+
+[中文文档](#中文文档)
+
+# Introduction - web
 
 ## 1 Configure JkFilter in web.xml
 
@@ -67,15 +71,15 @@ controllerPackages:
 
 ## 4 Run web server
 
-![](https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/runserver.png)
+![](https://raw.githubusercontent.com/shigebeyond/jkmvc/master/img/runserver.png)
 
 ## 5 Visit web page
 
 visit http://localhost:8081/jkmvc-example/
 
-![](https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/webpage.png)
+![](https://raw.githubusercontent.com/shigebeyond/jkmvc/master/img/webpage.png)
 
-# usage - view
+# Introduction - view
 
 ## 1 Render View in Controller
 
@@ -125,10 +129,10 @@ Hello <%= request.getAttribute("name") %><br/>
 
 visit http://localhost:8081/jkmvc/welcome/jsp
 
-![](https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/webview.png)
+![](https://raw.githubusercontent.com/shigebeyond/jkmvc/master/img/webview.png)
 
 
-# usage - orm
+# Introduction - orm
 
 Orm　provides object-oriented way to mainpulate db data.
 
@@ -448,8 +452,8 @@ class UserController: Controller()
 download source and run web server
 
 ```
-git clone https://github.com/shigebeyond/kotlin-jkmvc.git
-cd kotlin-jkmvc
+git clone https://github.com/shigebeyond/jkmvc.git
+cd jkmvc
 gradle :jkmvc-example:jettyRun
 ```
 
@@ -457,19 +461,19 @@ visit url
 
 http://localhost:8081/jkmvc/user/index
 
-![](https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/actionindex.png)
+![](https://raw.githubusercontent.com/shigebeyond/jkmvc/master/img/actionindex.png)
 
 http://localhost:8081/jkmvc/user/detail
 
-![](https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/actiondetail.png)
+![](https://raw.githubusercontent.com/shigebeyond/jkmvc/master/img/actiondetail.png)
 
 http://localhost:8081/jkmvc/user/new
 
-![](https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/actionnew.png)
+![](https://raw.githubusercontent.com/shigebeyond/jkmvc/master/img/actionnew.png)
 
 http://localhost:8081/jkmvc/user/edit
 
-![](https://raw.githubusercontent.com/shigebeyond/kotlin-jkmvc/master/img/actionedit.png)
+![](https://raw.githubusercontent.com/shigebeyond/jkmvc/master/img/actionedit.png)
 
 # gradle command for build
 
@@ -479,3 +483,70 @@ gradle :jkmvc-orm:build -x test
 gradle :jkmvc-http:build -x test
 gradle :jkmvc-example:build -x test
 ```
+
+# Document
+
+## http module
+1. [getting started](doc/http/getting_started.md)
+2. [controller](doc/http/controller.md)
+3. [request](doc/http/request.md)
+4. [response](doc/http/response.md)
+5. [route](doc/http/route.md)
+6. [upload](doc/http/upload.md)
+7. [request handling flow](doc/http/flow.md)
+
+## db module
+8. [getting started](doc/db/getting_started.md)
+9. [query](doc/db/query.md)
+10. [query builder](doc/db/query_builder.md)
+11. [db expression](doc/db/expr.md)
+
+## orm module
+12. [getting_started](doc/orm/getting_started.md)
+13. [model](doc/orm/model.md)
+14. [relation](doc/orm/relation.md)
+15. [validation](doc/orm/validation.md)
+16. [using](doc/orm/using.md)
+
+## common module
+17. [deploy](doc/common/deploy.md)
+18. [config](doc/common/config.md)
+19. [validation_expression](doc/common/validation/validation_expression.md)
+20. [validation](doc/common/validation/validation.md)
+
+# 中文文档
+
+## http模块
+1. [快速开始](doc/http/getting_started.cn.md)
+2. [控制器](doc/http/controller.cn.md)
+3. [请求](doc/http/request.cn.md)
+4. [响应](doc/http/response.cn.md)
+5. [路由](doc/http/route.cn.md)
+6. [上传](doc/http/upload.cn.md)
+7. [请求处理流程](doc/http/flow.cn.md)
+
+## db模块
+8. [快速开始](doc/db/getting_started.cn.md)
+9. [查询](doc/db/query.cn.md)
+10. [sql构建器](doc/db/query_builder.cn.md)
+11. [db表达式](doc/db/expr.cn.md)
+
+## orm模块
+12. [快速开始](doc/orm/getting_started.cn.md)
+13. [模型](doc/orm/model.cn.md)
+14. [关联关系](doc/orm/relation.cn.md)
+15. [校验](doc/orm/validation.cn.md)
+16. [使用](doc/orm/using.cn.md)
+
+## 公共
+17. [部署](doc/common/deploy.cn.md)
+18. [配置](doc/common/config.cn.md)
+19. [缓存](doc/common/cache.cn.md)
+20. [锁](doc/common/lock.cn.md)
+21. [序列化](doc/common/serializer.cn.md)
+22. [校验器](doc/common/validation/validation.cn.md)
+23. [校验表达式](doc/common/validation/validation_expression.cn.md)
+24. [id生成器](doc/common/idworker.cn.md)
+
+## 其他
+25. [changelog](doc/changelog.md)

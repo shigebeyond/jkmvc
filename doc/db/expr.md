@@ -1,19 +1,22 @@
-# Db表达式
+# Db Expression
 
-见类 `DbExpr`
+see class `DbExpr`
 
 ```
-data class DbExpr(public val exp:CharSequence /* 表达式, 可以是 String | DbQueryBuilder */,
-                  public val alias:String?, /* 别名 */
-                  public val expQuoting:Boolean = (exp !is IDbQueryBuilder) /* 是否转义exp, 只要不是子查询, 默认都转 */
+data class DbExpr(public val exp:CharSequence /* Expression: String | DbQueryBuilder */,
+                  public val alias:String?, /* alias */
+                  public val expQuoting:Boolean = (exp !is IDbQueryBuilder) /* Whether `exp` is quoting, If `exp` is not sub query, default value is true */
 ) : CharSequence by ""
 ```
 
-主要有两个作用:
-1. 带别名
+It has 2 uses:
+
+1. With alias
+
 `DbQueryBuilder().select(DbExpr("username", "u"), DbExpr("password", "p")).from("user");`
 
-2. 控制是否转义
+2. Controller quoting expression
+
 `DbQueryBuilder().select("username", DbExpr("COUNT(`id`)", "total_posts", false))`
 
 

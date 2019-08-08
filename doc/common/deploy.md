@@ -27,3 +27,16 @@ encoding=gbk
 # domain to visit uploaded file
 uploadDomain=http://localhost:8081/jkmvc/upload
 ```
+
+## 4 Setting up the controller classes's package
+
+vim src/main/resources/http.yaml
+
+```
+# 是否调试
+debug: true
+# controller类所在的包路径
+# controller classes's package paths
+controllerPackages:
+    - net.jkcode.jkmvc.example.controller
+```
