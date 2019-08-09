@@ -14,13 +14,10 @@
   <div class="panel panel-default">
     <!-- Default panel contents -->
     <div class="panel-heading">编辑用户</div>
-    <div class="panel-body">
-      <p>...</p>
-    </div>
 
     <!-- Form -->
     <% UserModel user = (UserModel) req.getAttribute("user"); %>
-    <form action="<%= req.absoluteUrl("user/edit/" + user.getId()) %>" method="post">
+    <form class="panel-body" action="<%= req.absoluteUrl("user/edit/" + user.getId()) %>" method="post">
       <div class="form-group">
         <label for="username">username</label>
         <input type="text" class="form-control" id="username" placeholder="username" name="username" value="<%= user.getUsername() %>">

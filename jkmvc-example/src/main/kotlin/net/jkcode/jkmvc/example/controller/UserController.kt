@@ -1,10 +1,10 @@
 package net.jkcode.jkmvc.example.controller
 
 import net.jkcode.jkmvc.common.format
+import net.jkcode.jkmvc.common.httpLogger
 import net.jkcode.jkmvc.example.model.UserModel
 import net.jkcode.jkmvc.http.controller.Controller
 import net.jkcode.jkmvc.http.fromRequest
-import net.jkcode.jkmvc.http.httpLogger
 import net.jkcode.jkmvc.http.session.Auth
 import net.jkcode.jkmvc.orm.OrmQueryBuilder
 import net.jkcode.jkmvc.orm.isLoaded

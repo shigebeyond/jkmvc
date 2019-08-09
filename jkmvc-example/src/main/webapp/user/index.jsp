@@ -20,39 +20,39 @@
         <a href="<%= req.absoluteUrl("user/new/") %>" class="btn btn-warning">新建</a>
         <a href="<%= req.absoluteUrl("user/login/") %>" class="btn btn-danger">登录</a>
       </p>
-    </div>
 
-    <!-- Table -->
-    <table class="table">
-      <thead>
-        <tr>
-          <th>id</th>
-          <th>username</th>
-          <th>password</th>
-          <th>name</th>
-          <th>age</th>
-          <th>操作:</th>
-        </tr>
-      </thead>
-      <tbody>
-        <%  List<UserModel> users = (List<UserModel>)request.getAttribute("users");
-            for (Iterator<UserModel> it = users.iterator(); it.hasNext();) {
-             UserModel user = it.next(); %>
-            <tr>
-              <th scope="row"><%= user.getId() %></th>
-              <td><%= user.getUsername() %></td>
-              <td><%= user.getPassword() %></td>
-              <td><%= user.getName() %></td>
-              <td><%= user.getAge() %></td>
-              <td>
-                <a href="<%= req.absoluteUrl("user/detail/" + user.getId()) %>" class="btn btn-default">详情</a>
-                <a href="<%= req.absoluteUrl("user/edit/" + user.getId()) %>" class="btn btn-primary">编辑</a>
-                <a href="<%= req.absoluteUrl("user/delete/" + user.getId())%>" class="btn btn-info">删除</a>
-               </td>
-            </tr>
-         <% } %>
-      </tbody>
-    </table>
+       <!-- Table -->
+      <table class="table">
+        <thead>
+          <tr>
+            <th>id</th>
+            <th>username</th>
+            <th>password</th>
+            <th>name</th>
+            <th>age</th>
+            <th>操作:</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%  List<UserModel> users = (List<UserModel>)request.getAttribute("users");
+              for (Iterator<UserModel> it = users.iterator(); it.hasNext();) {
+               UserModel user = it.next(); %>
+              <tr>
+                <th scope="row"><%= user.getId() %></th>
+                <td><%= user.getUsername() %></td>
+                <td><%= user.getPassword() %></td>
+                <td><%= user.getName() %></td>
+                <td><%= user.getAge() %></td>
+                <td>
+                  <a href="<%= req.absoluteUrl("user/detail/" + user.getId()) %>" class="btn btn-default">详情</a>
+                  <a href="<%= req.absoluteUrl("user/edit/" + user.getId()) %>" class="btn btn-primary">编辑</a>
+                  <a href="<%= req.absoluteUrl("user/delete/" + user.getId())%>" class="btn btn-info">删除</a>
+                 </td>
+              </tr>
+           <% } %>
+        </tbody>
+      </table>
+    </div>
   </div>
   <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
   <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>

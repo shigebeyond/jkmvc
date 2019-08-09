@@ -26,20 +26,20 @@
             未登录
       <% } %>
       </p>
-    </div>
 
-    <!-- Form -->
-    <form action="<%= req.absoluteUrl("user/login") %>" method="post">
-      <div class="form-group">
-        <label for="username">username</label>
-        <input type="text" class="form-control" id="username" placeholder="username" name="username">
-      </div>
-      <div class="form-group">
-        <label for="password">password</label>
-        <input type="text" class="form-control" id="password" placeholder="password" name="password">
-      </div>
-      <button type="submit" class="btn btn-default">Submit</button>
-    </form>
+      <!-- Form -->
+      <form action="<%= req.absoluteUrl("user/login") %>" method="post">
+        <div class="form-group">
+          <label for="username">username</label>
+          <input type="text" class="form-control" id="username" placeholder="username" name="username">
+        </div>
+        <div class="form-group">
+          <label for="password">password</label>
+          <input type="text" class="form-control" id="password" placeholder="password" name="password">
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form>
+    </div>
 
   </div>
   <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->

@@ -9,6 +9,8 @@ Inspired by 2 php frameworks: [kohana](https://github.com/kohana/kohana) and [sk
 
 # Introduction - web
 
+Take `jkmvc/jkmvc-example` for example.
+
 ## 1 Configure JkFilter in web.xml
 
 JkFilter is a Filter for your web application
@@ -69,15 +71,42 @@ controllerPackages:
     - net.jkcode.jkmvc.example.controller
 ```
 
-## 4 Run web server
+## 4 Config jetty gradle plugin
 
-![](https://raw.githubusercontent.com/shigebeyond/jkmvc/master/img/runserver.png)
+vim build.gradle
 
-## 5 Visit web page
+```
+apply plugin: 'org.akhikhl.gretty'
 
-visit http://localhost:8081/jkmvc-example/
+// 启动jetty
+gretty{
+    // server 配置
+    servletContainer 'jetty9' // 'tomcat8'
+    httpPort 8080
+    managedClassReload true // 热部署
+    scanInterval 1 // 热部署的扫描间隔，当值为0时，不扫描新class，不热部署
 
-![](https://raw.githubusercontent.com/shigebeyond/jkmvc/master/img/webpage.png)
+    // 调试: gradle appRunDebug
+    debugPort 5006 // 运行jetty的jvm独立于运行gradle的jvm, 因此也使用独立的调试端口
+    debugSuspend true
+
+    // webapp 配置
+    contextPath "/${project.name}"
+    inplaceMode "hard" // 资源目录 src/main/webapp
+}
+```
+
+## 5 Run web server
+
+`gradle jettyRun -x test`
+
+![](img/runserver.png)
+
+## 6 Visit web page
+
+visit http://localhost:8080/jkmvc-example/
+
+![](img/webpage.png)
 
 # Introduction - view
 
@@ -127,9 +156,9 @@ Hello <%= request.getAttribute("name") %><br/>
 
 ## 3 Visit web page
 
-visit http://localhost:8081/jkmvc/welcome/jsp
+visit http://localhost:8080/jkmvc-example/welcome/jsp
 
-![](https://raw.githubusercontent.com/shigebeyond/jkmvc/master/img/webview.png)
+![](img/webview.png)
 
 
 # Introduction - orm
@@ -459,21 +488,21 @@ gradle :jkmvc-example:jettyRun
 
 visit url
 
-http://localhost:8081/jkmvc/user/index
+http://localhost:8080/jkmvc-example/user/index
 
-![](https://raw.githubusercontent.com/shigebeyond/jkmvc/master/img/actionindex.png)
+![](img/actionindex.png)
 
-http://localhost:8081/jkmvc/user/detail
+http://localhost:8080/jkmvc-example/user/detail
 
-![](https://raw.githubusercontent.com/shigebeyond/jkmvc/master/img/actiondetail.png)
+![](img/actiondetail.png)
 
-http://localhost:8081/jkmvc/user/new
+http://localhost:8080/jkmvc-example/user/new
 
-![](https://raw.githubusercontent.com/shigebeyond/jkmvc/master/img/actionnew.png)
+![](img/actionnew.png)
 
-http://localhost:8081/jkmvc/user/edit
+http://localhost:8080/jkmvc-example/user/edit
 
-![](https://raw.githubusercontent.com/shigebeyond/jkmvc/master/img/actionedit.png)
+![](img/actionedit.png)
 
 # gradle command for build
 

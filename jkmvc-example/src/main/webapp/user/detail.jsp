@@ -14,13 +14,10 @@
   <div class="panel panel-default">
     <!-- Default panel contents -->
     <div class="panel-heading">用户详情</div>
-    <div class="panel-body">
-      <p>...</p>
-    </div>
 
     <!-- Form -->
     <% UserModel user = (UserModel) req.getAttribute("user"); %>
-    <div>
+    <div class="panel-body">
       <div class="form-group">
         <label for="id">id</label>
         <span><%= user.getId() %></span>
