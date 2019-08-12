@@ -5,6 +5,8 @@ import net.jkcode.jkmvc.common.httpLogger
 import net.jkcode.jkmvc.example.model.UserModel
 import net.jkcode.jkmvc.http.controller.Controller
 import net.jkcode.jkmvc.http.fromRequest
+import net.jkcode.jkmvc.http.isPost
+import net.jkcode.jkmvc.http.isUpload
 import net.jkcode.jkmvc.http.session.Auth
 import net.jkcode.jkmvc.orm.OrmQueryBuilder
 import net.jkcode.jkmvc.orm.isLoaded
@@ -176,7 +178,7 @@ class UserController: Controller()
 
         // 检查并处理上传文件 | check and handle upload request
         if(req.isUpload()){ // 检查上传请求 | check upload request
-            user.avatar = req.getFileRelativePath("avatar")
+            user.avatar = req.getPartFileRelativePath("avatar")!!
             user.update()
         }
 

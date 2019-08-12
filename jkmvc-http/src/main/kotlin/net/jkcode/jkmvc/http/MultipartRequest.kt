@@ -2,33 +2,42 @@ package net.jkcode.jkmvc.http
 
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy
 import com.oreilly.servlet.multipart.FileRenamePolicy
-import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.fileSize2Bytes
-import net.jkcode.jkmvc.common.prepareDirectory
+import net.jkcode.jkmvc.common.*
 import java.io.File
+import java.nio.charset.Charset
 import java.util.*
 import javax.servlet.ServletRequestWrapper
 import javax.servlet.http.HttpServletRequest
 
 /**
- * 上传文件的请求
+ * 多部分参数(包含文本/文件类型)的请求, 即上传请求
+ *   一个参数的值有2种类型: 1 多个文本值 2 单个文件的二进制数据
  *
  * @author shijianhang<772910474@qq.com>
  * @date 6/23/17 7:58 PM
  */
-abstract class MultipartRequest(req:HttpServletRequest /* 请求对象 */): ServletRequestWrapper(req), HttpServletRequest by req{
+abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): ServletRequestWrapper(req), HttpServletRequest by req{
 
     companion object{
         /**
          * 上传配置
          */
-        public val uploadConfig = Config.instance("upload")
+        public val uploadConfig: IConfig = Config.instance("upload")
+
+        /**
+         * 上传目录
+         */
+        public val uploadDirectory: String = uploadConfig.getString("uploadDirectory")!!.trim("", File.separator) // 去掉最后的路径分隔符
 
         /**
          * 上传文件的最大size
          */
-        protected val maxPostSize:Int = fileSize2Bytes(uploadConfig["maxPostSize"]!!).toInt()
+        protected val maxPostSize: Int = fileSize2Bytes(uploadConfig["maxPostSize"]!!).toInt()
 
+        /**
+         * 禁止上传的文件扩展名
+         */
+        protected val forbiddenExt: List<String> = uploadConfig.getString("forbiddenExt")!!.split(',')
 
         /**
          * 上传文件重命名的策略
@@ -49,26 +58,90 @@ abstract class MultipartRequest(req:HttpServletRequest /* 请求对象 */): Serv
         get() = req.getScheme() + "://" + req.getServerName() + ':' + req.getServerPort()
 
     /**
-     * 是否是上传文件的请求
-     */
-    protected val uploaded:Boolean = req.isUpload()
-
-    /**
-     *  上传子目录，用在子类 MultipartRequest 中
+     *  上传子目录
      *      如果你需要设置上传子目录，必须在第一次调用 this.mulReq 之前设置，否则无法生效
      */
     public var uploadSubdir:String = ""
 
     /**
-     * 上传文件的请求
-     *    递延执行，以便能获得在 controller#action 动态设置的 uploadSubdir，用以构建上传目录
-     *    第一次调用 this.mulReq 时，会解析请求中的字段与文件，并将文件保存到指定的目录 = 根目录/子目录
+     * 多部分参数值, 一次性解析所有参数
+     *    一个参数的值有2种类型
+     *    1 多个文本值, 类型为 List<String>
+     *    2 单个文件的二进制数据, 类型为 File
      */
-    protected val mulReq:com.oreilly.servlet.MultipartRequest by lazy(LazyThreadSafetyMode.NONE){
-        if(!uploaded)
+    protected val partMap: Hashtable<String, Any> by lazy{
+        if(!isUpload())
             throw UnsupportedOperationException("当前请求不是上传文件的请求")
 
-        com.oreilly.servlet.MultipartRequest(req, prepareUploadDirectory(), maxPostSize, uploadConfig["encoding"], uploadPolicy)
+        val table = Hashtable<String, Any>()
+        // 遍历每个部分, 一次性解析所有参数
+        for(part in parts){
+            val name = part.name
+            if(table.containsKey(name))
+                continue
+
+            if(part.isFile()) // 文件域: 一个文件
+                table[name] = parsePartFile(name)
+            else// 文本域: 多个值
+                table[name] = parsePartTexts(name)
+        }
+
+        table
+    }
+
+    /**
+     * 获得多部分表单的参数名
+     * @return
+     */
+    public fun getPartNames(): Enumeration<String>{
+        return partMap.keys()
+    }
+
+    /**
+     * 解析文本域
+     *
+     * @param name
+     * @return
+     */
+    protected fun parsePartTexts(name: String): List<String> {
+        return parts.mapNotNull { part ->
+            if(part.isText() && part.name == name) // 逐个 part 匹配 name, 可能会匹配多个 part
+                part.inputStream.readBytes().toString(Charset.forName("UTF-8"))
+            else
+                null
+        }
+    }
+
+    /**
+     * 解析文件域
+     *
+     * @param name
+     * @return
+     */
+    protected fun parsePartFile(name: String): File? {
+        val part = getPart(name)
+        if(part.isFile())
+            return null
+
+        if(isForbiddenUploadFile(part.submittedFileName))
+            throw UnsupportedOperationException("文件域[$name]的文件为[${part.submittedFileName}], 属于禁止上传的文件类型")
+
+        val file = prepareUploadFile(part.submittedFileName)
+        part.write(file.absolutePath)
+        return file
+    }
+
+    /**
+     * 检查文件是否禁止上传
+     *
+     * @param fileName 上传文件名
+     * @return boolean
+     */
+    public fun isForbiddenUploadFile(fileName: String): Boolean {
+        val ext = fileName.substringAfterLast('.')
+        return forbiddenExt.any {
+            it.equals(ext, true)
+        }
     }
 
     /**
@@ -78,7 +151,7 @@ abstract class MultipartRequest(req:HttpServletRequest /* 请求对象 */): Serv
      */
     protected fun prepareUploadDirectory(): String {
         // 上传目录 = 根目录/子目录
-        var path:String = uploadConfig.getString("uploadDirectory") + File.separatorChar
+        var path:String = uploadDirectory + File.separatorChar
         if(uploadSubdir != "")
             path = path + uploadSubdir + File.separatorChar
         // 如果目录不存在，则创建
@@ -87,51 +160,74 @@ abstract class MultipartRequest(req:HttpServletRequest /* 请求对象 */): Serv
     }
 
     /**
-     * 检查是否有上传文件
+     * 准备好上传文件路径
      *
-     * @param key
+     * @param fileName 文件名
      * @return
      */
-    public fun containsFile(key: String): Boolean {
-        return mulReq.getFilesystemName(key) != null
+    protected fun prepareUploadFile(fileName: String): File {
+        //准备好上传目录, 并构建文件
+        val file = File(prepareUploadDirectory(), fileName)
+        // 文件创建或重命名
+        return file.createOrRename()
     }
 
     /**
-     * 获得文件名的枚举
-     * @return
-     */
-    public fun getFileNames(): Enumeration<String>{
-        return mulReq.fileNames as Enumeration<String>
-    }
-
-    /**
-     * 获得某个上传文件
+     * 获得文本域的值
      *
      * @param name
      * @return
      */
-    public fun getFile(name: String): File{
-        return mulReq.getFile(name);
+    public fun getPartTexts(name: String): List<String>? {
+        val v = partMap[name]
+        if(v == null)
+            return null
+
+        if(v is File)
+            throw IllegalArgumentException("表单域[$name]是不是文本域")
+
+        return v as List<String>
     }
 
     /**
-     * 获得上传文件
-     * @return
-     */
-    public fun getFileMap(): Map<String, File>{
-        return mulReq.getFileMap()
-    }
-
-    /**
-     * 获得某个上传文件的相对路径
+     * 获得上传的文件, 已保存到上传子目录
      *
      * @param name
      * @return
      */
-    public fun getFileRelativePath(name: String): String{
-        val file = mulReq.getFile(name);
-        val uploadDirLen = uploadConfig.getString("uploadDirectory")!!.length + 1 // 如 upload/
-        return file.path.substring(uploadDirLen)
+    public fun getPartFile(name: String): File? {
+        val v = partMap[name]
+        if(v == null)
+            return null
+
+        if(v !is File)
+            throw IllegalArgumentException("表单域[$name]是不是文件域")
+
+        return v
+    }
+
+    /**
+     * 获得上传文件的相对路径
+     *
+     * @param name
+     * @return
+     */
+    public fun getPartFileRelativePath(name: String): String? {
+        val file = getPartFile(name)
+        if(file == null)
+            return null
+
+        return getFileRelativePath(file)
+    }
+
+    /**
+     * 获得指定文件的相对路径
+     *
+     * @param file
+     * @return
+     */
+    public fun getFileRelativePath(file: File): String {
+        return file.path.substring(uploadDirectory.length + 1)
     }
 
     /**
@@ -139,7 +235,7 @@ abstract class MultipartRequest(req:HttpServletRequest /* 请求对象 */): Serv
      * @param relativePath 上传文件的相对路径
      * @return
      */
-    public fun getUploadUrl(relativePath:String):String {
+    public fun getUploadUrl(relativePath: String): String {
         if(uploadConfig.containsKey("uploadDomain"))
             return uploadConfig.getString("uploadDomain") + '/' + relativePath;
         else

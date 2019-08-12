@@ -12,17 +12,13 @@ uploadDirectory=/var/www/upload
 # max file size, unit: B K M G T
 maxPostSize=1M
 encoding=gbk
+# forbidden file extensions, splited by `,`
+forbiddenExt = jsp,jspx,exe,sh,php,py
 # domain to visit uploaded file
 uploadDomain=http://localhost:8081/jkmvc/upload
 ```
 
 Configuration item | usage
---- | ---
-The root directory uploadDirectory | upload, received by the jkmvc upload files are saved to the directory, at the same time in order to be able to access these files, you need to set the directory file server based on HTTP
-UploadDomain | access to upload files with domain name, it can get access to upload files URL
-
-
-配置项 | 作用
 --- | ---
 uploadDirectory | The root directory for upload, which jkmvc saves the upload files. To access these files, you need to setup a file server on this diretory.
 uploadDomain | Domain name to access to upload files
@@ -45,9 +41,6 @@ The form is defined with `enctype =" multipart / form-data "` property.
 
 ### 2.2 Receive upload files
 
-
-### 2.2 接收上传文件
-
 ```
 /**
  * upload avatar
@@ -67,7 +60,7 @@ public fun uploadAvatarAction()
 
     // check and handle upload request
     if(req.isUpload()){ // check upload request
-        user.avatar = req.getFileRelativePath("avatar")
+        user.avatar = req.getPartFileRelativePath("avatar")
         user.update()
     }
 

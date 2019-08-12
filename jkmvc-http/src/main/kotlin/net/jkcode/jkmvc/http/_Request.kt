@@ -3,14 +3,11 @@ package net.jkcode.jkmvc.http
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
-import com.oreilly.servlet.MultipartRequest
 import net.jkcode.jkmvc.orm.IRelationMeta
 import net.jkcode.jkmvc.orm.Orm
 import net.jkcode.jkmvc.orm.RelationType
-import java.io.File
-import java.lang.reflect.Field
-import java.util.*
 import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.Part
 
 /****************************** HttpServletRequest扩展 *******************************/
 
@@ -111,65 +108,19 @@ public fun HttpServletRequest.toCurlCommand(): String {
     return cmd.toString()
 }
 
-/****************************** com.oreilly.servlet.MultipartRequest扩展 *******************************/
+/****************************** Part扩展 *******************************/
 /**
- * 上传参数的属性
+ * 是否文本域
  */
-val parametersField: Field = MultipartRequest::class.java.getDeclaredField("parameters").apply { this.isAccessible = true }
-
-/**
- * 获得上传参数
- * @return
- */
-public inline fun MultipartRequest.getParameterMap(): Map<String, Vector<String>> {
-    return parametersField.get(this) as Map<String, Vector<String>>
+public fun Part.isText(): Boolean {
+    return submittedFileName == null // this is what Apache FileUpload does ...
 }
 
 /**
- * 上传文件的属性
+ * 是否文件域
  */
-//val filesField: Field = MultipartRequest::class.java.getField("files").apply { isAccessible = true }
-
-/**
- * 获得上传文件
- *     wrong - com.oreilly.servlet.UploadedFile 类不可访问
- * @return
- */
-/*public inline fun MultipartRequest.getFileMap(): Map<String, UploadedFile> {
-    return filesField.get(this) as Map<String, UploadedFile>
-}*/
-
-/**
- * 获得上传文件
- *    由于com.oreilly.servlet.UploadedFile 类不可访问，因此我们返回File，而不是com.oreilly.servlet.UploadedFile
- * @return
- */
-public inline fun MultipartRequest.getFileMap(): Map<String, File> {
-    val names = fileNames as Enumeration<String>
-    if(!names.hasMoreElements())
-        return emptyMap()
-
-    val map = HashMap<String, File>()
-    for (name in names){
-        val file = this.getFile(name)
-        if (isSafeUploadFile(file)) {
-            map[name] = file
-        }else{
-            file.delete()
-        }
-    }
-    return map
-}
-
-/**
- * 检查是否安全的上传文件
- *
- * @param uploadFile 上传文件
- * @return boolean
- */
-public inline fun isSafeUploadFile(uploadFile: File): Boolean {
-    val ext = uploadFile.extension
-    return !ext.equals("jsp", true) && ext.equals("jspx", true)
+public fun Part.isFile(): Boolean {
+    return !isText()
 }
 
 /****************************** Orm扩展 *******************************/

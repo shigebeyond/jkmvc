@@ -63,14 +63,17 @@ getShortParameter(key: String, defaultValue: Short? = null): Short? | Get short 
 
 method | usage
 --- | ---
-containsFile(key: String): Boolean | Check whether contains uploaed file
-getFile(name: String): File | Get a uploaed file
-getFileMap(): Map<String, File> | Get all uploaed files
-getFileNames(): Enumeration<String> | Get all uploaed file names
-getFileRelativePath(name: String): String | Get a uploaed file's relative path where file is saved
+getPartFile(name: String): File? | Get a uploaded file
+getPartFileRelativePath(name: String): String | Get a uploaded file's relative path where file is saved
+
+6. File Path vs Url
+
+method | usage
+--- | ---
+getFileRelativePath(file: File): String | Obtain an relative path based on file
 getUploadUrl(relativePath: String): String | Obtain an absolute url based on the uploaded file's relative path
 
-6. Get request parameter（including routing paramter and `get/post` parameter）
+7. Get request parameter（including routing paramter and `get/post` parameter）
 
 method | usage
 --- | ---

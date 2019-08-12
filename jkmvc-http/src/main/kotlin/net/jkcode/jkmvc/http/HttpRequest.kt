@@ -96,8 +96,8 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 */
 	public val httpParams: Map<String, Any>
 		get(){
-			return if(isUpload()) // 上传请求的参数类型：Map<String, Vector<String>>
-						mulReq.getParameterMap()
+			return if(isUpload()) // 上传请求的参数类型：Map<String, List<String>|File>
+						partMap
 					else // 非上传请求的参数类型：Map<String, Array<String>>
 						req.parameterMap
 		}
@@ -116,8 +116,8 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 					return false
 
 				if(isUpload()){
-					return mulReq.getParameterMap().any{ k, v ->
-						v.contains(value)
+					return partMap.any { k, v ->
+						v is List<*> && v.contains(value)
 					}
 				}
 
@@ -159,46 +159,6 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	}
 
 	/*************************** 各种判断 *****************************/
-	/**
-	 * 是否post请求
-	 * @return
-	 */
-	public fun isPost(): Boolean {
-		return req.isPost()
-	}
-
-	/**
-	 * 是否get请求
-	 * @return
-	 */
-	public fun isGet(): Boolean {
-		return req.isGet()
-	}
-
-	/**
-	 * 是否 multipart 请求
-	 * @return
-	 */
-	public fun isMultipartContent(): Boolean{
-		return req.isMultipartContent()
-	}
-
-	/**
-	 * 是否上传文件的请求
-	 * @return
-	 */
-	public fun isUpload(): Boolean{
-		return uploaded
-	}
-
-	/**
-	 * 是否ajax请求
-	 * @return
-	 */
-	public fun isAjax(): Boolean {
-		return req.isAjax()
-	}
-
 	/**
 	 * 检查请求参数是否为空
 	 *
@@ -458,7 +418,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 */
 	public override fun getParameterNames():Enumeration<String>{
 		if(isUpload())
-			return mulReq.parameterNames as Enumeration<String>;
+			return getPartNames()
 
 		return req.parameterNames;
 	}
@@ -471,7 +431,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 */
 	public override fun getParameter(key: String): String? {
 		if(isUpload())
-			return mulReq.getParameter(key);
+			return getPartTexts(key)?.first()
 
 		return req.getParameter(key)
 	}
@@ -484,7 +444,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 */
 	public override fun getParameterValues(key: String): Array<String>? {
 		if(isUpload())
-			return mulReq.getParameterValues(key)
+			return getPartTexts(key)?.toTypedArray()
 
 		return req.getParameterValues(key)
 	}

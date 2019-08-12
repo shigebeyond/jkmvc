@@ -13,6 +13,8 @@ uploadDirectory=/var/www/upload
 maxPostSize=1M
 # 编码
 encoding=gbk
+# 禁止上传的文件扩展名, 以逗号分隔
+forbiddenExt = jsp,jspx,exe,sh,php,py
 # 访问上传文件的域名
 #uploadDomain=http://localhost:8081/jkmvc/upload
 ```
@@ -59,7 +61,7 @@ public fun uploadAvatarAction()
 
     // 检查并处理上传文件
     if(req.isUpload()){ // 检查上传请求
-        user.avatar = req.getFileRelativePath("avatar")
+        user.avatar = req.getPartFileRelativePath("avatar")
         user.update()
     }
 

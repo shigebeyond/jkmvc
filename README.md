@@ -317,10 +317,18 @@ class AddressModel(id:Int? = null): Orm(id) {
 ```
 package net.jkcode.jkmvc.example.controller
 
+import net.jkcode.jkmvc.common.format
+import net.jkcode.jkmvc.common.httpLogger
 import net.jkcode.jkmvc.example.model.UserModel
-import net.jkcode.jkmvc.http.Controller
+import net.jkcode.jkmvc.http.controller.Controller
+import net.jkcode.jkmvc.http.fromRequest
+import net.jkcode.jkmvc.http.isPost
+import net.jkcode.jkmvc.http.isUpload
+import net.jkcode.jkmvc.http.session.Auth
+import net.jkcode.jkmvc.orm.OrmQueryBuilder
 import net.jkcode.jkmvc.orm.isLoaded
-import java.io.File
+import java.util.*
+
 
 /**
  * 用户管理
@@ -329,15 +337,35 @@ import java.io.File
 class UserController: Controller()
 {
     /**
+     * action前置处理
+     */
+    public override fun before() {
+        // 如检查权限
+        httpLogger.info("action前置处理")
+    }
+
+    /**
+     * action后置处理
+     */
+    public override fun after() {
+        // 如记录日志
+        httpLogger.info("action后置处理")
+    }
+
+    /**
      * 列表页
      * list page
      */
     public fun indexAction()
     {
+        val query: OrmQueryBuilder = UserModel.queryBuilder()
+        // 统计用户个数 | count users
+        val counter:OrmQueryBuilder = query.clone() as OrmQueryBuilder // 复制query builder
+        val count = counter.count()
         // 查询所有用户 | find all users
-        val users = UserModel.queryBuilder().findAllModels<UserModel>()
+        val users = query.findAllModels<UserModel>()
         // 渲染视图 | render view
-        res.renderView(view("user/index", mutableMapOf("users" to users)))
+        res.renderView(view("user/index", mutableMapOf("count" to count, "users" to users)))
     }
 
     /**
@@ -399,7 +427,8 @@ class UserController: Controller()
     public fun editAction()
     {
         // 查询单个用户 | find a user
-        val user = UserModel(req["id"])
+        val id: Int = req["id"]!!
+        val user = UserModel(id)
         if(!user.isLoaded()){
             res.renderString("用户[" + req["id"] + "]不存在")
             return
@@ -466,12 +495,35 @@ class UserController: Controller()
 
         // 检查并处理上传文件 | check and handle upload request
         if(req.isUpload()){ // 检查上传请求 | check upload request
-            user.avatar = req.getFileRelativePath("avatar")
+            user.avatar = req.getPartFileRelativePath("avatar")!!
             user.update()
         }
 
         // 重定向到详情页 | redirect to detail page
         redirect("user/detail/$id");
+    }
+
+    /**
+     * 登录
+     */
+    public fun loginAction(){
+        if(req.isPost()){ // post请求
+            val user = Auth.instance().login(req["username"]!!, req["password"]!!);
+            if(user == null)
+                res.renderString("登录失败")
+            else
+                redirect("user/login")
+        }else{ // get请求
+            res.renderView(view())
+        }
+    }
+
+    /**
+     * 登录
+     */
+    public fun logoutAction(){
+        Auth.instance().logout()
+        redirect("user/login")
     }
 }
 ```

@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.common
 
 import java.io.File
+import java.io.IOException
 import java.net.JarURLConnection
 import java.net.URL
 import java.text.DecimalFormat
@@ -69,6 +70,49 @@ public fun String.prepareDirectory(){
     val dir = File(this)
     if(!dir.exists())
         dir.mkdirs()
+}
+
+/**
+ * 尝试创建文件, 如果已有同名文件, 则重命名为新文件, 加计数后缀
+ * @return
+ */
+public fun File.createOrRename(): File {
+    if (this.createNewFileSafely())
+        return this
+
+    val name = this.name
+    val body: String
+    val ext: String
+    val dot = name.lastIndexOf(".")
+    if (dot != -1) {
+        body = name.substring(0, dot)
+        ext = name.substring(dot)
+    } else {
+        body = name
+        ext = ""
+    }
+
+    var count = 0
+    var newfile: File
+    do {
+        count++
+        val newName = body + count + ext
+        newfile = File(this.parent, newName)
+    }while (!newfile.createNewFileSafely() && count < 9999)
+
+    return newfile
+}
+
+/**
+ * 无异常的创建新文件
+ * @return
+ */
+private fun File.createNewFileSafely(): Boolean {
+    try {
+        return createNewFile()
+    } catch (ignored: IOException) {
+        return false
+    }
 }
 
 /****************************** 文本处理 *******************************/

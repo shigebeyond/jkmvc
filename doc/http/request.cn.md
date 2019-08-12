@@ -65,14 +65,17 @@ getShortParameter(key: String, defaultValue: Short? = null): Short? | 获得shor
 
 方法 | 作用
 --- | ---
-containsFile(key: String): Boolean | 检查是否有上传文件
-getFile(name: String): File | 获得某个上传文件
-getFileMap(): Map<String, File> | 获得上传文件
-getFileNames(): Enumeration<String> | 获得文件名的枚举
-getFileRelativePath(name: String): String | 获得某个上传文件的相对路径
+getPartFile(name: String): File? | 获得某个上传文件
+getPartFileRelativePath(name: String): String | 获得某个上传文件的相对路径
+
+6. 文件路径与url的相互转换
+
+方法 | 作用
+--- | ---
+getFileRelativePath(file: File): String | 获得指定文件的相对路径
 getUploadUrl(relativePath: String): String | 获得上传文件的url
 
-6. 获得请求参数（包含路由参数与get/post参数）的方法
+7. 获得请求参数（包含路由参数与get/post参数）的方法
 
 方法 | 作用
 --- | ---
