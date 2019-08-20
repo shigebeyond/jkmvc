@@ -1,8 +1,12 @@
 package net.jkcode.jkmvc.http
 
+import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.JSONArray
+import com.alibaba.fastjson.JSONObject
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy
 import com.oreilly.servlet.multipart.FileRenamePolicy
 import net.jkcode.jkmvc.common.*
+import sun.misc.IOUtils
 import java.io.File
 import java.nio.charset.Charset
 import java.util.*
@@ -240,5 +244,30 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Ser
             return uploadConfig.getString("uploadDomain") + '/' + relativePath;
         else
             return serverUrl + contextPath + '/' + uploadConfig["uploadDirectory"] + '/' + relativePath;
+    }
+
+    /**
+     * 从输入流中解析json
+     * @return
+     */
+    public fun parseJson(): Any {
+        val bytes = IOUtils.readFully(inputStream, -1, false)
+        return JSON.parse(bytes)
+    }
+
+    /**
+     * 从输入流中解析json对象
+     * @return
+     */
+    public fun parseJsonObject(): JSONObject {
+        return parseJson() as JSONObject
+    }
+
+    /**
+     * 从输入流中解析json数组
+     * @return
+     */
+    public fun parseJsonArray(): JSONArray {
+        return parseJson() as JSONArray
     }
 }
