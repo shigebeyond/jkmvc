@@ -31,8 +31,11 @@ public fun currMillis(): Long {
 
 /**
  * 缓存日期格式
+ *   使用 ThreadLocal 解决 SimpleDateFormat 线程安全问题
  */
-private val dateFormats: ConcurrentHashMap<String, SimpleDateFormat> = ConcurrentHashMap()
+private val dateFormats: ThreadLocal<ConcurrentHashMap<String, SimpleDateFormat>> = ThreadLocal.withInitial {
+    ConcurrentHashMap<String, SimpleDateFormat>()
+}
 
 /**
  * 日期格式化
@@ -41,7 +44,7 @@ private val dateFormats: ConcurrentHashMap<String, SimpleDateFormat> = Concurren
  * @return
  */
 public fun Date.format(pattern: String = "yyyy-MM-dd HH:mm:ss"): String {
-    return dateFormats.getOrPut(pattern){
+    return dateFormats.get().getOrPut(pattern){
                 SimpleDateFormat(pattern)
             }
             .format(this)
