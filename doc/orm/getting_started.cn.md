@@ -30,12 +30,12 @@ vim src/main/resources/db.yaml
 ```
 # 是否调试
 debug: true
-# 是否分库, 如果是则使用 sharding-jdbc
-sharding: false
-# 字段名是下划线命名的数据源, 用于逗号分隔
-columnUnderline: default,test
-# 字段名全大写的数据源, 用逗号分隔
-columnUpperCase:
+# 分库的数据库名, 会使用 sharding-jdbc
+shardingDbs: shardorder
+# 字段名是下划线命名的数据库名, 用于逗号分隔
+columnUnderlineDbs: default,test
+# 字段名全大写的数据库名, 用逗号分隔
+columnUpperCaseDbs:
 ```
  
 现在你就可以创建 [模型](model.cn.md)，并[使用 ORM](using.cn.md)。

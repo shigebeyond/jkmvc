@@ -49,25 +49,14 @@ internal class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
 
     /************************** 元数据 ***************************/
     /**
-     * 主库配置
-     */
-    protected val config: Config = Config.instance("db", "yaml")
-
-    /**
      * 字段有下划线
      */
-    protected val columnUnderline: Boolean by lazy{
-        val dbs: String? = config["columnUnderline"] // 获得 字段有下划线 的db
-        dbs?.split(",")?.contains(name) ?: false
-    }
+    protected val columnUnderline: Boolean = DbConfig.isColumnUnderline(name)
 
     /**
      * 字段全大写
      */
-    protected val columnUpperCase: Boolean by lazy{
-        val dbs: String? = config["columnUpperCase"] // 获得 字段全大写 的db
-        dbs?.split(",")?.contains(name) ?: false
-    }
+    protected val columnUpperCase: Boolean = DbConfig.isColumnUpperCase(name)
 
     /**
      * 任意连接

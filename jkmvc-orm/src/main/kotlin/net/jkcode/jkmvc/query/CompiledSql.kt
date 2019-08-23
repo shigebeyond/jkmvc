@@ -31,7 +31,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
             field = sql;
 
             // 预览sql
-            if(Db.debug && sql != "")
+            if(DbConfig.debug && sql != "")
                 dbLogger.debug("编译好的sql：{}", previewSql())
         }
 
@@ -121,7 +121,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
         }
 
         // 预览sql
-        if(Db.debug)
+        if(DbConfig.debug)
             dbLogger.debug("实际的sql：{}", previewSql(dynamicParams, fromIndex))
 
         return result;

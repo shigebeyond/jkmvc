@@ -64,6 +64,37 @@ class SingleDb(name:String /* 标识 */) : Db(name) {
     }
 
     /**
+     * 记录事务开始时的 autoCommit
+     */
+    protected var preAutoCommit: Boolean = false
+
+    /**
+     * 开启事务
+     */
+    protected override fun handleBegin(){
+        preAutoCommit = masterConn.autoCommit
+        masterConn.autoCommit = false; // 禁止自动提交事务
+    }
+
+    /**
+     * 提交事务
+     */
+    protected override fun handleCommit(){
+        masterConn.commit()
+        masterConn.autoCommit = preAutoCommit
+        preAutoCommit = false
+    }
+
+    /**
+     * 回滚事务
+     */
+    protected override fun handleRollback(){
+        masterConn.rollback();
+        masterConn.autoCommit = preAutoCommit
+        preAutoCommit = false
+    }
+
+    /**
      * 关闭
      */
     public override fun close():Unit{

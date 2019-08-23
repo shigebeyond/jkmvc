@@ -1,6 +1,5 @@
 package net.jkcode.jkmvc.db
 
-import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.common.dbLogger
 import net.jkcode.jkmvc.common.mapToArray
 import net.jkcode.jkmvc.db.sharding.ShardingDb
@@ -25,21 +24,6 @@ abstract class Db protected constructor(public override val name:String /* 标�
     companion object {
 
         /**
-         * 公共配置
-         */
-        public val commonConfig: Config = Config.instance("db", "yaml")
-
-        /**
-         * 是否调试
-         */
-        public val debug: Boolean = commonConfig.getBoolean("debug", false)!!;
-
-        /**
-         * 是否分库
-         */
-        public val sharding: Boolean = commonConfig.getBoolean("sharding", false)!!;
-
-        /**
          * 线程安全的db缓存
          *    每个线程有多个db, 一个名称各一个db对象
          *    每个请求都创建新的db对象, 请求结束要调用 close() 来删除db对象
@@ -55,10 +39,13 @@ abstract class Db protected constructor(public override val name:String /* 标�
          * @param name
          * @return
          */
-        public fun instance(name:String = "default"):Db{
+        public fun instance(name: String = "default"):Db{
             return dbs.get().getOrPut(name){
                 // 是否分库
-                if(sharding ) ShardingDb(name) else SingleDb(name)
+                if(DbConfig.isSharding(name))
+                    ShardingDb(name)
+                else
+                    SingleDb(name)
             }
         }
 
@@ -130,17 +117,32 @@ abstract class Db protected constructor(public override val name:String /* 标�
     }
 
     /**
+     * 处理开启事务
+     */
+    protected abstract fun handleBegin()
+
+    /**
+     * 处理提交事务
+     */
+    protected abstract fun handleCommit()
+
+    /**
+     * 处理回滚事务
+     */
+    protected abstract fun handleRollback()
+
+    /**
      * 开启事务
      */
-    public override fun begin():Unit{
+    public override fun begin(){
         if(transDepth++ === 0)
-            masterConn.autoCommit = false; // 禁止自动提交事务
+            handleBegin()
     }
 
     /**
      * 提交事务
      */
-    public override fun commit():Boolean{
+    public override fun commit(): Boolean{
         // 未开启事务
         if (transDepth <= 0)
             return false;
@@ -150,9 +152,9 @@ abstract class Db protected constructor(public override val name:String /* 标�
         {
             // 回滚 or 提交事务: 回滚的话,返回false
             if(rollbacked)
-                masterConn.rollback();
+                handleRollback()
             else
-                masterConn.commit()
+                handleCommit()
             val result = rollbacked;
             rollbacked = false; // 清空回滚标记
             return result;
@@ -174,7 +176,7 @@ abstract class Db protected constructor(public override val name:String /* 标�
         if (--transDepth === 0)
         {
             rollbacked = false; // 清空回滚标记
-            masterConn.rollback(); // 回滚事务
+            handleRollback() // 回滚事务
         }
 
         // 有嵌套事务

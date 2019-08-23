@@ -29,12 +29,12 @@ vim src/main/resources/db.yaml
 
 ```
 debug: true
-# Whether sharding database, if true we will use sharding-jdbc
-sharding: false
-# Column name is underlined for these dataSource
-columnUnderline: default,test
-# Column name is all uppercase for these dataSource
-columnUpperCase:
+# sharding database names, it uses sharding-jdbc
+shardingDbs: shardorder
+# Column name is underlined for these database names
+columnUnderlineDbs: default,test
+# Column name is all uppercase for these database names
+columnUpperCaseDbs:
 ```
 
 You can now create your [model](model.md) and [use ORM](using.md).
