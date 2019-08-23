@@ -1,0 +1,65 @@
+dataSources:
+  ds_master_0: !!com.alibaba.druid.pool.DruidDataSource
+      driverClassName: com.mysql.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/demo_ds_master_0
+      username: root
+      password: root 
+  ds_master_0_slave_0: !!com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/demo_ds_master_0_slave_0
+    username: root
+    password: root
+  ds_master_0_slave_1: !!com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/demo_ds_master_0_slave_1
+    username: root
+    password: root 
+  ds_master_1: !!com.alibaba.druid.pool.DruidDataSource
+        driverClassName: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/demo_ds_master_1
+        username: root
+        password: root 
+  ds_master_1_slave_0: !!com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/demo_ds_master_1_slave_0
+    username: root
+    password: root
+  ds_master_1_slave_1: !!com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/demo_ds_master_1_slave_1
+    username: root
+    password: root 
+    
+shardingRule:
+  tables:
+    t_order: 
+      actualDataNodes: ds_${0..1}.t_order
+      databaseStrategy:
+          inline:
+            shardingColumn: user_id
+            algorithmExpression: ds_${user_id % 2}
+      keyGeneratorColumnName: order_id
+    t_order_item:
+      actualDataNodes: ds_${0..1}.t_order_item
+      databaseStrategy:
+                inline:
+                  shardingColumn: user_id
+                  algorithmExpression: ds_${user_id % 2}
+  
+  bindingTables:
+    - t_order,t_order_item
+  
+  masterSlaveRules:
+    ds_0:
+      masterDataSourceName: ds_master_0
+      slaveDataSourceNames: [ds_master_0_slave_0, ds_master_0_slave_1]
+      loadBalanceAlgorithmType: ROUND_ROBIN
+    ds_1:
+      masterDataSourceName: ds_master_1
+      slaveDataSourceNames: [ds_master_1_slave_0, ds_master_1_slave_1]
+      loadBalanceAlgorithmType: ROUND_ROBIN
+  
+  defaultKeyGeneratorClass: io.shardingjdbc.core.keygen.DefaultKeyGenerator
+  
+  props:
+    sql.show: true

@@ -14,10 +14,16 @@ import java.sql.Connection
 class ShardingDb(name:String /* 标识 */) : Db(name) {
 
     /**
+     * 连接使用情况
+     */
+    protected var connUsed: Boolean = false
+
+    /**
      * 主库连接
      */
     protected override val masterConn: Connection by lazy {
         val dataSource = ShardingDataSourceFactory.getDataSource(name)
+        connUsed = true
         dataSource.connection
     }
 
@@ -27,4 +33,13 @@ class ShardingDb(name:String /* 标识 */) : Db(name) {
     protected override val slaveConn: Connection
         get() = masterConn
 
+    /**
+     * 关闭
+     */
+    public override fun close():Unit{
+        super.close()
+
+        if(connUsed)
+            masterConn.close()
+    }
 }

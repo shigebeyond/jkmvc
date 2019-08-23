@@ -15,11 +15,11 @@ object ShardingDataSourceFactory : IDataSourceFactory() {
 
     /**
      * 构建数据源
-     * @param name 数据源名
+     * @param name 数据源名, 对应配置文件 dataSource-$name.yaml
      * @return
      */
     override fun buildDataSource(name:String): DataSource {
-        val configFile = Thread.currentThread().contextClassLoader.getResource("dataSources-$name.yaml").getFile()
+        val configFile = Thread.currentThread().contextClassLoader.getResource("dataSource-$name.yaml").getFile()
         return io.shardingjdbc.core.api.ShardingDataSourceFactory.createDataSource(File(
                 configFile))
     }
