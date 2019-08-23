@@ -17,8 +17,13 @@ import org.dom4j.DocumentException
 import org.dom4j.Element
 import org.dom4j.io.SAXReader
 import org.junit.Test
+import java.io.BufferedReader
 import java.io.File
+import java.io.IOException
+import java.io.InputStreamReader
 import java.lang.reflect.ParameterizedType
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -619,6 +624,84 @@ class MyTests{
                 reg.replace(it, "")
             }
         }
+    }
+
+    @Test
+    fun testDomainCheck() {
+        val dir = File("/home/shi/code/php/sk")
+        val domainReg = "http://([\\w\\d-_\\.]+)\\.(sk(\\d)?|shikee)\\.com".toRegex() //
+        val subDomains = HashSet<String>()
+        dir.travel { file ->
+            if (!file.name.endsWith(".php"))
+                return@travel
+
+            // 配置文件处理
+            if(file.name == "shikee.php")
+                return@travel
+
+            // 收集域名
+            val txt = file.readText()
+            val matches = domainReg.findAll(txt)
+            for(m in matches){
+                subDomains.add(m.groupValues.get(1)) // 子域名
+            }
+        }
+
+        val f = File(dir, "common/config/sk0.com/shikee.php")
+        val txt = f.readText()
+        val configReg = "domain_([\\w\\d-_]+)".toRegex()
+        val matches = configReg.findAll(txt)
+        val configDomains = HashSet<String>()
+        for(m in matches){
+            configDomains.add(m.groupValues.get(1))
+        }
+        println("****用到子域名****")
+        println(subDomains.joinToString("\n"))
+        println("****配置子域名****")
+        println(configDomains.joinToString("\n"))
+        println("****没有配置的子域名****")
+        subDomains.removeAll(configDomains)
+        println(subDomains.joinToString("\n"))
+
+    }
+
+    @Test
+    fun testDomainReplace(){
+        val dir = File("/home/shi/code/php/sk")
+        val domainPattern = "http://([\\w\\d-_\\.]+)\\.(sk(\\d)?|shikee)\\.com/?" // 1 子域名
+        val domainReg = domainPattern.toRegex() // 1 子域名
+        val assignReg = "((=|=>|\\?)\\s*)('|\")$domainPattern".toRegex()  // 1 赋值号+空格 2 赋值号 3 引号 4 子域名
+        dir.travel { file ->
+            if(!file.name.endsWith(".php"))
+                return@travel
+
+            // 配置文件处理
+            if(file.name == "shikee.php")
+                return@travel
+
+            // view文件处理
+            if(file.absolutePath.contains("/views/")) {
+                /*file.replaceText { txt ->
+                    domainReg.replace(txt) { result: MatchResult ->
+                        val subDomain = result.groupValues.get(1)
+                        "<?= config_item('domain_$subDomain') ?>"
+                    };
+                }*/
+
+                return@travel
+            }
+
+            // 业务文件处理
+            file.replaceText { txt ->
+                assignReg.replace(txt) { result: MatchResult ->
+                    val assign = result.groupValues.get(1) // 1 赋值号
+                    val quote = result.groupValues.get(3) // 2 引号
+                    val subDomain = result.groupValues.get(4) // 3 子域名
+                    "${assign}config_item('domain_$subDomain').$quote"
+                };
+            }
+        }
+        println("over")
     }
 
     @Test
@@ -1248,6 +1331,27 @@ class MyTests{
             val key = randomString(5)
             println("key[$key]哈希[${key.hashCode()}]命中节点: " + ch.get(key))
         }
+    }
+
+    @Test
+    fun testBioHttp(){
+        val url = URL("https://www.zhonghuasuan.com/")
+        val document = StringBuffer()
+        try {
+            val urlCon = url.openConnection() as HttpURLConnection
+            val reader = BufferedReader(InputStreamReader(urlCon.getInputStream(), "UTF-8"))
+            do{
+                val line = reader.readLine()
+                if(line == null)
+                    break
+                document.append(line)
+            }while(true)
+            reader.close()
+            println(document)
+        } catch (e: IOException) {
+            e.printStackTrace();
+        }
+
     }
 
 }

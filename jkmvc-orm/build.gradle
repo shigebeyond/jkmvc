@@ -3,7 +3,11 @@ dependencies{
     compile project(':jkmvc-common')
 
     // datasource
+    // single db
     compile 'com.alibaba:druid:1.1.6'
+    // sharding db
+    compile "io.shardingjdbc:sharding-jdbc-transaction:2.0.3"
+    compile "io.shardingjdbc:sharding-jdbc-core:2.0.3"
 
     // jdbc
     testRuntime "mysql:mysql-connector-java:5.1.6"

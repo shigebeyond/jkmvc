@@ -21,10 +21,6 @@ default:
     url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
     username: root
     password: root
-    # 字段名是下划线命名
-    columnUnderline: true
-    # 字段名全大写
-    columnUpperCase: false
 ```
 
 Java 使用的是驼峰命名，因此 Jkmvc 会根据上面的 `columnUnderline` and `columnUpperCase` 配置项，在 ORM 对象与数据库字段名之间，自动转换命名。
@@ -32,6 +28,10 @@ Java 使用的是驼峰命名，因此 Jkmvc 会根据上面的 `columnUnderline
 vim src/main/resources/db.yaml
 
 ```
+# 是否调试
+debug: true
+# 是否分库, 如果是则使用 sharding-jdbc
+sharding: false
 # 字段名是下划线命名的数据源, 用于逗号分隔
 columnUnderline: default,test
 # 字段名全大写的数据源, 用逗号分隔

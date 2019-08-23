@@ -1,5 +1,9 @@
 package net.jkcode.jkmvc.db
 
+import net.jkcode.jkmvc.closing.ClosingOnShutdown
+import net.jkcode.jkmvc.common.getOrPutOnce
+import net.jkcode.jkmvc.db.single.DruidDataSourceFactory
+import java.util.concurrent.ConcurrentHashMap
 import javax.sql.DataSource
 
 /**
@@ -8,7 +12,12 @@ import javax.sql.DataSource
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-interface IDataSourceFactory {
+abstract class IDataSourceFactory : ClosingOnShutdown() {
+
+    /**
+     * 缓存数据源
+     */
+    private val dataSources: ConcurrentHashMap<String, DataSource> = ConcurrentHashMap();
 
     /**
      * 获得数据源
@@ -16,11 +25,27 @@ interface IDataSourceFactory {
      * @param name 数据源名
      * @return
      */
-    fun getDataSource(name: String): DataSource;
+    public fun getDataSource(name: String): DataSource {
+        return dataSources.getOrPutOnce(name){
+            buildDataSource(name)
+        }
+    }
+
+    /**
+     * 构建数据源
+     * @param name 数据源名
+     * @return
+     */
+    protected abstract fun buildDataSource(name:String): DataSource
 
     /**
      * 关闭所有数据源
      */
-    fun closeAllDataSources():Unit;
+    public override fun close(){
+        for((name, dataSource) in dataSources){
+            (dataSource as AutoCloseable).close()
+        }
+        dataSources.clear();
+    }
 
 }

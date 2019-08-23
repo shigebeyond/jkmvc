@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.tests
 
+import net.jkcode.jkmvc.common.randomString
 import net.jkcode.jkmvc.db.*
 import net.jkcode.jkmvc.orm.DbKey
 import org.apache.commons.collections.map.HashedMap
@@ -92,7 +93,7 @@ class DbTests{
 
     @Test
     fun testUpdate(){
-        val f = db.execute("update user set name = ?, age = ? where id =?" /*sql*/, listOf("shi", 1, id) /*参数*/) // 返回更新行数
+        val f = db.execute("update user set name = ?, age = ? where id =?" /*sql*/, listOf(randomString(5), 1, id) /*参数*/) // 返回更新行数
         println("更新user表：" + f)
     }
 

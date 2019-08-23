@@ -1,9 +1,8 @@
-package net.jkcode.jkmvc.db
+package net.jkcode.jkmvc.db.single
 
 import com.alibaba.druid.pool.DruidDataSource
 import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.getOrPutOnce
-import java.util.concurrent.ConcurrentHashMap
+import net.jkcode.jkmvc.db.IDataSourceFactory
 import javax.sql.DataSource
 
 /**
@@ -13,31 +12,14 @@ import javax.sql.DataSource
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-class DruidDataSourceFactory : IDataSourceFactory {
-
-    /**
-     * 缓存数据源
-     */
-    protected val dataSources: ConcurrentHashMap<String, DruidDataSource> = ConcurrentHashMap();
-
-    /**
-     * 获得数据源
-     *    跨线程跨请求, 全局共有的数据源
-     * @param name 数据源名
-     * @return
-     */
-    public override fun getDataSource(name: String): DataSource {
-        return dataSources.getOrPutOnce(name){
-            buildDruidDataSource(name)
-        }
-    }
+object DruidDataSourceFactory : IDataSourceFactory() {
 
     /**
      * 构建数据源
      * @param name 数据源名
      * @return
      */
-    private fun buildDruidDataSource(name:String): DruidDataSource {
+    override fun buildDataSource(name:String): DataSource {
         val config: Config = Config.instance("dataSources.$name", "yaml")
         val ds: DruidDataSource = DruidDataSource()
 
@@ -85,16 +67,6 @@ class DruidDataSourceFactory : IDataSourceFactory {
             ds.setFilters(filters)
 
         return ds;
-    }
-
-    /**
-     * 关闭所有数据源
-     */
-    public override fun closeAllDataSources():Unit{
-        for((name, dataSource) in dataSources){
-            dataSource.close()
-        }
-        dataSources.clear();
     }
 
     /**

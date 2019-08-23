@@ -28,6 +28,9 @@ Java use camel-case naming, so jkmvc will transform between ORM object's propert
 vim src/main/resources/db.yaml
 
 ```
+debug: true
+# Whether sharding database, if true we will use sharding-jdbc
+sharding: false
 # Column name is underlined for these dataSource
 columnUnderline: default,test
 # Column name is all uppercase for these dataSource
