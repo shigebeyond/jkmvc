@@ -38,7 +38,7 @@ class DruidDataSourceFactory : IDataSourceFactory {
      * @return
      */
     private fun buildDruidDataSource(name:String): DruidDataSource {
-        val config: Config = Config.instance("database.$name", "yaml")
+        val config: Config = Config.instance("dataSources.$name", "yaml")
         val ds: DruidDataSource = DruidDataSource()
 
         // 基本属性 url、user、password

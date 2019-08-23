@@ -1,12 +1,4 @@
-# 1 公共配置
-__common:
-  # 是否调试
-  debug: true
-  # 指定数据源工厂，需要 IDataSourceFactory 对象，可自定义实现类，但需自己实现根据数据源名来缓存创建好的数据源
-  # set dataSourceFactory for Db, it wants IDataSourceFactory's object, you can implements your subclass, but you need to cache dataSource by a name
-  dataSourceFactory: net.jkcode.jkmvc.db.DruidDataSourceFactory
-
-# 2 不同数据库的配置
+# 不同数据库的配置
 # mysql, 命名: 小写+下划线
 default:
   # 主库
@@ -15,10 +7,6 @@ default:
     url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
     username: root
     password: root
-    # 字段名是下划线命名
-    columnUnderline: true
-    # 字段名全大写
-    columnUpperCase: false
   # 多个从库, 可省略
   slaves:
     -
@@ -34,10 +22,6 @@ default:
 #    url: jdbc:sqlserver://192.168.0.56:1433;databaseName=tempdb
 #    username: sa
 #    password: '111111'
-#    # 字段名是下划线命名
-#    columnUnderline: true
-#    # 字段名全大写
-#    columnUpperCase: false
 
 # oracle, 命名: 大写+下划线
 #default:
@@ -52,7 +36,3 @@ default:
 #    connectionProperties: oracle.jdbc.V8Compatible=true
 #    # 查询超时(秒)
 #    queryTimeOut: 0
-#    # 字段名是下划线命名
-#    columnUnderline: true
-#    # 字段名全大写
-#    columnUpperCase: true

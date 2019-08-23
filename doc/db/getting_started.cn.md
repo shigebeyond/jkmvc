@@ -2,7 +2,7 @@
 
 ## 1 数据库配置, 支持读写分离
 
-vim src/main/resources/database.yaml
+vim src/main/resources/dataSources.yaml
 
 ```
 # 数据库名
@@ -13,10 +13,6 @@ default:
     url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
     username: root
     password: root
-    # 字段名是下划线命名
-    columnUnderline: true
-    # 字段名全大写
-    columnUpperCase: false
   # 多个从库, 可省略
   slaves:
     -
@@ -35,7 +31,7 @@ default:
 1. 管理数据库连接
 2. 执行sql
 
-使用 `Db::instance(name:String = "default"):Db` 来获得 Db 对象，他会找到配置文件 `database.yaml` 中对应 name 的连接配置，并建立连接
+使用 `Db::instance(name:String = "default"):Db` 来获得 Db 对象，他会找到配置文件 `dataSources.yaml` 中对应 name 的连接配置，并建立连接
 
 例子
 

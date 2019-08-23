@@ -1,0 +1,11 @@
+# 是否调试
+debug: true
+# 指定数据源工厂，需要 IDataSourceFactory 对象，可自定义实现类，但需自己实现根据数据源名来缓存创建好的数据源
+# set dataSourceFactory for Db, it wants IDataSourceFactory's object, you can implements your subclass, but you need to cache dataSource by a name
+dataSourceFactory: net.jkcode.jkmvc.db.DruidDataSourceFactory
+# 字段名是下划线命名的数据源, 用于逗号分隔
+# Column name is underlined for these dataSource
+columnUnderline: default,test
+# 字段名全大写的数据源, 用逗号分隔
+# Column name is all uppercase for these dataSource
+columnUpperCase:

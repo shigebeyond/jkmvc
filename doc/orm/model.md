@@ -30,7 +30,7 @@ Orm's meta data reprensents by class `net.jkcode.jkmvc.orm.OrmMeta`, which has t
 2. model label, default is model name
 3. table name, default is model name
 4. primary key, , default is `id`
-5. database name, which is defined in `database.yaml`, default is `default`
+5. database name, which is defined in `dataSources.yaml`, default is `default`
 
 When you create a `net.jkcode.jkmvc.orm.OrmMeta` object, you must pass these properties, just like:
 
@@ -55,7 +55,7 @@ val generator = ModelGenerator("/home/shi/code/java/jkmvc/jkmvc-example/src/main
 generator.genenateModelFile("UserModel" /* model class name */, "用户模型" /* model label */, "user" /* table name */)
 ```
 
-It will generate model code, according to the database and the table. And convert database column name to object's property name, according to configuration item `columnUnderline` and `columnUpperCase`  in file `database.yaml`.
+It will generate model code, according to the database and the table. And convert database column name to object's property name, according to configuration item `columnUnderline` and `columnUpperCase`  in file `dataSources.yaml`.
 
 The code is following
 

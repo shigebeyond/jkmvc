@@ -29,7 +29,7 @@ httponly = false
 
 Supports multiple level of key-value pairs
 
-eg. `jkmvc/jkmvc-orm/src/main/resources/database.yaml`
+eg. `jkmvc/jkmvc-orm/src/main/resources/dataSources.yaml`
 
 ```
 #  database name
@@ -40,11 +40,6 @@ default:
     url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
     username: root
     password: root
-    # column's naming conventions: underline
-    columnUnderline: true
-    # column's naming conventions: all upperCase
-    columnUpperCase: false
-        columnUnderline: true
   # multiple slave databases
   slaves:
     -
@@ -74,7 +69,7 @@ val path:String? = cookieConfig["path"]; // use the [] operator to get the confi
 // get the configuration object
 // first parameter: configure file name and multiple level keys, separated by "."
 // second parameter: configuration file type
-val dbConfig: Config = Config.instance("database.default.master", "yaml")
+val dbConfig: Config = Config.instance("dataSources.default.master", "yaml")
 // get single configuration item, same as 2.1
 val username: String? = config["username"]
 ```

@@ -10,7 +10,7 @@ environment=dev
 ```
 ## 2 Setting up the production database
 
-vim src/main/resources/database.yaml
+vim src/main/resources/dataSources.yaml
 
 Write your database configure
 

@@ -10,7 +10,7 @@ environment=dev
 ```
 ## 2 设置生成库
 
-vim src/main/resources/database.yaml
+vim src/main/resources/dataSources.yaml
 
 修改你的生成库的连接配置
 

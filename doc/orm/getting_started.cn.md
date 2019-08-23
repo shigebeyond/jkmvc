@@ -12,7 +12,7 @@ ORM 允许你像操作java对象一样，操作数据库。一旦你定义好元
 
 在使用 ORM 之前，你必须先定义好数据库配置：
 
-vim src/main/resources/database.yaml
+vim src/main/resources/dataSources.yaml
 
 ```
 # 数据库名
@@ -28,5 +28,14 @@ default:
 ```
 
 Java 使用的是驼峰命名，因此 Jkmvc 会根据上面的 `columnUnderline` and `columnUpperCase` 配置项，在 ORM 对象与数据库字段名之间，自动转换命名。
+
+vim src/main/resources/db.yaml
+
+```
+# 字段名是下划线命名的数据源, 用于逗号分隔
+columnUnderline: default,test
+# 字段名全大写的数据源, 用逗号分隔
+columnUpperCase:
+```
  
 现在你就可以创建 [模型](model.cn.md)，并[使用 ORM](using.cn.md)。

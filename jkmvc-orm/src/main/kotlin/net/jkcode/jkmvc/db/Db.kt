@@ -26,7 +26,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
         /**
          * 公共配置
          */
-        public val commonConfig: Config = Config.instance("database.__common", "yaml")
+        public val commonConfig: Config = Config.instance("db", "yaml")
 
         /**
          * 是否调试
@@ -74,7 +74,7 @@ class Db protected constructor(public override val name:String /* 标识 */,
     /**
      * 数据库配置
      */
-    protected val config: Config = Config.instance("database.$name", "yaml")
+    protected val config: Config = Config.instance("dataSources.$name", "yaml")
 
     /**
      * 从库数量
@@ -266,7 +266,6 @@ class Db protected constructor(public override val name:String /* 标识 */,
      */
     public override fun execute(sql: String, params: List<Any?>, generatedColumn:String?): Int {
         try{
-            // forceMaster = true // 更新后, 让后续操作走主库
             return masterConn.execute(sql, params, generatedColumn);
         }catch (e:Exception){
             dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
@@ -284,7 +283,6 @@ class Db protected constructor(public override val name:String /* 标识 */,
      */
     public override fun batchExecute(sql: String, paramses: List<Any?>, paramSize:Int): IntArray {
         try{
-            // forceMaster = true // 更新后, 让后续操作走主库
             return masterConn.batchExecute(sql, paramses, paramSize)
         }catch (e:Exception){
             dbLogger.error("出错[{}], sql={}, params={}", e.message, sql, paramses)
@@ -385,10 +383,12 @@ class Db protected constructor(public override val name:String /* 标识 */,
         if(dbs.get().remove(name) == null)
             return // 当前线程并没有db对象
 
-        // 关闭连接
+        // 关闭主库连接
         if(connUsed and 1 > 0)
             masterConn.close()
+        // 关闭从库连接
         if(connUsed and 2 > 0)
-            slaveConn.close()
+            if(connUsed and 1 == 0 || masterConn != slaveConn) // 检查从库 != 主库, 防止重复关闭
+                slaveConn.close()
     }
 }

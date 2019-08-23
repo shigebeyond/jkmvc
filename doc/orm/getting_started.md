@@ -12,7 +12,7 @@ By creating relationships between models that follow convention over configurati
 
 Before we use ORM, we must define database configuration.
 
-vim src/main/resources/database.yaml
+vim src/main/resources/dataSources.yaml
 
 ```
 # database name
@@ -21,12 +21,17 @@ default:
     url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
     username: root
     password: root
-    # Column name is underlined
-    columnUnderline: true
-    # Column name is all uppercase
-    columnUpperCase: false
 ```
 
 Java use camel-case naming, so jkmvc will transform between ORM object's property name and table's column name, according to configuration item `columnUnderline` and `columnUpperCase`
+
+vim src/main/resources/db.yaml
+
+```
+# Column name is underlined for these dataSource
+columnUnderline: default,test
+# Column name is all uppercase for these dataSource
+columnUpperCase:
+```
 
 You can now create your [model](model.md) and [use ORM](using.md).

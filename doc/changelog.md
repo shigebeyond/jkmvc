@@ -67,3 +67,6 @@
 
 20. IQuotaFlusher 暴露open属性 executor 来让子类可以修改执行线程, 主要是给 TopicMessagesExector 使用, 用于控制消息消费的并发或串行.
 
+# 1.8
+
+1. 重构db, 兼容sharding-jdbc的dataSource

@@ -29,7 +29,7 @@ httponly = false
 
 支持定义多层的键值对
 
-如 `jkmvc/jkmvc-orm/src/main/resources/database.yaml`
+如 `jkmvc/jkmvc-orm/src/main/resources/dataSources.yaml`
 
 ```
 # 数据库名
@@ -40,10 +40,6 @@ default:
     url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
     username: root
     password: root
-    # 字段名是下划线命名
-    columnUnderline: true
-    # 字段名全大写
-    columnUpperCase: false
   # 多个从库, 可省略
   slaves:
     -
@@ -72,7 +68,7 @@ val path:String? = cookieConfig["path"]; // 使用[]操作符来获得配置项�
 // 获得配置对象
 // 第一个参数：配置文件名+多层的键，以"."分隔
 // 第二个参数：配置文件类型
-val dbConfig: Config = Config.instance("database.default.master", "yaml")
+val dbConfig: Config = Config.instance("dataSources.default.master", "yaml")
 // 获得单个配置项，与2.1一样
 val username: String? = config["username"]
 ```

@@ -1,8 +1,8 @@
 # Manipulate database
 
-## 1 Configure database
+## 1 Configure dataSource
 
-vim src/main/resources/database.yaml
+vim src/main/resources/dataSources.yaml
 
 ```
 #  database name
@@ -13,11 +13,6 @@ default:
     url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
     username: root
     password: root
-    # column's naming conventions: underline
-    columnUnderline: true
-    # column's naming conventions: all upperCase
-    columnUpperCase: false
-        columnUnderline: true
   # multiple slave databases
   slaves:
     -
@@ -35,7 +30,7 @@ Database manipulation class is `net.jkcode.jkmvc.db.Db`, there are 2 usage
 1. Manage database connections
 2. Execute sql
 
-Use `Db::instance(name:String = "default"):Db` to get `Db` object, it will get the configuration item corresponding to the `name` in file `database.yaml`, and establish a database connection.
+Use `Db::instance(name:String = "default"):Db` to get `Db` object, it will get the configuration item corresponding to the `name` in file `dataSources.yaml`, and establish a database connection.
 
 Just like:
 

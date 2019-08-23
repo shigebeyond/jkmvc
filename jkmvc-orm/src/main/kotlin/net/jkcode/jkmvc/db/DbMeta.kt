@@ -51,7 +51,23 @@ internal class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
     /**
      * 主库配置
      */
-    protected val masterConfig: Config = Config.instance("database.$name.master", "yaml")
+    protected val config: Config = Config.instance("db", "yaml")
+
+    /**
+     * 字段有下划线
+     */
+    protected val columnUnderline: Boolean by lazy{
+        val dbs: String? = config["columnUnderline"] // 获得 字段有下划线 的db
+        dbs?.split(",")?.contains(name) ?: false
+    }
+
+    /**
+     * 字段全大写
+     */
+    protected val columnUpperCase: Boolean by lazy{
+        val dbs: String? = config["columnUpperCase"] // 获得 字段全大写 的db
+        dbs?.split(",")?.contains(name) ?: false
+    }
 
     /**
      * 任意连接
@@ -122,6 +138,8 @@ internal class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
      *    可省略，默认值=username
      */
     public override val schema:String? by lazy {
+        // 主库配置, 只支持单机db, 不只是sharding db
+        val masterConfig: Config = Config.instance("dataSources.$name.master", "yaml")
         if(dbType == DbType.Oracle) // oracle: 直接读db配置
             masterConfig.getString("schema", masterConfig["username"])
         else if(dbType == DbType.Mysql){ // mysql: 解析url
@@ -164,9 +182,9 @@ internal class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
 
             // 转属性
             var column = if(tableAndProp == null) prop else tableAndProp[1]
-            if(masterConfig["columnUnderline"]!!) // 字段有下划线
+            if(columnUnderline) // 字段有下划线
                 column = column.camel2Underline()
-            if(masterConfig["columnUpperCase"]!!)// 字段全大写
+            if(columnUpperCase)// 字段全大写
                 column = column.toUpperCase() // 转大写
 
             if(tableAndProp == null) column else tableAndProp[0] + '.' + column
@@ -183,9 +201,9 @@ internal class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
     public override fun column2Prop(column:String): String {
         return column2PropMapping.getOrPut(column){
             var prop = column
-            if(masterConfig["columnUpperCase"]!!)// 字段全大写
+            if(columnUpperCase)// 字段全大写
                 prop = prop.toLowerCase() // 转小写
-            if(masterConfig["columnUnderline"]!!) // 字段有下划线
+            if(columnUnderline) // 字段有下划线
                 prop = prop.underline2Camel()
             prop
         }
