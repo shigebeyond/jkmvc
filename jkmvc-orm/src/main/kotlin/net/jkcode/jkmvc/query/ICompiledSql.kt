@@ -83,7 +83,7 @@ abstract class ICompiledSql: IDbQuery() {
      * @param generatedColumn 返回的自动生成的主键名
      * @return 影响行数|新增id
      */
-    public abstract fun execute(params: List<Any?>, generatedColumn:String?, db: IDb):Int
+    public abstract fun execute(params: List<Any?>, generatedColumn:String?, db: IDb): Long
 
     /**
      * 批量更新有参数的sql

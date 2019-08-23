@@ -224,7 +224,7 @@ abstract class Db protected constructor(public override val name:String /* 标�
      * @param generatedColumn 返回的自动生成的主键名
      * @return
      */
-    public override fun execute(sql: String, params: List<Any?>, generatedColumn:String?): Int {
+    public override fun execute(sql: String, params: List<Any?>, generatedColumn:String?): Long {
         try{
             return masterConn.execute(sql, params, generatedColumn);
         }catch (e:Exception){

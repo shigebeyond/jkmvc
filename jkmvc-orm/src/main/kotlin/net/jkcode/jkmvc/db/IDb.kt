@@ -83,7 +83,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter, ClosingOnReque
      * @param generatedColumn 返回的自动生成的主键名
      * @return
      */
-    public abstract fun execute(sql: String, params: List<Any?> = emptyList(), generatedColumn:String? = null): Int;
+    public abstract fun execute(sql: String, params: List<Any?> = emptyList(), generatedColumn:String? = null): Long;
 
     /**
      * 批量更新: 每次更新sql参数不一样

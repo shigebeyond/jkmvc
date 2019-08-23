@@ -230,7 +230,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param generatedColumn 返回的自动生成的主键名
      * @return 影响行数|新增id
      */
-    public override fun execute(params: List<Any?>, generatedColumn:String?, db: IDb):Int {
+    public override fun execute(params: List<Any?>, generatedColumn:String?, db: IDb): Long {
         return db.execute(sql, buildParams(params), generatedColumn);
     }
 

@@ -115,7 +115,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      * @param db 数据库连接
      * @return 影响行数|新增id
      */
-    public abstract fun execute(action: SqlType, params:List<Any?> = emptyList(), generatedColumn:String? = null, db: IDb = defaultDb):Int;
+    public abstract fun execute(action: SqlType, params:List<Any?> = emptyList(), generatedColumn:String? = null, db: IDb = defaultDb): Long;
 
     /**
      * 插入：insert语句
@@ -125,7 +125,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      *  @param db 数据库连接
      * @return 新增的id
      */
-    public fun insert(generatedColumn:String? = null, params: List<Any?> = emptyList(), db: IDb = defaultDb):Int {
+    public fun insert(generatedColumn:String? = null, params: List<Any?> = emptyList(), db: IDb = defaultDb): Long {
         return execute(SqlType.INSERT, params, generatedColumn, db);
     }
 
@@ -136,7 +136,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      * @param db 数据库连接
      * @return
      */
-    public fun update(params: List<Any?> = emptyList(), db: IDb = defaultDb):Boolean {
+    public fun update(params: List<Any?> = emptyList(), db: IDb = defaultDb): Boolean {
         return execute(SqlType.UPDATE, params, null, db) > 0;
     }
 
@@ -147,7 +147,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      * @param db 数据库连接
      * @return
      */
-    public fun delete(params: List<Any?> = emptyList(), db: IDb = defaultDb):Boolean {
+    public fun delete(params: List<Any?> = emptyList(), db: IDb = defaultDb): Boolean {
         return execute(SqlType.DELETE, params, null, db) > 0;
     }
 

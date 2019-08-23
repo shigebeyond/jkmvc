@@ -65,7 +65,7 @@ isInTransaction(): Boolean | Check whether in a transaction
 
 Method | Function
 --- --- --- ---
-execute(sql: String, params: List<Any?> = emptyList(), generatedColumn: String? = null): Int | Execute a update-sql
+execute(sql: String, params: List<Any?> = emptyList(), generatedColumn: String? = null): Long | Execute a update-sql
 batchExecute(sql: String, paramses: List<Any?>): IntArray | Batch update
 
 ### 3.4 Query-sql executing method

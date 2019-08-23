@@ -135,7 +135,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      * @param db 数据库连接
      * @return 影响行数|新增id
      */
-    public override fun execute(action: SqlType, params:List<Any?>, generatedColumn:String?, db: IDb):Int {
+    public override fun execute(action: SqlType, params:List<Any?>, generatedColumn:String?, db: IDb): Long {
         // 编译 + 执行
         return compile(action, db).execute(params, generatedColumn, db)
     }

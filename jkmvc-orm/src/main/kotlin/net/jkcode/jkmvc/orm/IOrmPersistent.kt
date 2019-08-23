@@ -69,7 +69,7 @@ interface IOrmPersistent : IOrmValid {
 	 * 
 	 * @return 新增数据的主键
 	 */
-	fun create(): Int;
+	fun create(): Long;
 
 	/**
 	 * 更新数据: update sql

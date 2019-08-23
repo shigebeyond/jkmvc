@@ -80,7 +80,7 @@ abstract class OrmPersistent : OrmValid() {
 	 * 
 	 * @return 新增数据的主键
 	 */
-	public override fun create(): Int {
+	public override fun create(): Long {
 		if(dirty.isEmpty())
 			throw OrmException("No data to create"); // 没有要创建的数据
 

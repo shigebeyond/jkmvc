@@ -109,7 +109,7 @@ class MiddleRelationMeta(
      * @param farPk IOrm 从对象
      * @return
      */
-    public fun insertMiddleTable(pk:IOrm, farPk:IOrm): Int {
+    public fun insertMiddleTable(pk:IOrm, farPk:IOrm): Long {
         return insertMiddleTable(pk as Any, farPk as Any)
     }
 
@@ -120,7 +120,7 @@ class MiddleRelationMeta(
      * @param farPk Any从表主键 | IOrm 从对象
      * @return
      */
-    public fun insertMiddleTable(pk:Any, farPk:Any): Int {
+    public fun insertMiddleTable(pk:Any, farPk:Any): Long {
         val query = DbQueryBuilder(ormMeta.db).from(middleTable).insertColumns(*foreignKey.columns, *farForeignKey.columns)
         val pk2 = if(pk is IOrm) pk.gets(primaryProp) else pk
         val farPk2 = if(farPk is IOrm) farPk.gets(farPrimaryProp) else farPk

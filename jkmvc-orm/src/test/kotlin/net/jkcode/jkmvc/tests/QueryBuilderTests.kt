@@ -28,7 +28,7 @@ class QueryBuilderTests{
     @Test
     fun testBatchInsert(){
         val query = DbQueryBuilder().table("user").insertColumns("name", "age");
-        val ids = ArrayList<Int>()
+        val ids = ArrayList<Long>()
         for (i in id..(id+10)){
             query.value("shi-$i", i)
             val id = query.insert("id");

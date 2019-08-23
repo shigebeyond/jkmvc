@@ -66,7 +66,7 @@ public fun PreparedStatement.setParameters(params: List<Any?>, start:Int = 0, le
  *       注：mysql可以不指定自增主键名，但oracle必须指定，否则调用pst.getGeneratedKeys()报错：不允许的操作
  * @return
  */
-public fun Connection.execute(sql: String, params: List<Any?> = emptyList(), generatedColumn:String? = null): Int {
+public fun Connection.execute(sql: String, params: List<Any?> = emptyList(), generatedColumn:String? = null): Long {
     var pst: PreparedStatement? = null
     var rs: ResultSet? = null;
     try{
@@ -84,7 +84,7 @@ public fun Connection.execute(sql: String, params: List<Any?> = emptyList(), gen
             return getGeneratedKey(pst)
 
         // 非insert语句，返回行数
-        return rows;
+        return rows.toLong()
     }finally{
         rs?.close()
         pst?.close()
@@ -97,12 +97,12 @@ public fun Connection.execute(sql: String, params: List<Any?> = emptyList(), gen
  * @param pst
  * @return
  */
-private fun getGeneratedKey(pst: PreparedStatement): Int {
+private fun getGeneratedKey(pst: PreparedStatement): Long {
     var rs: ResultSet? = null
     try {
         rs = pst.getGeneratedKeys(); //获取新增id
         rs.next();
-        return rs.getInt(1); //返回新增id
+        return rs.getLong(1); //返回新增id
     }finally{
         rs?.close()
     }
