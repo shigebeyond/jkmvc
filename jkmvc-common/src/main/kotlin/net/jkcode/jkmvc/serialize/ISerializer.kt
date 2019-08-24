@@ -36,8 +36,8 @@ interface ISerializer {
      * @param bytes
      * @return
      */
-    fun unserizlize(bytes: ByteArray): Any? {
-        return unserizlize(ByteArrayInputStream(bytes))
+    fun unserialize(bytes: ByteArray): Any? {
+        return unserialize(ByteArrayInputStream(bytes))
     }
 
     /**
@@ -46,5 +46,5 @@ interface ISerializer {
      * @param input
      * @return
      */
-    fun unserizlize(input: InputStream): Any?
+    fun unserialize(input: InputStream): Any?
 }

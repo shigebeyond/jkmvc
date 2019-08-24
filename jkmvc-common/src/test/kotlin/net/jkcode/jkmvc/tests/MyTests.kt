@@ -125,7 +125,7 @@ class MyTests{
     @Test
     fun testSerialize(){
         //val obj = "hello world"
-        //val words = LongArray(3)
+        //val obj = LongArray(3)
         //val obj = BitSet.valueOf(words)
         val obj = BitSet()
         obj.set(100)
@@ -133,7 +133,7 @@ class MyTests{
         val instance = ISerializer.instance("fst")
         val bs = instance.serialize(obj)
         if(bs != null) {
-            val obj2 = instance.unserizlize(bs!!)
+            val obj2 = instance.unserialize(bs!!)
             println(obj2)
         }
     }

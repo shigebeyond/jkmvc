@@ -27,5 +27,5 @@ val dest = serializer.serialize(src)
 ## 反序列化
 
 ```
-val src = serializer.unserizlize(dest)
+val src = serializer.unserialize(dest)
 ```

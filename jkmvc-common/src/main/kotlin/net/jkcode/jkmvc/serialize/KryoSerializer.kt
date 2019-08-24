@@ -42,7 +42,7 @@ class KryoSerializer: ISerializer {
      * @param input
      * @return
      */
-    public override fun unserizlize(input: InputStream): Any? {
+    public override fun unserialize(input: InputStream): Any? {
         try {
             val kryo = Kryo()
             val input = Input(input)

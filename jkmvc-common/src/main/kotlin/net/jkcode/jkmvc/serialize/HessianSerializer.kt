@@ -41,7 +41,7 @@ class HessianSerializer: ISerializer {
      * @param input
      * @return
      */
-    public override fun unserizlize(input: InputStream): Any? {
+    public override fun unserialize(input: InputStream): Any? {
         try{
             val his = Hessian2Input(input)
             return his.readObject()

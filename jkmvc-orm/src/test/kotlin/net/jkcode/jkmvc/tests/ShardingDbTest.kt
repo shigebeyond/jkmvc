@@ -41,7 +41,7 @@ class ShardingDbTest {
 
     @Test
     fun testFind(){
-        val row = db.queryRow("select * from user limit 1" /*sql*/, emptyList() /*参数*/, ::HashedMap /*转换结果的函数*/) // 返回 Map 类型的一行数据
+        val row = db.queryRow("select * from t_order limit 1" /*sql*/, emptyList() /*参数*/, ::HashedMap /*转换结果的函数*/) // 返回 Map 类型的一行数据
         println("查询user表：" + row)
     }
 
@@ -50,7 +50,6 @@ class ShardingDbTest {
         val rows = db.queryRows("SELECT i.* FROM t_order o JOIN t_order_item i ON o.order_id=i.order_id WHERE o.user_id in (?, ?)" /*sql*/, listOf(10, 11) /*参数*/, ::HashedMap /*转换结果的函数*/) // 返回 Map 类型的多行数据
         println("查询订单表：" + rows)
     }
-
 
     @Test
     fun testTransaction(){

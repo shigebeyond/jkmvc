@@ -74,7 +74,7 @@ class EntityTests{
         val instance = ISerializer.instance("fst")
         val bs = instance.serialize(msg)
         if(bs != null) {
-            val msg2: MessageEntity = instance.unserizlize(bs!!) as MessageEntity
+            val msg2: MessageEntity = instance.unserialize(bs!!) as MessageEntity
             println(msg2)
             println("" + msg2.fromUid + " => " + msg2.toUid + " : " + msg2.content)
         }

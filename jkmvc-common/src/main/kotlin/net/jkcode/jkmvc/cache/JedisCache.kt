@@ -42,7 +42,7 @@ class JedisCache(protected val configName: String = "default") : BaseCache(){
         val value = jedis.get(serializer.serialize(key))
         if(value == null)
             return null
-        return serializer.unserizlize(value)
+        return serializer.unserialize(value)
     }
 
     /**

@@ -247,7 +247,7 @@ open class OrmEntity : IOrmEntity, Serializable {
      * @param bytes
      */
     public override fun unserialize(bytes: ByteArray): Unit {
-        data.putAll(serializer.unserizlize(bytes) as Map<String, Any?>)
+        data.putAll(serializer.unserialize(bytes) as Map<String, Any?>)
     }
 
     /**

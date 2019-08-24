@@ -52,7 +52,7 @@ class ProtostuffSerializer: ISerializer {
      * @param bytes
      * @return
      */
-    public override fun unserizlize(bytes: ByteArray): Any? {
+    public override fun unserialize(bytes: ByteArray): Any? {
         val clazz = Any::class.java
         val obj:Any = objenesis.newInstance(clazz)
         val schma = getSchma(clazz)
@@ -66,7 +66,7 @@ class ProtostuffSerializer: ISerializer {
      * @param input
      * @return
      */
-    public override fun unserizlize(input: InputStream): Any? {
+    public override fun unserialize(input: InputStream): Any? {
         val clazz = Any::class.java
         val obj:Any = objenesis.newInstance(clazz)
         val schma = getSchma(clazz)

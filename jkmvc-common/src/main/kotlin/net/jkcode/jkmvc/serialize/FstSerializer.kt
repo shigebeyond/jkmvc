@@ -33,7 +33,7 @@ class FstSerializer: ISerializer {
      * @param bytes
      * @return
      */
-    public override fun unserizlize(bytes: ByteArray): Any? {
+    public override fun unserialize(bytes: ByteArray): Any? {
         return conf.getObjectInput(bytes).readObject()
     }
 
@@ -43,7 +43,7 @@ class FstSerializer: ISerializer {
      * @param input
      * @return
      */
-    public override fun unserizlize(input: InputStream): Any? {
+    public override fun unserialize(input: InputStream): Any? {
         return conf.getObjectInput(input).readObject()
     }
 

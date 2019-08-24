@@ -35,7 +35,7 @@ class JdkSerializer : ISerializer {
      * @param input
      * @return
      */
-    public override fun unserizlize(input: InputStream): Any? {
+    public override fun unserialize(input: InputStream): Any? {
         try {
             val oi = ObjectInputStream(input)
             return oi.readObject()
