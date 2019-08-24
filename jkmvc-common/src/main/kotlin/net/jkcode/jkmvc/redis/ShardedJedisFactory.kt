@@ -15,17 +15,11 @@ import java.util.concurrent.ConcurrentHashMap
  **/
 object ShardedJedisFactory: IJedisFactory {
 
+    /********************* 连接池 *******************/
     /**
      * redis连接池
      */
     private val pools: ConcurrentHashMap<String, ShardedJedisPool> = ConcurrentHashMap();
-
-    /**
-     * 线程安全的redis连接
-     */
-    private val jedises:ThreadLocal<MutableMap<String, ShardedJedis>> = ThreadLocal.withInitial {
-        HashMap<String, ShardedJedis>();
-    }
 
     /**
      * 获得连接池
@@ -63,13 +57,21 @@ object ShardedJedisFactory: IJedisFactory {
         return ShardedJedisPool(poolConfig, shards)
     }
 
+    /********************* 线程安全的单例 *******************/
+    /**
+     * 线程安全的redis连接
+     */
+    private val jedises:ThreadLocal<MutableMap<String, ShardedJedis>> = ThreadLocal.withInitial {
+        HashMap<String, ShardedJedis>();
+    }
+
     /**
      * 获得redis连接
      *
      * @param name 配置标识
      * @return
      */
-    public fun instance(name: String = "default"): ShardedJedis {
+    public fun getConnection(name: String = "default"): ShardedJedis {
         // 获得已有连接
         var jedis:ShardedJedis = jedises.get().getOrPut(name){
             getPool(name).resource

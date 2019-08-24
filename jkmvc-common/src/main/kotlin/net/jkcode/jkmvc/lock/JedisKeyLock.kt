@@ -1,10 +1,8 @@
 package net.jkcode.jksoa.lock
 
 import net.jkcode.jkmvc.common.Application
-import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.IConfig
-import net.jkcode.jkmvc.redis.JedisFactory
-import redis.clients.jedis.Jedis
+import net.jkcode.jkmvc.redis.ShardedJedisFactory
+import redis.clients.jedis.ShardedJedis
 
 /**
  * 分布式锁实现: redis锁
@@ -24,9 +22,9 @@ class JedisKeyLock : IDistributedKeyLock() {
         /**
          * redis连接
          */
-        protected val jedis: Jedis
+        protected val jedis: ShardedJedis
             get(){
-                return JedisFactory.instance()
+                return ShardedJedisFactory.getConnection()
             }
     }
 

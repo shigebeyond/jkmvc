@@ -9,7 +9,7 @@ import net.jkcode.jkmvc.elements.ElementCollection
 import net.jkcode.jkmvc.idworker.SnowflakeId
 import net.jkcode.jkmvc.idworker.SnowflakeIdWorker
 import net.jkcode.jkmvc.iterator.ArrayFilteredIterator
-import net.jkcode.jkmvc.redis.JedisFactory
+import net.jkcode.jkmvc.redis.ShardedJedisFactory
 import net.jkcode.jkmvc.serialize.ISerializer
 import net.jkcode.jkmvc.validator.ValidateFuncDefinition
 import org.dom4j.Attribute
@@ -1261,7 +1261,7 @@ class MyTests{
 
     @Test
     fun testRedis(){
-        val jedis = JedisFactory.instance()
+        val jedis = ShardedJedisFactory.getConnection()
         println(jedis.get("name"))
         jedis.set("name", "shi")
         println(jedis.get("name"))

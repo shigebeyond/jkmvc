@@ -28,7 +28,7 @@ class JedisCache(protected val configName: String = "default") : BaseCache(){
      */
     protected val jedis: ShardedJedis
         get(){
-            return ShardedJedisFactory.instance(configName)
+            return ShardedJedisFactory.getConnection(configName)
         }
 
 
