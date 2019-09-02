@@ -292,7 +292,25 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
         return query.batchUpdate(params);
     }
 
+    /**
+     * 单个删除
+     *
+     * @param pk 主键值, 可能是单主键(Any), 也可能是多主键(DbKey)
+     * @return
+     */
+    public override fun delete(pk: Any): Boolean {
+        // 构建delete语句
+        val query = queryBuilder().where(primaryKey, DbExpr.question)
 
+        // 构建参数
+        val params:ArrayList<Any?> = ArrayList()
+        if(pk is DbKey<*>)
+            params.addAll(pk.columns)
+        else
+            params.add(pk)
+
+        return query.delete(params)
+    }
 
     /**
      * 批量删除

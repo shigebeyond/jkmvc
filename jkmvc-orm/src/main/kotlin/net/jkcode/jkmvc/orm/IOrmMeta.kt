@@ -177,6 +177,14 @@ interface IOrmMeta {
     fun batchUpdate(items: List<IOrmEntity>): IntArray
 
     /**
+     * 单个删除
+     *
+     * @param pk 主键值, 可能是单主键(Any), 也可能是多主键(DbKey)
+     * @return
+     */
+    fun delete(pk: Any): Boolean
+
+    /**
      * 批量删除
      *
      * @param pks 主键值列表, 主键值可能是单主键(Any), 也可能是多主键(DbKey)

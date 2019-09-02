@@ -25,6 +25,7 @@ import java.lang.reflect.ParameterizedType
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.collections.ArrayList
@@ -120,6 +121,32 @@ class MyTests{
         println(map)
         println(map.keys) // keySet()
         println(map.values) // values()
+    }
+
+    @Test
+    fun testTreeMap(){
+        val map = TreeMap<Int, String>()
+        map[4] = "d"
+        map[3] = "c"
+        map[1] = "a"
+        map[2] = "b"
+        println(map) // {1=a, 2=b, 3=c, 4=d}
+        println(map.keys) // [1, 2, 3, 4]
+        println(map.values) // [a, b, c, d]
+
+        val hm = map.headMap(3)
+        println(hm) // {1=a, 2=b} -- key < 3
+
+        val tm = map.tailMap(3)
+        println(tm) // {3=c, 4=d} -- key >= 3, 包含3
+
+        println("----- clear sub map")
+        // 子map清空后, 父map也会删除相应的元素
+        hm.clear()
+        println(map) // {3=c, 4=d}
+
+        tm.clear()
+        println(map) // {}
     }
 
     @Test
