@@ -12,13 +12,13 @@ public val UnitFuture: CompletableFuture<Unit> = CompletableFuture.completedFutu
  * 等待并输出异步结果
  */
 public fun List<CompletableFuture<*>>.print() {
-    this.toTypedArray().print()
+    (this.toTypedArray() as Array<CompletableFuture<Any?>>).print()
 }
 
 /**
  * 等待并输出异步结果
  */
-public fun Array<CompletableFuture<*>>.print() {
+public fun Array<CompletableFuture<Any?>>.print() {
     val f: CompletableFuture<Void> = CompletableFuture.allOf(*this)
     f.get() // 等待
     println(this.joinToString(", ", "异步结果: [", "]") {
