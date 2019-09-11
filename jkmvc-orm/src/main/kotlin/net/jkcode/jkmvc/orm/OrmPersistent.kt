@@ -117,16 +117,47 @@ abstract class OrmPersistent : OrmValid() {
 	/**
 	* 构建要改变的数据
 	 *   在往db中写数据时调用，将本对象的变化属性值保存到db中
-	 *   要做字段转换：对象属性名 -> db字段名
+	 *   要做字段名转换：对象属性名 -> db字段名
+	 *   要做字段值转换: 序列化
 	 *
 	 * @return
 	 */
 	protected fun buildDirtyData(): MutableRow {
 		// 挑出变化的属性
 		return dirty.associate { prop, oldValue ->
+			// 字段名
+			val column = ormMeta.prop2Column(prop)
+			// 字段值
+			var value = data[prop]
+			var value2 = if(value != null && ormMeta.serializingProps.contains(prop))
+				serializer.serialize(value)
+			else
+				value
 			// 字段名 => 字段值
-			ormMeta.prop2Column(prop) to data[prop]
+			column to value2
 		}
+	}
+
+	/**
+	 * 设置原始的单个字段值
+	 *    在从db中读数据时调用，来赋值给本对象属性
+	 *    要做字段名转换：db字段名 -> 对象属性名
+	 *    要做字段值转换: 反序列化
+	 *    被 OrmRelated::setOriginal(orgn: Row) 逐个字段调用
+	 *
+	 * @param column 字段名
+	 * @param value 字段值
+	 */
+	protected fun setOriginal(column: String, value: Any?): Unit{
+		// 属性名
+		val prop = ormMeta.column2Prop(column)
+		// 属性值: 需要反序列化
+		var value2 = if(value is ByteArray && ormMeta.serializingProps.contains(prop))
+						serializer.unserialize(value)
+					else
+						value
+		// 设置属性值
+		data[prop] = value2;
 	}
 
 	/**

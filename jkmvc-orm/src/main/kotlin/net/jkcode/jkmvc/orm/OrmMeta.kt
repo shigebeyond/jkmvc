@@ -109,6 +109,12 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     }
 
     /**
+     * 要序列化的对象属性
+     *   写时序列化, 读时反序列化
+     */
+    public override val serializingProps: List<String> = emptyList()
+
+    /**
      * 默认要设置的字段名
      */
     public override val defaultExpectedProps: List<String> by lazy{
