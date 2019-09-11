@@ -15,4 +15,9 @@ interface IOrmValid : IOrmEntity {
      */
     fun validate(): Boolean;
 
+    /**
+     * 标记字段为脏
+     * @param column 字段名
+     */
+    fun setDirty(column: String)
 }

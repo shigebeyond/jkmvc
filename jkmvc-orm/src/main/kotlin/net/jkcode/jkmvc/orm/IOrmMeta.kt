@@ -79,6 +79,12 @@ interface IOrmMeta {
     val props: List<String>
 
     /**
+     * 要序列化的对象属性
+     *   写时序列化, 读时反序列化
+     */
+    val serializingProps: List<String>
+
+    /**
      * 默认要设置的字段名
      */
     val defaultExpectedProps: List<String>
