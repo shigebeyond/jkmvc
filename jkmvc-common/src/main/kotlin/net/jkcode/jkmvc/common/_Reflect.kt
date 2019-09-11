@@ -6,7 +6,9 @@ import java.io.File
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
 import java.lang.reflect.*
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Future
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.*
 import kotlin.reflect.full.declaredMemberProperties
@@ -22,8 +24,13 @@ public fun Any.forceClone():Any {
     if(!(this is Cloneable))
         throw IllegalArgumentException("非Cloneable对象，不能调用clone()方法")
 
+    /*
     val f:KFunction<*> = this::class.getFunction("clone")!!
-    return f.call(this) as Any;
+    return f.call(this) as Any
+    */
+    val method = this.javaClass.getMethod("clone")
+    method.isAccessible = true
+    return method.invoke(this)
 }
 
 /**
@@ -196,13 +203,40 @@ public fun <T: Any> KClass<T>.getGetters(): Map<String, KProperty1.Getter<T, Any
     }
 }
 
-/****************************** java反射扩展: Class *******************************/
+/****************************** java反射扩展: Method *******************************/
 /**
  * 是否静态方法
  */
 public val Method.isStatic: Boolean
         get() = Modifier.isStatic(modifiers)
 
+/**
+ * 从CompletableFuture获得方法结果值
+ *
+ * @param resFuture
+ * @return
+ */
+public fun Method.resultFromFuture(resFuture: CompletableFuture<Any?>): Any? {
+    // 1 异步结果
+    //if (Future::class.java.isAssignableFrom(method.returnType))
+    if(this.returnType == Future::class.java
+            || this.returnType == CompletableFuture::class.java)
+        return resFuture
+
+    // 2 同步结果
+    return resFuture.get()
+}
+
+/**
+ * 获得方法的默认结果值
+ * @return
+ */
+public fun Method.defaultResult(): Any? {
+    return this.returnType.kotlin.defaultValue
+}
+
+
+/****************************** java反射扩展: Class *******************************/
 /**
  * 是否抽象类
  */

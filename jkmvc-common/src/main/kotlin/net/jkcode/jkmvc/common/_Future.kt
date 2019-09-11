@@ -27,6 +27,18 @@ public fun Array<CompletableFuture<Any?>>.print() {
 }
 
 /**
+ * 等待并合并异步结果
+ */
+public fun Array<CompletableFuture<Any?>>.join(): CompletableFuture<Array<Any?>> {
+    val f: CompletableFuture<Void> = CompletableFuture.allOf(*this)
+    return f.thenApply {
+        this.mapToArray { future ->
+            future.get()
+        }
+    }
+}
+
+/**
  * 将(单参数)的方法调用 转为future工厂
  * @param supplier
  * @return

@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.TimeUnit
+import java.util.function.Supplier
 import kotlin.reflect.KProperty1
 import kotlin.reflect.jvm.javaField
 
@@ -41,6 +42,15 @@ public val threadPoolCloser = object: ClosingOnShutdown(){
  */
 public fun ExecutorService.runAsync(runnable: Runnable): CompletableFuture<Void> {
     return CompletableFuture.runAsync(runnable, this)
+}
+
+/**
+ * 异步执行, 并返回异步结果
+ * @param runnable
+ * @return
+ */
+public fun <T> ExecutorService.supplyAsync(supplier: Supplier<T>): CompletableFuture<T> {
+    return CompletableFuture.supplyAsync(supplier, this)
 }
 
 /**

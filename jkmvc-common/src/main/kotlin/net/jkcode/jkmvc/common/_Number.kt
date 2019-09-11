@@ -10,6 +10,8 @@ import kotlin.reflect.KClass
  */
 public inline fun <T: Any> BigDecimal.toNumber(clazz: KClass<T>): T{
     return when(clazz){
+        Byte::class -> this.toByte()
+        Short::class -> this.toShort()
         Int::class -> this.toInt()
         Long::class -> this.toLong()
         Float::class -> this.toFloat()
