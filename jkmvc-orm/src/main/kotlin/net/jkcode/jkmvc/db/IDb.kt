@@ -69,6 +69,13 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter, ClosingOnReque
     public abstract fun isInTransaction(): Boolean
 
     /**
+     * 添加事务完成后的回调
+     * @param callback 回调函数, 只有一个Boolean参数, 代表是否提交
+     * @return
+     */
+    public abstract fun addTransactionCallback(callback: (Boolean)->Unit): IDb
+
+    /**
      * 预览sql
      * @param sql
      * @param params sql参数

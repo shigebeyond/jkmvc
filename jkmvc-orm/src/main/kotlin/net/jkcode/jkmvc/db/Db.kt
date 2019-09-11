@@ -92,6 +92,13 @@ abstract class Db protected constructor(public override val name:String /* 标�
     protected var rollbacked = false;
 
     /**
+     * 事务完成后的回调
+     */
+    protected val transactionCallbacks: MutableList<(Boolean)->Unit> by lazy{
+        LinkedList<(Boolean)->Unit>()
+    }
+
+    /**
      * 是否强制使用主库
      */
     public override fun forceMaster(f: Boolean): IDb{
@@ -114,6 +121,16 @@ abstract class Db protected constructor(public override val name:String /* 标�
             rollback(); // 回顾
             throw e;
         }
+    }
+
+    /**
+     * 添加事务完成后的回调
+     * @param callback 回调函数, 只有一个Boolean参数, 代表是否提交
+     * @return
+     */
+    public override fun addTransactionCallback(callback: (Boolean)->Unit): IDb {
+        transactionCallbacks.add(callback)
+        return this
     }
 
     /**
@@ -155,7 +172,11 @@ abstract class Db protected constructor(public override val name:String /* 标�
                 handleRollback()
             else
                 handleCommit()
-            val result = rollbacked;
+            val result = !rollbacked;
+            // 调用回调
+            transactionCallbacks.forEach {
+                it.invoke(result)
+            }
             rollbacked = false; // 清空回滚标记
             return result;
         }
@@ -177,6 +198,10 @@ abstract class Db protected constructor(public override val name:String /* 标�
         {
             rollbacked = false; // 清空回滚标记
             handleRollback() // 回滚事务
+            // 调用回调
+            transactionCallbacks.forEach {
+                it.invoke(false)
+            }
         }
 
         // 有嵌套事务
