@@ -3,6 +3,8 @@ package net.jkcode.jkmvc.orm
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.serializer.SerializerFeature
 import net.jkcode.jkmvc.common.decorateIterator
+import net.jkcode.jkmvc.common.isAbstract
+import net.jkcode.jkmvc.common.isSubClass
 import net.jkcode.jkmvc.db.Row
 import java.io.Serializable
 import java.util.*
@@ -66,7 +68,29 @@ public val KClass<out IOrm>.modelOrmMeta: IOrmMeta
     get() = companionObjectInstance as IOrmMeta
 
 /**
- * 获得类的行转换器
+ * 获得实体类
+ *    实体类与模型类分离
+ *    实体类直接继承 OrmEntity, 不继承 IOrm 或 Orm
+ *    模型类直接继承 实体类, 同时继承 IOrm, 不直接继承 Orm
+ */
+public val KClass<out IOrm>.entityClass: Class<OrmEntity>?
+    get(){
+        var clazz: Class<*>? = this.java.superclass
+        while(clazz != null){
+            // 接口/抽象类无法实例化, 直接中断
+            if(clazz.isAbstract || clazz.isInterface)
+                return null
+
+            // 实体类直接继承 OrmEntity, 不继承 IOrm 或 Orm
+            if(clazz.isSubClass(OrmEntity::class.java) && !clazz.isSubClass(IOrm::class.java))
+                return clazz as Class<OrmEntity>
+        }
+
+        return null
+    }
+
+/**
+ * 获得模型类的行转换器
  * @return 转换的匿名函数
  */
 public val <T:IOrm> KClass<T>.rowTransformer: (Row) -> T
@@ -91,6 +115,18 @@ fun Collection<out IOrm>.itemToMap(): List<Map<String, Any?>> {
 
     return this.map {
         it.toMap()
+    }
+}
+
+/**
+ * orm列表转为实体列表
+ */
+fun Collection<out IOrm>.itemToEntity(): List<OrmEntity> {
+    if(this.isEmpty())
+        return emptyList()
+
+    return this.map {
+        it.toEntity()
     }
 }
 

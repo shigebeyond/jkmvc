@@ -20,4 +20,17 @@ interface IOrmValid : IOrmEntity {
      * @param column 字段名
      */
     fun setDirty(column: String)
+
+    /**
+     * 从其他实体对象中设置字段值
+     *
+     * @param from
+     */
+    fun fromEntity(from: IOrmEntity)
+
+    /**
+     * 转为实体对象
+     * @return
+     */
+    fun toEntity(): OrmEntity
 }

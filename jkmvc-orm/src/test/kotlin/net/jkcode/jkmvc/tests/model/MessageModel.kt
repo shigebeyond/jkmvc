@@ -7,6 +7,9 @@ import net.jkcode.jkmvc.tests.entity.MessageEntity
 
 /**
  * 消息模型
+ *    实体类与模型类分离
+ *    实体类直接继承 OrmEntity, 不继承 IOrm 或 Orm
+ *    模型类直接继承 实体类, 同时继承 IOrm, 不直接继承 Orm
  *
  * @ClassName: MessageModel
  * @Description:

@@ -4,6 +4,9 @@ import net.jkcode.jkmvc.orm.OrmEntity
 
 /**
  * 消息实体
+ *    实体类与模型类分离
+ *    实体类直接继承 OrmEntity, 不继承 IOrm 或 Orm
+ *    模型类直接继承 实体类, 同时继承 IOrm, 不直接继承 Orm
  * @author shijianhang<772910474@qq.com>
  * @date 2019-06-27 2:53 PM
  */

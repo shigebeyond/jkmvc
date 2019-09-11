@@ -98,13 +98,6 @@ interface IOrmEntity {
     fun toMap(to: MutableMap<String, Any?> = HashMap(), expected: List<String> = emptyList()): MutableMap<String, Any?>;
 
     /**
-     * 从其他实体对象中设置字段值
-     *
-     * @param from
-     */
-    fun from(from: IOrmEntity): Unit
-
-    /**
      * 序列化
      * @return
      */

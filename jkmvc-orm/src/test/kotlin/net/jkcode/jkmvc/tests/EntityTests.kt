@@ -2,7 +2,6 @@ package net.jkcode.jkmvc.tests
 
 import net.jkcode.jkmvc.common.*
 import net.jkcode.jkmvc.orm.IOrm
-import net.jkcode.jkmvc.orm.OrmEntity
 import net.jkcode.jkmvc.serialize.ISerializer
 import net.jkcode.jkmvc.tests.entity.MessageEntity
 import net.jkcode.jkmvc.tests.model.MessageModel
@@ -84,7 +83,7 @@ class EntityTests{
     fun testModelFromEntity(){
         val entity = buildEntity()
         val orm = MessageModel()
-        orm.from(entity)
+        orm.fromEntity(entity)
         orm.save()
         println(orm)
     }

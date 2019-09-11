@@ -32,7 +32,7 @@ import kotlin.reflect.KMutableProperty1
  * @author shijianhang
  * @date 2016-10-10 上午12:52:34
  */
-open class OrmEntity : IOrmEntity, Serializable {
+abstract class OrmEntity : IOrmEntity, Serializable {
 
     companion object{
 
@@ -138,15 +138,6 @@ open class OrmEntity : IOrmEntity, Serializable {
      */
     internal fun getData(): MutableRow {
         return data
-    }
-
-    /**
-     * 从其他实体对象中设置字段值
-     *   子类会改写
-     * @param from
-     */
-    public override fun from(from: IOrmEntity): Unit{
-        from.toMap(data)
     }
 
     /**
