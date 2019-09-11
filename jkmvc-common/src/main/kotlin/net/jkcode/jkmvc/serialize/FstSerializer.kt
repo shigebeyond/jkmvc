@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.serialize
 
 import org.nustaq.serialization.FSTConfiguration
+import org.nustaq.serialization.FSTObjectSerializer
 import java.io.InputStream
 
 /**
@@ -15,7 +16,18 @@ class FstSerializer: ISerializer {
     /**
      * 配置
      */
-    public val conf = FSTConfiguration.createDefaultConfiguration()
+    protected val conf = FSTConfiguration.createDefaultConfiguration()
+
+    /**
+     * 给特定类指定序列器
+     * @param cl 类
+     * @param ser 序列器
+     * @param includeSubclasses 是否包含子类
+     */
+    public fun putSerializer(cl: Class<*>, ser: FSTObjectSerializer, includeSubclasses: Boolean) {
+        val reg = conf.getCLInfoRegistry().getSerializerRegistry()
+        reg.putSerializer(cl, ser, includeSubclasses)
+    }
 
     /**
      * 序列化

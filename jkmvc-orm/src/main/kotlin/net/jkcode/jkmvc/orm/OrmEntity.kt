@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.common.*
 import net.jkcode.jkmvc.db.MutableRow
+import net.jkcode.jkmvc.serialize.FstSerializer
 import net.jkcode.jkmvc.serialize.ISerializer
 import java.io.Serializable
 import java.math.BigDecimal
@@ -30,7 +31,6 @@ import kotlin.reflect.KMutableProperty1
  *
  * @author shijianhang
  * @date 2016-10-10 上午12:52:34
- *
  */
 open class OrmEntity : IOrmEntity, Serializable {
 
@@ -44,7 +44,11 @@ open class OrmEntity : IOrmEntity, Serializable {
         /**
          * 序列器
          */
-        public val serializer: ISerializer = ISerializer.instance(config["serializer"]!!)
+        public val serializer: FstSerializer = ISerializer.instance("fst") as FstSerializer
+
+        init {
+            serializer.putSerializer(OrmEntity::class.java, OrmEntitySerializer(), true)
+        }
 
     }
 
