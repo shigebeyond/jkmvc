@@ -27,5 +27,5 @@ interface INamedConfiguredSingletons<T> {
      * @param name 单例名
      * @return
      */
-    fun instance(name: String): T
+    fun instance(name: String = "default"): T
 }

@@ -8,6 +8,7 @@ import java.util.*;
  *    线程不安全, 尽量在单线程中使用
  *
  * @deprecated 其实我搞错了, HashMap的table数组数组也是延迟创建, 只要没有put(), table即为null
+ *             真正的优化在于 FixedKeyMap
  * @author shijianhang<772910474@qq.com>
  * @date 2019-03-31 9:43 PM
  */

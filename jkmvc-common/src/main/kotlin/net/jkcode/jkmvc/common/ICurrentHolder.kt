@@ -15,7 +15,7 @@ abstract class ICurrentHolder<T>(supplier: (()->T)? = null) {
      */
     protected val holder:ThreadLocal<T> =
             if(supplier == null)
-                ThreadLocal ()
+                ThreadLocal()
             else
                 ThreadLocal.withInitial { supplier.invoke() }
 
