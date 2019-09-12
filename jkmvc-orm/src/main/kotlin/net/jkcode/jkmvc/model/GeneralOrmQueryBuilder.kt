@@ -8,7 +8,7 @@ import net.jkcode.jkmvc.orm.OrmQueryBuilder
 /**
  * 通用模型的查询构建器
  *    改写 OrmQueryBuilder, 在查询并创建 GeneralModel 后才能由 GeneralOrmQueryBuilder 设置其 ormMeta, 即调用 GeneralModel.delaySetMeta(ormMeta)
- *    因为创建过程在 KClass<T>.rowTransformer(), 无 ormMeta 参数, 只能使用默认构造函数, 给默认参数 EmptyOrmMeta
+ *    因为创建过程在 KClass<T>.modelRowTransformer(), 无 ormMeta 参数, 只能使用默认构造函数, 给默认参数 EmptyOrmMeta
  *
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-17 3:38 PM

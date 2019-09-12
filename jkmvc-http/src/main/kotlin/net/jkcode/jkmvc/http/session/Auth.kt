@@ -7,7 +7,7 @@ import net.jkcode.jkmvc.common.isSuperClass
 import net.jkcode.jkmvc.common.dbLogger
 import net.jkcode.jkmvc.orm.Orm
 import net.jkcode.jkmvc.orm.modelOrmMeta
-import net.jkcode.jkmvc.orm.rowTransformer
+import net.jkcode.jkmvc.orm.modelRowTransformer
 import net.jkcode.jkmvc.singleton.NamedConfiguredSingletons
 import kotlin.reflect.KClass
 
@@ -78,7 +78,7 @@ abstract class Auth: IAuth, ClosingOnRequestEnd() {
             query.withs(*withs)
 
         // 根据用户名查找用户
-        val user = query.where(sessionConfig["usernameField"]!!, "=", username).find(transform = userModel.rowTransformer) as IAuthUserModel?;
+        val user = query.where(sessionConfig["usernameField"]!!, "=", username).find(transform = userModel.modelRowTransformer) as IAuthUserModel?;
         if(user == null)
             return null;
 

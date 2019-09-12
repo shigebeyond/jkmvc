@@ -159,9 +159,9 @@ abstract class OrmRelated : OrmPersistent() {
 
                 query.select(*columns) // 查字段
                 if (relation.type == RelationType.HAS_MANY) { // 查多个
-                    result = query.findAll(transform = relation.rowTransformer)
+                    result = query.findAll(transform = relation.modelRowTransformer)
                 } else { // 查一个
-                    result = query.find(transform = relation.rowTransformer)
+                    result = query.find(transform = relation.modelRowTransformer)
                 }
             }
 

@@ -381,7 +381,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                 query.selectWiths(columns)
 
             // 得结果
-            val relatedItems = query.findAll(transform = relation.rowTransformer)
+            val relatedItems = query.findAll(transform = relation.modelRowTransformer)
 
             // 处理查询结果
             action(name, relation, relatedItems)

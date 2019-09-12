@@ -1,9 +1,12 @@
 package net.jkcode.jkmvc.orm
 
+import net.jkcode.jkmvc.common.format
 import net.jkcode.jkmvc.db.MutableRow
+import java.util.*
+import kotlin.collections.HashMap
 
 /**
- * ORM之数据校验
+ * ORM之数据校验+格式化
  *
  * @author shijianhang
  * @date 2016-10-10 上午12:52:34
@@ -65,6 +68,34 @@ abstract class OrmValid : IOrm, OrmEntity() {
      */
     public override fun validate(): Boolean {
         return ormMeta.validate(this)
+    }
+
+    /**
+     * 格式化日期字段值
+     * @param column
+     * @return
+     */
+    public fun formateDate(column: String): String {
+        val value = data[column]
+        if(value is Date)
+            return value.format()
+
+        return ""
+    }
+
+    /**
+     * 格式化时间戳字段值
+     * @param column
+     * @param isSecond 是否秒数, 否则毫秒数
+     * @return
+     */
+    @JvmOverloads
+    public fun formateTimestamp(column: String, isSecond: Boolean = true): String {
+        val value = data[column]
+        if(value is Long)
+            return Date(value).format()
+
+        return ""
     }
 
 }

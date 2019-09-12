@@ -90,8 +90,16 @@ class EntityTests{
 
         // 模型转实体
         val entity2: MessageEntity = orm.toEntity()
-
         println(orm)
+    }
+
+    /**
+     * 测试实体查询
+     */
+    @Test
+    fun testFindEntity(){
+        val entities = MessageModel.queryBuilder().findEntity<MessageModel, MessageEntity>()
+        println(entities)
     }
 
     /**

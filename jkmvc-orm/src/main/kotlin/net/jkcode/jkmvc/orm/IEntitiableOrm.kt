@@ -9,7 +9,7 @@ import net.jkcode.jkmvc.common.getInterfaceGenricType
  * @author shijianhang<772910474@qq.com>
  * @date 2019-09-12 9:26 AM
  */
-interface IEntitiableOrm<T: OrmEntity>: IOrm {
+interface IEntitiableOrm<E: OrmEntity>: IOrm {
 
     /**
      * 从其他实体对象中设置字段值
@@ -34,11 +34,11 @@ interface IEntitiableOrm<T: OrmEntity>: IOrm {
      *
      * @return
      */
-    public fun toEntity(): T{
-        // 获得实体类: IEntitiableOrm 接口的泛型类型
+    public fun toEntity(): E{
+        // 获得实体类: 当前类实现 IEntitiableOrm 接口时, 指定的泛型类型
         val entityClass = this.javaClass.getInterfaceGenricType(IEntitiableOrm::class.java)!!
         // 创建实体
-        val entity = entityClass.newInstance() as T
+        val entity = entityClass.newInstance() as E
 
         // 1 转关联对象
         for((name, relation) in ormMeta.relations){

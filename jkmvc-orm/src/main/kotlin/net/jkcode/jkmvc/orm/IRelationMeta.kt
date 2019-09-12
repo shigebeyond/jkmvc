@@ -62,8 +62,8 @@ interface IRelationMeta {
     /**
      * 行转换器
      */
-    val rowTransformer: (Row) -> IOrm
-        get()= model.rowTransformer
+    val modelRowTransformer: (Row) -> IOrm
+        get()= model.modelRowTransformer
 
     /**
      * 获得关联模型的查询器

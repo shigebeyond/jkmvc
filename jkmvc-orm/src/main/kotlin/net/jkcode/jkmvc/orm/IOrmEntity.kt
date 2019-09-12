@@ -82,6 +82,12 @@ interface IOrmEntity {
     fun setIntelligent(column:String, value:String):Boolean
 
     /**
+     * 清空字段值
+     * @return
+     */
+    fun clear()
+
+    /**
      * 从map中设置字段值
      *
      * @param from   字段值的哈希：<字段名 to 字段值>

@@ -231,9 +231,10 @@ public fun Method.resultFromFuture(resFuture: CompletableFuture<Any?>): Any? {
  * 获得方法的默认结果值
  * @return
  */
-public fun Method.defaultResult(): Any? {
-    return this.returnType.kotlin.defaultValue
-}
+public val Method.defaultResult: Any?
+    get(){
+        return this.returnType.kotlin.defaultValue
+    }
 
 
 /****************************** java反射扩展: Class *******************************/

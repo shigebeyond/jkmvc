@@ -3,9 +3,7 @@ package net.jkcode.jkmvc.query
 import net.jkcode.jkmvc.db.Cell
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.db.Row
-import net.jkcode.jkmvc.orm.IOrm
-import net.jkcode.jkmvc.orm.OrmEntity
-import net.jkcode.jkmvc.orm.rowTransformer
+import net.jkcode.jkmvc.orm.*
 import org.apache.commons.collections.map.HashedMap
 import kotlin.reflect.KClass
 
@@ -61,7 +59,18 @@ abstract class IDbQuery{
      * @return 列表
      */
     public inline fun <reified T: IOrm> findAllModels(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<T> {
-        return findAll(params, db, T::class.rowTransformer)
+        return findAll(params, db, T::class.modelRowTransformer)
+    }
+
+    /**
+     * 查找一个： select ... limit 1语句
+     *
+     * @param params 参数
+     * @param db 数据库连接
+     * @return 一个数据
+     */
+    public inline fun <reified T: IEntitiableOrm<E>, reified E: OrmEntity> findAllEntities(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<E> {
+        return findAll(params, db, T::class.entityRowTransformer(E::class))
     }
 
     /**
@@ -94,7 +103,18 @@ abstract class IDbQuery{
      * @return 一个数据
      */
     public inline fun <reified T: IOrm> findModel(params: List<Any?> = emptyList(), db: IDb = defaultDb): T? {
-        return find(params, db, T::class.rowTransformer)
+        return find(params, db, T::class.modelRowTransformer)
+    }
+
+    /**
+     * 查找一个： select ... limit 1语句
+     *
+     * @param params 参数
+     * @param db 数据库连接
+     * @return 一个数据
+     */
+    public inline fun <reified T: IEntitiableOrm<E>, reified E: OrmEntity> findEntity(params: List<Any?> = emptyList(), db: IDb = defaultDb): E? {
+        return find(params, db, T::class.entityRowTransformer(E::class))
     }
 
     /**

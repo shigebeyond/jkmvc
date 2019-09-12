@@ -45,11 +45,11 @@ class UserModel(id:Int? = null): Orm(id) {
 
     // 关联地址：一个用户有多个地址
     // relate to AddressModel: user has many addresses
-    public var addresses:List<AddressModel> by property();
+    public var addresses:List<AddressModel> by listProperty();
 
-    public var parcelSenders:List<UserModel> by property();
+    public var parcelSenders:List<UserModel> by listProperty();
 
-    public var parcelReceivers:List<UserModel> by property();
+    public var parcelReceivers:List<UserModel> by listProperty();
 
     /**
      * 处理create前置事件

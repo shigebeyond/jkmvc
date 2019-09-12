@@ -64,6 +64,19 @@ class Lambda {
 
 data class Man(val name: String, val age: Int)
 
+class Woman(var name: String, var age: Int): Cloneable{
+
+    val id = generateId("woman")
+
+    /*public override fun clone(): Any {
+        return super.clone()
+    }*/
+
+    override fun toString(): String {
+        return "woman: id=$id, name=$name, age=$age"
+    }
+}
+
 /**
  * 基本测试
  * @Description:
@@ -961,6 +974,10 @@ class MyTests{
     fun testMethod(){
         for(m in IConfig::class.java.methods)
             println(m.getSignature())
+
+        val method = IConfig::class.java.getMethod("containsKey", String::class.java)
+        println(method.defaultValue) // null
+        println(method.defaultResult) // false
     }
 
     @Test
@@ -1080,6 +1097,17 @@ class MyTests{
         m = m.copy(name = "li")
         println("${++i}: m=$m")
     }
+
+    @Test
+    fun testClone(){
+        val m = Woman("shi", 1)
+        val m2 = m.forceClone() as Woman
+        m2.age = m2.age + 1
+        println(m2)
+        // 默认的clone实现(Object.clone())会拷贝所有属性, 但是不会调用构造方法, 因此id也会相等, 如果要不等, 必须自己改写 clone() 方法
+        println(m == m2)
+    }
+
 
     @Test
     fun testPattern(){
@@ -1294,12 +1322,31 @@ class MyTests{
         println(jedis.get("name"))
     }
 
-    @Test
-    fun testGenericSuperclass(){
-        val obj = ArrayList<String>()
-        val clazz = obj.javaClass
 
-//        println(clazz.getSuperClassGenricType())
+    @Test
+    fun testGenericInterface() {
+        // 无效
+//        val obj = ArrayList<String>()
+//        val clazz = obj.javaClass
+
+        // 有效
+        val clazz = SetBitIterator::class.java
+
+        println(clazz.getInterfaceGenricType())
+
+    }
+
+        @Test
+    fun testGenericSuperclass(){
+        // 无效
+//        val obj = ArrayList<String>()
+//        val clazz = obj.javaClass
+
+        // 有效
+        class TestList: ArrayList<String>()
+        val clazz = TestList::class.java
+
+        println(clazz.getSuperClassGenricType())
 
         //getSuperclass()获得该类的父类
         println(clazz.getSuperclass())

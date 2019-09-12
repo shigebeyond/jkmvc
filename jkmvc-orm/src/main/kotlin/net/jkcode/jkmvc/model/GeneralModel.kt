@@ -19,14 +19,14 @@ import java.util.*
  *      改写 queryBuilder(), 返回 GeneralOrmQueryBuilder
  * 3.2 GeneralOrmQueryBuilder
  *     改写 OrmQueryBuilder, 在查询并创建 GeneralModel 后才能由 GeneralOrmQueryBuilder 设置其 ormMeta, 即调用 GeneralModel.delaySetMeta(ormMeta)
- *     因为创建过程在 KClass<T>.rowTransformer(), 无 ormMeta 参数, 只能使用默认构造函数, 给默认参数 EmptyOrmMeta
+ *     因为创建过程在 KClass<T>.modelRowTransformer(), 无 ormMeta 参数, 只能使用默认构造函数, 给默认参数 EmptyOrmMeta
  *
  * 4 如果元数据是 OrmMeta 普通元数据
  *   跟普通的model一样, 只是可能使用 GeneralModel 来做代理, 如 `class MessageModel: IOrm by GeneralModel(m)`
  *   此时 GeneralModel 是必有
  *
  * 5 如果元数据是 EmptyOrmMeta 空的元数据
- *   只在  KClass<T>.rowTransformer() 中使用默认构造函数实例化时才出现, 这种情况需要延迟 1 设置 ormMeta 2 调用 super.setOriginal(orgn)
+ *   只在  KClass<T>.modelRowTransformer() 中使用默认构造函数实例化时才出现, 这种情况需要延迟 1 设置 ormMeta 2 调用 super.setOriginal(orgn)
  *
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-17 3:38 PM
@@ -35,7 +35,7 @@ class GeneralModel(myOrmMeta: IOrmMeta /* 自定义元数据 */) : Orm(emptyArra
 
     public constructor(table: String /* 表名 */, primaryKey:String = "id" /* 主键 */):this(GeneralOrmMeta(GeneralModel::class, "`$table`'s general model", table, primaryKey))
 
-    // 仅在内部使用 (如 KClass<T>.rowTransformer), 不暴露给外部
+    // 仅在内部使用 (如 KClass<T>.modelRowTransformer), 不暴露给外部
     internal constructor():this(EmptyOrmMeta)
 
     /**
@@ -44,7 +44,7 @@ class GeneralModel(myOrmMeta: IOrmMeta /* 自定义元数据 */) : Orm(emptyArra
     public override var ormMeta: IOrmMeta = myOrmMeta
 
     /**
-     * 伴随对象 -- 实例化时需要的元数据，在 KClass<T>.rowTransformer　中使用
+     * 伴随对象 -- 实例化时需要的元数据，在 KClass<T>.modelRowTransformer　中使用
      */
     companion object EmptyOrmMeta: OrmMeta(GeneralModel::class, "?", "?", "?"){
 

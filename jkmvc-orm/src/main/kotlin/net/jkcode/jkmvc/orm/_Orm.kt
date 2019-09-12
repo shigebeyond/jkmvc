@@ -69,7 +69,7 @@ public val KClass<out IOrm>.modelOrmMeta: IOrmMeta
  * 获得模型类的行转换器
  * @return 转换的匿名函数
  */
-public val <T:IOrm> KClass<T>.rowTransformer: (Row) -> T
+public val <T:IOrm> KClass<T>.modelRowTransformer: (Row) -> T
     get(){
         // 实例化函数
         return {
@@ -81,6 +81,41 @@ public val <T:IOrm> KClass<T>.rowTransformer: (Row) -> T
                     obj as T
         }
     }
+
+
+/**
+ * 全局共享的可复用的模型实例
+ *   主要用在实体类的行转换器 entityRowTransformer()
+ *   由于实体类没有orm映射元数据, 因此他是无法识别结果行的数据, 也无法转换为实体属性, 因此需要通过orm模型作为桥梁
+ *   orm模型将结果行转为模型对象, 再将模型对象转为实体对象
+ */
+private val reusedModels:ThreadLocal<MutableMap<KClass<*>, Any?>> = ThreadLocal.withInitial {
+    HashMap<KClass<*>, Any?>();
+}
+
+/**
+ * 获得实体类的行转换器
+ * @return 转换的匿名函数
+ */
+public fun <T: IEntitiableOrm<E>, E: OrmEntity> KClass<T>.entityRowTransformer(entityClass: KClass<E>): (Row) -> E {
+    // 实例化函数
+    return {
+        // 获得模型实例
+        val obj = reusedModels.get().getOrPut(this) {
+            java.newInstance()
+        } as IEntitiableOrm<E>
+
+        // 清空字段值
+        obj.clear()
+
+        // 设置字段值
+        obj.setOriginal(it)
+
+        // 转为实体
+        obj.toEntity()
+    }
+}
+
 
 /**
  * orm列表获得字段值
