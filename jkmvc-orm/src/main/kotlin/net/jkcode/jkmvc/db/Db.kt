@@ -124,6 +124,26 @@ abstract class Db protected constructor(public override val name:String /* 标�
     }
 
     /**
+     * 执行事务, 但异步提交
+     * @param statement db操作过程
+     * @return
+     */
+    public override fun <T> transactionAsync(statement: () -> CompletableFuture<T>): CompletableFuture<T> {
+        begin(); // 开启事务
+
+        val future = trySupplierFuture(statement)
+        return future.whenComplete{ r, ex ->
+            if(ex != null){
+                rollback(); // 回滚事务
+                throw ex;
+            }
+
+            commit(); // 提交事务
+            r
+        }
+    }
+
+    /**
      * 添加事务完成后的回调
      * @param callback 回调函数, 只有一个Boolean参数, 代表是否提交
      * @return

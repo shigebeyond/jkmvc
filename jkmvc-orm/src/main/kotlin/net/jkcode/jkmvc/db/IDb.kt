@@ -50,6 +50,13 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter, ClosingOnReque
     public abstract fun <T> transaction(statement: () -> T):T;
 
     /**
+     * 执行事务, 但异步提交
+     * @param statement db操作过程
+     * @return
+     */
+    public fun <T> transactionAsync(statement: () -> CompletableFuture<T>): CompletableFuture<T>
+
+    /**
      * 执行事务
      * @param fake 不真正使用事务
      * @param statement db操作过程
