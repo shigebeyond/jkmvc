@@ -80,11 +80,17 @@ class EntityTests{
     }
 
     @Test
-    fun testModelFromEntity(){
+    fun testModel2Entity(){
         val entity = buildEntity()
+
+        // 实体转模型
         val orm = MessageModel()
         orm.fromEntity(entity)
         orm.save()
+
+        // 模型转实体
+        val entity2: MessageEntity = orm.toEntity()
+
         println(orm)
     }
 

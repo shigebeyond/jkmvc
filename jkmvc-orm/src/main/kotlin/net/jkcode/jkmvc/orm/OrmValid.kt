@@ -67,38 +67,4 @@ abstract class OrmValid : IOrm, OrmEntity() {
         return ormMeta.validate(this)
     }
 
-    /**
-     * 从其他实体对象中设置字段值
-     *   子类会改写
-     * @param from
-     */
-    public override fun fromEntity(from: IOrmEntity){
-        from.toMap(data)
-    }
-
-    /**
-     * 转为实体对象
-     * @return
-     */
-    public override fun toEntity(): OrmEntity {
-        // 查找实体类
-        val entityClass = this::class.entityClass
-        if(entityClass == null)
-            throw OrmException("模型类[${this.javaClass}]没有抽取实体类");
-
-        // 创建实体
-        val entity = entityClass.newInstance() as OrmEntity
-        toEntity(entity)
-        return entity
-    }
-
-    /**
-     * 转为实体对象
-     *   子类会改写
-     *
-     * @param entity
-     */
-    protected open fun toEntity(entity: OrmEntity) {
-        this.toMap(entity.getData())
-    }
 }

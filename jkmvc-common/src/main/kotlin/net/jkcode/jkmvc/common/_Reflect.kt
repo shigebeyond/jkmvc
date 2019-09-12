@@ -354,24 +354,58 @@ public fun Method.getMethodHandle(): MethodHandle {
 /**
  * 通过反射, 获得定义 Class 时声明的父类的泛型参数的类型
  *
- * @param index
+ * @param genTypeIndex 第几个泛型
  * @return
  */
-fun Class<*>.getSuperClassGenricType(index: Int = 0): Class<*> {
+public fun Class<*>.getSuperClassGenricType(genTypeIndex: Int = 0): Class<*>? {
     val genType = this.genericSuperclass
+    return getGenricType(genType, genTypeIndex)
+}
+
+/**
+ * 通过反射, 获得定义 Class 时声明的接口的泛型参数的类型
+ *
+ * @param interfaceIndex 第几个接口
+ * @param genTypeIndex 第几个泛型
+ * @return
+ */
+public fun Class<*>.getInterfaceGenricType(interfaceIndex: Int = 0, genTypeIndex: Int = 0): Class<*>? {
+    val genType = this.genericInterfaces.getOrNull(interfaceIndex)
+    return getGenricType(genType, genTypeIndex)
+}
+
+/**
+ * 通过反射, 获得定义 Class 时声明的接口的泛型参数的类型
+ *
+ * @param interfaceIndex 第几个接口
+ * @param genTypeIndex 第几个泛型
+ * @return
+ */
+public fun Class<*>.getInterfaceGenricType(`interface`: Class<*>, genTypeIndex: Int = 0): Class<*>? {
+    val genType = this.genericInterfaces.firstOrNull{
+        it is ParameterizedType && it.rawType == `interface`
+    }
+    return getGenricType(genType, genTypeIndex)
+}
+
+/**
+ * 获得泛型的类型
+ * @param genType 泛型类型信息
+ * @param genTypeIndex 第几个泛型
+ * @return
+ */
+private fun getGenricType(genType: Type?, genTypeIndex: Int): Class<out Any>? {
+    if(genType == null)
+        return null
 
     if (genType !is ParameterizedType)
-        return Any::class.java
+        return genType as Class<out Any>
 
+    // 泛型参数
     val params = genType.getActualTypeArguments()
-
-    if (index >= params.size || index < 0)
-        return Any::class.java
-
-    if (params[index] !is Class<*>)
-        return Any::class.java
-
-    return params[index] as Class<*>
+    return params.getOrElse(genTypeIndex){
+        Any::class.java
+    } as Class<*>
 }
 
 /**

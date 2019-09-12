@@ -136,47 +136,6 @@ abstract class OrmRelated : OrmPersistent() {
     }
 
     /**
-     * 从其他实体对象中设置字段值
-     *    对于关联对象字段值的设置: 只考虑一对一的关联对象, 不考虑一对多的关联对象
-     *
-     * @param from
-     */
-    public override fun fromEntity(from: IOrmEntity): Unit{
-        for(column in ormMeta.defaultExpectedProps) {
-            val value:Any? = from[column]
-            if(value is IOrmEntity){ // 如果是IOrmEntity，则为关联对象
-                val realValue = related(column, true) // 创建关联对象
-                (realValue as Orm).fromEntity(value) // 递归设置关联对象的字段值
-            }else
-                set(column, value)
-        }
-    }
-
-    /**
-     * 转为实体对象
-     *   对于关联对象字段值的设置: 只考虑一对一的关联对象, 不考虑一对多的关联对象
-     *
-     * @param entity
-     */
-    protected override fun toEntity(entity: OrmEntity) {
-        // 1 转关联对象
-        for((name, relation) in ormMeta.relations){
-            val value = data[name]
-            if(value != null){
-                entity[name] = when(value){
-                    is Collection<*> -> (value as Collection<IOrm>).itemToEntity() // 有多个
-                    is IOrm -> value.toEntity()  // 有一个
-                    else -> value
-                }
-            }
-        }
-
-        // 2 转当前对象：由于关联对象联查时不处理null值, 因此关联对象会缺少null值的字段，这里要补上
-        for(prop in ormMeta.props)
-            entity[prop] = data[prop]
-    }
-
-    /**
      * 获得关联对象
      *
      * @param name 关联对象名
