@@ -180,11 +180,13 @@ public fun ClassLoader.getRootResource(): URL {
  * @param action 访问者函数
  */
 public fun URL.travel(action:(relativePath:String, isDir:Boolean) -> Unit):Unit{
+    // 分隔符
+    val sp = File.separatorChar
     if(isJar()){ // 遍历jar
         val conn = openConnection() as JarURLConnection
         val jarFile = conn.jarFile
         for (entry in jarFile.entries()){
-            val isDir = entry.name.endsWith(File.separatorChar)
+            val isDir = entry.name.endsWith(sp)
             action(entry.name, isDir);
         }
     }else{ // 遍历目录
@@ -208,23 +210,35 @@ public fun URL.travel(action:(relativePath:String, isDir:Boolean) -> Unit):Unit{
 
         /**
          * fix bug: 测试环境下路径对不上
-         * classLoader根目录1: /home/shi/code/java/java/jksoa/jksoa-rpc/jksoa-rpc-client/out/test/classes/
-         * 文件绝对路径1:       /home/shi/code/java/java/jksoa/jksoa-rpc/jksoa-rpc-client/out/production/classes/com/jksoa/example/EchoService.class
+         * classLoader根目录: /home/shi/code/java/java/jksoa/jksoa-rpc/jksoa-rpc-client/out/test/classes/
+         * 文件绝对路径:       /home/shi/code/java/java/jksoa/jksoa-rpc/jksoa-rpc-client/out/production/classes/com/jksoa/example/EchoService.class
          * 参考: ClientTests.testScanClass()
          *
-         * classLoader根目录1: /home/shi/code/java/jksoa/jksoa-job/out/test/classes/
-         * 文件绝对路径1:       /home/shi/code/java/jksoa/jksoa-common/out/production/classes/com/jksoa/example/ISimpleService$DefaultImpls.class
+         * classLoader根目录: /home/shi/code/java/jksoa/jksoa-job/out/test/classes/
+         * 文件绝对路径:       /home/shi/code/java/jksoa/jksoa-common/out/production/classes/com/jksoa/example/ISimpleService$DefaultImpls.class
          * 参考: JobTests.testRpcJob()
          *
          * => 直接取classes/后面的部分
          */
         //println("是否单元测试环境: " + Application.isJunitTest)
 
+        /**
+         * fix bug: gretty环境下路径对不上, 主要是启动gretty时连带启动rpc server
+         * classLoader根目录: /home/shi/code/java/jksoa/jksoa-dtx/jksoa-dtx-demo/jksoa-dtx-order/build/classes/kotlin/main/
+         * 文件绝对路径:       /home/shi/code/java/jksoa/jksoa-rpc/jksoa-rpc-server/build/classes/kotlin/main/net/jkcode/jksoa/rpc/example/SimpleService.class
+         * 参考: gradle :jksoa-dtx:jksoa-dtx-demo:jksoa-dtx-order:appRun
+         *
+         * => 直接取classes/kotlin/main/后面的部分
+         */
+        //println("是否单元测试环境: " + Application.isJunitTest)
+
         File(path).travel {
             // println("文件绝对路径：" + it.path)
             val relativePath = if(Application.isJunitTest) // 测试环境下取classes/后面的部分
-                                    it.path.split("classes" + File.separatorChar)[1]
-                               else
+                                    it.path.split("classes$sp")[1]
+                               else if(Application.isGretty) // gretty环境下取classes/kotlin/main/后面的部分
+                                    it.path.split("classes${sp}kotlin${sp}main${sp}")[1]
+                                else
                                     it.path.substring(rootLen)
             // println("文件相对路径：" + relativePath)
             action(relativePath, it.isDirectory)

@@ -53,6 +53,11 @@ object Application {
     public val isJunitTest: Boolean = System.getProperty("sun.java.command").contains("-junit")
 
     /**
+     * 是否gradle的gretty插件运行环境
+     */
+    public val isGretty: Boolean = System.getProperty("sun.java.command").contains("org.akhikhl.gretty.Runner")
+
+    /**
      * 机器的配置
      */
     private val workerConfig = Config.instance("snow-flake-id", "properties")
