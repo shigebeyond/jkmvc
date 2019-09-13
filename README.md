@@ -98,7 +98,7 @@ gretty{
 
 ## 5 Run web server
 
-`gradle jettyRun -x test`
+`gradle appRun -x test`
 
 ![](img/runserver.png)
 
@@ -535,7 +535,7 @@ download source and run web server
 ```
 git clone https://github.com/shigebeyond/jkmvc.git
 cd jkmvc
-gradle :jkmvc-example:jettyRun
+gradle :jkmvc-example:appRun
 ```
 
 visit url
