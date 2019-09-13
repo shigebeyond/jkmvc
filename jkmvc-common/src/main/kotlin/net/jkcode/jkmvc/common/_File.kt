@@ -167,6 +167,7 @@ public fun URL.isJar(): Boolean {
 
 /**
  * 获得根资源
+ * @return
  */
 public fun ClassLoader.getRootResource(): URL {
     val res = getResource("/") // web环境
@@ -176,72 +177,91 @@ public fun ClassLoader.getRootResource(): URL {
 }
 
 /**
+ * 获得根目录
+ * @return
+ */
+public fun ClassLoader.getRootPath(): String {
+    var root = getRootResource().path
+    // println("classLoader根目录：" + root)
+    // println("当前目录：" + path)
+
+    /**
+     * fix bug: window下路径对不上
+     * classLoader根目录：/C:/Webclient/tomcat0/webapps/ROOT/WEB-INF/classes/
+     * 文件绝对路径：      C:\Webclient\tomcat0\webapps\ROOT\WEB-INF\classes\com\jkmvc\szpower\controller\WorkInstructionController.class
+     * 文件相对路径=文件绝对路径-跟路径：om\jkmvc\szpower\controller\WorkInstructionController.class
+     *
+     * => classLoader根目录开头多了一个/符号， 同时分隔符变为/（linux的分隔符）
+     */
+    if(Application.isWin && root.startsWith('/')){
+        root = root.substring(1)
+        root = root.replace('/', File.separatorChar)
+    }
+    return root
+}
+
+/**
  * 遍历url中的资源
  * @param action 访问者函数
  */
 public fun URL.travel(action:(relativePath:String, isDir:Boolean) -> Unit):Unit{
-    // 分隔符
-    val sp = File.separatorChar
     if(isJar()){ // 遍历jar
         val conn = openConnection() as JarURLConnection
         val jarFile = conn.jarFile
         for (entry in jarFile.entries()){
-            val isDir = entry.name.endsWith(sp)
+            val isDir = entry.name.endsWith(File.separatorChar)
             action(entry.name, isDir);
         }
     }else{ // 遍历目录
-        val root = Thread.currentThread().contextClassLoader.getRootResource().path
-         // println("classLoader根目录：" + root)
-         // println("当前目录：" + path)
-        var rootLen = root.length
-
-        /**
-         * fix bug: window下路径对不上
-         * classLoader根目录：/C:/Webclient/tomcat0/webapps/ROOT/WEB-INF/classes/
-         * 文件绝对路径：      C:\Webclient\tomcat0\webapps\ROOT\WEB-INF\classes\com\jkmvc\szpower\controller\WorkInstructionController.class
-         * 文件相对路径=文件绝对路径-跟路径：om\jkmvc\szpower\controller\WorkInstructionController.class
-         *
-         * => classLoader根目录开头多了一个/符号
-         */
-        val os = System.getProperty("os.name")
-        // println("操作系统：" + os)
-        if(os.startsWith("Windows", true))
-            rootLen--
-
-        /**
-         * fix bug: 测试环境下路径对不上
-         * classLoader根目录: /home/shi/code/java/java/jksoa/jksoa-rpc/jksoa-rpc-client/out/test/classes/
-         * 文件绝对路径:       /home/shi/code/java/java/jksoa/jksoa-rpc/jksoa-rpc-client/out/production/classes/com/jksoa/example/EchoService.class
-         * 参考: ClientTests.testScanClass()
-         *
-         * classLoader根目录: /home/shi/code/java/jksoa/jksoa-job/out/test/classes/
-         * 文件绝对路径:       /home/shi/code/java/jksoa/jksoa-common/out/production/classes/com/jksoa/example/ISimpleService$DefaultImpls.class
-         * 参考: JobTests.testRpcJob()
-         *
-         * => 直接取classes/后面的部分
-         */
-        //println("是否单元测试环境: " + Application.isJunitTest)
-
-        /**
-         * fix bug: gretty环境下路径对不上, 主要是启动gretty时连带启动rpc server
-         * classLoader根目录: /home/shi/code/java/jksoa/jksoa-dtx/jksoa-dtx-demo/jksoa-dtx-order/build/classes/kotlin/main/
-         * 文件绝对路径:       /home/shi/code/java/jksoa/jksoa-rpc/jksoa-rpc-server/build/classes/kotlin/main/net/jkcode/jksoa/rpc/example/SimpleService.class
-         * 参考: gradle :jksoa-dtx:jksoa-dtx-demo:jksoa-dtx-order:appRun
-         *
-         * => 直接取classes/kotlin/main/后面的部分
-         */
-        //println("是否单元测试环境: " + Application.isJunitTest)
-
+        val rootPath = Thread.currentThread().contextClassLoader.getRootPath()
         File(path).travel {
-            // println("文件绝对路径：" + it.path)
-            val relativePath = if(Application.isJunitTest) // 测试环境下取classes/后面的部分
-                                    it.path.split("classes$sp")[1]
-                               else if(Application.isGretty) // gretty环境下取classes/kotlin/main/后面的部分
-                                    it.path.split("classes${sp}kotlin${sp}main${sp}")[1]
-                                else
-                                    it.path.substring(rootLen)
+            // 文件相对路径
+            val relativePath = getResourceRelativePath(it.path, rootPath)
             // println("文件相对路径：" + relativePath)
             action(relativePath, it.isDirectory)
         }
     }
+}
+
+/**
+ * 获得资源的相对路径
+ * @param absolutePath 资源的绝对路径
+ * @param rootPath 根目录
+ * @return
+ */
+private fun getResourceRelativePath(absolutePath: String, rootPath: String): String {
+    // println("文件绝对路径：" + absolutePath)
+    // 1 同一个工程下
+    if (absolutePath.startsWith(rootPath))
+        return absolutePath.substring(rootPath.length)
+
+    // 2 其他工程下（兄弟工程/子工程）
+    /**
+     * 模式1： idea中直接运行类， 编译输出目录为 out
+     * fix bug: 运行main()或单元测试时路径对不上
+     * classLoader根目录: /home/shi/code/java/java/jksoa/jksoa-rpc/jksoa-rpc-client/out/test/classes/
+     * 文件绝对路径:       /home/shi/code/java/java/jksoa/jksoa-rpc/jksoa-rpc-client/out/production/classes/com/jksoa/example/EchoService.class
+     * 参考: ClientTests.testScanClass()
+     *
+     * classLoader根目录: /home/shi/code/java/jksoa/jksoa-job/out/test/classes/
+     * 文件绝对路径:       /home/shi/code/java/jksoa/jksoa-common/out/production/classes/com/jksoa/example/ISimpleService$DefaultImpls.class
+     * 参考: JobTests.testRpcJob()
+     *
+     * classLoader根目录: /home/shi/code/java/jksoa/jksoa-dtx/jksoa-dtx-demo/jksoa-dtx-order/out/production/classes/
+     * 文件绝对路径: /home/shi/code/java/jksoa/jksoa-rpc/jksoa-rpc-server/out/production/classes/net/jkcode/jksoa/rpc/example/SimpleService.class
+     * 参考：JettyServerLauncher 运行在项目jksoa-dtx-order上
+     *
+     * => 模式是： out/production/classes/ 或 out/test/classes/, 直接取后续部分
+     */
+
+    /**
+     * 模式2： gradle运行， 编译输出目录是 classes
+     * fix bug: 运行gretty时路径对不上, 主要是启动gretty时连带启动rpc server
+     * classLoader根目录: /home/shi/code/java/jksoa/jksoa-dtx/jksoa-dtx-demo/jksoa-dtx-order/build/classes/kotlin/main/
+     * 文件绝对路径:       /home/shi/code/java/jksoa/jksoa-rpc/jksoa-rpc-server/build/classes/kotlin/main/net/jkcode/jksoa/rpc/example/SimpleService.class
+     * 参考: gradle :jksoa-dtx:jksoa-dtx-demo:jksoa-dtx-order:appRun
+     *
+     * => 模式是： build/classes/kotlin/main/ 或 build/classes/java/main/, 直接取后续部分
+     */
+    return absolutePath.split("classes" + File.separatorChar)[1]
 }

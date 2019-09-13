@@ -48,6 +48,11 @@ object Application {
     public val isDebug: Boolean = System.getProperty("java.class.path").contains("debugger-agent.jar")
 
     /**
+     * 是否是windows系统
+     */
+    public val isWin: Boolean = System.getProperty("os.name").startsWith("Windows", true)
+
+    /**
      * 是否单元测试环境
      */
     public val isJunitTest: Boolean = System.getProperty("sun.java.command").contains("-junit")
@@ -55,7 +60,7 @@ object Application {
     /**
      * 是否gradle的gretty插件运行环境
      */
-    public val isGretty: Boolean = System.getProperty("sun.java.command").contains("org.akhikhl.gretty.Runner")
+    public val isGretty: Boolean = System.getProperty("sun.java.command").startsWith("org.akhikhl.gretty.Runner")
 
     /**
      * 机器的配置
