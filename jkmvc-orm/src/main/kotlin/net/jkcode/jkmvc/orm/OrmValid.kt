@@ -4,6 +4,9 @@ import net.jkcode.jkmvc.common.format
 import net.jkcode.jkmvc.db.MutableRow
 import java.util.*
 import kotlin.collections.HashMap
+import java.text.DecimalFormat
+
+
 
 /**
  * ORM之数据校验+格式化
@@ -70,32 +73,5 @@ abstract class OrmValid : IOrm, OrmEntity() {
         return ormMeta.validate(this)
     }
 
-    /**
-     * 格式化日期字段值
-     * @param column
-     * @return
-     */
-    public fun formateDate(column: String): String {
-        val value = data[column]
-        if(value is Date)
-            return value.format()
-
-        return ""
-    }
-
-    /**
-     * 格式化时间戳字段值
-     * @param column
-     * @param isSecond 是否秒数, 否则毫秒数
-     * @return
-     */
-    @JvmOverloads
-    public fun formateTimestamp(column: String, isSecond: Boolean = true): String {
-        val value = data[column]
-        if(value is Long)
-            return Date(value).format()
-
-        return ""
-    }
 
 }
