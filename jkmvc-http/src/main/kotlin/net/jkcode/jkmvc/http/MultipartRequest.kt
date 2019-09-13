@@ -47,6 +47,17 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Ser
          * 上传文件重命名的策略
          */
         protected val uploadPolicy: FileRenamePolicy = DefaultFileRenamePolicy()
+
+        /**
+         * 服务器的url
+         */
+        public var serverUrl:String? = null
+    }
+
+    init {
+        // fix bug: 不能实时调用 org.eclipse.jetty.server.Request.getServerName(), 因为jetty在异步servlet下会丢失 _metadata 数据 => 缓存起来
+        if(serverUrl == null)
+            serverUrl = req.getScheme() + "://" + req.getServerName() + ':' + req.getServerPort()
     }
 
     /**
@@ -54,12 +65,6 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Ser
      */
     protected val req: HttpServletRequest
         get() = request as HttpServletRequest
-
-    /**
-     * 服务器的url
-     */
-    public val serverUrl:String
-        get() = req.getScheme() + "://" + req.getServerName() + ':' + req.getServerPort()
 
     /**
      *  上传子目录
