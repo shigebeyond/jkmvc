@@ -2,11 +2,13 @@ package net.jkcode.jkmvc.db
 
 import net.jkcode.jkmvc.common.dbLogger
 import net.jkcode.jkmvc.common.mapToArray
+import net.jkcode.jkmvc.common.trySupplierFuture
 import net.jkcode.jkmvc.db.sharding.ShardingDb
 import net.jkcode.jkmvc.db.single.SingleDb
 import java.sql.Connection
 import java.sql.ResultSet
 import java.util.*
+import java.util.concurrent.CompletableFuture
 import kotlin.reflect.KClass
 
 /**
@@ -140,7 +142,7 @@ abstract class Db protected constructor(public override val name:String /* 标�
 
             commit(); // 提交事务
             r
-        }
+        } as CompletableFuture<T>
     }
 
     /**

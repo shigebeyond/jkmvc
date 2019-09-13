@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.db
 
 import net.jkcode.jkmvc.closing.ClosingOnRequestEnd
 import java.sql.ResultSet
+import java.util.concurrent.CompletableFuture
 import kotlin.reflect.KClass
 
 /**
@@ -54,7 +55,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter, ClosingOnReque
      * @param statement db操作过程
      * @return
      */
-    public fun <T> transactionAsync(statement: () -> CompletableFuture<T>): CompletableFuture<T>
+    public abstract fun <T> transactionAsync(statement: () -> CompletableFuture<T>): CompletableFuture<T>
 
     /**
      * 执行事务

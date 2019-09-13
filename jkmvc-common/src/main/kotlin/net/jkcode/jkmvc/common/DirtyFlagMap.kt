@@ -77,4 +77,8 @@ class DirtyFlagMap<K, V> /* 非公开构造函数 */protected constructor(protec
         dirty = true
         map.clear()
     }
+
+    public override fun toString(): String {
+        return map.toString()
+    }
 }
