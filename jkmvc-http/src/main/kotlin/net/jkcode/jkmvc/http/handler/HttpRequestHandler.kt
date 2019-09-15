@@ -35,7 +35,7 @@ object HttpRequestHandler : IHttpRequestHandler/*, MethodGuardInvoker()*/ {
     /**
      * http请求处理的拦截器
      */
-    public override val interceptors: List<IHttpRequestInterceptor> = config.classes2Instances("requestInterceptors")
+    public override val interceptors: List<IHttpRequestInterceptor> = config.classes2Instances("interceptors")
 
     /**
      * http请求处理的拦截器链表
