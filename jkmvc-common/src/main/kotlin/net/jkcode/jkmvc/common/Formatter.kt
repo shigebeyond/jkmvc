@@ -29,6 +29,8 @@ object Formatter {
     @JvmStatic
     @JvmOverloads
     public fun formateTimestamp(value: Long, isSecond: Boolean = true): String {
+        if(value == 0L)
+            return ""
         val ts = if (isSecond) value * 1000 else value
         return Date(ts).format()
     }

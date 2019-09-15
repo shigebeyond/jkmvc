@@ -303,6 +303,20 @@ public fun Class<*>.getMethodSignatureMaps(): Map<String, Method> {
 }
 
 /**
+ * 根据类名+方法签名来获得方法
+ *
+ * @param methodSignature
+ * @return
+ */
+public fun getMethodByClassAndSignature(clazz: String, methodSignature: String): Method{
+    val c = Class.forName(clazz) // ClassNotFoundException
+    val m = c.getMethodBySignature(methodSignature)
+    if(m == null)
+        throw IllegalArgumentException("Class [$clazz] has no method [$methodSignature]") // 无函数
+    return m
+}
+
+/**
  * 根据方法签名来获得方法
  *
  * @param methodSignature

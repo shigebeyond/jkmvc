@@ -124,7 +124,9 @@ class CompletableFutureTests{
             println("结果=" + r + "，异常=" + ex)
         }
         future.thenRun {
-            println("run")
+            println("run1")
+        }.thenRun {
+            println("run2")
         }
     }
 

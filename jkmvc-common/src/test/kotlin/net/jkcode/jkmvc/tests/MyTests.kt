@@ -931,6 +931,7 @@ class MyTests{
         // 获得方法的参数名
         val clazz = method.getDeclaringClass()
         val methodName = method.getName()
+        println(methodName)
         for(p in method.parameters)
             println(p.name)
 

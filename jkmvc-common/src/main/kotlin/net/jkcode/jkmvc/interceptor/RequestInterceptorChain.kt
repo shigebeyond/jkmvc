@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.interceptor
 
+import net.jkcode.jkmvc.common.commonLogger
 import net.jkcode.jkmvc.common.trySupplierFuture
 import java.util.concurrent.CompletableFuture
 
@@ -11,6 +12,10 @@ import java.util.concurrent.CompletableFuture
 class RequestInterceptorChain<R>(
         protected val chain: List<IRequestInterceptor<R>> // 链表
 ): IRequestInterceptor<R> {
+
+    init {
+        commonLogger.debug(chain.joinToString(", ", "加载拦截器: ") { it.javaClass.toString() })
+    }
 
     /**
      * 拦截action, 插入链表上所有拦截器的前置后置处理
