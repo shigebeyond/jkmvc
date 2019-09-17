@@ -11,7 +11,7 @@ import java.util.function.Supplier
 abstract class ICurrentHolder<T>(supplier: (()->T)? = null) {
 
     /**
-     * 线程安全的跟踪器对象缓存
+     * 线程安全的对象缓存
      */
     protected val holder:ThreadLocal<T> =
             if(supplier == null)

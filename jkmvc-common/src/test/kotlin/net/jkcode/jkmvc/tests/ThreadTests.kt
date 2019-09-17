@@ -1,6 +1,8 @@
 package net.jkcode.jkmvc.tests
 
 import net.jkcode.jkmvc.common.*
+import net.jkcode.jkmvc.ttl.ScopedTransferableThreadLocal
+import net.jkcode.jkmvc.ttl.SttlThreadPool
 import org.junit.Test
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ForkJoinPool
@@ -36,12 +38,12 @@ class ThreadTests {
     }
 
     /**
-     * InheritableThreadLocal
+     * ScopedTransferableThreadLocal
      *   单向: 父 写 子, 但子 不能写 父
      */
     @Test
-    fun testInheritableThreadLocalInChildThread(){
-        val msgs = InheritableThreadLocal<String>()
+    fun testScopedTransferableThreadLocalInChildThread(){
+        val msgs = ScopedTransferableThreadLocal<String>()
 
         msgs.set("a")
         println("mainThread: " + msgs.get()) // a
@@ -58,8 +60,8 @@ class ThreadTests {
      * 在无关的线程中测试
      */
     @Test
-    fun testInheritableThreadLocalInOtherThread(){
-        val msgs = InheritableThreadLocal<String>()
+    fun testScopedTransferableThreadLocalInOtherThread(){
+        val msgs = ScopedTransferableThreadLocal<String>()
 
         msgs.set("a")
         println("mainThread: " + msgs.get()) // a
@@ -82,14 +84,14 @@ class ThreadTests {
 
     /**
      * 测试 CompletableFuture 是否继承 ThreadLocal
-     *   发起 runAsync() 与 完成 complete() 都是在 ThreadLocalInheritableThreadPool.commonPool 触发
+     *   发起 runAsync() 与 完成 complete() 都是在 SttlThreadPool.commonPool 触发
      */
     @Test
-    fun testInheritableThreadLocalInCompletableFuture() {
-        // 修改 CompletableFuture.asyncPool 属性为 ThreadLocalInheritableThreadPool.commonPool
-        // ThreadLocalInheritableThreadPool.applyCommonPoolToCompletableFuture()
+    fun testScopedTransferableThreadLocalInCompletableFuture() {
+        // 修改 CompletableFuture.asyncPool 属性为 SttlThreadPool.commonPool
+        // SttlThreadPool.applyCommonPoolToCompletableFuture()
 
-        val msgs = InheritableThreadLocal<String>()
+        val msgs = ScopedTransferableThreadLocal<String>()
         msgs.set("0")
         println("mainThread: " + msgs.get()) // 0
 
@@ -107,17 +109,17 @@ class ThreadTests {
                 println("rid=$id, srcTname=$srcTname, destTname=$destTname, step=$step - after : " + msgs.get()) //
             }
 
-            // 完成 complete() 在 ThreadLocalInheritableThreadPool.commonPool 触发
+            // 完成 complete() 在 SttlThreadPool.commonPool 触发
             CompletableFuture.runAsync(stepRun)
                     .thenRunAsync(stepRun)
                     .thenRunAsync(stepRun)
         }
 
         // 多线程发起
-        // 没有经过 ThreadLocalInheritableThreadPool, 是不能继承 ThreadLocal 的
+        // 没有经过 SttlThreadPool, 是不能继承 ThreadLocal 的
         //makeThreads(3, run)
 
-        // 发起 runAsync() 在 ThreadLocalInheritableThreadPool.commonPool 触发
+        // 发起 runAsync() 在 SttlThreadPool.commonPool 触发
         CommonThreadPool.execute(run)
         CommonThreadPool.execute(run)
         CommonThreadPool.execute(run)
@@ -128,12 +130,12 @@ class ThreadTests {
 
     /**
      * 测试 CompletableFuture 是否继承 ThreadLocal
-     *    完成 complete() 在 ThreadLocalInheritableThreadPool.commonPool 之外的其他线程触发
+     *    完成 complete() 在 SttlThreadPool.commonPool 之外的其他线程触发
      */
     @Test
-    fun testInheritableThreadLocalInCompletableFuture2() {
-        // 修改 CompletableFuture.asyncPool 属性为 ThreadLocalInheritableThreadPool.commonPool
-        ThreadLocalInheritableThreadPool.applyCommonPoolToCompletableFuture()
+    fun testScopedTransferableThreadLocalInCompletableFuture2() {
+        // 修改 CompletableFuture.asyncPool 属性为 SttlThreadPool.commonPool
+        SttlThreadPool.applyCommonPoolToCompletableFuture()
 
         val msgs = ThreadLocal<String>()
         msgs.set("0")
@@ -161,7 +163,7 @@ class ThreadTests {
         }
 
         // 完成 complete() 在其他线程
-        // 没有经过 ThreadLocalInheritableThreadPool, 是不能继承 ThreadLocal 的
+        // 没有经过 SttlThreadPool, 是不能继承 ThreadLocal 的
         makeThreads(num){i ->
             run()
             futures[i].complete(null)
@@ -198,13 +200,13 @@ class ThreadTests {
 
     /**
      * 可继承ThreadLocal的线程池
-     *    与 testInheritableThreadLocalInOtherThread 对比
+     *    与 testScopedTransferableThreadLocalInOtherThread 对比
      */
     @Test
-    fun testThreadLocalInheritableThreadPool(){
-        val pool = ThreadLocalInheritableThreadPool(ForkJoinPool.commonPool())
+    fun testSttlThreadPool(){
+        val pool = SttlThreadPool(ForkJoinPool.commonPool())
 
-        val msgs = InheritableThreadLocal<String>()
+        val msgs = ScopedTransferableThreadLocal<String>()
 
         msgs.set("a")
         println("mainThread: " + msgs.get()) // a
@@ -215,7 +217,7 @@ class ThreadTests {
             msgs.set("b")
             println("otherThread($name): " + msgs.get()) // b
 
-            // 没有经过 ThreadLocalInheritableThreadPool, 是不能继承 ThreadLocal 的
+            // 没有经过 SttlThreadPool, 是不能继承 ThreadLocal 的
             makeThreads(1) {
                 println("childThread: " + msgs.get()) // b
                 msgs.set("c")

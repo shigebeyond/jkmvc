@@ -2,7 +2,7 @@ package net.jkcode.jkmvc.http
 
 import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.common.IPlugin
-import net.jkcode.jkmvc.common.ThreadLocalInheritableThreadPool
+import net.jkcode.jkmvc.ttl.SttlThreadPool
 import net.jkcode.jkmvc.http.handler.HttpRequestHandler
 import javax.servlet.*
 import javax.servlet.http.HttpServletRequest
@@ -38,7 +38,7 @@ open class JkFilter() : Filter {
         HttpRequest.globalServletContext = filterConfig.servletContext
 
         // 将公共线程池应用到 CompletableFuture.asyncPool
-        ThreadLocalInheritableThreadPool.applyCommonPoolToCompletableFuture()
+        SttlThreadPool.applyCommonPoolToCompletableFuture()
 
         // 初始化插件
         for(p in plugins)
@@ -62,7 +62,7 @@ open class JkFilter() : Filter {
 
             // 异步处理请求
             //actx.start { // web server线程池
-            ThreadLocalInheritableThreadPool.commonPool.execute { // 其他线程池
+            SttlThreadPool.commonPool.execute { // 其他线程池
                 handleRequest(actx.request, actx.response, chain)
 
             }

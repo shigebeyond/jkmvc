@@ -2,7 +2,6 @@ package net.jkcode.jkmvc.http.handler
 
 import net.jkcode.jkmvc.closing.ClosingOnRequestEnd
 import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.ThreadLocalInheritableInterceptor
 import net.jkcode.jkmvc.common.httpLogger
 import net.jkcode.jkmvc.common.ucFirst
 import net.jkcode.jkmvc.http.*
@@ -11,6 +10,7 @@ import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
 import net.jkcode.jkmvc.http.router.RouteException
 import net.jkcode.jkmvc.interceptor.RequestInterceptorChain
+import net.jkcode.jkmvc.ttl.SttlInterceptor
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
@@ -90,12 +90,9 @@ object HttpRequestHandler : IHttpRequestHandler/*, MethodGuardInvoker()*/ {
         }
 
         // 3 关闭请求(资源)
-        val threadLocalItct = ThreadLocalInheritableInterceptor()
-        future.whenComplete{ r, ex ->
-            threadLocalItct.beforeExecute() // 继承 ThreadLocal
+        future.whenComplete(SttlInterceptor.interceptToBiConsumer { r, ex ->
             endRequest(req, ex) // 关闭请求(资源)
-            threadLocalItct.afterExecute() // 清理 ThreadLocal
-        }
+        })
         return true
     }
 

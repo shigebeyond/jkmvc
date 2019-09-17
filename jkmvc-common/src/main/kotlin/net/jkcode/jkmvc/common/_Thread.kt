@@ -4,8 +4,8 @@ import io.netty.util.concurrent.EventExecutor
 import io.netty.util.concurrent.MultithreadEventExecutorGroup
 import io.netty.util.concurrent.SingleThreadEventExecutor
 import net.jkcode.jkmvc.closing.ClosingOnShutdown
+import net.jkcode.jkmvc.ttl.SttlThreadPool
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.CompletableFuture.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.function.Supplier
@@ -17,7 +17,7 @@ import kotlin.reflect.jvm.javaField
  *   执行任务时要处理好异常
  */
 public val CommonThreadPool: ExecutorService =
-        ThreadLocalInheritableThreadPool.commonPool
+        SttlThreadPool.commonPool
         //ForkJoinPool.commonPool()
         //Executors.newFixedThreadPool(8)
 

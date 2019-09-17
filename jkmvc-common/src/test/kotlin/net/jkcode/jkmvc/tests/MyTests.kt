@@ -98,6 +98,18 @@ class MyTests{
         })
     }
 
+
+    @Test
+    fun testCompare(){
+        // 检查装箱后对象是否一样
+        fun allEquals(a: Integer, b: Integer): Boolean {
+            return a === b
+        }
+        val a = 1
+        val b = 1
+        println(allEquals(a as Integer, b as Integer)) // 是同一个 Integer对象
+    }
+
     @Test
     fun testNullSafe() {
         val field = String::class.java.getReadableField("test")

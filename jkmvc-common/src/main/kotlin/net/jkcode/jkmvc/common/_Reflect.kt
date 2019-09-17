@@ -48,7 +48,7 @@ public fun String.classPath2class(): Class<*> {
  * 获得指定类型的默认值
  * @return
  */
-public inline val <T: Any> KClass<T>.defaultValue:T
+public inline val <T: Any> KClass<T>.defaultValue:T?
     get(){
         return when (this) {
             Int::class -> 0
@@ -59,7 +59,7 @@ public inline val <T: Any> KClass<T>.defaultValue:T
             Short::class -> 0
             Byte::class -> 0
             else -> null
-        } as T
+        } as T?
     }
 
 /****************************** kotlin反射扩展: KClass *******************************/
@@ -460,6 +460,18 @@ public fun Class<*>.getWritableFinalField(name: String): Field {
         field.isAccessible = true
 
     return field
+}
+
+/**
+ * 获得可访问的方法
+ * @param name 方法名
+ * @param parameterTypes 参数类型
+ * @return
+ */
+public fun Class<*>.getAccessibleMethod(name: String, vararg parameterTypes: Class<*>): Method {
+    val method = this.getDeclaredMethod(name, *parameterTypes)
+    method.setAccessible(true)
+    return method
 }
 
 /****************************** 代理实现接口 *******************************/
