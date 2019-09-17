@@ -25,7 +25,6 @@ import java.lang.reflect.ParameterizedType
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.collections.ArrayList
@@ -112,7 +111,7 @@ class MyTests{
 
     @Test
     fun testNullSafe() {
-        val field = String::class.java.getReadableField("test")
+        val field = String::class.java.getAccessibleField("test")
         val b = field?.type == String::class.java
         println(b) // false
     }
@@ -342,7 +341,7 @@ class MyTests{
     @Test
     fun testMap(){
         val map = HashMap<Int, String>() // {1=a, 2=b}
-        val tableField = HashMap::class.java.getReadableField("table")!!
+        val tableField = HashMap::class.java.getAccessibleField("table")!!
         println(tableField.get(map))
 
         //val map = TreeMap<Int, String>() // {1=a, 2=b}
@@ -925,7 +924,7 @@ class MyTests{
         val map = HashMap<String, String>()
         map["a"] = "b"
         // 获得字段
-        val f = map.javaClass.getReadableField("table")!! // transient Node<K,V>[] table
+        val f = map.javaClass.getAccessibleField("table")!! // transient Node<K,V>[] table
         println(f)
         println(f.declaringClass) // HashMap
         println(f.name) // table

@@ -23,18 +23,25 @@ object SttlInterceptor {
      * @return
      */
     public inline fun <T> wrap(callerLocals: Local2Value = ScopedTransferableThreadLocal.getLocal2Value(), action:() -> T): T {
-        // 0 worker thread 的ScopedTransferableThreadLocal对象
+        // 1 worker thread 的ScopedTransferableThreadLocal对象
         val workerLocals = ScopedTransferableThreadLocal.getLocal2Value()
         try {
+            // 2 ScopedTransferableThreadLocal对象记录当前线程
+            for((local, value) in callerLocals)
+                value.addThread()
 
-            // 1 在执行之前, 传递(直接引用) caller thread 的ScopedTransferableThreadLocal对象, 因为是同一个ScopedTransferableThreadLocal对象, 因此 caller thread 与 worker thread 都能看到批次的改动
+            // 3 在执行之前, 传递(直接引用) caller thread 的ScopedTransferableThreadLocal对象, 因为是同一个ScopedTransferableThreadLocal对象, 因此 caller thread 与 worker thread 都能看到批次的改动
             ScopedTransferableThreadLocal.setLocal2Value(callerLocals)
 
-            // 2 执行
+            // 4 执行
             return action.invoke()
         }finally {
-            // 3 在执行结束后, 恢复ScopedTransferableThreadLocal对象
+            // 5 在执行结束后, 恢复ScopedTransferableThreadLocal对象
             ScopedTransferableThreadLocal.setLocal2Value(workerLocals)
+
+            // 6 ScopedTransferableThreadLocal对象删除当前线程
+            for((local, value) in callerLocals)
+                value.removeThread()
         }
     }
 

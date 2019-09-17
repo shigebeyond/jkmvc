@@ -2,8 +2,8 @@ package net.jkcode.jkmvc.http
 
 import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.common.IPlugin
-import net.jkcode.jkmvc.ttl.SttlThreadPool
 import net.jkcode.jkmvc.http.handler.HttpRequestHandler
+import net.jkcode.jkmvc.ttl.SttlThreadPool
 import javax.servlet.*
 import javax.servlet.http.HttpServletRequest
 
@@ -36,9 +36,6 @@ open class JkFilter() : Filter {
     override fun init(filterConfig: FilterConfig) {
         // fix bug: jetty异步请求后 req.contextPath/req.servletContext 居然为null, 因此直接在 JkFilter.init() 时记录 contextPath, 反正他是全局不变的
         HttpRequest.globalServletContext = filterConfig.servletContext
-
-        // 将公共线程池应用到 CompletableFuture.asyncPool
-        SttlThreadPool.applyCommonPoolToCompletableFuture()
 
         // 初始化插件
         for(p in plugins)

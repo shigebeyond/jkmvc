@@ -1,6 +1,10 @@
-package java.lang
+//package java.lang
+package net.jkcode.jkmvc.ttl
 
-import net.jkcode.jkmvc.common.getAccessibleMethod
+import net.jkcode.jkmvc.ttl.reflect.ThreadClass
+import net.jkcode.jkmvc.ttl.reflect.ThreadLocalClass
+import net.jkcode.jkmvc.ttl.reflect.ThreadLocalMapClass
+import net.jkcode.jkmvc.ttl.reflect.ThreadLocalMapEntryClass
 
 /**
  * ThreadLocal扩展
@@ -9,21 +13,6 @@ import net.jkcode.jkmvc.common.getAccessibleMethod
  * @date 2019-09-17 10:29 AM
  */
 class JkThreadLocal<T>(public val supplier: ()->T) : ThreadLocal<T>() {
-
-    /**
-     * ThreadLocalMap.set()私有方法的引用
-     */
-    public val setMethod = ThreadLocal.ThreadLocalMap::class.java.getAccessibleMethod("set", ThreadLocal::class.java, Any::class.java)
-
-    /**
-     * ThreadLocalMap.getEntry()包内方法的引用
-     */
-    public val getEntryMethod = ThreadLocal.ThreadLocalMap::class.java.getAccessibleMethod("getEntry", ThreadLocal::class.java)
-
-    /**
-     * ThreadLocalMap.remove()包内方法的引用
-     */
-    public val removeMethod = ThreadLocal.ThreadLocalMap::class.java.getAccessibleMethod("remove", ThreadLocal::class.java)
 
     /**
      * 获得初始值
@@ -39,12 +28,14 @@ class JkThreadLocal<T>(public val supplier: ()->T) : ThreadLocal<T>() {
      * @param value
      */
     public fun set(t: Thread, value: T) {
-        val map = getMap(t)
+        //val map: ThreadLocal.ThreadLocalMap = t.threadLocals
+        val map = ThreadClass.threadLocalField.get(t)
         if (map != null)
             //map.set(this, value)
-            setMethod.invoke(map, this, value)
+            ThreadLocalMapClass.setMethod.invoke(map, this, value)
         else
-            createMap(t, value)
+            //createMap(t, value)
+            ThreadLocalClass.createMapMethod.invoke(this, t, value)
     }
 
     /**
@@ -57,14 +48,19 @@ class JkThreadLocal<T>(public val supplier: ()->T) : ThreadLocal<T>() {
      */
     public fun get(t: Thread): T? {
         // 获得线程自有的 ThreadLocalMap
-        val map: ThreadLocal.ThreadLocalMap = t.threadLocals
+        //val map: ThreadLocal.ThreadLocalMap = t.threadLocals
+        val map = ThreadClass.threadLocalField.get(t)
         if (map == null)
             return null
 
         // 获得对应的值
         // val e = m.getEntry(this)
-        val e = getEntryMethod.invoke(map, this) as ThreadLocal.ThreadLocalMap.Entry
-        return e?.value as T?
+        val e = ThreadLocalMapClass.getEntryMethod.invoke(map, this)
+        if(e == null)
+            return null
+
+        //return e.value as T
+        return ThreadLocalMapEntryClass.valueField.get(e) as T
     }
 
     /**
@@ -77,15 +73,22 @@ class JkThreadLocal<T>(public val supplier: ()->T) : ThreadLocal<T>() {
             return
 
         // 获得线程自有的 ThreadLocalMap
-        val map: ThreadLocal.ThreadLocalMap = t.threadLocals
-        if (map != null) {
-            // 删除对应的值
-            // val e = m.getEntry(this)
-            val e = getEntryMethod.invoke(map, this) as ThreadLocal.ThreadLocalMap.Entry
-            if(e != null && e.value == value)  // 值没有改变
-                //m.remove(this)
-                removeMethod.invoke(map, this)
-        }
+        //val map: ThreadLocal.ThreadLocalMap = t.threadLocals
+        val map = ThreadClass.threadLocalField.get(t)
+        if (map == null)
+            return
+
+        // 删除对应的值
+        // val e = m.getEntry(this)
+        val e = ThreadLocalMapClass.getEntryMethod.invoke(map, this)
+        if(e == null)
+            return
+
+        // 值没有改变, 则删除
+        //if(e.value == value)
+        if(ThreadLocalMapEntryClass.valueField.get(e) == value)
+            //m.remove(this)
+            ThreadLocalMapClass.removeMethod.invoke(map, this)
     }
 
 }

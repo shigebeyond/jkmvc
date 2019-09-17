@@ -424,11 +424,11 @@ private fun getGenricType(genType: Type?, genTypeIndex: Int): Class<out Any>? {
 }
 
 /**
- * 获得private的属性, 并使其可读
+ * 获得可访问的属性
  * @param name 属性名
  * @return
  */
-public fun Class<*>.getReadableField(name: String): Field? {
+public fun Class<*>.getAccessibleField(name: String): Field? {
     try {
         val field = getDeclaredField(name)
 
@@ -512,7 +512,7 @@ class InterfaceDelegateFieldIterator(protected val clazz: Class<*>) : Iterator<F
      */
     protected fun getInterfaceDelegateField(i: Int): Field? {
         val name = "\$\$delegate_" + i
-        return clazz.getReadableField(name)
+        return clazz.getAccessibleField(name)
     }
 }
 
@@ -622,7 +622,7 @@ class PropDelegateFieldIterator(protected val clazz: Class<*>) : Iterator<Field>
  */
 public fun Class<*>.getPropoDelegateField(prop: String): Field? {
     val name = prop + "\$delegate"
-    val field = this.getReadableField(name)
+    val field = this.getAccessibleField(name)
     if(field?.type == ReadWriteProperty::class.java)
         return field
 

@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.db
 
 import net.jkcode.jkmvc.common.dbLogger
 import net.jkcode.jkmvc.common.mapToArray
+import net.jkcode.jkmvc.common.trySupplierFinally
 import net.jkcode.jkmvc.common.trySupplierFuture
 import net.jkcode.jkmvc.db.sharding.ShardingDb
 import net.jkcode.jkmvc.db.single.SingleDb
@@ -19,8 +20,9 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-abstract class Db protected constructor(public override val name:String /* 标识 */,
-                               public override val dbMeta: IDbMeta = DbMeta.get(name) /* 元数据 */
+abstract class Db protected constructor(
+        public override val name:String /* 标识 */,
+        public override val dbMeta: IDbMeta = DbMeta.get(name) /* 元数据 */
 ) : IDb(), IDbMeta by dbMeta {
 
     companion object {
@@ -110,31 +112,15 @@ abstract class Db protected constructor(public override val name:String /* 标�
 
     /**
      * 执行事务
+     *    兼容 statement 返回类型是CompletableFuture
+     *
      * @param statement db操作过程
      * @return
      */
     public override fun <T> transaction(statement: () -> T):T{
-        try{
-            begin(); // 开启事务
-            val result:T = statement(); // 执行sql
-            commit(); // 提交事务
-            return result; // 返回结果
-        }catch(e:Exception){
-            rollback(); // 回顾
-            throw e;
-        }
-    }
-
-    /**
-     * 执行事务, 但异步提交
-     * @param statement db操作过程
-     * @return
-     */
-    public override fun <T> transactionAsync(statement: () -> CompletableFuture<T>): CompletableFuture<T> {
         begin(); // 开启事务
 
-        val future = trySupplierFuture(statement)
-        return future.whenComplete{ r, ex ->
+        return trySupplierFinally(statement){ r, ex ->
             if(ex != null){
                 rollback(); // 回滚事务
                 throw ex;
@@ -142,7 +128,8 @@ abstract class Db protected constructor(public override val name:String /* 标�
 
             commit(); // 提交事务
             r
-        } as CompletableFuture<T>
+
+        }
     }
 
     /**

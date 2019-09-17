@@ -45,17 +45,12 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter, ClosingOnReque
 
     /**
      * 执行事务
+     *    兼容 statement 返回类型是CompletableFuture
+     *
      * @param statement db操作过程
      * @return
      */
     public abstract fun <T> transaction(statement: () -> T):T;
-
-    /**
-     * 执行事务, 但异步提交
-     * @param statement db操作过程
-     * @return
-     */
-    public abstract fun <T> transactionAsync(statement: () -> CompletableFuture<T>): CompletableFuture<T>
 
     /**
      * 执行事务
