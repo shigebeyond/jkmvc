@@ -24,7 +24,7 @@ class SttlValue(public var value: Any? = null) {
      * 添加被传递的线程
      */
     public fun addThread(t: Thread = Thread.currentThread()){
-        println("addThread: " + t.name)
+        //println("addThread: " + t.name)
         threads.add(t)
     }
 
@@ -32,7 +32,7 @@ class SttlValue(public var value: Any? = null) {
      * 删除被传递线程
      */
     public fun removeThread(t: Thread = Thread.currentThread()) {
-        println("removeThread: " + t.name)
+        //println("removeThread: " + t.name)
         threads.remove(t)
     }
 

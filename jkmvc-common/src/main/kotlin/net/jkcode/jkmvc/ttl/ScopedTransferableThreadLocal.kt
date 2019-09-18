@@ -6,7 +6,7 @@ import java.util.*
 /**
  * 本地值映射: <ThreadLocal, 值>
  */
-typealias Local2Value = HashMap<ScopedTransferableThreadLocal<*>, SttlValue>
+typealias Local2Value = MutableMap<ScopedTransferableThreadLocal<*>, SttlValue>
 
 /**
  * 有作用域的可传递的 ThreadLocal
@@ -40,7 +40,7 @@ open class ScopedTransferableThreadLocal<T>(public val supplier: (()->T)? = null
          *   本地值映射: <ThreadLocal, 值>
          */
         protected val local2Values: JkThreadLocal<Local2Value> = JkThreadLocal() {
-            Local2Value()
+            HashMap<ScopedTransferableThreadLocal<*>, SttlValue>()
         }
 
         /**
@@ -54,13 +54,28 @@ open class ScopedTransferableThreadLocal<T>(public val supplier: (()->T)? = null
         }
 
         /**
+         * 复制当前线程线的本地值映射
+         *    本地值映射: <ThreadLocal, 值>
+         *
+         * @return
+         */
+        public fun weakCopyLocal2Value(): Local2Value {
+            val map = WeakHashMap<ScopedTransferableThreadLocal<*>, SttlValue>()
+            map.putAll(getLocal2Value())
+            return map
+        }
+
+        /**
          * 设置当前线程线的本地值映射
          *    本地值映射: <ThreadLocal, 值>
          *
          * @param local2Value
          */
-        public fun setLocal2Value(local2Value: Local2Value) {
-            return local2Values.set(local2Value)
+        public fun putLocal2Value(local2Value: Local2Value) {
+            //return local2Values.set(local2Value)
+            val map = local2Values.get()
+            map.clear()
+            map.putAll(local2Value)
         }
 
     }
@@ -104,7 +119,7 @@ open class ScopedTransferableThreadLocal<T>(public val supplier: (()->T)? = null
      *   开始新值, 如果有旧值, 就删掉
      */
     public override fun doBeginScope() {
-        println("开始作用域")
+        //println("beginScope")
         // 删除当前线程的旧值
         val v = local2Values.get().remove(this)
         // 旧值也删除当前线程
@@ -116,7 +131,7 @@ open class ScopedTransferableThreadLocal<T>(public val supplier: (()->T)? = null
      *    删除值, 要删除所有被传递的线程的值
      */
     public override fun doEndScope() {
-        println("结束作用域")
+        //println("endScope")
         // 删除当前线程的值 -- 漏掉删除其他线程的值
         //local2Values.get().remove(this)
 
