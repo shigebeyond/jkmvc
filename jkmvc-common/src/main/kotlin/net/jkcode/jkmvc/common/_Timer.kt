@@ -3,7 +3,7 @@ package net.jkcode.jkmvc.common
 import io.netty.util.HashedWheelTimer
 import io.netty.util.Timeout
 import io.netty.util.TimerTask
-import net.jkcode.jkmvc.closing.ClosingOnShutdown
+import net.jkcode.jkmvc.scope.ClosingOnShutdown
 import java.util.concurrent.TimeUnit
 
 /**

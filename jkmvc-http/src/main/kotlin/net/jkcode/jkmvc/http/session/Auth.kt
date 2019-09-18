@@ -1,10 +1,9 @@
 package net.jkcode.jkmvc.http.session
 
-import net.jkcode.jkmvc.closing.ClosingOnRequestEnd
 import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.common.IConfig
-import net.jkcode.jkmvc.common.isSuperClass
 import net.jkcode.jkmvc.common.dbLogger
+import net.jkcode.jkmvc.common.isSuperClass
 import net.jkcode.jkmvc.orm.Orm
 import net.jkcode.jkmvc.orm.modelOrmMeta
 import net.jkcode.jkmvc.orm.modelRowTransformer
@@ -19,7 +18,7 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @create 2017-09-19 下午11:35
  **/
-abstract class Auth: IAuth, ClosingOnRequestEnd() {
+abstract class Auth: IAuth{
 
     companion object: NamedConfiguredSingletons<Auth>() {
 

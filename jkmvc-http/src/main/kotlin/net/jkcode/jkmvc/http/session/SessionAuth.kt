@@ -48,7 +48,4 @@ class SessionAuth : Auth() {
         getSession(false).invalidate();
     }
 
-    public override fun close() {
-    }
-
 }

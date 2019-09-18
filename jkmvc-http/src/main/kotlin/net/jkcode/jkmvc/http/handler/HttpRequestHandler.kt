@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.http.handler
 
-import net.jkcode.jkmvc.closing.ClosingOnRequestEnd
+import net.jkcode.jkmvc.scope.GlobalRequestScope
 import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.common.httpLogger
 import net.jkcode.jkmvc.common.ucFirst
@@ -20,6 +20,7 @@ import kotlin.reflect.jvm.javaMethod
 
 /**
  * http请求处理者
+ *    在请求处理前后调用 GlobalRequestScope 的 beginScope()/endScope()
  *
  * @author shijianhang
  * @date 2016-10-6 上午9:27:56
@@ -123,6 +124,9 @@ object HttpRequestHandler : IHttpRequestHandler/*, MethodGuardInvoker()*/ {
         controller.req = req;
         controller.res = res;
 
+        // 请求处理前，开始作用域
+        GlobalRequestScope.beginScope()
+
         // 调用controller的action方法
         return controller.callActionMethod(action.javaMethod!!)
         //return guardInvoke(action.javaMethod!!, controller, emptyArray())
@@ -138,8 +142,8 @@ object HttpRequestHandler : IHttpRequestHandler/*, MethodGuardInvoker()*/ {
         if(ex != null)
             ex.printStackTrace()
 
-        // 1 请求处理后，关闭资源
-        ClosingOnRequestEnd.triggerClosings()
+        // 1 请求处理后，结束作用域(关闭资源)
+        GlobalRequestScope.endScope()
 
         // 2 如果是异步操作, 则需要关闭异步响应
         if (req.isAsyncStarted)

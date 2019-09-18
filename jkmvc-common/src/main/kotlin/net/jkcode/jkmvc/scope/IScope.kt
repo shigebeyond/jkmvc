@@ -1,17 +1,31 @@
-package net.jkcode.jkmvc.ttl
+package net.jkcode.jkmvc.scope
 
 import net.jkcode.jkmvc.common.trySupplierFinally
-import net.jkcode.jkmvc.common.trySupplierFuture
-import java.util.concurrent.CompletableFuture
+import java.io.Closeable
 
 /**
- * 有作用域的对象
- *    实现该接口, 必须承诺 beginScope()/endScope()会在作用域开始与结束时调用
+ * 作用域对象
+ *    1. 实现该接口, 必须承诺 beginScope()/endScope()会在作用域开始与结束时调用
+ *    2. 父作用域的 beginScope()/endScope() 会自动调用子作用域的 beginScope()/endScope()
  *
  * @author shijianhang<772910474@qq.com>
  * @date 2019-09-17 9:52 AM
  */
-interface Scoped {
+interface IScope {
+
+    /**
+     * 添加子作用域
+     * @param childScope
+     */
+    fun addChildScope(childScope: IScope)
+
+    /**
+     * 添加子作用域
+     * @param closing
+     */
+    fun addChildScope(closing: Closeable){
+        addChildScope(CloseableScope(closing))
+    }
 
     /**
      * 作用域开始
@@ -41,5 +55,4 @@ interface Scoped {
             r
         }
     }
-
 }

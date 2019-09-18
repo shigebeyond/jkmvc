@@ -1,8 +1,6 @@
 package net.jkcode.jkmvc.db
 
-import net.jkcode.jkmvc.closing.ClosingOnRequestEnd
 import java.sql.ResultSet
-import java.util.concurrent.CompletableFuture
 import kotlin.reflect.KClass
 
 /**
@@ -14,7 +12,7 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter, ClosingOnRequestEnd() {
+abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
 
     /**
      * db元数据

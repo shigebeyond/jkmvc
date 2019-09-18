@@ -3,7 +3,7 @@ package net.jkcode.jkmvc.common
 import io.netty.util.concurrent.EventExecutor
 import io.netty.util.concurrent.MultithreadEventExecutorGroup
 import io.netty.util.concurrent.SingleThreadEventExecutor
-import net.jkcode.jkmvc.closing.ClosingOnShutdown
+import net.jkcode.jkmvc.scope.ClosingOnShutdown
 import net.jkcode.jkmvc.ttl.SttlThreadPool
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService

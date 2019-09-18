@@ -13,9 +13,9 @@ import java.util.*
 abstract class IDistributedKeyLock(): IKeyLock {
 
     /**
-     * 过期时间, 用于记录本地jvm获得过的锁的过期时间
+     * key对应的过期时间, 用于记录本地jvm获得过的锁的过期时间
      */
-    private val expireTimes: ThreadLocal<MutableMap<Any, Long?>> = ThreadLocal.withInitial {
+    private val key2ExpireTimes: ThreadLocal<MutableMap<Any, Long?>> = ThreadLocal.withInitial {
         HashMap<Any, Long?>()
     }
 
@@ -25,7 +25,7 @@ abstract class IDistributedKeyLock(): IKeyLock {
      * @return
      */
     public fun isNotExpired(key: Any): Boolean{
-        val expireTime = expireTimes.get()[key]
+        val expireTime = key2ExpireTimes.get()[key]
         return expireTime != null && expireTime!! < currMillis() // 未过期
     }
 
@@ -40,7 +40,7 @@ abstract class IDistributedKeyLock(): IKeyLock {
         val result = doQuickLock(key, expireSeconds)
         // 更新过期时间
         if(result)
-            expireTimes.get()[key] = currMillis() + expireSeconds * 1000
+            key2ExpireTimes.get()[key] = currMillis() + expireSeconds * 1000
         return result
     }
 
@@ -61,7 +61,7 @@ abstract class IDistributedKeyLock(): IKeyLock {
     public override fun unlock(key: Any){
         doUnlock(key)
         // 删除过期时间
-        expireTimes.get().remove(key)
+        key2ExpireTimes.get().remove(key)
     }
 
     /**

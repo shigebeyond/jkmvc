@@ -6,6 +6,8 @@ import net.jkcode.jkmvc.common.trySupplierFinally
 import net.jkcode.jkmvc.common.trySupplierFuture
 import net.jkcode.jkmvc.db.sharding.ShardingDb
 import net.jkcode.jkmvc.db.single.SingleDb
+import net.jkcode.jkmvc.ttl.RequestScopedTransferableThreadLocal
+import java.io.Closeable
 import java.sql.Connection
 import java.sql.ResultSet
 import java.util.*
@@ -14,8 +16,9 @@ import kotlin.reflect.KClass
 
 /**
  * 封装db操作
- *   ThreadLocal保证的线程安全, 每个请求都创建新的db对象
- *   db对象的生命周期是请求级
+ *   1. ThreadLocal保证的线程安全, 每个请求都创建新的db对象, 请求结束要调用 close() 来关闭连接
+ *   2. db对象的生命周期是请求级
+ *   3. 继承 Closeable 来关闭连接
  *
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
@@ -23,23 +26,31 @@ import kotlin.reflect.KClass
 abstract class Db protected constructor(
         public override val name:String /* 标识 */,
         public override val dbMeta: IDbMeta = DbMeta.get(name) /* 元数据 */
-) : IDb(), IDbMeta by dbMeta {
+) : IDb(), IDbMeta by dbMeta, Closeable {
 
     companion object {
 
         /**
          * 线程安全的db缓存
          *    每个线程有多个db, 一个名称各一个db对象
-         *    每个请求都创建新的db对象, 请求结束要调用 close() 来删除db对象
+         *    每个请求都创建新的db对象, 请求结束要调用 close() 来关闭连接
          */
-        protected val dbs:ThreadLocal<HashMap<String, Db>> = ThreadLocal.withInitial {
-            HashMap<String, Db>();
+        protected val dbs:RequestScopedTransferableThreadLocal<HashMap<String, Db>> = object: RequestScopedTransferableThreadLocal<HashMap<String, Db>>({HashMap()}){
+            public override fun doEndScope() {
+                // 请求结束要调用 close() 来关闭连接
+                val dbs = get()
+                for((name, db) in dbs)
+                    db.close()
+                dbs.clear()
+
+                super.doEndScope()
+            }
         }
 
         /**
          * 获得db(线程安全)
          *    获得当前线程下的指定名字的db, 没有则创建新db
-         *    每个请求都创建新的db对象, 请求结束要调用 close() 来删除db对象
+         *    每个请求都创建新的db对象, 请求结束要调用 close() 来关闭连接
          * @param name
          * @return
          */
@@ -369,14 +380,5 @@ abstract class Db protected constructor(
             dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
             throw  e
         }
-    }
-
-    /**
-     * 关闭
-     */
-    public override fun close():Unit{
-        // 删除当前线程的db对象
-        if(dbs.get().remove(name) == null)
-            return // 当前线程并没有db对象
     }
 }

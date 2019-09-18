@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.server
 
-import net.jkcode.jkmvc.closing.ClosingOnShutdown
+import net.jkcode.jkmvc.scope.ClosingOnShutdown
 import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.common.prepareDirectory
 import net.jkcode.jkmvc.common.httpLogger

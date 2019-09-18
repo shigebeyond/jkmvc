@@ -1,8 +1,7 @@
 package net.jkcode.jkmvc.db
 
-import net.jkcode.jkmvc.closing.ClosingOnShutdown
+import net.jkcode.jkmvc.scope.ClosingOnShutdown
 import net.jkcode.jkmvc.common.getOrPutOnce
-import net.jkcode.jkmvc.db.single.DruidDataSourceFactory
 import java.util.concurrent.ConcurrentHashMap
 import javax.sql.DataSource
 

@@ -98,8 +98,6 @@ class SingleDb(name:String /* 标识 */) : Db(name) {
      * 关闭
      */
     public override fun close():Unit{
-        super.close()
-
         // 关闭主库连接
         if(connUsed and 1 > 0)
             masterConn.close()

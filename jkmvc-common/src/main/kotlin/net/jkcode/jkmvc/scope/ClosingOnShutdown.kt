@@ -1,4 +1,4 @@
-package net.jkcode.jkmvc.closing
+package net.jkcode.jkmvc.scope
 
 import java.io.Closeable
 import java.util.*
