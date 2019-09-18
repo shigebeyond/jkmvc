@@ -105,29 +105,28 @@ object HttpRequestHandler : IHttpRequestHandler/*, MethodGuardInvoker()*/ {
      * @return
      */
     private fun callController(req: HttpRequest, res: HttpResponse): Any? {
-        // 获得controller类
+        // 1 获得controller类
         val clazz: ControllerClass? = ControllerClassLoader.get(req.controller);
         if (clazz == null)
             throw RouteException("Controller类不存在：" + req.controller);
 
-        // 获得action方法
+        // 2 获得action方法
         val action: KFunction<*>? = clazz.getActionMethod(req.action);
         if (action == null){
             val method = "action" + req.action.ucFirst()
             throw RouteException("控制器${req.controller}不存在方法：${method}()");
         }
 
-        // 创建controller
+        // 3 创建controller
         val controller: Controller = clazz.clazz.java.newInstance() as Controller;
-
         // 设置req/res属性
         controller.req = req;
         controller.res = res;
 
-        // 请求处理前，开始作用域
+        // 4 请求处理前，开始作用域
         GlobalRequestScope.beginScope()
 
-        // 调用controller的action方法
+        // 5 调用controller的action方法
         return controller.callActionMethod(action.javaMethod!!)
         //return guardInvoke(action.javaMethod!!, controller, emptyArray())
     }

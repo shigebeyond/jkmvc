@@ -216,7 +216,7 @@ public val Method.isStatic: Boolean
  * @param resFuture
  * @return
  */
-public fun Method.resultFromFuture(resFuture: CompletableFuture<Any?>): Any? {
+public fun Method.resultFromFuture(resFuture: CompletableFuture<*>): Any? {
     // 1 异步结果
     //if (Future::class.java.isAssignableFrom(method.returnType))
     if(this.returnType == Future::class.java

@@ -39,6 +39,31 @@ class CompletableFutureTests{
     }
 
     /**
+     * 合并2个future
+     */
+    @Test
+    fun testCombine() {
+        val f = CompletableFuture.supplyAsync {
+                val r = randomInt(100)
+                println("结果1: $r")
+                r
+            }.thenCombine(
+                CompletableFuture.supplyAsync{
+                    val r = randomInt(100)
+                    println("结果2: $r")
+                    r
+                }
+            , { r1, r2 ->
+                // 合并两个查询结果
+                val r = r1 + r2
+                println("结果3: $r")
+                r
+            });
+
+        println(f.get())
+    }
+
+    /**
      * CompletableFuture.allOf()
      */
     @Test
