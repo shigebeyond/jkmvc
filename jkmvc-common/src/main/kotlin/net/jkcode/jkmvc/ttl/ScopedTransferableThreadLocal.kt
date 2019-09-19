@@ -97,7 +97,7 @@ open class ScopedTransferableThreadLocal<T>(public val supplier: (()->T)? = null
     public fun set(value: T) {
         val local2Value = local2Values.get()
         // 有旧值,则更新
-        val oldValue = local2Value.get(this)
+        val oldValue: SttlValue? = local2Value.get(this)
         if(oldValue != null) {
             oldValue.value = value
             return
@@ -116,7 +116,7 @@ open class ScopedTransferableThreadLocal<T>(public val supplier: (()->T)? = null
      */
     public fun get(initOnNull: Boolean = true): T {
         val local2Value = local2Values.get()
-        var value = local2Value.get(this)
+        var value: SttlValue? = local2Value.get(this)
         // 已删除
         if(value != null && value.deleted)
             value = null
@@ -153,26 +153,25 @@ open class ScopedTransferableThreadLocal<T>(public val supplier: (()->T)? = null
 
         // 删除所有被传递的线程的值
         // 获得值
-        val value = local2Values.get().get(this)
+        val value: SttlValue? = local2Values.get().get(this)
         if(value == null)
             return
 
         // 标记已删除
         value.deleted = true
 
-        // 遍历每个被传递线程来删除值
-        while(value.threads.isNotEmpty()){
-            // 删除线程
-            val t = value.threads.pop()
-            // 获得该线程的值
+        // 出队每个被传递线程来删除值
+        value.pollEachThread { t ->
+            // 获得该线程的map
             val local2Value = local2Values.get(t)
-            if(local2Value == null)
-                continue
-            val value2 = local2Value.get(this)
+            if(local2Value != null) {
+                // 获得该线程的值
+                val value2: SttlValue? = local2Value.get(this)
 
-            // 如果值没有改变, 则删除
-            if(value2 == value)
-                local2Value.remove(this)
+                // 如果值没有改变, 则删除
+                if (value2 == value)
+                    local2Value.remove(this)
+            }
         }
     }
 

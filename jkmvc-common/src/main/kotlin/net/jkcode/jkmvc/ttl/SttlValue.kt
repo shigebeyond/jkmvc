@@ -1,6 +1,8 @@
 package net.jkcode.jkmvc.ttl
 
+import net.jkcode.jkmvc.common.pollEach
 import java.util.*
+import java.util.concurrent.LinkedBlockingQueue
 
 /**
  * 值, 有作用域的可传递的 ThreadLocal 中的值
@@ -14,7 +16,7 @@ class SttlValue(public var value: Any? = null) {
     /**
      * 被传递的线程
      */
-    internal val threads: Queue<Thread> = BlockingQueue()
+    private val threads: Queue<Thread> = LinkedBlockingQueue()
 
     /**
      * 是否已删除
@@ -45,10 +47,12 @@ class SttlValue(public var value: Any? = null) {
     }
 
     /**
-     * 清空所有被传递的线程
+     * 逐个出队被传递线程, 并访问
+     * @param action 访问的回调
+     * @return
      */
-    public fun clearThreads(){
-        threads.clear()
+    public fun pollEachThread(action: (Thread) -> Unit){
+        threads.pollEach(action)
     }
 
 }

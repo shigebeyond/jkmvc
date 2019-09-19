@@ -432,6 +432,19 @@ public fun <E> ConcurrentLinkedQueue<E>.drainTo(c: MutableCollection<E>, maxElem
     return n
 }
 
+/**
+ * 逐个出队元素, 并访问
+ * @param action 访问的回调
+ * @return
+ */
+public fun <T> Queue<T>.pollEach(action: (T) -> Unit){
+    var t: T = poll()
+    while(t != null){
+        action.invoke(t)
+        t = poll()
+    }
+}
+
 /****************************** 扩展 Map *****************************/
 /**
  * 获得map的某个值，如果值为空，则返回默认值
