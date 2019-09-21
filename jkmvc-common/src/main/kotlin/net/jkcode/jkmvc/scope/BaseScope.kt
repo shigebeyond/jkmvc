@@ -10,7 +10,7 @@ import java.util.*
  * @author shijianhang<772910474@qq.com>
  * @date 2019-09-17 9:52 AM
  */
-abstract class Scope : IScope {
+abstract class BaseScope : IScope {
 
     /**
      * 子作用域

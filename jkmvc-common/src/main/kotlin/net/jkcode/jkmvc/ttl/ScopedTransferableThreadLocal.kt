@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.ttl
 
-import net.jkcode.jkmvc.scope.Scope
+import net.jkcode.jkmvc.scope.BaseScope
 import java.util.*
 
 /**
@@ -12,7 +12,7 @@ typealias Local2Value = MutableMap<ScopedTransferableThreadLocal<*>, SttlValue>
  * 有作用域的可传递的 ThreadLocal
  *    1. 实现 Scopable 接口, 标识有作用域, 保证值的创建与删除无误
  *    1.1 在作用域开始时创建, 保证多线程切换作用域时不污染新的作用域
- *    1.2 在作用域开始时删除, 防止内存泄露
+ *    1.2 在作用域结束时删除, 针对 ThreadLocal 逃逸现象, 防止内存泄露
  *    1.3 Scopable的 beginScope()/endScope() 必须保证被调用
  *
  *    2. 自动刷新与删除
@@ -31,7 +31,7 @@ typealias Local2Value = MutableMap<ScopedTransferableThreadLocal<*>, SttlValue>
  * @author shijianhang<772910474@qq.com>
  * @date 2019-09-17 8:32 AM
  */
-open class ScopedTransferableThreadLocal<T>(public val supplier: (()->T)? = null): Scope() {
+open class ScopedTransferableThreadLocal<T>(public val supplier: (()->T)? = null): BaseScope() {
 
     companion object{
 
@@ -92,6 +92,8 @@ open class ScopedTransferableThreadLocal<T>(public val supplier: (()->T)? = null
 
     /**
      * 设置值
+     *    只能在作用域内部调用, 否则无法在作用域结束时自动删除
+     *
      * @param value
      */
     public fun set(value: T) {

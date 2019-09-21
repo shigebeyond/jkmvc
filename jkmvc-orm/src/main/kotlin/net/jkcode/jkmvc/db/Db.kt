@@ -3,15 +3,13 @@ package net.jkcode.jkmvc.db
 import net.jkcode.jkmvc.common.dbLogger
 import net.jkcode.jkmvc.common.mapToArray
 import net.jkcode.jkmvc.common.trySupplierFinally
-import net.jkcode.jkmvc.common.trySupplierFuture
 import net.jkcode.jkmvc.db.sharding.ShardingDb
 import net.jkcode.jkmvc.db.single.SingleDb
-import net.jkcode.jkmvc.ttl.RequestScopedTransferableThreadLocal
+import net.jkcode.jkmvc.ttl.AllRequestScopedTransferableThreadLocal
 import java.io.Closeable
 import java.sql.Connection
 import java.sql.ResultSet
 import java.util.*
-import java.util.concurrent.CompletableFuture
 import kotlin.reflect.KClass
 
 /**
@@ -35,7 +33,7 @@ abstract class Db protected constructor(
          *    每个线程有多个db, 一个名称各一个db对象
          *    每个请求都创建新的db对象, 请求结束要调用 close() 来关闭连接
          */
-        protected val dbs:RequestScopedTransferableThreadLocal<HashMap<String, Db>> = object: RequestScopedTransferableThreadLocal<HashMap<String, Db>>({HashMap()}){
+        protected val dbs:AllRequestScopedTransferableThreadLocal<HashMap<String, Db>> = object: AllRequestScopedTransferableThreadLocal<HashMap<String, Db>>({HashMap()}){
             public override fun doEndScope() {
                 // 请求结束要调用 close() 来关闭连接
                 val dbs = get()

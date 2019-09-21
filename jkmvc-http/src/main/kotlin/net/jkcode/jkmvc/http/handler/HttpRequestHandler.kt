@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.http.handler
 
-import net.jkcode.jkmvc.scope.GlobalRequestScope
+import net.jkcode.jkmvc.scope.GlobalAllRequestScope
 import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.common.httpLogger
 import net.jkcode.jkmvc.common.ucFirst
@@ -10,6 +10,7 @@ import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
 import net.jkcode.jkmvc.http.router.RouteException
 import net.jkcode.jkmvc.interceptor.RequestInterceptorChain
+import net.jkcode.jkmvc.scope.GlobalHttpRequestScope
 import net.jkcode.jkmvc.ttl.SttlInterceptor
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
@@ -124,7 +125,8 @@ object HttpRequestHandler : IHttpRequestHandler/*, MethodGuardInvoker()*/ {
         controller.res = res;
 
         // 4 请求处理前，开始作用域
-        GlobalRequestScope.beginScope()
+        GlobalAllRequestScope.beginScope()
+        GlobalHttpRequestScope.beginScope()
 
         // 5 调用controller的action方法
         return controller.callActionMethod(action.javaMethod!!)
@@ -142,7 +144,8 @@ object HttpRequestHandler : IHttpRequestHandler/*, MethodGuardInvoker()*/ {
             ex.printStackTrace()
 
         // 1 请求处理后，结束作用域(关闭资源)
-        GlobalRequestScope.endScope()
+        GlobalAllRequestScope.endScope()
+        GlobalHttpRequestScope.endScope()
 
         // 2 如果是异步操作, 则需要关闭异步响应
         if (req.isAsyncStarted)

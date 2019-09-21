@@ -3,6 +3,7 @@ package net.jkcode.jkmvc.redis
 import net.jkcode.jkmvc.common.AddressesParser
 import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.common.getOrPutOnce
+import net.jkcode.jkmvc.ttl.AllRequestScopedTransferableThreadLocal
 import redis.clients.jedis.*
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -61,9 +62,20 @@ object ShardedJedisFactory: IJedisFactory {
     /**
      * 线程安全的redis连接
      */
-    private val jedises:ThreadLocal<MutableMap<String, ShardedJedis>> = ThreadLocal.withInitial {
-        HashMap<String, ShardedJedis>();
+    private val jedises: AllRequestScopedTransferableThreadLocal<HashMap<String, ShardedJedis>> = object: AllRequestScopedTransferableThreadLocal<HashMap<String, ShardedJedis>>({HashMap()}){ // 所有请求域的可传递的 ThreadLocal
+        public override fun doEndScope() {
+            // 请求结束要调用 close() 来关闭连接
+            val jedises = get()
+            for((name, jedis) in jedises)
+                //getPool(name).returnResource(jedis)
+                jedis.close()
+            jedises.clear()
+
+            super.doEndScope()
+        }
     }
+
+
 
     /**
      * 获得redis连接

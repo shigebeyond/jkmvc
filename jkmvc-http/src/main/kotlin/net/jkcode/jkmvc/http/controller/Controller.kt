@@ -1,9 +1,10 @@
 package net.jkcode.jkmvc.http.controller
 
-import net.jkcode.jkmvc.common.ICurrentHolder
+import net.jkcode.jkmvc.ttl.SttlCurrentHolder
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.view.View
+import net.jkcode.jkmvc.ttl.HttpRequestScopedTransferableThreadLocal
 
 /**
  * 控制器
@@ -15,7 +16,7 @@ import net.jkcode.jkmvc.http.view.View
  */
 abstract class Controller : IController {
 
-    companion object: ICurrentHolder<Controller>()
+    companion object: SttlCurrentHolder<Controller>(HttpRequestScopedTransferableThreadLocal()) // http请求域的可传递的 ThreadLocal
 
     /**
      * 请求对象

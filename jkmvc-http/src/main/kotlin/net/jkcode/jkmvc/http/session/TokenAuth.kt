@@ -3,7 +3,7 @@ package net.jkcode.jkmvc.http.session
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.session.token.ITokenManager
 import net.jkcode.jkmvc.http.session.token.TokenManager
-import net.jkcode.jkmvc.ttl.RequestScopedTransferableThreadLocal
+import net.jkcode.jkmvc.ttl.AllRequestScopedTransferableThreadLocal
 
 /**
  * 基于token认证用户 -- 使用token来保存登录用户的状态
@@ -18,7 +18,7 @@ class TokenAuth : Auth() {
     /**
      * 登录用户缓存
      */
-    protected val users:RequestScopedTransferableThreadLocal<IAuthUserModel?> = RequestScopedTransferableThreadLocal {
+    protected val users:AllRequestScopedTransferableThreadLocal<IAuthUserModel?> = AllRequestScopedTransferableThreadLocal {
         // 获得当前token
         val token = getToken()
         if(token == null)
