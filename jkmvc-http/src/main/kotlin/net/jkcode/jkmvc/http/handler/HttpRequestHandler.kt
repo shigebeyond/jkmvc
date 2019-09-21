@@ -118,15 +118,16 @@ object HttpRequestHandler : IHttpRequestHandler/*, MethodGuardInvoker()*/ {
             throw RouteException("控制器${req.controller}不存在方法：${method}()");
         }
 
-        // 3 创建controller
+        // 3 请求处理前，开始作用域
+        // 必须在创建controller之前调用, 因为controller自身就是一个请求域的资源
+        GlobalAllRequestScope.beginScope()
+        GlobalHttpRequestScope.beginScope()
+
+        // 4 创建controller
         val controller: Controller = clazz.clazz.java.newInstance() as Controller;
         // 设置req/res属性
         controller.req = req;
         controller.res = res;
-
-        // 4 请求处理前，开始作用域
-        GlobalAllRequestScope.beginScope()
-        GlobalHttpRequestScope.beginScope()
 
         // 5 调用controller的action方法
         return controller.callActionMethod(action.javaMethod!!)
