@@ -4,8 +4,8 @@ import net.jkcode.jkmvc.scope.*
 
 /**
  * 请求域的可传递的 ThreadLocal
- *   在所有请求的作用域中有效
- *   作为请求域的子作用域来自动处理
+ *   1 在对应的请求域中有效
+ *   2 对应的请求处理器, 承诺在请求处理前后调用其  beginScope()/endScope(), 通过作为请求域的子作用域来自动处理
  *
  * @author shijianhang<772910474@qq.com>
  * @date 2019-09-18 10:21 AM

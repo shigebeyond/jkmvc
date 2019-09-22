@@ -11,6 +11,15 @@ public val UnitFuture: CompletableFuture<Unit> = CompletableFuture.completedFutu
 /**
  * 等待并输出异步结果
  */
+public fun CompletableFuture<*>.print() {
+    this.thenAccept {
+        println("异步结果: $it")
+    }
+}
+
+/**
+ * 等待并输出异步结果
+ */
 public fun List<CompletableFuture<*>>.print() {
     (this.toTypedArray() as Array<CompletableFuture<Any?>>).print()
 }
