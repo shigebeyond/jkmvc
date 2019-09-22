@@ -23,7 +23,7 @@ typealias Local2Value = MutableMap<ScopedTransferableThreadLocal<*>, SttlValue>
  *
  *    4. 所有的get()/set()操作必须在作用域内执行, 也就是说必须先调用 beginScope()
  *
- *    5. 值的变动 vs 超过作用域的引用
+ *    5. 值的变动 vs 超出作用域的引用
  *       endScope() 可能随时随地调用, 也就是说 SttlValue 随时可能被删除, 但可能某个线程调用了 SttlInterceptor.intercept(回调), 但此时回调还没触发, 也就是旧的 ScopedTransferableThreadLocal 对象还未恢复, 等恢复后引用的 SttlValue 却应该被删掉, 因此添加 deleted 属性来做是否已删除的判断
  *       可能同一个线程读两次get(), 读的值不一样, 第一次不为null, 第二次为null, 具体以其他线程修改的时间或endScope()调用的时间为准
  *       不过我本意是将 endScope() 交给开发者来自行调用, 从而保证 endScope() 是最后调用的, 往后不会有后续引用了, 从而保证不会作用域逃逸
