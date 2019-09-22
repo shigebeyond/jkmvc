@@ -216,6 +216,22 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		return defaultValue;
 	}
 
+
+	/**
+	 * 智能获得非空请求参数值，先从路由参数中取，如果没有，则从get/post参数中取
+	 *    注：调用时需明确指定返回类型，来自动转换参数值为指定类型
+	 *
+	 * @param key 参数名
+	 * @return
+	 */
+	public inline fun <reified T:Any> getNotNull(key: String): T{
+		val value: T? = get(key)
+		if(value == null)
+			throw IllegalArgumentException("请求参数[$key]为空")
+		
+		return value
+	}
+
 	/**
 	 * 智能获得并校验请求参数值，先从路由参数中取，如果没有，则从get/post参数中取
 	 *    注：调用时需明确指定返回类型，来自动转换参数值为指定类型
