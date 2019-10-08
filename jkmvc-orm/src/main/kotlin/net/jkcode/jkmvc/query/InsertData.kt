@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.query
 
+import net.jkcode.jkmvc.common.cloneProperties
 import net.jkcode.jkmvc.db.DbException
 
 /**
@@ -16,7 +17,7 @@ class InsertData: Cloneable{
     /**
      * 要插入的多行数据，但是只有一维，需要按columns的大小，来拆分成多行
      */
-    public var rows: ArrayList<Any?> = ArrayList();
+    public val rows: ArrayList<Any?> = ArrayList();
 
     /**
      * 检查行的大小
@@ -98,9 +99,9 @@ class InsertData: Cloneable{
      * @return o
      */
     public override fun clone(): Any {
-        val o = super.clone() as InsertData
-        o.columns = columns.clone()
-        o.rows = rows.clone() as ArrayList<Any?>
+        val o = super.clone()
+        // 复制列/行
+        o.cloneProperties("columns", "rows")
         return o;
     }
 }

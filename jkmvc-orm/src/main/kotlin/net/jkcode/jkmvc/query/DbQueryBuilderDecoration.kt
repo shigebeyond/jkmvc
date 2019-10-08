@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.query
 
+import net.jkcode.jkmvc.common.cloneProperties
 import net.jkcode.jkmvc.common.getOrPut
 import net.jkcode.jkmvc.common.isArrayOrCollectionEmpty
 import net.jkcode.jkmvc.db.DbException
@@ -19,13 +20,13 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
     /**
      * where/group by/having/order by/limit子句的数组
      */
-    protected var clauses: Array<DbQueryBuilderDecorationClauses<*>?> = arrayOfNulls(5);
+    protected val clauses: Array<DbQueryBuilderDecorationClauses<*>?> = arrayOfNulls(5);
 
     /**
      * join子句
      *   联表数组，每个联表join = 表名 + 联表方式 | 每个联表条件on = 字段 + 运算符 + 字段
      */
-    protected var joinClause: LinkedList<DbQueryBuilderDecorationClauses<*>> = LinkedList()
+    protected val joinClause: LinkedList<DbQueryBuilderDecorationClauses<*>> = LinkedList()
 
     /**
      * where子句
@@ -193,9 +194,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
         travelDecorationClauses { clause: IDbQueryBuilderDecorationClauses<*> ->
             clause.clear();
         }
-
         joinClause.clear();
-
         return super.clear();
     }
 
@@ -204,13 +203,9 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * @return o
      */
     public override fun clone(): Any {
-        val o = super.clone() as DbQueryBuilderDecoration
-        //join子句
-        o.joinClause = joinClause.clone() as LinkedList<DbQueryBuilderDecorationClauses<*>>
-        //where/group by/having/order by/limit子句
-        o.clauses = arrayOfNulls(clauses.size)
-        for (i in 0..(clauses.size - 1))
-            o.clauses[i] = clauses[i]?.clone() as DbQueryBuilderDecorationClauses<*>?
+        val o = super.clone()
+        // 复制子句
+        o.cloneProperties(true,"clauses", "joinClause")
         return o
     }
 

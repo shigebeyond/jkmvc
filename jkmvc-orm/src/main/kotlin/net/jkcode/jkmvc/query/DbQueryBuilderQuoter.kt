@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.query
 
+import net.jkcode.jkmvc.common.cloneProperties
 import net.jkcode.jkmvc.db.IDb
 
 /**
@@ -11,7 +12,7 @@ abstract class DbQueryBuilderQuoter: IDbQueryBuilder(){
     /**
      * 缓存编译好的sql
      */
-    protected var compiledSql: CompiledSql = CompiledSql();
+    protected val compiledSql: CompiledSql = CompiledSql();
 
     /**
      * 清空条件
@@ -29,7 +30,7 @@ abstract class DbQueryBuilderQuoter: IDbQueryBuilder(){
     public override fun clone(): Any {
         val o = super.clone() as DbQueryBuilder
         // 复制编译结果
-        o.compiledSql = compiledSql.clone() as CompiledSql
+        o.cloneProperties("compiledSql")
         return o;
     }
 

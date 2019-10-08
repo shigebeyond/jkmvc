@@ -6,6 +6,7 @@ import java.io.File
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
 import java.lang.reflect.*
+import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
@@ -16,13 +17,28 @@ import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.staticFunctions
 import kotlin.reflect.full.staticProperties
 import kotlin.reflect.jvm.javaType
+import java.util.ArrayList
 
 /**
- * 强制调用克隆方法
+ * 尝试调用克隆方法
+ *    1 如果是集合+数组, 则复制为新的集合+数组
+ *    2 如果实现了 Cloneable 接口, 则调用并返回 clone(), 否则直接返回 this
+ *
+ * @param cloningArrayCollectionElement 是否克隆集合+数组的元素
+ * @return
  */
-public fun Any.forceClone():Any {
-    if(!(this is Cloneable))
-        throw IllegalArgumentException("非Cloneable对象，不能调用clone()方法")
+public fun Any.tryClone(cloningArrayCollectionElement: Boolean = false):Any {
+    // 1 集合
+    if(this is Collection<*>)
+        return this.cloneCollection(cloningArrayCollectionElement)
+
+    // 2 数组
+    if(this.isArray())
+        return this.cloneArray(cloningArrayCollectionElement)
+
+    // 3 其他
+    if(this !is Cloneable)
+        return this
 
     /*
     val f:KFunction<*> = this::class.getFunction("clone")!!
@@ -31,6 +47,132 @@ public fun Any.forceClone():Any {
     val method = this.javaClass.getMethod("clone")
     method.isAccessible = true
     return method.invoke(this)
+}
+
+/**
+ * 包装clone()的调用
+ * @param cloning 是否需要克隆
+ * @return
+ */
+private fun Any.wrapClone(cloning: Boolean): Any{
+    return if(cloning) this.tryClone() else this
+}
+
+// 单元素list
+private val singleListClass = Class.forName("java.util.Collections\$SingletonList")
+
+/**
+ * 克隆集合
+ * @param cloningElement 是否克隆元素
+ * @return
+ */
+private fun Collection<Any?>.cloneCollection(cloningElement: Boolean = false): Collection<Any?>{
+    // 1 特殊处理单元素list
+    if(this.javaClass == singleListClass)
+        return Collections.singletonList(this.first()?.wrapClone(cloningElement))
+
+    // 2 其他
+    val dest = this.javaClass.newInstance() as MutableCollection<Any?>
+    for(e in this)
+        dest.add(e?.wrapClone(cloningElement))
+    return dest
+}
+
+/**
+ * 克隆数组
+ * @param cloningElement 是否克隆元素
+ * @return
+ */
+private fun Any.cloneArray(cloningElement: Boolean = false): Any{
+    // 1 对象类型的数据
+    if(this is Array<*>) {
+        // return Arrays.copyOf(this, this.size) // 元素没clone
+
+        // 由于 T[] != Object[], 就算你能复制属性值, 但是设置属性值时会报错, 因为属性类型与属性值类型不匹配
+        //val copy = arrayOfNulls<Any?>(this.size) // Object[]
+        val copy = java.lang.reflect.Array.newInstance(this.javaClass.getComponentType(), this.size) as Array<Any?>
+        for(i in 0 until this.size)
+            copy[i] = this[i]?.wrapClone(cloningElement)
+        return copy
+    }
+
+    // 2 基础类型的数组
+    if(this is IntArray) {
+        return Arrays.copyOf(this, this.size)
+    }
+    if(this is ShortArray)
+        return Arrays.copyOf(this, this.size)
+
+    if(this is LongArray)
+        return Arrays.copyOf(this, this.size)
+
+    if(this is FloatArray)
+        return Arrays.copyOf(this, this.size)
+
+    if(this is DoubleArray)
+        return Arrays.copyOf(this, this.size)
+
+    if(this is BooleanArray)
+        return Arrays.copyOf(this, this.size)
+
+    throw IllegalArgumentException("Not Array")
+}
+
+/**
+ * 克隆对象属性
+ * @param props 要克隆的属性名
+ */
+public fun Any.cloneProperties(vararg props: String){
+    cloneProperties(false, *props)
+}
+
+/**
+ * 克隆对象属性
+ * @param cloningArrayCollectionElement 是否克隆集合+数组的元素
+ * @param props 要克隆的属性名
+ */
+public fun Any.cloneProperties(cloningArrayCollectionElement: Boolean, vararg props: String){
+    cloneProperties(this, this, cloningArrayCollectionElement, *props)
+}
+
+/**
+ * 克隆对象多个属性
+ * @param src 源对象
+ * @param dest 目标对象
+ * @param cloningArrayCollectionElement 是否克隆集合+数组的元素
+ * @param props 要克隆的属性名
+ */
+private fun cloneProperties(src: Any, dest: Any, cloningArrayCollectionElement: Boolean, vararg props: String){
+    if(src.javaClass != dest.javaClass)
+        throw IllegalArgumentException("克隆属性中的双方不是同类型")
+
+    for(prop in props)
+        cloneProperty(src, dest, prop, cloningArrayCollectionElement)
+}
+
+/**
+ * 克隆对象单个属性
+ *    调用属性值的clone()
+ *
+ * @param src 源对象
+ * @param dest 目标对象
+ * @param props 要克隆的属性名
+ * @param cloningArrayCollectionElement 是否克隆集合+数组的元素
+ */
+private fun cloneProperty(src: Any, dest: Any, prop: String, cloningArrayCollectionElement: Boolean) {
+    val clazz = src.javaClass
+    // 获得字段
+    val field = clazz.getWritableFinalField(prop, true)
+    // 获得源对象的字段值
+    val srcValue = field.get(src)
+    if (srcValue == null)
+        return
+
+    // 克隆字段值
+    val destValue = srcValue.tryClone(cloningArrayCollectionElement)
+
+    // 获得目标对象的字段值
+    field.set(dest, destValue)
 }
 
 /**
@@ -445,21 +587,44 @@ public fun Class<*>.getAccessibleField(name: String): Field? {
 /**
  * 获得final的属性, 并使其可写
  * @param name 属性名
+ * @param inherited 是否包含继承的属性
  * @return
  */
-public fun Class<*>.getWritableFinalField(name: String): Field {
-    val field = getDeclaredField(name)
+public fun Class<*>.getWritableFinalField(name: String, inherited: Boolean = false): Field {
+    val field = if(inherited)
+                    getInheritField(name) // 本类+父类, 可获得父类的protected属性
+                else
+                    getDeclaredField(name) // 本类, 可获得本类的private属性
 
     // 去掉final
-    val modifiersField = Field::class.java!!.getDeclaredField("modifiers")
-    modifiersField.setAccessible(true) //Field 的 modifiers 是私有的
-    modifiersField.setInt(field, field.modifiers and Modifier.FINAL.inv())
+    if (Modifier.isFinal(field.getModifiers())) {
+        val modifiersField = Field::class.java!!.getDeclaredField("modifiers")
+        modifiersField.setAccessible(true) //Field 的 modifiers 是私有的
+        modifiersField.setInt(field, field.modifiers and Modifier.FINAL.inv())
+    }
 
     // 开放访问
     if (!field.isAccessible)
         field.isAccessible = true
 
     return field
+}
+
+/**
+ * 获得属性, 包含继承的
+ * @param name
+ * @return
+ */
+public fun Class<*>.getInheritField(name: String): Field{
+    var c: Class<*>? = this
+    while (c != null) {
+        try{
+            return c.getDeclaredField(name)
+        }catch(e: NoSuchFieldException){
+            c = c.superclass
+        }
+    }
+    throw NoSuchFieldException(name)
 }
 
 /**

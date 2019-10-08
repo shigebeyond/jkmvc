@@ -227,7 +227,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	public inline fun <reified T:Any> getNotNull(key: String): T{
 		val value: T? = get(key)
 		if(value == null)
-			throw IllegalArgumentException("请求参数[$key]为空")
+			throw IllegalArgumentException("缺少请求参数[$key]")
 		
 		return value
 	}

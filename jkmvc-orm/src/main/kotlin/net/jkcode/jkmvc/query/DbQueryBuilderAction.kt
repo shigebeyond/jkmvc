@@ -52,7 +52,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * 要操作的数据：增改查的数据（没有删）
      *   操作数据的动作顺序 = SqlType中定义的动作顺序
      */
-    protected var manipulatedData:Array<Any?> = arrayOfNulls(3)
+    protected val manipulatedData:Array<Any?> = arrayOfNulls(3)
 
     /**
      * 要查询的字段名
@@ -230,9 +230,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
     public override fun clone(): Any {
         val o = super.clone() as DbQueryBuilderAction
         // 复制要操作的数据
-        o.manipulatedData = arrayOfNulls(manipulatedData.size)
-        for (i in 0..(manipulatedData.size - 1))
-            o.manipulatedData[i] = manipulatedData[i]?.forceClone()
+        o.cloneProperties(true, "manipulatedData")
         return o;
     }
 

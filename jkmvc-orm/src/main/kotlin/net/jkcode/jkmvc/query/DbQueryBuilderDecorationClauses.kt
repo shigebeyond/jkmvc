@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.query
 
+import net.jkcode.jkmvc.common.cloneProperties
 import net.jkcode.jkmvc.db.IDb
 import java.util.*
 import kotlin.reflect.KFunction2
@@ -18,7 +19,7 @@ abstract class DbQueryBuilderDecorationClauses<T>(protected val operator: String
     /**
      * 子表达式, 可视为行
      */
-    protected var subexps: LinkedList<T> = LinkedList();
+    protected val subexps: LinkedList<T> = LinkedList();
 
     /**
      * 编译多个子表达式
@@ -49,8 +50,9 @@ abstract class DbQueryBuilderDecorationClauses<T>(protected val operator: String
      * @return o
      */
     public override fun clone(): Any {
-        val o = super.clone() as DbQueryBuilderDecorationClauses<T>
-        o.subexps = subexps.clone() as LinkedList<T>
+        val o = super.clone()
+        // 复制子表达式
+        o.cloneProperties("subexps")
         return o;
     }
 }

@@ -20,7 +20,7 @@ abstract class ICompiledSql: IDbQuery() {
     /**
      * 编译后的sql参数 / 静态参数
      */
-    public abstract var staticParams: LinkedList<Any?>
+    public abstract val staticParams: LinkedList<Any?>
 
     /**
      * 动态参数的个数 = 静态参数中?的个数

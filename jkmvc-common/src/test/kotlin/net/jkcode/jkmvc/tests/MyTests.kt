@@ -12,6 +12,7 @@ import net.jkcode.jkmvc.iterator.ArrayFilteredIterator
 import net.jkcode.jkmvc.redis.ShardedJedisFactory
 import net.jkcode.jkmvc.serialize.ISerializer
 import net.jkcode.jkmvc.validator.ValidateFuncDefinition
+import org.apache.commons.lang.StringEscapeUtils
 import org.dom4j.Attribute
 import org.dom4j.DocumentException
 import org.dom4j.Element
@@ -29,52 +30,12 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
+import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.full.memberFunctions
+import kotlin.reflect.jvm.javaField
 import kotlin.reflect.jvm.javaMethod
 import kotlin.reflect.jvm.reflect
-
-open class A() {
-    open fun echo(){}
-}
-class B():A() {
-    /*override fun echo(){
-        println("Ah")
-    }*/
-}
-
-fun A.sayHi(){
-    println("hi, I'm A")
-}
-
-fun B.sayHi(){
-    println("hi, I'm B")
-}
-
-enum class NumType {
-    Byte,
-    Short,
-    INT,
-    LONG
-}
-
-class Lambda {
-}
-
-data class Man(val name: String, val age: Int)
-
-class Woman(var name: String, var age: Int): Cloneable{
-
-    val id = generateId("woman")
-
-    /*public override fun clone(): Any {
-        return super.clone()
-    }*/
-
-    override fun toString(): String {
-        return "woman: id=$id, name=$name, age=$age"
-    }
-}
 
 /**
  * 基本测试
@@ -83,6 +44,8 @@ class Woman(var name: String, var age: Int): Cloneable{
  * @date 2017-12-14 3:11 PM
  */
 class MyTests{
+
+    var id: Long = 0
 
     @Test
     fun testSys(){
@@ -823,7 +786,7 @@ class MyTests{
             // 遍历迭代器，获取根节点中的信息(书籍)
             for(ib in bookStore.elementIterator()){
                 val book = ib as Element
-                System.out.println("=====开始遍历某一本书=====");
+                println("=====开始遍历某一本书=====");
                 // 获取book的属性名以及 属性值
                 for (ia in book.attributes()) {
                     val attr = ia as Attribute
@@ -833,7 +796,7 @@ class MyTests{
                     val child = ie as Element
                     println("节点：" + child.name + "=" + child.getStringValue());
                 }
-                System.out.println("=====结束遍历某一本书=====");
+                println("=====结束遍历某一本书=====");
             }
         } catch (e: DocumentException) {
             e.printStackTrace();
@@ -1029,7 +992,7 @@ class MyTests{
         val value = threadLocalProp.get(Thread.currentThread())
 
         // 克隆实例
-        //val o = value.forceClone() // wrong: ThreadLocalMap没有实现Cloneable接口
+        //val o = value.tryClone() // wrong: ThreadLocalMap没有实现Cloneable接口
         val o = mapConstructor.newInstance(value) // wrong: ThreadLocalMap(ThreadLocalMap parentMap) 构造函数只能用于对 InheritableThreadLocal 中的ThreadLocalMap进行复制
     }
 
@@ -1099,27 +1062,16 @@ class MyTests{
 
     @Test
     fun testDataClass(){
-        var m = Man("shi", 1)
+        var m = Thing("shi", 1)
         var i = 0
         println("${++i}: m=$m")
         m = m.copy()
         println("${++i}: m=$m")
-        m = m.copy(age = 12)
+        m = m.copy(weight = 12)
         println("${++i}: m=$m")
         m = m.copy(name = "li")
         println("${++i}: m=$m")
     }
-
-    @Test
-    fun testClone(){
-        val m = Woman("shi", 1)
-        val m2 = m.forceClone() as Woman
-        m2.age = m2.age + 1
-        println(m2)
-        // 默认的clone实现(Object.clone())会拷贝所有属性, 但是不会调用构造方法, 因此id也会相等, 如果要不等, 必须自己改写 clone() 方法
-        println(m == m2)
-    }
-
 
     @Test
     fun testPattern(){
@@ -1322,6 +1274,9 @@ class MyTests{
         // val o:LinkedList<String> = LinkedList()
         // println(field.get(o))
 
+        val mp: KMutableProperty1<MyTests, Long> = MyTests::id
+        val mp2: KMutableProperty0<Long> = ::id // this::id
+
         println(currMillis() / 100)
 
     }
@@ -1365,7 +1320,7 @@ class MyTests{
         //getGenericSuperclass()获得带有泛型的父类
         //Type是 Java 编程语言中所有类型的公共高级接口。它们包括原始类型、参数化类型、数组类型、类型变量和基本类型。
         val type = clazz.getGenericSuperclass()
-        System.out.println(type)
+        println(type)
         //ParameterizedType参数化类型，即泛型
         val p = type as ParameterizedType
         //getActualTypeArguments获取参数化类型的数组，泛型可能有多个
@@ -1437,7 +1392,24 @@ class MyTests{
         } catch (e: IOException) {
             e.printStackTrace();
         }
+    }
 
+    @Test
+    fun testEscape(){
+        val sql = "1' or '1'='1"
+        println("防SQL注入:" + StringEscapeUtils.escapeSql(sql))  //防SQL注入 -- 其实可以直接参数化执行sql
+
+        val html = "<span>hello 施</span>"
+        val ehtml = StringEscapeUtils.escapeHtml(html)
+        println("转义HTML,注意汉字:" + ehtml)    //转义HTML,注意汉字
+        println("反转义HTML:" + StringEscapeUtils.unescapeHtml(ehtml))    //反转义HTML
+
+        println("转成Unicode编码：" + StringEscapeUtils.escapeJava("施"))    //转义成Unicode编码
+
+        val xml = html
+        val exml = StringEscapeUtils.escapeXml(xml)
+        println("转义XML：" + exml)    //转义xml
+        println("反转义XML：" + StringEscapeUtils.unescapeXml(exml))    //转义xml
     }
 
 }

@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.query
 
+import net.jkcode.jkmvc.common.cloneProperties
 import net.jkcode.jkmvc.db.*
 import net.jkcode.jkmvc.common.dbLogger
 import java.util.*
@@ -38,7 +39,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
     /**
      * 编译后的sql参数 / 静态参数
      */
-    public override var staticParams: LinkedList<Any?> = LinkedList<Any?>()
+    public override val staticParams: LinkedList<Any?> = LinkedList<Any?>()
 
     /**
      * 动态参数的个数 = 静态参数中?的个数
@@ -74,8 +75,9 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @return
      */
     public override fun clone(): Any {
-        val o = super.clone() as CompiledSql
-        o.staticParams = staticParams.clone() as LinkedList<Any?>
+        val o = super.clone()
+        // 复制静态参数
+        o.cloneProperties("staticParams")
         return o
     }
 
