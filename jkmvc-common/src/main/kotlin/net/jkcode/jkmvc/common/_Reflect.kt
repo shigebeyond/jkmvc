@@ -470,6 +470,19 @@ public fun Class<*>.getMethodBySignature(methodSignature: String): Method?{
 }
 
 /**
+ * 根据方法名来获得方法
+ *   忽略参数类型, 一般只用在没有重载的方法中, 方便非java语言(如php)客户端的调用, 不用关心方法签名
+ *
+ * @param name
+ * @return
+ */
+public fun Class<*>.getMethodByName(name: String): Method?{
+    return methods.firstOrNull {
+        it.name == name
+    }
+}
+
+/**
  * 查找构造函数
  * @param paramTypes 参数类型
  * @return

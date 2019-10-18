@@ -10,7 +10,6 @@ import net.jkcode.jkmvc.idworker.SnowflakeId
 import net.jkcode.jkmvc.idworker.SnowflakeIdWorker
 import net.jkcode.jkmvc.iterator.ArrayFilteredIterator
 import net.jkcode.jkmvc.redis.ShardedJedisFactory
-import net.jkcode.jkmvc.serialize.ISerializer
 import net.jkcode.jkmvc.validator.ValidateFuncDefinition
 import org.apache.commons.lang.StringEscapeUtils
 import org.dom4j.Attribute
@@ -33,7 +32,6 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.full.memberFunctions
-import kotlin.reflect.jvm.javaField
 import kotlin.reflect.jvm.javaMethod
 import kotlin.reflect.jvm.reflect
 
@@ -134,22 +132,6 @@ class MyTests{
 
         tm.clear()
         println(map) // {}
-    }
-
-    @Test
-    fun testSerialize(){
-        //val obj = "hello world"
-        //val obj = LongArray(3)
-        //val obj = BitSet.valueOf(words)
-        val obj = BitSet()
-        obj.set(100)
-        println(obj)
-        val instance = ISerializer.instance("fst")
-        val bs = instance.serialize(obj)
-        if(bs != null) {
-            val obj2 = instance.unserialize(bs!!)
-            println(obj2)
-        }
     }
 
     @Test
@@ -768,7 +750,29 @@ class MyTests{
 
         val o2 = JSONObject.parse(json) as JSONObject
         println(o2["notify_url"])
+    }
 
+    @Test
+    fun testJson2(){
+        val o = Man("shi", 12)
+        var json = JSON.toJSONString(o)
+        println(json) // 输出 {"age":12,"id":105254286010613760,"name":"shi"}
+
+        json = JSON.toJSONString(o, SerializerFeature.WriteSlashAsSpecial)
+        println(json) // 输出: {"age":12,"id":105254286010613760,"name":"shi"}
+
+        val o2 = JSON.parseObject(json, Man::class.java);
+        println(o2)
+    }
+
+    @Test
+    fun testJson3(){
+        val o = IllegalArgumentException("test error")
+        var json = JSON.toJSONString(o)
+        println(json) // 输出 {"age":12,"id":105254286010613760,"name":"shi"}
+
+        val o2 = JSON.parseObject(json, IllegalArgumentException::class.java);
+        println(o2)
     }
 
     @Test
