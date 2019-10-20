@@ -40,10 +40,15 @@ dependencies {
     // http
     compile "org.apache.httpcomponents:httpclient:4.5.4"
 
+    // netty -- 用到 HashedWheelTimer
+    compile "io.netty:netty-all:$netty_version"
+
+    // http client
+    compile("org.asynchttpclient:async-http-client:$asynchttpclient_version") {
+        exclude(module: "slf4j-api")
+    }
+
     // test
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testCompile 'junit:junit:4.11'
-
-    // netty -- 用到 HashedWheelTimer
-    compile "io.netty:netty-all:$netty_version"
 }

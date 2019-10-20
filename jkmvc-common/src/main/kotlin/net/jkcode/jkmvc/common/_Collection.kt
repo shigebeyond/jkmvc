@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.common
 
 import org.apache.commons.collections.iterators.AbstractIteratorDecorator
 import java.math.BigDecimal
+import java.net.URLEncoder
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ConcurrentMap
@@ -660,6 +661,34 @@ public fun Collection<out Map<*, *>>.toMap(keyField:String, valueField:String? =
         // key to value
         it[keyField]!! to (if(valueField == null) it else it[valueField])
     }
+}
+
+/**
+ * 将参数转为查询字符串
+ * @param str
+ * @param encoding 是否编码
+ * @return
+ */
+public fun Map<*, *>.buildQueryString(str: StringBuilder, encoding: Boolean = false): StringBuilder {
+    return entries.joinTo(str, "&") {
+        var key = it.key.toString()
+        var value = it.value.toString()
+        if(encoding){
+            key = URLEncoder.encode(key, "UTF-8")
+            value = URLEncoder.encode(value, "UTF-8")
+        }
+        "$key=$value"
+    }
+}
+
+/**
+ * 将参数转为查询字符串
+ * @param str
+ * @param encoding 是否编码
+ * @return
+ */
+public fun Map<*, *>.buildQueryString(encoding: Boolean = false): String {
+    return buildQueryString(StringBuilder(), encoding).toString()
 }
 
 /********************** 转为各种类型的Map<String, *>.getter *********************/
