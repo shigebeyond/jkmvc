@@ -70,3 +70,13 @@
 # 1.8
 
 1. 重构db, 兼容sharding-jdbc的dataSource
+
+2. db事务支持回调
+
+3. orm支持序列化某些字段
+
+4. 支持orm与entity的互转
+
+5. 支持有作用域的可传递的 ThreadLocal
+
+6. 支持异步的http client, 基于asynchttpclient实现
