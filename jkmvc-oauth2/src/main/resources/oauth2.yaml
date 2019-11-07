@@ -1,9 +1,0 @@
-# 授权配置
-qq:
-  clientId: xxx
-  clientSecret: yyy
-  redirectUri: http://test.com/oauth2/callback?type=qq
-weibo:
-  clientId: xxx
-  clientSecret: yyy
-  redirectUri: http://test.com/oauth2/callback?type=weibo
