@@ -30,7 +30,7 @@ buildscript {
 // 所有工程
 allprojects{
     group 'net.jkcode.jkmvc'
-    version '1.0-SNAPSHOT'
+    version '1.8.0'
 }
 
 // 子工程
@@ -38,33 +38,6 @@ subprojects{
     apply plugin: 'java'
     apply plugin: 'kotlin'
     apply plugin: 'maven'
-
-    // kotlin文档生成
-    apply plugin: 'org.jetbrains.dokka'
-
-    dokka {
-        outputFormat = 'html'
-        outputDirectory = "$buildDir/javadoc"
-    }
-
-    task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
-        outputFormat = "javadoc"
-        outputDirectory = "$buildDir/dokkaJavadoc"
-    }
-
-    sourceCompatibility = 1.8
-    compileKotlin {
-        kotlinOptions {
-            freeCompilerArgs = ["-Xjvm-default=enable"]
-            jvmTarget = jvm_version
-        }
-    }
-    compileTestKotlin {
-        kotlinOptions {
-            freeCompilerArgs = ["-Xjvm-default=enable"]
-            jvmTarget = jvm_version
-        }
-    }
 
     repositories {
         // china area
@@ -101,4 +74,110 @@ subprojects{
             }
         }
     }
+
+    // kotlin文档生成
+    apply plugin: 'org.jetbrains.dokka'
+
+    dokka {
+        outputFormat = 'html'
+        outputDirectory = "$buildDir/javadoc"
+    }
+
+    task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
+        outputFormat = "javadoc"
+        outputDirectory = "$buildDir/dokkaJavadoc"
+    }
+
+    sourceCompatibility = 1.8
+    compileKotlin {
+        kotlinOptions {
+            freeCompilerArgs = ["-Xjvm-default=enable"]
+            jvmTarget = jvm_version
+        }
+    }
+    compileTestKotlin {
+        kotlinOptions {
+            freeCompilerArgs = ["-Xjvm-default=enable"]
+            jvmTarget = jvm_version
+        }
+    }
+
+    // 发布到maven中央库
+    apply plugin: 'maven-publish'
+    apply plugin: 'signing'
+
+    task sourcesJar(type: Jar) {
+        //from sourceSets.main.allJava // 只java, 不包含kotlin与配置文件
+        from sourceSets.main.allSource // 所有
+        classifier = 'sources'
+    }
+
+    task javadocJar(type: Jar) {
+        //from javadoc
+        from dokkaJavadoc
+        classifier = 'javadoc'
+    }
+
+    publishing {
+        // 定义发布什么
+        publications {
+            mavenJava(MavenPublication) {
+                // groupId = project.group
+                // artifactId = project.name
+                // version = project.version
+                // groupId,artifactId,version，如果不定义，则会按照以上默认值执行
+                from components.java
+                artifact sourcesJar
+                artifact javadocJar
+                
+                pom {
+                    // 构件名称
+                    // 区别于artifactId，可以理解为artifactName
+                    name = 'jkmvc'
+                    // 构件描述
+                    description = "Jkmvc is an elegant, powerful and lightweight MVC & ORM framework built using kotlin. It aims to be swift, secure, and small. It will turn java's heavy development into kotlin's simple pleasure. No spring."
+                    // 构件主页
+                    url = 'https://github.com/shigebeyond/jkmvc'
+
+                    // 许可证名称和地址
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    // 开发者信息
+                    developers {
+                        developer {
+                            name = 'shijianhang'
+                            email = '772910474@qq.com'
+                        }
+                    }
+                    // 版本控制仓库地址
+                    scm {
+                        url = 'https://github.com/shigebeyond/jkmvc'
+                        connection = 'scm:git:https://github.com/shigebeyond/jkmvc.git'
+                        developerConnection = 'scm:git:https://github.com/shigebeyond/jkmvc.git'
+                    }
+                }
+            }
+        }
+        // 定义发布到哪里
+        repositories {
+            maven {
+                url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+                credentials {
+                    // 这里就是之前在issues.sonatype.org注册的账号
+                    username sonatypeUsername
+                    password sonatypePassword
+                }
+            }
+        }
+    }
+
+    signing {
+        sign publishing.publications.mavenJava
+    }
+
+
 }
