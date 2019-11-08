@@ -167,7 +167,7 @@ subprojects{
             maven {
                 url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
                 credentials {
-                    // 这里就是之前在issues.sonatype.org注册的账号
+                    // issues.sonatype.org账号, 配置在 ~/.gradle/gradle.properties
                     username sonatypeUsername
                     password sonatypePassword
                 }
