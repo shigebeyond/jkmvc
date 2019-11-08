@@ -39,7 +39,7 @@ buildscript {
 
 // project name
 group 'net.jkcode.jkmvc'
-version '1.0-SNAPSHOT'
+version '1.8.0'
 name 'myproj'
 
 // plugin
@@ -57,7 +57,7 @@ repositories {
 }
 
 dependencies {
-	compile "net.jkcode.jkmvc:jkmvc-http:1.0-SNAPSHOT"
+	compile "net.jkcode.jkmvc:jkmvc-http:1.8.0"
 }
 
 // src directory

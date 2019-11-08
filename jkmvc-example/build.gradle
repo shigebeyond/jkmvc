@@ -1,7 +1,9 @@
 dependencies{
     // other project
-    compile project(':jkmvc-http')
-    compile project(':jkmvc-server-jetty')
+//   compile "net.jkcode.jkmvc:jkmvc-http:${project.version}"
+//   compile "net.jkcode.jkmvc:jkmvc-server-jetty:${project.version}"
+     compile project(':jkmvc-http')
+     compile project(':jkmvc-server-jetty')
 
     // jdbc
     runtime "mysql:mysql-connector-java:5.1.6"

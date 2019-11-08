@@ -11,7 +11,16 @@ Inspired by 2 php frameworks: [kohana](https://github.com/kohana/kohana) and [sk
 
 Take `jkmvc/jkmvc-example` for example.
 
-## 1 Configure JkFilter in web.xml
+## 1 Gradle add jkmvc dependecies
+
+```
+dependencies{
+   compile "net.jkcode.jkmvc:jkmvc-http:1.8.0"
+   compile "net.jkcode.jkmvc:jkmvc-server-jetty:1.8.0"
+}
+```
+
+## 2 Configure JkFilter in web.xml
 
 JkFilter is a Filter for your web application
 
@@ -32,7 +41,7 @@ vim src/main/webapp/WEB-INF/web.xml
 </web-app>
 ```
 
-## 2 Create Controller
+## 3 Create Controller
 
 Controller handles request, and render data to response.
 
@@ -58,7 +67,7 @@ class WelcomeController: Controller() {
 }
 ```
 
-## 3 Register Controller
+## 4 Register Controller
 
 configure controller classes's package paths
 
@@ -71,7 +80,7 @@ controllerPackages:
     - net.jkcode.jkmvc.example.controller
 ```
 
-## 4 Config jetty gradle plugin
+## 5 Gradle config jetty plugin
 
 vim build.gradle
 

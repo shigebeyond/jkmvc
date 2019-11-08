@@ -44,7 +44,7 @@ buildscript {
 
 // 工程标识
 group 'net.jkcode.jkmvc'
-version '1.0-SNAPSHOT'
+version '1.8.0'
 name 'myproj'
 
 // gradle插件
@@ -67,7 +67,7 @@ repositories {
 
 // 依赖
 dependencies {
-	compile "net.jkcode.jkmvc:jkmvc-http:1.0-SNAPSHOT"
+	compile "net.jkcode.jkmvc:jkmvc-http:1.8.0"
 }
 
 // 源码目录
