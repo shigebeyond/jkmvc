@@ -45,7 +45,20 @@ dependencies {
 
     // http client
     compile("org.asynchttpclient:async-http-client:$asynchttpclient_version") {
+        // 去掉slf4j重复引用
         exclude(module: "slf4j-api")
+        // 去掉netty重复引用
+        exclude(module: "io.netty:netty-buffer")
+        exclude(module: "io.netty:netty-codec-http")
+        exclude(module: "io.netty:netty-codec")
+        exclude(module: "io.netty:netty-codec-socks")
+        exclude(module: "io.netty:netty-handler-proxy")
+        exclude(module: "io.netty:netty-common")
+        exclude(module: "io.netty:netty-transport")
+        exclude(module: "io.netty:netty-handler")
+        exclude(module: "io.netty:netty-resolver-dns")
+        exclude(module: "io.netty:netty-transport-native-epoll")
+        exclude(module: "io.netty:netty-transport-native-kqueue")
     }
 
     // test
