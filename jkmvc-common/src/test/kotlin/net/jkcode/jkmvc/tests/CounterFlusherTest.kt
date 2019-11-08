@@ -1,4 +1,4 @@
-package net.jkcode.jksoa.guard
+package net.jkcode.jkmvc.guard
 
 import net.jkcode.jkmvc.common.VoidFuture
 import net.jkcode.jkmvc.common.makeThreads

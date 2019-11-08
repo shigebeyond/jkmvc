@@ -5,7 +5,7 @@
 ```
 # 缓存实现
 local: net.jkcode.jkmvc.lock.LocalKeyLock
-jedis: net.jkcode.jksoa.lock.JedisKeyLock
+jedis: net.jkcode.jkmvc.lock.JedisKeyLock
 ```
 
 ## 获得锁

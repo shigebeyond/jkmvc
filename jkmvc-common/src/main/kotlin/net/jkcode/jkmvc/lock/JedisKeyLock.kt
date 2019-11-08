@@ -1,4 +1,4 @@
-package net.jkcode.jksoa.lock
+package net.jkcode.jkmvc.lock
 
 import net.jkcode.jkmvc.common.Application
 import net.jkcode.jkmvc.redis.ShardedJedisFactory
