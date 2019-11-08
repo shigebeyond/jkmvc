@@ -80,3 +80,5 @@
 5. 支持有作用域的可传递的 ThreadLocal
 
 6. 支持异步的http client, 基于asynchttpclient实现
+
+7. gradle支持发布到maven中央库
