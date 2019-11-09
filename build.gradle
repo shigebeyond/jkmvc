@@ -75,19 +75,6 @@ subprojects{
         }
     }
 
-    // kotlin文档生成
-    apply plugin: 'org.jetbrains.dokka'
-
-    dokka {
-        outputFormat = 'html'
-        outputDirectory = "$buildDir/javadoc"
-    }
-
-    task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
-        outputFormat = "javadoc"
-        outputDirectory = "$buildDir/dokkaJavadoc"
-    }
-
     sourceCompatibility = 1.8
     compileKotlin {
         kotlinOptions {
@@ -100,6 +87,19 @@ subprojects{
             freeCompilerArgs = ["-Xjvm-default=enable"]
             jvmTarget = jvm_version
         }
+    }
+
+    // kotlin文档生成
+    apply plugin: 'org.jetbrains.dokka'
+
+    dokka {
+        outputFormat = 'html'
+        outputDirectory = "$buildDir/javadoc"
+    }
+
+    task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
+        outputFormat = "javadoc"
+        outputDirectory = "$buildDir/dokkaJavadoc"
     }
 
     // 发布到maven中央库
