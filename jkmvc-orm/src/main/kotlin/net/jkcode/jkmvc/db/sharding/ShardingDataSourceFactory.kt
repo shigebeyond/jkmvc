@@ -19,9 +19,8 @@ object ShardingDataSourceFactory : IDataSourceFactory() {
      * @return
      */
     override fun buildDataSource(name:String): DataSource {
-        val configFile = Thread.currentThread().contextClassLoader.getResource("dataSource-$name.yaml").getFile()
-        return io.shardingjdbc.core.api.ShardingDataSourceFactory.createDataSource(File(
-                configFile))
+        val config = Thread.currentThread().contextClassLoader.getResourceAsStream("dataSource-$name.yaml")
+        return io.shardingjdbc.core.api.ShardingDataSourceFactory.createDataSource(config.readBytes())
     }
 
 }
