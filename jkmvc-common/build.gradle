@@ -29,7 +29,7 @@ dependencies {
     compile 'redis.clients:jedis:2.9.0'
 
     // 序列化
-    compile "de.ruedigermoeller:fst:2.55"
+    compile "de.ruedigermoeller:fst:2.57"
     compile "com.caucho:hessian:4.0.51"
     compile "com.esotericsoftware:kryo-shaded:4.0.0"
     compile "com.dyuproject.protostuff:protostuff-core:1.0.8"
