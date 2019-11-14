@@ -76,11 +76,24 @@ class Config(public override val props: Map<String, *> /* 配置项 */,
          * @param type properties | yaml | json
          * @return
          */
-        public fun buildProperties(file:String, type: String = "properties"): Map<String, *> {
-            val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(file)
-            if(inputStream == null)
+        public fun buildProperties(file:String, type: String = "properties", merging: Boolean = false): Map<String, *> {
+            val urls = Thread.currentThread().contextClassLoader.getResources(file)
+            if(urls.hasMoreElements())
                 throw IllegalArgumentException("配置文件[$file]不存在")
-            return buildProperties(inputStream, type)
+            // 1 不合并, 取第一个
+            if (!merging) {
+                val inputStream = urls.nextElement().openStream()
+                return buildProperties(inputStream, type)
+            }
+
+            // 2 合并
+            val result = HashMap<String, Any?>()
+            for (url in urls){
+                val inputStream = urls.nextElement().openStream()
+                val props = buildProperties(inputStream, type)
+                result.putAll(props)
+            }
+            return result
         }
 
         /**
