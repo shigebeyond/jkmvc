@@ -522,6 +522,15 @@ public fun Map<*, *>.containsAllKeys(vararg keys: Any): Boolean {
 }
 
 /**
+ * 合并map, 只合并不存在的key/value
+ * @param map
+ */
+public fun  <K, V> MutableMap<K, V>.putAllIfAbsent(map: Map<K, V>){
+    for ((key, value) in map)
+        this.putIfAbsent(key, value)
+}
+
+/**
  * map删除多个key
  * @param keys
  * @return

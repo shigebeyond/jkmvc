@@ -6,6 +6,7 @@ import net.jkcode.jkmvc.singleton.BeanSingletons
 import org.yaml.snakeyaml.Yaml
 import java.io.InputStream
 import java.io.InputStreamReader
+import java.net.URL
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.HashMap
@@ -47,9 +48,10 @@ class Config(public override val props: Map<String, *> /* 配置项 */,
          *
          * @param file the properties file's name in classpath or the sub directory of classpath
          * @param type properties | yaml
+         * @param merging
          */
         @JvmStatic
-        public fun instance(file: String, type: String = "properties"): Config {
+        public fun instance(file: String, type: String = "properties", merging: Boolean = false): Config {
             // 解析出文件名 + 子项路径
             var filename:String = file
             var path:String? = null
@@ -60,7 +62,7 @@ class Config(public override val props: Map<String, *> /* 配置项 */,
             }
             // 获得文件的配置项
             val config = configs.getOrPutOnce(filename){
-                Config("$filename.$type", type)
+                Config("$filename.$type", type, merging)
             }!!
             // 无子项
             if(path == null)
@@ -74,24 +76,23 @@ class Config(public override val props: Map<String, *> /* 配置项 */,
          *
          * @param file the properties file's name in classpath or the sub directory of classpath
          * @param type properties | yaml | json
+         * @param merging
          * @return
          */
         public fun buildProperties(file:String, type: String = "properties", merging: Boolean = false): Map<String, *> {
             val urls = Thread.currentThread().contextClassLoader.getResources(file)
-            if(urls.hasMoreElements())
+            if(!urls.hasMoreElements())
                 throw IllegalArgumentException("配置文件[$file]不存在")
-            // 1 不合并, 取第一个
-            if (!merging) {
-                val inputStream = urls.nextElement().openStream()
-                return buildProperties(inputStream, type)
-            }
+            // 1 不合并: 取第一个
+            if (!merging)
+                return buildProperties(urls.nextElement(), type)
 
-            // 2 合并
+            // 2 合并: 先来先写, 后来不覆盖
             val result = HashMap<String, Any?>()
             for (url in urls){
-                val inputStream = urls.nextElement().openStream()
-                val props = buildProperties(inputStream, type)
-                result.putAll(props)
+                val props = buildProperties(url, type)
+                // 合并, 但不覆盖先前的
+                result.putAllIfAbsent(props)
             }
             return result
         }
@@ -99,14 +100,12 @@ class Config(public override val props: Map<String, *> /* 配置项 */,
         /**
          * 构建配置项
          *
-         * @param inputStream
+         * @param url　配置文件
          * @param type properties | yaml | json
          * @return
          */
-        public fun buildProperties(inputStream: InputStream, type: String = "properties"): Map<String, *> {
-            if(inputStream == null)
-                throw IllegalArgumentException("配置输入流为空")
-
+        public fun buildProperties(url: URL, type: String = "properties"): Map<String, *> {
+            val inputStream = url.openStream()
             // 无内容则返回空map
             if(inputStream.available() == 0)
                 return emptyMap<String, Any?>()
@@ -134,8 +133,9 @@ class Config(public override val props: Map<String, *> /* 配置项 */,
      *
      * @param file the properties file's name in classpath or the sub directory of classpath
      * @param type properties | yaml
+     * @param　merging
      */
-    public constructor(file: String, type: String = "properties"):this(buildProperties(file, type), file){
+    public constructor(file: String, type: String = "properties", merging: Boolean = false):this(buildProperties(file, type, merging), file){
     }
 
     /**
