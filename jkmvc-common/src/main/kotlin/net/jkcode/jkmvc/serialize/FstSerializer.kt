@@ -1,5 +1,8 @@
 package net.jkcode.jkmvc.serialize
 
+import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkmvc.common.IConfig
+import net.jkcode.jkmvc.common.isSubClass
 import org.nustaq.serialization.FSTConfiguration
 import org.nustaq.serialization.FSTObjectSerializer
 import java.io.InputStream
@@ -14,9 +17,32 @@ import java.io.InputStream
 class FstSerializer: ISerializer {
 
     /**
-     * 配置
+     * fst内部配置
      */
     protected val conf = FSTConfiguration.createDefaultConfiguration()
+
+    init {
+        try{
+            // 自定义的序列器
+            val config: IConfig = Config.instance("fst-serializer", "yaml", true)
+            // key是被序列化的类名, value是序列器的类名
+            for((key, value) in config.props){
+                if(value == null)
+                    throw RuntimeException("配置文件 fst-serializer.yaml 的配置项[$key]的值为空");
+                // 被序列化的类名
+                val targetClass = Class.forName(key)
+                // 序列器的类名
+                val serializerClass = Class.forName(value as String)
+                if(!serializerClass.isSubClass(FSTObjectSerializer::class.java))
+                    throw RuntimeException("配置文件 fst-serializer.yaml 中的值[$value]对应的类型没有实现 FSTObjectSerializer");
+                val serializer = serializerClass.newInstance() as FSTObjectSerializer
+                // 指定序列器
+                putSerializer(targetClass, serializer, true)
+            }
+        }catch (e: ClassNotFoundException){
+            throw RuntimeException("配置文件 fst-serializer.yaml 错误: ${e.message}", e);
+        }
+    }
 
     /**
      * 给特定类指定序列器

@@ -1,0 +1,3 @@
+# fst自定义序列器
+# key是被序列化的类名, value是序列器的类名
+net.jkcode.jkmvc.orm.OrmEntity: net.jkcode.jkmvc.orm.OrmEntityFstSerializer

@@ -46,10 +46,6 @@ abstract class OrmEntity : IOrmEntity, Serializable {
          */
         public val serializer: FstSerializer = ISerializer.instance("fst") as FstSerializer
 
-        init {
-            serializer.putSerializer(OrmEntity::class.java, OrmEntitySerializer(), true)
-        }
-
     }
 
     /**

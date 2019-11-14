@@ -11,7 +11,7 @@ import org.nustaq.serialization.serializers.FSTMapSerializer
  * @author shijianhang
  * @date 2016-10-10 上午12:52:34
  */
-class OrmEntitySerializer : FSTBasicObjectSerializer() {
+class OrmEntityFstSerializer : FSTBasicObjectSerializer() {
 
     /**
      * map的序列器

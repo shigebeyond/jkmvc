@@ -23,6 +23,11 @@ abstract class IConfig {
     public abstract val props: Map<String, *>;
 
     /**
+     * 是否合并
+     */
+    public abstract val merging: Boolean
+
+    /**
      * 判断是否含有配置项
      * @param key
      * @return
