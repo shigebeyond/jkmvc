@@ -18,8 +18,9 @@ import kotlin.collections.HashMap
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-class Config(public override val props: Map<String, *> /* 配置项 */,
-             public override val file: String = "" /* 配置文件 */
+class Config(public override val props: Map<String, *>, // 配置项
+             public override val file: String = "", // 配置文件
+             public override val merging: Boolean = false // 是否合并
 ): IConfig(){
 
     companion object{
@@ -64,6 +65,9 @@ class Config(public override val props: Map<String, *> /* 配置项 */,
             val config = configs.getOrPutOnce(filename){
                 Config("$filename.$type", type, merging)
             }!!
+            if(config.merging != merging)
+                throw IllegalArgumentException("配置文件[$file]已加载过, 但本地加载与之前加载的 merging 参数不一样")
+
             // 无子项
             if(path == null)
                 return config
@@ -111,14 +115,18 @@ class Config(public override val props: Map<String, *> /* 配置项 */,
                 return emptyMap<String, Any?>()
 
             // 解析内容
-            return inputStream.use {
+            val result = inputStream.use {
                 when(type){
                     "properties" -> Properties().apply { load(InputStreamReader(inputStream, "UTF-8")) } // 加载 properties 文件
                     "yaml" -> Yaml().loadAs(inputStream, HashMap::class.java) // 加载 yaml 文件
                     "json" -> JSONObject.parseObject(inputStream.reader().readText()) // 加载 json 文件
                     else -> throw IllegalArgumentException("未知配置文件类型")
                 }
-            } as Map<String, *>
+            }
+            if(result == null)
+                return emptyMap<String, Any?>()
+
+            return result as Map<String, *>
         }
     }
 
@@ -135,7 +143,7 @@ class Config(public override val props: Map<String, *> /* 配置项 */,
      * @param type properties | yaml
      * @param　merging
      */
-    public constructor(file: String, type: String = "properties", merging: Boolean = false):this(buildProperties(file, type, merging), file){
+    public constructor(file: String, type: String = "properties", merging: Boolean = false):this(buildProperties(file, type, merging), file, merging){
     }
 
     /**
