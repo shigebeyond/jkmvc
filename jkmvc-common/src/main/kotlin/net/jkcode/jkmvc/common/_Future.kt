@@ -38,6 +38,13 @@ public fun Array<CompletableFuture<Any?>>.print() {
 /**
  * 等待并合并异步结果
  */
+public fun List<CompletableFuture<*>>.join(): CompletableFuture<Array<Any?>>{
+    return (this.toTypedArray() as Array<CompletableFuture<Any?>>).join()
+}
+
+/**
+ * 等待并合并异步结果
+ */
 public fun Array<CompletableFuture<Any?>>.join(): CompletableFuture<Array<Any?>> {
     val f: CompletableFuture<Void> = CompletableFuture.allOf(*this)
     return f.thenApply {

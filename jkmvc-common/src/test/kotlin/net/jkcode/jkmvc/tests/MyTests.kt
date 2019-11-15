@@ -92,10 +92,28 @@ class MyTests{
 
     @Test
     fun testTime(){
-        for(i in 0..10000){
+        /*for(i in 0..10000){
             println(currMillis())
             Thread.sleep(1)
-        }
+        }*/
+        val ms1 = System.currentTimeMillis()
+        val ns1 = System.nanoTime()
+        Thread.sleep(1000)
+        val ms2 = System.currentTimeMillis()
+        val ns2 = System.nanoTime()
+
+        // 毫秒
+        println("ms1: " + ms1)
+        println("ms2: " + ms2)
+        println("ms span: " + (ms2 - ms1)) // 1000
+        println()
+
+        // 纳秒
+        //1纳秒=0.000001 毫秒
+        //1纳秒=0.00000 0001秒
+        println("ns1: " + ns1)
+        println("ns2: " + ns2)
+        println("ns span: " + (ns2 - ns1) / 1000000) // 1000
     }
 
     @Test

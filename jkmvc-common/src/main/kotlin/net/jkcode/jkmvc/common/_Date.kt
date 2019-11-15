@@ -6,6 +6,8 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
+// 是否缓存当前毫秒
+public var currMillisCached: Boolean = true
 // 缓存当前毫秒
 @Volatile
 private var currMs:Long = 0
@@ -19,7 +21,11 @@ private val started: AtomicBoolean = AtomicBoolean(false)
  * @return
  */
 public fun currMillis(): Long {
-//    return System.currentTimeMillis()
+    // 不缓存
+    if(!currMillisCached)
+        return System.currentTimeMillis()
+
+    // 缓存
     if(!started.get()){ // 未启动定时
         if(started.compareAndSet(false, true))
             CommonMilliTimer.newPeriodic({ currMs = System.currentTimeMillis()}, 1, TimeUnit.MILLISECONDS)
