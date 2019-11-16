@@ -57,7 +57,7 @@ class ModuleLogSwitcher(protected val module: String /* 组件 */) {
         public override fun invoke(proxy: Any, method: Method, args: Array<out Any>): Any? {
             // 当前等级 < 允许的等级 => 不打日志
             val level = levelMethods.indexOf(method.name)
-            if(level < allowLevel)
+            if(level != -1 && level < allowLevel)
                 return null
 
             return method.invoke(delegate, *args)
