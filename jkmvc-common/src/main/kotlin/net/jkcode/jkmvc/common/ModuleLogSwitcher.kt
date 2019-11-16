@@ -24,22 +24,20 @@ class ModuleLogSwitcher(protected val module: String /* 组件 */) {
          * 组件日志切换配置
          */
         public val config: Config = Config.instance("module-log-switcher", "yaml")
+
+
+        /**
+         * 等级方法
+         */
+        protected val levelMethods = arrayOf("trace", "debug", "info", "warn", "error")
     }
 
-    /**
-     * 是否启用
-     */
-    protected val enabled: Boolean = config.getBoolean(module, true)!!
 
     /**
-     * 是否禁用
+     * 允许的等级
      */
-    protected val disabled: Boolean = !enabled
+    protected val allowLevel: Int = levelMethods.indexOf(config[module]!!)
 
-    /**
-     * 禁用的方法
-     */
-    protected val disableMethods = arrayOf("debug", "info", "warn")
 
     /**
      * 获得logger
@@ -57,8 +55,9 @@ class ModuleLogSwitcher(protected val module: String /* 组件 */) {
     inner class ModuleLoggerHandler(protected val delegate: Logger/* 代理的日志对象 */) : InvocationHandler{
 
         public override fun invoke(proxy: Any, method: Method, args: Array<out Any>): Any? {
-            // 禁用中, 不打印debug/info/warn, 只打印error/fatal日志
-            if(!enabled && disableMethods.contains(method.name))
+            // 当前等级 < 允许的等级 => 不打日志
+            val level = levelMethods.indexOf(method.name)
+            if(level < allowLevel)
                 return null
 
             return method.invoke(delegate, *args)
