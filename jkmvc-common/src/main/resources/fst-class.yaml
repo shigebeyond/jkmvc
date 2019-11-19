@@ -1,2 +1,2 @@
-# fst注册类
+# fst注册类, 会合并多个配置文件的内容, 要保证rpc client/server端都拥有同样的配置文件
 # key是类名, value是空

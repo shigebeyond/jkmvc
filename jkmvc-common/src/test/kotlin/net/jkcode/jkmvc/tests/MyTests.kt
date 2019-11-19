@@ -24,6 +24,7 @@ import java.io.InputStreamReader
 import java.lang.reflect.ParameterizedType
 import java.net.HttpURLConnection
 import java.net.URL
+import java.text.MessageFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -88,6 +89,11 @@ class MyTests{
         println(1.toExpr().exprTo(Int::class))
         //println("1L".toLong()) // java.lang.NumberFormatException: For input string: "1L"
         println(1L.toExpr().exprTo(Long::class))
+    }
+
+    @Test
+    fun testFormat(){
+        println(MessageFormat.format("Avg ResponseTime: {0,number,#.##}ms", 1.toFloat() / 3))
     }
 
     @Test

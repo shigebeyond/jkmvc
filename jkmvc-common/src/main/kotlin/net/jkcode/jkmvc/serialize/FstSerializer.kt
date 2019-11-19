@@ -44,7 +44,7 @@ class FstSerializer: ISerializer {
             throw RuntimeException("配置文件 fst-serializer.yaml 错误: ${e.message}", e);
         }
         try{
-            // 1 注册类
+            // 2 注册类
             val config: IConfig = Config.instance("fst-class", "yaml", true)
             // key是类名, value是空
             // 类名必须排序, 这样保证rpc client/server两端的类名注册顺序一样, 这样保证类名依次映射的简写code也一样
