@@ -23,7 +23,8 @@ class FstSerializer: ISerializer {
 
     init {
         try{
-            // 自定义的序列器
+            // 1 自定义的序列器
+            val reg = conf.getCLInfoRegistry().getSerializerRegistry()
             val config: IConfig = Config.instance("fst-serializer", "yaml", true)
             // key是被序列化的类名, value是序列器的类名
             for((key, value) in config.props){
@@ -36,23 +37,33 @@ class FstSerializer: ISerializer {
                 if(!serializerClass.isSubClass(FSTObjectSerializer::class.java))
                     throw RuntimeException("配置文件 fst-serializer.yaml 中的值[$value]对应的类型没有实现 FSTObjectSerializer");
                 val serializer = serializerClass.newInstance() as FSTObjectSerializer
-                // 指定序列器
-                putSerializer(targetClass, serializer, true)
+                // 给特定类指定序列器
+                reg.putSerializer(targetClass, serializer, true)
             }
         }catch (e: ClassNotFoundException){
             throw RuntimeException("配置文件 fst-serializer.yaml 错误: ${e.message}", e);
         }
+        try{
+            // 1 注册类
+            val config: IConfig = Config.instance("fst-class", "yaml", true)
+            // key是类名, value是空
+            // 类名必须排序, 这样保证rpc client/server两端的类名注册顺序一样, 这样保证类名依次映射的简写code也一样
+            val names = config.props.keys.sorted()
+            for(name in names) {
+                val clazz = Class.forName(name)
+                conf.registerClass(clazz)
+            }
+        }catch (e: ClassNotFoundException){
+            throw RuntimeException("配置文件 fst-class.yaml 错误: ${e.message}", e);
+        }
     }
 
     /**
-     * 给特定类指定序列器
-     * @param cl 类
-     * @param ser 序列器
-     * @param includeSubclasses 是否包含子类
+     * 注册类名, 相当于缩写, 加快序列化
+     * @param c
      */
-    public fun putSerializer(cl: Class<*>, ser: FSTObjectSerializer, includeSubclasses: Boolean) {
-        val reg = conf.getCLInfoRegistry().getSerializerRegistry()
-        reg.putSerializer(cl, ser, includeSubclasses)
+    public fun registerClass(vararg c: Class<*>) {
+        conf.registerClass(*c)
     }
 
     /**
