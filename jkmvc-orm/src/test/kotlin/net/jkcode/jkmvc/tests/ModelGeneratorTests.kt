@@ -7,7 +7,7 @@ class ModelGeneratorTests{
 
     @Test
     fun testCodeModel() {
-        val generator = ModelGenerator("/oldhome/shi/code/java/jksoa/jksoa-dtx/jksoa-dtx-demo/jksoa-dtx-common/src/main/kotlin", "net.jkcode.jksoa.dtx.demo", "default", "shijianhang")
+        val generator = ModelGenerator("/home/shi/code/java/jksoa-benchmark/common/src/main/kotlin", "net.jkcode.jksoa.benchmark.common.analyze", "default", "shijianhang")
         // 生成model文件
 //        generator.genenateModelFile("UserModel", "用户", "user")
 //        generator.genenateModelFile("AddressModel", "地址", "address")
@@ -23,11 +23,13 @@ class ModelGeneratorTests{
 //        generator.genenateModelFile("TransactionMqModel", "事务消息", "transaction_mq")
 //        generator.genenateModelFile("TccTransactionModel", "tcc事务", "tcc_transaction")
 
-        generator.genenateModelFile("ProductModel", "商品", "ord_product")
-        generator.genenateModelFile("OrderModel", "订单", "ord_order")
-        generator.genenateModelFile("OrderItemModel", "订单项", "ord_order_item")
-        generator.genenateModelFile("PayAccountModel", "支付账号", "pay_account")
-        generator.genenateModelFile("PayOrderModel", "支付订单", "pay_order")
-        generator.genenateModelFile("RedPacketModel", "红包", "red_packet")
+//        generator.genenateModelFile("ProductModel", "商品", "ord_product")
+//        generator.genenateModelFile("OrderModel", "订单", "ord_order")
+//        generator.genenateModelFile("OrderItemModel", "订单项", "ord_order_item")
+//        generator.genenateModelFile("PayAccountModel", "支付账号", "pay_account")
+//        generator.genenateModelFile("PayOrderModel", "支付订单", "pay_order")
+//        generator.genenateModelFile("RedPacketModel", "红包", "red_packet")
+        generator.genenateModelFile("BenchmarkResultModel", "性能测试结果", "benchmark_result")
+
     }
 }

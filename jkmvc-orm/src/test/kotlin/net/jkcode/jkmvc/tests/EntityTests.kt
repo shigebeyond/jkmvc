@@ -6,6 +6,7 @@ import net.jkcode.jkmvc.serialize.ISerializer
 import net.jkcode.jkmvc.tests.entity.MessageEntity
 import net.jkcode.jkmvc.tests.model.MessageModel
 import org.junit.Test
+import java.text.MessageFormat
 
 class EntityTests{
 
@@ -132,6 +133,39 @@ class EntityTests{
         val model = MessageEntity()
         val dele = model.getPropDelegate("id")
         println(dele)
+    }
+
+    @Test
+    fun testTransformFieldName(){
+        val row = mapOf<String, Any>("to_uid" to 4, "id" to 2, "from_uid" to 8, "content" to "hello world")
+
+        // 1 手工转换字段名
+        var start = System.nanoTime()
+        for(i in 0..1000000) {
+            val e = MessageEntity()
+            e["toUid"] = row["to_uid"]
+            e["id"] = row["id"]
+            e["fromUid"] = row["from_uid"]
+            e["content"] = row["content"]
+        }
+        var runTime = (System.nanoTime() - start).toDouble() / 1000000L
+        println(MessageFormat.format("Manual transform field name cost {0,number,#.##} ms", runTime))
+
+        // 2 orm自动转换字段名
+        // 参考 net.jkcode.jkmvc.orm._OrmKt.entityRowTransformer
+        val obj = MessageModel()
+        start = System.nanoTime()
+        for(i in 0..1000000) {
+            // 清空字段值
+            obj.clear() // 2
+            // 设置字段值
+            obj.setOriginal(row) // 9
+            // 转为实体
+            obj.toEntity() // 12
+        }
+        runTime = (System.nanoTime() - start).toDouble() / 1000000L
+        println(MessageFormat.format("Auto transform field name: cost {0,number,#.##} ms", runTime))
+
     }
 
 }

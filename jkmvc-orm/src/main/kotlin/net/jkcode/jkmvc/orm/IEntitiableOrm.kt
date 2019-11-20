@@ -37,6 +37,7 @@ interface IEntitiableOrm<E: OrmEntity>: IOrm {
     public fun toEntity(): E{
         // 获得实体类: 当前类实现 IEntitiableOrm 接口时, 指定的泛型类型
         val entityClass = this.javaClass.getInterfaceGenricType(IEntitiableOrm::class.java)!!
+        //val entityClass = ormMeta.entityClass!!
         // 创建实体
         val entity = entityClass.newInstance() as E
 

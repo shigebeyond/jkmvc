@@ -11,6 +11,7 @@ import net.jkcode.jkmvc.validator.IValidator
 import java.util.*
 import kotlin.collections.set
 import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
 
 /**
  * orm的元数据
@@ -79,6 +80,16 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
             val method = model.java.getMethod(event)
             method.declaringClass != OrmEntity::class.java // 实际上事件处理方法是定义在 IOrmPersistent 接口, 但反射中获得声明类却是 OrmEntity 抽象类
         }
+    }
+
+    /**
+     * 获得实体类: 模型类实现 IEntitiableOrm 接口时, 指定的泛型类型
+     */
+    public override val entityClass: Class<*>? by lazy {
+        if(model.isSubclassOf(IEntitiableOrm::class))
+            model.java.getInterfaceGenricType(IEntitiableOrm::class.java)
+        else
+            null
     }
 
     /**

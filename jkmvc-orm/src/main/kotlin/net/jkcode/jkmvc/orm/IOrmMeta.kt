@@ -64,6 +64,11 @@ interface IOrmMeta {
     val rules: MutableMap<String, IValidator>
 
     /**
+     * 获得实体类: 模型类实现 IEntitiableOrm 接口时, 指定的泛型类型
+     */
+    val entityClass: Class<*>?
+
+    /**
      * 数据库
      */
     val db: IDb
