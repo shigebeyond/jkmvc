@@ -306,4 +306,8 @@ class Config(public override val props: Map<String, *>, // 配置项
             BeanSingletons.instance(clazz) as T
         }
     }
+
+    public override fun toString(): String {
+        return "Config[$props]"
+    }
 }

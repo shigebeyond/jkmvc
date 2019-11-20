@@ -379,4 +379,15 @@ abstract class Db protected constructor(
             throw  e
         }
     }
+
+    /**
+     * 关闭连接+清理ThreadLocal
+     *   只提供给第三方框架调用, 因为他们没有请求作用域, 无法自动清理ThreadLocal
+     */
+    public fun closeAndClear(){
+        // 关闭连接
+        close()
+        // 清理ThreadLocal
+        dbs.get().remove(name)
+    }
 }
