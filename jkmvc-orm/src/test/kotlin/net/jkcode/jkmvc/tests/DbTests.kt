@@ -63,6 +63,14 @@ class DbTests{
     }
 
     @Test
+    fun testResultSet(){
+        Db.instance().queryResult("select * from user"){
+            val id = it.getInt("id")
+            println(id)
+        }
+    }
+
+    @Test
     fun testPreviewSql(){
         println(db.previewSql("select * from user where name = ?", listOf("shi")))
     }

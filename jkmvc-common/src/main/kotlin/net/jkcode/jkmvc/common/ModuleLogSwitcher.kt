@@ -25,6 +25,10 @@ class ModuleLogSwitcher(protected val module: String /* 组件 */) {
          */
         public val config: Config = Config.instance("module-log-switcher", "yaml")
 
+        /**
+         * 是否启用
+         */
+        public val enable: Boolean = config["enable"]!!
 
         /**
          * 等级方法
@@ -46,6 +50,9 @@ class ModuleLogSwitcher(protected val module: String /* 组件 */) {
      */
     public fun getLogger(name: String): Logger{
         val logger = LoggerFactory.getLogger(name)
+        if(!enable) // 不启用
+            return logger
+
         return Proxy.newProxyInstance(this.javaClass.classLoader, arrayOf(Logger::class.java), ModuleLoggerHandler(logger)) as Logger
     }
 

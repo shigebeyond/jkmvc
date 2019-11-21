@@ -1,6 +1,7 @@
 jkmvc.iml
 .idea/
 build/
+target/
 .gradle
 *.log
 out/

@@ -52,6 +52,7 @@ class Config(public override val props: Map<String, *>, // 配置项
          * @param merging
          */
         @JvmStatic
+        @JvmOverloads
         public fun instance(file: String, type: String = "properties", merging: Boolean = false): Config {
             // 解析出文件名 + 子项路径
             var filename:String = file

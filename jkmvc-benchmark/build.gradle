@@ -1,0 +1,32 @@
+dependencies{
+    // other project
+    if(env == 'dev') {
+        compile project(':jkmvc-http')
+        compile project(':jkmvc-server-jetty')
+    }else{
+        compile "net.jkcode.jkmvc:jkmvc-http:${project.version}"
+        compile "net.jkcode.jkmvc:jkmvc-server-jetty:${project.version}"
+    }
+
+    // jdbc
+    runtime "mysql:mysql-connector-java:5.1.6"
+}
+
+apply plugin: 'org.akhikhl.gretty'
+
+// 启动jetty
+gretty{
+    // server 配置
+    servletContainer 'jetty9' // 'tomcat8'
+    httpPort 8080
+    managedClassReload true // 热部署
+    scanInterval 1 // 热部署的扫描间隔，当值为0时，不扫描新class，不热部署
+
+    // 调试: gradle appRunDebug
+    debugPort 5006 // 运行jetty的jvm独立于运行gradle的jvm, 因此也使用独立的调试端口
+    debugSuspend true
+
+    // webapp 配置
+    contextPath "/${project.name}"
+    inplaceMode "hard" // 资源目录 src/main/webapp
+}
