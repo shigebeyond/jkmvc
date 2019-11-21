@@ -3,6 +3,7 @@ package net.jkcode.jkmvc.orm
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.serializer.SerializerFeature
 import net.jkcode.jkmvc.common.decorateIterator
+import net.jkcode.jkmvc.db.ResultRow
 import net.jkcode.jkmvc.db.Row
 import java.io.Serializable
 import java.util.*
@@ -69,7 +70,7 @@ public val KClass<out IOrm>.modelOrmMeta: IOrmMeta
  * 获得模型类的行转换器
  * @return 转换的匿名函数
  */
-public val <T:IOrm> KClass<T>.modelRowTransformer: (Row) -> T
+public val <T:IOrm> KClass<T>.modelRowTransformer: (ResultRow) -> T
     get(){
         // 实例化函数
         return {
@@ -97,7 +98,7 @@ private val reusedModels:ThreadLocal<MutableMap<KClass<*>, Any?>> = ThreadLocal.
  * 获得实体类的行转换器
  * @return 转换的匿名函数
  */
-public fun <T: IEntitiableOrm<E>, E: OrmEntity> KClass<T>.entityRowTransformer(entityClass: KClass<E>): (Row) -> E {
+public fun <T: IEntitiableOrm<E>, E: OrmEntity> KClass<T>.entityRowTransformer(entityClass: KClass<E>): (ResultRow) -> E {
     // 实例化函数
     return {
         // 获得模型实例

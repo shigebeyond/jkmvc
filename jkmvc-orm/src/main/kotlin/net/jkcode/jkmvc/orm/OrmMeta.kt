@@ -101,14 +101,16 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     /**
      * 默认外键
      */
-    public override val defaultForeignKey:DbKeyNames
-        get() = primaryKey.wrap(table + '_')  // table + '_' + primaryKey;
+    public override val defaultForeignKey:DbKeyNames by lazy{
+        primaryKey.wrap(table + '_')  // table + '_' + primaryKey;
+    }
 
     /**
      * 表字段
      */
-    public override val columns: List<String>
-        get() = db.listColumns(table)
+    public override val columns: List<String> by lazy{
+        db.listColumns(table)
+    }
 
     /**
      * 对象属性

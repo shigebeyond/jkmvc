@@ -73,7 +73,7 @@ batchExecute(sql: String, paramses: List<Any?>): IntArray | 批量更新: 每次
 
 方法 | 作用
 --- | ---
-queryResult(sql: String, params: List<Any?> = emptyList(), action: (ResultSet) -> T): T | 查询多行
+queryResult(sql: String, params: List<Any?> = emptyList(), action: (DbResultSet) -> T): T | 查询多行
 queryRow(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T): T? | 查询一行(多列)
 queryRows(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T): List<T> | 查询多行
 queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): List<T?> | 查询一列(多行)

@@ -1,6 +1,5 @@
 package net.jkcode.jkmvc.db
 
-import java.sql.ResultSet
 import kotlin.reflect.KClass
 
 /**
@@ -108,29 +107,37 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * 查询多行
      * @param sql
      * @param params
-     * @param action 转换结果的函数
+     * @param transform 转换结果的函数
      * @return
      */
-    public abstract fun <T> queryResult(sql: String, params: List<Any?> = emptyList(), action: (ResultSet) -> T): T;
+    public abstract fun <T> queryResult(sql: String, params: List<Any?> = emptyList(), transform: (DbResultSet) -> T): T;
 
     /**
      * 查询多行
      * @param sql
      * @param params 参数
-     * @param transform 转换结果的函数
+     * @param transform 转换行的函数
      * @return
      */
-    public abstract fun <T> queryRows(sql: String, params: List<Any?> = emptyList(), transform: (Row) -> T): List<T>;
+    public fun <T> queryRows(sql: String, params: List<Any?> = emptyList(), transform: (ResultRow) -> T): List<T>{
+        return queryResult(sql, params){ rs ->
+            rs.mapRows(transform)
+        }
+    }
 
     /**
      * 查询一行(多列)
      *
      * @param sql
      * @param params 参数
-     * @param transform 转换结果的函数
+     * @param transform 转换行的函数
      * @return
      */
-    public abstract fun <T> queryRow(sql: String, params: List<Any?> = emptyList(), transform: (Row) -> T): T?;
+    public fun <T> queryRow(sql: String, params: List<Any?> = emptyList(), transform: (ResultRow) -> T): T?{
+        return queryResult(sql, params){ rs ->
+            rs.mapRow(transform)
+        }
+    }
 
     /**
      * 查询一列(多行)
@@ -140,7 +147,13 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * @param clazz 值类型
      * @return
      */
-    public abstract fun <T:Any> queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): List<T>
+    public fun <T:Any> queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): List<T>{
+        return queryResult(sql, params){ rs ->
+            rs.mapRows{ row ->
+                row.get(1, clazz) as T
+            }
+        }
+    }
 
     /**
      * 查询一行一列
@@ -150,7 +163,13 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * @param clazz 值类型
      * @return
      */
-    public abstract fun <T:Any> queryCell(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): Cell<T>
+    public fun <T:Any> queryCell(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): T?{
+        return queryResult(sql, params){ rs ->
+            rs.mapRow{ row ->
+                row.get(1, clazz) as T?
+            }
+        }
+    }
 
     /**
      * 查询一行一列
@@ -159,7 +178,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * @param params 参数
      * @return
      */
-    public inline fun <reified T:Any> queryCell(sql: String, params: List<Any?> = emptyList()): Cell<T> {
+    public inline fun <reified T:Any> queryCell(sql: String, params: List<Any?> = emptyList()): T? {
         return queryCell(sql, params, T::class)
     }
 }

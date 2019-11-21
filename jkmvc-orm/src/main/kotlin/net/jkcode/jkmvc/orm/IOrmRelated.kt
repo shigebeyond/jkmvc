@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.orm
 
+import net.jkcode.jkmvc.db.ResultRow
 import net.jkcode.jkmvc.db.Row
 
 /**
@@ -16,7 +17,7 @@ interface IOrmRelated : IOrmPersistent
 	 *
 	 * @param orgn
 	 */
-	fun setOriginal(orgn: Row): Unit
+	fun setOriginal(orgn: ResultRow): Unit
 
 	/**
 	 * 获得关联对象

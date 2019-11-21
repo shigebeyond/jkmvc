@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.orm
 
+import net.jkcode.jkmvc.db.ResultRow
 import net.jkcode.jkmvc.db.Row
 
 /**
@@ -55,12 +56,9 @@ abstract class OrmRelated : OrmPersistent() {
      *
      * @param data
      */
-    public override fun setOriginal(orgn: Row): Unit {
-        if(orgn.isEmpty())
-            return
-
+    public override fun setOriginal(orgn: ResultRow): Unit {
         // 设置属性值
-        for ((column, value) in orgn) {
+        orgn.forEach { column, value ->
             // 关联查询时，会设置关联表字段的列别名（列别名 = 表别名 : 列名），可以据此来设置关联对象的字段值
             if (!column.contains(":")){ // 自身字段
                 setOriginal(column, value)

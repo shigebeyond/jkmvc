@@ -26,7 +26,7 @@ internal class GeneralOrmQueryBuilder(ormMeta: IOrmMeta /* orm元数据 */,
      * @param transform 转换函数
      * @return 列表
      */
-    public override fun <T:Any> findAll(params: List<Any?>, db: IDb, transform: (Row) -> T): List<T>{
+    public override fun <T:Any> findAll(params: List<Any?>, db: IDb, transform: (ResultRow) -> T): List<T>{
         val items = super.findAll(params, db, transform)
         if(items.isNotEmpty() && items.first() is GeneralModel){
             for(item in items)
@@ -42,7 +42,7 @@ internal class GeneralOrmQueryBuilder(ormMeta: IOrmMeta /* orm元数据 */,
      * @param transform 转换函数
      * @return 单个数据
      */
-    public override fun <T:Any> find(params: List<Any?>, db: IDb, transform: (Row) -> T): T?{
+    public override fun <T:Any> find(params: List<Any?>, db: IDb, transform: (ResultRow) -> T): T?{
         val item = super.find(params, db, transform)
         if(item != null && item is GeneralModel){
             item.delaySetMeta(ormMeta)

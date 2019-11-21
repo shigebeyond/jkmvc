@@ -9,7 +9,7 @@ import org.junit.Test
 class OrmTests{
 
     val id: Int by lazy {
-        val minId = Db.instance().queryCell<Int>("select id from user order by id limit 1").get()!!
+        val minId = Db.instance().queryCell<Int>("select id from user order by id limit 1")!!
         println("随便选个id: " + minId)
         minId
     }

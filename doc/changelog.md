@@ -82,3 +82,7 @@
 6. 支持异步的http client, 基于asynchttpclient实现
 
 7. gradle支持发布到maven中央库
+
+8. 优化fst, 支持自定义序列器
+
+9. 优化Config, 支持合并多个同名的配置文件的数据

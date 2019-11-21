@@ -8,7 +8,6 @@ import net.jkcode.jkmvc.db.single.SingleDb
 import net.jkcode.jkmvc.ttl.AllRequestScopedTransferableThreadLocal
 import java.io.Closeable
 import java.sql.Connection
-import java.sql.ResultSet
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -300,80 +299,12 @@ abstract class Db protected constructor(
      *
      * @param sql
      * @param params
-     * @param action 转换结果的函数
-     * @return
-     */
-    public override fun <T> queryResult(sql: String, params: List<Any?>, action: (ResultSet) -> T): T {
-        try{
-            return conn.queryResult(sql, params, action)
-        }catch (e:Exception){
-            dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
-            throw  e
-        }
-    }
-
-    /**
-     * 查询一行(多列)
-     *
-     * @param sql
-     * @param params
      * @param transform 转换结果的函数
      * @return
      */
-    public override fun <T> queryRow(sql: String, params: List<Any?>, transform: (Row) -> T): T? {
+    public override fun <T> queryResult(sql: String, params: List<Any?>, transform: (DbResultSet) -> T): T {
         try{
-            return conn.queryRow(sql, params, transform);
-        }catch (e:Exception){
-            dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
-            throw  e
-        }
-    }
-
-    /**
-     * 查询多行
-     *
-     * @param sql
-     * @param params
-     * @param transform 转换结果的函数
-     * @return
-     */
-    public override fun <T> queryRows(sql: String, params: List<Any?>, transform: (Row) -> T): List<T> {
-        try{
-            return conn.queryRows(sql, params, transform);
-        }catch (e:Exception){
-            dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
-            throw  e
-        }
-    }
-
-    /**
-     * 查询一列(多行)
-     *
-     * @param sql
-     * @param params
-     * @param clazz 值类型
-     * @return
-     */
-    public override fun <T:Any> queryColumn(sql: String, params: List<Any?>, clazz: KClass<T>?): List<T> {
-        try{
-            return conn.queryColumn(sql, params);
-        }catch (e:Exception){
-            dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
-            throw  e
-        }
-    }
-
-    /**
-     * 查询一行一列
-     *
-     * @param sql
-     * @param params
-     * @param clazz 值类型
-     * @return
-     */
-    public override fun <T:Any> queryCell(sql: String, params: List<Any?>, clazz: KClass<T>?): Cell<T> {
-        try{
-            return conn.queryCell(sql, params, clazz);
+            return conn.queryResult(sql, params, transform)
         }catch (e:Exception){
             dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
             throw  e

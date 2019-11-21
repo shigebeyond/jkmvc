@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.query
 
 import net.jkcode.jkmvc.db.Cell
 import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkmvc.db.ResultRow
 import net.jkcode.jkmvc.db.Row
 import net.jkcode.jkmvc.orm.*
 import org.apache.commons.collections.map.HashedMap
@@ -38,7 +39,7 @@ abstract class IDbQuery{
      * @param transform 转换函数
      * @return 列表
      */
-    public abstract fun <T:Any> findAll(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (Row) -> T): List<T>
+    public abstract fun <T:Any> findAll(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (ResultRow) -> T): List<T>
 
     /**
      * 查找多个： select 语句
@@ -93,7 +94,7 @@ abstract class IDbQuery{
      * @param transform 转换函数
      * @return 一个数据
      */
-    public abstract fun <T:Any> find(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (Row) -> T): T?
+    public abstract fun <T:Any> find(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (ResultRow) -> T): T?
 
     /**
      * 查找一个： select ... limit 1语句

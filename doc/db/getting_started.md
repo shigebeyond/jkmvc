@@ -72,7 +72,7 @@ batchExecute(sql: String, paramses: List<Any?>): IntArray | Batch update
 
 Method | Function
 --- --- --- ---
-queryResult(sql: String, params: List<Any?> = emptyList(), action: (ResultSet) -> T): T | Query and get result with lambda
+queryResult(sql: String, params: List<Any?> = emptyList(), action: (DbResultSet) -> T): T | Query and get result with lambda
 queryRow(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T) | Query one row
 queryRows(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T): List<T> | Query multiple rows
 queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): List<T> | Query a column in multiple rows
