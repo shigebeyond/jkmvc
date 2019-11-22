@@ -141,9 +141,9 @@ count(vararg params: Any?):Long | 查询行数
 ```
 val query = DbQueryBuilder().from("user")
 // SELECT * FROM `user`
-val rows = query.findAllRows()
+val rows = query.findMaps()
 // SELECT * FROM `user` LIMIT 1
-val row = query.findRow()
+val row = query.findMap()
 // SELECT username FROM `user`
 val usernames = query.select("username").findColumn<String>()
 // SELECT count(1) FROM `user`
@@ -210,7 +210,7 @@ DELETE FROM `user` WHERE `username` IN ("john", "jane")
 
 ```
 // 使用`JOIN` 来查询出作者 "smith" 关联的所有文章
-query.select("authors.name", "posts.content").from("authors").join("posts").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith").findAllRows();
+query.select("authors.name", "posts.content").from("authors").join("posts").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith").findMaps();
 ```
 
 生成sql如下：
@@ -239,7 +239,7 @@ SELECT `authors`.`name`, `posts`.`content` FROM `authors` LEFT JOIN `posts` ON (
 SQL中提供的聚合函数可以用来统计、求和、求最值等，如 `COUNT()`, `SUM()`, `AVG()`. 他们通常是结合 `groupBy()` 来分组统计，或结合 `having()` 来过滤聚合结果
 
 ```
-query.select("username", DbExpr("COUNT(`id`)", "total_posts", false)).from("posts").groupBy("username").having("total_posts", ">=", 10).findAllRows()
+query.select("username", DbExpr("COUNT(`id`)", "total_posts", false)).from("posts").groupBy("username").having("total_posts", ">=", 10).findMaps()
 ```
 
 生成sql如下：
@@ -259,7 +259,7 @@ val sub = DbQueryBuilder().select("username", DbExpr("COUNT(`id`)", "total_posts
 
 // join subquery
 DbQueryBuilder().select("profiles.*", "posts.total_posts").from("profiles")
-.join(DbExpr(sub, "posts", false), "INNER").on("profiles.username", "=", "posts.username").findAllRows()
+.join(DbExpr(sub, "posts", false), "INNER").on("profiles.username", "=", "posts.username").findMaps()
 ```
 
 生成sql如下：
@@ -302,7 +302,7 @@ query.from("user")
         .andWhereClose()
     .whereClose()
     .andWhere("removed","IS", null)
-    .findAllRows()
+    .findMaps()
 ```
 
 生成sql如下：
@@ -345,7 +345,7 @@ db.transaction {
     println("插入user表：" + id)
 
     // 查询一条数据
-    val row = DbQueryBuilder(db).table("user").where("id", "=", id).findRow()
+    val row = DbQueryBuilder(db).table("user").where("id", "=", id).findMap()
     println("查询user表：" + row)
 
     // 更新
@@ -353,7 +353,7 @@ db.transaction {
     println("更新user表：" + f)
 
     // 查询多条数据
-    val rows = DbQueryBuilder(db).table("user").orderBy("id").limit(1).findAllRows()
+    val rows = DbQueryBuilder(db).table("user").orderBy("id").limit(1).findMaps()
     println("查询user表：" + rows)
 
     // 删除

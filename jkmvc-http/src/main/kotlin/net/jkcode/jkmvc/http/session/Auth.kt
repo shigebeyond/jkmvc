@@ -77,7 +77,7 @@ abstract class Auth: IAuth{
             query.withs(*withs)
 
         // 根据用户名查找用户
-        val user = query.where(sessionConfig["usernameField"]!!, "=", username).find(transform = userModel.modelRowTransformer) as IAuthUserModel?;
+        val user = query.where(sessionConfig["usernameField"]!!, "=", username).findRow(transform = userModel.modelRowTransformer) as IAuthUserModel?;
         if(user == null)
             return null;
 

@@ -299,7 +299,7 @@ abstract class Db protected constructor(
      *
      * @param sql
      * @param params
-     * @param transform 转换结果的函数
+     * @param transform 结果转换函数
      * @return
      */
     public override fun <T> queryResult(sql: String, params: List<Any?>, transform: (DbResultSet) -> T): T {

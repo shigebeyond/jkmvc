@@ -62,7 +62,7 @@ abstract class OrmPersistent : OrmValid() {
 	 */
 	public override fun loadByPk(vararg pk: Any): Unit {
 		if(pk.isNotEmpty())
-			queryBuilder().where(ormMeta.primaryKey, DbKeyValues(pk)).find(){
+			queryBuilder().where(ormMeta.primaryKey, DbKeyValues(pk)).findRow(){
 				this.setOriginal(it)
 				this
 			}
@@ -164,7 +164,7 @@ abstract class OrmPersistent : OrmValid() {
 	 * 更新数据: update sql
 	 *
 	 * <code>
-	 *    val user = UserModel.queryBuilder().where("id", 1).find<UserModel>();
+	 *    val user = UserModel.queryBuilder().where("id", 1).findRow<UserModel>();
 	 *    user.name = "li";
 	 *    user.update();
 	 * </code>
@@ -207,7 +207,7 @@ abstract class OrmPersistent : OrmValid() {
 	 * 删除数据: delete sql
 	 *
 	 *　<code>
-	 *    val user = UserModel.queryBuilder().where("id", "=", 1).find<UserModel>();
+	 *    val user = UserModel.queryBuilder().where("id", "=", 1).findRow<UserModel>();
 	 *    user.delete();
 	 *　</code>
 	 *
@@ -242,7 +242,7 @@ abstract class OrmPersistent : OrmValid() {
 	 *   注：没更新内存
 	 *
 	 * <code>
-	 *    val user = UserModel.queryBuilder().where("id", 1).find<UserModel>();
+	 *    val user = UserModel.queryBuilder().where("id", 1).findRow<UserModel>();
 	 *    user.incr("age", 1);
 	 * </code>
 	 *

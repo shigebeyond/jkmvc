@@ -184,7 +184,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * 查找多个： select 语句
      *
      * @param params 动态参数
-     * @param transform 转换函数
+     * @param transform 行转换函数
      * @return 列表
      */
     public override fun <T:Any> findAll(params: List<Any?>, db: IDb, transform: (ResultRow) -> T): List<T>{
@@ -196,10 +196,10 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * 查找一个： select ... limit 1语句
      *
      * @param params 动态参数
-     * @param transform 转换函数
+     * @param transform 行转换函数
      * @return 单个数据
      */
-    public override fun <T:Any> find(params: List<Any?>, db: IDb, transform: (ResultRow) -> T): T?{
+    public override fun <T:Any> findRow(params: List<Any?>, db: IDb, transform: (ResultRow) -> T): T?{
         return db.queryRow(sql, buildParams(params), transform);
     }
 

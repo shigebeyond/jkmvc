@@ -37,10 +37,10 @@ class OrmTests{
 
     @Test
     fun testFindAll(){
-        val users = UserModel.queryBuilder().findAllModels<UserModel>()
-//        val users = UserModel.queryBuilder().where("id", "=", 6).findAllModels<UserModel>()
-//        val users = UserModel.queryBuilder().where("id", "IN", arrayOf(6, 7)).findAllModels<UserModel>()
-//        val users = UserModel.queryBuilder(true).where("id", "IN", arrayOf("6", "100")).findAllModels<UserModel>()
+        val users = UserModel.queryBuilder().findModels<UserModel>()
+//        val users = UserModel.queryBuilder().where("id", "=", 6).findModels<UserModel>()
+//        val users = UserModel.queryBuilder().where("id", "IN", arrayOf(6, 7)).findModels<UserModel>()
+//        val users = UserModel.queryBuilder(true).where("id", "IN", arrayOf("6", "100")).findModels<UserModel>()
         println("查找所有用户: $users" )
     }
 
@@ -107,7 +107,7 @@ class OrmTests{
         println("删除用户: $id")
 
         // query builder
-        val users = GeneralModel(table, primaryKey).queryBuilder().limit(2).findAllModels<GeneralModel>()
+        val users = GeneralModel(table, primaryKey).queryBuilder().limit(2).findModels<GeneralModel>()
         println(users)
     }
 
@@ -136,7 +136,7 @@ class OrmTests{
 //        println(addresses)
 
         // 多个user，联查多个address
-        var users = UserModel.queryBuilder().with("addresses").limit(100).findAllModels<UserModel>()
+        var users = UserModel.queryBuilder().with("addresses").limit(100).findModels<UserModel>()
         for (user in users){
             println("user[${user.id}]: ${user.name}")
             for(address in user.addresses){
@@ -202,7 +202,7 @@ class OrmTests{
 
     @Test
     fun testMiddleRelationManage(){
-        val users = UserModel.queryBuilder().limit(2).findAllModels<UserModel>()
+        val users = UserModel.queryBuilder().limit(2).findModels<UserModel>()
         val (u1, u2) = users
 
         println("${u1.id} 给 ${u2.id} 寄快递")

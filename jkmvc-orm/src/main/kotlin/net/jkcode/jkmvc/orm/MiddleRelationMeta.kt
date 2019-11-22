@@ -46,7 +46,7 @@ class MiddleRelationMeta(
 
     /**
      * 中间表的外键字段别名
-     *    用在 OrmQueryBuilder.findAll() 联查从表时，绑定主对象
+     *    用在 OrmQueryBuilder.findRows() 联查从表时，绑定主对象
      *    不能使用foreignKey, 因为中间表的该字段可能与从表字段重名
      */
     public val middleForeignKey:DbKeyNames = foreignKey.wrap("", "_") // foreignKey + '_'
@@ -62,7 +62,7 @@ class MiddleRelationMeta(
      * @return
      */
     protected fun buildQuery(): OrmQueryBuilder {
-        // select关联字段：中间表.外键 = 主表.主键，用在 OrmQueryBuilder.findAll() 联查从表时，绑定主对象
+        // select关联字段：中间表.外键 = 主表.主键，用在 OrmQueryBuilder.findRows() 联查从表时，绑定主对象
          //val smfk = DbExpr(middleTable + '.' + foreignKey, middleForeignKey)
         val smfk:DbKey<DbExpr> = foreignKey.mapWith(middleForeignKey){ fk, mfk ->
             DbExpr(middleTable + '.' + fk, mfk)

@@ -372,7 +372,7 @@ class UserController: Controller()
         val counter:OrmQueryBuilder = query.clone() as OrmQueryBuilder // 复制query builder
         val count = counter.count()
         // 查询所有用户 | find all users
-        val users = query.findAllModels<UserModel>()
+        val users = query.findModels<UserModel>()
         // 渲染视图 | render view
         res.renderView(view("user/index", mutableMapOf("count" to count, "users" to users)))
     }

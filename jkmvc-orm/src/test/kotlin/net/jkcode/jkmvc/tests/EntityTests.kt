@@ -43,7 +43,7 @@ class EntityTests{
         println("create: " + msg)
 
         msg = MessageModel.queryBuilder().where("id", id).findModel<MessageModel>()!!
-        println("find: " + msg)
+        println("findRow: " + msg)
 
         msg.content = "reply orm"
         msg.update()

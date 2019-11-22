@@ -63,12 +63,12 @@ class OrmBenchmarkTests{
      * TPS: 60453.64
      *
      * 通过jprofile得知, 内存跟orm差不多
-     * findEntity() 跟 find{} 差不多
+     * findEntity() 跟 findRow{} 差不多
      */
     @Test
     fun testQuery(){
         test{id ->
-            DbQueryBuilder().table("message").where("id", "=", id).find{ row ->
+            DbQueryBuilder().table("message").where("id", "=", id).findRow{ row ->
                 val msg = MessageEntity()
                 msg.fromMap(row)
                 msg
@@ -91,7 +91,7 @@ class OrmBenchmarkTests{
         val query = DbQueryBuilder()
         test{id ->
             query.clear()
-            query.table("message").where("id", "=", id).find{ row ->
+            query.table("message").where("id", "=", id).findRow{ row ->
                 val msg = MessageEntity()
                 msg.fromMap(row)
                 msg
@@ -108,7 +108,7 @@ class OrmBenchmarkTests{
     fun testQueryCompiled(){
         val csql = DbQueryBuilder().table("message").where("id", "=", DbExpr.question).compileSelectOne()
         test{ id ->
-            csql.find(listOf(id)){ row ->
+            csql.findRow(listOf(id)){ row ->
                 val msg = MessageEntity()
                 msg.fromMap(row)
                 msg

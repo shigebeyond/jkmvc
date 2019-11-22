@@ -107,7 +107,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * 查询多行
      * @param sql
      * @param params
-     * @param transform 转换结果的函数
+     * @param transform 结果转换函数
      * @return
      */
     public abstract fun <T> queryResult(sql: String, params: List<Any?> = emptyList(), transform: (DbResultSet) -> T): T;

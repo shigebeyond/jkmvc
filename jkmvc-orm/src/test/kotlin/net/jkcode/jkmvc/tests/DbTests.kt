@@ -83,13 +83,13 @@ class DbTests{
 
     @Test
     fun testFind(){
-        val row = db.queryRow("select * from user limit 1" /*sql*/, emptyList() /*参数*/, ::HashedMap /*转换结果的函数*/) // 返回 Map 类型的一行数据
+        val row = db.queryRow("select * from user limit 1" /*sql*/, emptyList() /*参数*/, ::HashedMap /*结果转换函数*/) // 返回 Map 类型的一行数据
         println("查询user表：" + row)
     }
 
     @Test
     fun testFindAll(){
-        val rows = db.queryRows("select * from user limit 10" /*sql*/, emptyList() /*参数*/, ::HashedMap /*转换结果的函数*/) // 返回 Map 类型的多行数据
+        val rows = db.queryRows("select * from user limit 10" /*sql*/, emptyList() /*参数*/, ::HashedMap /*结果转换函数*/) // 返回 Map 类型的多行数据
         println("查询user表：" + rows)
     }
 

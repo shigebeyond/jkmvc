@@ -19,7 +19,7 @@ class DbResultSet(protected val rs: ResultSet) : ResultSet by rs {
      * 遍历结果集的每一行
      * @param action 访问者函数
      */
-    public fun forEachRow(action: (ResultRow) -> Unit): Unit {
+    public inline fun forEachRow(action: (ResultRow) -> Unit): Unit {
         while(next()){
             action(ResultRow(this))
         }
@@ -30,7 +30,7 @@ class DbResultSet(protected val rs: ResultSet) : ResultSet by rs {
      * @param transform 行的转换函数
      * @return
      */
-    public fun <T> mapRows(transform: (ResultRow) -> T): List<T> {
+    public inline fun <T> mapRows(transform: (ResultRow) -> T): List<T> {
         val result = LinkedList<T>()
         this.forEachRow { row ->
             result.add(transform(row));// 转换一行数据
@@ -43,7 +43,7 @@ class DbResultSet(protected val rs: ResultSet) : ResultSet by rs {
      * @param transform 行的转换函数
      * @return
      */
-    public fun <T> mapRow(transform: (ResultRow) -> T): T? {
+    public inline fun <T> mapRow(transform: (ResultRow) -> T): T? {
         if(rs.next())
             return transform(ResultRow(this))
 
@@ -58,7 +58,7 @@ class DbResultSet(protected val rs: ResultSet) : ResultSet by rs {
      * @param clazz
      * @return
      */
-    public fun get(i: Int, clazz: KClass<*>? = null): Any? {
+    public inline fun get(i: Int, clazz: KClass<*>? = null): Any? {
         return when(clazz){
             null -> getValue(i)
 

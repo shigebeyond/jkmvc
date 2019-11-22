@@ -1,9 +1,6 @@
 package net.jkcode.jkmvc.query
 
-import net.jkcode.jkmvc.db.Cell
-import net.jkcode.jkmvc.db.IDb
-import net.jkcode.jkmvc.db.ResultRow
-import net.jkcode.jkmvc.db.Row
+import net.jkcode.jkmvc.db.*
 import net.jkcode.jkmvc.orm.*
 import org.apache.commons.collections.map.HashedMap
 import kotlin.reflect.KClass
@@ -32,24 +29,27 @@ abstract class IDbQuery{
     public abstract val defaultDb: IDb
 
     /**
-     * 查找多个： select 语句
+     * 查询多行
      *
-     * @param params 参数
-     * @param db 数据库连接
-     * @param transform 转换函数
-     * @return 列表
+     * @param sql
+     * @param params
+     * @param transform 结果转换函数
+     * @return
      */
-    public abstract fun <T:Any> findAll(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (ResultRow) -> T): List<T>
+    public abstract fun <T> findResult(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (DbResultSet) -> T): T
 
     /**
      * 查找多个： select 语句
      *
      * @param params 参数
      * @param db 数据库连接
+     * @param transform 行转换函数
      * @return 列表
      */
-    public fun findAllRows(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<Row>{
-        return findAll(params, db, ::HashedMap) as List<Row>
+    public fun <T:Any> findRows(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (ResultRow) -> T): List<T>{
+        return findResult(params, db){ rs ->
+            rs.mapRows(transform)
+        }
     }
 
     /**
@@ -59,8 +59,21 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return 列表
      */
-    public inline fun <reified T: IOrm> findAllModels(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<T> {
-        return findAll(params, db, T::class.modelRowTransformer)
+    public fun findMaps(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<Row>{
+        return findRows(params, db){
+            it.toMap()
+        }
+    }
+
+    /**
+     * 查找多个： select 语句
+     *
+     * @param params 参数
+     * @param db 数据库连接
+     * @return 列表
+     */
+    public inline fun <reified T: IOrm> findModels(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<T> {
+        return findRows(params, db, T::class.modelRowTransformer)
     }
 
     /**
@@ -70,8 +83,8 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return 一个数据
      */
-    public inline fun <reified T: IEntitiableOrm<E>, reified E: OrmEntity> findAllEntities(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<E> {
-        return findAll(params, db, T::class.entityRowTransformer(E::class))
+    public inline fun <reified T: IEntitiableOrm<E>, reified E: OrmEntity> findEntities(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<E> {
+        return findRows(params, db, T::class.entityRowTransformer(E::class))
     }
 
     /**
@@ -79,11 +92,13 @@ abstract class IDbQuery{
      *
      * @param params 参数
      * @param db 数据库连接
-     * @param transform 转换函数
+     * @param transform 行转换函数
      * @return 一个数据
      */
-    public fun findRow(params: List<Any?> = emptyList(), db: IDb = defaultDb): Row?{
-        return find(params, db, ::HashedMap) as Row?
+    public fun findMap(params: List<Any?> = emptyList(), db: IDb = defaultDb): Row?{
+        return findRow(params, db){ row ->
+            row.toMap()
+        }
     }
 
     /**
@@ -91,10 +106,14 @@ abstract class IDbQuery{
      *
      * @param params 参数
      * @param db 数据库连接
-     * @param transform 转换函数
+     * @param transform 行转换函数
      * @return 一个数据
      */
-    public abstract fun <T:Any> find(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (ResultRow) -> T): T?
+    public fun <T:Any> findRow(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (ResultRow) -> T): T?{
+        return findResult { rs ->
+            rs.mapRow(transform)
+        }
+    }
 
     /**
      * 查找一个： select ... limit 1语句
@@ -104,7 +123,7 @@ abstract class IDbQuery{
      * @return 一个数据
      */
     public inline fun <reified T: IOrm> findModel(params: List<Any?> = emptyList(), db: IDb = defaultDb): T? {
-        return find(params, db, T::class.modelRowTransformer)
+        return findRow(params, db, T::class.modelRowTransformer)
     }
 
     /**
@@ -115,7 +134,7 @@ abstract class IDbQuery{
      * @return 一个数据
      */
     public inline fun <reified T: IEntitiableOrm<E>, reified E: OrmEntity> findEntity(params: List<Any?> = emptyList(), db: IDb = defaultDb): E? {
-        return find(params, db, T::class.entityRowTransformer(E::class))
+        return findRow(params, db, T::class.entityRowTransformer(E::class))
     }
 
     /**

@@ -1,7 +1,6 @@
 package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.db.ResultRow
-import net.jkcode.jkmvc.db.Row
 
 /**
  * ORM之关联对象操作
@@ -157,9 +156,9 @@ abstract class OrmRelated : OrmPersistent() {
 
                 query.select(*columns) // 查字段
                 if (relation.type == RelationType.HAS_MANY) { // 查多个
-                    result = query.findAll(transform = relation.modelRowTransformer)
+                    result = query.findRows(transform = relation.modelRowTransformer)
                 } else { // 查一个
-                    result = query.find(transform = relation.modelRowTransformer)
+                    result = query.findRow(transform = relation.modelRowTransformer)
                 }
             }
 

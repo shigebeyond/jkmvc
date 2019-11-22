@@ -71,19 +71,19 @@ class QueryBuilderTests{
 
     @Test
     fun testFind(){
-        val row = DbQueryBuilder().table("user").where("id", "=", id).findRow()
+        val row = DbQueryBuilder().table("user").where("id", "=", id).findMap()
         println("查询user表：" + row)
     }
 
     @Test
     fun testFindAll(){
-        val rows = DbQueryBuilder().table("user").orderBy("id").limit(1).findAllRows()
+        val rows = DbQueryBuilder().table("user").orderBy("id").limit(1).findMaps()
         println("查询user表：" + rows)
     }
 
     @Test
     fun testBetween(){
-        val rows = DbQueryBuilder().table("user").where("id", "BETWEEN", Pair(1, 2)).findAllRows()
+        val rows = DbQueryBuilder().table("user").where("id", "BETWEEN", Pair(1, 2)).findMaps()
         println("查询user表：" + rows)
     }
 
@@ -91,7 +91,7 @@ class QueryBuilderTests{
     fun testFindPage(){
         val query: IDbQueryBuilder = DbQueryBuilder().table("user")
         val counter: IDbQueryBuilder = query.clone() as IDbQueryBuilder // 克隆query builder
-        val rows = query.orderBy("id").limit(10).findAllRows() // 查分页数据
+        val rows = query.orderBy("id").limit(10).findMaps() // 查分页数据
         val count = counter.count() // 查总数
         println("查询user表：总数: " + count + ", 分页数据：" + rows)
     }
@@ -235,7 +235,7 @@ class QueryBuilderTests{
         println("使用编译过的sql来重复查询")
         val csql = DbQueryBuilder().table("user").where("id", "=", DbExpr.question).compileSelectOne()
         for(i in 0..10){
-            println(csql.findRow(listOf(i)))
+            println(csql.findMap(listOf(i)))
         }
     }
 

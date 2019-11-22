@@ -5,7 +5,6 @@ import net.jkcode.jkmvc.common.isNullOrEmpty
 import net.jkcode.jkmvc.common.iteratorArrayOrCollection
 import net.jkcode.jkmvc.common.map
 import net.jkcode.jkmvc.db.IDb
-import net.jkcode.jkmvc.db.Row
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.DbQueryBuilder
 import net.jkcode.jkmvc.query.IDbQueryBuilder
@@ -271,7 +270,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * 查找一个： select ... limit 1语句
      *
      * @param params 参数
-     * @param transform 转换函数
+     * @param transform 行转换函数
      * @return 单个数据
      */
     public override fun <T:Any> find(params: List<Any?>, db: IDb, transform: (ResultRow) -> T): T?{
@@ -291,11 +290,11 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * 查找多个： select 语句
      *
      * @param params 参数
-     * @param transform 转换函数
+     * @param transform 行转换函数
      * @return 列表
      */
     public override fun <T:Any> findAll(params: List<Any?>, db:IDb, transform: (ResultRow) -> T): List<T>{
-        val result = super.findAll(params, db, transform);
+        val result = super.findRows(params, db, transform);
         if(result.isEmpty())
             return result
 
@@ -381,7 +380,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
                 query.selectWiths(columns)
 
             // 得结果
-            val relatedItems = query.findAll(transform = relation.modelRowTransformer)
+            val relatedItems = query.findRows(transform = relation.modelRowTransformer)
 
             // 处理查询结果
             action(name, relation, relatedItems)

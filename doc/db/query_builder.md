@@ -136,9 +136,9 @@ There are some examples:
 ```
 val query = DbQueryBuilder().from("user")
 // SELECT * FROM `user`
-val rows = query.findAllRows()
+val rows = query.findMaps()
 // SELECT * FROM `user` LIMIT 1
-val row = query.findRow()
+val row = query.findMap()
 // SELECT username FROM `user`
 val usernames = query.select("username").findColumn<String>()
 // SELECT count(1) FROM `user`
@@ -207,7 +207,7 @@ The `on()` method sets the conditions for the previous `join()` method and is ve
 
 ```
 // This query will find all the posts related to "smith" with JOIN
-query.select("authors.name", "posts.content").from("authors").join("posts").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith").findAllRows();
+query.select("authors.name", "posts.content").from("authors").join("posts").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith").findMaps();
 ```
 
 This query would generate the following SQL:
@@ -220,7 +220,7 @@ If you want to do a LEFT, RIGHT or INNER JOIN you would do it like this `join("c
 
 ```
 // This query will find all the posts related to "smith" with LEFT JOIN
-query.from("authors").join("posts", "LEFT").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith").findAllRows();
+query.from("authors").join("posts", "LEFT").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith").findMaps();
 ```
 
 This query would generate the following SQL:
@@ -236,7 +236,7 @@ SELECT `authors`.`name`, `posts`.`content` FROM `authors` LEFT JOIN `posts` ON (
 Aggregate functions like `COUNT()`, `SUM()`, `AVG()`, etc. will most likely be used with the `groupBy()` and possibly the `having()` methods in order to group and filter the results on a set of columns.
 
 ```
-query.select("username", DbExpr("COUNT(`id`)", "total_posts", false)).from("posts").groupBy("username").having("total_posts", ">=", 10).findAllRows();
+query.select("username", DbExpr("COUNT(`id`)", "total_posts", false)).from("posts").groupBy("username").having("total_posts", ">=", 10).findMaps();
 ```
 
 This will generate the following query:
@@ -256,7 +256,7 @@ val sub = DbQueryBuilder().select("username", DbExpr("COUNT(`id`)", "total_posts
 
 // join subquery
 DbQueryBuilder().select("profiles.*", "posts.total_posts").from("profiles")
-.join(DbExpr(sub, "posts", false), "INNER").on("profiles.username", "=", "posts.username").findAllRows()
+.join(DbExpr(sub, "posts", false), "INNER").on("profiles.username", "=", "posts.username").findMaps()
 ```
 
 This will generate the following query:
@@ -339,7 +339,7 @@ db.transaction {
     println("insert into user: " + id)
 
     // query a row
-    val row = DbQueryBuilder(db).table("user").where("id", "=", id).findRow()
+    val row = DbQueryBuilder(db).table("user").where("id", "=", id).findMap()
     println("query user: " + row)
 
     // update
@@ -347,7 +347,7 @@ db.transaction {
     println("update user: " + f)
 
     // query multiple rows
-    val rows = DbQueryBuilder(db).table("user").orderBy("id").limit(1).findAllRows()
+    val rows = DbQueryBuilder(db).table("user").orderBy("id").limit(1).findMaps()
     println("query user: " + rows)
 
     // delete

@@ -1,7 +1,6 @@
 package net.jkcode.jkmvc.model
 
 import net.jkcode.jkmvc.db.IDb
-import net.jkcode.jkmvc.db.Row
 import net.jkcode.jkmvc.orm.IOrmMeta
 import net.jkcode.jkmvc.orm.OrmQueryBuilder
 
@@ -23,11 +22,11 @@ internal class GeneralOrmQueryBuilder(ormMeta: IOrmMeta /* orm元数据 */,
      * 查找多个： select 语句
      *
      * @param params 参数
-     * @param transform 转换函数
+     * @param transform 行转换函数
      * @return 列表
      */
     public override fun <T:Any> findAll(params: List<Any?>, db: IDb, transform: (ResultRow) -> T): List<T>{
-        val items = super.findAll(params, db, transform)
+        val items = super.findRows(params, db, transform)
         if(items.isNotEmpty() && items.first() is GeneralModel){
             for(item in items)
                 (item as GeneralModel).delaySetMeta(ormMeta)
@@ -39,7 +38,7 @@ internal class GeneralOrmQueryBuilder(ormMeta: IOrmMeta /* orm元数据 */,
      * 查找一个： select ... limit 1语句
      *
      * @param params 参数
-     * @param transform 转换函数
+     * @param transform 行转换函数
      * @return 单个数据
      */
     public override fun <T:Any> find(params: List<Any?>, db: IDb, transform: (ResultRow) -> T): T?{

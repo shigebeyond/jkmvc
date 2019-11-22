@@ -3,7 +3,6 @@ package net.jkcode.jkmvc.query
 import net.jkcode.jkmvc.db.Cell
 import net.jkcode.jkmvc.db.Db
 import net.jkcode.jkmvc.db.IDb
-import net.jkcode.jkmvc.db.Row
 import kotlin.reflect.KClass
 
 /**
@@ -47,7 +46,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      *
      * @param params 参数
      * @param db 数据库连接
-     * @param transform 转换函数
+     * @param transform 行转换函数
      * @return 列表
      */
     public override fun <T:Any> findAll(params: List<Any?>, db: IDb, transform: (ResultRow) -> T): List<T>{
@@ -60,12 +59,12 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      *
      * @param params 参数
      * @param db 数据库连接
-     * @param transform 转换函数
+     * @param transform 行转换函数
      * @return 单个数据
      */
     public override fun <T:Any> find(params: List<Any?>, db: IDb, transform: (ResultRow) -> T): T?{
         // 编译 + 执行
-        return compileSelectOne(db).find(params, db, transform)
+        return compileSelectOne(db).findRow(params, db, transform)
     }
 
     /**
