@@ -9,6 +9,7 @@ import kotlin.reflect.KClass
 
 /**
  * 结果集的一行
+ *    生命周期只在转换结果集阶段, 不能被外部引用
  *
  * @author shijianhang<772910474@qq.com>
  * @date 2019-11-21 4:27 PM
@@ -19,9 +20,9 @@ class DbResultSet(protected val rs: ResultSet) : ResultSet by rs {
      * 遍历结果集的每一行
      * @param action 访问者函数
      */
-    public inline fun forEachRow(action: (ResultRow) -> Unit): Unit {
+    public inline fun forEachRow(action: (DbResultRow) -> Unit): Unit {
         while(next()){
-            action(ResultRow(this))
+            action(DbResultRow(this))
         }
     }
 
@@ -30,7 +31,7 @@ class DbResultSet(protected val rs: ResultSet) : ResultSet by rs {
      * @param transform 行的转换函数
      * @return
      */
-    public inline fun <T> mapRows(transform: (ResultRow) -> T): List<T> {
+    public inline fun <T> mapRows(transform: (DbResultRow) -> T): List<T> {
         val result = LinkedList<T>()
         this.forEachRow { row ->
             result.add(transform(row));// 转换一行数据
@@ -43,11 +44,24 @@ class DbResultSet(protected val rs: ResultSet) : ResultSet by rs {
      * @param transform 行的转换函数
      * @return
      */
-    public inline fun <T> mapRow(transform: (ResultRow) -> T): T? {
+    public inline fun <T> mapRow(transform: (DbResultRow) -> T): T? {
         if(rs.next())
-            return transform(ResultRow(this))
+            return transform(DbResultRow(this))
 
         return null
+    }
+
+    /**
+     * 转换为map
+     *    TODO: 优化为固定key的map
+     *
+     * @param columnTransform 列名转换器
+     * @return
+     */
+    public fun toMaps(columnTransform: ((String)->String)? = null): List<Map<String, Any?>>{
+        return mapRows { row ->
+            row.toMap(columnTransform)
+        }
     }
 
     /**

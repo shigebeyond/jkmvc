@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.orm
 
-import net.jkcode.jkmvc.db.Row
+import net.jkcode.jkmvc.db.DbResultRow
 import kotlin.reflect.KClass
 
 /**
@@ -62,7 +62,7 @@ interface IRelationMeta {
     /**
      * 行转换器
      */
-    val modelRowTransformer: (Row) -> IOrm
+    val modelRowTransformer: (DbResultRow) -> IOrm
         get()= model.modelRowTransformer
 
     /**

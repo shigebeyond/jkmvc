@@ -9,7 +9,6 @@ import net.jkcode.jkmvc.ttl.AllRequestScopedTransferableThreadLocal
 import java.io.Closeable
 import java.sql.Connection
 import java.util.*
-import kotlin.reflect.KClass
 
 /**
  * 封装db操作
@@ -304,7 +303,9 @@ abstract class Db protected constructor(
      */
     public override fun <T> queryResult(sql: String, params: List<Any?>, transform: (DbResultSet) -> T): T {
         try{
-            return conn.queryResult(sql, params, transform)
+            return conn.queryResult(sql, params){
+                transform(DbResultSet(it))
+            }
         }catch (e:Exception){
             dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
             throw  e

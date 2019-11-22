@@ -4,20 +4,15 @@ import net.jkcode.jkmvc.common.isArrayOrCollection
 import net.jkcode.jkmvc.common.isNullOrEmpty
 import net.jkcode.jkmvc.common.iteratorArrayOrCollection
 import net.jkcode.jkmvc.common.map
+import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.DbQueryBuilder
 import net.jkcode.jkmvc.query.IDbQueryBuilder
 import java.util.*
 import kotlin.collections.HashMap
-import kotlin.collections.List
-import kotlin.collections.MutableList
-import kotlin.collections.MutableMap
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.emptyList
-import kotlin.collections.first
-import kotlin.collections.iterator
 import kotlin.collections.set
 
 /**
@@ -273,8 +268,8 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @param transform 行转换函数
      * @return 单个数据
      */
-    public override fun <T:Any> find(params: List<Any?>, db: IDb, transform: (ResultRow) -> T): T?{
-        val result = super.find(params, db, transform);
+    public override fun <T:Any> findRow(params: List<Any?>, db: IDb, transform: (DbResultRow) -> T): T?{
+        val result = super.findRow(params, db, transform);
         // 联查hasMany
         if(result is IOrm){
             // 遍历每个hasMany关系的查询结果
@@ -293,7 +288,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @param transform 行转换函数
      * @return 列表
      */
-    public override fun <T:Any> findAll(params: List<Any?>, db:IDb, transform: (ResultRow) -> T): List<T>{
+    public override fun <T:Any> findRows(params: List<Any?>, db: IDb, transform: (DbResultRow) -> T): List<T>{
         val result = super.findRows(params, db, transform);
         if(result.isEmpty())
             return result
@@ -498,7 +493,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @param prop 属性名
      * @return 字段名
      */
-    public fun convertColumn(prop: String): String {
+    public inline fun convertColumn(prop: String): String {
         return if (convertingColumn)
             ormMeta.prop2Column(prop)
         else
@@ -512,7 +507,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @param value 属性值
      * @return 准确类型的属性值
      */
-    public fun convertValue(prop: String, value: Any?): Any? {
+    public inline fun convertValue(prop: String, value: Any?): Any? {
         return if (convertingValue && (value is String || value.isArrayOrCollection()))
             convertIntelligent(prop, value!!)
         else

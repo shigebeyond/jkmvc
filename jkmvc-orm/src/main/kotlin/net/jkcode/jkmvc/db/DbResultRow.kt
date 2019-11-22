@@ -4,11 +4,12 @@ import kotlin.reflect.KClass
 
 /**
  * 结果集的一行
+ *   生命周期只在转换结果集阶段, 不能被外部引用
  *
  * @author shijianhang<772910474@qq.com>
  * @date 2019-11-21 4:27 PM
  */
-class ResultRow(protected val rs: DbResultSet) {
+class DbResultRow(protected val rs: DbResultSet) {
 
     /**
      * 通过inline指定的值类型, 来获得结果集的单个值
@@ -52,12 +53,14 @@ class ResultRow(protected val rs: DbResultSet) {
 
     /**
      * 转换为map
+     * @param columnTransform 列名转换器
      * @return
      */
-    public fun toMap(): Map<String, Any?>{
+    public fun toMap(columnTransform: ((String)->String)? = null): Map<String, Any?>{
         val map = HashMap<String, Any?>()
-        forEach { label, value ->
-            map[label] = value;
+        forEach { col, value ->
+            val key = if(columnTransform == null) col else columnTransform(col)
+            map[key] = value;
         }
         return map
     }

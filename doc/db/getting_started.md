@@ -76,7 +76,7 @@ queryResult(sql: String, params: List<Any?> = emptyList(), action: (DbResultSet)
 queryRow(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T) | Query one row
 queryRows(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T): List<T> | Query multiple rows
 queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): List<T> | Query a column in multiple rows
-queryCell(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): Cell<T> | Query a cell in a row
+queryValue(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): T? | Query a cell in a row
 
 ### 3.5 Quote / Preview sql methods
 
@@ -122,7 +122,7 @@ db.transaction {
     println("select a user：" + row)
 
     // count
-    val count = db.queryCell<Int>("select count(1) from user" /*sql*/).get()!!
+    val count = db.queryValue<Int>("select count(1) from user" /*sql*/).get()!!
     println("count users: " + count)
 
     // update

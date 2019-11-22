@@ -77,7 +77,7 @@ queryResult(sql: String, params: List<Any?> = emptyList(), action: (DbResultSet)
 queryRow(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T): T? | 查询一行(多列)
 queryRows(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T): List<T> | 查询多行
 queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): List<T?> | 查询一列(多行)
-queryCell(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): Cell<T> | 查询一行一列
+queryValue(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): T? | 查询一行一列
 
 ### 3.5 转义与预览的方法
 
@@ -123,7 +123,7 @@ db.transaction {
     println("查询user表：" + row)
 
     // 统计行数
-    val count = db.queryCell<Int>("select count(1) from user" /*sql*/).get()!!
+    val count = db.queryValue<Int>("select count(1) from user" /*sql*/).get()!!
     println("统计user表：" + count)
 
     // 更新

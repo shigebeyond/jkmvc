@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.orm
 
-import net.jkcode.jkmvc.db.ResultRow
+import net.jkcode.jkmvc.db.DbResultRow
 
 /**
  * ORM之关联对象操作
@@ -55,7 +55,7 @@ abstract class OrmRelated : OrmPersistent() {
      *
      * @param data
      */
-    public override fun setOriginal(orgn: ResultRow): Unit {
+    public override fun setOriginal(orgn: DbResultRow): Unit {
         // 设置属性值
         orgn.forEach { column, value ->
             // 关联查询时，会设置关联表字段的列别名（列别名 = 表别名 : 列名），可以据此来设置关联对象的字段值

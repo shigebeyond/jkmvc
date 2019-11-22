@@ -1,9 +1,8 @@
 package net.jkcode.jkmvc.tests
 
 import net.jkcode.jkmvc.common.randomString
-import net.jkcode.jkmvc.db.*
+import net.jkcode.jkmvc.db.Db
 import net.jkcode.jkmvc.orm.DbKey
-import org.apache.commons.collections.map.HashedMap
 import org.junit.Test
 
 class DbTests{
@@ -11,7 +10,7 @@ class DbTests{
     val db: Db = Db.instance()
 
     val id: Int by lazy {
-        val minId = db.queryCell<Int>("select id from user order by id limit 1" /*sql*/)!!
+        val minId = db.queryValue<Int>("select id from user order by id limit 1" /*sql*/)!!
         println("随便选个id: " + minId)
         minId
     }
@@ -35,7 +34,7 @@ class DbTests{
     @Test
     fun testDbDate(){
         /*
-        val (hasNext, date) = Db.instance().queryCell<Date>("SELECT  LAST_LOGIN_TIME FROM RC_ACCOUNTS WHERE ACCOUNT_CODE = 'tann771x@nng.gx.csg.cn'")
+        val (hasNext, date) = Db.instance().queryValue<Date>("SELECT  LAST_LOGIN_TIME FROM RC_ACCOUNTS WHERE ACCOUNT_CODE = 'tann771x@nng.gx.csg.cn'")
         if(hasNext)
             println(date)
         */
@@ -83,19 +82,19 @@ class DbTests{
 
     @Test
     fun testFind(){
-        val row = db.queryRow("select * from user limit 1" /*sql*/, emptyList() /*参数*/, ::HashedMap /*结果转换函数*/) // 返回 Map 类型的一行数据
+        val row = db.queryMap("select * from user limit 1" /*sql*/, emptyList() /*参数*/) // 返回 Map 类型的一行数据
         println("查询user表：" + row)
     }
 
     @Test
     fun testFindAll(){
-        val rows = db.queryRows("select * from user limit 10" /*sql*/, emptyList() /*参数*/, ::HashedMap /*结果转换函数*/) // 返回 Map 类型的多行数据
+        val rows = db.queryMaps("select * from user limit 10" /*sql*/, emptyList() /*参数*/) // 返回 Map 类型的多行数据
         println("查询user表：" + rows)
     }
 
     @Test
     fun testCount(){
-        val count = db.queryCell<Int>("select count(1) from user" /*sql*/)!!
+        val count = db.queryValue<Int>("select count(1) from user" /*sql*/)!!
         println("统计user表：" + count)
     }
 

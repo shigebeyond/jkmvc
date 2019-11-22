@@ -6,7 +6,7 @@
 
 ```
 Db::execute()
-Db::queryCell()
+Db::queryValue()
 Db::queryRow()
 Db::queryRows()
 ```

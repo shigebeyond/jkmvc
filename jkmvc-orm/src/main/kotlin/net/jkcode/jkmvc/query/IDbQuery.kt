@@ -1,8 +1,10 @@
 package net.jkcode.jkmvc.query
 
-import net.jkcode.jkmvc.db.*
+import net.jkcode.jkmvc.db.DbResultSet
+import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkmvc.db.DbResultRow
+import net.jkcode.jkmvc.db.Row
 import net.jkcode.jkmvc.orm.*
-import org.apache.commons.collections.map.HashedMap
 import kotlin.reflect.KClass
 
 /**
@@ -28,8 +30,9 @@ abstract class IDbQuery{
      */
     public abstract val defaultDb: IDb
 
+    /************************* 查底层结果集, 要转换 ****************************/
     /**
-     * 查询多行
+     * 查找结果： select 语句
      *
      * @param sql
      * @param params
@@ -40,28 +43,115 @@ abstract class IDbQuery{
 
     /**
      * 查找多个： select 语句
+     *    不能inline, 子类OrmQueryBuilder改写
      *
      * @param params 参数
      * @param db 数据库连接
      * @param transform 行转换函数
      * @return 列表
      */
-    public fun <T:Any> findRows(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (ResultRow) -> T): List<T>{
+    public open fun <T:Any> findRows(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (DbResultRow) -> T): List<T>{
         return findResult(params, db){ rs ->
             rs.mapRows(transform)
         }
     }
 
     /**
-     * 查找多个： select 语句
+     * 查找一个： select ... limit 1语句
      *
      * @param params 参数
      * @param db 数据库连接
+     * @param transform 行转换函数
+     * @return 一个数据
+     */
+    public open fun <T:Any> findRow(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (DbResultRow) -> T): T?{
+        return findResult(params, db) { rs ->
+            rs.mapRow(transform)
+        }
+    }
+
+    /**
+     * 查询一列（多行）
+     *
+     * @param params 参数
+     * @param clazz 值类型
+     * @param db 数据库连接
+     * @return
+     */
+    public fun <T:Any> findColumn(params: List<Any?> = emptyList(), clazz: KClass<T>? = null, db: IDb = defaultDb): List<T>{
+        return findResult(params, db){ rs ->
+            rs.mapRows{ row ->
+                row.get(1, clazz) as T
+            }
+        }
+    }
+
+    /**
+     * 查询一列（多行）
+     *
+     * @param params 参数
+     * @param db 数据库连接
+     * @return
+     */
+    public inline fun <reified T:Any> findColumn(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<T> {
+        return findColumn(params, T::class, db)
+    }
+
+    /**
+     * 查询一行一列
+     *
+     * @param params 参数
+     * @param clazz 值类型
+     * @param db 数据库连接
+     * @return
+     */
+    public fun <T:Any> findValue(params: List<Any?> = emptyList(), clazz: KClass<T>? = null, db: IDb = defaultDb): T?{
+        return findResult(params, db){ rs ->
+            rs.mapRow{ row ->
+                row.get(1, clazz) as T?
+            }
+        }
+    }
+
+    /**
+     * 查询一行一列
+     *
+     * @param params 参数
+     * @param db 数据库连接
+     * @return
+     */
+    public inline fun <reified T:Any> findValue(params: List<Any?> = emptyList(), db: IDb = defaultDb): T? {
+        return findValue(params, T::class, db)
+    }
+
+    /************************* 查高层对象 ****************************/
+    /**
+     * 查找多个： select 语句
+     *
+     * @param params 参数
+     * @param convertingColumn 是否转换字段名
+     * @param db 数据库连接
      * @return 列表
      */
-    public fun findMaps(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<Row>{
+    public fun findMaps(params: List<Any?> = emptyList(), convertingColumn: Boolean = false, db: IDb = defaultDb): List<Row>{
+        val columnTransform: ((String)->String)? = if(convertingColumn) db::column2Prop else null
         return findRows(params, db){
-            it.toMap()
+            it.toMap(columnTransform)
+        }
+    }
+
+    /**
+     * 查找一个： select ... limit 1语句
+     *
+     * @param params 参数
+     * @param convertingColumn 是否转换字段名
+     * @param db 数据库连接
+     * @return 一个数据
+     */
+    public fun findMap(params: List<Any?> = emptyList(), convertingColumn: Boolean = false, db: IDb = defaultDb): Row?{
+        val columnTransform: ((String)->String)? = if(convertingColumn) db::column2Prop else null
+        return findRow(params, db){ row ->
+            row.toMap(columnTransform)
         }
     }
 
@@ -83,45 +173,6 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return 一个数据
      */
-    public inline fun <reified T: IEntitiableOrm<E>, reified E: OrmEntity> findEntities(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<E> {
-        return findRows(params, db, T::class.entityRowTransformer(E::class))
-    }
-
-    /**
-     * 查找一个： select ... limit 1语句
-     *
-     * @param params 参数
-     * @param db 数据库连接
-     * @param transform 行转换函数
-     * @return 一个数据
-     */
-    public fun findMap(params: List<Any?> = emptyList(), db: IDb = defaultDb): Row?{
-        return findRow(params, db){ row ->
-            row.toMap()
-        }
-    }
-
-    /**
-     * 查找一个： select ... limit 1语句
-     *
-     * @param params 参数
-     * @param db 数据库连接
-     * @param transform 行转换函数
-     * @return 一个数据
-     */
-    public fun <T:Any> findRow(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (ResultRow) -> T): T?{
-        return findResult { rs ->
-            rs.mapRow(transform)
-        }
-    }
-
-    /**
-     * 查找一个： select ... limit 1语句
-     *
-     * @param params 参数
-     * @param db 数据库连接
-     * @return 一个数据
-     */
     public inline fun <reified T: IOrm> findModel(params: List<Any?> = emptyList(), db: IDb = defaultDb): T? {
         return findRow(params, db, T::class.modelRowTransformer)
     }
@@ -133,50 +184,19 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return 一个数据
      */
+    public inline fun <reified T: IEntitiableOrm<E>, reified E: OrmEntity> findEntities(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<E> {
+        return findRows(params, db, T::class.entityRowTransformer(E::class))
+    }
+
+    /**
+     * 查找一个： select ... limit 1语句
+     *
+     * @param params 参数
+     * @param db 数据库连接
+     * @return 一个数据
+     */
     public inline fun <reified T: IEntitiableOrm<E>, reified E: OrmEntity> findEntity(params: List<Any?> = emptyList(), db: IDb = defaultDb): E? {
         return findRow(params, db, T::class.entityRowTransformer(E::class))
-    }
-
-    /**
-     * 查询一列（多行）
-     *
-     * @param params 参数
-     * @param clazz 值类型
-     * @param db 数据库连接
-     * @return
-     */
-    public abstract fun <T:Any> findColumn(params: List<Any?> = emptyList(), clazz: KClass<T>? = null, db: IDb = defaultDb): List<T>
-
-    /**
-     * 查询一列（多行）
-     *
-     * @param params 参数
-     * @param db 数据库连接
-     * @return
-     */
-    public inline fun <reified T:Any> findColumn(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<T> {
-        return findColumn(params, T::class, db)
-    }
-
-    /**
-     * 查询一行一列
-     *
-     * @param params 参数
-     * @param clazz 值类型
-     * @param db 数据库连接
-     * @return
-     */
-    public abstract fun <T:Any> findCell(params: List<Any?> = emptyList(), clazz: KClass<T>? = null, db: IDb = defaultDb): Cell<T>
-
-    /**
-     * 查询一行一列
-     *
-     * @param params 参数
-     * @param db 数据库连接
-     * @return
-     */
-    public inline fun <reified T:Any> findCell(params: List<Any?> = emptyList(), db: IDb = defaultDb): Cell<T> {
-        return findCell(params, T::class, db)
     }
 
 }

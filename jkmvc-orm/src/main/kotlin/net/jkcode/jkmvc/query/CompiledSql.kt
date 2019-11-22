@@ -1,11 +1,13 @@
 package net.jkcode.jkmvc.query
 
 import net.jkcode.jkmvc.common.cloneProperties
-import net.jkcode.jkmvc.db.*
 import net.jkcode.jkmvc.common.dbLogger
+import net.jkcode.jkmvc.db.Db
+import net.jkcode.jkmvc.db.DbConfig
+import net.jkcode.jkmvc.db.DbResultSet
+import net.jkcode.jkmvc.db.IDb
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.reflect.KClass
 
 
 /**
@@ -181,48 +183,15 @@ class CompiledSql : Cloneable, ICompiledSql() {
 
     /****************************** 执行sql *******************************/
     /**
-     * 查找多个： select 语句
+     * 查找结果： select 语句
      *
      * @param params 动态参数
      * @param transform 行转换函数
      * @return 列表
      */
-    public override fun <T:Any> findAll(params: List<Any?>, db: IDb, transform: (ResultRow) -> T): List<T>{
+    public override fun <T> findResult(params: List<Any?>, db: IDb, transform: (DbResultSet) -> T): T{
         // 执行 select
-        return db.queryRows(sql, buildParams(params), transform)
-    }
-
-    /**
-     * 查找一个： select ... limit 1语句
-     *
-     * @param params 动态参数
-     * @param transform 行转换函数
-     * @return 单个数据
-     */
-    public override fun <T:Any> findRow(params: List<Any?>, db: IDb, transform: (ResultRow) -> T): T?{
-        return db.queryRow(sql, buildParams(params), transform);
-    }
-
-    /**
-     * 查询一列（多行）
-     *
-     * @param params 动态参数
-     * @return
-     */
-    public override fun <T:Any> findColumn(params: List<Any?>, clazz: KClass<T>?, db: IDb): List<T> {
-        // 执行 select
-        return db.queryColumn(sql, buildParams(params), clazz)
-    }
-
-    /**
-     * 查询一个值（单行单列）
-     *
-     * @param params 动态参数
-     * @return
-     */
-    public override fun <T:Any> findCell(params: List<Any?>, clazz: KClass<T>?, db: IDb): Cell<T> {
-        // 执行 select
-        return db.queryCell(sql, buildParams(params), clazz);
+        return db.queryResult(sql, buildParams(params), transform)
     }
 
     /**

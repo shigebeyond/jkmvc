@@ -1,9 +1,8 @@
 package net.jkcode.jkmvc.query
 
-import net.jkcode.jkmvc.db.Cell
 import net.jkcode.jkmvc.db.Db
+import net.jkcode.jkmvc.db.DbResultSet
 import net.jkcode.jkmvc.db.IDb
-import kotlin.reflect.KClass
 
 /**
  * sql构建器
@@ -42,55 +41,16 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
 
     /****************************** 执行sql ********************************/
     /**
-     * 查找多个： select 语句
+     * 查找结果： select 语句
      *
-     * @param params 参数
-     * @param db 数据库连接
-     * @param transform 行转换函数
-     * @return 列表
-     */
-    public override fun <T:Any> findAll(params: List<Any?>, db: IDb, transform: (ResultRow) -> T): List<T>{
-        // 编译 + 执行
-        return compile(SqlType.SELECT, db).findAll(params, db, transform)
-    }
-
-    /**
-     * 查找一个： select ... limit 1语句
-     *
-     * @param params 参数
-     * @param db 数据库连接
-     * @param transform 行转换函数
-     * @return 单个数据
-     */
-    public override fun <T:Any> find(params: List<Any?>, db: IDb, transform: (ResultRow) -> T): T?{
-        // 编译 + 执行
-        return compileSelectOne(db).findRow(params, db, transform)
-    }
-
-    /**
-     * 查询一列（多行）
-     *
-     * @param params 参数
-     * @param clazz 值类型
-     * @param db 数据库连接
+     * @param sql
+     * @param params
+     * @param transform 结果转换函数
      * @return
      */
-    public override fun <T:Any> findColumn(params: List<Any?>, clazz: KClass<T>?, db: IDb): List<T>{
+    public override fun <T> findResult(params: List<Any?>, db: IDb, transform: (DbResultSet) -> T): T{
         // 编译 + 执行
-        return compile(SqlType.SELECT, db).findColumn(params, clazz, db)
-    }
-
-    /**
-     * 查询一行一列
-     *
-     * @param params 参数
-     * @param clazz 值类型
-     * @param db 数据库连接
-     * @return
-     */
-    public override fun <T:Any> findCell(params: List<Any?>, clazz: KClass<T>?, db: IDb): Cell<T> {
-        // 编译 + 执行
-        return compile(SqlType.SELECT, db).findCell(params, clazz, db)
+        return compile(SqlType.SELECT, db).findResult(params, db, transform)
     }
 
     /**
@@ -106,7 +66,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
         val csql = select(DbExpr("count(1)", "NUM", false) /* oracle会自动转为全大写 */).compile(SqlType.SELECT, db);
 
         // 2 执行 select
-        return csql.findCell<Int>(params, db).get()!!
+        return csql.findValue<Int>(params, db)!!
     }
 
     /**

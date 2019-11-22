@@ -6,7 +6,7 @@ There are two different ways to make queries.
 
 ```
 Db::execute()
-Db::queryCell()
+Db::queryValue()
 Db::queryRow()
 Db::queryRows()
 ```
