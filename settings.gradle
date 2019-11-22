@@ -6,9 +6,9 @@ rootProject.name = 'jkmvc'
 if(env == 'dev') {
     // orm性能测试
     include 'orm-benchmark'
-    project(':orm-benchmark').projectDir = new File('../orm-benchmark')
+    project(':orm-benchmark').projectDir = new File('../jkmvc-benchmark/orm/jkorm')
 
     // http性能测试
     include 'http-benchmark'
-    project(':http-benchmark').projectDir = new File('../http-benchmark')
+    project(':http-benchmark').projectDir = new File('../jkmvc-benchmark/http/jkhttp')
 }
