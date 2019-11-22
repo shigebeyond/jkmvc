@@ -70,13 +70,24 @@ batchExecute(sql: String, paramses: List<Any?>): IntArray | Batch update
 
 ### 3.4 Query-sql executing method
 
+1. Low level method, which needs `transform`
+
 Method | Function
 --- --- --- ---
-queryResult(sql: String, params: List<Any?> = emptyList(), action: (DbResultSet) -> T): T | Query and get result with lambda
-queryRow(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T) | Query one row
-queryRows(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T): List<T> | Query multiple rows
+queryResult(sql: String, params: List<Any?> = emptyList(), transform: (DbResultSet) -> T): T | Query and get result with lambda
+queryRows(sql: String, params: List<Any?> = emptyList(), transform: (DbResultRow) -> T): List<T> | Query multiple rows
+queryRow(sql: String, params: List<Any?> = emptyList(), transform: (DbResultRow) -> T): T? | Query one row
 queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): List<T> | Query a column in multiple rows
-queryValue(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): T? | Query a cell in a row
+inline queryColumn(sql: String, params: List<Any?> = emptyList()): List<T> | Query a column in multiple rows, `inline` saves a parameter
+queryValue(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): T? | Query a value in a row
+inline queryValue(sql: String, params: List<Any?> = emptyList()): T? | Query a value in a row, `inline` saves a parameter
+
+2. High level method, which auto transform to target class's object
+
+Method | Function
+--- --- --- ---
+queryMaps(sql: String, params: List<Any?> = emptyList(), convertingColumn: Boolean): List<Map<String, Any?>> | Query multiple rows, transform each row into `Map`
+queryMap(sql: String, params: List<Any?> = emptyList(), convertingColumn: Boolean): Map<String, Any?>? | Query one row, and transform it into `Map`
 
 ### 3.5 Quote / Preview sql methods
 
@@ -118,7 +129,7 @@ db.transaction {
     println("insert a user：" + id)
 
     // select single row
-    val row = db.queryRow("select * from user limit 1" /*sql*/, emptyList() /*sql parameters*/, ::HashedMap /*transfrom lambda: org.apache.commons.collections.map.HashedMap.HashedMap(java.util.Map)*/) // return a row as `Map` object
+    val row = db.queryMap("select * from user limit 1" /*sql*/, emptyList() /*sql parameters*/) // return a row as `Map` object
     println("select a user：" + row)
 
     // count
@@ -126,11 +137,11 @@ db.transaction {
     println("count users: " + count)
 
     // update
-    var f = db.execute("update user set name = ?, age = ? where id =?" /*sql*/, listOf("shi", 1, id) /*sql parameters*/) // return the updated rows count
+    var f = db.execute("update user set name = ?, age = ? where id =?" /*sql*/, listOf("shi", 1, id) /*sql parameters*/, true /* convert column name into property name, eg: to_uid => toUid */) // return the updated rows count
     println("update a user：" + f)
 
     // select multiple rows
-    val rows = db.queryRows("select * from user limit 10" /*sql*/, emptyList() /*sql parameters*/, ::HashedMap /*transfrom lambda: org.apache.commons.collections.map.HashedMap.HashedMap(java.util.Map)*/) // 返回 Map 类型的多行数据
+    val rows = db.queryMaps("select * from user limit 10" /*sql*/, emptyList() /*sql parameters*/, true /* convert column name into property name, eg: to_uid => toUid */) // return multiple rows as `Map` objects
     println("select multiple users: " + rows)
 
     // delete

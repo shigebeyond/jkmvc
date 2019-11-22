@@ -71,13 +71,24 @@ batchExecute(sql: String, paramses: List<Any?>): IntArray | 批量更新: 每次
 
 ### 3.4 执行查询sql的方法
 
+1. 需要转换的底层方法
+
 方法 | 作用
 --- | ---
-queryResult(sql: String, params: List<Any?> = emptyList(), action: (DbResultSet) -> T): T | 查询多行
-queryRow(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T): T? | 查询一行(多列)
-queryRows(sql: String, params: List<Any?> = emptyList(), transform: (Map<String, Any?>) -> T): List<T> | 查询多行
+queryResult(sql: String, params: List<Any?> = emptyList(), transform: (DbResultSet) -> T): T | 查询多行
+queryRows(sql: String, params: List<Any?> = emptyList(), transform: (DbResultRow) -> T): List<T> | 查询多行
+queryRow(sql: String, params: List<Any?> = emptyList(), transform: (DbResultRow) -> T): T? | 查询一行(多列)
 queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): List<T?> | 查询一列(多行)
+inline queryColumn(sql: String, params: List<Any?> = emptyList()): List<T?> | 查询一列(多行), 内联省了最后一个参数
 queryValue(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): T? | 查询一行一列
+inline queryValue(sql: String, params: List<Any?> = emptyList()): T? | 查询一行一列, 内联省了最后一个参数
+
+2. 自动转换的高层方法
+
+方法 | 作用
+--- | ---
+queryMaps(sql: String, params: List<Any?> = emptyList(), convertingColumn: Boolean): List<Map<String, Any?>> | 查询多行, 并将每行转为 `Map`
+queryMap(sql: String, params: List<Any?> = emptyList(), convertingColumn: Boolean): Map<String, Any?>? | 查询一行, 并转为 `Map`
 
 ### 3.5 转义与预览的方法
 
@@ -119,7 +130,7 @@ db.transaction {
     println("插入user表：" + id)
 
     // 查询一条数据
-    val row = db.queryRow("select * from user limit 1" /*sql*/, emptyList() /*参数*/, ::HashedMap /*结果转换函数: org.apache.commons.collections.map.HashedMap.HashedMap(java.util.Map)*/) // 返回 Map 类型的一行数据
+    val row = db.queryRow("select * from user limit 1" /*sql*/, emptyList() /*参数*/, true /* 将字段名转为属性名, 如 to_uid => toUid */) // 返回 Map 类型的一行数据
     println("查询user表：" + row)
 
     // 统计行数
@@ -131,7 +142,7 @@ db.transaction {
     println("更新user表：" + f)
 
     // 查询多条数据
-    val rows = db.queryRows("select * from user limit 10" /*sql*/, emptyList() /*参数*/, ::HashedMap /*结果转换函数: org.apache.commons.collections.map.HashedMap.HashedMap(java.util.Map)*/) // 返回 Map 类型的多行数据
+    val rows = db.queryRows("select * from user limit 10" /*sql*/, emptyList() /*参数*/, true /* 将字段名转为属性名, 如 to_uid => toUid */) // 返回 Map 类型的多行数据
     println("查询user表：" + rows)
 
     // 删除 

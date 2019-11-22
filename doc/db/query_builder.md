@@ -122,14 +122,30 @@ SELECT * FROM `posts` ORDER BY `published` DESC
 ```
 ### 2.6 Execute sql and get result
 
+1. Low level method, which needs `transform`
+
 method | usage
 --- | ---
-find(vararg params: Any?, transform: (Map<String, Any?>) -> T): T? | find single row, the `transform` parameter is a lambda which transforms db row to result row
-find(vararg params: Any?): T? | find single row, it needs no `transform` parameter, but depends on the return type for transforming, and the return type only takes 3 type of class: 1. `Map` 2. Implementation class of `IOrm` 3. Any class which has a constructor function with a `Map` parameter
-findAll(vararg params: Any?, transform: (Map<String, Any?>) -> T): List<T> | find multiple rows, the `transform` parameter is a lambda which transforms db row to result row
-findAll(vararg params: Any?): List<T> | find multiple rows, it needs no `transform` parameter, but depends on the return type for transforming, and the return type only takes 3 type of class: 1. `Map` 2. Implementation class of `IOrm` 3. Any class which has a constructor function with a `Map` parameter
-findColumn(vararg params: Any?): List<Any?> | find multiple row in single column
-count(vararg params: Any?):Long | count rows
+findResult(params: List<Any?>, db: IDb, transform: (DbResultSet) -> T): T? | find result set，the `transform` parameter is a lambda which transforms result set into target class' object
+findRow(params: List<Any?>, db: IDb, transform: (DbResultRow) -> T): T? | find single row, the `transform` parameter is a lambda which transforms db row to result row
+findRows(params: List<Any?>, db: IDb, transform: (DbResultRow) -> T): List<T> | find multiple rows, the `transform` parameter is a lambda which transforms db row to result row
+findColumn(params: List<Any?>, clazz: KClass<T>?, db: IDb): List<T> | find multiple row in single column
+inline findColumn(params: List<Any?>, db: IDb): List<T> | find multiple row in single column, `inline` saves the a parameter
+findValue(params: List<Any?>, clazz: KClass<T>?, db: IDb): T? | find a value in a row
+inline findValue(params: List<Any?>, db: IDb): T? | find a value in a row, `inline` saves a parameter
+
+2. High level method, which auto transform to target class's object
+
+method | usage
+--- | ---
+findMap(params: List<Any?>, convertingColumn: Boolean, db: IDb): T? |  find single `Map` object, it needs no `transform` parameter, but depends on the return type for transforming
+findMaps(params: List<Any?>, convertingColumn: Boolean, db: IDb): List<T> | find multiple `Map` object, it needs no `transform` parameter, but depends on the return type for transforming
+inline findModel(params: List<Any?>, db: IDb): T? |  find single `Orm` object, it needs no `transform` parameter, but depends on the return type for transforming
+inline findModels(params: List<Any?>, db: IDb): List<T> | find multiple `Orm` object, it needs no `transform` parameter, but depends on the return type for transforming
+inline findEntity(params: List<Any?>, db: IDb): T? | find single `OrmEntity` object, it needs no `transform` parameter, but depends on the return type for transforming
+inline findEntities(params: List<Any?>, db: IDb): List<T> | find multiple `OrmEntity` object, it needs no `transform` parameter, but depends on the return type for transforming
+count(params: List<Any?>, db: IDb):Long | count rows
+
 
 There are some examples:
 
