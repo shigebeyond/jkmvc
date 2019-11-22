@@ -1,9 +1,7 @@
 package net.jkcode.jkmvc.model
 
-import net.jkcode.jkmvc.db.MutableRow
-import net.jkcode.jkmvc.db.Row
+import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.orm.*
-import java.util.*
 
 /**
  * 通用模型
@@ -64,17 +62,15 @@ class GeneralModel(myOrmMeta: IOrmMeta /* 自定义元数据 */) : Orm(emptyArra
     /**
      * 临时存储的原始字段值
      */
-    protected val tempOriginal: MutableRow by lazy{
-        HashMap<String, Any?>()
-    }
+    protected var tempOriginal: DbResultRow? = null
 
     /**
      * 改写 setOriginal(), 将原始字段值临时存储 tempOriginal
      * @param data
      */
-    public override fun setOriginal(orgn: Row): Unit {
+    public override fun setOriginal(orgn: DbResultRow): Unit {
         if(ormMeta == EmptyOrmMeta)
-            tempOriginal.putAll(orgn)
+            tempOriginal = orgn
         else
             super.setOriginal(orgn)
     }
@@ -84,10 +80,12 @@ class GeneralModel(myOrmMeta: IOrmMeta /* 自定义元数据 */) : Orm(emptyArra
      * @param ormMeta
      */
     public fun delaySetMeta(ormMeta: IOrmMeta) {
-        this.ormMeta = ormMeta
-        // 设置原始字段值
-        super.setOriginal(tempOriginal)
-        tempOriginal.clear()
+        if(this.ormMeta == EmptyOrmMeta) {
+            this.ormMeta = ormMeta
+            // 设置原始字段值
+            super.setOriginal(tempOriginal!!)
+            tempOriginal = null
+        }
     }
 }
 

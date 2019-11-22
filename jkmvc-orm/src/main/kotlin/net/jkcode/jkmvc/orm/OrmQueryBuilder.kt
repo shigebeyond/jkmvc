@@ -269,7 +269,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @return 单个数据
      */
     public override fun <T:Any> findRow(params: List<Any?>, db: IDb, transform: (DbResultRow) -> T): T?{
-        val result = super.findRow(params, db, transform);
+        val result = super.findRow(params, db, transform)
         // 联查hasMany
         if(result is IOrm){
             // 遍历每个hasMany关系的查询结果
@@ -289,7 +289,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @return 列表
      */
     public override fun <T:Any> findRows(params: List<Any?>, db: IDb, transform: (DbResultRow) -> T): List<T>{
-        val result = super.findRows(params, db, transform);
+        val result = super.findRows(params, db, transform)
         if(result.isEmpty())
             return result
 

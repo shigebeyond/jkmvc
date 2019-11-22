@@ -14,7 +14,10 @@ import kotlin.reflect.KClass
  * @author shijianhang<772910474@qq.com>
  * @date 2019-11-21 4:27 PM
  */
-class DbResultSet(protected val rs: ResultSet) : ResultSet by rs {
+class DbResultSet(
+        public val db: IDb,
+        protected val rs: ResultSet
+) : ResultSet by rs {
 
     /**
      * 遍历结果集的每一行
@@ -55,12 +58,12 @@ class DbResultSet(protected val rs: ResultSet) : ResultSet by rs {
      * 转换为map
      *    TODO: 优化为固定key的map
      *
-     * @param columnTransform 列名转换器
+     * @param convertingColumn 是否转换字段名
      * @return
      */
-    public fun toMaps(columnTransform: ((String)->String)? = null): List<Map<String, Any?>>{
+    public fun toMaps(convertingColumn: Boolean = false): List<Map<String, Any?>>{
         return mapRows { row ->
-            row.toMap(columnTransform)
+            row.toMap(convertingColumn)
         }
     }
 

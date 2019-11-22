@@ -1,7 +1,8 @@
 package net.jkcode.jkmvc.query
 
 import net.jkcode.jkmvc.common.*
-import net.jkcode.jkmvc.db.*
+import net.jkcode.jkmvc.db.DbException
+import net.jkcode.jkmvc.db.IDb
 import java.util.*
 import kotlin.reflect.KFunction2
 
@@ -77,7 +78,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
     /**
      * 要更新字段值: <column to value>
      */
-    protected val updateRow: MutableRow
+    protected val updateRow: MutableMap<String, Any?>
         get(){
             return manipulatedData.getOrPut(SqlType.UPDATE.ordinal){
                 HashMap<String, Any?>();
@@ -139,7 +140,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @param row
      * @return
      */
-    public override fun value(row: Row): IDbQueryBuilder {
+    public override fun value(row: Map<String, Any?>): IDbQueryBuilder {
         insertRows.columns = row.keys.mapToArray {
             it
         }
@@ -178,7 +179,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @param row 单行数据
      * @return
      */
-    public override fun sets(row: Row): IDbQueryBuilder {
+    public override fun sets(row: Map<String, Any?>): IDbQueryBuilder {
         updateRow.putAll(row);
         return this;
     }

@@ -203,9 +203,8 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * @return
      */
     public fun queryMaps(sql: String, params: List<Any?> = emptyList(), convertingColumn: Boolean = false): List<Map<String, Any?>>{
-        val columnTransform: ((String)->String)? = if(convertingColumn) this::column2Prop else null
         return queryResult(sql, params){ rs ->
-            rs.toMaps(columnTransform)
+            rs.toMaps(convertingColumn)
         }
     }
 
@@ -219,9 +218,8 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * @return
      */
     public fun queryMap(sql: String, params: List<Any?> = emptyList(), convertingColumn: Boolean = false): Map<String, Any?>?{
-        val columnTransform: ((String)->String)? = if(convertingColumn) this::column2Prop else null
         return queryRow(sql, params){ row ->
-            row.toMap(columnTransform)
+            row.toMap(convertingColumn)
         }
     }
 

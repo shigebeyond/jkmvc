@@ -153,7 +153,7 @@ class EntityTests{
 
         // 2 orm自动转换字段名
         // 参考 net.jkcode.jkmvc.orm._OrmKt.entityRowTransformer
-        val obj = MessageModel()
+        /*val obj = MessageModel()
         start = System.nanoTime()
         for(i in 0..1000000) {
             // 清空字段值
@@ -165,7 +165,7 @@ class EntityTests{
         }
         runTime = (System.nanoTime() - start).toDouble() / 1000000L
         println(MessageFormat.format("Auto transform field name: cost {0,number,#.##} ms", runTime))
-
+        */
     }
 
 }

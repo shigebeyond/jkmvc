@@ -103,7 +103,7 @@ subprojects{
     }
 
     // 发布到maven中央库
-    if(project.name != 'jkmvc-example' && project.name != 'jkmvc-benchmark'){
+    if(!project.name.endsWith('example') && !project.name.endsWith('demo') && !project.name.endsWith('benchmark')){
         apply plugin: 'maven-publish'
         apply plugin: 'signing'
 

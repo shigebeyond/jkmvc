@@ -1,9 +1,8 @@
 package net.jkcode.jkmvc.query
 
+import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.db.DbResultSet
 import net.jkcode.jkmvc.db.IDb
-import net.jkcode.jkmvc.db.DbResultRow
-import net.jkcode.jkmvc.db.Row
 import net.jkcode.jkmvc.orm.*
 import kotlin.reflect.KClass
 
@@ -133,10 +132,9 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return 列表
      */
-    public fun findMaps(params: List<Any?> = emptyList(), convertingColumn: Boolean = false, db: IDb = defaultDb): List<Row>{
-        val columnTransform: ((String)->String)? = if(convertingColumn) db::column2Prop else null
-        return findRows(params, db){
-            it.toMap(columnTransform)
+    public fun findMaps(params: List<Any?> = emptyList(), convertingColumn: Boolean = false, db: IDb = defaultDb): List<Map<String, Any?>>{
+        return findRows(params, db){ row ->
+            row.toMap(convertingColumn)
         }
     }
 
@@ -148,10 +146,9 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return 一个数据
      */
-    public fun findMap(params: List<Any?> = emptyList(), convertingColumn: Boolean = false, db: IDb = defaultDb): Row?{
-        val columnTransform: ((String)->String)? = if(convertingColumn) db::column2Prop else null
+    public fun findMap(params: List<Any?> = emptyList(), convertingColumn: Boolean = false, db: IDb = defaultDb): Map<String, Any?>?{
         return findRow(params, db){ row ->
-            row.toMap(columnTransform)
+            row.toMap(convertingColumn)
         }
     }
 

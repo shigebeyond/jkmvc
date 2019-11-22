@@ -1,5 +1,7 @@
 package net.jkcode.jkmvc.orm
 
+import net.jkcode.jkmvc.db.DbResultRow
+
 /**
  * ORM之实体对象
  *  1. 本来想继承 MutableMap<String, Any?>, 但是得不偿失, 不值得做
@@ -86,6 +88,13 @@ interface IOrmEntity {
      * @return
      */
     fun clear()
+
+    /**
+     * 从结果行中设置字段值
+     * @param convertingColumn 是否转换字段名
+     * @param row 结果行
+     */
+    fun fromRow(row: DbResultRow, convertingColumn: Boolean = false): Unit
 
     /**
      * 从map中设置字段值

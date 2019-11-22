@@ -1,3 +1,14 @@
-include 'jkmvc-common', 'jkmvc-orm', 'jkmvc-http', 'jkmvc-example', 'jkmvc-server-jetty', 'jkmvc-benchmark'
+include 'jkmvc-common', 'jkmvc-orm', 'jkmvc-http', 'jkmvc-example', 'jkmvc-server-jetty'
 
 rootProject.name = 'jkmvc'
+
+// 添加性能测试子项目
+if(env == 'dev') {
+    // orm性能测试
+    include 'orm-benchmark'
+    project(':orm-benchmark').projectDir = new File('../orm-benchmark')
+
+    // http性能测试
+    include 'http-benchmark'
+    project(':http-benchmark').projectDir = new File('../http-benchmark')
+}

@@ -53,16 +53,16 @@ class DbResultRow(protected val rs: DbResultSet) {
 
     /**
      * 转换为map
-     * @param columnTransform 列名转换器
+     * @param convertingColumn 是否转换字段名
+     * @param to
      * @return
      */
-    public fun toMap(columnTransform: ((String)->String)? = null): Map<String, Any?>{
-        val map = HashMap<String, Any?>()
+    public fun toMap(convertingColumn: Boolean = false, to: MutableMap<String, Any?> = HashMap()): Map<String, Any?>{
         forEach { col, value ->
-            val key = if(columnTransform == null) col else columnTransform(col)
-            map[key] = value;
+            val key = if(convertingColumn) rs.db.column2Prop(col) else col
+            to[key] = value;
         }
-        return map
+        return to
     }
 
 }

@@ -4,8 +4,7 @@ import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 
-typealias Row = Map<String, Any?>
-typealias MutableRow = MutableMap<String, Any?>
+typealias DbRow = Map<String, Any?>
 
 /****************************** PreparedStatement扩展 *******************************/
 /**

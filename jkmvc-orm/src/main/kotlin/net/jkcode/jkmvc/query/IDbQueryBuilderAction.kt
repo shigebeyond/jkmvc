@@ -1,7 +1,6 @@
 package net.jkcode.jkmvc.query
 
 import net.jkcode.jkmvc.db.IDb
-import net.jkcode.jkmvc.db.Row
 
 /**
  * sql构建器 -- 动作子句: 由动态select/insert/update/delete来构建的子句
@@ -93,7 +92,7 @@ interface IDbQueryBuilderAction {
      * @param row
      * @return
      */
-    fun value(row: Row): IDbQueryBuilder;
+    fun value(row: Map<String, Any?>): IDbQueryBuilder;
 
     /**
      * 设置更新的单个值, update时用
@@ -120,7 +119,7 @@ interface IDbQueryBuilderAction {
      * @param row
      * @return
      */
-    fun sets(row: Row): IDbQueryBuilder;
+    fun sets(row: Map<String, Any?>): IDbQueryBuilder;
 
     /**
      * 设置查询的字段, select时用

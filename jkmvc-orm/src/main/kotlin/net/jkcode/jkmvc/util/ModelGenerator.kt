@@ -95,7 +95,7 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
     public fun genenateModelClass(model:String, label:String, table: String): String {
         // 查询字段的sql
         val sql = config.getString("columns")!!
-        val fields = db.queryRows(sql, listOf(table, db.schema), ::HashedMap) // org.apache.commons.collections.map.HashedMap.HashedMap(java.util.Map)
+        val fields = db.queryMaps(sql, listOf(table, db.schema)) // org.apache.commons.collections.map.HashedMap.HashedMap(java.util.Map)
         // 找到主键
         var pk:String = ""
         var pkType: String = "Any"

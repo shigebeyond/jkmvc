@@ -1,7 +1,7 @@
 package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.common.*
-import net.jkcode.jkmvc.db.MutableRow
+import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.serialize.FstSerializer
 import net.jkcode.jkmvc.serialize.ISerializer
 import java.io.Serializable
@@ -53,7 +53,7 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      * 1 子类会改写
      * 2 延迟加载, 对于子类改写是没有意义的, 但针对实体类 XXXEntity 与模型类 XXXModel 分离的场景下是有意义的, 也就是IOrm 的方法全部交由 GeneralModel 代理来改写, 也就用不到该类的 data 属性
      */
-    protected open val data: MutableRow by lazy{
+    protected open val data: MutableMap<String, Any?> by lazy{
         HashMap<String, Any?>()
     }
 
@@ -132,7 +132,7 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      * 暴露data属性, 仅限orm模块使用
      * @return
      */
-    internal fun getData(): MutableRow {
+    internal fun getData(): MutableMap<String, Any?> {
         return data
     }
 
@@ -143,6 +143,16 @@ abstract class OrmEntity : IOrmEntity, Serializable {
     public override fun clear(){
         data.clear()
     }
+
+    /**
+     * 从结果行中设置字段值
+     * @param convertingColumn 是否转换字段名
+     * @param row 结果行
+     */
+    public override fun fromRow(row: DbResultRow, convertingColumn: Boolean): Unit{
+        row.toMap(convertingColumn, data)
+    }
+
 
     /**
      * 从map中设置字段值
@@ -174,14 +184,15 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      * @return
      */
     protected fun copyMap(from: Map<String, Any?>, to: MutableMap<String, Any?>, expected: List<String>): MutableMap<String, Any?> {
-        val columns = if (expected.isEmpty())
-                        from.keys
-                    else
-                        expected
+        // 复制全部字段
+        if(expected.isEmpty()) {
+            to.putAll(from)
+            return to
+        }
 
-        for (column in columns)
+        // 复制指定字段
+        for (column in expected)
             to[column] = from[column]
-
         return to
     }
 

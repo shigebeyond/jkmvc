@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.model
 
+import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.orm.IOrmMeta
 import net.jkcode.jkmvc.orm.OrmQueryBuilder
@@ -19,19 +20,17 @@ internal class GeneralOrmQueryBuilder(ormMeta: IOrmMeta /* orm元数据 */,
 ): OrmQueryBuilder(ormMeta, convertingValue, convertingColumn, withSelect){
 
     /**
-     * 查找多个： select 语句
-     *
-     * @param params 参数
-     * @param transform 行转换函数
-     * @return 列表
+     * 包装行转换函数
+     * @param transform 行转换函数, 在 findRows()/findRow() 中使用
+     * @return
      */
-    public override fun <T:Any> findAll(params: List<Any?>, db: IDb, transform: (ResultRow) -> T): List<T>{
-        val items = super.findRows(params, db, transform)
-        if(items.isNotEmpty() && items.first() is GeneralModel){
-            for(item in items)
-                (item as GeneralModel).delaySetMeta(ormMeta)
+    protected fun <T> wrapRowTransform(transform: (DbResultRow) -> T): (DbResultRow) -> T {
+        return { row ->
+            val item = transform.invoke(row)
+            if(item != null && item is GeneralModel)
+                item.delaySetMeta(ormMeta)
+            item
         }
-        return items
     }
 
     /**
@@ -41,11 +40,18 @@ internal class GeneralOrmQueryBuilder(ormMeta: IOrmMeta /* orm元数据 */,
      * @param transform 行转换函数
      * @return 单个数据
      */
-    public override fun <T:Any> find(params: List<Any?>, db: IDb, transform: (ResultRow) -> T): T?{
-        val item = super.find(params, db, transform)
-        if(item != null && item is GeneralModel){
-            item.delaySetMeta(ormMeta)
-        }
-        return item
+    public override fun <T:Any> findRow(params: List<Any?>, db: IDb, transform: (DbResultRow) -> T): T?{
+        return super.findRow(params, db, wrapRowTransform(transform) /* 包装行转换函数 */)
+    }
+
+    /**
+     * 查找多个： select 语句
+     *
+     * @param params 参数
+     * @param transform 行转换函数
+     * @return 列表
+     */
+    public override fun <T:Any> findRows(params: List<Any?>, db: IDb, transform: (DbResultRow) -> T): List<T>{
+        return super.findRows(params, db, wrapRowTransform(transform) /* 包装行转换函数 */)
     }
 }

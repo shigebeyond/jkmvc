@@ -304,7 +304,7 @@ abstract class Db protected constructor(
     public override fun <T> queryResult(sql: String, params: List<Any?>, transform: (DbResultSet) -> T): T {
         try{
             return conn.queryResult(sql, params){
-                transform(DbResultSet(it))
+                transform(DbResultSet(this, it))
             }
         }catch (e:Exception){
             dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))

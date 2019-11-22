@@ -1,12 +1,5 @@
 package net.jkcode.jkmvc.orm
 
-import net.jkcode.jkmvc.common.format
-import net.jkcode.jkmvc.db.MutableRow
-import java.util.*
-import kotlin.collections.HashMap
-import java.text.DecimalFormat
-
-
 
 /**
  * ORM之数据校验+格式化
@@ -21,7 +14,7 @@ abstract class OrmValid : IOrm, OrmEntity() {
      * 改写 OrmEntity 中的 data属性
      * 最新的字段值：<字段名 to 最新字段值>
      */
-    protected override val data: MutableRow by lazy{
+    protected override val data: MutableMap<String, Any?> by lazy{
         try {
             ormMeta.dataFactory.createMap()
         }catch (e: Exception){
@@ -34,7 +27,7 @@ abstract class OrmValid : IOrm, OrmEntity() {
      * 变化的字段值：<字段名 to 原始字段值>
      *     一般只读，lazy创建，节省内存
      */
-    protected val dirty: MutableRow = HashMap<String, Any?>()
+    protected val dirty: MutableMap<String, Any?> = HashMap<String, Any?>()
 
     /**
      * 设置对象字段值
