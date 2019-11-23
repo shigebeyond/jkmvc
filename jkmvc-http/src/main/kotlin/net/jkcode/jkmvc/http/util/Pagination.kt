@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.http.util
 
-import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkutil.common.Config
 import net.jkcode.jkmvc.http.HttpRequest
 
 /**

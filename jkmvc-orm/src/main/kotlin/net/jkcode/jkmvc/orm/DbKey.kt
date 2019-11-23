@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.orm
 
-import net.jkcode.jkmvc.common.toArray
+import net.jkcode.jkutil.common.toArray
 import net.jkcode.jkmvc.query.IDbQueryBuilder
 import java.util.*
 

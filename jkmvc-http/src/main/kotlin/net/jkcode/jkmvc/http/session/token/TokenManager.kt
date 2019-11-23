@@ -1,8 +1,8 @@
 package net.jkcode.jkmvc.http.session.token
 
-import net.jkcode.jkmvc.cache.ICache
-import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.generateId
+import net.jkcode.jkutil.cache.ICache
+import net.jkcode.jkutil.common.Config
+import net.jkcode.jkutil.common.generateId
 import net.jkcode.jkmvc.http.session.Auth
 import net.jkcode.jkmvc.http.session.IAuthUserModel
 

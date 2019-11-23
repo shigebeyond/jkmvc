@@ -1,13 +1,11 @@
 package net.jkcode.jkmvc.orm
 
-import net.jkcode.jkmvc.common.*
+import net.jkcode.jkutil.common.*
 import net.jkcode.jkmvc.db.Db
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.model.GeneralModel
 import net.jkcode.jkmvc.query.DbExpr
-import net.jkcode.jkmvc.query.DbQueryBuilder
-import net.jkcode.jkmvc.query.SqlType
-import net.jkcode.jkmvc.validator.IValidator
+import net.jkcode.jkutil.validator.IValidator
 import java.util.*
 import kotlin.collections.set
 import kotlin.reflect.KClass

@@ -1,9 +1,9 @@
 package net.jkcode.jkmvc.db
 
-import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.camel2Underline
-import net.jkcode.jkmvc.common.format
-import net.jkcode.jkmvc.common.underline2Camel
+import net.jkcode.jkutil.common.Config
+import net.jkcode.jkutil.common.camel2Underline
+import net.jkcode.jkutil.common.format
+import net.jkcode.jkutil.common.underline2Camel
 import java.sql.Connection
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap

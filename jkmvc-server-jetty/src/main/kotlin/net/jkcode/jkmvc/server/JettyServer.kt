@@ -1,9 +1,9 @@
 package net.jkcode.jkmvc.server
 
-import net.jkcode.jkmvc.scope.ClosingOnShutdown
-import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.prepareDirectory
-import net.jkcode.jkmvc.common.httpLogger
+import net.jkcode.jkutil.scope.ClosingOnShutdown
+import net.jkcode.jkutil.common.Config
+import net.jkcode.jkutil.common.prepareDirectory
+import net.jkcode.jkutil.common.httpLogger
 import org.eclipse.jetty.server.NCSARequestLog
 import org.eclipse.jetty.server.NetworkConnector
 import org.eclipse.jetty.server.Server

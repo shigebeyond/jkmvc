@@ -1,13 +1,13 @@
 package net.jkcode.jkmvc.http
 
-import net.jkcode.jkmvc.common.*
+import net.jkcode.jkutil.common.*
 import net.jkcode.jkmvc.http.controller.Controller
 import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
 import net.jkcode.jkmvc.http.router.Route
 import net.jkcode.jkmvc.http.router.RouteException
 import net.jkcode.jkmvc.http.router.Router
-import net.jkcode.jkmvc.validator.RuleValidator
+import net.jkcode.jkutil.validator.RuleValidator
 import org.apache.commons.collections.map.CompositeMap
 import java.util.*
 import javax.servlet.RequestDispatcher

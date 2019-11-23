@@ -1,7 +1,7 @@
 package net.jkcode.jkmvc.query
 
-import net.jkcode.jkmvc.common.iteratorArrayOrCollection
-import net.jkcode.jkmvc.common.joinToString
+import net.jkcode.jkutil.common.iteratorArrayOrCollection
+import net.jkcode.jkutil.common.joinToString
 import net.jkcode.jkmvc.db.IDb
 
 /**

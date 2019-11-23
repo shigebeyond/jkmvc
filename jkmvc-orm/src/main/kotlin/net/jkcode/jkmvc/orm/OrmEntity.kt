@@ -1,9 +1,9 @@
 package net.jkcode.jkmvc.orm
 
-import net.jkcode.jkmvc.common.*
+import net.jkcode.jkutil.common.*
 import net.jkcode.jkmvc.db.DbResultRow
-import net.jkcode.jkmvc.serialize.FstSerializer
-import net.jkcode.jkmvc.serialize.ISerializer
+import net.jkcode.jkutil.serialize.FstSerializer
+import net.jkcode.jkutil.serialize.ISerializer
 import java.io.Serializable
 import java.math.BigDecimal
 import java.util.*
@@ -19,7 +19,7 @@ import kotlin.reflect.KMutableProperty1
  *
  *  2. data 属性的改写
  *  2.1 子类 OrmValid 中改写
- *      改写为 net.jkcode.jkmvc.common.FixedKeyMapFactory.FixedKeyMap
+ *      改写为 net.jkcode.jkutil.common.FixedKeyMapFactory.FixedKeyMap
  *      由于是直接继承 OrmEntity 来改写的, 因此直接覆写 data 属性, 因此能够应用到依赖 data 属性的方法
  *
  *  2.2 在实体类 XXXEntity 与模型类 XXXModel 分离的场景下改写, 如:

@@ -1,3 +1,0 @@
-# 缓存实现
-lru: net.jkcode.jkmvc.cache.LRUCache
-jedis: net.jkcode.jkmvc.cache.JedisCache

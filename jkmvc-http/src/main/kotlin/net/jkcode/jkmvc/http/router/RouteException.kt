@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.http.router
 
-import net.jkcode.jkmvc.common.JkException
+import net.jkcode.jkutil.common.JkException
 
 /**
  * 路由异常

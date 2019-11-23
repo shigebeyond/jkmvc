@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.query
 
-import net.jkcode.jkmvc.common.*
+import net.jkcode.jkutil.common.*
 import net.jkcode.jkmvc.db.DbException
 import net.jkcode.jkmvc.db.IDb
 import java.util.*

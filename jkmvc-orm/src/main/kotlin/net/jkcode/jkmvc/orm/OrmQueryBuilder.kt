@@ -1,9 +1,9 @@
 package net.jkcode.jkmvc.orm
 
-import net.jkcode.jkmvc.common.isArrayOrCollection
-import net.jkcode.jkmvc.common.isNullOrEmpty
-import net.jkcode.jkmvc.common.iteratorArrayOrCollection
-import net.jkcode.jkmvc.common.map
+import net.jkcode.jkutil.common.isArrayOrCollection
+import net.jkcode.jkutil.common.isNullOrEmpty
+import net.jkcode.jkutil.common.iteratorArrayOrCollection
+import net.jkcode.jkutil.common.map
 import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.query.DbExpr

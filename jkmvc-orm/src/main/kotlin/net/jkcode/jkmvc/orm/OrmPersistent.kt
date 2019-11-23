@@ -1,7 +1,7 @@
 package net.jkcode.jkmvc.orm
 
-import net.jkcode.jkmvc.common.associate
-import net.jkcode.jkmvc.common.dbLogger
+import net.jkcode.jkutil.common.associate
+import net.jkcode.jkutil.common.dbLogger
 
 /**
  * ORM之持久化，主要是负责数据库的增删改查

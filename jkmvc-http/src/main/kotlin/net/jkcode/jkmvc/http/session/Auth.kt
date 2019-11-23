@@ -1,13 +1,13 @@
 package net.jkcode.jkmvc.http.session
 
-import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.IConfig
-import net.jkcode.jkmvc.common.dbLogger
-import net.jkcode.jkmvc.common.isSuperClass
+import net.jkcode.jkutil.common.Config
+import net.jkcode.jkutil.common.IConfig
+import net.jkcode.jkutil.common.dbLogger
+import net.jkcode.jkutil.common.isSuperClass
 import net.jkcode.jkmvc.orm.Orm
 import net.jkcode.jkmvc.orm.modelOrmMeta
 import net.jkcode.jkmvc.orm.modelRowTransformer
-import net.jkcode.jkmvc.singleton.NamedConfiguredSingletons
+import net.jkcode.jkutil.singleton.NamedConfiguredSingletons
 import kotlin.reflect.KClass
 
 /**

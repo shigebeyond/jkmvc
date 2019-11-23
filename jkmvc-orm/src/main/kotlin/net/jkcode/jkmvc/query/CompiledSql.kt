@@ -1,7 +1,7 @@
 package net.jkcode.jkmvc.query
 
-import net.jkcode.jkmvc.common.cloneProperties
-import net.jkcode.jkmvc.common.dbLogger
+import net.jkcode.jkutil.common.cloneProperties
+import net.jkcode.jkutil.common.dbLogger
 import net.jkcode.jkmvc.db.Db
 import net.jkcode.jkmvc.db.DbConfig
 import net.jkcode.jkmvc.db.DbResultSet

@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.db
 
-import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkutil.common.Config
 
 /**
  * db配置

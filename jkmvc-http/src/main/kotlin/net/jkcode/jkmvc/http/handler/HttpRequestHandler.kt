@@ -1,17 +1,17 @@
 package net.jkcode.jkmvc.http.handler
 
-import net.jkcode.jkmvc.scope.GlobalAllRequestScope
-import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.httpLogger
-import net.jkcode.jkmvc.common.ucFirst
+import net.jkcode.jkutil.scope.GlobalAllRequestScope
+import net.jkcode.jkutil.common.Config
+import net.jkcode.jkutil.common.httpLogger
+import net.jkcode.jkutil.common.ucFirst
 import net.jkcode.jkmvc.http.*
 import net.jkcode.jkmvc.http.controller.Controller
 import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
 import net.jkcode.jkmvc.http.router.RouteException
-import net.jkcode.jkmvc.interceptor.RequestInterceptorChain
-import net.jkcode.jkmvc.scope.GlobalHttpRequestScope
-import net.jkcode.jkmvc.ttl.SttlInterceptor
+import net.jkcode.jkutil.interceptor.RequestInterceptorChain
+import net.jkcode.jkutil.scope.GlobalHttpRequestScope
+import net.jkcode.jkutil.ttl.SttlInterceptor
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest

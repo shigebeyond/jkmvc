@@ -1,8 +1,8 @@
 package net.jkcode.jkmvc.util
 
-import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.format
-import net.jkcode.jkmvc.common.prepareDirectory
+import net.jkcode.jkutil.common.Config
+import net.jkcode.jkutil.common.format
+import net.jkcode.jkutil.common.prepareDirectory
 import net.jkcode.jkmvc.db.Db
 import org.apache.commons.collections.map.HashedMap
 import java.io.File

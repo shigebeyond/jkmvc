@@ -1,9 +1,13 @@
-include 'jkmvc-common', 'jkmvc-orm', 'jkmvc-http', 'jkmvc-example', 'jkmvc-server-jetty'
+include 'jkutil', 'jkmvc-orm', 'jkmvc-http', 'jkmvc-example', 'jkmvc-server-jetty'
 
 rootProject.name = 'jkmvc'
 
-// 添加性能测试子项目
+// 添加子项目
 if(env == 'dev') {
+	// jkutil
+    include 'jkutil'
+    project(':jkutil').projectDir = new File('../jkutil')
+
     // orm性能测试
     include 'orm-benchmark'
     project(':orm-benchmark').projectDir = new File('../jkmvc-benchmark/orm/jkorm')

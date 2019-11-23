@@ -326,8 +326,8 @@ class AddressModel(id:Int? = null): Orm(id) {
 ```
 package net.jkcode.jkmvc.example.controller
 
-import net.jkcode.jkmvc.common.format
-import net.jkcode.jkmvc.common.httpLogger
+import net.jkcode.jkutil.common.format
+import net.jkcode.jkutil.common.httpLogger
 import net.jkcode.jkmvc.example.model.UserModel
 import net.jkcode.jkmvc.http.controller.Controller
 import net.jkcode.jkmvc.http.fromRequest
@@ -568,7 +568,6 @@ http://localhost:8080/jkmvc-example/user/edit
 # gradle command for build
 
 ```
-gradle :jkmvc-common:build -x test
 gradle :jkmvc-orm:build -x test
 gradle :jkmvc-http:build -x test
 gradle :jkmvc-example:build -x test

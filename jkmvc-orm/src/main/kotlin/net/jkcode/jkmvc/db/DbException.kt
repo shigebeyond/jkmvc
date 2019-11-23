@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.db
 
-import net.jkcode.jkmvc.common.JkException
+import net.jkcode.jkutil.common.JkException
 
 /**
  * db异常

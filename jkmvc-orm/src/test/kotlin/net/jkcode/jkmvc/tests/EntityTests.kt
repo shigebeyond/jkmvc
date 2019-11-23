@@ -1,8 +1,8 @@
 package net.jkcode.jkmvc.tests
 
-import net.jkcode.jkmvc.common.*
+import net.jkcode.jkutil.common.*
 import net.jkcode.jkmvc.orm.IOrm
-import net.jkcode.jkmvc.serialize.ISerializer
+import net.jkcode.jkutil.serialize.ISerializer
 import net.jkcode.jkmvc.tests.entity.MessageEntity
 import net.jkcode.jkmvc.tests.model.MessageModel
 import org.junit.Test

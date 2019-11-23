@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy
 import com.oreilly.servlet.multipart.FileRenamePolicy
-import net.jkcode.jkmvc.common.*
+import net.jkcode.jkutil.common.*
 import sun.misc.IOUtils
 import java.io.File
 import java.nio.charset.Charset

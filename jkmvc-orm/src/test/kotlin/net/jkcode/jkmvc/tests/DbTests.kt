@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.tests
 
-import net.jkcode.jkmvc.common.randomString
+import net.jkcode.jkutil.common.randomString
 import net.jkcode.jkmvc.db.Db
 import net.jkcode.jkmvc.orm.DbKey
 import org.junit.Test

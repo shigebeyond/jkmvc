@@ -1,6 +1,12 @@
 //gradle脚本自身需要使用的资源
 buildscript {
     repositories {
+        maven {
+            url "http://dl.bintray.com/kotlin/kotlin"
+        }
+        maven {
+            url 'https://dl.bintray.com/kotlin/kotlin-eap'
+        }
         // china area
         maven {
             url 'http://maven.aliyun.com/nexus/content/repositories/snapshots'
@@ -8,18 +14,16 @@ buildscript {
         jcenter()
         mavenCentral()
         maven {
-            url "http://dl.bintray.com/kotlin/kotlin"
-        }
-        maven {
-            url 'https://dl.bintray.com/kotlin/kotlin-eap'
-        }
-        maven {
             url 'http://oss.jfrog.org/artifactory/oss-snapshot-local'
         }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlin_version"
+
+        // fix: kotlin not configured
+        //classpath 'org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version'
+        //classpath "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokka_version}"
 
@@ -30,7 +34,7 @@ buildscript {
 // 所有工程
 allprojects{
     group 'net.jkcode.jkmvc'
-    version '1.8.0'
+    version '1.9.0'
 }
 
 // 子工程
@@ -40,6 +44,7 @@ subprojects{
     apply plugin: 'maven'
 
     repositories {
+	mavenLocal()
         // china area
         maven {
             url 'http://maven.aliyun.com/nexus/content/repositories/snapshots'

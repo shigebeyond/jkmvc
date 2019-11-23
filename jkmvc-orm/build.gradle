@@ -1,6 +1,13 @@
 dependencies{
     // other project
-    compile project(':jkmvc-common')
+    if(env == 'dev') {
+        // jkutil
+        compile project(':jkutil')
+    }else{
+        // jkutil
+        compile "net.jkcode.jkutil:jkutil:$jkutil_version"
+    }
+
 
     // datasource
     // single db
@@ -11,6 +18,20 @@ dependencies{
 
     // jdbc
     testRuntime "mysql:mysql-connector-java:5.1.6"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     //testCompile 'com.microsoft.sqlserver:mssql-jdbc:6.5.4.jre8-preview'
 
+}
+repositories {
+    mavenCentral()
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }

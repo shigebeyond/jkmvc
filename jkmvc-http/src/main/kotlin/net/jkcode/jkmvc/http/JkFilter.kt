@@ -1,9 +1,9 @@
 package net.jkcode.jkmvc.http
 
-import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.IPlugin
+import net.jkcode.jkutil.common.Config
+import net.jkcode.jkutil.common.IPlugin
 import net.jkcode.jkmvc.http.handler.HttpRequestHandler
-import net.jkcode.jkmvc.ttl.SttlThreadPool
+import net.jkcode.jkutil.ttl.SttlThreadPool
 import javax.servlet.*
 import javax.servlet.http.HttpServletRequest
 

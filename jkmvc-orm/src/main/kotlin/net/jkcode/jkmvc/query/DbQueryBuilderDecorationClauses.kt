@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.query
 
-import net.jkcode.jkmvc.common.cloneProperties
+import net.jkcode.jkutil.common.cloneProperties
 import net.jkcode.jkmvc.db.IDb
 import java.util.*
 import kotlin.reflect.KFunction2

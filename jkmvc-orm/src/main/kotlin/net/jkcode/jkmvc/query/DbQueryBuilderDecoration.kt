@@ -1,8 +1,8 @@
 package net.jkcode.jkmvc.query
 
-import net.jkcode.jkmvc.common.cloneProperties
-import net.jkcode.jkmvc.common.getOrPut
-import net.jkcode.jkmvc.common.isArrayOrCollectionEmpty
+import net.jkcode.jkutil.common.cloneProperties
+import net.jkcode.jkutil.common.getOrPut
+import net.jkcode.jkutil.common.isArrayOrCollectionEmpty
 import net.jkcode.jkmvc.db.DbException
 import net.jkcode.jkmvc.db.DbType
 import net.jkcode.jkmvc.db.IDb

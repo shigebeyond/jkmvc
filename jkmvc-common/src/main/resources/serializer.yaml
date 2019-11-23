@@ -1,6 +1,0 @@
-# 序列器的类型
-jdk: net.jkcode.jkmvc.serialize.JdkSerializer
-fst: net.jkcode.jkmvc.serialize.FstSerializer
-kryo: net.jkcode.jkmvc.serialize.KryoSerializer
-hessian: net.jkcode.jkmvc.serialize.HessianSerializer
-protostuff: net.jkcode.jkmvc.serialize.ProtostuffSerializer

@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.query
 
-import net.jkcode.jkmvc.common.isArrayOrCollection
+import net.jkcode.jkutil.common.isArrayOrCollection
 import net.jkcode.jkmvc.db.IDb
 
 /**

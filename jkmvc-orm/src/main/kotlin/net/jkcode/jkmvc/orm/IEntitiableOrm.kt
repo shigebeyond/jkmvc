@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.orm
 
-import net.jkcode.jkmvc.common.getInterfaceGenricType
+import net.jkcode.jkutil.common.getInterfaceGenricType
 
 /**
  * 实体化的IOrm

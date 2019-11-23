@@ -1,10 +1,10 @@
 package net.jkcode.jkmvc.http.controller
 
-import net.jkcode.jkmvc.ttl.SttlCurrentHolder
+import net.jkcode.jkutil.ttl.SttlCurrentHolder
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.view.View
-import net.jkcode.jkmvc.ttl.HttpRequestScopedTransferableThreadLocal
+import net.jkcode.jkutil.ttl.HttpRequestScopedTransferableThreadLocal
 
 /**
  * 控制器

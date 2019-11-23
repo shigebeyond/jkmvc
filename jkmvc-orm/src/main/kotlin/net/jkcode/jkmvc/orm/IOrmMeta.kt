@@ -1,10 +1,10 @@
 package net.jkcode.jkmvc.orm
 
-import net.jkcode.jkmvc.common.FixedKeyMapFactory
+import net.jkcode.jkutil.common.FixedKeyMapFactory
 import net.jkcode.jkmvc.db.IDb
-import net.jkcode.jkmvc.validator.IValidator
-import net.jkcode.jkmvc.validator.RuleValidator
-import net.jkcode.jkmvc.validator.ValidateLambda
+import net.jkcode.jkutil.validator.IValidator
+import net.jkcode.jkutil.validator.RuleValidator
+import net.jkcode.jkutil.validator.ValidateLambda
 import kotlin.reflect.KClass
 
 /**

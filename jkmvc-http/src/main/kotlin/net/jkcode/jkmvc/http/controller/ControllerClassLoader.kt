@@ -1,10 +1,10 @@
 package net.jkcode.jkmvc.http.controller
 
-import net.jkcode.jkmvc.common.ClassScanner
-import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.classPath2class
-import net.jkcode.jkmvc.common.isSuperClass
-import net.jkcode.jkmvc.common.httpLogger
+import net.jkcode.jkutil.common.ClassScanner
+import net.jkcode.jkutil.common.Config
+import net.jkcode.jkutil.common.classPath2class
+import net.jkcode.jkutil.common.isSuperClass
+import net.jkcode.jkutil.common.httpLogger
 import java.lang.reflect.Modifier
 import kotlin.collections.Collection
 import kotlin.collections.HashMap

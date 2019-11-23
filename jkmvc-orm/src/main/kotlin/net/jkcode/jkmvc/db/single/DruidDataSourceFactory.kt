@@ -1,7 +1,7 @@
 package net.jkcode.jkmvc.db.single
 
 import com.alibaba.druid.pool.DruidDataSource
-import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkutil.common.Config
 import net.jkcode.jkmvc.db.IDataSourceFactory
 import javax.sql.DataSource
 

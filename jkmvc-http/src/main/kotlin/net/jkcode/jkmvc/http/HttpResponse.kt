@@ -1,8 +1,8 @@
 package net.jkcode.jkmvc.http
 
 import com.alibaba.fastjson.JSONObject
-import net.jkcode.jkmvc.common.Config
-import net.jkcode.jkmvc.common.httpLogger
+import net.jkcode.jkutil.common.Config
+import net.jkcode.jkutil.common.httpLogger
 import net.jkcode.jkmvc.http.util.AllPagination
 import net.jkcode.jkmvc.http.util.Pagination
 import net.jkcode.jkmvc.http.view.View

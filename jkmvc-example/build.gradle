@@ -10,9 +10,11 @@ dependencies{
 
     // jdbc
     runtime "mysql:mysql-connector-java:5.1.6"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
 
 apply plugin: 'org.akhikhl.gretty'
+apply plugin: 'kotlin'
 
 // 启动jetty
 gretty{
@@ -29,4 +31,26 @@ gretty{
     // webapp 配置
     contextPath "/${project.name}"
     inplaceMode "hard" // 资源目录 src/main/webapp
+}
+buildscript {
+    ext.kotlin_version = '1.3.60'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+repositories {
+    mavenCentral()
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
