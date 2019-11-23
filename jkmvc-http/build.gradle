@@ -4,7 +4,7 @@ apply plugin: 'kotlin'
 dependencies{
     // other project
     compile project(':jkmvc-orm')
-    //compile project(':jksoa-guard')
+    //compile project(':jkguard')
 
     // upload
     compile 'servlets.com:cos:05Nov2002'
