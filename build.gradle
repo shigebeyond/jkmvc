@@ -1,18 +1,19 @@
 //gradle脚本自身需要使用的资源
 buildscript {
     repositories {
-        maven {
-            url "http://dl.bintray.com/kotlin/kotlin"
-        }
-        maven {
-            url 'https://dl.bintray.com/kotlin/kotlin-eap'
-        }
+        mavenLocal()
         // china area
         maven {
             url 'http://maven.aliyun.com/nexus/content/repositories/snapshots'
         }
         jcenter()
         mavenCentral()
+        maven {
+            url "http://dl.bintray.com/kotlin/kotlin"
+        }
+        maven {
+            url 'https://dl.bintray.com/kotlin/kotlin-eap'
+        }
         maven {
             url 'http://oss.jfrog.org/artifactory/oss-snapshot-local'
         }
@@ -45,6 +46,7 @@ subprojects{
 
     repositories {
 	mavenLocal()
+        mavenLocal()
         // china area
         maven {
             url 'http://maven.aliyun.com/nexus/content/repositories/snapshots'
