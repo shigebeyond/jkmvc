@@ -597,11 +597,8 @@ gradle :jkmvc-example:build -x test
 15. [validation](doc/orm/validation.md)
 16. [using](doc/orm/using.md)
 
-## common module
-17. [deploy](doc/common/deploy.md)
-18. [config](doc/common/config.md)
-19. [validation_expression](doc/common/validation/validation_expression.md)
-20. [validation](doc/common/validation/validation.md)
+## other
+17. [deploy](doc/deploy.md)
 
 # 中文文档
 
@@ -627,15 +624,6 @@ gradle :jkmvc-example:build -x test
 15. [校验](doc/orm/validation.cn.md)
 16. [使用](doc/orm/using.cn.md)
 
-## 公共
-17. [部署](doc/common/deploy.cn.md)
-18. [配置](doc/common/config.cn.md)
-19. [缓存](doc/common/cache.cn.md)
-20. [锁](doc/common/lock.cn.md)
-21. [序列化](doc/common/serializer.cn.md)
-22. [校验器](doc/common/validation/validation.cn.md)
-23. [校验表达式](doc/common/validation/validation_expression.cn.md)
-24. [id生成器](doc/common/idworker.cn.md)
-
 ## 其他
-25. [changelog](doc/changelog.md)
+17. [部署](doc/deploy.cn.md)
+18. [changelog](doc/changelog.md)
