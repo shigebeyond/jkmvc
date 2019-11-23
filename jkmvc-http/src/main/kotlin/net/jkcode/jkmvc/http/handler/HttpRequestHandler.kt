@@ -1,17 +1,21 @@
 package net.jkcode.jkmvc.http.handler
 
-import net.jkcode.jkutil.scope.GlobalAllRequestScope
-import net.jkcode.jkutil.common.Config
-import net.jkcode.jkutil.common.httpLogger
-import net.jkcode.jkutil.common.ucFirst
+import net.jkcode.jkguard.MethodGuardInvoker
 import net.jkcode.jkmvc.http.*
 import net.jkcode.jkmvc.http.controller.Controller
 import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
 import net.jkcode.jkmvc.http.router.RouteException
+import net.jkcode.jkutil.common.Config
+import net.jkcode.jkutil.common.httpLogger
+import net.jkcode.jkutil.common.trySupplierFuture
+import net.jkcode.jkutil.common.ucFirst
 import net.jkcode.jkutil.interceptor.RequestInterceptorChain
+import net.jkcode.jkutil.scope.GlobalAllRequestScope
 import net.jkcode.jkutil.scope.GlobalHttpRequestScope
 import net.jkcode.jkutil.ttl.SttlInterceptor
+import java.lang.reflect.Method
+import java.util.concurrent.CompletableFuture
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
@@ -27,7 +31,7 @@ import kotlin.reflect.jvm.javaMethod
  * @date 2016-10-6 上午9:27:56
  *
  */
-object HttpRequestHandler : IHttpRequestHandler/*, MethodGuardInvoker()*/ {
+object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
 
     /**
      * http配置
@@ -130,8 +134,8 @@ object HttpRequestHandler : IHttpRequestHandler/*, MethodGuardInvoker()*/ {
         controller.res = res;
 
         // 4 调用controller的action方法
-        return controller.callActionMethod(action.javaMethod!!)
-        //return guardInvoke(action.javaMethod!!, controller, emptyArray())
+        //return controller.callActionMethod(action.javaMethod!!)
+        return guardInvoke(action.javaMethod!!, controller, emptyArray())
     }
 
     /**
@@ -153,14 +157,15 @@ object HttpRequestHandler : IHttpRequestHandler/*, MethodGuardInvoker()*/ {
             req.asyncContext.complete()
     }
 
+    /***************** MethodGuardInvoker 实现 *****************/
     /**
      * 获得调用的对象
      * @param method
      * @return
      */
-    /*public override fun getCombineInovkeObject(method: Method): Any{
+    public override fun getCombineInovkeObject(method: Method): Any{
         return Controller.current()
-    }*/
+    }
 
     /**
      * 守护之后真正的调用
@@ -171,11 +176,11 @@ object HttpRequestHandler : IHttpRequestHandler/*, MethodGuardInvoker()*/ {
      * @param args 参数
      * @return
      */
-    /*public override fun invokeAfterGuard(action: Method, controller: Any, args: Array<Any?>): CompletableFuture<Any?> {
+    public override fun invokeAfterGuard(action: Method, controller: Any, args: Array<Any?>): CompletableFuture<Any?> {
         return trySupplierFuture {
             // 调用controller的action方法
             (controller as Controller).callActionMethod(action)
         }
-    }*/
+    }
 
 }

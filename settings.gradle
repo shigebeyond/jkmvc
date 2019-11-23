@@ -8,6 +8,10 @@ if(env == 'dev') {
     include 'jkutil'
     project(':jkutil').projectDir = new File('../jkutil')
 
+    // 应用守护
+    include 'jkguard'
+    project(':jkguard').projectDir = new File('../jkguard')
+
     // orm性能测试
     include 'orm-benchmark'
     project(':orm-benchmark').projectDir = new File('../jkmvc-benchmark/orm/jkorm')

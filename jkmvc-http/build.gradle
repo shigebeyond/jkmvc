@@ -4,7 +4,11 @@ apply plugin: 'kotlin'
 dependencies{
     // other project
     compile project(':jkmvc-orm')
-    //compile project(':jkguard')
+    if(env == 'dev')
+        compile project(':jkguard')
+    else
+        compile "net.jkcode.jkguard:jkguard:$jkguard_version"
+
 
     // upload
     compile 'servlets.com:cos:05Nov2002'
