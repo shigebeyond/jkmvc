@@ -45,7 +45,7 @@ interface IDbMeta: IDbIdentifierQuoter, IDbValueQuoter {
      * @return
      */
     fun listColumns(table:String): List<String> {
-        return tableColumns.get(table)!!;
+        return tableColumns.get(table) ?: throw DbException("表[$table]不存在")
     }
 
     /**
