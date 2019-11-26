@@ -94,28 +94,18 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 * 请求参数
 	 *    兼容上传文件的情况, 但由于value类型是 Array<String?>, 因此不兼容File字段值
 	 */
-	public val httpParams: Map<String, String> by lazy{
+	public val httpParams: Map<String, String?> by lazy{
 			val params: Map<String, Array<String?>> = if(isUpload()) // 上传请求的参数类型：Map<String, Array<String>|File>, 但不兼容File字段值
 														partMap as Map<String, Array<String?>>
 													else // 非上传请求的参数类型：Map<String, Array<String>>
 														req.parameterMap
-			object: Map<String, String> by params as Map<String, String>{
-				public override fun containsValue(value: String): Boolean {
-					return params.any{ k, v ->
-						v.contains(value)
-					}
-				}
-
-				public override fun get(key: String): String? {
-					return params.get(key)?.first()
-				}
-			}
+			HttpParamMap(params)
 		}
 
 	/**
 	 * 全部参数 = 路由参数 + 请求参数
 	 */
-	public val allParams:Map<String, String> by lazy{
+	public val allParams:Map<String, String?> by lazy{
 		CompositeMap(routeParams, httpParams) as Map<String, String>
 	}
 
