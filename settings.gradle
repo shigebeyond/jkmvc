@@ -12,11 +12,13 @@ if(env == 'dev') {
     include 'jkguard'
     project(':jkguard').projectDir = new File('../jkguard')
 
-    // orm性能测试
+    // 性能测试
+    include 'jkbenchmark-test'
+    project(':jkbenchmark-test').projectDir = new File('../jkbenchmark/jkbenchmark-test')
+
     include 'orm-benchmark'
     project(':orm-benchmark').projectDir = new File('../jkmvc-benchmark/orm/jkorm')
 
-    // http性能测试
     include 'http-benchmark'
     project(':http-benchmark').projectDir = new File('../jkmvc-benchmark/http/jkhttp')
 }
