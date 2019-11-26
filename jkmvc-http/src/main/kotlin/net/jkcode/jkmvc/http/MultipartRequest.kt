@@ -75,7 +75,7 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Ser
     /**
      * 多部分参数值, 一次性解析所有参数
      *    一个参数的值有2种类型
-     *    1 多个文本值, 类型为 List<String>
+     *    1 多个文本值, 类型为 Array<String>
      *    2 单个文件的二进制数据, 类型为 File
      */
     protected val partMap: Hashtable<String, Any> by lazy{
@@ -112,8 +112,8 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Ser
      * @param name
      * @return
      */
-    protected fun parsePartTexts(name: String): List<String> {
-        return parts.mapNotNull { part ->
+    protected fun parsePartTexts(name: String): Array<String?> {
+        return parts.mapToArray { part ->
             if(part.isText() && part.name == name) // 逐个 part 匹配 name, 可能会匹配多个 part
                 part.inputStream.readBytes().toString(Charset.forName("UTF-8"))
             else
@@ -187,7 +187,7 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Ser
      * @param name
      * @return
      */
-    public fun getPartTexts(name: String): List<String>? {
+    public fun getPartTexts(name: String): Array<String>? {
         val v = partMap[name]
         if(v == null)
             return null
@@ -195,7 +195,7 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Ser
         if(v is File)
             throw IllegalArgumentException("表单域[$name]是不是文本域")
 
-        return v as List<String>
+        return v as Array<String>
     }
 
     /**

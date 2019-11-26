@@ -92,47 +92,31 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 
 	/**
 	 * 请求参数
-	 *    兼容上传文件的情况
+	 *    兼容上传文件的情况, 但由于value类型是 Array<String?>, 因此不兼容File字段值
 	 */
-	public val httpParams: Map<String, Any>
-		get(){
-			return if(isUpload()) // 上传请求的参数类型：Map<String, List<String>|File>
-						partMap
-					else // 非上传请求的参数类型：Map<String, Array<String>>
-						req.parameterMap
+	public val httpParams: Map<String, String> by lazy{
+			val params: Map<String, Array<String?>> = if(isUpload()) // 上传请求的参数类型：Map<String, Array<String>|File>, 但不兼容File字段值
+														partMap as Map<String, Array<String?>>
+													else // 非上传请求的参数类型：Map<String, Array<String>>
+														req.parameterMap
+			object: Map<String, String> by params as Map<String, String>{
+				public override fun containsValue(value: String): Boolean {
+					return params.any{ k, v ->
+						v.contains(value)
+					}
+				}
+
+				public override fun get(key: String): String? {
+					return params.get(key)?.first()
+				}
+			}
 		}
 
 	/**
 	 * 全部参数 = 路由参数 + 请求参数
 	 */
-	public val allParameters:Map<String, Any> by lazy{
-		val params = CompositeMap(routeParams, httpParams) as Map<String, Any>
-		object: Map<String, Any> by params{
-			/**
-			 * Returns `true` if the map maps one or more keys to the specified [value].
-			 */
-			public override fun containsValue(value: Any): Boolean {
-				if(routeParams.containsValue(value))
-					return false
-
-				if(isUpload()){
-					return partMap.any { k, v ->
-						v is List<*> && v.contains(value)
-					}
-				}
-
-				return req.parameterMap.any{ k, v ->
-					v.contains(value)
-				}
-			}
-
-			/**
-			 * Returns the value corresponding to the given [key], or `null` if such a key is not present in the map.
-			 */
-			public override fun get(key: String): String? {
-				return get<String>(key, null)
-			}
-		}
+	public val allParams:Map<String, String> by lazy{
+		CompositeMap(routeParams, httpParams) as Map<String, String>
 	}
 
 	init{
@@ -181,7 +165,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 * @return
 	 */
 	public fun contains(key:String):Boolean{
-		return allParameters.containsKey(key)
+		return allParams.containsKey(key)
 	}
 
 	/**
@@ -266,7 +250,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 */
 	protected inline fun validateValue(key: String, value: Any?, rule: String): String {
 		// 校验单个字段: 字段值可能被修改
-		return RuleValidator(key, rule).validate(value, allParameters) as String
+		return RuleValidator(key, rule).validate(value, allParams) as String
 	}
 
 	/*************************** 路由参数 *****************************/
@@ -460,7 +444,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 */
 	public override fun getParameterValues(key: String): Array<String>? {
 		if(isUpload())
-			return getPartTexts(key)?.toTypedArray()
+			return getPartTexts(key)
 
 		return req.getParameterValues(key)
 	}
