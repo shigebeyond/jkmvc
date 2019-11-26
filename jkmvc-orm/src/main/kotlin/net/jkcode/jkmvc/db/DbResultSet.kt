@@ -99,6 +99,7 @@ class DbResultSet(
             Blob::class -> rs.getBlob(i)
             Clob::class -> rs.getClob(i)
 
+            Any::class -> getObject(i)
             else -> getObject(i, clazz.java)
         }
     }
