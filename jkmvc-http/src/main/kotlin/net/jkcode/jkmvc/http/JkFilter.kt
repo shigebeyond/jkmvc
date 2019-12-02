@@ -3,6 +3,7 @@ package net.jkcode.jkmvc.http
 import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.IPlugin
 import net.jkcode.jkmvc.http.handler.HttpRequestHandler
+import net.jkcode.jkutil.common.CommonThreadPool
 import net.jkcode.jkutil.ttl.SttlThreadPool
 import javax.servlet.*
 import javax.servlet.http.HttpServletRequest
@@ -69,7 +70,7 @@ open class JkFilter() : Filter {
 
             // 异步处理请求
             //actx.start { // web server线程池
-            SttlThreadPool.commonPool.execute { // 其他线程池
+            CommonThreadPool.execute { // 其他线程池
                 handleRequest(actx.request, actx.response, chain)
             }
             return;
