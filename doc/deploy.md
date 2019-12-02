@@ -33,9 +33,9 @@ uploadDomain=http://localhost:8081/jkmvc/upload
 vim src/main/resources/http.yaml
 
 ```
-# 是否调试
 debug: true
-# controller类所在的包路径
+# static file extension
+staticFileExt: gif|jpg|jpeg|png|bmp|ico|swf|js|css|eot|ttf|woff
 # controller classes's package paths
 controllerPackages:
     - net.jkcode.jkmvc.example.controller

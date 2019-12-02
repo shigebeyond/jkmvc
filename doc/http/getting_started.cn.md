@@ -169,7 +169,6 @@ vim src/main/resources/http.yaml
 
 ```
 # controller类所在的包路径
-# controller classes's package paths
 controllerPackages:
     - net.jkcode.jkmvc.example.controller
 ```

@@ -16,9 +16,19 @@ import javax.servlet.http.HttpServletRequest
 open class JkFilter() : Filter {
 
     /**
+     * http配置
+     */
+    public val config = Config.instance("http", "yaml")
+
+    /**
+     * 静态文件的扩展名
+     */
+    protected val staticFileExt = config.getString("staticFileExt", "gif|jpg|jpeg|png|bmp|ico|swf|js|css|eot|ttf|woff")
+
+    /**
      * 静态文件uri的正则
      */
-    protected val staticFileRegex: Regex = ".*\\.(gif|jpg|jpeg|png|bmp|ico|swf|js|css|eot|ttf|woff)$".toRegex(RegexOption.IGNORE_CASE)
+    protected val staticFileRegex: Regex = config.getString("staticFileExtends", ".*\\.($staticFileExt)$")!!.toRegex(RegexOption.IGNORE_CASE)
 
     /**
      * 插件配置
@@ -61,7 +71,6 @@ open class JkFilter() : Filter {
             //actx.start { // web server线程池
             SttlThreadPool.commonPool.execute { // 其他线程池
                 handleRequest(actx.request, actx.response, chain)
-
             }
             return;
         }
