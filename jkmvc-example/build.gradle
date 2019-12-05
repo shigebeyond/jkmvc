@@ -13,8 +13,8 @@ dependencies{
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
 
+apply plugin: 'war'
 apply plugin: 'org.akhikhl.gretty'
-apply plugin: 'kotlin'
 
 // 启动jetty
 gretty{
