@@ -2,7 +2,7 @@
 
 ## 1 Setting up a production environment
 
-vim src/main/resources/application.properties
+vim src/main/resources/jkapp.yaml
 
 ```
 # environment: prod/dev/test
