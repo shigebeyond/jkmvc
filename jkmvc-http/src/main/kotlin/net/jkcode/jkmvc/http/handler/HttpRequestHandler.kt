@@ -11,9 +11,7 @@ import net.jkcode.jkutil.common.httpLogger
 import net.jkcode.jkutil.common.trySupplierFuture
 import net.jkcode.jkutil.common.ucFirst
 import net.jkcode.jkutil.interceptor.RequestInterceptorChain
-import net.jkcode.jkutil.scope.GlobalAllRequestScope
 import net.jkcode.jkutil.scope.GlobalHttpRequestScope
-import net.jkcode.jkutil.ttl.SttlInterceptor
 import java.lang.reflect.Method
 import java.util.concurrent.CompletableFuture
 import javax.servlet.ServletRequest
@@ -90,20 +88,19 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
         if(debug)
             httpLogger.debug("当前uri匹配路由: controller=[{}], action=[{}]", req.controller, req.action)
 
-        // 2 请求处理前，开始作用域
-        // 必须在拦截器之前调用, 因为拦截器可能引用请求域的资源
-        GlobalAllRequestScope.beginScope()
-        GlobalHttpRequestScope.beginScope()
+        // 2 包装请求作用域的处理
+        GlobalHttpRequestScope.wrap {
+            // 3 调用controller与action
+            val future = interceptorChain.intercept(req) {
+                callController(req, res)
+            }
 
-        // 3 调用controller与action
-        val future = interceptorChain.intercept(req) {
-            callController(req, res)
+            // 4 关闭请求(资源)
+            future.whenComplete{ r, ex ->
+                endRequest(req, ex) // 关闭请求(资源)
+            }
         }
 
-        // 3 关闭请求(资源)
-        future.whenComplete(SttlInterceptor.interceptToBiConsumer { r, ex ->
-            endRequest(req, ex) // 关闭请求(资源)
-        })
         return true
     }
 
@@ -144,15 +141,11 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      * @param ex
      */
     private fun endRequest(req: HttpRequest, ex: Throwable?) {
-        // 0 打印异常
+        // 打印异常
         if(ex != null)
             ex.printStackTrace()
 
-        // 1 请求处理后，结束作用域(关闭资源)
-        GlobalAllRequestScope.endScope()
-        GlobalHttpRequestScope.endScope()
-
-        // 2 如果是异步操作, 则需要关闭异步响应
+        // 如果是异步操作, 则需要关闭异步响应
         if (req.isAsyncStarted)
             req.asyncContext.complete()
     }

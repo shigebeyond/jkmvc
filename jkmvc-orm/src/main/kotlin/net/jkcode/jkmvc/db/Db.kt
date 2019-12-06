@@ -32,14 +32,14 @@ abstract class Db protected constructor(
          *    每个请求都创建新的db对象, 请求结束要调用 close() 来关闭连接
          */
         protected val dbs: AllRequestScopedTransferableThreadLocal<HashMap<String, Db>> = object: AllRequestScopedTransferableThreadLocal<HashMap<String, Db>>({HashMap()}){
-            public override fun doEndScope() {
+            public override fun endScope() {
                 // 请求结束要调用 close() 来关闭连接
                 val dbs = get()
                 for((name, db) in dbs)
                     db.close()
                 dbs.clear()
 
-                super.doEndScope()
+                super.endScope()
             }
         }
 
