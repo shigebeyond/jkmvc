@@ -89,7 +89,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
             httpLogger.debug("当前uri匹配路由: controller=[{}], action=[{}]", req.controller, req.action)
 
         // 2 包装请求作用域的处理
-        GlobalHttpRequestScope.wrap {
+        GlobalHttpRequestScope.sttlWrap {
             // 3 调用controller与action
             val future = interceptorChain.intercept(req) {
                 callController(req, res)
