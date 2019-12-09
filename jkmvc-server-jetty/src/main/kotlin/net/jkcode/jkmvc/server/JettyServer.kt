@@ -40,8 +40,7 @@ class JettyServer : Closeable{
         ClosingOnShutdown.addClosing(this)
 
         // 启动server
-        val threadPool = createThreadPool() // 线程池
-        server = Server(threadPool)
+        server = Server(createThreadPool()) // 线程池
         server.addConnector(createConnector()) // 连接器
         server.setHandler(createHandlers()) // 处理器
         server.setStopAtShutdown(true)
@@ -55,7 +54,9 @@ class JettyServer : Closeable{
      * 创建线程池
      */
     protected fun createThreadPool(): QueuedThreadPool {
-        val threadNum = config.getInt("threadNum", Runtime.getRuntime().availableProcessors())!!
+        var threadNum: Int = config["threadNum"]!!
+        if(threadNum == 0)
+            threadNum = Runtime.getRuntime().availableProcessors() * 8
         val threadPool = QueuedThreadPool(threadNum)
         return threadPool
     }
