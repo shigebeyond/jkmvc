@@ -6,4 +6,5 @@ target/
 *.log
 out/
 upload/
-jkmvc-example/jetty/
+logs/
+tmp/

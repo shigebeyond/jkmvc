@@ -16,6 +16,13 @@ dependencies{
 apply plugin: 'war'
 apply plugin: 'org.akhikhl.gretty'
 
+// 复制start.sh
+task copyStartSh(type: Copy) {
+    into "${buildDir}/libs"
+    from "start-jetty.sh"
+}
+build.dependsOn(copyStartSh)
+
 // 启动jetty
 gretty{
     // server 配置

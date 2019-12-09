@@ -67,7 +67,7 @@ repositories {
 
 // 依赖
 dependencies {
-	compile "net.jkcode.jkmvc:jkmvc-http:1.8.0"
+	compile "net.jkcode.jkmvc:jkmvc-http:1.9.0
 }
 
 // 源码目录

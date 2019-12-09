@@ -3,5 +3,5 @@ threadNum: 5 # io线程数, 如果为0则取Runtime.getRuntime().availableProces
 port: 8080
 webDir: jkmvc-example/src/main/webapp
 contextPath: /jkmvc-example
-logDir: jkmvc-example/jetty/logs
-tempDir: jkmvc-example/jetty/tmp
+logDir: logs
+tempDir: tmp

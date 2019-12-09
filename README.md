@@ -15,8 +15,9 @@ Take `jkmvc/jkmvc-example` for example.
 
 ```
 dependencies{
-   compile "net.jkcode.jkmvc:jkmvc-http:1.8.0"
-   compile "net.jkcode.jkmvc:jkmvc-server-jetty:1.8.0"
+   compile "net.jkcode.jkmvc:jkmvc-http:1.9.0
+   // If you want to use embedded jetty
+   compile "net.jkcode.jkmvc:jkmvc-server-jetty:1.9.0
 }
 ```
 
