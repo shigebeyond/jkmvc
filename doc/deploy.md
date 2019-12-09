@@ -35,7 +35,7 @@ vim src/main/resources/http.yaml
 ```
 debug: true
 # static file extension
-staticFileExt: gif|jpg|jpeg|png|bmp|ico|swf|js|css|eot|ttf|woff
+staticFileExt: gif|jpg|jpeg|png|bmp|ico|svg|swf|js|css|eot|ttf|woff
 # controller classes's package paths
 controllerPackages:
     - net.jkcode.jkmvc.example.controller

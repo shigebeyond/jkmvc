@@ -38,7 +38,7 @@ vim src/main/resources/http.yaml
 # 是否调试
 debug: true
 # 静态文件的扩展名
-staticFileExt: gif|jpg|jpeg|png|bmp|ico|swf|js|css|eot|ttf|woff
+staticFileExt: gif|jpg|jpeg|png|bmp|ico|svg|swf|js|css|eot|ttf|woff
 # controller类所在的包路径
 controllerPackages:
     - net.jkcode.jkmvc.example.controller
