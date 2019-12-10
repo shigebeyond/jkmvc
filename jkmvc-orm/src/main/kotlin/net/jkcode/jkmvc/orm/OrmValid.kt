@@ -18,7 +18,6 @@ abstract class OrmValid : IOrm, OrmEntity() {
         try {
             ormMeta.dataFactory.createMap()
         }catch (e: Exception){
-            e.printStackTrace()
             throw e
         }
     }

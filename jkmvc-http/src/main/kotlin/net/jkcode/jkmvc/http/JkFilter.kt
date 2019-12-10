@@ -1,10 +1,7 @@
 package net.jkcode.jkmvc.http
 
-import net.jkcode.jkutil.common.Config
-import net.jkcode.jkutil.common.IPlugin
 import net.jkcode.jkmvc.http.handler.HttpRequestHandler
-import net.jkcode.jkutil.common.CommonThreadPool
-import net.jkcode.jkutil.ttl.SttlThreadPool
+import net.jkcode.jkutil.common.*
 import javax.servlet.*
 import javax.servlet.http.HttpServletRequest
 
@@ -93,7 +90,7 @@ open class JkFilter() : Filter {
             if (!handled)
                 chain.doFilter(req, res)
         }catch (e: Exception){
-            e.printStackTrace()
+            httpLogger.errorAndPrint("JkFilter处理请求错误: $req", e)
         }
     }
 
