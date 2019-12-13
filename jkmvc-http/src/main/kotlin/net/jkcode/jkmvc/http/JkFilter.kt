@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.http
 
 import net.jkcode.jkmvc.http.handler.HttpRequestHandler
 import net.jkcode.jkutil.common.*
+import java.util.concurrent.RejectedExecutionException
 import javax.servlet.*
 import javax.servlet.http.HttpServletRequest
 
@@ -66,9 +67,14 @@ open class JkFilter() : Filter {
             val actx = req.startAsync(req, res)
 
             // 异步处理请求
-            //actx.start { // web server线程池
-            CommonThreadPool.execute { // 其他线程池
-                handleRequest(actx.request, actx.response, chain)
+            try {
+                //actx.start { // web server线程池
+                CommonThreadPool.execute {
+                    // 其他线程池
+                    handleRequest(actx.request, actx.response, chain)
+                }
+            }catch (e: RejectedExecutionException){
+                httpLogger.errorAndPrint("JkFilter处理请求错误: 公共线程池已满", e)
             }
             return;
         }
