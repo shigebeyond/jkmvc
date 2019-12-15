@@ -54,10 +54,10 @@ class JettyServer : Closeable{
      * 创建线程池
      */
     protected fun createThreadPool(): QueuedThreadPool {
-        var threadNum: Int = config["threadNum"]!!
-        if(threadNum == 0)
-            threadNum = Runtime.getRuntime().availableProcessors() * 8
-        val threadPool = QueuedThreadPool(threadNum)
+        var maxThreads: Int = config["maxThreads"]!!
+        if(maxThreads == 0)
+            maxThreads = Runtime.getRuntime().availableProcessors() * 8
+        val threadPool = QueuedThreadPool(maxThreads)
         return threadPool
     }
 

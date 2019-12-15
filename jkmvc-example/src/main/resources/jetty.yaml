@@ -1,4 +1,4 @@
-threadNum: 5 # io线程数, 如果为0则取Runtime.getRuntime().availableProcessors()*8
+maxThreads: 5 # io线程数, 如果为0则取Runtime.getRuntime().availableProcessors()*8
 #host: localhost # The network interface this connector binds to as an IP address or a hostname.  If null or 0.0.0.0 then bind to all interfaces.
 port: 8080
 webDir: jkmvc-example/src/main/webapp
