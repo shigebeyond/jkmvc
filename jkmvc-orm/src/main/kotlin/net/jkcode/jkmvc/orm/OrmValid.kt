@@ -15,11 +15,7 @@ abstract class OrmValid : IOrm, OrmEntity() {
      * 最新的字段值：<字段名 to 最新字段值>
      */
     protected override val data: MutableMap<String, Any?> by lazy{
-        try {
-            ormMeta.dataFactory.createMap()
-        }catch (e: Exception){
-            throw e
-        }
+        ormMeta.dataFactory.createMap()
     }
 
     /**
