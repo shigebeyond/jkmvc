@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.db.DbResultRow
+import kotlin.properties.ReadWriteProperty
 
 /**
  * ORM之实体对象
@@ -14,6 +15,20 @@ import net.jkcode.jkmvc.db.DbResultRow
  *
  */
 interface IOrmEntity {
+
+    /**
+     * 获得属性代理
+     */
+    public fun <T> property(): ReadWriteProperty<IOrmEntity, T> {
+        return OrmPropDelegater as ReadWriteProperty<IOrmEntity, T>;
+    }
+
+    /**
+     * 获得列表属性代理
+     */
+    public fun <T: List<*>> listProperty(): ReadWriteProperty<IOrmEntity, T> {
+        return OrmListPropDelegater as ReadWriteProperty<IOrmEntity, T>;
+    }
 
     /**
      * 判断是否有某字段

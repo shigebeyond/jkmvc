@@ -1,13 +1,12 @@
 package net.jkcode.jkmvc.orm
 
-import net.jkcode.jkutil.common.*
 import net.jkcode.jkmvc.db.DbResultRow
+import net.jkcode.jkutil.common.*
 import net.jkcode.jkutil.serialize.FstSerializer
 import net.jkcode.jkutil.serialize.ISerializer
 import java.io.Serializable
 import java.math.BigDecimal
 import java.util.*
-import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KMutableProperty1
 
 /**
@@ -55,20 +54,6 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      */
     protected open val data: MutableMap<String, Any?> by lazy{
         HashMap<String, Any?>()
-    }
-
-    /**
-     * 获得属性代理
-     */
-    public fun <T> property(): ReadWriteProperty<IOrmEntity, T> {
-        return OrmPropDelegater as ReadWriteProperty<IOrmEntity, T>;
-    }
-
-    /**
-     * 获得列表属性代理
-     */
-    public fun <T: List<*>> listProperty(): ReadWriteProperty<IOrmEntity, T> {
-        return OrmListPropDelegater as ReadWriteProperty<IOrmEntity, T>;
     }
 
     /**

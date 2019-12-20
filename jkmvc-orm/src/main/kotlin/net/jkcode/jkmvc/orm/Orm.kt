@@ -10,7 +10,7 @@ import net.jkcode.jkutil.common.toArray
  * @author shijianhang
  * @date 2016-10-10 上午12:52:34
  */
-abstract class Orm(pk: Array<Any> /* 主键值, 非null */) : OrmRelated() {
+abstract class Orm(pk: Array<Any> = emptyArray() /* 主键值, 非null */) : OrmRelated() {
 
     // wrong: 主构造函数签名相同冲突
     //public constructor(vararg cols:Any):this(cols)
