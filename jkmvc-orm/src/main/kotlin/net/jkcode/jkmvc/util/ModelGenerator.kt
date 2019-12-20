@@ -4,7 +4,6 @@ import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.format
 import net.jkcode.jkutil.common.prepareDirectory
 import net.jkcode.jkmvc.db.Db
-import org.apache.commons.collections.map.HashedMap
 import java.io.File
 import java.util.*
 
@@ -97,25 +96,46 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
         val sql = config.getString("columns")!!
         val fields = db.queryMaps(sql, listOf(table, db.schema)) // org.apache.commons.collections.map.HashedMap.HashedMap(java.util.Map)
         // 找到主键
-        var pk:String = ""
-        var pkType: String = "Any"
+        val pks = ArrayList<Pair<String, String>>() // 主键的字段名+类型
         for (field in fields){
             if(field["COLUMN_KEY"] == "PRI"){
-                pk = field["COLUMN_NAME"] as String
-                pkType = getType(field["COLUMN_TYPE"] as String)
+                val name = field["COLUMN_NAME"] as String
+                val type = getType(field["COLUMN_TYPE"] as String)
+                pks.add(name to type)
             }
         }
 
-        // 1 注释与包
+        // 0 注释与包
         val code = StringBuilder()
         val date = Date().format()
         code.append("package $pck \n\n")
-        code.append("import net.jkcode.jkmvc.orm.OrmMeta \nimport net.jkcode.jkmvc.orm.Orm \n\n")
+        code.append("import net.jkcode.jkmvc.orm.* \nimport java.util.*\n\n")
         code.append("/**\n * $label\n *\n * @author shijianhang<772910474@qq.com>\n * @date $date\n */\n")
-        // 2 类
-        code.append("class $model(id:$pkType? = null): Orm(id) {\n")
+        // 1 类
+        code.append("class $model")
+        // 2 主键参数
+        if(pks.size == 1) { // 单主键
+            val (name, type) = pks.first()
+            code.append("(${getProp(name)}:$type? = null): Orm(${getProp(name)}) {\n")
+        }else { // 多主键
+            // 默认构造函数
+            code.append("(pk: Array<Any> = emptyArray()): Orm(pk) {\n\n")
+
+            // 多参数构造函数
+            // public constructor((name1:type1, name2:type2)
+            pks.joinTo(code, ", ", "\tpublic constructor(", ")") { (name, type) ->
+                "${getProp(name)}: $type"
+            }
+            // : Orm(name1, name2) {\n
+            pks.joinTo(code, ", ", " : this(arrayOf(", "))\n\n") { (name, type) ->
+                getProp(name)
+            }
+        }
         // 3 元数据
-        code.append("\t// 伴随对象就是元数据\n \tcompanion object m: OrmMeta($model::class, \"$label\", \"$table\", \"$pk\"){}\n\n")
+        val pkMeta = if(pks.size == 1) "\"${pks.first().first}\"" else pks.joinToString(", ", "DbKeyNames(", ")") {(name, type) ->
+            "\"$name\""
+        }
+        code.append("\t// 伴随对象就是元数据\n \tcompanion object m: OrmMeta($model::class, \"$label\", \"$table\", $pkMeta){}\n\n")
         // 4 属性
         code.append("\t// 代理属性读写")
         // 遍历字段来生成属性
