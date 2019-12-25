@@ -11,9 +11,8 @@ interface IOrmValid : IOrmEntity {
 
     /**
      * 校验数据
-     * @return
      */
-    fun validate(): Boolean;
+    fun validate();
 
     /**
      * 标记字段为脏

@@ -240,7 +240,8 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 */
 	protected inline fun validateValue(key: String, value: Any?, rule: String): String {
 		// 校验单个字段: 字段值可能被修改
-		return RuleValidator(key, rule).validate(value, allParams) as String
+		val result = RuleValidator(key, rule).validate(value, allParams)
+		return result.getOrThrow() as String
 	}
 
 	/*************************** 路由参数 *****************************/
