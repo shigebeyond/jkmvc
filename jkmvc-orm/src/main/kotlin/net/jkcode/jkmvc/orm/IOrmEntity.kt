@@ -18,6 +18,7 @@ interface IOrmEntity {
 
     /**
      * 获得属性代理
+     * @return
      */
     public fun <T> property(): ReadWriteProperty<IOrmEntity, T> {
         return OrmPropDelegater as ReadWriteProperty<IOrmEntity, T>;
@@ -25,9 +26,27 @@ interface IOrmEntity {
 
     /**
      * 获得列表属性代理
+     * @return
      */
     public fun <T: List<*>> listProperty(): ReadWriteProperty<IOrmEntity, T> {
         return OrmListPropDelegater as ReadWriteProperty<IOrmEntity, T>;
+    }
+
+    /**
+     * 获得集合属性代理
+     * @return
+     */
+    public fun <T: Set<*>> setProperty(): ReadWriteProperty<IOrmEntity, T> {
+        return OrmSetPropDelegater as ReadWriteProperty<IOrmEntity, T>;
+    }
+
+    /**
+     * 获得哈希属性代理
+     * @param key 作为键的字段名
+     * @return
+     */
+    public fun <T: Map<*, *>> mapProperty(key: String): ReadWriteProperty<IOrmEntity, T> {
+        return OrmMapPropDelegater.instance(key) as ReadWriteProperty<IOrmEntity, T>;
     }
 
     /**

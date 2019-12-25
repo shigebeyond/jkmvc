@@ -22,6 +22,10 @@ abstract class Orm(pk: Array<Any> = emptyArray() /* 主键值, 非null */) : Orm
 
     public constructor(a: Any, b:Any, c:Any):this(toArray(a, b, c))
 
+    public constructor(a: Any, b:Any, c:Any, d: Any):this(toArray(a, b, c, d))
+
+    public constructor(a: Any, b:Any, c:Any, d: Any, e: Any):this(toArray(a, b, c, d, e))
+
     init{
         // 根据主键值来加载数据
         if(pk.isNotEmpty())

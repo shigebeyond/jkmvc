@@ -42,6 +42,10 @@ data class DbKey<T>(val columns: Array<T>) {
 
     public constructor(a: T, b:T, c:T):this(toArray(a, b, c))
 
+    public constructor(a: T, b:T, c:T, d:T):this(toArray(a, b, c, d))
+
+    public constructor(a: T, b:T, c:T, d:T, e: T):this(toArray(a, b, c, d, e))
+
     /**
      * 字段个数
      */

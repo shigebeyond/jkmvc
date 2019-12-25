@@ -198,6 +198,10 @@ abstract class OrmRelated : OrmPersistent() {
         // 获得关联关系
         val relation = ormMeta.getRelation(name)!!;
 
+        // 不能删除 belongsTo 关联对象
+        if(relation.type == RelationType.BELONGS_TO)
+            throw OrmException("不能删除模型[${ormMeta.name}]的 belongsTo 关联对象[$name]");
+
         // 1 有中间表的关联对象
         if(relation is MiddleRelationMeta)
             return deleteMiddleRelated(relation, fkInMany)
@@ -253,7 +257,7 @@ abstract class OrmRelated : OrmPersistent() {
      *     至于 belongsTo 关系的主对象中只要主键，没有外键，你只能清空本对象的外键咯
      *
      * @param name 关系名
-     * @param nullValue 外键的空值
+     * @param nullValue 外键的空值, 标识删除关系, 默认null
      * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
      * @return
      */

@@ -120,7 +120,7 @@ interface IOrmRelated : IOrmPersistent
 	 *     至于 belongsTo 关系的主对象中只要主键，没有外键，你只能清空本对象的外键咯
 	 *
 	 * @param name 关系名
-	 * @param nullValue 外键的空值
+	 * @param nullValue 外键的空值, 标识删除关系, 默认null
 	 * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
 	 * @return
 	 */
@@ -132,7 +132,7 @@ interface IOrmRelated : IOrmPersistent
 	 *     至于 belongsTo 关系的主对象中只要主键，没有外键，你只能清空本对象的外键咯
 	 *
 	 * @param name 关系名
-	 * @param nullValue 外键的空值
+	 * @param nullValue 外键的空值, 标识删除关系, 默认null
 	 * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
 	 * @return
 	 */

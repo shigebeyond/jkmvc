@@ -6,6 +6,8 @@ import net.jkcode.jkutil.common.decorateIterator
 import net.jkcode.jkmvc.db.DbResultRow
 import java.io.Serializable
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.HashMap
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
@@ -39,6 +41,66 @@ object OrmListPropDelegater: ReadWriteProperty<IOrmEntity, Any?>, Serializable {
 
     // 设置属性
     public override operator fun setValue(thisRef: IOrmEntity, property: KProperty<*>, value: Any?) {
+        thisRef[property.name] = value
+    }
+}
+
+/**
+ * orm map属性代理
+ *    TODO: 只是简单将list转为map, 只读
+ */
+class OrmMapPropDelegater protected constructor (public val key:String): ReadWriteProperty<IOrmEntity, Any?>, Serializable {
+
+    companion object{
+
+        /**
+         * 单例池: <类 to 单例>
+         */
+        private val insts: ConcurrentHashMap<String, OrmMapPropDelegater> = ConcurrentHashMap();
+
+        /**
+         * 获得单例
+         */
+        public fun instance(key:String): OrmMapPropDelegater {
+            return insts.getOrPut(key){
+                OrmMapPropDelegater(key)
+            }
+        }
+    }
+
+    // 获得属性
+    public override operator fun getValue(thisRef: IOrmEntity, property: KProperty<*>): Any? {
+        val list: List<Any?>? = thisRef[property.name]
+        if(list == null)
+            return emptyMap<Any, Any?>()
+
+        return list.associateBy { thisRef.get<Any?>(key) }
+    }
+
+    // 设置属性
+    public override operator fun setValue(thisRef: IOrmEntity, property: KProperty<*>, value: Any?) {
+        val list = (value as Map<Any, Any?>?)?.map { it.value }
+        thisRef[property.name] = list
+    }
+}
+
+/**
+ * orm set属性代理
+ *    TODO: 只是简单将list转为Set, 只读
+ */
+object OrmSetPropDelegater: ReadWriteProperty<IOrmEntity, Any?>, Serializable {
+    // 获得属性
+    public override operator fun getValue(thisRef: IOrmEntity, property: KProperty<*>): Any? {
+        val list: List<Any?>? = thisRef[property.name]
+        if(list == null)
+            return emptySet<Any?>()
+
+        return list.toSet()
+    }
+
+    // 设置属性
+    public override operator fun setValue(thisRef: IOrmEntity, property: KProperty<*>, value: Any?) {
+        // set也是集合, 不用转了
         thisRef[property.name] = value
     }
 }
