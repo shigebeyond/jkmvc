@@ -10,12 +10,10 @@ import net.jkcode.jkutil.common.JkException
  *
  */
 class OrmException : JkException {
-    public constructor(message: String) : super(message) {
-    }
 
     public constructor(cause: Throwable) : super(cause) {
     }
 
-    public constructor(message: String, cause: Throwable) : super(message, cause) {
+    public constructor(message: String, cause: Throwable? = null) : super(message, cause) {
     }
 }

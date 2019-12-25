@@ -24,22 +24,6 @@ open class View(override val req: HttpRequest /* 请求对象 */,
 		 * 空的map, 用在函数 HttpResponse.renderView(String, MutableMap) 的参数默认值中
 		 */
 		internal val emptyData: MutableMap<String, Any?> = HashMap()
-
-		/**
-		 * 全局变量
-		 */
-		public val globalData: ConcurrentHashMap<String, Any?> = ConcurrentHashMap();
-
-		/**
-		 * 设置全局变量
-		 * @param key
-		 * @param value
-		 * @return
-		 */
-		public fun setGlobal(key:String, value:Any?): Companion {
-			globalData.set(key, value);
-			return this;
-		}
 	}
 
 	/**
@@ -57,9 +41,6 @@ open class View(override val req: HttpRequest /* 请求对象 */,
 	 * 渲染视图
 	 */
 	public override fun render(){
-		// 设置全局变量
-		req.setAttributes(globalData)
-
 		// 设置局部变量
 		req.setAttributes(data)
 

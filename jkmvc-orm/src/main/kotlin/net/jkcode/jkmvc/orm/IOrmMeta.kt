@@ -135,9 +135,8 @@ interface IOrmMeta {
     /**
      * 校验orm对象数据
      * @param item
-     * @return
      */
-    fun validate(item: IOrmEntity): Boolean
+    fun validate(item: IOrmEntity)
 
     /**
      * 添加规则

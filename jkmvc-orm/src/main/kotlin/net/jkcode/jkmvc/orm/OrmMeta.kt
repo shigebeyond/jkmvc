@@ -6,6 +6,7 @@ import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.model.GeneralModel
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkutil.validator.IValidator
+import net.jkcode.jkutil.validator.ValidateException
 import java.util.*
 import kotlin.collections.set
 import kotlin.reflect.KClass
@@ -198,23 +199,30 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     /**
      * 校验orm对象数据
      * @param item
-     * @return
      */
-    public override fun validate(item: IOrmEntity): Boolean {
+    public override fun validate(item: IOrmEntity) {
         // 逐个属性校验
+        val errors = HashMap<String, String>()
         for ((field, rule) in rules) {
-            // 获得属性值
+            // 1 获得属性值
             val value: Any = item[field];
 
-            // 校验单个属性: 属性值可能被修改
-            val newValue = rule.validate(value, (item as OrmEntity).getData())
+            // 2 校验单个属性: 属性值可能被修改
+            val result = rule.validate(value, (item as OrmEntity).getData())
 
-            // 更新被修改的属性值
-            if (value !== newValue)
-                item[field] = newValue;
+            // 3 校验失败, 记录错误
+            if(result.error != null) {
+                errors[field] = result.error!!
+                continue
+            }
+
+            // 4 校验成功, 更新被修改的属性值
+            if (value !== result.value)
+                item[field] = result.value;
         }
 
-        return true;
+        if(errors.isNotEmpty())
+            throw ValidateException("Fail to validate $name model", name, errors)
     }
 
     /********************************* query builder **************************************/

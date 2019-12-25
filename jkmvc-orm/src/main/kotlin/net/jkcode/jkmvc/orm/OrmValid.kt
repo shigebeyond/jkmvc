@@ -55,10 +55,9 @@ abstract class OrmValid : IOrm, OrmEntity() {
 
     /**
      * 校验数据
-     * @return
      */
-    public override fun validate(): Boolean {
-        return ormMeta.validate(this)
+    public override fun validate() {
+        ormMeta.validate(this)
     }
 
 
