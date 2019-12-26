@@ -8,6 +8,7 @@ dependencies{
     compile "org.eclipse.jetty:jetty-webapp:${jetty_version}"
     compile "org.eclipse.jetty:jetty-servlets:${jetty_version}"
     compile "org.eclipse.jetty:jetty-jsp:${jetty_jsp_version}"
+    //compile "org.eclipse.jetty:apache-jstl:${jetty_jsp_version}"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 repositories {

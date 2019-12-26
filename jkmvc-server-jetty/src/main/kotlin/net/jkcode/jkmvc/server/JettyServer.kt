@@ -1,9 +1,10 @@
 package net.jkcode.jkmvc.server
 
-import net.jkcode.jkutil.scope.ClosingOnShutdown
 import net.jkcode.jkutil.common.Config
-import net.jkcode.jkutil.common.prepareDirectory
 import net.jkcode.jkutil.common.httpLogger
+import net.jkcode.jkutil.common.prepareDirectory
+import net.jkcode.jkutil.scope.ClosingOnShutdown
+import org.apache.jasper.runtime.TldScanner
 import org.eclipse.jetty.server.NCSARequestLog
 import org.eclipse.jetty.server.NetworkConnector
 import org.eclipse.jetty.server.Server
@@ -14,6 +15,7 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.webapp.WebAppContext
 import java.io.Closeable
 import java.io.File
+
 
 /**
  * jetty服务器
@@ -38,6 +40,9 @@ class JettyServer : Closeable{
     public fun start() {
         // 关机时要关闭
         ClosingOnShutdown.addClosing(this)
+
+        // 加载 jstl 的 tld 文件
+        loadJstlTld()
 
         // 启动server
         server = Server(createThreadPool()) // 线程池
@@ -126,6 +131,16 @@ class JettyServer : Closeable{
         context.setTempDirectory(File(tempDir))
         
         return context
+    }
+
+    private fun loadJstlTld() {
+        try {
+            val f = TldScanner::class.java.getDeclaredField("systemUris")
+            f.isAccessible = true
+            (f.get(null) as MutableSet<*>).clear()
+        } catch (e: Exception) {
+            throw RuntimeException("Could not clear TLD system uris.", e)
+        }
     }
 
     /**
