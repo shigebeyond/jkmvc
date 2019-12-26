@@ -1,0 +1,102 @@
+package net.jkcode.jkmvc.tags.form
+
+import net.jkcode.jkutil.common.PropertyHandler
+import net.jkcode.jkutil.common.trim
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.jsp.PageContext
+import javax.servlet.jsp.tagext.SimpleTagSupport
+
+/**
+ * 绑定值的标签
+ * @author shijianhang<772910474@qq.com>
+ * @date 2019-12-25 3:35 PM
+ */
+abstract class IBoundTag: SimpleTagSupport() {
+
+    /**
+     * 会话
+     */
+    protected val session
+        get() = (jspContext as PageContext).session
+
+    /**
+     * 请求
+     */
+    protected val request
+        get() = (jspContext as PageContext).request as HttpServletRequest
+
+    /**
+     * 属性路径
+     */
+    public var path: String? = null
+
+    /**
+     * 属性的绝对路径
+     *   暂时只支持两层
+     */
+    public val absolutePath: String by lazy{
+        // 子路径
+        var absolutePath = if(path == null) "" else path!!
+        // 父路径
+        val parent = findAncestorWithClass(this, IBoundTag::class.java) as SelectTag
+        if(parent.path != null)
+            absolutePath = "$absolutePath.${parent.path}"
+        absolutePath
+    }
+
+    /**
+     * 绑定值
+     */
+    public val boundValue: Any? by lazy{
+        val keys = absolutePath.split("\\.".toRegex(), 2)
+        var value = request.getAttribute(keys[0])
+        if(keys.size == 2)
+            value = PropertyHandler.getPath(value, keys[1])
+        value
+    }
+
+    /**
+     * 绑定值类型
+     */
+    public val boundType: Class<*>? by lazy{
+        val keys = absolutePath.split("\\.".toRegex(), 2)
+        var value = request.getAttribute(keys[0])
+        if(keys.size == 2)
+            PropertyHandler.getPathType(value, keys[1])
+        else
+            value.javaClass
+    }
+
+    /**
+     * 绑定的错误
+     */
+    public val boundError: Any? by lazy{
+        val errors = request.getAttribute("errors")
+        val path = if(absolutePath.endsWith(".*")) // 所有错误
+                        absolutePath.trim(".*")
+                    else // 单个错误
+                        absolutePath
+        PropertyHandler.getPath(errors, path)
+    }
+
+    /**
+     * 检查绑定值是否等于指定值
+     */
+    public fun isBoundValueEquals(value: Any?): Boolean {
+        return value != null && boundValue != null && boundValue!!.equals(value)
+    }
+
+    /**
+     * 是否有错
+     */
+    public val isError: Boolean
+        get(){
+            if(boundError == null)
+                return true
+
+            if(boundError is Map<*, *> && (boundError as Map<*, *>).isEmpty())
+                return true
+
+            return false
+        }
+}
