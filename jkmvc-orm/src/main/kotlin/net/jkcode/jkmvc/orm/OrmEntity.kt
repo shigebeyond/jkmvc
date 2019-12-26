@@ -16,7 +16,7 @@ import kotlin.reflect.KMutableProperty1
  *    可有可无的是size()/isEmpty()/containsKey()/containsValue()
  *    完全不需要的是remove()/clear()/keys/values/entries/MutableEntry
  *
- *  2. data 属性的改写
+ *  2. _data 属性的改写
  *  2.1 子类 OrmValid 中改写
  *      改写为 net.jkcode.jkutil.common.FixedKeyMapFactory.FixedKeyMap
  *      由于是直接继承 OrmEntity 来改写的, 因此直接覆写 data 属性, 因此能够应用到依赖 data 属性的方法
@@ -26,7 +26,7 @@ import kotlin.reflect.KMutableProperty1
  *      XXXModel: class MessageModel: MessageEntity(), IOrm by GeneralModel(m)
  *      而 XXXModel 继承于 XXXEntity 是为了继承与复用其声明的属性, 但是 IOrm 的方法全部交由 GeneralModel 代理来改写, 也就对应改写掉 XXXEntity/OrmEntity 中与 IOrm 重合的方法(即 IOrmEntity 的方法)
  *      但是注意某些方法与属性是 XXXEntity/OrmEntity 特有的, 没有归入 IOrm 接口, 也就是说 GeneralModel 不能改写这些方法与属性
- *      如 data 是内部属性无法被 IOrm 接口暴露
+ *      如 _data 是内部属性无法被 IOrm 接口暴露
  *
  * @author shijianhang
  * @date 2016-10-10 上午12:52:34
@@ -52,7 +52,7 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      * 1 子类会改写
      * 2 延迟加载, 对于子类改写是没有意义的, 但针对实体类 XXXEntity 与模型类 XXXModel 分离的场景下是有意义的, 也就是IOrm 的方法全部交由 GeneralModel 代理来改写, 也就用不到该类的 data 属性
      */
-    protected open val data: MutableMap<String, Any?> by lazy{
+    protected open val _data: MutableMap<String, Any?> by lazy{
         HashMap<String, Any?>()
     }
 
@@ -74,7 +74,7 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      * @param  value  字段值
      */
     public override operator fun set(column: String, value: Any?) {
-        data[column] = value;
+        _data[column] = value;
     }
 
     /**
@@ -110,7 +110,7 @@ abstract class OrmEntity : IOrmEntity, Serializable {
         if (!hasColumn(column))
             throw OrmException("类 ${this.javaClass} 没有字段 $column");
 
-        return (data[column] ?: defaultValue) as T
+        return (_data[column] ?: defaultValue) as T
     }
 
     /**
@@ -118,7 +118,7 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      * @return
      */
     internal fun getData(): MutableMap<String, Any?> {
-        return data
+        return _data
     }
 
     /**
@@ -126,7 +126,7 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      * @return
      */
     public override fun clear(){
-        data.clear()
+        _data.clear()
     }
 
     /**
@@ -135,7 +135,7 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      * @param row 结果行
      */
     public override fun fromRow(row: DbResultRow, convertingColumn: Boolean): Unit{
-        row.toMap(convertingColumn, data)
+        row.toMap(convertingColumn, _data)
     }
 
 
@@ -146,7 +146,7 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      * @param expected 要设置的字段名的列表
      */
     public override fun fromMap(from: Map<String, Any?>, expected: List<String>): Unit {
-        copyMap(from, data, expected)
+        copyMap(from, _data, expected)
     }
 
     /**
@@ -157,7 +157,7 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      * @return
      */
     public override fun toMap(to: MutableMap<String, Any?>, expected: List<String>): MutableMap<String, Any?> {
-        return copyMap(data, to, expected)
+        return copyMap(_data, to, expected)
     }
 
     /**
@@ -242,7 +242,7 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      * @param bytes
      */
     public override fun unserialize(bytes: ByteArray): Unit {
-        data.putAll(serializer.unserialize(bytes) as Map<String, Any?>)
+        _data.putAll(serializer.unserialize(bytes) as Map<String, Any?>)
     }
 
     /**
@@ -254,10 +254,10 @@ abstract class OrmEntity : IOrmEntity, Serializable {
     public override fun compileTemplate(template:String):String{
         // 1 编译模板
         if(template.contains(':'))
-            return template.replaces(data);
+            return template.replaces(_data);
 
         // 2 输出单个字段
-        return data[template].toString()
+        return _data[template].toString()
     }
 
     /**
@@ -270,7 +270,7 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      *   => 将 toString() 归入 IOrm 接口
      */
     public override fun toString(): String{
-        return "${this.javaClass}: $data"
+        return "${this.javaClass}: $_data"
     }
 
     /**

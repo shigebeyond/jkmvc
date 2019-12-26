@@ -22,7 +22,7 @@ abstract class OrmRelated : OrmPersistent() {
         val relation = ormMeta.getRelation(column);
         if (relation != null) {
             // 设置关联对象
-            data[column] = value;
+            _data[column] = value;
             // 如果关联的是主表，则更新从表的外键
             if (value != null && relation.type == RelationType.BELONGS_TO)
                 sets(relation.foreignProp, (value as Orm).pk); // 更新字段
@@ -78,8 +78,8 @@ abstract class OrmRelated : OrmPersistent() {
         loaded = true;
         // 只标记一层，防止递归死循环
         for((name, relation) in ormMeta.relations){
-            if(name in data)
-                (data[name] as Orm).loaded = true
+            if(name in _data)
+                (_data[name] as Orm).loaded = true
         }
     }
 
@@ -115,7 +115,7 @@ abstract class OrmRelated : OrmPersistent() {
     public override fun toMap(to: MutableMap<String, Any?>, expected: List<String>): MutableMap<String, Any?> {
         // 1 转关联对象
         for((name, relation) in ormMeta.relations){
-            val value = data[name]
+            val value = _data[name]
             if(value != null){
                 to[name] = when(value){
                     is Collection<*> -> (value as Collection<IOrm>).itemToMap() // 有多个
@@ -127,7 +127,7 @@ abstract class OrmRelated : OrmPersistent() {
 
         // 2 转当前对象：由于关联对象联查时不处理null值, 因此关联对象会缺少null值的字段，这里要补上
         for(prop in ormMeta.props)
-            to[prop] = data[prop]
+            to[prop] = _data[prop]
 
         return to;
     }
@@ -142,7 +142,7 @@ abstract class OrmRelated : OrmPersistent() {
      * @return
      */
     public override fun related(name: String, newed: Boolean, vararg columns: String): Any? {
-        if (name !in data){
+        if (name !in _data){
             // 获得关联关系
             val relation = ormMeta.getRelation(name)!!;
 
@@ -162,10 +162,10 @@ abstract class OrmRelated : OrmPersistent() {
                 }
             }
 
-            data[name] = result;
+            _data[name] = result;
         }
 
-        return data[name];
+        return _data[name];
     }
 
     /**

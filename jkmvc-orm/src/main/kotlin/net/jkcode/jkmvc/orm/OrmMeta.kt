@@ -142,7 +142,8 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * 数据的工厂
      */
     public override val dataFactory: FixedKeyMapFactory by lazy{
-        val keys = ArrayList<String>(props.size + relations.size)
+        // 之所以用 HashSet, 是因为可能有多个中间表的关联关系, 进而有重名的中间表外键属性
+        val keys = HashSet<String>(props.size + relations.size)
         keys.addAll(props) // 1 对象属性
         keys.addAll(relations.keys) // 2 关联属性
         for((_, relation) in relations){ // 3 有中间表关联关系: 中间表的外键属性

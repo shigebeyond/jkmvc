@@ -23,7 +23,7 @@ class OrmEntityFstSerializer : FSTBasicObjectSerializer() {
      */
     public override fun writeObject(out: FSTObjectOutput, toWrite: Any, clzInfo: FSTClazzInfo, referencedBy: FSTClazzInfo.FSTFieldInfo, streamPosition: Int) {
         val entity = toWrite as OrmEntity
-        // 写 OrmEntity.data
+        // 写 OrmEntity._data
         mapSerializer.writeObject(out, entity.getData(), clzInfo, referencedBy, streamPosition)
     }
 

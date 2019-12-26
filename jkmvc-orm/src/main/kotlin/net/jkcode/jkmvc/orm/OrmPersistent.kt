@@ -37,9 +37,9 @@ abstract class OrmPersistent : OrmValid() {
 	public override val oldPk:DbKeyValues
 		get(){
 			val pp = ormMeta.primaryProp
-			if(dirty.containsAllKeys(pp))
+			if(_dirty.containsAllKeys(pp))
 				return pp.map {
-					dirty[it]
+					_dirty[it]
 				}
 
 			return pk
@@ -80,7 +80,7 @@ abstract class OrmPersistent : OrmValid() {
 	 * @return 新增数据的主键
 	 */
 	public override fun create(): Long {
-		if(dirty.isEmpty())
+		if(_dirty.isEmpty())
 			throw OrmException("No data to create"); // 没有要创建的数据
 
 		// 校验
@@ -93,13 +93,13 @@ abstract class OrmPersistent : OrmValid() {
 			beforeSave()
 
 			// 插入数据库
-			val needPk = !ormMeta.primaryProp.isAllEmpty() && !data.containsAllKeys(ormMeta.primaryProp) // 是否需要生成主键
+			val needPk = !ormMeta.primaryProp.isAllEmpty() && !_data.containsAllKeys(ormMeta.primaryProp) // 是否需要生成主键
 			val generatedColumn = if (needPk) ormMeta.primaryKey.first() else null // 主键名
 			val pk = queryBuilder().value(buildDirtyData()).insert(generatedColumn);
 
 			// 更新内部数据
 			if (needPk)
-				data[ormMeta.primaryProp.first()] = pk; // 主键
+				_data[ormMeta.primaryProp.first()] = pk; // 主键
 
 			// 触发后置事件
 			afterCreate()
@@ -107,7 +107,7 @@ abstract class OrmPersistent : OrmValid() {
 
 			// 更新内部数据
 			loaded = true; // save事件据此来判定是新增与修改
-			dirty.clear(); // create事件据此来获得变化的字段
+			_dirty.clear(); // create事件据此来获得变化的字段
 
 			pk;
 		}
@@ -123,11 +123,11 @@ abstract class OrmPersistent : OrmValid() {
 	 */
 	protected fun buildDirtyData(): MutableMap<String, Any?> {
 		// 挑出变化的属性
-		return dirty.associate { prop, oldValue ->
+		return _dirty.associate { prop, oldValue ->
 			// 字段名
 			val column = ormMeta.prop2Column(prop)
 			// 字段值
-			var value = data[prop]
+			var value = _data[prop]
 			var value2 = if(value != null && ormMeta.serializingProps.contains(prop))
 				serializer.serialize(value)
 			else
@@ -156,7 +156,7 @@ abstract class OrmPersistent : OrmValid() {
 					else
 						value
 		// 设置属性值
-		data[prop] = value2;
+		_data[prop] = value2;
 	}
 
 	/**
@@ -175,7 +175,7 @@ abstract class OrmPersistent : OrmValid() {
 			throw OrmException("Load before updating object[$this]"); // 更新对象[$this]前先检查是否存在
 
 		// 如果没有修改，则不执行sql，不抛异常，直接返回true
-		if (dirty.isEmpty()){
+		if (_dirty.isEmpty()){
 			dbLogger.debug("No data to update") // 没有要更新的数据
 			return true;
 		}
@@ -197,7 +197,7 @@ abstract class OrmPersistent : OrmValid() {
 			afterSave()
 
 			// 更新内部数据
-			dirty.clear() // update事件据此来获得变化的字段
+			_dirty.clear() // update事件据此来获得变化的字段
 			result
 		};
 	}
@@ -228,8 +228,8 @@ abstract class OrmPersistent : OrmValid() {
 			afterDelete()
 
 			// 更新内部数据
-			data.clear() // delete事件据此来获得删除前的数据
-			dirty.clear()
+			_data.clear() // delete事件据此来获得删除前的数据
+			_dirty.clear()
 
 			result;
 		}

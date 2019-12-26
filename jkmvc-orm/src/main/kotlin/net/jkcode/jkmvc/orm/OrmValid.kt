@@ -14,7 +14,7 @@ abstract class OrmValid : IOrm, OrmEntity() {
      * 改写 OrmEntity 中的 data属性
      * 最新的字段值：<字段名 to 最新字段值>
      */
-    protected override val data: MutableMap<String, Any?> by lazy{
+    protected override val _data: MutableMap<String, Any?> by lazy{
         ormMeta.dataFactory.createMap()
     }
 
@@ -22,7 +22,7 @@ abstract class OrmValid : IOrm, OrmEntity() {
      * 变化的字段值：<字段名 to 原始字段值>
      *     一般只读，lazy创建，节省内存
      */
-    protected val dirty: MutableMap<String, Any?> = HashMap<String, Any?>()
+    protected val _dirty: MutableMap<String, Any?> = HashMap()
 
     /**
      * 设置对象字段值
@@ -36,10 +36,10 @@ abstract class OrmValid : IOrm, OrmEntity() {
             throw OrmException("类 ${this.javaClass} 没有字段 $column");
 
         // 记录变化的字段名 + 原始值
-        if(!dirty.containsKey(column)
-                //&& value != data[column])
-                && !equalsValue(data[column], value))
-            dirty[column] = data[column];
+        if(!_dirty.containsKey(column)
+                //&& value != _data[column])
+                && !equalsValue(_data[column], value))
+            _dirty[column] = _data[column];
 
         super.set(column, value)
     }
@@ -49,8 +49,8 @@ abstract class OrmValid : IOrm, OrmEntity() {
      * @param column 字段名
      */
     public override fun setDirty(column: String){
-        if(!dirty.containsKey(column))
-            dirty[column] = data[column];
+        if(!_dirty.containsKey(column))
+            _dirty[column] = _data[column];
     }
 
     /**
