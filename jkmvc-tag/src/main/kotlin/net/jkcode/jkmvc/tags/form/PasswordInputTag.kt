@@ -16,6 +16,8 @@ class PasswordInputTag : InputTag("password") {
     var isShowPassword = false
 
     override fun beforeWriteTag(writer: JspWriter) {
+        super.beforeWriteTag(writer)
+
         if(!isShowPassword)
             value = ""
     }

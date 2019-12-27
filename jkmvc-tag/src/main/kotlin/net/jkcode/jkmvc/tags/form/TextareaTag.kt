@@ -1,5 +1,7 @@
 package net.jkcode.jkmvc.tags.form
 
+import javax.servlet.jsp.JspWriter
+
 /**
  * 文本域
  * @author shijianhang<772910474@qq.com>
@@ -12,5 +14,10 @@ class TextareaTag: BaseInputTag("textarea", true){
     public var cols: String? by property()
 
     public var onselect: String? by property()
+
+    override fun beforeWriteTag(writer: JspWriter) {
+        if(value == null && boundValue != null)
+            value = boundValue
+    }
 
 }

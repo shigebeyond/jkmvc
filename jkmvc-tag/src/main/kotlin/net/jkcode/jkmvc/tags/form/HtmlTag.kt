@@ -5,6 +5,7 @@ import org.apache.commons.lang.StringEscapeUtils
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 import javax.servlet.jsp.JspWriter
+import javax.servlet.jsp.tagext.DynamicAttributes
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -35,7 +36,7 @@ object AttrDelegater: ReadWriteProperty<HtmlTag, Any?> {
 open class HtmlTag(
         public var tag: String?, // 标签名
         public var hasBody: Boolean // 是否有标签体
-) : IBoundTag() {
+) : IBoundTag(), DynamicAttributes {
 
     companion object{
 
@@ -77,7 +78,14 @@ open class HtmlTag(
 
     public var cssStyle: String? = null
 
-    public var id: String? by property()
+    // id属性与 TagSupport的属性 重名了
+    //public override var id: String? by property()
+    override fun setId(id: String?) {
+        attrs["id"] = id
+    }
+    override fun getId(): String? {
+        return attrs["id"] as String?
+    }
 
     public var name: String? by property()
 
@@ -112,6 +120,18 @@ open class HtmlTag(
     public var onkeydown: String? by property()
 
     /**
+     * 实现 DynamicAttributes 接口
+     * 设置动态属性
+     *
+     * @param uri 属性的命名空间uri
+     * @param localName 属性名
+     * @param value 属性值
+     */
+    public override fun setDynamicAttribute(uri: String?, localName: String, value: Any?) {
+        attrs[localName] = value
+    }
+
+    /**
      * 生成id
      */
     protected fun nextId(): String {
@@ -133,69 +153,92 @@ open class HtmlTag(
     protected open fun afterWriteTag(writer: JspWriter) {
     }
 
-    /**
-     * 输出标签
-     */
-    public override fun doTag() {
-        writeTag(jspContext.out)
+    override fun doStartTag(): Int {
+        // 标签头
+        writeTagStart(pageContext.out)
+
+        return if(hasBody) EVAL_BODY_INCLUDE else SKIP_BODY
+    }
+
+    override fun doEndTag(): Int {
+        // 标签尾
+        writeTagEnd(pageContext.out)
+
+        return EVAL_PAGE;
     }
 
     /**
      * 输出标签
      */
     public fun writeTag(writer: JspWriter) {
-        // 默认id
-        if(id == null)
-            id = nextId()
-
-        // 默认name
-        if(name == null && path != null)
-            name = path
-
-        // 样式
-        if(isError && cssErrorClass != null) // 错误样式类
-            attrs["class"] = cssErrorClass
-        if(attrs["class"] == null && cssClass != null) // 默认样式类
-            attrs["class"] = cssClass
-        if(cssStyle != null) // 样式
-            attrs["style"] = cssStyle
-
-        beforeWriteTag(writer)
-
         // 标签头
-        if(tag != null) {
-            writer.append("<").append(tag)
-            // 属性
-            for ((name, value) in attrs)
-                writeAttr(writer, name, value)
-
-            if (!hasBody) {
-                writer.append("/>")
-                return
-            }
-
-            writer.append(">")
-        }
+        writeTagStart(writer)
 
         // 标签体
         writeBody(writer)
 
         // 标签尾
-        if(tag != null)
-            writer.append("<").append(tag).append("/>")
+        writeTagEnd(writer)
+    }
+
+    /**
+     * 写标签头
+     * @param writer
+     */
+    protected fun writeTagStart(writer: JspWriter) {
+        if (tag == null)
+            return
+
+        // 默认id
+        if (id == null)
+            id = nextId()
+
+        // 默认name
+        if (name == null && path != null)
+            name = path
+
+        // 样式
+        if (isError && cssErrorClass != null) // 错误样式类
+            attrs["class"] = cssErrorClass
+        if (attrs["class"] == null && cssClass != null) // 默认样式类
+            attrs["class"] = cssClass
+        if (cssStyle != null) // 样式
+            attrs["style"] = cssStyle
+
+        beforeWriteTag(writer)
+
+        // 标签头
+        writer.append("<").append(tag)
+        // 属性
+        for ((name, value) in attrs)
+            writeAttr(writer, name, value)
+
+        if (!hasBody) {
+            writer.append("/>")
+            return
+        }
+
+        writer.append(">")
+    }
+
+    /**
+     * 写标签尾
+     * @param writer
+     */
+    protected fun writeTagEnd(writer: JspWriter) {
+        if (tag != null)
+            writer.append("</").append(tag).append(">")
 
         afterWriteTag(writer)
     }
 
     /**
-     * 标签体
+     * 写标签体
      * @param writer
      */
     protected open fun writeBody(writer: JspWriter) {
         if (body != null)
             writer.append(body)
-        else if (jspBody != null)
-            jspBody.invoke(writer)
     }
 
     /**
@@ -267,8 +310,9 @@ open class HtmlTag(
      */
     public fun clear(){
         attrs.clear()
-        jspContext = null
+        pageContext = null
         parent = null
+        id = null
     }
 
 }

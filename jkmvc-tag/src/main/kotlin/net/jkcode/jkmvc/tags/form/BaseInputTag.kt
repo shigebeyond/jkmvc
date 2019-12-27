@@ -20,4 +20,7 @@ abstract class BaseInputTag(
 
     public var readonly: Boolean by property()
 
+    // 对 <select/> 无效
+    public var value: Any? by property()
+
 }

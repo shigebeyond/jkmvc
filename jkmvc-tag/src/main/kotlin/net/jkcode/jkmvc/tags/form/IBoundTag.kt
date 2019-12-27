@@ -3,27 +3,26 @@ package net.jkcode.jkmvc.tags.form
 import net.jkcode.jkutil.common.PropertyHandler
 import net.jkcode.jkutil.common.trim
 import javax.servlet.http.HttpServletRequest
-import javax.servlet.jsp.PageContext
-import javax.servlet.jsp.tagext.SimpleTagSupport
+import javax.servlet.jsp.tagext.TagSupport
 
 /**
  * 绑定值的标签
  * @author shijianhang<772910474@qq.com>
  * @date 2019-12-25 3:35 PM
  */
-abstract class IBoundTag: SimpleTagSupport() {
+abstract class IBoundTag: TagSupport() {
 
     /**
      * 会话
      */
     protected val session
-        get() = (jspContext as PageContext).session
+        get() = pageContext.session
 
     /**
      * 请求
      */
     protected val request
-        get() = (jspContext as PageContext).request as HttpServletRequest
+        get() = pageContext.request as HttpServletRequest
 
     /**
      * 属性路径
@@ -32,51 +31,67 @@ abstract class IBoundTag: SimpleTagSupport() {
 
     /**
      * 属性的绝对路径
-     *   暂时只支持两层
+     *   暂时只支持2层
      */
-    public val absolutePath: String by lazy{
-        // 子路径
-        var absolutePath = if(path == null) "" else path!!
-        // 父路径
-        val parent = findAncestorWithClass(this, IBoundTag::class.java) as SelectTag
-        if(parent.path != null)
-            absolutePath = "$absolutePath.${parent.path}"
-        absolutePath
+    public val absolutePath: String? by lazy{
+        if(path == null)
+            null
+        else { // 2层全路径
+            // 子路径
+            var absolutePath = path!!
+            // 父路径
+            val parent = findAncestorWithClass(this, IBoundTag::class.java) as IBoundTag?
+            if (parent?.path != null)
+                absolutePath = "$absolutePath.${parent.path}"
+            absolutePath
+        }
     }
 
     /**
      * 绑定值
      */
     public val boundValue: Any? by lazy{
-        val keys = absolutePath.split("\\.".toRegex(), 2)
-        var value = request.getAttribute(keys[0])
-        if(keys.size == 2)
-            value = PropertyHandler.getPath(value, keys[1])
-        value
+        if(absolutePath == null)
+            null
+        else {
+            val keys = absolutePath!!.split("\\.".toRegex(), 2)
+            var value = request.getAttribute(keys[0])
+            if (keys.size == 2)
+                value = PropertyHandler.getPath(value, keys[1])
+            value
+        }
     }
 
     /**
      * 绑定值类型
      */
     public val boundType: Class<*>? by lazy{
-        val keys = absolutePath.split("\\.".toRegex(), 2)
-        var value = request.getAttribute(keys[0])
-        if(keys.size == 2)
-            PropertyHandler.getPathType(value, keys[1])
-        else
-            value.javaClass
+        if(absolutePath == null)
+            null
+        else {
+            val keys = absolutePath!!.split("\\.".toRegex(), 2)
+            var value = request.getAttribute(keys[0])
+            if (keys.size == 2)
+                PropertyHandler.getPathType(value, keys[1])
+            else
+                value.javaClass
+        }
     }
 
     /**
      * 绑定的错误
      */
     public val boundError: Any? by lazy{
-        val errors = request.getAttribute("errors")
-        val path = if(absolutePath.endsWith(".*")) // 所有错误
-                        absolutePath.trim(".*")
-                    else // 单个错误
-                        absolutePath
-        PropertyHandler.getPath(errors, path)
+        if(absolutePath == null)
+            null
+        else {
+            val errors = request.getAttribute("_errors")
+            val path = if (absolutePath!!.endsWith(".*")) // 所有错误
+                            absolutePath!!.trim(".*")
+                        else // 单个错误
+                            absolutePath!!
+            PropertyHandler.getPath(errors, path)
+        }
     }
 
     /**
