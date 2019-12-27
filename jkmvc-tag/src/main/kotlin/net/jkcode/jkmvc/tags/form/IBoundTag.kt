@@ -42,7 +42,7 @@ abstract class IBoundTag: TagSupport() {
             // 父路径
             val parent = findAncestorWithClass(this, IBoundTag::class.java) as IBoundTag?
             if (parent?.path != null)
-                absolutePath = "$absolutePath.${parent.path}"
+                absolutePath = "${parent.path}.$absolutePath"
             absolutePath
         }
     }
