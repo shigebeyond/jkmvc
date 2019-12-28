@@ -36,7 +36,7 @@ object AttrDelegater: ReadWriteProperty<HtmlTag, Any?> {
 open class HtmlTag(
         public var tag: String?, // 标签名
         public var hasBody: Boolean // 是否有标签体
-) : IBoundTag(), DynamicAttributes {
+) : BaseBoundTag(), DynamicAttributes {
 
     companion object{
 

@@ -10,7 +10,7 @@ import javax.servlet.jsp.tagext.TagSupport
  * @author shijianhang<772910474@qq.com>
  * @date 2019-12-25 3:35 PM
  */
-abstract class IBoundTag: TagSupport() {
+abstract class BaseBoundTag: TagSupport() {
 
     /**
      * 会话
@@ -40,7 +40,7 @@ abstract class IBoundTag: TagSupport() {
             // 子路径
             var absolutePath = path!!
             // 父路径
-            val parent = findAncestorWithClass(this, IBoundTag::class.java) as IBoundTag?
+            val parent = findAncestorWithClass(this, BaseBoundTag::class.java) as BaseBoundTag?
             if (parent?.path != null)
                 absolutePath = "${parent.path}.$absolutePath"
             absolutePath
