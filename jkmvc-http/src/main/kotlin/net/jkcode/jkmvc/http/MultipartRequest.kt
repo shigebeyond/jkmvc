@@ -8,6 +8,7 @@ import com.oreilly.servlet.multipart.FileRenamePolicy
 import net.jkcode.jkutil.common.*
 import sun.misc.IOUtils
 import java.io.File
+import java.net.URLDecoder
 import java.nio.charset.Charset
 import java.util.*
 import javax.servlet.ServletRequestWrapper
@@ -135,7 +136,8 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Ser
         if(isForbiddenUploadFile(part.submittedFileName))
             throw UnsupportedOperationException("文件域[$name]的文件为[${part.submittedFileName}], 属于禁止上传的文件类型")
 
-        val file = prepareUploadFile(part.submittedFileName)
+        val fileName = URLDecoder.decode(part.submittedFileName, "UTF-8")
+        val file = prepareUploadFile(fileName)
         part.write(file.absolutePath)
         return file
     }
