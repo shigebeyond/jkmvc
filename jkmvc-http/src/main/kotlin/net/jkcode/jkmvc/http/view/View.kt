@@ -2,8 +2,8 @@ package net.jkcode.jkmvc.http.view
 
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
+import net.jkcode.jkutil.common.LazyAllocatedMap
 import java.io.FileNotFoundException
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 视图
@@ -12,19 +12,22 @@ import java.util.concurrent.ConcurrentHashMap
  * @author shijianhang
  * @date 2016-10-21 下午3:14:54
  */
-open class View(override val req: HttpRequest /* 请求对象 */,
-                override val res: HttpResponse /* 响应对象 */,
-                override val file:String/* 视图文件 */,
-                override var data:MutableMap<String, Any?> /* 局部变量 */
+open class View(override val req: HttpRequest, // 请求对象
+				override val res: HttpResponse, // 响应对象
+				override val file:String, // 视图文件
+				tmpData:Map<String, Any?> // 局部变量
 ): IView {
 
-	companion object{
-
-		/**
-		 * 空的map, 用在函数 HttpResponse.renderView(String, MutableMap) 的参数默认值中
-		 */
-		internal val emptyData: MutableMap<String, Any?> = HashMap()
-	}
+	/**
+	 * 局部变量
+	 */
+	override var data:MutableMap<String, Any?> =
+			if(tmpData is MutableMap<*, *>)
+				tmpData as MutableMap<String, Any?>
+			else if(tmpData.isEmpty())
+				LazyAllocatedMap()
+			else
+				HashMap(tmpData)
 
 	/**
 	 * 设置局部变量

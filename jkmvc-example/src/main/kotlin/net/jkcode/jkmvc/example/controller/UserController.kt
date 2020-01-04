@@ -48,7 +48,7 @@ class UserController: Controller()
         // 查询所有用户 | find all users
         val users = query.findModels<UserModel>()
         // 渲染视图 | render view
-        res.renderView(view("user/index", mutableMapOf("count" to count, "users" to users)))
+        res.renderView(view("user/index", mapOf("count" to count, "users" to users)))
     }
 
     /**

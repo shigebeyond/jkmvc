@@ -3,6 +3,7 @@ package net.jkcode.jkmvc.http.controller
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.view.View
+import net.jkcode.jkutil.common.LazyAllocatedMap
 import java.lang.reflect.Method
 import java.util.*
 
@@ -31,14 +32,14 @@ interface IController{
      * @param data 视图变量
      * @return 视图
      */
-    fun view(file:String, data:MutableMap<String, Any?> = HashMap<String, Any?>()): View
+    fun view(file:String, data:Map<String, Any?> = LazyAllocatedMap()): View
 
     /**
      * 视图
      * @param data 视图变量
      * @return 视图
      */
-    fun view(data:MutableMap<String, Any?> = HashMap<String, Any?>()): View
+    fun view(data:Map<String, Any?> = LazyAllocatedMap()): View
 
     /**
      * 重定向到指定url
@@ -60,6 +61,12 @@ interface IController{
 
         // 后置处理
         after()
+
+        // 渲染视图
+        if(result is View)
+            res.renderView(result)
+        if(result is String)
+            res.renderView(result)
 
         return result
     }

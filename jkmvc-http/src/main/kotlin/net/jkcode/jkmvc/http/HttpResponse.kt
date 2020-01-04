@@ -8,6 +8,7 @@ import net.jkcode.jkmvc.http.util.Pagination
 import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jkmvc.orm.normalizeOrmData
 import net.jkcode.jkmvc.orm.toJson
+import net.jkcode.jkutil.common.LazyAllocatedMap
 import java.io.File
 import java.io.FileInputStream
 import java.io.PrintWriter
@@ -89,6 +90,11 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseW
 				505 to "HTTP Version Not Supported",
 				509 to "Bandwidth Limit Exceeded"
 		);
+
+		/**
+		 * 空的map, 用在函数 renderView(String, MutableMap) 的参数默认值中
+		 */
+		internal val emptyData: MutableMap<String, Any?> = LazyAllocatedMap()
 	}
 
 	/**
@@ -124,7 +130,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseW
 	 * @param file 视图文件
 	 * @param data 局部变量
 	 */
-	public fun renderView(file:String, data:MutableMap<String, Any?> = View.emptyData):Unit
+	public fun renderView(file:String, data:Map<String, Any?> = emptyData):Unit
 	{
 		renderView(View(HttpRequest.current(), this, file, data))
 	}

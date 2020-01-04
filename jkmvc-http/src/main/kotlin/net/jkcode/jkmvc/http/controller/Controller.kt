@@ -38,7 +38,7 @@ abstract class Controller : IController {
      * @param data 视图变量
      * @return 视图
      */
-    public override fun view(file:String, data:MutableMap<String, Any?>): View
+    public override fun view(file:String, data:Map<String, Any?>): View
     {
         return View(req, res, file, data);
     }
@@ -48,7 +48,7 @@ abstract class Controller : IController {
      * @param data 视图变量
      * @return 视图
      */
-    public override fun view(data:MutableMap<String, Any?>): View
+    public override fun view(data:Map<String, Any?>): View
     {
         return view(req.controller + "/" + req.action, data)
     }
