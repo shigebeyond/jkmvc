@@ -104,6 +104,12 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseW
 		get() = response as HttpServletResponse
 
 	/**
+	 * 是否已渲染过
+	 */
+	 public var rendered: Boolean = false
+		internal set
+
+	/**
 	 * 获得writer
 	 */
 	public fun prepareWriter(): PrintWriter
@@ -121,6 +127,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseW
 	 */
 	public fun renderView(view: View):Unit
 	{
+		rendered = true
 		view.render();
 	}
 
@@ -142,6 +149,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseW
 	 */
 	public fun renderString(content:String):Unit
 	{
+		rendered = true
 		prepareWriter().print(content);
 	}
 
@@ -162,6 +170,8 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseW
 	 */
 	public fun renderFile(file: File):Unit
 	{
+		rendered = true
+
 		//通知客户端文件的下载    URLEncoder.encode解决文件名中文的问题
 		res.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(file.name, "utf-8"))
 		res.setHeader("Content-Type", "application/octet-stream")

@@ -4,8 +4,10 @@ import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jkutil.common.LazyAllocatedMap
+import java.io.File
 import java.lang.reflect.Method
 import java.util.*
+import java.util.concurrent.CompletableFuture
 
 /**
  * 控制器
@@ -62,13 +64,36 @@ interface IController{
         // 后置处理
         after()
 
+        // 渲染结果
+        if(result is CompletableFuture<*>)
+            return result.thenApply(::renderResult)
+
+        renderResult(result)
+        return result
+    }
+
+    /**
+     * 渲染结果
+     */
+    fun renderResult(result: Any?) {
+        if(result == null || result is Unit || result is Void // 无结果
+                || res.rendered) // 渲染过
+            return
+
         // 渲染视图
-        if(result is View)
-            res.renderView(result)
-        if(result is String)
+        if (result is View)
             res.renderView(result)
 
-        return result
+        // 渲染文本
+        if (result is String)
+            res.renderString(result)
+
+        // 渲染文件
+        if (result is File)
+            res.renderFile(result)
+
+        // 渲染json
+        res.renderJson(result)
     }
 
     /**

@@ -23,7 +23,7 @@ object Router: IRouter
 	/**
 	 * 全部路由规则
 	 */
-	private val routes:MutableMap<String, Route> = HashMap();
+	private val routes:MutableMap<String, Route> = TreeMap(); // 有序
 
 	init {
 	    // 加载配置的路由
