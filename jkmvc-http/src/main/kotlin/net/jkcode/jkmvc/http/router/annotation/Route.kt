@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.http.router.annotation
 
 import net.jkcode.jkmvc.http.router.HttpMethod
+import net.jkcode.jkmvc.http.router.IRouter
 import net.jkcode.jkutil.common.getCachedAnnotation
 import java.lang.reflect.Method
 
