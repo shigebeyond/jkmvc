@@ -1,12 +1,16 @@
 package net.jkcode.jkmvc.http.controller
 
+import net.jkcode.jkmvc.http.router.Route
 import net.jkcode.jkutil.common.getConstructorOrNull
 import net.jkcode.jkutil.common.lcFirst
 import net.jkcode.jkmvc.http.router.RouteException
+import net.jkcode.jkmvc.http.router.Router
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberFunctions
+import net.jkcode.jkmvc.http.router.annotation.Route as ARoute
 
 /**
  * 封装Controller类
@@ -45,8 +49,14 @@ class ControllerClass(public override val clazz: KClass<*> /* controller类 */):
         for (func in clazz.memberFunctions) {
             val funname = func.name
             if (funname.endsWith("Action") || func.parameters.isEmpty()) { // 以Action结尾 + 无参数
-                val name = funname.substring(0, funname.length - 6) // 去掉Action结尾
-                actions[name] = func;
+                // action名: 去掉Action结尾
+                val action = funname.substring(0, funname.length - 6)
+                // 缓存action
+                actions[action] = func;
+                // 解析路由注解
+                val annotation = func.findAnnotation<ARoute>()
+                if(annotation != null)
+                    Router.addRoute(name, action, annotation)
             }
         }
     }

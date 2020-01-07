@@ -4,6 +4,7 @@ import net.jkcode.jkutil.common.*
 import net.jkcode.jkmvc.http.controller.Controller
 import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
+import net.jkcode.jkmvc.http.router.HttpMethod
 import net.jkcode.jkmvc.http.router.Route
 import net.jkcode.jkmvc.http.router.RouteException
 import net.jkcode.jkmvc.http.router.Router
@@ -71,6 +72,11 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	}
 
 	/**
+	 * http方法
+	 */
+	public val httpMethod: HttpMethod = HttpMethod.valueOf(method.toUpperCase())
+
+	/**
 	 * 获得要解析的uri
 	 *   1 去掉头部的contextPath
 	 *   2 去掉末尾的/
@@ -121,7 +127,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 */
 	public fun parseRoute(): Boolean {
 		// 解析路由
-		val result = Router.parse(routeUri);
+		val result = Router.parse(routeUri, httpMethod);
 
 		if(result != null){
 			this.routeParams = result.component1();

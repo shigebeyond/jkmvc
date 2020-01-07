@@ -39,9 +39,10 @@ data class GroupRange(var start:Int, var end:Int){
  *     route.mathes('welcome/index');
  * </code>
  */
-class Route(override val regex:String /* 原始正则: <controller>(\/<action>(\/<id>)?)? */,
-			override val paramRegex:Map<String, String> = emptyMap() /* 参数的子正则 */,
-			override val defaults:Map<String, String>? /* 参数的默认值 */ = null
+class Route(override val regex:String, // 原始正则: <controller>(\/<action>(\/<id>)?)?
+			override val paramRegex:Map<String, String> = emptyMap(), // 参数的子正则
+			override val defaults:Map<String, String>? = null, // 参数的默认值
+			override val method: HttpMethod = HttpMethod.ALL // http方法
 ): IRoute {
 
 	companion object{
@@ -148,10 +149,15 @@ class Route(override val regex:String /* 原始正则: <controller>(\/<action>(\
 	 * 检查uri是否匹配路由正则
 	 *
 	 * @param uri
+	 * @param method
 	 * @return 匹配的路由参数，如果为null，则没有匹配
 	 */
-	public override fun match(uri:String):Map<String, String>?{
-		// 匹配uri
+	public override fun match(uri: String, method: HttpMethod):Map<String, String>?{
+		// 1 匹配方法
+		if(this.method != HttpMethod.ALL && this.method != method)
+			return null
+
+		// 2 匹配uri
 		val matches:MatchResult? = compiledRegex.find(uri)
 		if(matches == null)
 			return defaults;

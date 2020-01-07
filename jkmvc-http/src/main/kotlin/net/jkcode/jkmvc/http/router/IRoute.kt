@@ -42,10 +42,16 @@ interface IRoute{
 	val defaults:Map<String, String>?
 
 	/**
+	 * http方法
+	 */
+	val method: HttpMethod
+
+	/**
 	 * 检查uri是否匹配路由正则
 	 *
 	 * @param uri
+	 * @param method
 	 * @return 匹配的路由参数，如果为null，则没有匹配
 	 */
-	fun match(uri:String):Map<String, String>?;
+	fun match(uri: String, method: HttpMethod):Map<String, String>?;
 }

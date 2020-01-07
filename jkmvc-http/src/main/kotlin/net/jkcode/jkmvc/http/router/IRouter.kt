@@ -1,5 +1,7 @@
 package net.jkcode.jkmvc.http.router
 
+import net.jkcode.jkmvc.http.router.annotation.Route as ARoute
+
 /**
  * 路由参数 + 路由规则
  */
@@ -24,9 +26,23 @@ interface IRouter
 	fun addRoute(name:String, route: Route): Router
 
 	/**
+	 * 添加注解路由
+	 * @param name 路由名
+	 * @parma annotation 路由注解
+	 */
+	fun addRoute(controller:String, action: String, annotation: ARoute): Router{
+		val params = mapOf(
+				"controller" to controller,
+				"action" to action
+		)
+		return addRoute("$controller#$action", Route(annotation.regex, emptyMap(), params, annotation.method))
+	}
+
+	/**
 	 * 解析路由：匹配规则
 	 * @param uri
+	 * @param method
 	 * @return [路由参数, 路由规则]
 	 */
-	fun parse(uri:String): ParamsAndRoute?;
+	fun parse(uri: String, method: HttpMethod): ParamsAndRoute?;
 }
