@@ -20,7 +20,10 @@ open class MethodRouteDetector {
      * @parma method 方法
      */
     public fun detect(controller:String, action: String, method: Method) {
-        val annotation: ARoute = method.getAnnotation(ARoute::class.java)
+        val annotation = method.getAnnotation(ARoute::class.java)
+        if(annotation == null)
+            return
+
         val params = mapOf(
                 "controller" to controller,
                 "action" to action

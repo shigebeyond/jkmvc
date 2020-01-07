@@ -27,6 +27,7 @@ class ControllerClass(public override val clazz: KClass<*> /* controller类 */):
 
         /**
          * 方法级路由的检测器
+         *    可通过自定义检测器, 来实现丰富的路由注解与处理
          */
         public val methodRoutDetector by lazy {
             val clazz = config.get("methodRouteDetectorClass", "net.jkcode.jkmvc.http.controller.MethodRouteDetector")
