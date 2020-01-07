@@ -160,7 +160,7 @@ class Route(override val regex:String, // 原始正则: <controller>(\/<action>(
 		// 2 匹配uri
 		val matches:MatchResult? = compiledRegex.find(uri)
 		if(matches == null)
-			return defaults;
+			return null
 
 		//返回 默认参数值 + 匹配的参数值
 		val params: MutableMap<String, String> = HashMap();

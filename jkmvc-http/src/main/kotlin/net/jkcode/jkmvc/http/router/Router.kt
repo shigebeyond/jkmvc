@@ -23,7 +23,7 @@ object Router: IRouter
 	/**
 	 * 全部路由规则
 	 *   有序, 但需要倒序插入, 也就是后添加的路由先匹配
-	 *   为什么要倒序? 是以为扫描加载controller类时, 会针对action方法解析路由注解, 并添加对应路由
+	 *   为什么要倒序? 是因为扫描加载controller类时, 会针对action方法解析路由注解, 并添加对应路由
 	 */
 	private val routes = LinkedList<Route>()
 
