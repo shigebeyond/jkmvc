@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.query
 
 import net.jkcode.jkmvc.db.IDb
+import kotlin.math.min
 import kotlin.reflect.KFunction2
 
 /**
@@ -52,13 +53,14 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
         if(j != 0 || afterGroup)
             sql.append(delimiter).append(' ');
 
-        // 遍历处理器来处理对应元素(单词), 没有处理的元素(单词)也直接拼接
-        for (i in elementHandlers.indices) {
+        // 遍历处理器来处理对应元素(单词)
+        val size = min(elementHandlers.size, exp.size)
+        for (i in 0 until size) {
             val handler: KFunction2 <IDb, *, String>? = elementHandlers[i];
             // 处理某个元素(单词)的值
             var value: Any? = exp[i];
-            if (exp.size > i && handler != null) {
-                value = handler.call(db, exp[i]); // 调用元素处理函数
+            if (handler != null) {
+                value = handler.call(db, value); // 调用元素处理函数
             }
             sql.append(value).append(' '); // 用空格拼接多个元素
         }

@@ -152,7 +152,33 @@ interface IDbQueryBuilderDecoration{
      */
     fun orWhere(column: String, op: String, value: Any?): IDbQueryBuilder;
 
-        /**
+    /**
+     * Alias of andWhereCondition()
+     *
+     * @param   condition  condition expression
+     * @return
+     */
+    fun whereCondition(condition: String): IDbQueryBuilder {
+        return andWhereCondition(condition)
+    }
+
+    /**
+     * Creates a new "AND WHERE" condition for the query.
+     *
+     * @param   condition  condition expression
+     * @return
+     */
+    fun andWhereCondition(condition: String): IDbQueryBuilder
+
+    /**
+     * Creates a new "OR WHERE" condition for the query.
+     *
+     * @param   condition  condition expression
+     * @return
+     */
+    fun orWhereCondition(condition: String): IDbQueryBuilder
+
+    /**
      * Alias of andWhereOpen()
      *
      * @return
@@ -303,8 +329,11 @@ interface IDbQueryBuilderDecoration{
      * @param   asc        whether asc direction
      * @return
      */
-    fun orderBy(column: String, asc: Boolean): IDbQueryBuilder {
-        return orderBy(column, if (asc) "ASC" else "DESC")
+    fun orderBy(column: String, desc: Boolean?): IDbQueryBuilder {
+        var direction: String? = null
+        if(desc != null)
+            direction = if (desc) "DESC" else "ASC"
+        return orderBy(column, direction)
     }
 
     /**

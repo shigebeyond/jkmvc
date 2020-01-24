@@ -88,6 +88,12 @@ class QueryBuilderTests{
     }
 
     @Test
+    fun testCondition(){
+        val rows = DbQueryBuilder().table("user").whereCondition("id BETWEEN 1 and 10").findMaps()
+        println("查询user表：" + rows)
+    }
+
+    @Test
     fun testFindPage(){
         val query: IDbQueryBuilder = DbQueryBuilder().table("user")
         val counter: IDbQueryBuilder = query.clone() as IDbQueryBuilder // 克隆query builder

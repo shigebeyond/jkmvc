@@ -86,7 +86,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * @param direction
      * @return
      */
-    fun quoteOrderDirection(db: IDb, direction: String?): String{
+    internal fun quoteOrderDirection(db: IDb, direction: String?): String{
         return if (direction != null && "^(ASC|DESC)$".toRegex().matches(direction))
             direction;
         else
@@ -273,7 +273,6 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
 
         whereClause.addSubexp(arrayOf(column, prepareOperator(column, op, value), value), "OR");
         return this;
-
     }
 
     /**
@@ -294,6 +293,27 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
         return op;
     }
 
+    /**
+     * Creates a new "AND WHERE" condition for the query.
+     *
+     * @param   condition  condition expression
+     * @return
+     */
+    public override fun andWhereCondition(condition: String): IDbQueryBuilder {
+        whereClause.addSubexp(arrayOf(DbExpr(condition, false)), "AND");
+        return this;
+    }
+
+    /**
+     * Creates a new "OR WHERE" condition for the query.
+     *
+     * @param   condition  condition expression
+     * @return
+     */
+    public override fun orWhereCondition(condition: String): IDbQueryBuilder {
+        whereClause.addSubexp(arrayOf(DbExpr(condition, false)), "OR");
+        return this;
+    }
 
     /**
      * Opens a new "AND WHERE (...)" grouping.

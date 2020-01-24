@@ -51,10 +51,10 @@ interface IDbIdentifierQuoter{
         }
 
         // 转义字段 + 非函数表达式
-        if (colQuoting && "^\\w[\\w\\d_\\.\\*]*".toRegex().matches(column)) {
+        if (colQuoting && "^\\w[\\w\\d_\\.\\*]*".toRegex().matches(col)) {
             // 表名
-            if(column.contains('.')){
-                var arr = column.split('.');
+            if(col.contains('.')){
+                var arr = col.split('.');
                 table = "${quoteIdentifier(arr[0])}.";
                 col = arr[1]
             }
@@ -69,7 +69,7 @@ interface IDbIdentifierQuoter{
 
         // 字段别名
         if(alias == null)
-            return "$table$col";
+            return if(table == "") col else "$table$col";
 
         return "$table$col AS ${quoteIdentifier(alias)}"; // 转义
     }
