@@ -78,8 +78,9 @@ abstract class OrmRelated : OrmPersistent() {
         loaded = true;
         // 只标记一层，防止递归死循环
         for((name, relation) in ormMeta.relations){
-            if(name in _data)
-                (_data[name] as Orm).loaded = true
+            val value = _data[name]
+            if(value != null)
+                (value as Orm).loaded = true
         }
     }
 
@@ -305,5 +306,55 @@ abstract class OrmRelated : OrmPersistent() {
         }
         // 2.2.2 改旧值
         return relation.queryRelated(this, fkInMany)!!.set(relation.foreignKey, value).update()
+    }
+
+    /**
+     * 添加 _data 中的 hasOne/hasMany 的关联关系
+     *   仅用在 create/update() 方法中
+     *   针对 _data 中改过的关联关系
+     *   for jkerp
+     */
+    internal override fun addHasRelations(){
+        for((name, relation) in ormMeta.relations){
+            // 仅处理 hasOne/hasMany 的关联关系
+            if(relation.type == RelationType.BELONGS_TO)
+                continue
+
+            val value = _data[name]
+            if(value != null)
+                addRelation(name, value) // 添加关系
+        }
+    }
+
+    /**
+     * 删除 hasOne/hasMany 的关联关系
+     *   仅用在 update()/delete() 方法中
+     *   for jkerp
+     *
+     * @param byDelete 是否delete()调用, 否则update()调用
+     */
+    internal override fun removeHasRelations(byDelete: Boolean) {
+        for((name, relation) in ormMeta.relations){
+            // 仅处理 hasOne/hasMany 的关联关系
+            if(relation.type == RelationType.BELONGS_TO)
+                continue
+
+            // 1 删除关联对象(包含关系)
+            if(byDelete && relation.cascadeDeleted) {
+                //deleteRelated(name) // 无法触发删除的前置后置回调
+                // 为了能触发删除的前置后置回调，　因此使用 Orm.delete()　实现
+                // 查询关联对象
+                val related = related(name)
+                // 逐个递归删除
+                when(related){
+                    is Collection<*> -> (related as Collection<IOrm>).forEach{ it.delete(true) }
+                    is IOrm -> related.delete(true)
+                }
+                continue
+            }
+
+            // 2 仅删除关联关系
+            removeRelations(name)
+        }
     }
 }

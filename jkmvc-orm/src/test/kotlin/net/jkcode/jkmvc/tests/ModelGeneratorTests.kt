@@ -68,7 +68,7 @@ class ModelGeneratorTests{
         generator.genenateModelFile("Grade", "岗位", "dir_grade")
         generator.genenateModelFile("User", "用户", "dir_user")
         generator.genenateModelFile("Group", "分组", "dir_group")
-        generator.genenateModelFile("Employment", "雇员", "dir_employment")
+        generator.genenateModelFile("Employment", "员工", "dir_employment")
         generator.genenateModelFile("UserMetaData", "某个用户的k/v元数据", "dir_user_meta")
         generator.genenateModelFile("Organization", "组织", "dir_organization")
         generator.genenateModelFile("Role", "岗位", "dir_role")

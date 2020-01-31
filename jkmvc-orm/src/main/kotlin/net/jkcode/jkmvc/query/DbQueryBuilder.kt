@@ -3,6 +3,7 @@ package net.jkcode.jkmvc.query
 import net.jkcode.jkmvc.db.Db
 import net.jkcode.jkmvc.db.DbResultSet
 import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkmvc.orm.OrmQueryBuilder
 
 /**
  * sql构建器
@@ -13,6 +14,46 @@ import net.jkcode.jkmvc.db.IDb
  * @date 2016-10-13
  */
 open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : DbQueryBuilderDecoration() {
+
+    /**
+     * 获得sql查询构建器
+     *   for jkerp
+     *
+     * @param table
+     * @param sort 排序字段
+     * @param desc 是否降序
+     * @param start 偏移
+     * @param rows 查询行数
+     * @param defaultDb
+     * @return
+     */
+    public constructor(table: String, sort: String? = null, desc: Boolean? = null, start: Int? = null, rows: Int? = null, defaultDb: IDb = Db.instance()): this(defaultDb) {
+        table(table)
+
+        if (sort != null && sort != "")
+            orderBy(sort, desc)
+
+        if (rows != null && rows > 0)
+            limit(rows, start ?: 0)
+    }
+
+    /**
+     * 获得sql查询构建器
+     *   for jkerp
+     *
+     * @param table
+     * @param condition 条件
+     * @param params 条件参数
+     * @param sort 排序字段
+     * @param desc 是否降序
+     * @param start 偏移
+     * @param rows 查询行数
+     * @param defaultDb
+     * @return
+     */
+    public constructor(table: String, condition: String, params: Array<*> = emptyArray<Any>(), sort: String? = null, desc: Boolean? = null, start: Int? = null, rows: Int? = null, defaultDb: IDb = Db.instance()): this(table, sort, desc, start, rows, defaultDb){
+        whereCondition(condition, params)
+    }
 
     /****************************** 编译sql ********************************/
     /**

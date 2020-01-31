@@ -10,14 +10,20 @@ import kotlin.reflect.KClass
  *      如 A/B 表是一对一的关系，在查询 A 表记录时，可以通过 join B 表来联查，具体实现参考 OrmQueryBuilder.joinSlave() / joinMaster()
  *    2 根据 A 表记录来查 B 表记录
  *      如 A 表先查出来，再根据 A 表来查 B 表，一般用在 OrmRelated.related() 与 hasMany关系的联查（不能使用join在同一条sql中查询），具体实现参考 RelationMeta.queryRelated()
+ *
+ * 关于 cascadeDeleted:
+ *      只对 hasOne/hasMany 有效, 对 belongsTo/hasOneThrough/hasManyThrough 无效
+ *      对 belongsTo, 你敢删除 belongsTo 关系的主对象？
+ *      对 hasOneThrough/hasManyThrough, 都通过中间表来关联了, 两者之间肯定是独立维护的, 只删除关联关系就好, 不删除关联对象
  */
 open class RelationMeta(
-        public override val sourceMeta:IOrmMeta, /* 源模型元数据 */
-        public override val type:RelationType /* 关联关系 */,
-        public override val model: KClass<out IOrm> /* 关联模型类型 */,
-        public override val foreignKey:DbKeyNames /* 外键 */,
-        public override val primaryKey:DbKeyNames/* 主键 */,
-        public override val conditions:Map<String, Any?> = emptyMap() /* 查询条件 */
+        public override val sourceMeta:IOrmMeta, // 源模型元数据
+        public override val type:RelationType, // 关联关系
+        public override val model: KClass<out IOrm>, // 关联模型类型
+        public override val foreignKey:DbKeyNames, // 外键
+        public override val primaryKey:DbKeyNames, // 主键
+        public override val conditions:Map<String, Any?> = emptyMap(), // 查询条件
+        public override val cascadeDeleted: Boolean = false // 是否级联删除
 ) : IRelationMeta {
 
     /**
@@ -43,17 +49,6 @@ open class RelationMeta(
      *   与 foreignKey 对应
      */
     public override val foreignProp:DbKeyNames = sourceMeta.columns2Props(foreignKey)
-
-    /**
-     * 构造函数
-     * @param sourceMeta 源模型元数据
-     * @param type 关联关系
-     * @param model 关联模型类型
-     * @param foreignKey 外键
-     * @param conditions 查询条件
-     */
-    /*public constructor(sourceMeta:IOrmMeta, type:RelationType, model: KClass<out IOrm>, foreignKey:DbKeyColumn, conditions:Map<String, Any?> = emptyMap()):this(sourceMeta, type, model, foreignKey, sourceMeta.primaryKey, conditions){
-    }*/
 
     /**
      * 检查指定外键值是否为空

@@ -1,10 +1,11 @@
 package net.jkcode.jkmvc.orm
 
-import net.jkcode.jkutil.common.*
 import net.jkcode.jkmvc.db.Db
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.model.GeneralModel
 import net.jkcode.jkmvc.query.DbExpr
+import net.jkcode.jkutil.cache.ICache
+import net.jkcode.jkutil.common.*
 import net.jkcode.jkutil.validator.IValidator
 import net.jkcode.jkutil.validator.ValidateException
 import java.util.*
@@ -17,33 +18,46 @@ import kotlin.reflect.full.isSubclassOf
  * 　两重职责
  *  1 模型映射表的映射元数据，如模型类/数据库/表名
  *  2 代理模型的属性读写
+ *
+ *  关于 cascadeDeleted:
+ *      只对 hasOne/hasMany 有效, 对 belongsTo/hasOneThrough/hasManyThrough 无效
+ *      对 belongsTo, 你敢删除 belongsTo 关系的主对象？
+ *      对 hasOneThrough/hasManyThrough, 都通过中间表来关联了, 两者之间肯定是独立维护的, 只删除关联关系就好, 不删除关联对象
  */
-open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
-                   public override val label: String = model.modelName /* 模型中文名 */,
-                   public override var table: String = model.modelName /* 表名，假定model类名, 都是以"Model"作为后缀 */,
-                   public override var primaryKey:DbKeyNames = DbKeyNames("id") /* 主键 */,
-                   public override val dbName: String = "default" /* 数据库名 */
+open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
+                   public override val label: String = model.modelName, // 模型中文名
+                   public override var table: String = model.modelName, // 表名，假定model类名, 都是以"Model"作为后缀
+                   public override var primaryKey:DbKeyNames = DbKeyNames("id"), // 主键
+                   public override val cached: Boolean = false, // 是否缓存
+                   public override val dbName: String = "default" // 数据库名
 ) : IOrmMeta {
 
-    companion object{
-        /**
-         * 事件
-         */
-        val events:Array<String> = arrayOf("beforeCreate", "afterCreate", "beforeUpdate", "afterUpdate", "beforeSave", "afterSave", "beforeDelete", "afterDelete");
-    }
-
     public constructor(
-            model: KClass<out IOrm> /* 模型类 */,
-            label: String /* 模型中文名 */,
-            table: String /* 表名，假定model类名, 都是以"Model"作为后缀 */,
-            primaryKey:String /* 主键 */,
-            dbName: String = "default" /* 数据库名 */
-    ):this(model, label, table, DbKeyNames(primaryKey), dbName)
+            model: KClass<out IOrm>, // 模型类
+            label: String, // 模型中文名
+            table: String, // 表名，假定model类名, 都是以"Model"作为后缀
+            primaryKey:String, // 主键
+            cacheType: Boolean = false, // 是否缓存
+            dbName: String = "default" // 数据库名
+    ):this(model, label, table, DbKeyNames(primaryKey), cacheType, dbName)
 
     init{
         // 检查 model 类的默认构造函数
         if(model != GeneralModel::class && model.java.getConstructorOrNull() == null)
             throw OrmException("Model Class [$model] has no no-arg constructor") // Model类${clazz}无默认构造函数
+    }
+
+    companion object{
+
+        /**
+         * orm配置
+         */
+        public val config: Config = Config.instance("orm")
+
+        /**
+         * 缓存
+         */
+        private val cache:ICache = ICache.instance(config["cacheType"]!!)
     }
 
     /**
@@ -178,11 +192,60 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * 如果有要处理的事件，则开启事务
      *
      * @param events 多个事件名，以|分隔，如 beforeCreate|afterCreate
+     * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
      * @param statement
      * @return
      */
-    public override fun <T> transactionWhenHandlingEvent(events:String, statement: () -> T): T{
-        return db.transaction(!canHandleAnyEvent(events), statement)
+    public override fun <T> transactionWhenHandlingEvent(events:String, withHasRelations: Boolean, statement: () -> T): T{
+        val needTrans = canHandleAnyEvent(events) || withHasRelations
+        return db.transaction(!needTrans, statement)
+    }
+
+    /********************************* 缓存 **************************************/
+    /**
+     * 读缓存, 无则读db
+     * @param pk 要查询的主键
+     * @param item 要赋值的对象
+     * @param expires 缓存过期时间
+     * @return
+     */
+    public override fun getOrPutCache(pk: DbKeyValues, item: IOrm, expires:Long): IOrm {
+        // 无需缓存
+        if(!cached){
+            loadByPk(pk, item)
+            return item
+        }
+
+        // 读缓存, 无则读db
+        val key = pk.columns.joinToString("_", "${dbName}_")
+        val data = cache.getOrPut(key, expires){
+            // 读db
+            loadByPk(pk, item)
+            // 转map
+            if(item.loaded)
+                item.toMap()
+            else
+                emptyMap<String, Any?>()
+        }.get() as Map<String, Any?>
+
+        // 读的是缓存(不是读db), 则设置item
+        if(!item.loaded && data.isNotEmpty()){
+            item.fromMap(data)
+            item.loaded = true
+        }
+        return item
+    }
+
+    /**
+     * 删除缓存
+     * @param item
+     */
+    public override fun removeCache(item: IOrm){
+        if(!cached)
+            return
+
+        val key = item.pk.columns.joinToString("_", "${dbName}_")
+        cache.remove(key)
     }
 
     /********************************* 校验 **************************************/
@@ -237,6 +300,47 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      */
     public override fun queryBuilder(convertingValue: Boolean, convertingColumn: Boolean, withSelect: Boolean): OrmQueryBuilder {
         return OrmQueryBuilder(this, convertingValue, convertingColumn, withSelect);
+    }
+
+    /**
+     * 根据主键值来加载数据
+     * @param pk 要查询的主键
+     * @param item 要赋值的对象
+     */
+    public override fun loadByPk(pk: DbKeyValues, item: IOrm){
+        queryBuilder().where(primaryKey, pk).findRow() {
+            item.setOriginal(it)
+            item
+        }
+    }
+
+    /**
+     * 根据主键值来查找数据
+     * @param pk 要查询的主键
+     * @return
+     */
+    public override fun <T: IOrm> findByPk(pk: DbKeyValues): T? {
+        return queryBuilder().where(primaryKey, pk).findRow() {
+            val item = model.java.newInstance() as IOrm
+            item.setOriginal(it)
+            item
+        } as T?
+    }
+
+    /**
+     * 根据主键值来删除数据
+     *    为了能触发删除的前置后置回调，　因此使用 Orm.delete()　实现
+     *
+     * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
+     * @param pk 要删除的主键
+     * @return
+     */
+    public override fun deleteByPk(pk: DbKeyValues, withHasRelations: Boolean): Boolean {
+        val item = findByPk<IOrm>(pk)
+        if(item != null && item.loaded)
+            return item.delete()
+
+        return true
     }
 
     /**
@@ -437,6 +541,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param foreignKey 外键
      * @param primaryKey 主键
      * @param conditions 关联查询条件
+     * @param cascadeDeleted 是否级联删除
      * @return
      */
     public override fun belongsTo(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions: Map<String, Any?>): IOrmMeta {
@@ -455,12 +560,13 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param foreignKey 外键
      * @param primaryKey 主键
      * @param conditions 关联查询条件
+     * @param cascadeDeleted 是否级联删除
      * @return
      */
-    public override fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions: Map<String, Any?>): IOrmMeta {
+    public override fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions: Map<String, Any?>, cascadeDeleted: Boolean): IOrmMeta {
         // 设置关联关系
         relations.getOrPut(name) {
-            RelationMeta(this, RelationType.HAS_ONE, relatedModel, foreignKey, primaryKey, conditions)
+            RelationMeta(this, RelationType.HAS_ONE, relatedModel, foreignKey, primaryKey, conditions, cascadeDeleted)
         }
 
         return this;
@@ -473,12 +579,13 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
      * @param foreignKey 外键
      * @param primaryKey 主键
      * @param conditions 关联查询条件
+     * @param cascadeDeleted 是否级联删除
      * @return
      */
-    public override fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions:Map<String, Any?>): IOrmMeta {
+    public override fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions:Map<String, Any?>, cascadeDeleted: Boolean): IOrmMeta {
         // 设置关联关系
         relations.getOrPut(name) {
-            RelationMeta(this, RelationType.HAS_MANY, relatedModel, foreignKey, primaryKey, conditions)
+            RelationMeta(this, RelationType.HAS_MANY, relatedModel, foreignKey, primaryKey, conditions, cascadeDeleted)
         }
 
         return this;
@@ -520,7 +627,7 @@ open class OrmMeta(public override val model: KClass<out IOrm> /* 模型类 */,
     public override fun hasManyThrough(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, middleTable:String, farForeignKey:DbKeyNames, farPrimaryKey:DbKeyNames, conditions:Map<String, Any?>): IOrmMeta {
         // 设置关联关系
         relations.getOrPut(name) {
-            MiddleRelationMeta(this, RelationType.HAS_MANY, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey)
+            MiddleRelationMeta(this, RelationType.HAS_MANY, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey, conditions)
         }
 
         return this;

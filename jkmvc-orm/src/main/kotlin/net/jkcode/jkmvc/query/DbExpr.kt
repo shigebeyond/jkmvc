@@ -20,10 +20,10 @@ import net.jkcode.jkmvc.db.IDbIdentifierQuoter
  * @author shijianhang
  * @create 2017-11-19 下午1:47
  **/
-data class DbExpr(public val exp:CharSequence /* 表达式, 可以是 String | DbQueryBuilder */,
-                  public val alias:String?, /* 别名 */
-                  public val expQuoting:Boolean = (exp !is IDbQueryBuilder) /* 是否转义exp, 只要不是子查询/函数, 默认都转 */
-) : CharSequence by "" {
+data class DbExpr(public val exp:CharSequence, // 表达式, 可以是 String | DbQueryBuilder
+                  public val alias:String?, // 别名
+                  public val expQuoting:Boolean = (exp !is IDbQueryBuilder) // 是否转义exp, 只要不是子查询/函数, 默认都转
+) : CharSequence by exp {
 
     companion object {
 

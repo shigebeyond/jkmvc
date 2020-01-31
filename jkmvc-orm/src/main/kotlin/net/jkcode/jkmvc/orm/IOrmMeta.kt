@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkutil.common.FixedKeyMapFactory
 import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkutil.cache.ICache
 import net.jkcode.jkutil.validator.IValidator
 import net.jkcode.jkutil.validator.RuleValidator
 import net.jkcode.jkutil.validator.ValidateLambda
@@ -10,6 +11,11 @@ import kotlin.reflect.KClass
 /**
  * orm的元数据
  * 　模型映射表的映射元数据，如模型类/数据库/表名
+ *
+ *   关于 cascadeDeleted:
+ *      只对 hasOne/hasMany 有效, 对 belongsTo/hasOneThrough/hasManyThrough 无效
+ *      对 belongsTo, 你敢删除 belongsTo 关系的主对象？
+ *      对 hasOneThrough/hasManyThrough, 都通过中间表来关联了, 两者之间肯定是独立维护的, 只删除关联关系就好, 不删除关联对象
  */
 interface IOrmMeta {
 
@@ -56,7 +62,7 @@ interface IOrmMeta {
     /**
      * 关联关系
      */
-    val relations: MutableMap<String, IRelationMeta>
+    val relations: Map<String, IRelationMeta>
 
     /**
      * 每个字段的规则
@@ -100,6 +106,15 @@ interface IOrmMeta {
     val dataFactory: FixedKeyMapFactory
 
     /**
+     * 熟悉是否需要序列化
+     * @param prop
+     * @return
+     */
+    fun isSerializingProp(prop: String): Boolean {
+        return serializingProps.contains(prop)
+    }
+
+    /**
      * 根据对象属性名，获得db字段名 -- 单个字段
      *    可根据实际需要在 model 类中重写
      *
@@ -130,6 +145,27 @@ interface IOrmMeta {
      * @param value 字符串
      */
     fun convertIntelligent(column:String, value:String):Any?
+
+    /************************************ 缓存 *************************************/
+    /**
+     * 是否缓存
+     */
+    val cached: Boolean
+
+    /**
+     * 读缓存, 无则读db
+     * @param pk 要查询的主键
+     * @param item 要赋值的对象
+     * @param expires 缓存过期时间
+     * @return
+     */
+    fun getOrPutCache(pk: DbKeyValues, item: IOrm = model.java.newInstance(), expires:Long = 5 * 3600): IOrm
+
+    /**
+     * 删除缓存
+     * @param item
+     */
+    fun removeCache(item: IOrm)
 
     /************************************ 事件 *************************************/
     /**
@@ -167,6 +203,96 @@ interface IOrmMeta {
      * @return
      */
     fun queryBuilder(convertingValue: Boolean = false, convertingColumn: Boolean = false, withSelect: Boolean = true): OrmQueryBuilder;
+
+    /**
+     * 获得orm查询构建器
+     *   for jkerp
+     *
+     * @param sort 排序字段
+     * @param desc 是否降序
+     * @param start 偏移
+     * @param rows 查询行数
+     * @return
+     */
+    fun queryBuilder(sort: String? = null, desc: Boolean? = null, start: Int? = null, rows: Int? = null): OrmQueryBuilder {
+        val query = queryBuilder()
+
+        if (sort != null && sort != "")
+            query.orderBy(sort, desc)
+
+        if (rows != null && rows > 0)
+            query.limit(rows, start ?: 0)
+
+        return query
+    }
+
+    /**
+     * 获得orm查询构建器
+     *   for jkerp
+     *
+     * @param condition 条件
+     * @param params 条件参数
+     * @param sort 排序字段
+     * @param desc 是否降序
+     * @param start 偏移
+     * @param rows 查询行数
+     * @return
+     */
+    fun queryBuilder(condition: String, params: Array<Any?> = emptyArray(), sort: String? = null, desc: Boolean? = null, start: Int? = null, rows: Int? = null): OrmQueryBuilder {
+        val query = queryBuilder(sort, desc, start, rows)
+        query.whereCondition(condition, params)
+        return query
+    }
+
+    /**
+     * 根据主键值来加载数据
+     * @param pk 要查询的主键
+     * @param item 要赋值的对象
+     */
+    public fun loadByPk(vararg pk: Any, item: IOrm){
+        loadByPk(DbKeyValues(pk),item)
+    }
+
+    /**
+     * 根据主键值来加载数据
+     * @param pk 要查询的主键
+     * @param item 要赋值的对象
+     */
+    public fun loadByPk(pk: DbKeyValues, item: IOrm)
+
+    /**
+     * 根据主键值来查找数据
+     * @param pk 要查询的主键
+     * @return
+     */
+    public fun <T: IOrm> findByPk(vararg pk: Any): T?{
+        return findByPk(DbKeyValues(pk))
+    }
+
+    /**
+     * 根据主键值来查找数据
+     * @param pk 要查询的主键
+     * @return
+     */
+    public fun <T: IOrm> findByPk(pk: DbKeyValues): T?
+
+    /**
+     * 根据主键值来删除数据
+     * @param pk 要删除的主键
+     * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
+     * @return
+     */
+    public fun deleteByPk(vararg pk: Any, withHasRelations: Boolean = false): Boolean{
+        return deleteByPk(DbKeyValues(pk), withHasRelations)
+    }
+
+    /**
+     * 根据主键值来删除数据
+     * @param pk 要删除的主键
+     * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
+     * @return
+     */
+    public fun deleteByPk(pk: DbKeyValues, withHasRelations: Boolean = false): Boolean
 
     /**
      * 批量插入
@@ -225,7 +351,6 @@ interface IOrmMeta {
      */
     fun joinRelated(query: OrmQueryBuilder, name: String, select: Boolean, columns: SelectColumnList?, lastName:String = this.name, path:String = ""): IRelationMeta
 
-
     /************************************ 事件 *************************************/
     /**
      * 能处理的事件
@@ -247,10 +372,11 @@ interface IOrmMeta {
      * 如果有要处理的事件，则开启事务
      *
      * @param events 多个事件名，以|分隔，如 beforeCreate|afterCreate
+     * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
      * @param statement
      * @return
      */
-    fun <T> transactionWhenHandlingEvent(events:String, statement: () -> T): T
+    fun <T> transactionWhenHandlingEvent(events:String, withHasRelations: Boolean, statement: () -> T): T
 
     /************************************ 关联关系 *************************************/
     /**
@@ -318,9 +444,10 @@ interface IOrmMeta {
      * @param foreignKey 外键
      * @param primaryKey 主键
      * @param conditions 关联查询条件
+     * @param cascadeDeleted 是否级联删除
      * @return
      */
-    fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions: Map<String, Any?> = emptyMap()): IOrmMeta
+    fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions: Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false): IOrmMeta
 
     /**
      * 设置关联关系(has one)
@@ -335,10 +462,11 @@ interface IOrmMeta {
      * @param relatedModel 关联模型
      * @param foreignKey 外键
      * @param conditions 关联查询条件
+     * @param cascadeDeleted 是否级联删除
      * @return
      */
-    fun hasOne(name:String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames = this.defaultForeignKey /* 主表_主键 = 本表_主键 */, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
-        return hasOne(name, relatedModel, foreignKey, this.primaryKey /* 本表的主键 */, conditions)
+    fun hasOne(name:String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames = this.defaultForeignKey /* 主表_主键 = 本表_主键 */, conditions:Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false): IOrmMeta{
+        return hasOne(name, relatedModel, foreignKey, this.primaryKey /* 本表的主键 */, conditions, cascadeDeleted)
     }
 
     /**
@@ -355,9 +483,10 @@ interface IOrmMeta {
      * @param foreignKey 外键
      * @param primaryKey 主键
      * @param conditions 关联查询条件
+     * @param cascadeDeleted 是否级联删除
      * @return
      */
-    fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions: Map<String, Any?> = emptyMap()): IOrmMeta
+    fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions: Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false): IOrmMeta
 
     /**
      * 设置关联关系(has many)
@@ -372,10 +501,11 @@ interface IOrmMeta {
      * @param relatedModel 关联模型
      * @param foreignKey 外键
      * @param conditions 关联查询条件
+     * @param cascadeDeleted 是否级联删除
      * @return
      */
-    fun hasMany(name:String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames = this.defaultForeignKey /* 主表_主键 = 本表_主键 */, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
-        return hasMany(name, relatedModel, foreignKey, this.primaryKey /* 本表的主键 */, conditions)
+    fun hasMany(name:String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames = this.defaultForeignKey /* 主表_主键 = 本表_主键 */, conditions:Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false): IOrmMeta{
+        return hasMany(name, relatedModel, foreignKey, this.primaryKey /* 本表的主键 */, conditions, cascadeDeleted)
     }
 
     /**
@@ -399,15 +529,16 @@ interface IOrmMeta {
      * @param middleTable 中间表
      * @param farForeignKey 远端外键
      * @param farPrimaryKey 远端主键
+     * @param conditions 关联查询条件
      * @return
      */
     fun hasOneThrough(name: String,
                       relatedModel: KClass<out IOrm>,
-                      foreignKey:DbKeyNames = this.defaultForeignKey /* 主表_主键 = 本表_主键 */,
-                      primaryKey:DbKeyNames = this.primaryKey /* 本表的主键 */,
-                      middleTable:String = table + '_' + relatedModel.modelOrmMeta.table /* 主表_从表 */,
-                      farForeignKey:DbKeyNames = relatedModel.modelOrmMeta.defaultForeignKey /* 远端主表_主键 = 从表_主键 */,
-                      farPrimaryKey:DbKeyNames = relatedModel.modelOrmMeta.primaryKey /* 从表的主键 */,
+                      foreignKey:DbKeyNames = this.defaultForeignKey, // 主表_主键 = 本表_主键 
+                      primaryKey:DbKeyNames = this.primaryKey, // 本表的主键 
+                      middleTable:String = table + '_' + relatedModel.modelOrmMeta.table, // 主表_从表 
+                      farForeignKey:DbKeyNames = relatedModel.modelOrmMeta.defaultForeignKey, // 远端主表_主键 = 从表_主键 
+                      farPrimaryKey:DbKeyNames = relatedModel.modelOrmMeta.primaryKey, // 从表的主键 
                       conditions: Map<String, Any?> = emptyMap()
     ): IOrmMeta
 
@@ -432,15 +563,16 @@ interface IOrmMeta {
      * @param middleTable 中间表
      * @param farForeignKey 远端外键
      * @param farPrimaryKey 远端主键
+     * @param conditions 关联查询条件
      * @return
      */
     fun hasManyThrough(name: String,
                        relatedModel: KClass<out IOrm>,
-                       foreignKey:DbKeyNames = this.defaultForeignKey /* 主表_主键 = 本表_主键 */,
-                       primaryKey:DbKeyNames = this.primaryKey /* 本表的主键 */,
-                       middleTable:String = table + '_' + relatedModel.modelOrmMeta.table /* 主表_从表 */,
-                       farForeignKey:DbKeyNames = relatedModel.modelOrmMeta.defaultForeignKey /* 远端主表_主键 = 从表_主键 */,
-                       farPrimaryKey:DbKeyNames = relatedModel.modelOrmMeta.primaryKey /* 从表的主键 */,
+                       foreignKey:DbKeyNames = this.defaultForeignKey, // 主表_主键 = 本表_主键 
+                       primaryKey:DbKeyNames = this.primaryKey, // 本表的主键 
+                       middleTable:String = table + '_' + relatedModel.modelOrmMeta.table, // 主表_从表 
+                       farForeignKey:DbKeyNames = relatedModel.modelOrmMeta.defaultForeignKey, // 远端主表_主键 = 从表_主键 
+                       farPrimaryKey:DbKeyNames = relatedModel.modelOrmMeta.primaryKey, // 从表的主键 
                        conditions: Map<String, Any?> = emptyMap()
     ): IOrmMeta
 
@@ -497,10 +629,11 @@ interface IOrmMeta {
      * @param foreignKey 外键
      * @param primaryKey 主键
      * @param conditions 关联查询条件
+     * @param cascadeDeleted 是否级联删除
      * @return
      */
-    fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey:String, primaryKey:String, conditions: Map<String, Any?> = emptyMap()): IOrmMeta{
-        return hasOne(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), conditions)
+    fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey:String, primaryKey:String, conditions: Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false): IOrmMeta{
+        return hasOne(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), conditions, cascadeDeleted)
     }
 
     /**
@@ -516,10 +649,11 @@ interface IOrmMeta {
      * @param relatedModel 关联模型
      * @param foreignKey 外键
      * @param conditions 关联查询条件
+     * @param cascadeDeleted 是否级联删除
      * @return
      */
-    fun hasOne(name:String, relatedModel: KClass<out IOrm>, foreignKey:String, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
-        return hasOne(name, relatedModel, foreignKey, this.primaryKey.first() /* 本表的主键 */, conditions)
+    fun hasOne(name:String, relatedModel: KClass<out IOrm>, foreignKey:String, conditions:Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false): IOrmMeta{
+        return hasOne(name, relatedModel, foreignKey, this.primaryKey.first() /* 本表的主键 */, conditions, cascadeDeleted)
     }
 
     /**
@@ -536,10 +670,11 @@ interface IOrmMeta {
      * @param foreignKey 外键
      * @param primaryKey 主键
      * @param conditions 关联查询条件
+     * @param cascadeDeleted 是否级联删除
      * @return
      */
-    fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey:String, primaryKey:String, conditions: Map<String, Any?> = emptyMap()): IOrmMeta{
-        return hasMany(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), conditions)
+    fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey:String, primaryKey:String, conditions: Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false): IOrmMeta{
+        return hasMany(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), conditions, cascadeDeleted)
     }
 
     /**
@@ -555,10 +690,11 @@ interface IOrmMeta {
      * @param relatedModel 关联模型
      * @param foreignKey 外键
      * @param conditions 关联查询条件
+     * @param cascadeDeleted 是否级联删除
      * @return
      */
-    fun hasMany(name:String, relatedModel: KClass<out IOrm>, foreignKey:String, conditions:Map<String, Any?> = emptyMap()): IOrmMeta{
-        return hasMany(name, relatedModel, foreignKey, this.primaryKey.first() /* 本表的主键 */, conditions)
+    fun hasMany(name:String, relatedModel: KClass<out IOrm>, foreignKey:String, conditions:Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false): IOrmMeta{
+        return hasMany(name, relatedModel, foreignKey, this.primaryKey.first() /* 本表的主键 */, conditions, cascadeDeleted)
     }
 
     /**
@@ -586,11 +722,11 @@ interface IOrmMeta {
      */
     fun hasOneThrough(name: String,
                       relatedModel: KClass<out IOrm>,
-                      foreignKey:String = this.defaultForeignKey.first() /* 主表_主键 = 本表_主键 */,
-                      primaryKey:String = this.primaryKey.first() /* 本表的主键 */,
-                      middleTable:String = table + '_' + relatedModel.modelOrmMeta.table /* 主表_从表 */,
-                      farForeignKey:String = relatedModel.modelOrmMeta.defaultForeignKey.first() /* 远端主表_主键 = 从表_主键 */,
-                      farPrimaryKey:String = relatedModel.modelOrmMeta.primaryKey.first() /* 从表的主键 */,
+                      foreignKey:String = this.defaultForeignKey.first(), // 主表_主键 = 本表_主键 
+                      primaryKey:String = this.primaryKey.first(), // 本表的主键 
+                      middleTable:String = table + '_' + relatedModel.modelOrmMeta.table, // 主表_从表 
+                      farForeignKey:String = relatedModel.modelOrmMeta.defaultForeignKey.first(), // 远端主表_主键 = 从表_主键 
+                      farPrimaryKey:String = relatedModel.modelOrmMeta.primaryKey.first(), // 从表的主键 
                       conditions: Map<String, Any?> = emptyMap()
     ): IOrmMeta{
         return hasOneThrough(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), middleTable, DbKeyNames(farForeignKey), DbKeyNames(farPrimaryKey), conditions)
@@ -621,11 +757,11 @@ interface IOrmMeta {
      */
     fun hasManyThrough(name: String,
                        relatedModel: KClass<out IOrm>,
-                       foreignKey:String = this.defaultForeignKey.first() /* 主表_主键 = 本表_主键 */,
-                       primaryKey:String = this.primaryKey.first() /* 本表的主键 */,
-                       middleTable:String = table + '_' + relatedModel.modelOrmMeta.table /* 主表_从表 */,
-                       farForeignKey:String = relatedModel.modelOrmMeta.defaultForeignKey.first() /* 远端主表_主键 = 从表_主键 */,
-                       farPrimaryKey:String = relatedModel.modelOrmMeta.primaryKey.first() /* 从表的主键 */,
+                       foreignKey:String = this.defaultForeignKey.first(), // 主表_主键 = 本表_主键 
+                       primaryKey:String = this.primaryKey.first(), // 本表的主键 
+                       middleTable:String = table + '_' + relatedModel.modelOrmMeta.table, // 主表_从表 
+                       farForeignKey:String = relatedModel.modelOrmMeta.defaultForeignKey.first(), // 远端主表_主键 = 从表_主键 
+                       farPrimaryKey:String = relatedModel.modelOrmMeta.primaryKey.first(), // 从表的主键 
                        conditions: Map<String, Any?> = emptyMap()
     ): IOrmMeta{
         return hasManyThrough(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), middleTable, DbKeyNames(farForeignKey), DbKeyNames(farPrimaryKey), conditions)

@@ -91,6 +91,18 @@ interface IOrmRelated : IOrmPersistent
 	}
 
 	/**
+	 * 删除关联对象
+	 *    一般用于删除 hasOne/hasMany 关系的从对象
+	 *    你敢删除 belongsTo 关系的主对象？
+	 *
+	 * @param names 关系名数组
+	 */
+	fun deleteRelateds(vararg names: String){
+		for(name in names)
+		 	deleteRelated(name)
+	}
+
+	/**
 	 * 添加关系（添加关联的外键值）
 	 *     一般用于添加 hasOne/hasMany 关系的从对象的外键值
 	 *     至于 belongsTo 关系的主对象中只要主键，没有外键，你只能添加本对象的外键咯
@@ -139,4 +151,5 @@ interface IOrmRelated : IOrmPersistent
 	fun removeRelations(name:String, nullValue: Any?, fkInMany: IOrm): Boolean{
 		return removeRelations(name, nullValue, fkInMany as Any)
 	}
+
 }

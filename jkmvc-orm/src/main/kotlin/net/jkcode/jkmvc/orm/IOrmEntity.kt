@@ -125,10 +125,10 @@ interface IOrmEntity {
 
     /**
      * 从结果行中设置字段值
-     * @param convertingColumn 是否转换字段名
      * @param row 结果行
+     * @param convertingColumn 是否转换字段名
      */
-    fun fromRow(row: DbResultRow, convertingColumn: Boolean = false): Unit
+    fun fromRow(row: DbResultRow, convertingColumn: Boolean = false)
 
     /**
      * 从map中设置字段值
@@ -136,7 +136,14 @@ interface IOrmEntity {
      * @param from   字段值的哈希：<字段名 to 字段值>
      * @param expected 要设置的字段名的列表
      */
-    fun fromMap(from: Map<String, Any?>, expected: List<String> = emptyList()): Unit;
+    fun fromMap(from: Map<String, Any?>, expected: List<String> = emptyList())
+
+    /**
+     * 从map中设置字段值
+     *
+     * @param from 源实体
+     */
+    fun fromEntity(from: IOrmEntity)
 
     /**
      * 获得字段值 -- 转为Map
@@ -157,7 +164,7 @@ interface IOrmEntity {
      *
      * @param bytes
      */
-    fun unserialize(bytes: ByteArray): Unit
+    fun unserialize(bytes: ByteArray)
 
     /**
      * 编译字符串模板

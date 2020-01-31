@@ -43,18 +43,24 @@ interface IOrmPersistent : IOrmValid {
 	 *
 	 * @param pk
 	 */
-	fun loadByPk(vararg pk: Any): Unit
+	fun loadByPk(vararg pk: Any)
+
+	/**
+	 * 删除缓存
+	 */
+	fun removeCache()
 
 	/**
 	 * 保存数据
 	 *
+	 * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
 	 * @return
 	 */
-	fun save(): Boolean {
+	fun save(withHasRelations: Boolean = false): Boolean {
 		if(loaded)
-			return update();
+			return update(withHasRelations);
 
-		return create() > 0;
+		return create(withHasRelations) > 0;
 	}
 
 	/**
@@ -66,10 +72,11 @@ interface IOrmPersistent : IOrmValid {
 	 *    user.age = 24;
 	 *    user.create();
 	 * </code>
-	 * 
+	 *
+	 * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系 for jkerp
 	 * @return 新增数据的主键
 	 */
-	fun create(): Long;
+	fun create(withHasRelations: Boolean = false): Long;
 
 	/**
 	 * 更新数据: update sql
@@ -79,10 +86,11 @@ interface IOrmPersistent : IOrmValid {
 	 *    user.name = "li";
 	 *    user.update();
 	 * </code>
-	 * 
+	 *
+	 * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系 for jkerp
 	 * @return 
 	 */
-	fun update(): Boolean;
+	fun update(withHasRelations: Boolean = false): Boolean;
 
 	/**
 	 * 删除数据: delete sql
@@ -92,9 +100,10 @@ interface IOrmPersistent : IOrmValid {
 	 *    user.delete();
 	 *　</code>
 	 *
+	 * @param withHasRelations 是否连带删除 hasOne/hasMany 的关联关系 for jkerp
 	 * @return 
 	 */
-	fun delete(): Boolean;
+	fun delete(withHasRelations: Boolean = false): Boolean;
 
 	/**
 	 * 字段值自增: update t1 set col1 = col1 + 1
@@ -106,7 +115,7 @@ interface IOrmPersistent : IOrmValid {
 	 *
 	 * @return
 	 */
-	fun incr(prop: String, step: Int): Boolean;
+	fun incr(prop: String, step: Int = 1): Boolean;
 
 	/************************************ 持久化事件 *************************************/
 	/**

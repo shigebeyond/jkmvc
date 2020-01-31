@@ -109,6 +109,30 @@ interface IDbQueryBuilderDecoration{
     }
 
     /**
+     * Creates a new "WHERE LIKE" condition for the query.
+     *
+     * @param   column  column name or DbExpr
+     * @param   value   column value
+     * @return
+     */
+    fun whereLike(column: String, value: String): IDbQueryBuilder {
+        val exp = if (value.contains('%')) value else "%$value%"
+        return where(column, "LIKE", exp)
+    }
+
+    /**
+     * Creates a new "OR WHERE LIKE" condition for the query.
+     *
+     * @param   column  column name or DbExpr
+     * @param   value   column value
+     * @return
+     */
+    fun orWhereLike(column: String, value: String): IDbQueryBuilder {
+        val exp = if (value.contains('%')) value else "%$value%"
+        return orWhere(column, "LIKE", exp)
+    }
+
+    /**
      * Multiple Where
      *
      * @param   conditions
@@ -156,9 +180,10 @@ interface IDbQueryBuilderDecoration{
      * Alias of andWhereCondition()
      *
      * @param   condition  condition expression
+     * @param   params
      * @return
      */
-    fun whereCondition(condition: String): IDbQueryBuilder {
+    fun whereCondition(condition: String, params: Array<*> = emptyArray<Any>()): IDbQueryBuilder {
         return andWhereCondition(condition)
     }
 
@@ -166,17 +191,19 @@ interface IDbQueryBuilderDecoration{
      * Creates a new "AND WHERE" condition for the query.
      *
      * @param   condition  condition expression
+     * @param   params
      * @return
      */
-    fun andWhereCondition(condition: String): IDbQueryBuilder
+    fun andWhereCondition(condition: String, params: Array<*> = emptyArray<Any>()): IDbQueryBuilder
 
     /**
      * Creates a new "OR WHERE" condition for the query.
      *
      * @param   condition  condition expression
+     * @param   params
      * @return
      */
-    fun orWhereCondition(condition: String): IDbQueryBuilder
+    fun orWhereCondition(condition: String, params: Array<*> = emptyArray<Any>()): IDbQueryBuilder
 
     /**
      * Alias of andWhereOpen()
@@ -324,6 +351,7 @@ interface IDbQueryBuilderDecoration{
 
     /**
      * Applies sorting with "ORDER BY ..."
+     *    for jkerp
      *
      * @param   column     column name or DbExpr
      * @param   asc        whether asc direction

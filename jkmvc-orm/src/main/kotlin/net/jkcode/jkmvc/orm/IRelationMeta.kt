@@ -5,6 +5,12 @@ import kotlin.reflect.KClass
 
 /**
  * 关联关系的元数据
+ *
+ * 关于 cascadeDeleted:
+ *      只对 hasOne/hasMany 有效, 对 belongsTo/hasOneThrough/hasManyThrough 无效
+ *      对 belongsTo, 你敢删除 belongsTo 关系的主对象？
+ *      对 hasOneThrough/hasManyThrough, 都通过中间表来关联了, 两者之间肯定是独立维护的, 只删除关联关系就好, 不删除关联对象
+ *
  * @author shijianhang
  * @date 2016-10-10
  */
@@ -41,6 +47,11 @@ interface IRelationMeta {
      *  查询条件
      */
     val conditions:Map<String, Any?>
+
+    /**
+     * 是否级联删除
+     */
+    val cascadeDeleted: Boolean
 
     /**
      * 主键属性

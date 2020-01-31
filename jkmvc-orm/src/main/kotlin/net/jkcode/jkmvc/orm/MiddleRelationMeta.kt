@@ -19,17 +19,22 @@ import kotlin.reflect.KClass
  * 只涉及到2类的关联查询
  *   只针对hasMany/hasOne
  *   不考虑belongsTo
+ *
+ * 关于 cascadeDeleted:
+ *      只对 hasOne/hasMany 有效, 对 belongsTo/hasOneThrough/hasManyThrough 无效
+ *      对 belongsTo, 你敢删除 belongsTo 关系的主对象？
+ *      对 hasOneThrough/hasManyThrough, 都通过中间表来关联了, 两者之间肯定是独立维护的, 只删除关联关系就好, 不删除关联对象
  */
 class MiddleRelationMeta(
-        sourceMeta:IOrmMeta, /* 源模型元数据 */
-        type:RelationType /* 关联关系 */,
-        model:KClass<out IOrm> /* 关联模型类型 */,
-        foreignKey:DbKeyNames /* 外键 */,
-        primaryKey:DbKeyNames/* 主键 */,
-        public val middleTable:String/* 中间表 */,
-        public val farForeignKey:DbKeyNames /* 远端外键 */,
-        public val farPrimaryKey:DbKeyNames/* 远端主键 */,
-        conditions:Map<String, Any?> = emptyMap() /* 查询条件 */
+        sourceMeta:IOrmMeta, // 源模型元数据
+        type:RelationType, // 关联关系
+        model:KClass<out IOrm>, // 关联模型类型
+        foreignKey:DbKeyNames, // 外键
+        primaryKey:DbKeyNames, // 主键
+        public val middleTable:String, // 中间表
+        public val farForeignKey:DbKeyNames, // 远端外键
+        public val farPrimaryKey:DbKeyNames, // 远端主键
+        conditions:Map<String, Any?> = emptyMap() // 查询条件
 ) : RelationMeta(sourceMeta, type, model, foreignKey, primaryKey, conditions) {
 
     /**

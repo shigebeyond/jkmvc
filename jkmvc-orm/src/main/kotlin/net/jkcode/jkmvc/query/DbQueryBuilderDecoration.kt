@@ -35,7 +35,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
     protected val whereClause: DbQueryBuilderDecorationClauses<*>
         get(){
             return clauses.getOrPut(ClauseType.WHERE.ordinal){
-                DbQueryBuilderDecorationClausesGroup("WHERE", arrayOf<KFunction2<IDb, *, String>?>(this::quoteColumn, null, this::quote));
+                DbQueryBuilderDecorationClausesGroup("WHERE", arrayOf<KFunction2<IDb, *, String>?>(this::quoteWhereColumn, null, this::quote));
             } as DbQueryBuilderDecorationClauses<*>
         }
 
@@ -78,6 +78,29 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      *    直接硬编码
      */
     protected var limitParams:Pair<Int, Int>? = null
+
+    /**
+     * 转义where字段名, 存在以下2种情况
+     *   1 普通字段(String|DbExpr): 转义
+     *   2 条件表达式(DbCondition): 不转义
+     *
+     * @param db
+     * @param table
+     * @return
+     */
+    internal fun quoteWhereColumn(db: IDb, column: CharSequence): String{
+        // 1 条件表达式(DbCondition): 不转义
+        if(column is DbCondition) {
+            // 记录参数
+            if(column.params.isNotEmpty())
+                compiledSql.staticParams.addAll(column.params);
+
+            return column.exp
+        }
+
+        // 2 普通字段(String|DbExpr): 转义
+        return db.quoteColumn(column)
+    }
 
     /**
      * 转义排序方向
@@ -297,10 +320,14 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * Creates a new "AND WHERE" condition for the query.
      *
      * @param   condition  condition expression
+     * @param   params
      * @return
      */
-    public override fun andWhereCondition(condition: String): IDbQueryBuilder {
-        whereClause.addSubexp(arrayOf(DbExpr(condition, false)), "AND");
+    public override fun andWhereCondition(condition: String, params: Array<*>): IDbQueryBuilder {
+        if(condition.isBlank())
+            return this
+
+        whereClause.addSubexp(arrayOf(DbCondition(condition, params)), "AND");
         return this;
     }
 
@@ -308,10 +335,14 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * Creates a new "OR WHERE" condition for the query.
      *
      * @param   condition  condition expression
+     * @param   params
      * @return
      */
-    public override fun orWhereCondition(condition: String): IDbQueryBuilder {
-        whereClause.addSubexp(arrayOf(DbExpr(condition, false)), "OR");
+    public override fun orWhereCondition(condition: String, params: Array<*>): IDbQueryBuilder {
+        if(condition.isBlank())
+            return this
+
+        whereClause.addSubexp(arrayOf(DbCondition(condition, params)), "OR");
         return this;
     }
 

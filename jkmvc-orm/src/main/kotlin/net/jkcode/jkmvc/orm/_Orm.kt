@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.serializer.SerializerFeature
 import net.jkcode.jkutil.common.decorateIterator
 import net.jkcode.jkmvc.db.DbResultRow
+import net.jkcode.jkutil.common.to
 import java.io.Serializable
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -19,7 +20,22 @@ import kotlin.reflect.full.companionObjectInstance
 object OrmPropDelegater: ReadWriteProperty<IOrmEntity, Any?>, Serializable {
     // 获得属性
     public override operator fun getValue(thisRef: IOrmEntity, property: KProperty<*>): Any? {
-        return thisRef[property.name]
+        val value: Any? = thisRef[property.name]
+        // int转bool
+        if(value != null && Boolean::class == (property.returnType.classifier as KClass<*>) && value !is Boolean){
+            return when(value) {
+                is Int -> value > 0
+                is Long -> value > 0
+                is Short -> value > 0
+                is Byte -> value > 0
+                is Float -> value > 0
+                is Double -> value > 0
+                else -> throw IllegalArgumentException("值[$value]不能自动转换为Boolean: ")
+            }
+        }
+
+        // 其他
+        return value
     }
 
     // 设置属性

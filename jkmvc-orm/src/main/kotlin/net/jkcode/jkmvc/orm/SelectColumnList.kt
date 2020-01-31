@@ -5,7 +5,7 @@ import java.util.*
 /**
  * 关系名 + 关联模型的字段列表
  */
-typealias RelatedSelectColumnList = Pair<String, SelectColumnList?>
+data class RelatedSelectColumnList(public val name: String, public val columns: SelectColumnList? = null)
 
 /**
  * 默认的查询字段
@@ -63,7 +63,7 @@ data class SelectColumnList(
 
                 // 处理关联模型+字段
                 val selects = if(subcolumns == null) null else parse(relation.ormMeta, subcolumns) // 递归解析 关联模型的字段
-                relatedColumns.add(subname to selects)
+                relatedColumns.add(RelatedSelectColumnList(subname, selects))
             }
             return SelectColumnList(myColoumns, relatedColumns)
         }
@@ -117,7 +117,7 @@ data class SelectColumnList(
      */
     public fun forEachRelatedColumns(action: (name: String, columns: SelectColumnList?) -> Unit) {
         for(field in relatedColumns){
-            action(field.first, field.second)
+            action(field.name, field.columns)
         }
     }
 }

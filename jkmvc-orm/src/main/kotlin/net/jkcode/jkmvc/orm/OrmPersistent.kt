@@ -60,11 +60,17 @@ abstract class OrmPersistent : OrmValid() {
 	 * @param pk
 	 */
 	public override fun loadByPk(vararg pk: Any): Unit {
-		if(pk.isNotEmpty())
-			queryBuilder().where(ormMeta.primaryKey, DbKeyValues(pk)).findRow(){
-				this.setOriginal(it)
-				this
-			}
+		if(pk.isNotEmpty()) {
+			// ormMeta.loadByPk(DbKeyValues(pk), this) // 无缓存
+			ormMeta.getOrPutCache(DbKeyValues(pk), this) // 有缓存
+		}
+	}
+
+	/**
+	 * 删除缓存
+	 */
+	public override fun removeCache(){
+		ormMeta.removeCache(this)
 	}
 
 	/**
@@ -76,10 +82,11 @@ abstract class OrmPersistent : OrmValid() {
 	 *    user.age = 24;
 	 *    user.create();
 	 * </code>
-	 * 
+	 *
+	 * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系 for jkerp
 	 * @return 新增数据的主键
 	 */
-	public override fun create(): Long {
+	public override fun create(withHasRelations: Boolean): Long {
 		if(_dirty.isEmpty())
 			throw OrmException("No data to create"); // 没有要创建的数据
 
@@ -87,7 +94,7 @@ abstract class OrmPersistent : OrmValid() {
 		validate();
 
 		// 事务
-		return ormMeta.transactionWhenHandlingEvent("beforeCreate|afterCreate|beforeSave|afterSave") {
+		return ormMeta.transactionWhenHandlingEvent("beforeCreate|afterCreate|beforeSave|afterSave", withHasRelations) {
 			// 触发前置事件
 			beforeCreate()
 			beforeSave()
@@ -104,6 +111,10 @@ abstract class OrmPersistent : OrmValid() {
 			// 触发后置事件
 			afterCreate()
 			afterSave()
+
+			// 添加 _data 中的 hasOne/hasMany 的关联关系
+			if(withHasRelations)
+				addHasRelations()
 
 			// 更新内部数据
 			loaded = true; // save事件据此来判定是新增与修改
@@ -128,7 +139,7 @@ abstract class OrmPersistent : OrmValid() {
 			val column = ormMeta.prop2Column(prop)
 			// 字段值
 			var value = _data[prop]
-			var value2 = if(value != null && ormMeta.serializingProps.contains(prop))
+			var value2 = if(value != null && ormMeta.isSerializingProp(prop))
 				serializer.serialize(value)
 			else
 				value
@@ -151,7 +162,7 @@ abstract class OrmPersistent : OrmValid() {
 		// 属性名
 		val prop = ormMeta.column2Prop(column)
 		// 属性值: 需要反序列化
-		var value2 = if(value is ByteArray && ormMeta.serializingProps.contains(prop))
+		var value2 = if(value is ByteArray && ormMeta.isSerializingProp(prop))
 						serializer.unserialize(value)
 					else
 						value
@@ -167,10 +178,11 @@ abstract class OrmPersistent : OrmValid() {
 	 *    user.name = "li";
 	 *    user.update();
 	 * </code>
-	 * 
+	 *
+	 * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系 for jkerp
 	 * @return
 	 */
-	public override fun update(): Boolean {
+	public override fun update(withHasRelations: Boolean): Boolean {
 		if(!loaded)
 			throw OrmException("Load before updating object[$this]"); // 更新对象[$this]前先检查是否存在
 
@@ -184,10 +196,13 @@ abstract class OrmPersistent : OrmValid() {
 		validate();
 
 		// 事务
-		return ormMeta.transactionWhenHandlingEvent("beforeUpdate|afterUpdate|beforeSave|afterSave") {
+		return ormMeta.transactionWhenHandlingEvent("beforeUpdate|afterUpdate|beforeSave|afterSave", withHasRelations) {
 			// 触发前置事件
 			beforeUpdate()
 			beforeSave()
+
+			// 删除缓存
+			removeCache()
 
 			// 更新数据库
 			val result = queryBuilder().sets(buildDirtyData()).where(ormMeta.primaryKey, oldPk /* 原始主键，因为主键可能被修改 */).update();
@@ -195,6 +210,12 @@ abstract class OrmPersistent : OrmValid() {
 			// 触发后置事件
 			afterUpdate()
 			afterSave()
+
+			// 修改(先删后加) _data 中的 hasOne/hasMany 的关联关系
+			if(withHasRelations) {
+				removeHasRelations(false) // 删除旧的关系
+				addHasRelations() // 添加新的关系
+			}
 
 			// 更新内部数据
 			_dirty.clear() // update事件据此来获得变化的字段
@@ -210,22 +231,30 @@ abstract class OrmPersistent : OrmValid() {
 	 *    user.delete();
 	 *　</code>
 	 *
+	 * @param withHasRelations 是否连带删除 hasOne/hasMany 的关联关系 for jkerp
 	 * @return
 	 */
-	public override fun delete(): Boolean {
+	public override fun delete(withHasRelations: Boolean): Boolean {
 		if(!loaded)
 			throw OrmException("Load before deleting object[$this]"); // 删除对象[$this]前先检查是否存在
 
 		// 事务
-		return ormMeta.transactionWhenHandlingEvent("beforeDelete|afterDelete") {
+		return ormMeta.transactionWhenHandlingEvent("beforeDelete|afterDelete", withHasRelations) {
 			// 触发前置事件
 			beforeDelete()
+
+			// 删除缓存
+			removeCache()
 
 			// 删除数据
 			val result = queryBuilder().where(ormMeta.primaryKey, "=", pk).delete();
 
 			// 触发后置事件
 			afterDelete()
+
+			// 删除 hasOne/hasMany 的关联关系
+			if(withHasRelations)
+				removeHasRelations(true)
 
 			// 更新内部数据
 			_data.clear() // delete事件据此来获得删除前的数据
@@ -255,4 +284,19 @@ abstract class OrmPersistent : OrmValid() {
 		return queryBuilder().set(column, "$column + $step", true).where(ormMeta.primaryKey, pk).update();
 	}
 
+	/**
+	 * 添加 _data 中的 hasOne/hasMany 的关联关系
+	 *   仅用在 create/update() 方法中
+	 *   for jkerp
+	 */
+	internal abstract fun addHasRelations()
+
+	/**
+	 * 删除 hasOne/hasMany 的关联关系
+	 *   仅用在 update()/delete() 方法中
+	 *   for jkerp
+	 *
+	 * @param byDelete 是否delete()调用, 否则update()调用
+	 */
+	internal abstract fun removeHasRelations(byDelete: Boolean)
 }

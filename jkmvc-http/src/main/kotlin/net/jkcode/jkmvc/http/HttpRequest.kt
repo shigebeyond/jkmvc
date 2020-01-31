@@ -82,7 +82,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 *   2 去掉末尾的/
 	 */
 	public val routeUri:String = if(contextPath == null)
-									throw RouteException("req.contextPath is null!!")
+									throw RouteException("req.contextPath is null")
 								else
 									requestURI.trim(contextPath + '/', "/")
 

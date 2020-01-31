@@ -150,6 +150,18 @@ abstract class OrmEntity : IOrmEntity, Serializable {
     }
 
     /**
+     * 从map中设置字段值
+     *
+     * @param from 源实体
+     */
+    public override fun fromEntity(from: IOrmEntity){
+        if(this::class != from::class)
+            throw IllegalArgumentException("fromEntity()的调用者类型[${this::class}]与参数类型[${from::class}]不匹配")
+
+        copyMap((from as OrmEntity)._data, _data)
+    }
+
+    /**
      * 获得字段值 -- 转为Map
      *     子类会改写
      * @param to
@@ -168,7 +180,7 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      * @param expected 要设置的字段名的列表
      * @return
      */
-    protected fun copyMap(from: Map<String, Any?>, to: MutableMap<String, Any?>, expected: List<String>): MutableMap<String, Any?> {
+    protected fun copyMap(from: Map<String, Any?>, to: MutableMap<String, Any?>, expected: List<String> = emptyList()): MutableMap<String, Any?> {
         // 复制全部字段
         if(expected.isEmpty()) {
             to.putAll(from)
@@ -258,6 +270,23 @@ abstract class OrmEntity : IOrmEntity, Serializable {
 
         // 2 输出单个字段
         return _data[template].toString()
+    }
+
+    /**
+     * 检查相等
+     */
+    public override fun equals(other: Any?): Boolean {
+        if(other is OrmEntity)
+            return _data == other._data
+
+        return false
+    }
+
+    /**
+     * 计算哈希码
+     */
+    public override fun hashCode(): Int {
+        return _data.hashCode()
     }
 
     /**

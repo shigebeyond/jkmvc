@@ -22,42 +22,45 @@ abstract class OrmValid : IOrm, OrmEntity() {
      * 变化的字段值：<字段名 to 原始字段值>
      *     一般只读，lazy创建，节省内存
      */
-    protected val _dirty: MutableMap<String, Any?> = HashMap()
-
-    /**
-     * 设置对象字段值
-     *    支持记录变化的字段名 + 原始值
-     *
-     * @param column 字段名
-     * @param  value  字段值
-     */
-    public override operator fun set(column: String, value: Any?) {
-        if (!hasColumn(column))
-            throw OrmException("类 ${this.javaClass} 没有字段 $column");
-
-        // 记录变化的字段名 + 原始值
-        if(!_dirty.containsKey(column)
-                //&& value != _data[column])
-                && !equalsValue(_data[column], value))
-            _dirty[column] = _data[column];
-
-        super.set(column, value)
+    protected val _dirty: MutableMap<String, Any?> by lazy {
+        HashMap<String, Any?>()
     }
 
-    /**
-     * 标记字段为脏
-     * @param column 字段名
-     */
-    public override fun setDirty(column: String){
-        if(!_dirty.containsKey(column))
-            _dirty[column] = _data[column];
-    }
+        /**
+         * 设置对象字段值
+         *    支持记录变化的字段名 + 原始值
+         *
+         * @param column 字段名
+         * @param  value  字段值
+         */
+        public override operator fun set(column: String, value: Any?) {
+            if (!hasColumn(column))
+                throw OrmException("类 ${this.javaClass} 没有字段 $column");
 
-    /**
-     * 校验数据
-     */
-    public override fun validate() {
-        ormMeta.validate(this)
+            // 记录变化的字段名 + 原始值
+            if(!_dirty.containsKey(column)
+                    //&& value != _data[column])
+                    && !equalsValue(_data[column], value))
+                _dirty[column] = _data[column];
+
+            super.set(column, value)
+        }
+
+        /**
+         * 标记字段为脏
+         * @param column 字段名
+         */
+        public override fun setDirty(column: String){
+            if(!_dirty.containsKey(column))
+                _dirty[column] = _data[column];
+        }
+
+        /**
+         * 校验数据
+         */
+        public override fun validate() {
+            ormMeta.validate(this)
+        }
     }
 
 

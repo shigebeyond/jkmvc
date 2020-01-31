@@ -132,6 +132,10 @@ data class DbKey<T>(val columns: Array<T>) {
         return columns.contentEquals(o.columns)
     }
 
+    public override fun hashCode(): Int {
+        return columns.hashCode()
+    }
+
     public override fun toString(): String{
         return columns.joinToString(", ", "DbKey[", "]")
     }

@@ -31,4 +31,22 @@ abstract class Orm(pk: Array<Any> = emptyArray() /* 主键值, 非null */) : Orm
         if(pk.isNotEmpty())
             loadByPk(*pk)
     }
+
+    /**
+     * 检查相等
+     */
+    public override fun equals(other: Any?): Boolean {
+        // TODO: 支持int转bool
+        if(other is Orm)
+            return _data == other._data
+
+        return false
+    }
+
+    /**
+     * 获得哈希码
+     */
+    public override fun hashCode(): Int {
+        return pk.hashCode()
+    }
 }

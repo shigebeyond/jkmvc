@@ -190,6 +190,28 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     }
 
     /**
+     * 联查中间表
+     *     中间表.外键 = 主表.主键
+     *
+     * @param slaveRelation 从表关系
+     * @return
+     */
+    public fun joinMiddleTable(slaveRelation: MiddleRelationMeta): OrmQueryBuilder {
+        val masterName = ormMeta.name
+
+        // 准备条件
+        val masterPk:DbKeyNames = slaveRelation.primaryKey.map {  // 主表.主键
+            masterName + "." + it // masterName + "." + slaveRelation.primaryKey
+        };
+        val middleFk:DbKeyNames = slaveRelation.foreignKey.map { // 中间表.外键
+            slaveRelation.middleTable + '.' + it // slaveRelation.middleTable + '.' + slaveRelation.foreignKey
+        }
+
+        // 查中间表
+        return join(slaveRelation.middleTable).on(masterPk, "=", middleFk) as OrmQueryBuilder// 中间表.外键 = 主表.主键
+    }
+
+    /**
      * 通过中间表联查从表
      *     中间表.外键 = 主表.主键
      *     中间表.远端外键 = 从表.远端主键
@@ -211,7 +233,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         val masterPk:DbKeyNames = slaveRelation.primaryKey.map {  // 主表.主键
             masterName + "." + it // masterName + "." + slaveRelation.primaryKey
         };
-        val middleFk:DbKeyNames = slaveRelation.foreignKey.map { // // 中间表.外键
+        val middleFk:DbKeyNames = slaveRelation.foreignKey.map { // 中间表.外键
             slaveRelation.middleTable + '.' + it // slaveRelation.middleTable + '.' + slaveRelation.foreignKey
         }
 

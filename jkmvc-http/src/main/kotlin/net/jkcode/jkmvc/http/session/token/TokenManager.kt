@@ -27,7 +27,7 @@ object TokenManager : ITokenManager {
     /**
      * 缓存
      */
-    private val cache:ICache = ICache.instance(sessionConfig["tokenCache"]!!)
+    private val cache:ICache = ICache.instance(sessionConfig["tokenCacheType"]!!)
 
     /**
      * 为指定用户创建一个token
