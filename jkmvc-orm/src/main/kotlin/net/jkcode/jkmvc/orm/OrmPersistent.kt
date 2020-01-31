@@ -114,7 +114,7 @@ abstract class OrmPersistent : OrmValid() {
 
 			// 添加 _data 中的 hasOne/hasMany 的关联关系
 			if(withHasRelations)
-				addHasRelations()
+				addHasNRelations()
 
 			// 更新内部数据
 			loaded = true; // save事件据此来判定是新增与修改
@@ -213,8 +213,8 @@ abstract class OrmPersistent : OrmValid() {
 
 			// 修改(先删后加) _data 中的 hasOne/hasMany 的关联关系
 			if(withHasRelations) {
-				removeHasRelations(false) // 删除旧的关系
-				addHasRelations() // 添加新的关系
+				removeHasNRelations(false) // 删除旧的关系
+				addHasNRelations() // 添加新的关系
 			}
 
 			// 更新内部数据
@@ -254,7 +254,7 @@ abstract class OrmPersistent : OrmValid() {
 
 			// 删除 hasOne/hasMany 的关联关系
 			if(withHasRelations)
-				removeHasRelations(true)
+				removeHasNRelations(true)
 
 			// 更新内部数据
 			_data.clear() // delete事件据此来获得删除前的数据
@@ -289,7 +289,7 @@ abstract class OrmPersistent : OrmValid() {
 	 *   仅用在 create/update() 方法中
 	 *   for jkerp
 	 */
-	internal abstract fun addHasRelations()
+	internal abstract fun addHasNRelations()
 
 	/**
 	 * 删除 hasOne/hasMany 的关联关系
@@ -298,5 +298,5 @@ abstract class OrmPersistent : OrmValid() {
 	 *
 	 * @param byDelete 是否delete()调用, 否则update()调用
 	 */
-	internal abstract fun removeHasRelations(byDelete: Boolean)
+	internal abstract fun removeHasNRelations(byDelete: Boolean)
 }

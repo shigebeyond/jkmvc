@@ -246,7 +246,7 @@ abstract class OrmRelated : OrmPersistent() {
      */
     public override fun addRelation(name:String, value: Any): Boolean {
         //更新外键
-        return updateForeighKey(name, value){ relation: IRelationMeta ->
+        return updateForeighKey(name, value){ relation: IRelationMeta -> // hasOne/hasMany的关联关系的外键手动更新
             if(relation is MiddleRelationMeta) { // 有中间表: 插入中间表记录
                 relation.insertMiddleTable(this, value) > 0
             }else{ // 无中间表: 更新从表外键
@@ -267,7 +267,7 @@ abstract class OrmRelated : OrmPersistent() {
      */
     public override fun removeRelations(name:String, nullValue: Any?, fkInMany: Any?): Boolean {
         //更新外键
-        return updateForeighKey(name, nullValue, fkInMany){ relation: IRelationMeta ->
+        return updateForeighKey(name, nullValue, fkInMany){ relation: IRelationMeta -> // hasOne/hasMany的关联关系的外键手动更新
             if(relation is MiddleRelationMeta) { // 有中间表: 删除中间表记录
                 val query = relation.queryMiddleTable(this, fkInMany)
                 if (query == null)
@@ -286,10 +286,10 @@ abstract class OrmRelated : OrmPersistent() {
      * @param name 关系名
      * @param value 外键值Any | 关联对象IOrm
      * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则更新所有关系, 否则更新单个关系
-     * @param hasRelationForeighKeyUpdater hasOne/hasMany的关联关系的外键更新函数
+     * @param hasNRelationForeighKeyUpdater hasOne/hasMany的关联关系的外键更新函数
      * @return
      */
-    protected fun updateForeighKey(name:String, value: Any?, fkInMany: Any? = null, hasRelationForeighKeyUpdater: ((relation: IRelationMeta) -> Boolean)): Boolean {
+    protected fun updateForeighKey(name:String, value: Any?, fkInMany: Any? = null, hasNRelationForeighKeyUpdater: ((relation: IRelationMeta) -> Boolean)): Boolean {
         // 获得关联关系
         val relation = ormMeta.getRelation(name)!!;
         // 1 belongsTo：更新本对象的外键
@@ -302,7 +302,7 @@ abstract class OrmRelated : OrmPersistent() {
         // 2 hasOne/hasMany
         // 2.1 有中间表： 手动更新
         if(relation is MiddleRelationMeta)
-            return hasRelationForeighKeyUpdater(relation)
+            return hasNRelationForeighKeyUpdater(relation)
 
         // 2.2 无中间表：更新关联对象的外键
         // 2.2.1 orm对象自动更新
@@ -312,7 +312,7 @@ abstract class OrmRelated : OrmPersistent() {
             return value.update()
         }
         // 2.2.2 手动更新 改旧值
-        return hasRelationForeighKeyUpdater(relation)
+        return hasNRelationForeighKeyUpdater(relation)
     }
 
     /**
@@ -321,7 +321,7 @@ abstract class OrmRelated : OrmPersistent() {
      *   针对 _data 中改过的关联关系
      *   for jkerp
      */
-    internal override fun addHasRelations(){
+    internal override fun addHasNRelations(){
         for((name, relation) in ormMeta.relations){
             // 仅处理 hasOne/hasMany 的关联关系
             if(relation.type == RelationType.BELONGS_TO)
@@ -340,7 +340,7 @@ abstract class OrmRelated : OrmPersistent() {
      *
      * @param byDelete 是否delete()调用, 否则update()调用
      */
-    internal override fun removeHasRelations(byDelete: Boolean) {
+    internal override fun removeHasNRelations(byDelete: Boolean) {
         for((name, relation) in ormMeta.relations){
             // 仅处理 hasOne/hasMany 的关联关系
             if(relation.type == RelationType.BELONGS_TO)
