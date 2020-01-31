@@ -150,18 +150,6 @@ abstract class OrmEntity : IOrmEntity, Serializable {
     }
 
     /**
-     * 从map中设置字段值
-     *
-     * @param from 源实体
-     */
-    public override fun fromEntity(from: IOrmEntity){
-        if(this::class != from::class)
-            throw IllegalArgumentException("fromEntity()的调用者类型[${this::class}]与参数类型[${from::class}]不匹配")
-
-        copyMap((from as OrmEntity)._data, _data)
-    }
-
-    /**
      * 获得字段值 -- 转为Map
      *     子类会改写
      * @param to

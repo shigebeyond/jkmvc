@@ -17,7 +17,7 @@ interface IEntitiableOrm<E: OrmEntity>: IOrm {
      *
      * @param from
      */
-    public override fun fromEntity(from: IOrmEntity){
+    public fun fromEntity(from: IOrmEntity){
         for(column in ormMeta.defaultExpectedProps) {
             val value:Any? = from[column]
             if(value is IOrmEntity){ // 如果是IOrmEntity，则为关联对象

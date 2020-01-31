@@ -139,13 +139,6 @@ interface IOrmEntity {
     fun fromMap(from: Map<String, Any?>, expected: List<String> = emptyList())
 
     /**
-     * 从map中设置字段值
-     *
-     * @param from 源实体
-     */
-    fun fromEntity(from: IOrmEntity)
-
-    /**
      * 获得字段值 -- 转为Map
      * @param to
      * @param expected 要设置的字段名的列表
