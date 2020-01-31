@@ -246,9 +246,12 @@ abstract class OrmRelated : OrmPersistent() {
      */
     public override fun addRelation(name:String, value: Any): Boolean {
         //更新外键
-        return updateForeighKey(name, value){ relation: MiddleRelationMeta, fkInMany: Any? ->
-            // 插入中间表
-            relation.insertMiddleTable(this, value) > 0
+        return updateForeighKey(name, value){ relation: IRelationMeta ->
+            if(relation is MiddleRelationMeta) { // 有中间表: 插入中间表记录
+                relation.insertMiddleTable(this, value) > 0
+            }else{ // 无中间表: 更新从表外键
+                relation.queryBuilder().where(relation.ormMeta.primaryKey, value).set(relation.foreignKey, this.pk).update()
+            }
         }
     }
 
@@ -264,13 +267,16 @@ abstract class OrmRelated : OrmPersistent() {
      */
     public override fun removeRelations(name:String, nullValue: Any?, fkInMany: Any?): Boolean {
         //更新外键
-        return updateForeighKey(name, nullValue, fkInMany){ relation: MiddleRelationMeta, fkInMany: Any? ->
-            // 删除中间表
-            val query = relation.queryMiddleTable(this, fkInMany)
-            if(query == null)
-                true
-            else
-                query.delete()
+        return updateForeighKey(name, nullValue, fkInMany){ relation: IRelationMeta ->
+            if(relation is MiddleRelationMeta) { // 有中间表: 删除中间表记录
+                val query = relation.queryMiddleTable(this, fkInMany)
+                if (query == null)
+                    true
+                else
+                    query.delete()
+            }else{ // 无中间表: 改旧值
+                relation.queryRelated(this, fkInMany)!!.set(relation.foreignKey, nullValue).update()
+            }
         }
     }
 
@@ -280,10 +286,10 @@ abstract class OrmRelated : OrmPersistent() {
      * @param name 关系名
      * @param value 外键值Any | 关联对象IOrm
      * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则更新所有关系, 否则更新单个关系
-     * @param middleForeighKeyUpdater 有中间表的关联关系的外键更新函数
+     * @param hasRelationForeighKeyUpdater hasOne/hasMany的关联关系的外键更新函数
      * @return
      */
-    protected fun updateForeighKey(name:String, value: Any?, fkInMany: Any? = null, middleForeighKeyUpdater: ((relation: MiddleRelationMeta, fkInMany: Any?) -> Boolean)): Boolean {
+    protected fun updateForeighKey(name:String, value: Any?, fkInMany: Any? = null, hasRelationForeighKeyUpdater: ((relation: IRelationMeta) -> Boolean)): Boolean {
         // 获得关联关系
         val relation = ormMeta.getRelation(name)!!;
         // 1 belongsTo：更新本对象的外键
@@ -294,18 +300,19 @@ abstract class OrmRelated : OrmPersistent() {
         }
 
         // 2 hasOne/hasMany
-        // 2.1 有中间表：
+        // 2.1 有中间表： 手动更新
         if(relation is MiddleRelationMeta)
-            return middleForeighKeyUpdater(relation, fkInMany)
+            return hasRelationForeighKeyUpdater(relation)
 
         // 2.2 无中间表：更新关联对象的外键
-        if(value is IOrm){ // 2.2.1 新加值
+        // 2.2.1 orm对象自动更新
+        if(value is IOrm){
             //value[relation.foreignProp] = this[relation.primaryProp]
             value.sets(relation.foreignProp, this.gets(relation.primaryProp))
             return value.update()
         }
-        // 2.2.2 改旧值
-        return relation.queryRelated(this, fkInMany)!!.set(relation.foreignKey, value).update()
+        // 2.2.2 手动更新 改旧值
+        return hasRelationForeighKeyUpdater(relation)
     }
 
     /**

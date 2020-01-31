@@ -41,7 +41,7 @@ class UserModel(id:Int? = null): Orm(id) {
 
     // 关联地址：一个用户有一个地址
     // relate to AddressModel: user has an address
-    public var address: AddressModel by property();
+    public var address: AddressModel? by property();
 
     // 关联地址：一个用户有多个地址
     // relate to AddressModel: user has many addresses
