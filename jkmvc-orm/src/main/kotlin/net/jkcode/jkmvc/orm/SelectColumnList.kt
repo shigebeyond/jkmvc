@@ -29,8 +29,8 @@ data class SelectColumnList(
          *    解析出本模型的字段 + （关系名 + 关联模型的字段）
          *
          * @param sourceMeta 源模型元数据
-         * @param columns 字段列表，其元素类型可以是 1 String 本模型字段名 2 RelatedSelectColumnList = Pair<String, SelectColumnList?> 关系名 + 关联模型的字段列表
-         *               如listOf("id", "name", "dept" to listOf("id", "title")), 其中本模型要显示id与name字段，dept是关联模型，要显示id与title字段
+         * @param columns 字段列表，其元素类型可以是 1 String 本模型字段名 2 RelatedSelectColumnList 关系名 + 关联模型的字段列表
+         *               如listOf("id", "name", "dept" to listOf("id", "title"), DbExpr("group", "group2") to listOf("*")), 其中本模型要显示id与name字段，dept是关联模型名，要显示id与title字段, group是关联模型名, group2是别名
          * @return
          */
         public fun parse(sourceMeta: IOrmMeta, columns:Iterator<Any>): SelectColumnList {
@@ -38,7 +38,7 @@ data class SelectColumnList(
             val relatedColumns = LinkedList<RelatedSelectColumnList>() // 关系名 + 关联模型的字段
             for (col in columns){
                 // 获得关系名
-                var subname:String // 关系名
+                var subname: String // 关系名, 类型 String|DbExpr
                 val subcolumns: List<Any>? // 关联模型的字段列表
                 when(col){
                     is Pair<*, *> -> {
@@ -49,7 +49,7 @@ data class SelectColumnList(
                         subname = col
                         subcolumns = null
                     }
-                    else -> throw IllegalArgumentException("查询字段参数类型必须是：1 String 本模型字段名 2 RelatedSelectColumnList = Pair<String, SelectColumnList?> 关系名 + 关联模型的字段列表")
+                    else -> throw IllegalArgumentException("查询字段参数类型必须是：1 String 本模型字段名 2 RelatedSelectColumnList 关系名 + 关联模型的字段列表")
                 }
 
                 // 检查关系
@@ -73,8 +73,8 @@ data class SelectColumnList(
          *    解析出本模型的字段 + （关系名 + 关联模型的字段）
          *
          * @param sourceMeta 源模型元数据
-         * @param fields 字段列表，其元素类型可以是 1 String 本模型字段名 2 RelatedSelectColumnList = Pair<String, SelectColumnList?> 关系名 + 关联模型的字段列表
-         *               如arrayOf("id", "name", "dept" to listOf("id", "title")), 其中本模型要显示id与name字段，dept是关联模型，要显示id与title字段
+         * @param fields 字段列表，其元素类型可以是 1 String 本模型字段名 2 RelatedSelectColumnList 关系名 + 关联模型的字段列表
+         *               如arrayOf("id", "name", "dept" to listOf("id", "title"), DbExpr("group", "group2") to listOf("*")), 其中本模型要显示id与name字段，dept是关联模型名，要显示id与title字段, group是关联模型名, group2是别名
          * @return
          */
         public fun parse(sourceMeta: IOrmMeta, fields:Array<out Any>): SelectColumnList {
@@ -89,8 +89,8 @@ data class SelectColumnList(
          *    解析出本模型的字段 + （关系名 + 关联模型的字段）
          *
          * @param sourceMeta 源模型元数据
-         * @param fields 字段列表，其元素类型可以是 1 String 本模型字段名 2 RelatedSelectColumnList = Pair<String, SelectColumnList?> 关系名 + 关联模型的字段列表
-         *               如listOf("id", "name", "dept" to listOf("id", "title")), 其中本模型要显示id与name字段，dept是关联模型，要显示id与title字段
+         * @param fields 字段列表，其元素类型可以是 1 String 本模型字段名 2 RelatedSelectColumnList 关系名 + 关联模型的字段列表
+         *               如listOf("id", "name", "dept" to listOf("id", "title"), DbExpr("group", "group2") to listOf("*")), 其中本模型要显示id与name字段，dept是关联模型名，要显示id与title字段, group是关联模型名, group2是别名
          * @return
          */
         public fun parse(sourceMeta: IOrmMeta, fields:List<Any>): SelectColumnList {

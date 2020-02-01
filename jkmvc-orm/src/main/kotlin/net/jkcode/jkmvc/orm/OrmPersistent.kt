@@ -61,8 +61,10 @@ abstract class OrmPersistent : OrmValid() {
 	 */
 	public override fun loadByPk(vararg pk: Any): Unit {
 		if(pk.isNotEmpty()) {
-			// ormMeta.loadByPk(DbKeyValues(pk), this) // 无缓存
-			ormMeta.getOrPutCache(DbKeyValues(pk), this) // 有缓存
+			val key = DbKeyValues(pk)
+			if(!isPkEmpty(key))
+				// ormMeta.loadByPk(key, this) // 无缓存
+				ormMeta.getOrPutCache(key, this) // 有缓存
 		}
 	}
 
