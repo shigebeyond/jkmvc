@@ -52,13 +52,15 @@ data class DbExpr(public val exp:CharSequence, // 表达式, 可以是 String | 
 
     /**
      * 转字符串
+     *    因为在 RelatedSelectColumnList#name 中用来记录关系名+别名, 因此 toString() 直接返回 exp 来方便引用关系名
+     *
      * @return
      */
     public override fun toString(): String {
-        if(alias == null)
+//        if(alias == null)
             return exp.toString();
 
-        return "$exp $alias"
+//        return "$exp $alias"
     }
 
     /**

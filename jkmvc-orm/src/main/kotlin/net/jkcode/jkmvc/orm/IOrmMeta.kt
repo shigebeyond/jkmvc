@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkutil.common.FixedKeyMapFactory
 import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkutil.cache.ICache
 import net.jkcode.jkutil.validator.IValidator
 import net.jkcode.jkutil.validator.RuleValidator
@@ -354,14 +355,14 @@ interface IOrmMeta {
      * 联查关联表
      *
      * @param query 查询构建器
-     * @param name 关联关系名
+     * @param name 关联关系名, 类型 String|DbExpr(关系名+别名)
      * @param select 是否select关联字段
      * @param columns 关联字段列表
-     * @param lastName 上一级关系名
+     * @param lastName 上一级关系名, 类型 String|DbExpr(关系名+别名)
      * @param path 列名父路径
      * @return 关联关系
      */
-    fun joinRelated(query: OrmQueryBuilder, name: String, select: Boolean, columns: SelectColumnList?, lastName:String = this.name, path:String = ""): IRelationMeta
+    fun joinRelated(query: OrmQueryBuilder, name: CharSequence, select: Boolean, columns: SelectColumnList?, lastName:CharSequence = this.name, path:String = ""): IRelationMeta
 
     /************************************ 事件 *************************************/
     /**
@@ -778,4 +779,5 @@ interface IOrmMeta {
     ): IOrmMeta{
         return hasManyThrough(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), middleTable, DbKeyNames(farForeignKey), DbKeyNames(farPrimaryKey), conditions)
     }
+
 }

@@ -5,7 +5,10 @@ import java.util.*
 /**
  * 关系名 + 关联模型的字段列表
  */
-data class RelatedSelectColumnList(public val name: String, public val columns: SelectColumnList? = null)
+data class RelatedSelectColumnList(
+        public val name: CharSequence, // 关系名, 类型 String|DbExpr(关系名+别名)
+        public val columns: SelectColumnList? = null // 查询字段
+)
 
 /**
  * 默认的查询字段
@@ -19,8 +22,8 @@ val defaultSelectColumnList = SelectColumnList(emptyList())
  * @date 2017-10-10
  */
 data class SelectColumnList(
-        public val myColumns: List<String> /* 本模型的字段 */,
-        public val relatedColumns: List<RelatedSelectColumnList> = emptyList() /* 多个 关系名 + 关联模型的字段列表 */
+        public val myColumns: List<String>, // 本模型的字段
+        public val relatedColumns: List<RelatedSelectColumnList> = emptyList() // 多个 关系名 + 关联模型的字段列表
 ){
     companion object{
 
@@ -38,11 +41,11 @@ data class SelectColumnList(
             val relatedColumns = LinkedList<RelatedSelectColumnList>() // 关系名 + 关联模型的字段
             for (col in columns){
                 // 获得关系名
-                var subname: String // 关系名, 类型 String|DbExpr
+                var subname: CharSequence // 关系名, 类型 String|DbExpr(关系名+别名)
                 val subcolumns: List<Any>? // 关联模型的字段列表
                 when(col){
                     is Pair<*, *> -> {
-                        subname = col.first as String
+                        subname = col.first as CharSequence
                         subcolumns = col.second as List<Any>
                     }
                     is String -> {
@@ -53,7 +56,7 @@ data class SelectColumnList(
                 }
 
                 // 检查关系
-                val relation = sourceMeta.getRelation(subname)
+                val relation = sourceMeta.getRelation(subname.toString()) // 兼容 name 类型是 DbExpr, 用 DbExpr.toString() 来引用关系名
 
                 // 处理本模型字段
                 if(relation == null){
@@ -115,7 +118,7 @@ data class SelectColumnList(
      *
      * @param action 处理字段的lambda，接收两个参数: 1 关系名 2 关联模型的字段列表
      */
-    public fun forEachRelatedColumns(action: (name: String, columns: SelectColumnList?) -> Unit) {
+    public fun forEachRelatedColumns(action: (name: CharSequence, columns: SelectColumnList?) -> Unit) {
         for(field in relatedColumns){
             action(field.name, field.columns)
         }

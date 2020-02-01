@@ -479,48 +479,50 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * 联查关联表
      *
      * @param query 查询构建器
-     * @param name 关联关系名
+     * @param name 关联关系名, 类型 String|DbExpr(关系名+别名)
      * @param select 是否select关联字段
      * @param columns 关联字段列表
-     * @param lastName 上一级关系名
+     * @param lastName 上一级关系名, 类型 String|DbExpr(关系名+别名)
      * @param path 列名父路径
      * @return 关联关系
      */
-    public override fun joinRelated(query: OrmQueryBuilder, name: String, select: Boolean, columns: SelectColumnList?, lastName:String, path:String): IRelationMeta {
+    public override fun joinRelated(query: OrmQueryBuilder, name: CharSequence, select: Boolean, columns: SelectColumnList?, lastName:CharSequence, path:String): IRelationMeta {
         // 获得当前关联关系
-        val relation = getRelation(name)!!;
+        val relation = getRelation(name.toString())!! // 兼容 name 类型是 DbExpr, 用 DbExpr.toString() 来引用关系名
         // 1 非hasMany关系：只处理一层
         if(relation.type == RelationType.HAS_MANY){
             // 单独处理hasMany关系，不在一个sql中联查，而是单独查询
-            query.withMany(name, columns)
+            query.withMany(name.toString(), columns)
             return relation;
         }
 
         // 2 非hasMany关系
+        val alias = if(name is DbExpr) name.alias!! else name.toString() // 当前关系别名, 用作表别名
+        val lastAlias = if(lastName is DbExpr) lastName.alias!! else lastName.toString() // 上一级关系别名, 用作表别名
         // join关联表
         if (relation.type == RelationType.BELONGS_TO) { // belongsto: join 主表
-            query.joinMaster(this, lastName, relation, name);
+            query.joinMaster(this, lastAlias, relation, alias);
         }else{ // hasxxx: join 从表
             if(relation is MiddleRelationMeta) // 有中间表
-                query.joinSlaveThrough(this, lastName, relation, name);
+                query.joinSlaveThrough(this, lastAlias, relation, alias);
             else // 无中间表
-                query.joinSlave(this, lastName, relation, name);
+                query.joinSlave(this, lastAlias, relation, alias);
         }
 
         //列名父路径
         val path2 = if(path == "")
-            name
+            name.toString()
         else
             path + ":" + name
 
         // 递归联查子关系
-        columns?.forEachRelatedColumns { subname: String, subcolumns: SelectColumnList? ->
+        columns?.forEachRelatedColumns { subname: CharSequence, subcolumns: SelectColumnList? ->
             relation.ormMeta.joinRelated(query, subname, select, subcolumns, name, path2)
         }
 
         // 查询当前关系字段
         if(select)
-            query.selectRelated(relation, name, columns?.myColumns /* 若字段为空，则查全部字段 */, path2);
+            query.selectRelated(relation, alias, columns?.myColumns /* 若字段为空，则查全部字段 */, path2);
 
         return relation;
     }

@@ -3,6 +3,7 @@ package net.jkcode.jkmvc.tests
 import net.jkcode.jkmvc.db.Db
 import net.jkcode.jkmvc.model.GeneralModel
 import net.jkcode.jkmvc.orm.*
+import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.tests.model.*
 import org.junit.Test
 
@@ -123,14 +124,21 @@ class OrmTests{
 
     @Test
     fun testRelateFind(){
-        val user = UserModel(id)
-        val address = user.address
+        // 1 延迟加载
+        //val user = UserModel(id)
+        // 2 with() 联查
+        //val user = UserModel.queryBuilder().with("address").where("user.id", id).findModel<UserModel>()
+        // 3 selectWiths() 联查
+        //val user = UserModel.queryBuilder().selectWiths("address" to listOf("*")).where("user.id", id).findModel<UserModel>()
+        // 4 selectWiths() 联查 + 表别名
+        val user = UserModel.queryBuilder().selectWiths(DbExpr("address", "a") to listOf("*")).where("user.id", id).findModel<UserModel>()
+        val address = user?.address
         println(address)
     }
 
     @Test
     fun testRelateFindMany(){
-        // 一个user，联查多个address
+        // 一个user，联查个address
 //        val user = UserModel(id)
 //        val addresses = user.addresses
 //        println(addresses)

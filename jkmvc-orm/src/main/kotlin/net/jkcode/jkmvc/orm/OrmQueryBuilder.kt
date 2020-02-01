@@ -90,7 +90,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @param columns 关联模型的字段列表
      * @return
      */
-    public fun with(name: String, select: Boolean = withSelect, columns: SelectColumnList? = null): OrmQueryBuilder {
+    public fun with(name: CharSequence, select: Boolean = withSelect, columns: SelectColumnList? = null): OrmQueryBuilder {
         // select当前表字段
         if (select && selectColumns.isEmpty())
             select(ormMeta.name + ".*");
@@ -108,7 +108,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * @param columns 关联模型的字段列表
      * @return
      */
-    public fun with(name: String, columns: SelectColumnList?): OrmQueryBuilder {
+    public fun with(name: CharSequence, columns: SelectColumnList?): OrmQueryBuilder {
         return with(name, withSelect, columns)
     }
 
@@ -134,7 +134,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      */
     public fun selectWiths(columns: SelectColumnList): OrmQueryBuilder {
         // 联查关联模型
-        columns.forEachRelatedColumns { name, columns ->
+        columns.forEachRelatedColumns { name: CharSequence, columns: SelectColumnList? ->
             with(name, columns)
         }
 
@@ -156,6 +156,37 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         //数据结构：<hasMany关系名, 查询字段>
         joinMany[name] = columns
         return this
+    }
+
+    /**
+     * 联查主表
+     *     主表.主键 = 从表.外键
+     *
+     * @param slave 从表模型
+     * @param slaveName 从表别名
+     * @param masterRelation 主表关系
+     * @param masterName 主表别名
+     * @return
+     */
+    public fun joinMaster(slave: IOrmMeta, slaveName:String, masterRelation: IRelationMeta, masterName: String): OrmQueryBuilder {
+        // 检查并添加关联查询记录
+        if(joins.containsKey(masterName))
+            return this;
+
+        joins[masterName] = masterRelation
+
+        // 准备条件
+        val slaveFk:DbKeyNames = masterRelation.foreignKey.map { // 从表.外键
+            slaveName + "." + it // slaveName + "." + masterRelation.foreignKey
+        }
+
+        val master: IOrmMeta = masterRelation.ormMeta;
+        val masterPk:DbKeyNames = masterRelation.primaryKey.map {  // 主表.主键
+            masterName + "." + it //masterName + "." + masterRelation.primaryKey
+        }
+
+        // 查主表
+        return join(DbExpr(master.table, masterName), "LEFT").on(masterPk, "=", slaveFk) as OrmQueryBuilder; // 主表.主键 = 从表.外键
     }
 
     /**
@@ -187,39 +218,6 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
 
         // 查从表
         return join(DbExpr(slave.table, slaveName), "LEFT").on(slaveFk, "=", masterPk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
-    }
-
-    /**
-     * 联查中间表
-     *     中间表.外键 = 主表.主键
-     *
-     * @param slaveRelationName 从表关系
-     * @return
-     */
-    public fun joinMiddleTable(slaveRelationName: String): OrmQueryBuilder {
-        return joinMiddleTable(ormMeta.getRelation(slaveRelationName) as MiddleRelationMeta)
-    }
-
-    /**
-     * 联查中间表
-     *     中间表.外键 = 主表.主键
-     *
-     * @param slaveRelation 从表关系
-     * @return
-     */
-    public fun joinMiddleTable(slaveRelation: MiddleRelationMeta): OrmQueryBuilder {
-        val masterName = ormMeta.name
-
-        // 准备条件
-        val masterPk:DbKeyNames = slaveRelation.primaryKey.map {  // 主表.主键
-            masterName + "." + it // masterName + "." + slaveRelation.primaryKey
-        };
-        val middleFk:DbKeyNames = slaveRelation.foreignKey.map { // 中间表.外键
-            slaveRelation.middleTable + '.' + it // slaveRelation.middleTable + '.' + slaveRelation.foreignKey
-        }
-
-        // 查中间表
-        return join(slaveRelation.middleTable).on(masterPk, "=", middleFk) as OrmQueryBuilder// 中间表.外键 = 主表.主键
     }
 
     /**
@@ -264,34 +262,36 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
     }
 
     /**
-     * 联查主表
-     *     主表.主键 = 从表.外键
+     * 联查中间表
+     *     中间表.外键 = 主表.主键
      *
-     * @param slave 从表模型
-     * @param slaveName 从表别名
-     * @param masterRelation 主表关系
-     * @param masterName 主表别名
+     * @param slaveRelationName 从表关系
      * @return
      */
-    public fun joinMaster(slave: IOrmMeta, slaveName:String, masterRelation: IRelationMeta, masterName: String): OrmQueryBuilder {
-        // 检查并添加关联查询记录
-        if(joins.containsKey(masterName))
-            return this;
+    public fun joinMiddleTable(slaveRelationName: String): OrmQueryBuilder {
+        return joinMiddleTable(ormMeta.getRelation(slaveRelationName) as MiddleRelationMeta)
+    }
 
-        joins[masterName] = masterRelation
+    /**
+     * 联查中间表
+     *     中间表.外键 = 主表.主键
+     *
+     * @param slaveRelation 从表关系
+     * @return
+     */
+    public fun joinMiddleTable(slaveRelation: MiddleRelationMeta): OrmQueryBuilder {
+        val masterName = ormMeta.name
 
         // 准备条件
-        val slaveFk:DbKeyNames = masterRelation.foreignKey.map { // 从表.外键
-            slaveName + "." + it // slaveName + "." + masterRelation.foreignKey
+        val masterPk:DbKeyNames = slaveRelation.primaryKey.map {  // 主表.主键
+            masterName + "." + it // masterName + "." + slaveRelation.primaryKey
+        };
+        val middleFk:DbKeyNames = slaveRelation.foreignKey.map { // 中间表.外键
+            slaveRelation.middleTable + '.' + it // slaveRelation.middleTable + '.' + slaveRelation.foreignKey
         }
 
-        val master: IOrmMeta = masterRelation.ormMeta;
-        val masterPk:DbKeyNames = masterRelation.primaryKey.map {  // 主表.主键
-            masterName + "." + it //masterName + "." + masterRelation.primaryKey
-        }
-
-        // 查主表
-        return join(DbExpr(master.table, masterName), "LEFT").on(masterPk, "=", slaveFk) as OrmQueryBuilder; // 主表.主键 = 从表.外键
+        // 查中间表
+        return join(slaveRelation.middleTable).on(masterPk, "=", middleFk) as OrmQueryBuilder// 中间表.外键 = 主表.主键
     }
 
     /**
