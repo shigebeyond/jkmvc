@@ -30,6 +30,13 @@ interface IOrmPersistent : IOrmValid {
 	 */
 	val oldPk:DbKeyValues
 
+	/**
+	 * 检查主键值是否为空
+	 */
+	fun isPkEmpty(pk: Any?): Boolean {
+		return ormMeta.isPkEmpty(pk)
+	}
+
 	/************************************ 持久化处理 *************************************/
 	/**
 	 * 获得sql构建器

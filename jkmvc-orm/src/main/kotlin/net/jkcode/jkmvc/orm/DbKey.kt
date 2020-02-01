@@ -206,17 +206,6 @@ internal inline fun DbKeyNames.isAllEmpty(): Boolean{
     }
 }
 
-/*************************** DbKeyValues扩展 ******************************/
-/**
- * 检查值是否为null -- 复合主键中的字段值不能为空
- * @return
- */
-internal inline fun DbKeyValues.isAnyNull(): Boolean {
-    return columns.isEmpty() || columns.all {
-        it == null
-    }
-}
-
 /*************************** IOrmMeta扩展 ******************************/
 /**
  * 根据对象属性名，获得db字段名 -- 多个字段
@@ -240,18 +229,6 @@ internal inline fun IOrmMeta.props2Columns(props:DbKeyNames): DbKeyNames {
 inline fun IOrmMeta.columns2Props(columns:DbKeyNames): DbKeyNames {
     return columns.map {
         column2Prop(it)
-    }
-}
-
-/**
- * 检查指定外键值是否为空
- *
- * @param fks 外键值
- * @return
- */
-internal fun IRelationMeta.isForeighKeysAllEmpty(fks: DbKeyValues): Boolean{
-    return fks.columns.all {
-        IRelationMeta@this.isForeighKeyEmpty(it)
     }
 }
 

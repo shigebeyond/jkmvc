@@ -54,6 +54,11 @@ interface IRelationMeta {
     val cascadeDeleted: Boolean
 
     /**
+     * 检查主键为空的规则
+     */
+    val pkEmptyRule: PkEmptyRule
+
+    /**
      * 主键属性
      */
     val primaryProp:DbKeyNames
@@ -91,14 +96,6 @@ interface IRelationMeta {
     fun newModelInstance(): IOrm {
         return model.java.newInstance();
     }
-
-    /**
-     * 检查指定外键值是否为空
-     *
-     * @param fk 外键值
-     * @return
-     */
-    fun isForeighKeyEmpty(fk: Any?): Boolean
 
     /**
      * 查询关联表

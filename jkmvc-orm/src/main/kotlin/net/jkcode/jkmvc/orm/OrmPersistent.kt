@@ -100,7 +100,9 @@ abstract class OrmPersistent : OrmValid() {
 			beforeSave()
 
 			// 插入数据库
-			val needPk = !ormMeta.primaryProp.isAllEmpty() && !_data.containsAllKeys(ormMeta.primaryProp) // 是否需要生成主键
+			// 是否需要生成主键
+			val needPk = !ormMeta.primaryProp.isAllEmpty() // 有主键字段
+					&& !_data.containsAllKeys(ormMeta.primaryProp) // 但无主键值
 			val generatedColumn = if (needPk) ormMeta.primaryKey.first() else null // 主键名
 			val pk = queryBuilder().value(buildDirtyData()).insert(generatedColumn);
 

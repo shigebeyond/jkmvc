@@ -23,20 +23,9 @@ open class RelationMeta(
         public override val foreignKey:DbKeyNames, // 外键
         public override val primaryKey:DbKeyNames, // 主键
         public override val conditions:Map<String, Any?> = emptyMap(), // 查询条件
-        public override val cascadeDeleted: Boolean = false // 是否级联删除
+        public override val cascadeDeleted: Boolean = false, // 是否级联删除
+        public override val pkEmptyRule: PkEmptyRule = model.modelOrmMeta.pkEmptyRule // 检查主键为空的规则
 ) : IRelationMeta {
-
-    /**
-     * 约定int类型的外键必须是正整数
-     * TODO: 可配置
-     */
-    public val intForeighKeyMustPositive:Boolean = true
-
-    /**
-     * 约定string类型的外键必须不为空
-     * TODO: 可配置
-     */
-    public val stringForeighKeyMustNotEmpty:Boolean = true
 
     /**
      * 主键属性
@@ -49,18 +38,6 @@ open class RelationMeta(
      *   与 foreignKey 对应
      */
     public override val foreignProp:DbKeyNames = sourceMeta.columns2Props(foreignKey)
-
-    /**
-     * 检查指定外键值是否为空
-     *
-     * @param fk 外键值
-     * @return
-     */
-    public override fun isForeighKeyEmpty(fk: Any?): Boolean {
-        return fk == null
-                || (fk is Int && intForeighKeyMustPositive && fk == 0)
-                || (fk is String && stringForeighKeyMustNotEmpty && fk.isEmpty())
-    }
 
     /**
      * 查询关联表
@@ -80,14 +57,14 @@ open class RelationMeta(
         // 查主表
         if(type == RelationType.BELONGS_TO) {
             val fk:DbKeyValues = item.gets(foreignProp)
-            if(isForeighKeysAllEmpty(fk)) // 如果外键为空，则联查为空
+            if(pkEmptyRule.isEmpty(fk)) // 如果外键为空，则联查为空
                 return null
             return queryBuilder().where(primaryKey.wrap(tableAlias) /*tableAlias + primaryKey*/, "=", fk) as OrmQueryBuilder // 主表.主键 = 从表.外键
         }
 
         // 查从表
         val pk:DbKeyValues = item.gets(primaryProp) // 主键
-        if(pk.isAnyNull())
+        if(item.isPkEmpty(pk))
             return null
         val query = queryBuilder().where(foreignKey.wrap(tableAlias) /*tableAlias + foreignKey*/, "=", pk) as OrmQueryBuilder// 从表.外键 = 主表.主键
         if(fkInMany != null) { // hasMany关系下过滤单个关系

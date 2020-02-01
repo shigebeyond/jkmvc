@@ -80,6 +80,11 @@ interface IOrmMeta {
     val db: IDb
 
     /**
+     * 检查主键为空的规则
+     */
+    val pkEmptyRule: PkEmptyRule
+
+    /**
      * 表字段
      */
     val columns:List<String>
@@ -104,6 +109,13 @@ interface IOrmMeta {
      * 数据的工厂
      */
     val dataFactory: FixedKeyMapFactory
+
+    /**
+     * 检查主键值是否为空
+     */
+    fun isPkEmpty(pk: Any?): Boolean {
+        return pkEmptyRule.isEmpty(pk)
+    }
 
     /**
      * 熟悉是否需要序列化

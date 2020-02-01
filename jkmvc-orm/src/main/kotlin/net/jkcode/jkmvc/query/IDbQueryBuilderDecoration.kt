@@ -354,7 +354,7 @@ interface IDbQueryBuilderDecoration{
      *    for jkerp
      *
      * @param   column     column name or DbExpr
-     * @param   asc        whether asc direction
+     * @param   desc       whether desc direction, for jkerp
      * @return
      */
     fun orderBy(column: String, desc: Boolean?): IDbQueryBuilder {

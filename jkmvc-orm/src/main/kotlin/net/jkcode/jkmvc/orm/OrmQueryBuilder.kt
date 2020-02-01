@@ -193,6 +193,17 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      * 联查中间表
      *     中间表.外键 = 主表.主键
      *
+     * @param slaveRelationName 从表关系
+     * @return
+     */
+    public fun joinMiddleTable(slaveRelationName: String): OrmQueryBuilder {
+        return joinMiddleTable(ormMeta.getRelation(slaveRelationName) as MiddleRelationMeta)
+    }
+
+    /**
+     * 联查中间表
+     *     中间表.外键 = 主表.主键
+     *
      * @param slaveRelation 从表关系
      * @return
      */

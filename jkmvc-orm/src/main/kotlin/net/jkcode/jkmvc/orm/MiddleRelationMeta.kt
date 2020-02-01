@@ -34,8 +34,9 @@ class MiddleRelationMeta(
         public val middleTable:String, // 中间表
         public val farForeignKey:DbKeyNames, // 远端外键
         public val farPrimaryKey:DbKeyNames, // 远端主键
-        conditions:Map<String, Any?> = emptyMap() // 查询条件
-) : RelationMeta(sourceMeta, type, model, foreignKey, primaryKey, conditions) {
+        conditions:Map<String, Any?> = emptyMap(), // 查询条件
+        pkEmptyRule: PkEmptyRule = model.modelOrmMeta.pkEmptyRule // 检查主键为空的规则
+) : RelationMeta(sourceMeta, type, model, foreignKey, primaryKey, conditions, false, pkEmptyRule) {
 
     /**
      * 远端主键属性
@@ -97,7 +98,7 @@ class MiddleRelationMeta(
      */
     public fun queryMiddleTable(item: IOrm, fkInMany: Any? = null): IDbQueryBuilder? {
         val pk: DbKeyValues = item.gets(primaryProp)
-        if(pk.isAnyNull())
+        if(item.isPkEmpty(pk))
             return null;
         val query = DbQueryBuilder(ormMeta.db).from(middleTable).where(foreignKey, "=", pk)
         if (fkInMany != null) { // hasMany关系下过滤单个关系
@@ -105,6 +106,15 @@ class MiddleRelationMeta(
             query.where(farForeignKey, fkInMany)
         }
         return query;
+    }
+
+    /**
+     * 查询中间表
+     *
+     * @return
+     */
+    public fun queryMiddleTable(): IDbQueryBuilder {
+        return DbQueryBuilder(ormMeta.db).from(middleTable)
     }
 
     /**
@@ -144,7 +154,7 @@ class MiddleRelationMeta(
     public override fun queryRelated(item: IOrm, fkInMany: Any?, withTableAlias:Boolean): OrmQueryBuilder? {
         // 通过join中间表 查从表
         val pk:DbKeyValues = item.gets(primaryProp) // 主键
-        if(pk.isAnyNull())
+        if(item.isPkEmpty(pk))
             return null;
         val tableAlias = middleTable + '.'
         val query = buildQuery() // 中间表.远端外键 = 从表.远端主键

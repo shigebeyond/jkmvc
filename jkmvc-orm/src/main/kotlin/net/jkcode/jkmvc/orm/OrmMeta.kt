@@ -29,7 +29,8 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
                    public override var table: String = model.modelName, // 表名，假定model类名, 都是以"Model"作为后缀
                    public override var primaryKey:DbKeyNames = DbKeyNames("id"), // 主键
                    public override val cached: Boolean = false, // 是否缓存
-                   public override val dbName: String = "default" // 数据库名
+                   public override val dbName: String = "default", // 数据库名
+                   public override val pkEmptyRule: PkEmptyRule = PkEmptyRule.default // 检查主键为空的规则
 ) : IOrmMeta {
 
     public constructor(
@@ -38,8 +39,9 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             table: String, // 表名，假定model类名, 都是以"Model"作为后缀
             primaryKey:String, // 主键
             cacheType: Boolean = false, // 是否缓存
-            dbName: String = "default" // 数据库名
-    ):this(model, label, table, DbKeyNames(primaryKey), cacheType, dbName)
+            dbName: String = "default", // 数据库名
+            pkEmptyRule: PkEmptyRule = PkEmptyRule.default // 检查主键为空的规则
+    ):this(model, label, table, DbKeyNames(primaryKey), cacheType, dbName, pkEmptyRule)
 
     init{
         // 检查 model 类的默认构造函数
@@ -308,6 +310,9 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param item 要赋值的对象
      */
     public override fun loadByPk(pk: DbKeyValues, item: IOrm){
+        if(isPkEmpty(pk))
+            return
+
         queryBuilder().where(primaryKey, pk).findRow() {
             item.setOriginal(it)
             item
@@ -320,6 +325,9 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @return
      */
     public override fun <T: IOrm> findByPk(pk: DbKeyValues): T? {
+        if(isPkEmpty(pk))
+            return null
+
         return queryBuilder().where(primaryKey, pk).findRow() {
             val item = model.java.newInstance() as IOrm
             item.setOriginal(it)
@@ -336,6 +344,9 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @return
      */
     public override fun deleteByPk(pk: DbKeyValues, withHasRelations: Boolean): Boolean {
+        if(isPkEmpty(pk))
+            return false
+
         val item = findByPk<IOrm>(pk)
         if(item != null && item.loaded)
             return item.delete()
