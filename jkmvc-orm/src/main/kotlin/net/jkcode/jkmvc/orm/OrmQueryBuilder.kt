@@ -117,7 +117,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
      *     设置查询字段，如果是关联字段，则联查
      *
      * @param columns 字段列表，其元素类型可以是 1 String 本模型字段名 2 RelatedSelectColumnList 关系名 + 关联模型的字段列表
-     *               如("id", "name", "dept" to listOf("id", "title"), DbExpr("group", "group2") to listOf("*")), 其中本模型要显示id与name字段，dept是关联模型名，要显示id与title字段, group是关联模型名, group2是别名
+     *               如("id", "name","org", "dept" to listOf("id", "title"), DbExpr("group", "group2") to listOf("*")), 其中本模型要显示id与name字段，org是关联模型名, 要显示所有字段, dept是关联模型名，要显示id与title字段, group是关联模型名, group2是别名
      * @return
      */
     public fun selectWiths(vararg columns: Any): OrmQueryBuilder {

@@ -33,7 +33,7 @@ data class SelectColumnList(
          *
          * @param sourceMeta 源模型元数据
          * @param columns 字段列表，其元素类型可以是 1 String 本模型字段名 2 RelatedSelectColumnList 关系名 + 关联模型的字段列表
-         *               如listOf("id", "name", "dept" to listOf("id", "title"), DbExpr("group", "group2") to listOf("*")), 其中本模型要显示id与name字段，dept是关联模型名，要显示id与title字段, group是关联模型名, group2是别名
+         *               如listOf("id", "name","org", "dept" to listOf("id", "title"), DbExpr("group", "group2") to listOf("*")), 其中本模型要显示id与name字段，org是关联模型名, 要显示所有字段, dept是关联模型名，要显示id与title字段, group是关联模型名, group2是别名
          * @return
          */
         public fun parse(sourceMeta: IOrmMeta, columns:Iterator<Any>): SelectColumnList {
@@ -77,7 +77,7 @@ data class SelectColumnList(
          *
          * @param sourceMeta 源模型元数据
          * @param fields 字段列表，其元素类型可以是 1 String 本模型字段名 2 RelatedSelectColumnList 关系名 + 关联模型的字段列表
-         *               如arrayOf("id", "name", "dept" to listOf("id", "title"), DbExpr("group", "group2") to listOf("*")), 其中本模型要显示id与name字段，dept是关联模型名，要显示id与title字段, group是关联模型名, group2是别名
+         *               如arrayOf("id", "name","org", "dept" to listOf("id", "title"), DbExpr("group", "group2") to listOf("*")), 其中本模型要显示id与name字段，org是关联模型名, 要显示所有字段, dept是关联模型名，要显示id与title字段, group是关联模型名, group2是别名
          * @return
          */
         public fun parse(sourceMeta: IOrmMeta, fields:Array<out Any>): SelectColumnList {
@@ -93,7 +93,7 @@ data class SelectColumnList(
          *
          * @param sourceMeta 源模型元数据
          * @param fields 字段列表，其元素类型可以是 1 String 本模型字段名 2 RelatedSelectColumnList 关系名 + 关联模型的字段列表
-         *               如listOf("id", "name", "dept" to listOf("id", "title"), DbExpr("group", "group2") to listOf("*")), 其中本模型要显示id与name字段，dept是关联模型名，要显示id与title字段, group是关联模型名, group2是别名
+         *               如listOf("id", "name","org", "dept" to listOf("id", "title"), DbExpr("group", "group2") to listOf("*")), 其中本模型要显示id与name字段，org是关联模型名, 要显示所有字段, dept是关联模型名，要显示id与title字段, group是关联模型名, group2是别名
          * @return
          */
         public fun parse(sourceMeta: IOrmMeta, fields:List<Any>): SelectColumnList {
