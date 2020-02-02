@@ -290,6 +290,15 @@ interface IOrmMeta {
     public fun <T: IOrm> findByPk(pk: DbKeyValues): T?
 
     /**
+     * 检查是否存在主键值对应的数据
+     * @param pk 要检查的主键
+     * @return
+     */
+    public fun existByPk(vararg pk: Any): Boolean {
+        return findByPk<IOrm>(*pk) != null
+    }
+
+    /**
      * 根据主键值来删除数据
      * @param pk 要删除的主键
      * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
