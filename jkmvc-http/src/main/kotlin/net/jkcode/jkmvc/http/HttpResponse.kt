@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.http
 
 import com.alibaba.fastjson.JSONObject
+import net.jkcode.jkmvc.http.controller.Controller
 import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.httpLogger
 import net.jkcode.jkmvc.http.util.AllPagination
@@ -95,6 +96,22 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseW
 		 * 空的map, 用在函数 renderView(String, MutableMap) 的参数默认值中
 		 */
 		internal val emptyData: MutableMap<String, Any?> = LazyAllocatedMap()
+
+		/**
+		 * 获得当前响应
+		 */
+		@JvmStatic
+		public fun current(): HttpResponse {
+			return currentOrNull()!!
+		}
+
+		/**
+		 * 获得当前响应
+		 */
+		@JvmStatic
+		public fun currentOrNull(): HttpResponse? {
+			return Controller.currentOrNull()?.res
+		}
 	}
 
 	/**
