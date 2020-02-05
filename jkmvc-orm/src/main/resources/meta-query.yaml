@@ -23,7 +23,7 @@ Mysql:
     binary|blob: ByteArray
 #sql server
 SqlServer:
-  table: SELECT * FROM [sysobjects] WHERE [type] = 'u' ORDER BY [name]
+  tables: SELECT * FROM [sysobjects] WHERE [type] = 'u' ORDER BY [name]
   columns: SELECT * FROM [syscolumns] WHERE [name] = ? ORDER BY [colid]
   types:
       bit|bigint: Long
