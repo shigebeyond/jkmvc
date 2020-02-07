@@ -323,7 +323,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * @param   params
      * @return
      */
-    public override fun andWhereCondition(condition: String, params: Array<*>): IDbQueryBuilder {
+    public override fun andWhereCondition(condition: String, params: List<*>): IDbQueryBuilder {
         if(condition.isBlank())
             return this
 
@@ -338,7 +338,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * @param   params
      * @return
      */
-    public override fun orWhereCondition(condition: String, params: Array<*>): IDbQueryBuilder {
+    public override fun orWhereCondition(condition: String, params: List<*>): IDbQueryBuilder {
         if(condition.isBlank())
             return this
 

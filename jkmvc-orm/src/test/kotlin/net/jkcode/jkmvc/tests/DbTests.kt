@@ -2,6 +2,9 @@ package net.jkcode.jkmvc.tests
 
 import net.jkcode.jkutil.common.randomString
 import net.jkcode.jkmvc.db.Db
+import net.jkcode.jkmvc.db.DbColumn
+import net.jkcode.jkmvc.db.DbColumnLogicType
+import net.jkcode.jkmvc.db.DbTable
 import net.jkcode.jkmvc.orm.DbKey
 import org.junit.Test
 
@@ -38,6 +41,18 @@ class DbTests{
         if(hasNext)
             println(date)
         */
+    }
+
+
+    @Test
+    fun testDefineTable(){
+        val table = DbTable("user")
+        val id = DbColumn("id", DbColumnLogicType.INT, null,11, null, null, false)
+        val name = DbColumn("name", DbColumnLogicType.VARCHAR, null,10)
+        table.addClumn(id)
+        table.addClumn(name)
+        table.primaryKeys = listOf("id")
+        println(table.generateCreateTableSql(Db.instance()))
     }
 
     @Test

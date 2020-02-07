@@ -98,32 +98,59 @@ internal class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
     }
 
     /**
+     * 获得表
+     *
+     * @param table
+     * @return
+     */
+    override fun getTable(table:String): DbTable?{
+        return tables[table]
+    }
+
+    /**
      * 表的字段
      */
-    public override val tableColumns: Map<String, List<String>> by lazy {
-        val tables = HashMap<String, MutableList<String>>()
+    public override val tables: Map<String, DbTable> by lazy {
+        val tables = HashMap<String, DbTable>()
         // 查询所有表的所有列
         /**
          * fix bug:
          * mysql中查询，conn.catalog = 数据库名
          * oracle中查询，conn.catalog = null，必须指定 schema 来过滤表，否则查出来多个库的表，会出现同名表，查出来的表字段有误
          */
-        val rs = anyConn.metaData.getColumns(anyConn.catalog, schema, null, null)
-        while (rs.next()) { // 逐个处理每一列
-            val table = rs.getString("TABLE_NAME")!! // 表名
-            val column = rs.getString("COLUMN_NAME")!! // 列名
-            // 添加表的列
-            tables.getOrPut(table){
-                LinkedList()
-            }.add(column);
+        val rs = anyConn.metaData.getColumns(catalog, schema, null, null)
+        rs.use {
+            while (rs.next()) { // 逐个处理每一列
+                val table = rs.getString("TABLE_NAME")!! // 表名
+                val name = rs.getString("COLUMN_NAME")!! // 列名
+                val sqlType = rs.getInt("DATA_TYPE")!! // sql类型
+                val logicType = DbColumnLogicType.getBySqlType(sqlType) // 逻辑类型
+                val physicalType = rs.getString("TYPE_NAME")!! // 物理类型
+                val length = rs.getInt("COLUMN_SIZE") // 长度
+                val precision = rs.getInt("DECIMAL_DIGITS") // 精度
+                val default = rs.getString("COLUMN_DEF") // 默认值
+                val nullable = "YES".equals(rs.getString("IS_NULLABLE"), true) // 默认值
+                val comment = rs.getString("REMARKS") // 注释
+                val column = DbColumn(name, logicType, physicalType, length, precision, default, nullable, comment)
+                // 添加表的列
+                tables.getOrPut(table){
+                    DbTable(table, catalog, schema)
+                }.addClumn(column);
+            }
         }
         tables
     }
 
     /**
+     * catalog
+     */
+    public override val catalog: String?
+        get() = anyConn.catalog
+
+    /**
      * schema
      *    oracle的概念，代表一组数据库对象
-     *    在 Db.tableColumns 中延迟加载表字段时，用来过滤 DYPT 库的表
+     *    在 Db.tables 中延迟加载表字段时，用来过滤 DYPT 库的表
      *    可省略，默认值=username
      */
     public override val schema:String? by lazy {

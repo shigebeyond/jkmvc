@@ -1,9 +1,7 @@
 package net.jkcode.jkmvc.orm
 
-import net.jkcode.jkutil.common.FixedKeyMapFactory
+import net.jkcode.jkutil.collection.FixedKeyMapFactory
 import net.jkcode.jkmvc.db.IDb
-import net.jkcode.jkmvc.query.DbExpr
-import net.jkcode.jkutil.cache.ICache
 import net.jkcode.jkutil.validator.IValidator
 import net.jkcode.jkutil.validator.RuleValidator
 import net.jkcode.jkutil.validator.ValidateLambda
@@ -251,7 +249,7 @@ interface IOrmMeta {
      * @param rows 查询行数
      * @return
      */
-    fun queryBuilder(condition: String, params: Array<Any?> = emptyArray(), sort: String? = null, desc: Boolean? = null, start: Int? = null, rows: Int? = null): OrmQueryBuilder {
+    fun queryBuilder(condition: String, params: List<Any?> = emptyList(), sort: String? = null, desc: Boolean? = null, start: Int? = null, rows: Int? = null): OrmQueryBuilder {
         val query = queryBuilder(sort, desc, start, rows)
         query.whereCondition(condition, params)
         return query

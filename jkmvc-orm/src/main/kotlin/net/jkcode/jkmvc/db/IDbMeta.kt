@@ -26,17 +26,30 @@ interface IDbMeta: IDbIdentifierQuoter, IDbValueQuoter {
     val identifierQuoteString:String
 
     /**
+     * catalog
+     */
+    val catalog: String?
+
+    /**
      * schema
      *    oracle的概念，代表一组数据库对象
-     *    在 Db.tableColumns 中延迟加载表字段时，用来过滤 DYPT 库的表
+     *    在 Db.tables 中延迟加载表字段时，用来过滤 DYPT 库的表
      *    可省略，默认值=username
      */
     val schema:String?
 
     /**
-     * 表的字段
+     * 表
      */
-    val tableColumns: Map<String, List<String>>
+    val tables: Map<String, DbTable>
+
+    /**
+     * 获得表
+     *
+     * @param table
+     * @return
+     */
+    fun getTable(table:String): DbTable?
 
     /**
      * 获得表的所有列
@@ -44,8 +57,8 @@ interface IDbMeta: IDbIdentifierQuoter, IDbValueQuoter {
      * @param table
      * @return
      */
-    fun listColumns(table:String): List<String> {
-        return tableColumns.get(table) ?: throw DbException("表[$table]不存在")
+    fun getColumns(table:String): Collection<DbColumn> {
+        return getTable(table)?.columns?.values ?: throw DbException("表[$table]不存在")
     }
 
     /**

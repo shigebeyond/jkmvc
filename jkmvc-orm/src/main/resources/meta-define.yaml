@@ -1,0 +1,86 @@
+# create table sql in different db: https://www.javatpoint.com/sql-create-table
+#Oracle
+Oracle:
+  createTableSql:
+  columnSql:
+  # 逻辑类型 -> 物理类型, 用于在生成建表sql时确定字段类型
+  logicalType2PhysicalType:
+    boolean: number(1,0)
+    int: number(10,0)
+    bigint: number(19,0)
+    double: double scale
+    float: float
+    date: date
+    time: date
+    timestamp: date
+    varchar: long
+    char: char(1)
+    bigint: number(19,0)
+    blob: blob
+    clob: clob
+  # 物理类型 -> java类, 用于根据表结构来生成model时确定字段的Java类
+  physicalType2javaClass:
+    NUMBER\(1(,0)?\)|INT: Boolean
+    NUMBER\(\d+(,0)?\)|INT: Int
+    NUMBER\(\d+,\d+\)|FLOAT: Float
+    DOUBLE: Double
+    CHAR|LONG|CLOB|NCLOB|RAW: String
+    DATE|TIMESTAMP: Date
+    BLOB: ByteArray
+#mysql
+Mysql:
+  createTableSql: CREATE TABLE <table> (\n\t<columns><primaryKeys:,\n\tPRIMARY KEY (_)> )\n ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  columnSql: <name> <type> <default:DEFAULT '_'> <notNullable:NOT NULL>  <comment:COMMENT '_'>
+  # 逻辑类型 -> 物理类型, 用于在生成建表sql时确定字段类型
+  logicalType2PhysicalType:
+    boolean: bit
+    int: integer
+    decimal: null
+    double: double scale
+    float: float
+    date: date
+    time: time
+    timestamp: datetime(6)
+    varchar: varchar
+    char: char(1)
+    bigint: bigint
+    binary: binary
+    blob: longblob
+    clob: longtext
+  # 物理类型 -> java类, 用于根据表结构来生成model时确定字段的Java类
+  physicalType2javaClass:
+    bit: Boolean
+    bigint: Long
+    int|decimal\(\d+,0\): Int
+    float: Float
+    double|decimal\(\d+,[1-9]: Double
+    char|text: String
+    date|datetime|timestamp|time: Date
+    binary|blob: ByteArray
+#sql server
+SqlServer:
+  createTableSql:
+  columnSql:
+  # 逻辑类型 -> 物理类型, 用于在生成建表sql时确定字段类型
+  logicalType2PhysicalType:
+      boolean: bit
+      int: int
+      bigint: bigint
+      float: float
+      date: date
+      time: time
+      timestamp: datetime2
+      char: char(1)
+      varchar: varchar
+      blob: varbinary(MAX)
+      clob: varchar(MAX)
+  # 物理类型 -> java类, 用于根据表结构来生成model时确定字段的Java类
+  physicalType2javaClass:
+      bit: Boolean
+      bigint: Long
+      int: Int
+      float: Float
+      double|decimal: Double
+      char|text: String
+      date|datetime|timestamp|time: Date
+      binary|blob: ByteArray

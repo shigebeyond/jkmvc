@@ -15,7 +15,7 @@ import kotlin.reflect.KClass
  * @date 2019-11-21 4:27 PM
  */
 class DbResultSet(
-        public val db: IDb,
+        public val db: IDbMeta,
         protected val rs: ResultSet
 ) : ResultSet by rs {
 

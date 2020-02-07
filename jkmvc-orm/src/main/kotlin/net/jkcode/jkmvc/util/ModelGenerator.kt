@@ -25,9 +25,9 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
     private val db = Db.instance(dbName)
 
     /**
-     * 元数据查询的配置
+     * 元数据定义的配置
      */
-    private val config = Config.instance("meta-query.${db.dbType}", "yaml")
+    private val config = Config.instance("meta-define.${db.dbType}", "yaml")
 
     /**
      * 获得查询字段的sql
@@ -50,7 +50,8 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
      * @return
      */
     private fun getType(columnType:String):String{
-        val mapping:Map<String, String> = config["types"]!!
+        // 物理类型 -> java类, 用于根据表结构来生成model时确定字段的Java类
+        val mapping:Map<String, String> = config["physicalType2javaClass"]!!
         for((typeRegex, propType) in mapping){
             if(typeRegex.toRegex().containsMatchIn(columnType))
                 return propType

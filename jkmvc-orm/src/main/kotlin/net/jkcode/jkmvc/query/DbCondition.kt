@@ -8,7 +8,7 @@ package net.jkcode.jkmvc.query
  * @create 2017-11-19 下午1:47
  **/
 data class DbCondition(public val exp:String, // 条件表达式
-                       public val params: Array<*> = emptyArray<Any>() // 参数
+                       public val params: List<*> = emptyList<Any>() // 参数
 ) : CharSequence by exp {
 
     /**

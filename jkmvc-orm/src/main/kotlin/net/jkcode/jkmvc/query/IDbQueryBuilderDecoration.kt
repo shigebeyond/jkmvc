@@ -183,7 +183,7 @@ interface IDbQueryBuilderDecoration{
      * @param   params
      * @return
      */
-    fun whereCondition(condition: String, params: Array<*> = emptyArray<Any>()): IDbQueryBuilder {
+    fun whereCondition(condition: String, params: List<*> = emptyList<Any>()): IDbQueryBuilder {
         return andWhereCondition(condition)
     }
 
@@ -194,7 +194,7 @@ interface IDbQueryBuilderDecoration{
      * @param   params
      * @return
      */
-    fun andWhereCondition(condition: String, params: Array<*> = emptyArray<Any>()): IDbQueryBuilder
+    fun andWhereCondition(condition: String, params: List<*> = emptyList<Any>()): IDbQueryBuilder
 
     /**
      * Creates a new "OR WHERE" condition for the query.
@@ -203,7 +203,7 @@ interface IDbQueryBuilderDecoration{
      * @param   params
      * @return
      */
-    fun orWhereCondition(condition: String, params: Array<*> = emptyArray<Any>()): IDbQueryBuilder
+    fun orWhereCondition(condition: String, params: List<*> = emptyList<Any>()): IDbQueryBuilder
 
     /**
      * Alias of andWhereOpen()

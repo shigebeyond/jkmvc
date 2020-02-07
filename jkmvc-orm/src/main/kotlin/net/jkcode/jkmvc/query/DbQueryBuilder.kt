@@ -51,7 +51,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      * @param defaultDb
      * @return
      */
-    public constructor(table: String, condition: String, params: Array<*> = emptyArray<Any>(), sort: String? = null, desc: Boolean? = null, start: Int? = null, rows: Int? = null, defaultDb: IDb = Db.instance()): this(table, sort, desc, start, rows, defaultDb){
+    public constructor(table: String, condition: String, params: List<*> = emptyList<Any>(), sort: String? = null, desc: Boolean? = null, start: Int? = null, rows: Int? = null, defaultDb: IDb = Db.instance()): this(table, sort, desc, start, rows, defaultDb){
         whereCondition(condition, params)
     }
 

@@ -9,7 +9,7 @@ import net.jkcode.jkmvc.http.util.Pagination
 import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jkmvc.orm.normalizeOrmData
 import net.jkcode.jkmvc.orm.toJson
-import net.jkcode.jkutil.common.LazyAllocatedMap
+import net.jkcode.jkutil.collection.LazyAllocatedMap
 import java.io.File
 import java.io.FileInputStream
 import java.io.PrintWriter

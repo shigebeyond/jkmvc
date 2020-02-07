@@ -5,6 +5,7 @@ import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.model.GeneralModel
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkutil.cache.ICache
+import net.jkcode.jkutil.collection.FixedKeyMapFactory
 import net.jkcode.jkutil.common.*
 import net.jkcode.jkutil.validator.IValidator
 import net.jkcode.jkutil.validator.ValidateException
@@ -124,7 +125,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * 表字段
      */
     public override val columns: List<String> by lazy{
-        db.listColumns(table)
+        db.getColumns(table).map { it.name }
     }
 
     /**

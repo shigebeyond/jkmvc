@@ -2,7 +2,7 @@ package net.jkcode.jkmvc.http.view
 
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
-import net.jkcode.jkutil.common.LazyAllocatedMap
+import net.jkcode.jkutil.collection.LazyAllocatedMap
 import java.io.FileNotFoundException
 
 /**
@@ -25,7 +25,7 @@ open class View(override val req: HttpRequest, // 请求对象
 			if(tmpData is MutableMap<*, *>)
 				tmpData as MutableMap<String, Any?>
 			else if(tmpData.isEmpty())
-				LazyAllocatedMap()
+                LazyAllocatedMap()
 			else
 				HashMap(tmpData)
 
