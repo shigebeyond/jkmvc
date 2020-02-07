@@ -74,6 +74,11 @@ public enum class DbColumnLogicType(
     }
 
     /**
+     * 是否小数 => 需要精度
+     */
+    public val isDeciaml: Boolean = "float|double|real|decimal|number|numeric".toRegex().containsMatchIn(code)
+
+    /**
      * 转为物理类型, 带长度与精度
      * @param db
      * @param precision 长度
@@ -90,12 +95,14 @@ public enum class DbColumnLogicType(
         if(physicalType.contains('(') || precision == null)
             return physicalType
 
-        // 2 没指定精度
-        if(scale == null)
+        // 2 没指定精度 或 非小数类型(不需要精度)
+        if(scale == null || !isDeciaml)
             return "$physicalType($precision)"
 
         // 3 有指定精度
         return "$physicalType($precision, $scale)"
     }
+
+
 
 }

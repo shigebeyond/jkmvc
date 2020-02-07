@@ -30,7 +30,7 @@ Oracle:
 #mysql
 Mysql:
   createTableSql: CREATE TABLE <table> (\n\t<columns><primaryKeys:,\n\tPRIMARY KEY (_)> )\n ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-  columnSql: <name> <type> <default:DEFAULT '_'> <notNullable:NOT NULL>  <comment:COMMENT '_'>
+  columnSql: <name> <type> <default:DEFAULT _ ><notNullable:NOT NULL ><comment:COMMENT '_'>
   # 逻辑类型 -> 物理类型, 用于在生成建表sql时确定字段类型
   logicalType2PhysicalType:
     boolean: bit
