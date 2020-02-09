@@ -10,6 +10,7 @@ import net.jkcode.jkmvc.http.router.RouteException
 import net.jkcode.jkmvc.http.router.Router
 import net.jkcode.jkutil.validator.RuleValidator
 import org.apache.commons.collections.map.CompositeMap
+import java.net.URI
 import java.util.*
 import javax.servlet.RequestDispatcher
 import javax.servlet.ServletContext
@@ -43,7 +44,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		 */
 		@JvmStatic
 		public fun current(): HttpRequest {
-			return currentOrNull()!!
+			return currentOrNull() ?: throw IllegalStateException("当前非http环境")
 		}
 
 		/**
@@ -116,6 +117,22 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		CompositeMap(routeParams, HttpParamMap(httpParams)) as Map<String, String>
 	}
 
+	/**
+	 * 来源url
+	 */
+	public val referer: String? by lazy {
+		req.getHeader("referer")
+	}
+
+	/**
+	 * 来源主机
+	 */
+	public val refererHost: String? by lazy{
+		if(referer.isNullOrBlank())
+			null
+		else
+			URI(referer).host
+	}
 	init{
 		// 中文编码
 		req.characterEncoding = "UTF-8";

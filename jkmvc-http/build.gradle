@@ -6,6 +6,8 @@ dependencies{
     else
         compile "net.jkcode.jkguard:jkguard:$jkguard_version"
 
+    // 加密
+    compile "commons-codec:commons-codec:1.5"
 
     // upload
     compile 'servlets.com:cos:05Nov2002'

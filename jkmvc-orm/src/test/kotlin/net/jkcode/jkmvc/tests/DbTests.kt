@@ -47,7 +47,7 @@ class DbTests{
     @Test
     fun testDefineTable(){
         val table = DbTable("user")
-        val id = DbColumn("id", DbColumnLogicType.INT, null,11, 2, null, false)
+        val id = DbColumn("id", DbColumnLogicType.INT, null,11, 2, null, false, "主键", true)
         val name = DbColumn("name", DbColumnLogicType.VARCHAR, null,10, null, "''")
         table.addClumn(id)
         table.addClumn(name)

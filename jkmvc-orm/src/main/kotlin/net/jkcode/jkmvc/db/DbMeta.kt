@@ -131,7 +131,8 @@ internal class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
                 val default = rs.getString("COLUMN_DEF") // 默认值
                 val nullable = "YES".equals(rs.getString("IS_NULLABLE"), true) // 默认值
                 val comment = rs.getString("REMARKS") // 注释
-                val column = DbColumn(name, logicType, physicalType, length, precision, default, nullable, comment)
+                val autoIncr = "YES".equals(rs.getString("IS_AUTOINCREMENT")) // 是否自增
+                val column = DbColumn(name, logicType, physicalType, length, precision, default, nullable, comment, autoIncr)
                 // 添加表的列
                 tables.getOrPut(table){
                     DbTable(table, catalog, schema)

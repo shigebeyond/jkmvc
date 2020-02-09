@@ -13,6 +13,7 @@ import java.nio.charset.Charset
 import java.util.*
 import javax.servlet.ServletRequestWrapper
 import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletRequestWrapper
 
 /**
  * 多部分参数(包含文本/文件类型)的请求, 即上传请求
@@ -21,7 +22,7 @@ import javax.servlet.http.HttpServletRequest
  * @author shijianhang<772910474@qq.com>
  * @date 6/23/17 7:58 PM
  */
-abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): ServletRequestWrapper(req), HttpServletRequest by req{
+abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): HttpServletRequestWrapper(req){
 
     companion object{
         /**

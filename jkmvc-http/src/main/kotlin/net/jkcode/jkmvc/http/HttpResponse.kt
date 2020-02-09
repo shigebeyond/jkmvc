@@ -16,6 +16,7 @@ import java.io.PrintWriter
 import java.net.URLEncoder
 import javax.servlet.ServletResponseWrapper
 import javax.servlet.http.HttpServletResponse
+import javax.servlet.http.HttpServletResponseWrapper
 
 /**
  * 响应对象
@@ -23,7 +24,7 @@ import javax.servlet.http.HttpServletResponse
  * @author shijianhang
  * @date 2016-10-7 下午11:32:07 
  */
-class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseWrapper(res), HttpServletResponse by res {
+class HttpResponse(res:HttpServletResponse /* 响应对象 */): HttpServletResponseWrapper(res) {
 
 	companion object{
 		/**
@@ -341,18 +342,18 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseW
 	 * 渲染标准3属性响应
 	 *
 	 * @param code 错误码，0是成功，非0是失败
-	 * @param msg 消息
+	 * @param message 消息
 	 * @param items 数据
 	 */
-	public fun renderJson(code:Int, msg:String?, data:Any? = null){
+	public fun renderJson(code:Int, message:String?, data:Any? = null){
 		//打印错误
 		if(code != 0)
-			httpLogger.error(msg);
+			httpLogger.error(message);
 
 		// json响应
 		val obj = JSONObject()
 		obj["code"] = code
-		obj["msg"] = msg
+		obj["message"] = message
 		obj["data"] = normalizeOrmData(data)
 		renderJson(obj)
 	}
@@ -361,19 +362,19 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseW
 	 * 渲染标准3属性响应: 数据是orm列表，支持分页
 	 *
 	 * @param code 错误码，0是成功，非0是失败
-	 * @param msg 消息
+	 * @param message 消息
 	 * @param items 当前页的数据
 	 * @param pagination 分页
 	 */
-	public fun renderJson(code:Int, msg:String?, items:List<*>, pagination: Pagination? = null){
+	public fun renderJson(code:Int, message:String?, items:List<*>, pagination: Pagination? = null){
 		//打印错误
 		if(code != 0)
-			httpLogger.error(msg);
+			httpLogger.error(message);
 
 		// json响应
 		val obj = JSONObject()
 		obj["code"] = code
-		obj["msg"] = msg
+		obj["message"] = message
 		obj["data"] = normalizeOrmData(items)
 
 		// 构造分页json
@@ -386,11 +387,11 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): ServletResponseW
 	 * 渲染标准3属性响应: 数据是orm列表，全量分页
 	 *
 	 * @param code 错误码，0是成功，非0是失败
-	 * @param msg 消息
+	 * @param message 消息
 	 * @param pagination 全量分页
 	 */
-	public fun renderJson(code:Int, msg:String?, pagination: AllPagination<*>){
-		renderJson(code, msg, pagination.pageItems, pagination)
+	public fun renderJson(code:Int, message:String?, pagination: AllPagination<*>){
+		renderJson(code, message, pagination.pageItems, pagination)
 	}
 
 	/**

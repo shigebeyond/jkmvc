@@ -18,7 +18,8 @@ class DbColumn(
         scale: Int? = null, // 精度
         public val default: String? = null, // 默认值, 转义后的值
         public val nullable: Boolean = true, // 是否可为null
-        public val comment: String? = null // 注释
+        public val comment: String? = null, // 注释
+        public val autoIncr: Boolean = false // 是否自增
 ) {
 
     /**
@@ -55,7 +56,8 @@ class DbColumn(
                 // bool类型, true才输出, false则输出null
                 // 因为如果参数值为null, 才不会格式化输出
                 "nullable" to if(nullable) "true" else null,
-                "notNullable" to if(notNullable) "true" else null
+                "notNullable" to if(notNullable) "true" else null,
+                "autoIncr" to if(autoIncr) "true" else null
         )
     }
 
