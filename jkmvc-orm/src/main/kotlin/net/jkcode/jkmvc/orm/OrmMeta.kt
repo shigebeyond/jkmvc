@@ -204,53 +204,6 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         return db.transaction(!needTrans, statement)
     }
 
-    /********************************* 缓存 **************************************/
-    /**
-     * 读缓存, 无则读db
-     * @param pk 要查询的主键
-     * @param item 要赋值的对象
-     * @param expires 缓存过期时间
-     * @return
-     */
-    public override fun getOrPutCache(pk: DbKeyValues, item: IOrm, expires:Long): IOrm {
-        // 无需缓存
-        if(!cached){
-            loadByPk(pk, item)
-            return item
-        }
-
-        // 读缓存, 无则读db
-        val key = pk.columns.joinToString("_", "${dbName}_")
-        val data = cache.getOrPut(key, expires){
-            // 读db
-            loadByPk(pk, item)
-            // 转map
-            if(item.loaded)
-                item.toMap()
-            else
-                emptyMap<String, Any?>()
-        }.get() as Map<String, Any?>
-
-        // 读的是缓存(不是读db), 则设置item
-        if(!item.loaded && data.isNotEmpty()){
-            item.fromMap(data)
-            item.loaded = true
-        }
-        return item
-    }
-
-    /**
-     * 删除缓存
-     * @param item
-     */
-    public override fun removeCache(item: IOrm){
-        if(!cached)
-            return
-
-        val key = item.pk.columns.joinToString("_", "${dbName}_")
-        cache.remove(key)
-    }
-
     /********************************* 校验 **************************************/
     /**
      * 添加规则
@@ -292,6 +245,64 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             throw ValidateException("Fail to validate $name model", name, errors)
     }
 
+    /********************************* 缓存 **************************************/
+    /**
+     * 删除缓存
+     * @param item
+     */
+    public override fun removeCache(item: IOrm){
+        if(!cached)
+            return
+
+        val key = item.pk.columns.joinToString("_", "${dbName}_")
+        cache.remove(key)
+    }
+
+    /**
+     * 读缓存, 无则读db
+     * @param pk 要查询的主键
+     * @param item 要赋值的对象
+     * @param expires 缓存过期时间
+     * @return
+     */
+    public override fun <T:IOrm> getOrPutCache(pk: DbKeyValues, item: T?, expires:Long): T? {
+        // 无需缓存
+        if(!cached){
+            return innerloadByPk(pk, item)
+        }
+
+        // 读缓存, 无则读db
+        val cacheItem = innerGetOrPutCache(pk, item, expires)
+        if(cacheItem == null) // 无记录
+            return null
+        if(item == null) // 无赋值对象, 则返回缓存对象
+            return cacheItem
+
+        // 有赋值对象, 则赋值并返回
+        item.fromMap((cacheItem as Orm).getData())
+        item.loaded = true
+        return item
+    }
+
+    /**
+     * 读缓存, 无则读db
+     * @param pk 要查询的主键
+     * @param item 要赋值的对象
+     * @param expires 缓存过期时间
+     * @return
+     */
+    private fun <T : IOrm> innerGetOrPutCache(pk: DbKeyValues, item: T?, expires: Long): T? {
+        // 读缓存, 无则读db
+        val key = pk.columns.joinToString("_", dbName + "_")
+        val result = cache.getOrPut(key, expires) {
+            // 读db
+            val item = innerloadByPk(pk, item)
+            // 直接缓存Orm, 其序列化依靠 OrmEntityFstSerializer
+            item ?: Unit // null则给一个空对象
+        }.get()
+        return if(result is Unit) null else result as T
+    }
+
     /********************************* query builder **************************************/
     /**
      * 获得orm查询构建器
@@ -310,14 +321,25 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param pk 要查询的主键
      * @param item 要赋值的对象
      */
-    public override fun loadByPk(pk: DbKeyValues, item: IOrm){
+    protected fun <T: IOrm> innerloadByPk(pk: DbKeyValues, item: T? = null): T? {
         if(isPkEmpty(pk))
-            return
+            return null
 
-        queryBuilder().where(primaryKey, pk).findRow() {
-            item.setOriginal(it)
-            item
+        return queryBuilder().where(primaryKey, pk).findRow{
+            (item ?: model.java.newInstance() as T).apply {
+                setOriginal(it)
+            }
         }
+    }
+
+    /**
+     * 根据主键值来加载数据
+     * @param pk 要查询的主键
+     * @param item 要赋值的对象
+     */
+    public override fun loadByPk(pk: DbKeyValues, item: IOrm){
+        //innerloadByPk(pk, item)
+        getOrPutCache(pk, item)
     }
 
     /**
@@ -326,14 +348,8 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @return
      */
     public override fun <T: IOrm> findByPk(pk: DbKeyValues): T? {
-        if(isPkEmpty(pk))
-            return null
-
-        return queryBuilder().where(primaryKey, pk).findRow() {
-            val item = model.java.newInstance() as IOrm
-            item.setOriginal(it)
-            item
-        } as T?
+        //return innerloadByPk(pk)
+        return getOrPutCache(pk)
     }
 
     /**

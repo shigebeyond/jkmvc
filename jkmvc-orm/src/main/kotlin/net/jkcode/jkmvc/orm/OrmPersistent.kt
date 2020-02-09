@@ -63,16 +63,8 @@ abstract class OrmPersistent : OrmValid() {
 		if(pk.isNotEmpty()) {
 			val key = DbKeyValues(pk)
 			if(!isPkEmpty(key))
-				// ormMeta.loadByPk(key, this) // 无缓存
-				ormMeta.getOrPutCache(key, this) // 有缓存
+				 ormMeta.loadByPk(key, this) // 无缓存
 		}
-	}
-
-	/**
-	 * 删除缓存
-	 */
-	public override fun removeCache(){
-		ormMeta.removeCache(this)
 	}
 
 	/**
@@ -206,7 +198,7 @@ abstract class OrmPersistent : OrmValid() {
 			beforeSave()
 
 			// 删除缓存
-			removeCache()
+			ormMeta.removeCache(this)
 
 			// 更新数据库
 			val result = queryBuilder().sets(buildDirtyData()).where(ormMeta.primaryKey, oldPk /* 原始主键，因为主键可能被修改 */).update();
@@ -248,7 +240,7 @@ abstract class OrmPersistent : OrmValid() {
 			beforeDelete()
 
 			// 删除缓存
-			removeCache()
+			ormMeta.removeCache(this)
 
 			// 删除数据
 			val result = queryBuilder().where(ormMeta.primaryKey, "=", pk).delete();

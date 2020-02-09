@@ -53,11 +53,6 @@ interface IOrmPersistent : IOrmValid {
 	fun loadByPk(vararg pk: Any)
 
 	/**
-	 * 删除缓存
-	 */
-	fun removeCache()
-
-	/**
 	 * 保存数据
 	 *
 	 * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
