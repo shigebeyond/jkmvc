@@ -170,7 +170,7 @@ interface IOrmMeta {
      * @param expires 缓存过期时间
      * @return
      */
-    fun getOrPutCache(pk: DbKeyValues, item: IOrm = model.java.newInstance(), expires:Long = 5 * 3600): IOrm
+    fun <T:IOrm> getOrPutCache(pk: DbKeyValues, item: T? = null, expires:Long = 5 * 3600): T?
 
     /**
      * 删除缓存
