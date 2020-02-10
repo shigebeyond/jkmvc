@@ -70,6 +70,13 @@ interface IDbMeta: IDbIdentifierQuoter, IDbValueQuoter {
     fun queryTableExist(table: String): Boolean
 
     /**
+     * 查询表的主键列
+     * @param table 表名, 必须不为空, 且存在于db, 否则报错
+     * @return
+     */
+    fun queryPrimaryKeysByTable(table: String): Collection<String>
+
+    /**
      * 查询表的列
      *    每次都查最新的
      *

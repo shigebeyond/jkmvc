@@ -22,6 +22,14 @@ class DbTests{
     fun testDbMeta(){
         println("database type: " + db.dbType)
         println("database schema: " + db.schema)
+        println("database table: " + db.tables.keys)
+
+        //val table = db.tables.keys.first()
+        val table = "xxxx"
+        println("table [$table] 's columns: ")
+        println(db.queryColumnsByTable(table))
+        println("table [$table] 's primary keys: ")
+        println(db.queryPrimaryKeysByTable(table))
     }
 
     @Test
@@ -32,15 +40,6 @@ class DbTests{
         println(k1.columns.equals(k2.columns)) // false
         println(k1.columns.contentEquals(k2.columns)) // true
         println(k1.columns.first() == k2.columns.first()) // true
-    }
-
-    @Test
-    fun testDbDate(){
-        /*
-        val (hasNext, date) = Db.instance().queryValue<Date>("SELECT  LAST_LOGIN_TIME FROM RC_ACCOUNTS WHERE ACCOUNT_CODE = 'tann771x@nng.gx.csg.cn'")
-        if(hasNext)
-            println(date)
-        */
     }
 
 

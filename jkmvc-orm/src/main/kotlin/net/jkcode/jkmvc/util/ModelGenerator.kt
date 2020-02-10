@@ -34,7 +34,7 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
      * @return
      */
     private fun getColumnsSql():String{
-        return config.getString("columns")!!
+        return config.getString("columnsSql")!!
     }
 
     /**
@@ -94,7 +94,7 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
      */
     public fun genenateModelClass(model:String, label:String, table: String): String {
         // 查询字段的sql
-        val sql = config.getString("columns")!!
+        val sql = config.getString("columnsSql")!!
         val fields = db.queryMaps(sql, listOf(table, db.schema)) // org.apache.commons.collections.map.HashedMap.HashedMap(java.util.Map)
         // 找到主键
         val pks = ArrayList<Pair<String, String>>() // 主键的字段名+类型

@@ -8,8 +8,6 @@ import java.sql.Connection
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.ArrayList
-import java.sql.ResultSet
-
 
 
 /**
@@ -119,7 +117,6 @@ internal class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
 
         // 查询所有表的所有列
         val columns = queryColumnsByTable(null)
-
         for (column in columns) {
             // 添加表的列
             val table = column.table
@@ -127,6 +124,12 @@ internal class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
                 DbTable(table, catalog, schema)
             }.addClumn(column);
         }
+
+        // 查询主键
+        for((name, table) in tables){
+            table.primaryKeys = queryPrimaryKeysByTable(name)
+        }
+
         tables
     }
 
@@ -143,6 +146,24 @@ internal class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
          */
         val rs = anyConn.metaData.getTables(catalog, schema, table, null)
         return rs.next()
+    }
+
+    /**
+     * 查询表的主键列
+     * @param table 表名, 必须不为空, 且存在于db, 否则报错
+     * @return
+     */
+    public override fun queryPrimaryKeysByTable(table: String): Collection<String> {
+        val rs = anyConn.metaData.getPrimaryKeys(catalog, schema, table)
+        val keys = TreeMap<Int, String>()
+        rs.use {
+            while (rs.next()) { // 逐个处理每一列
+                val name = rs.getString("COLUMN_NAME")!! // 列名
+                val seq = rs.getInt("KEY_SEQ")!! // 序号
+                keys[seq] = name
+            }
+        }
+        return keys.values
     }
 
     /**
