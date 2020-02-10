@@ -85,7 +85,7 @@ public enum class DbColumnLogicType(
      * @param scale 精度
      * @return
      */
-    public fun toPhysicalType(db: Db,  precision: Int? = null, scale: Int? = null): String {
+    public fun toPhysicalType(db: IDb,  precision: Int? = null, scale: Int? = null): String {
         // 元数据定义的配置
         val config = Config.instance("meta-define.${db.dbType}", "yaml")
         // 获得对应的物理类型表达式

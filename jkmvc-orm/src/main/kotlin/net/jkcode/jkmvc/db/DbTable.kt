@@ -27,7 +27,7 @@ open class DbTable(
     /**
      * 主键
      */
-    public var primaryKeys: List<String>? = null
+    public var primaryKeys: Collection<String> = emptyList()
 
     /**
      * 添加字段
@@ -50,7 +50,7 @@ open class DbTable(
      * 更新表结构
      * @param db
      */
-    public fun updateSchema(db: Db){
+    public fun updateSchema(db: IDb){
         // 1 如果表存在则改表
         if(db.queryTableExist(name)){
             val sqls = generateAlterTableSqls(db)
@@ -67,7 +67,7 @@ open class DbTable(
      * 删除表
      * @param db
      */
-    public fun dropSchema(db: Db){
+    public fun dropSchema(db: IDb){
         val sql = generateDropTableSql(db)
         db.execute(sql)
     }
@@ -77,7 +77,7 @@ open class DbTable(
      * @param db
      * @return
      */
-    public fun generateCreateTableSql(db: Db): String {
+    public fun generateCreateTableSql(db: IDb): String {
         // 元数据定义的配置
         val config = Config.instance("meta-define.${db.dbType}", "yaml")
         // 建表sql
@@ -108,7 +108,7 @@ open class DbTable(
      * @param db
      * @return
      */
-    public fun generateAlterTableSqls(db: Db): List<String>{
+    public fun generateAlterTableSqls(db: IDb): List<String>{
         // 元数据定义的配置
         val config = Config.instance("meta-define.${db.dbType}", "yaml")
         // 建表sql
@@ -143,7 +143,7 @@ open class DbTable(
      * @param db
      * @return
      */
-    public fun generateDropTableSql(db: Db): String {
+    public fun generateDropTableSql(db: IDb): String {
         // 元数据定义的配置
         val config = Config.instance("meta-define.${db.dbType}", "yaml")
         // 建表sql

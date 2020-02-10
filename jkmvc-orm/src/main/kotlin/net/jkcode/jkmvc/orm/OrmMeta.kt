@@ -124,7 +124,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     /**
      * 表字段
      */
-    public override val columns: List<String> by lazy{
+    public override val columns: Collection<String> by lazy{
         db.getColumnsByTable(table).map { it.name }
     }
 
