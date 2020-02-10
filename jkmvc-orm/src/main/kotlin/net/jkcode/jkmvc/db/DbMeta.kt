@@ -7,6 +7,10 @@ import net.jkcode.jkutil.common.underline2Camel
 import java.sql.Connection
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.ArrayList
+import java.sql.ResultSet
+
+
 
 /**
  * db元数据
@@ -112,13 +116,49 @@ internal class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
      */
     public override val tables: Map<String, DbTable> by lazy {
         val tables = HashMap<String, DbTable>()
+
         // 查询所有表的所有列
+        val columns = queryColumnsByTable(null)
+
+        for (column in columns) {
+            // 添加表的列
+            val table = column.table
+            tables.getOrPut(table) {
+                DbTable(table, catalog, schema)
+            }.addClumn(column);
+        }
+        tables
+    }
+
+    /**
+     * 查询表是否存在
+     * @param table 表名
+     * @return
+     */
+    public override fun queryTableExist(table: String): Boolean {
         /**
          * fix bug:
          * mysql中查询，conn.catalog = 数据库名
          * oracle中查询，conn.catalog = null，必须指定 schema 来过滤表，否则查出来多个库的表，会出现同名表，查出来的表字段有误
          */
-        val rs = anyConn.metaData.getColumns(catalog, schema, null, null)
+        val rs = anyConn.metaData.getTables(catalog, schema, table, null)
+        return rs.next()
+    }
+
+    /**
+     * 查询表的列
+     * @param table 表名, 如果为null, 则查询所有表的列
+     * @return
+     */
+    public override fun queryColumnsByTable(table: String?): List<DbColumn> {
+        /**
+         * fix bug:
+         * mysql中查询，conn.catalog = 数据库名
+         * oracle中查询，conn.catalog = null，必须指定 schema 来过滤表，否则查出来多个库的表，会出现同名表，查出来的表字段有误
+         */
+        val rs = anyConn.metaData.getColumns(catalog, schema, table, null)
+
+        val columns = ArrayList<DbColumn>()
         rs.use {
             while (rs.next()) { // 逐个处理每一列
                 val table = rs.getString("TABLE_NAME")!! // 表名
@@ -132,14 +172,11 @@ internal class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
                 val nullable = "YES".equals(rs.getString("IS_NULLABLE"), true) // 默认值
                 val comment = rs.getString("REMARKS") // 注释
                 val autoIncr = "YES".equals(rs.getString("IS_AUTOINCREMENT")) // 是否自增
-                val column = DbColumn(name, logicType, physicalType, length, precision, default, nullable, comment, autoIncr)
-                // 添加表的列
-                tables.getOrPut(table){
-                    DbTable(table, catalog, schema)
-                }.addClumn(column);
+                val column = DbColumn(name, logicType, physicalType, length, precision, default, nullable, comment, autoIncr, table)
+                columns.add(column)
             }
         }
-        tables
+        return columns
     }
 
     /**

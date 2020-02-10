@@ -125,7 +125,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * 表字段
      */
     public override val columns: List<String> by lazy{
-        db.getColumns(table).map { it.name }
+        db.getColumnsByTable(table).map { it.name }
     }
 
     /**
@@ -394,10 +394,12 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         }*/
         // value字段值
         val values = DbExpr.question.repeateToArray(columns.size)
+        // columns 顺序
         val query = queryBuilder().insertColumns(*columns.toTypedArray()).value(*values)
 
         // 构建参数
         val params:ArrayList<Any?> = ArrayList()
+        // props 顺序 = columns 顺序
         for (item in items){
             for(prop in props) {
                 params.add(item[prop])

@@ -1,6 +1,7 @@
 # create table sql in different db: https://www.javatpoint.com/sql-create-table
 #Oracle
 Oracle:
+  dropTableSql:
   createTableSql:
   columnSql:
   # 逻辑类型 -> 物理类型, 用于在生成建表sql时确定字段类型
@@ -29,7 +30,10 @@ Oracle:
     BLOB: ByteArray
 #mysql
 Mysql:
-  createTableSql: CREATE TABLE <table> (\n\t<columns><primaryKeys:,\n\tPRIMARY KEY (?)> )\n ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  dropTableSql: DROP TABLE IF EXISTS <table>;
+  createTableSql: CREATE TABLE <table> (\n\t<columnsSql><primaryKeys:,\n\tPRIMARY KEY (?)> )\n ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  # 目前只支持新建列, 对已有列不做修改/删除, 防止不小心丢了数据无法恢复
+  alterTableSql: ALTER TABLE <table> ADD COLUMN <columnsSql>;
   columnSql: <name> <type> <default:DEFAULT ? ><notNullable:NOT NULL ><autoIncr:AUTO_INCREMENT ><comment:COMMENT '?'>
   # 逻辑类型 -> 物理类型, 用于在生成建表sql时确定字段类型
   logicalType2PhysicalType:
@@ -59,6 +63,7 @@ Mysql:
     binary|blob: ByteArray
 #sql server
 SqlServer:
+  dropTableSql:
   createTableSql:
   columnSql:
   # 逻辑类型 -> 物理类型, 用于在生成建表sql时确定字段类型

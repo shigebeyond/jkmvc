@@ -6,12 +6,14 @@ import java.util.LinkedHashMap
 
 /**
  * 表
- *   参考 hibernate 的 org.hibernate.mapping.Table
+ *   1 参考 hibernate 的 org.hibernate.mapping.Table
+ *   2 支持生成建表/改表/删表sql
+ *   3 改表sql: 目前只支持新建列, 对已有列不做修改/删除, 防止不小心丢了数据无法恢复
  *
  * @author shijianhang
  * @date 2020-2-4 下午8:02:47
  */
-class DbTable(
+open class DbTable(
     public val name: String, // 表名
     public val catalog: String? = null,
     public val schema: String? = null
@@ -45,6 +47,32 @@ class DbTable(
     }
 
     /**
+     * 更新表结构
+     * @param db
+     */
+    public fun updateSchema(db: Db){
+        // 1 如果表存在则改表
+        if(db.queryTableExist(name)){
+            val sqls = generateAlterTableSqls(db)
+            for (sql in sqls)
+                db.execute(sql)
+        }
+
+        // 2 否则建表
+        val sql = generateCreateTableSql(db)
+        db.execute(sql)
+    }
+
+    /**
+     * 删除表
+     * @param db
+     */
+    public fun dropSchema(db: Db){
+        val sql = generateDropTableSql(db)
+        db.execute(sql)
+    }
+
+    /**
      * 生成建表sql
      * @param db
      * @return
@@ -52,24 +80,84 @@ class DbTable(
     public fun generateCreateTableSql(db: Db): String {
         // 元数据定义的配置
         val config = Config.instance("meta-define.${db.dbType}", "yaml")
-        // 建表语句
-        val tableSql: String = config["createTableSql"]!!
+        // 建表sql
+        val createTableSql: String = config["createTableSql"]!!
         // 生成字段定义sql
         val columnsSql = columns.values.joinToString(",\n\t") {
             it.generateDefineColumnSql(db)
         }
 
+        // 参数
         val data = mapOf(
                 "table" to db.quoteTable(name),
-                "columns" to columnsSql,
+                "columnsSql" to columnsSql,
                 "primaryKeys" to primaryKeys?.joinToString {
                     db.quoteColumn(it)
                 }
         )
-        return tableSql.replacesFormat(data, "<", ">")
+        // 生成sql
+        return createTableSql.replacesFormat(data, "<", ">")
                 .replace("\\n", "\n")
                 .replace("\\t", "\t")
+    }
+
+    /**
+     * 生成改表sql
+     *    目前只支持新建列, 对已有列不做修改/删除, 防止不小心丢了数据无法恢复
+     *
+     * @param db
+     * @return
+     */
+    public fun generateAlterTableSqls(db: Db): List<String>{
+        // 元数据定义的配置
+        val config = Config.instance("meta-define.${db.dbType}", "yaml")
+        // 建表sql
+        val createTableSql: String = config["alterTableSql"]!!
+
+        // 获得旧的列
+        val oldColumns = db.queryColumnsByTable(name).map { it.name }
+        
+        // 对比获得新的列
+        val newColumns = columns.keys.subtract(oldColumns)
+
+        // 遍历每个新的列, 生成添加列的sql
+        return newColumns.map {
+            val columnSql = columns[it]!!.generateDefineColumnSql(db)
+
+            // 参数
+            val data = mapOf(
+                    "table" to db.quoteTable(name),
+                    "columnSql" to columnSql,
+                    "primaryKeys" to primaryKeys?.joinToString {
+                        db.quoteColumn(it)
+                    }
+            )
+            // 生成sql
+            createTableSql.replacesFormat(data, "<", ">")
+        }
 
     }
+
+    /**
+     * 生成删表sql
+     * @param db
+     * @return
+     */
+    public fun generateDropTableSql(db: Db): String {
+        // 元数据定义的配置
+        val config = Config.instance("meta-define.${db.dbType}", "yaml")
+        // 建表sql
+        val dropTableSql: String = config["createTableSql"]!!
+
+        // 参数
+        val data = mapOf(
+                "table" to db.quoteTable(name)
+        )
+        // 生成sql
+        return dropTableSql.replacesFormat(data, "<", ">")
+                .replace("\\n", "\n")
+                .replace("\\t", "\t")
+    }
+
 
 }

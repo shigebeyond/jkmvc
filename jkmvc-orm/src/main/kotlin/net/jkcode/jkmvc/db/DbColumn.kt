@@ -19,7 +19,8 @@ class DbColumn(
         public val default: String? = null, // 默认值, 转义后的值
         public val nullable: Boolean = true, // 是否可为null
         public val comment: String? = null, // 注释
-        public val autoIncr: Boolean = false // 是否自增
+        public val autoIncr: Boolean = false, // 是否自增
+        public val table: String = "" // 表名
 ) {
 
     /**
@@ -69,7 +70,7 @@ class DbColumn(
     public fun generateDefineColumnSql(db: Db): String {
         // 元数据定义的配置
         val config = Config.instance("meta-define.${db.dbType}", "yaml")
-        // 字段语句
+        // 字段sql
         val columnSql: String = config["columnSql"]!!
 
         // 替换参数: 如果参数值为null, 才不会格式化输出

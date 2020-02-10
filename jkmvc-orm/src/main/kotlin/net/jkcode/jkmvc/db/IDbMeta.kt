@@ -53,13 +53,30 @@ interface IDbMeta: IDbIdentifierQuoter, IDbValueQuoter {
 
     /**
      * 获得表的所有列
+     *    有缓存
      *
      * @param table
      * @return
      */
-    fun getColumns(table:String): Collection<DbColumn> {
+    fun getColumnsByTable(table:String): Collection<DbColumn> {
         return getTable(table)?.columns?.values ?: throw DbException("表[$table]不存在")
     }
+
+    /**
+     * 查询表是否存在
+     * @param table 表名
+     * @return
+     */
+    fun queryTableExist(table: String): Boolean
+
+    /**
+     * 查询表的列
+     *    每次都查最新的
+     *
+     * @param table 表名, 如果为null, 则查询所有表的列
+     * @return
+     */
+    fun queryColumnsByTable(table: String?): List<DbColumn>
 
     /**
      * 根据对象属性名，获得db字段名
