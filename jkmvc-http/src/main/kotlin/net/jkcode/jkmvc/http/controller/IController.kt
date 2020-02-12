@@ -46,7 +46,7 @@ interface IController{
      * 重定向到指定url
      * @param uri
      */
-    fun redirect(uri: String):Unit
+    fun redirect(uri: String)
 
     /**
      * 执行action

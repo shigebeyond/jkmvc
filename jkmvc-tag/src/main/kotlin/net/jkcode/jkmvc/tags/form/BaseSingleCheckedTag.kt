@@ -43,7 +43,7 @@ open class BaseSingleCheckedTag(type: String = "") : InputTag(type) {
 
         // bool
         if(boundValue is Boolean)
-            return boundValue is String && java.lang.Boolean.valueOf(boundValue as String)
+            return boundValue is String && (boundValue as String).toBoolean()
 
         // map, 仅针对checkbox
         if (boundValue is Map<*, *>)

@@ -28,6 +28,18 @@ abstract class Controller : IController {
      */
     override lateinit var res: HttpResponse
 
+    /**
+     * for jkerp
+     */
+    val request: HttpRequest
+        get() = req
+
+    /**
+     * for jkerp
+     */
+    val response: HttpResponse
+        get() = res
+
     init {
         setCurrent(this)
     }
@@ -57,7 +69,7 @@ abstract class Controller : IController {
      * 重定向到指定url
      * @param uri
      */
-    public override fun redirect(uri: String):Unit
+    public override fun redirect(uri: String)
     {
         res.sendRedirect(req.absoluteUrl(uri));
     }

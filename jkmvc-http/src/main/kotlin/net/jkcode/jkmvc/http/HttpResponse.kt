@@ -10,10 +10,10 @@ import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jkmvc.orm.normalizeOrmData
 import net.jkcode.jkmvc.orm.toJson
 import net.jkcode.jkutil.collection.LazyAllocatedMap
-import java.io.File
-import java.io.FileInputStream
-import java.io.PrintWriter
+import net.jkcode.jkutil.common.writeFile
+import java.io.*
 import java.net.URLEncoder
+import javax.servlet.ServletOutputStream
 import javax.servlet.ServletResponseWrapper
 import javax.servlet.http.HttpServletResponse
 import javax.servlet.http.HttpServletResponseWrapper
@@ -143,7 +143,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): HttpServletRespo
 	 *
 	 * @param view 视图
 	 */
-	public fun renderView(view: View):Unit
+	public fun renderView(view: View)
 	{
 		rendered = true
 		view.render();
@@ -155,7 +155,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): HttpServletRespo
 	 * @param file 视图文件
 	 * @param data 局部变量
 	 */
-	public fun renderView(file:String, data:Map<String, Any?> = emptyData):Unit
+	public fun renderView(file:String, data:Map<String, Any?> = emptyData)
 	{
 		renderView(View(HttpRequest.current(), this, file, data))
 	}
@@ -165,7 +165,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): HttpServletRespo
 	 *
 	 * @param content
 	 */
-	public fun renderString(content:String):Unit
+	public fun renderString(content:String)
 	{
 		rendered = true
 		prepareWriter().print(content);
@@ -176,7 +176,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): HttpServletRespo
 	 *
 	 * @param file
 	 */
-	public fun renderFile(file: String):Unit
+	public fun renderFile(file: String)
 	{
 		renderFile(File(file))
 	}
@@ -186,7 +186,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): HttpServletRespo
 	 *
 	 * @param file
 	 */
-	public fun renderFile(file: File):Unit
+	public fun renderFile(file: File)
 	{
 		rendered = true
 
@@ -195,17 +195,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): HttpServletRespo
 		res.setHeader("Content-Type", "application/octet-stream")
 
 		// 输出文件
-		val `in` = FileInputStream(file)
-		val out = res.getOutputStream()
-
-		`in`.use {
-			var length = -1
-			val buffer = ByteArray(1024)
-			do{
-				length = `in`.read(buffer)
-				out.write(buffer, 0, length)
-			}while(length != -1)
-		}
+		res.getOutputStream().writeFile(file)
 	}
 
 	/**
@@ -214,7 +204,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): HttpServletRespo
 	 * @param status 状态码
 	 * @return
 	 */
-	public override fun setStatus(status: Int):Unit {
+	public override fun setStatus(status: Int) {
 		if(!messages.containsKey(status))
 			throw IllegalArgumentException("无效响应状态码");
 

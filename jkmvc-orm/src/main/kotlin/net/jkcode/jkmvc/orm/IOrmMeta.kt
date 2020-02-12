@@ -86,7 +86,7 @@ interface IOrmMeta {
     /**
      * 表字段
      */
-    val columns:List<String>
+    val columns: Collection<String>
 
     /**
      * 对象属性

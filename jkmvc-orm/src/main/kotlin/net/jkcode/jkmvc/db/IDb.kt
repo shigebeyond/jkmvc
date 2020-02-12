@@ -27,7 +27,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
     /**
      * 开启事务
      */
-    public abstract fun begin():Unit;
+    public abstract fun begin();
 
 
     /**

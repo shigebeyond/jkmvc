@@ -429,7 +429,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
             return this;
         }
 
-        var cols = columns // 查询列
+        var cols: Collection<String>? = columns // 查询列
         var convertingColumn = this.convertingColumn // 是否转换字段名
         // 如果列为空 或 列只有*
         if(columns == null || columns.isEmpty() || columns.size == 1 && columns.first() == "*"){

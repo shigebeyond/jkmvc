@@ -194,7 +194,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
      * 遍历修饰子句
      * @param visitor 访问者函数，遍历时调用
      */
-    protected fun travelDecorationClauses(visitor: (IDbQueryBuilderDecorationClauses<*>) -> Unit):Unit {
+    protected fun travelDecorationClauses(visitor: (IDbQueryBuilderDecorationClauses<*>) -> Unit) {
         // 逐个处理修饰词及其表达式
         // 1 joinClause
         for (j in joinClause)

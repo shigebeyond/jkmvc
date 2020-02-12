@@ -102,7 +102,7 @@ class ShardingDb(name:String /* 标识 */) : Db(name) {
     /**
      * 关闭
      */
-    public override fun close():Unit{
+    public override fun close(){
         // 关闭连接
         if(connUsed)
             masterConn.close()

@@ -19,7 +19,7 @@ interface IDbQueryBuilderDecorationClauses<T> {
      * @param db 数据库连接
      * @param sql 保存编译sql
      */
-    fun compile(db: IDb, sql:StringBuilder):Unit;
+    fun compile(db: IDb, sql:StringBuilder);
 
     /**
      * 添加一个子表达式+连接符
@@ -38,7 +38,7 @@ interface IDbQueryBuilderDecorationClauses<T> {
      * @param db 数据库连接
      * @param sql 保存编译的sql
      */
-    fun compileSubexp(subexp:T, j:Int, db: IDb, sql:StringBuilder):Unit;
+    fun compileSubexp(subexp:T, j:Int, db: IDb, sql:StringBuilder);
 
     /**
      * 开启一个分组
