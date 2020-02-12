@@ -80,7 +80,7 @@ class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如w
      * @param db 数据库连接
      * @param sql 保存编译的sql
      */
-    public override fun compileSubexp(subexp: Any, j:Int, db: IDb, sql: StringBuilder): Unit {
+    public override fun compileSubexp(subexp: Any, j:Int, db: IDb, sql: StringBuilder) {
         // 子表达式是: string / DbQueryBuilderDecorationClausesSimple
         if (subexp is DbQueryBuilderDecorationClausesSimple) {
             subexp.compile(db, sql);

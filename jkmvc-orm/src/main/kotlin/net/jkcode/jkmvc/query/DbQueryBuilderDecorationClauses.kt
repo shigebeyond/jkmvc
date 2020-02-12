@@ -26,7 +26,7 @@ abstract class DbQueryBuilderDecorationClauses<T>(protected val operator: String
      * @param db 数据库连接
      * @param sql 保存编译的sql
      */
-    public override fun compile(db: IDb, sql:StringBuilder): Unit {
+    public override fun compile(db: IDb, sql:StringBuilder) {
         if (subexps.isEmpty())
             return;
 

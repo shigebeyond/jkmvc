@@ -59,7 +59,7 @@ abstract class OrmPersistent : OrmValid() {
 	 *
 	 * @param pk
 	 */
-	public override fun loadByPk(vararg pk: Any): Unit {
+	public override fun loadByPk(vararg pk: Any) {
 		if(pk.isNotEmpty()) {
 			val key = DbKeyValues(pk)
 			if(!isPkEmpty(key))
@@ -154,7 +154,7 @@ abstract class OrmPersistent : OrmValid() {
 	 * @param column 字段名
 	 * @param value 字段值
 	 */
-	protected fun setOriginal(column: String, value: Any?): Unit{
+	protected fun setOriginal(column: String, value: Any?) {
 		// 属性名
 		val prop = ormMeta.column2Prop(column)
 		// 属性值: 需要反序列化

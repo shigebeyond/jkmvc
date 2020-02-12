@@ -134,7 +134,7 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      * @param convertingColumn 是否转换字段名
      * @param row 结果行
      */
-    public override fun fromRow(row: DbResultRow, convertingColumn: Boolean): Unit{
+    public override fun fromRow(row: DbResultRow, convertingColumn: Boolean) {
         row.toMap(convertingColumn, _data)
     }
 
@@ -145,7 +145,7 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      * @param from   字段值的哈希：<字段名 to 字段值>
      * @param expected 要设置的字段名的列表
      */
-    public override fun fromMap(from: Map<String, Any?>, expected: List<String>): Unit {
+    public override fun fromMap(from: Map<String, Any?>, expected: List<String>) {
         copyMap(from, _data, expected)
     }
 
@@ -241,7 +241,7 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      *
      * @param bytes
      */
-    public override fun unserialize(bytes: ByteArray): Unit {
+    public override fun unserialize(bytes: ByteArray) {
         _data.putAll(serializer.unserialize(bytes) as Map<String, Any?>)
     }
 

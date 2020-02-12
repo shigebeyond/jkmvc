@@ -43,7 +43,7 @@ class DbResultRow(protected val rs: DbResultSet) {
      * 遍历键值
      * @param action
      */
-    public inline fun forEach(action: (String, Any?) -> Unit): Unit {
+    public inline fun forEach(action: (String, Any?) -> Unit) {
         for (i in 1..rs.metaData.columnCount) { // 多列
             val label: String = rs.metaData.getColumnLabel(i); // 字段名
             val value: Any? = rs.getValue(i) // 字段值

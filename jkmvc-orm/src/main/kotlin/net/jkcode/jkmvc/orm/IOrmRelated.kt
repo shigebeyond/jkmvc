@@ -16,7 +16,7 @@ interface IOrmRelated : IOrmPersistent
 	 *
 	 * @param orgn
 	 */
-	fun setOriginal(orgn: DbResultRow): Unit
+	fun setOriginal(orgn: DbResultRow)
 
 	/**
 	 * 获得关联对象

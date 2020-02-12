@@ -23,7 +23,7 @@ class DbResultSet(
      * 遍历结果集的每一行
      * @param action 访问者函数
      */
-    public inline fun forEachRow(action: (DbResultRow) -> Unit): Unit {
+    public inline fun forEachRow(action: (DbResultRow) -> Unit) {
         while(next()){
             action(DbResultRow(this))
         }

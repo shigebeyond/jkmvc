@@ -45,7 +45,7 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
      * @param db 数据库连接
      * @param sql 保存编译的sql
      */
-    public override fun compileSubexp(subexp: WordsAndDelimiter, j:Int, db: IDb, sql: StringBuilder): Unit {
+    public override fun compileSubexp(subexp: WordsAndDelimiter, j:Int, db: IDb, sql: StringBuilder) {
         val (exp, delimiter) = subexp;
 
         // 针对where子句，要在前面插入连接符

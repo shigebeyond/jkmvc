@@ -55,7 +55,7 @@ abstract class OrmRelated : OrmPersistent() {
      *
      * @param data
      */
-    public override fun setOriginal(orgn: DbResultRow): Unit {
+    public override fun setOriginal(orgn: DbResultRow) {
         // 设置属性值
         orgn.forEach { column, value ->
             // 关联查询时，会设置关联表字段的列别名（列别名 = 表别名 : 列名），可以据此来设置关联对象的字段值
@@ -91,7 +91,7 @@ abstract class OrmRelated : OrmPersistent() {
      * @param from   字段值的哈希：<字段名 to 字段值>
      * @param expected 要设置的字段名的列表
      */
-    public override fun fromMap(from: Map<String, Any?>, expected: List<String>): Unit {
+    public override fun fromMap(from: Map<String, Any?>, expected: List<String>) {
         val columns = if (expected.isEmpty())
                             ormMeta.defaultExpectedProps
                         else

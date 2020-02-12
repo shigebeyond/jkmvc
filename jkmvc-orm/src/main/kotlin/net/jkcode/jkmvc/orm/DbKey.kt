@@ -88,7 +88,7 @@ data class DbKey<T>(val columns: Array<T>) {
      * 遍历每个字段
      * @param action 操作函数
      */
-    public inline fun forEachColumn(action: (i: Int, col: T) -> Unit): Unit {
+    public inline fun forEachColumn(action: (i: Int, col: T) -> Unit) {
         var i = 0
         for (item in columns)
             action(i++, item)

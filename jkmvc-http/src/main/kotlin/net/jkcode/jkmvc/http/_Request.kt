@@ -130,7 +130,7 @@ public fun Part.isFile(): Boolean {
  * @param values   字段值的数组：<字段名 to 字段值>
  * @param expected 要设置的字段名的数组
  */
-public fun Orm.fromRequest(req: HttpRequest, expected: List<String> = emptyList()): Unit {
+public fun Orm.fromRequest(req: HttpRequest, expected: List<String> = emptyList()) {
     // 默认为请求中的所有列
     val columns = if (expected.isEmpty()) req.parameterNames.iterator() else expected!!.iterator()
 

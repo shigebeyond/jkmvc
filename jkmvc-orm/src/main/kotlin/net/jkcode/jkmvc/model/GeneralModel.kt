@@ -57,7 +57,7 @@ open class GeneralModel(myOrmMeta: IOrmMeta /* 自定义元数据 */) : Orm(empt
      * 改写 setOriginal(), 将原始字段值临时存储 tempOriginal
      * @param data
      */
-    public override fun setOriginal(orgn: DbResultRow): Unit {
+    public override fun setOriginal(orgn: DbResultRow) {
         if(ormMeta is EmptyOrmMeta)
             tempOriginal = orgn
         else
