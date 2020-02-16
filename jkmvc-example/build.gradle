@@ -8,6 +8,13 @@ dependencies{
         compile "net.jkcode.jkmvc:jkmvc-server-jetty:${project.version}"
     }
 
+    /*
+     * JettyServerLauncher 启动时报错: `java.lang.NoClassDefFoundError: javax/servlet/ServletRequest`
+     * 原因: gradle的 war 插件自动将 javax.servlet-api 弄成 providedCompile, 你就算在工程的build.gradle 改为 compile 也没用
+     * fix: project structure -> modules -> 选中 JettyServerLauncher 应用的工程 -> depencies -> 选中 Gradle: javax.servlet:javax.servlet-api:3.1.0 包, 将 scop 由 provided 改为 compile
+     */
+    //compile "javax.servlet:javax.servlet-api:3.1.0"
+
     // jdbc
     runtime "mysql:mysql-connector-java:5.1.6"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
