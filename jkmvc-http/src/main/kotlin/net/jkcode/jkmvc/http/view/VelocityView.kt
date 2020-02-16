@@ -24,7 +24,7 @@ class VelocityView(req: HttpRequest /* 请求对象 */, res: HttpResponse /* 响
         val props = Properties()
         props.setProperty("resource.loader", "file")
         props.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.FileResourceLoader")
-        props.setProperty("file.resource.loader.path", req.getWebPath())
+        props.setProperty("file.resource.loader.path", req.webRootDirectory)
         props.setProperty("file.resource.loader.cache", "false")
         props.setProperty("file.resource.loader.modificationCheckInterval", "2")
         props.setProperty("input.encoding", "UTF-8")

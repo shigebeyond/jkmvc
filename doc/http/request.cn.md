@@ -66,13 +66,13 @@ getShortParameter(key: String, defaultValue: Short? = null): Short? | 获得shor
 方法 | 作用
 --- | ---
 getPartFile(name: String): File? | 获得某个上传文件
-getPartFileRelativePath(name: String): String | 获得某个上传文件的相对路径
+storePartFileAndGetRelativePath(name: String): String | 保存某个上传文件, 并返回其相对路径
 
 6. 文件路径与url的相互转换
 
 方法 | 作用
 --- | ---
-getFileRelativePath(file: File): String | 获得指定文件的相对路径
+getFileRelativePath(file: String): String | 获得指定文件的相对路径
 getUploadUrl(relativePath: String): String | 获得上传文件的url
 
 7. 获得请求参数（包含路由参数与get/post参数）的方法

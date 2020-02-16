@@ -20,14 +20,11 @@ vim src/main/resources/upload.properties
 
 ```
 # 上传文件的保存目录，末尾不要带/
-rootDirectory=upload
-# 上传文件的大小限制，单位 B K M G T
-maxPostSize=1M
+uploadRootDirectory=upload
 # 编码
 encoding=gbk
 # 上传文件的域名
 uploadDomain=http://localhost:8081/jkmvc/upload
-
 ```
 
 ## 4 设置你的controller包

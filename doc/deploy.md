@@ -20,9 +20,7 @@ vim src/main/resources/upload.properties
 
 ```
 # upload directory, where the uploaded file save, without postfix "/"
-rootDirectory=/var/www/upload
-# max file size, unit: B K M G T
-maxPostSize=1M
+uploadRootDirectory=/var/www/upload
 encoding=gbk
 # domain to visit uploaded file
 uploadDomain=http://localhost:8081/jkmvc/upload

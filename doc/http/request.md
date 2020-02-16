@@ -64,13 +64,13 @@ getShortParameter(key: String, defaultValue: Short? = null): Short? | Get short 
 method | usage
 --- | ---
 getPartFile(name: String): File? | Get a uploaded file
-getPartFileRelativePath(name: String): String | Get a uploaded file's relative path where file is saved
+storePartFileAndGetRelativePath(name: String): String | Save a uploaded file, and return its relative path where file is saved
 
 6. File Path vs Url
 
 method | usage
 --- | ---
-getFileRelativePath(file: File): String | Obtain an relative path based on file
+getFileRelativePath(file: String): String | Obtain an relative path based on file
 getUploadUrl(relativePath: String): String | Obtain an absolute url based on the uploaded file's relative path
 
 7. Get request parameter（including routing paramter and `get/post` parameter）

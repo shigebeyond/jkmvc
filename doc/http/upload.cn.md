@@ -8,20 +8,18 @@ vim src/main/resources/upload.properties
 
 ```
 # 上传文件的保存目录，末尾不要带/
-rootDirectory=/var/www/upload
-# 上传文件的大小限制，单位 B K M G T
-maxPostSize=1M
+uploadRootDirectory=/var/www/upload
 # 编码
 encoding=gbk
 # 禁止上传的文件扩展名, 以逗号分隔
 forbiddenExt = jsp,jspx,exe,sh,php,py
 # 访问上传文件的域名
-#uploadDomain=http://localhost:8081/jkmvc/upload
+uploadDomain=http://localhost:8081/jkmvc/upload
 ```
 
 配置项 | 作用
 --- | ---
-rootDirectory | 上传的根目录，由jkmvc接收的上传文件都保存到该目录下，同时为了能访问这些文件，你需要基于该目录建立http文件服务器
+uploadRootDirectory | 上传的根目录，由jkmvc接收的上传文件都保存到该目录下，同时为了能访问这些文件，你需要基于该目录建立http文件服务器
 uploadDomain | 访问上传文件的域名，结合它可以获得访问上传文件的url
 
 ## 2 处理上传文件
@@ -48,9 +46,6 @@ uploadDomain | 访问上传文件的域名，结合它可以获得访问上传�
  */
 public fun uploadAvatarAction()
 {
-    // 设置上传的子目录（将上传文件保存到指定的子目录），必须要在调用 req 的其他api之前调用，否则无法生效
-    req.uploadDirectory = "avatar/" + Date().format("yyyy/MM/dd")
-
     // 查询单个用户
     val id: Int = req["id"]!!
     val user = UserModel(id)
@@ -61,7 +56,7 @@ public fun uploadAvatarAction()
 
     // 检查并处理上传文件
     if(req.isUpload()){ // 检查上传请求
-        user.avatar = req.getPartFileRelativePath("avatar")
+        user.avatar = req.storePartFileAndGetRelativePath("avatar")
         user.update()
     }
 

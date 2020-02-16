@@ -8,9 +8,7 @@ vim src/main/resources/upload.properties
 
 ```
 # upload directory, where the uploaded file save, without postfix "/"
-rootDirectory=/var/www/upload
-# max file size, unit: B K M G T
-maxPostSize=1M
+uploadRootDirectory=/var/www/upload
 encoding=gbk
 # forbidden file extensions, splited by `,`
 forbiddenExt = jsp,jspx,exe,sh,php,py
@@ -20,7 +18,7 @@ uploadDomain=http://localhost:8081/jkmvc/upload
 
 Configuration item | usage
 --- | ---
-rootDirectory | The root directory for upload, which jkmvc saves the upload files. To access these files, you need to setup a file server on this diretory.
+uploadRootDirectory | The root directory for upload, which jkmvc saves the upload files. To access these files, you need to setup a file server on this diretory.
 uploadDomain | Domain name to access to upload files
 
 ## 2 Process upload files
@@ -47,9 +45,6 @@ The form is defined with `enctype =" multipart / form-data "` property.
  */
 public fun uploadAvatarAction()
 {
-    // set uploadDirectory which uploaded file is saved, you must set it before calling req's other api, or it's useless
-    req.uploadDirectory = "avatar/" + Date().format("yyyy/MM/dd")
-
     // find a user
     val id: Int = req["id"]!!
     val user = UserModel(id)
@@ -60,7 +55,7 @@ public fun uploadAvatarAction()
 
     // check and handle upload request
     if(req.isUpload()){ // check upload request
-        user.avatar = req.getPartFileRelativePath("avatar")
+        user.avatar = req.storePartFileAndGetRelativePath("avatar")
         user.update()
     }
 

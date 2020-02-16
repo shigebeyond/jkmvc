@@ -602,10 +602,8 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 * 获得web根目录的路径
 	 * @return
 	 */
-	public fun getWebPath(): String
-	{
-		return session.servletContext.getRealPath("/");
-	}
+	public val webRootDirectory: String
+		get() = session.servletContext.getRealPath("/");
 
 	/**
 	 * 对query string进行 null 转 空字符串

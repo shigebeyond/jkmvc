@@ -40,16 +40,6 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
         public val uploadConfig: IConfig = Config.instance("upload")
 
         /**
-         * 上传目录
-         */
-        public val rootDirectory: String = uploadConfig.getString("rootDirectory")!!.trim("", File.separator) // 去掉最后的路径分隔符
-
-        /**
-         * 禁止上传的文件扩展名
-         */
-        protected val forbiddenExt: List<String> = uploadConfig.getString("forbiddenExt")!!.split(',')
-
-        /**
          * 服务器的url
          */
         public var serverUrl:String? = null
@@ -66,12 +56,6 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
      */
     protected val req: HttpServletRequest
         get() = request as HttpServletRequest
-
-    /**
-     *  上传子目录
-     *      如果你需要设置上传子目录，必须在第一次调用 this.mulReq 之前设置，否则无法生效
-     */
-    public var uploadDirectory:String = ""
 
     /**
      * 多部分参数值, 一次性解析所有参数
@@ -130,23 +114,7 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
      */
     protected fun parsePartFile(name: String): PartFile? {
         val part = getPart(name)
-        if(isForbiddenUploadFile(part.submittedFileName))
-            throw UnsupportedOperationException("文件域[$name]的文件为[${part.submittedFileName}], 属于禁止上传的文件类型")
-
         return PartFile(part)
-    }
-
-    /**
-     * 检查文件是否禁止上传
-     *
-     * @param fileName 上传文件名
-     * @return boolean
-     */
-    public fun isForbiddenUploadFile(fileName: String): Boolean {
-        val ext = fileName.substringAfterLast('.')
-        return forbiddenExt.any {
-            it.equals(ext, true)
-        }
     }
 
     /**
@@ -172,29 +140,25 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
      * @param name
      * @return
      */
-    public fun getPartFile(name: String): File? {
+    public fun getPartFile(name: String): PartFile? {
         val v = partMap[name]
         if(v == null)
             return null
 
-        if(v !is File)
+        if(v !is PartFile)
             throw IllegalArgumentException("表单域[$name]是不是文件域")
 
         return v
     }
 
     /**
-     * 获得上传文件的相对路径
+     * 保存上传文件, 并返回相对路径
      *
      * @param name
      * @return
      */
-    public fun getPartFileRelativePath(name: String): String? {
-        val file = getPartFile(name)
-        if(file == null)
-            return null
-
-        return getFileRelativePath(file)
+    public fun storePartFileAndGetRelativePath(name: String): String? {
+        return getPartFile(name)?.storeAndGetRelativePath()
     }
 
     /**
@@ -203,8 +167,8 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
      * @param file
      * @return
      */
-    public fun getFileRelativePath(file: File): String {
-        return file.path.substring(rootDirectory.length + 1)
+    public fun getFileRelativePath(file: String): String {
+        return PartFile.getFileRelativePath(file)
     }
 
     /**
@@ -213,10 +177,7 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
      * @return
      */
     public fun getUploadUrl(relativePath: String): String {
-        if(uploadConfig.containsKey("uploadDomain"))
-            return uploadConfig.getString("uploadDomain") + '/' + relativePath;
-        else
-            return serverUrl + contextPath + '/' + uploadConfig["rootDirectory"] + '/' + relativePath;
+        return uploadConfig.getString("uploadDomain") + '/' + relativePath;
     }
 
     /**
