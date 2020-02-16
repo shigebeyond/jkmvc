@@ -60,7 +60,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         /**
          * 缓存
          */
-        private val cache:ICache = ICache.instance(config["cacheType"]!!)
+        private val cache: ICache = ICache.instance(config["cacheType"]!!)
     }
 
     /**
@@ -293,7 +293,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     private fun <T : IOrm> innerGetOrPutCache(pk: DbKeyValues, item: T?, expires: Long): T? {
         // 读缓存, 无则读db
-        val key = pk.columns.joinToString("_", dbName + "_")
+        val key = getCacheKey(pk)
         val result = cache.getOrPut(key, expires) {
             // 读db
             val item = innerloadByPk(pk, item)
@@ -301,6 +301,15 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             item ?: Unit // null则给一个空对象
         }.get()
         return if(result is Unit) null else result as T
+    }
+
+    /**
+     * 获得缓存的key
+     * @param pk
+     * @return
+     */
+    protected fun getCacheKey(pk: DbKeyValues): String {
+        return pk.columns.joinToString("_", "orm:$dbName:$name:")
     }
 
     /********************************* query builder **************************************/

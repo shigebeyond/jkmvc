@@ -27,6 +27,7 @@ interface IDbMeta: IDbIdentifierQuoter, IDbValueQuoter {
 
     /**
      * catalog
+     *   一般是db名, 就是 show databases; 中某个名字
      */
     val catalog: String?
 
