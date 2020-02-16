@@ -102,8 +102,18 @@ class PartFile(protected val part: Part): Part by part {
     /**
      * 存储的相对路径
      */
-    protected lateinit var relativePath: String
+    protected var relativePath: String? = null
 
+    /**
+     * 获得存储后的文件名
+     */
+    public val storedFileName: String
+        get() {
+            if (relativePath == null)
+                throw IllegalStateException("未存储");
+
+            return relativePath!!.substringAfterLast(File.separatorChar)
+        }
 
     /**
      * 存储的相对路径
@@ -144,7 +154,7 @@ class PartFile(protected val part: Part): Part by part {
         write(file.absolutePath)
 
         // 返回相对路径
-        return relativePath
+        return relativePath!!
     }
 
 }

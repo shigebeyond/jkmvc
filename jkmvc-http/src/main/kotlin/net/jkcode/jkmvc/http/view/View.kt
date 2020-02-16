@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.http.view
 
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
+import net.jkcode.jkmvc.http.setAttributes
 import net.jkcode.jkutil.collection.LazyAllocatedMap
 import java.io.FileNotFoundException
 
