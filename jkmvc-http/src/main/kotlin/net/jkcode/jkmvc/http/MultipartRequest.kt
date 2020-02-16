@@ -45,11 +45,6 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
         public val rootDirectory: String = uploadConfig.getString("rootDirectory")!!.trim("", File.separator) // 去掉最后的路径分隔符
 
         /**
-         * 上传文件的最大size
-         */
-        protected val maxPostSize: Int = fileSize2Bytes(uploadConfig["maxPostSize"]!!).toInt()
-
-        /**
          * 禁止上传的文件扩展名
          */
         protected val forbiddenExt: List<String> = uploadConfig.getString("forbiddenExt")!!.split(',')
@@ -135,18 +130,10 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
      */
     protected fun parsePartFile(name: String): PartFile? {
         val part = getPart(name)
-        if(part.isFile())
-            return null
-
         if(isForbiddenUploadFile(part.submittedFileName))
             throw UnsupportedOperationException("文件域[$name]的文件为[${part.submittedFileName}], 属于禁止上传的文件类型")
 
-        val fileName = URLDecoder.decode(part.submittedFileName, "UTF-8")
-        // 准备好上传文件路径
-        val file = prepareUploadFile(fileName)
-        // 另存文件
-        part.write(file.absolutePath)
-        return file
+        return PartFile(part)
     }
 
     /**
@@ -160,43 +147,6 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
         return forbiddenExt.any {
             it.equals(ext, true)
         }
-    }
-
-    /**
-     * 准备好上传目录 = 根目录/子目录
-     *
-     * @return
-     */
-    protected fun prepareUploadDirectory(): String {
-        // 1 绝对目录
-        if(FileSystems.getDefault().getPath(uploadDirectory).isAbsolute){
-            // 如果目录不存在，则创建
-            uploadDirectory.prepareDirectory()
-            return uploadDirectory
-        }
-        
-        // 2 相对目录
-        // 上传目录 = 根目录/子目录
-        var path:String = rootDirectory + File.separatorChar
-        if(uploadDirectory != "")
-            path = path + uploadDirectory + File.separatorChar
-        // 如果目录不存在，则创建
-        path.prepareDirectory()
-        return path
-    }
-
-    /**
-     * 准备好上传文件路径
-     *   保存文件前被调用
-     *
-     * @param fileName 文件名
-     * @return
-     */
-    protected fun prepareUploadFile(fileName: String): File {
-        //准备好上传目录, 并构建文件
-        val file = File(prepareUploadDirectory(), fileName)
-        // 文件创建或重命名
-        return file.createOrRename()
     }
 
     /**
