@@ -10,6 +10,7 @@ import sun.misc.IOUtils
 import java.io.File
 import java.net.URLDecoder
 import java.nio.charset.Charset
+import java.nio.file.FileSystems
 import java.util.*
 import javax.servlet.ServletRequestWrapper
 import javax.servlet.http.HttpServletRequest
@@ -17,7 +18,15 @@ import javax.servlet.http.HttpServletRequestWrapper
 
 /**
  * 多部分参数(包含文本/文件类型)的请求, 即上传请求
- *   一个参数的值有2种类型: 1 多个文本值 2 单个文件的二进制数据
+ *   Servlet3.0中提供了对文件上传的原生支持，我们不需要借助任何第三方上传组件(如Apache的commons-fileupload组件)，直接使用Servlet3.0提供的API就行。
+ *   1. 一个参数的值有2种类型: 1 多个文本值 2 单个文件的二进制数据
+ *   2. 限制文件大小是在 web.xml 的 <servlet> 内部配置, 单位是byte
+ *   <multipart-config>
+ *       <max-file-size>500</max-file-size>
+ *       <max-request-size>700</max-request-size>
+ *       <file-size-threshold>0</file-size-threshold>
+ *   </multipart-config>
+ *
  *
  * @author shijianhang<772910474@qq.com>
  * @date 6/23/17 7:58 PM
@@ -33,7 +42,7 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
         /**
          * 上传目录
          */
-        public val uploadDirectory: String = uploadConfig.getString("uploadDirectory")!!.trim("", File.separator) // 去掉最后的路径分隔符
+        public val rootDirectory: String = uploadConfig.getString("rootDirectory")!!.trim("", File.separator) // 去掉最后的路径分隔符
 
         /**
          * 上传文件的最大size
@@ -44,11 +53,6 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
          * 禁止上传的文件扩展名
          */
         protected val forbiddenExt: List<String> = uploadConfig.getString("forbiddenExt")!!.split(',')
-
-        /**
-         * 上传文件重命名的策略
-         */
-        protected val uploadPolicy: FileRenamePolicy = DefaultFileRenamePolicy()
 
         /**
          * 服务器的url
@@ -72,13 +76,13 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
      *  上传子目录
      *      如果你需要设置上传子目录，必须在第一次调用 this.mulReq 之前设置，否则无法生效
      */
-    public var uploadSubdir:String = ""
+    public var uploadDirectory:String = ""
 
     /**
      * 多部分参数值, 一次性解析所有参数
      *    一个参数的值有2种类型
      *    1 多个文本值, 类型为 Array<String>
-     *    2 单个文件的二进制数据, 类型为 File
+     *    2 单个文件的二进制数据, 类型为 PartFile
      */
     protected val partMap: Hashtable<String, Any> by lazy{
         if(!isUpload())
@@ -129,7 +133,7 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
      * @param name
      * @return
      */
-    protected fun parsePartFile(name: String): File? {
+    protected fun parsePartFile(name: String): PartFile? {
         val part = getPart(name)
         if(part.isFile())
             return null
@@ -138,7 +142,9 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
             throw UnsupportedOperationException("文件域[$name]的文件为[${part.submittedFileName}], 属于禁止上传的文件类型")
 
         val fileName = URLDecoder.decode(part.submittedFileName, "UTF-8")
+        // 准备好上传文件路径
         val file = prepareUploadFile(fileName)
+        // 另存文件
         part.write(file.absolutePath)
         return file
     }
@@ -162,10 +168,18 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
      * @return
      */
     protected fun prepareUploadDirectory(): String {
+        // 1 绝对目录
+        if(FileSystems.getDefault().getPath(uploadDirectory).isAbsolute){
+            // 如果目录不存在，则创建
+            uploadDirectory.prepareDirectory()
+            return uploadDirectory
+        }
+        
+        // 2 相对目录
         // 上传目录 = 根目录/子目录
-        var path:String = uploadDirectory + File.separatorChar
-        if(uploadSubdir != "")
-            path = path + uploadSubdir + File.separatorChar
+        var path:String = rootDirectory + File.separatorChar
+        if(uploadDirectory != "")
+            path = path + uploadDirectory + File.separatorChar
         // 如果目录不存在，则创建
         path.prepareDirectory()
         return path
@@ -173,6 +187,7 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
 
     /**
      * 准备好上传文件路径
+     *   保存文件前被调用
      *
      * @param fileName 文件名
      * @return
@@ -239,7 +254,7 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
      * @return
      */
     public fun getFileRelativePath(file: File): String {
-        return file.path.substring(uploadDirectory.length + 1)
+        return file.path.substring(rootDirectory.length + 1)
     }
 
     /**
@@ -251,7 +266,7 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
         if(uploadConfig.containsKey("uploadDomain"))
             return uploadConfig.getString("uploadDomain") + '/' + relativePath;
         else
-            return serverUrl + contextPath + '/' + uploadConfig["uploadDirectory"] + '/' + relativePath;
+            return serverUrl + contextPath + '/' + uploadConfig["rootDirectory"] + '/' + relativePath;
     }
 
     /**

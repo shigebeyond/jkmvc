@@ -20,7 +20,7 @@ vim src/main/resources/upload.properties
 
 ```
 # 上传文件的保存目录，末尾不要带/
-uploadDirectory=upload
+rootDirectory=upload
 # 上传文件的大小限制，单位 B K M G T
 maxPostSize=1M
 # 编码

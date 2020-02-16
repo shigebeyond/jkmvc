@@ -586,14 +586,6 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	}
 
 	/**
-	* 设置多个属性
-	 */
-	public fun setAttributes(data:Map<String, Any?>) {
-		for ((k, v) in data)
-			req.setAttribute(k, v);
-	}
-
-	/**
 	 * 将相对路径转为绝对路径
 	 * @param uri 相对路径
 	 * @return 绝对路径

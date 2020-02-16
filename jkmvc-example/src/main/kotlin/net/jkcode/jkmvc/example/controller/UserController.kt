@@ -165,8 +165,8 @@ class UserController: Controller()
     public fun uploadAvatarAction()
     {
         // 设置上传的子目录（将上传文件保存到指定的子目录），必须要在调用 req 的其他api之前调用，否则无法生效
-        // set uploadSubdir which uploaded file is saved, you must set it before calling req's other api, or it's useless
-        req.uploadSubdir = "avatar/" + Date().format("yyyy/MM/dd")
+        // set uploadDirectory which uploaded file is saved, you must set it before calling req's other api, or it's useless
+        req.uploadDirectory = "avatar/" + Date().format("yyyy/MM/dd")
 
         // 查询单个用户 | find a user
         val id: Int = req["id"]!!

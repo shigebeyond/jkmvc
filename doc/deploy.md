@@ -20,7 +20,7 @@ vim src/main/resources/upload.properties
 
 ```
 # upload directory, where the uploaded file save, without postfix "/"
-uploadDirectory=/var/www/upload
+rootDirectory=/var/www/upload
 # max file size, unit: B K M G T
 maxPostSize=1M
 encoding=gbk

@@ -7,6 +7,7 @@ import net.jkcode.jkmvc.orm.IRelationMeta
 import net.jkcode.jkmvc.orm.Orm
 import net.jkcode.jkmvc.orm.RelationType
 import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpSession
 import javax.servlet.http.Part
 
 /****************************** HttpServletRequest扩展 *******************************/
@@ -61,6 +62,74 @@ public fun HttpServletRequest.isUpload(): Boolean{
 public fun HttpServletRequest.isAjax(): Boolean {
     return "XMLHttpRequest".equals(getHeader("x-requested-with"), true) // // 通过XMLHttpRequest发送请求
             && "text/javascript, application/javascript, */*".equals(getHeader("Accept"), true); // 通过jsonp来发送请求
+}
+
+/**
+ * 设置多个属性
+ */
+public fun HttpServletRequest.setAttributes(data:Map<String, Any?>) {
+    for ((k, v) in data)
+        setAttribute(k, v);
+}
+
+/**
+ * 读取某个属性, 如果没有则设置
+ */
+public fun HttpServletRequest.getOrPutAttribute(key: String, default: () -> Any): Any {
+    var value = getAttribute(key)
+    // 如果没有则设置
+    if(value == null){
+        value = default()
+        setAttribute(key, value)
+    }
+    return value
+}
+
+/**
+ * 读取某个属性, 如果没有则设置
+ */
+public fun HttpSession.getOrPutAttribute(key: String, default: () -> Any): Any {
+    var value = getAttribute(key)
+    // 如果没有则设置
+    if(value == null){
+        value = default()
+        setAttribute(key, value)
+    }
+    return value
+}
+
+/**
+ * 读取某个会过期的属性, 如果没有则设置, 如果过期则重新生成
+ */
+public fun HttpSession.getOrPutExpiringAttribute(key: String, expireSencond:Long = 6000, default: () -> Any): Any? {
+    var pair = getAttribute(key) as Pair<Any, Long>?
+    // 如果没有/过期, 则设置
+    if(pair == null || pair.second < System.currentTimeMillis()){
+        // 过期时间
+        val expire = System.currentTimeMillis() + expireSencond
+        // 值 + 过期时间
+        pair = default() to expire
+        setAttribute(key, pair)
+    }
+
+    return pair.first
+}
+
+/**
+ * 读取某个会过期的属性, 过期则返回null
+ */
+public fun HttpSession.getExpiringAttribute(key: String): Any?{
+    var pair = getAttribute(key) as Pair<Any, Long>?
+    if(pair == null)
+        return null
+
+    // 检查是否过期
+    if(pair.second < System.currentTimeMillis()){
+        removeAttribute(key)
+        return null
+    }
+
+    return pair.first
 }
 
 /**

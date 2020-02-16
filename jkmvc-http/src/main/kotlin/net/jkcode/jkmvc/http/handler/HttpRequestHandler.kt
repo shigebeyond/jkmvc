@@ -71,7 +71,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
         }
 
         // 构建响应对象
-        val res = HttpResponse(response as HttpServletResponse);
+        val res = HttpResponse(response as HttpServletResponse, req);
 
         // 允许跨域
         if(config.getBoolean("allowCrossDomain", false)!!){

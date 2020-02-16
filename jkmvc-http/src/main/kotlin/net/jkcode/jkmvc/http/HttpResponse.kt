@@ -11,10 +11,9 @@ import net.jkcode.jkmvc.orm.normalizeOrmData
 import net.jkcode.jkmvc.orm.toJson
 import net.jkcode.jkutil.collection.LazyAllocatedMap
 import net.jkcode.jkutil.common.writeFile
+import net.jkcode.jkutil.common.writeFromInput
 import java.io.*
 import java.net.URLEncoder
-import javax.servlet.ServletOutputStream
-import javax.servlet.ServletResponseWrapper
 import javax.servlet.http.HttpServletResponse
 import javax.servlet.http.HttpServletResponseWrapper
 
@@ -24,7 +23,7 @@ import javax.servlet.http.HttpServletResponseWrapper
  * @author shijianhang
  * @date 2016-10-7 下午11:32:07 
  */
-class HttpResponse(res:HttpServletResponse /* 响应对象 */): HttpServletResponseWrapper(res) {
+class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req: HttpRequest): HttpServletResponseWrapper(res) {
 
 	companion object{
 		/**
@@ -192,10 +191,31 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */): HttpServletRespo
 
 		//通知客户端文件的下载    URLEncoder.encode解决文件名中文的问题
 		res.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(file.name, "utf-8"))
-		res.setHeader("Content-Type", "application/octet-stream")
+		val contentType = req.session.servletContext.getMimeType(file.getName()) ?: "application/octet-stream"
+		res.setHeader("Content-Type", contentType)
 
 		// 输出文件
 		res.getOutputStream().writeFile(file)
+	}
+
+	/**
+	 * 响应输入流
+	 *   会帮你关掉输入流
+	 *
+	 * @param input
+	 */
+	public fun renderFromInput(input: InputStream, name: String? = null)
+	{
+		rendered = true
+
+		//通知客户端文件的下载    URLEncoder.encode解决文件名中文的问题
+		if(name != null)
+			res.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(name, "utf-8"))
+		val contentType = req.session.servletContext.getMimeType(name) ?: "application/octet-stream"
+		res.setHeader("Content-Type", contentType)
+
+		// 输出文件
+		res.outputStream.writeFromInput(input)
 	}
 
 	/**
