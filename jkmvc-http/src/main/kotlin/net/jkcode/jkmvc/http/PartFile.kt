@@ -20,7 +20,7 @@ class PartFile(protected val part: Part): Part by part {
         /**
          * 上传目录
          */
-        public val uploadRootDirectory: String = uploadConfig.getString("uploadRootDirectory")!!.trim("", File.separator) // 去掉最后的路径分隔符
+        public var uploadRootDirectory: String = uploadConfig.getString("uploadRootDirectory")!!.trim("", File.separator) // 去掉最后的路径分隔符
 
         /**
          * 禁止上传的文件扩展名
@@ -109,16 +109,12 @@ class PartFile(protected val part: Part): Part by part {
      */
     public val storedFileName: String
         get() {
+            this.inputStream.reader()
             if (relativePath == null)
                 throw IllegalStateException("未存储");
 
             return relativePath!!.substringAfterLast(File.separatorChar)
         }
-
-    /**
-     * 存储的相对路径
-     */
-    //public val relativePath: String
 
     /**
      * 另存文件, 并记录相对路径

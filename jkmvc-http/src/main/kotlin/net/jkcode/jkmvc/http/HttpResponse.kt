@@ -195,7 +195,8 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 		res.setHeader("Content-Type", contentType)
 
 		// 输出文件
-		res.getOutputStream().writeFile(file)
+		res.outputStream.writeFile(file)
+		res.outputStream.flush()
 	}
 
 	/**

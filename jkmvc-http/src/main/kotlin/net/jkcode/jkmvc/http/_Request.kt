@@ -200,12 +200,22 @@ public fun Part.isFile(): Boolean {
  * @param expected 要设置的字段名的数组
  */
 public fun Orm.fromRequest(req: HttpRequest, expected: List<String> = emptyList()) {
+    // 1 文本参数
     // 默认为请求中的所有列
     val columns = if (expected.isEmpty()) req.parameterNames.iterator() else expected!!.iterator()
 
     // 取得请求中的指定参数
     for (column in columns)
         setFromRequest(column, req.getParameter(column))
+
+    // 2 文件参数
+    for(column in req.partFileNames){
+        val file = req.getPartFile(column)
+        // 先保存文件
+        val path = file!!.storeAndGetRelativePath()
+        // 属性值为文件相对路径
+        set(column, path)
+    }
 }
 
 /**

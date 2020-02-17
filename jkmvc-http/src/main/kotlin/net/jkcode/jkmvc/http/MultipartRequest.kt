@@ -3,29 +3,24 @@ package net.jkcode.jkmvc.http
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
-import com.oreilly.servlet.multipart.DefaultFileRenamePolicy
-import com.oreilly.servlet.multipart.FileRenamePolicy
 import net.jkcode.jkutil.common.*
 import sun.misc.IOUtils
-import java.io.File
-import java.net.URLDecoder
-import java.nio.charset.Charset
-import java.nio.file.FileSystems
 import java.util.*
-import javax.servlet.ServletRequestWrapper
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletRequestWrapper
+import kotlin.collections.HashMap
 
 /**
  * 多部分参数(包含文本/文件类型)的请求, 即上传请求
  *   Servlet3.0中提供了对文件上传的原生支持，我们不需要借助任何第三方上传组件(如Apache的commons-fileupload组件)，直接使用Servlet3.0提供的API就行。
- *   1. 一个参数的值有2种类型: 1 多个文本值 2 单个文件的二进制数据
+ *   1. 一个参数封装为类型 Part, 他的值有2种类型: 1 文本值 2 文件的二进制数据
  *   2. 限制文件大小是在 web.xml 的 <servlet> 内部配置, 单位是byte
  *   <multipart-config>
  *       <max-file-size>500</max-file-size>
  *       <max-request-size>700</max-request-size>
  *       <file-size-threshold>0</file-size-threshold>
  *   </multipart-config>
+ *   3. jkmvc使用的是 filter, 因此限制文件大小暂时不支持, 会导致上传文件报错: No multipart config for servlet, 在 JkFilter 中临时处理
  *
  *
  * @author shijianhang<772910474@qq.com>
@@ -40,7 +35,7 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
         public val uploadConfig: IConfig = Config.instance("upload")
 
         /**
-         * 服务器的url
+         * 全局服务器的url, 只需要初始化一次
          */
         public var serverUrl:String? = null
     }
@@ -58,97 +53,48 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): Htt
         get() = request as HttpServletRequest
 
     /**
-     * 多部分参数值, 一次性解析所有参数
-     *    一个参数的值有2种类型
-     *    1 多个文本值, 类型为 Array<String>
-     *    2 单个文件的二进制数据, 类型为 PartFile
+     * 上传请求中文件参数
      */
-    protected val partMap: Hashtable<String, Any> by lazy{
+    public val partFileMap: Map<String, List<PartFile>> by lazy{
         if(!isUpload())
             throw UnsupportedOperationException("当前请求不是上传文件的请求")
 
-        val table = Hashtable<String, Any>()
+        val map = HashMap<String, MutableList<PartFile>>()
         // 遍历每个部分, 一次性解析所有参数
-        for(part in parts){
-            val name = part.name
-            if(table.containsKey(name))
-                continue
-
-            if(part.isFile()) // 文件域: 一个文件
-                table[name] = parsePartFile(name)
-            else// 文本域: 多个值
-                table[name] = parsePartTexts(name)
+        for (part in parts) {
+            val files = map.getOrPut(part.name){
+                LinkedList()
+            }
+            files.add(PartFile(part))
         }
 
-        table
+        map
     }
 
     /**
-     * 获得多部分表单的参数名
-     * @return
+     * 上传请求中文件参数名
      */
-    public fun getPartNames(): Enumeration<String>{
-        return partMap.keys()
-    }
+    public val partFileNames: Set<String>
+        get() = partFileMap.keys
 
     /**
-     * 解析文本域
-     *
-     * @param name
-     * @return
-     */
-    protected fun parsePartTexts(name: String): Array<String?> {
-        return parts.mapToArray { part ->
-            if(part.isText() && part.name == name) // 逐个 part 匹配 name, 可能会匹配多个 part
-                part.inputStream.readBytes().toString(Charset.forName("UTF-8"))
-            else
-                null
-        }
-    }
-
-    /**
-     * 解析文件域
-     *
-     * @param name
-     * @return
-     */
-    protected fun parsePartFile(name: String): PartFile? {
-        val part = getPart(name)
-        return PartFile(part)
-    }
-
-    /**
-     * 获得文本域的值
-     *
-     * @param name
-     * @return
-     */
-    public fun getPartTexts(name: String): Array<String>? {
-        val v = partMap[name]
-        if(v == null)
-            return null
-
-        if(v is File)
-            throw IllegalArgumentException("表单域[$name]是不是文本域")
-
-        return v as Array<String>
-    }
-
-    /**
-     * 获得上传的文件, 已保存到上传子目录
+     * 获得上传的文件
      *
      * @param name
      * @return
      */
     public fun getPartFile(name: String): PartFile? {
-        val v = partMap[name]
-        if(v == null)
-            return null
+        return partFileMap[name]?.firstOrNull()
+    }
 
-        if(v !is PartFile)
-            throw IllegalArgumentException("表单域[$name]是不是文件域")
-
-        return v
+    /**
+     * 获得上传的文件
+     *
+     * @param name
+     * @return
+     */
+    public fun getPartFileValues(name: String): List<PartFile>? {
+        return partFileMap[name]
     }
 
     /**

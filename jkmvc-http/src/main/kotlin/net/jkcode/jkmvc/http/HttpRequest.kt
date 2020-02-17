@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest
 
 /**
  * 请求对象
+ *    servlet3, 对上传请求中文本字段的获取 跟在普通请求中一样, 直接使用 parameterMap / getParameter() 就行, 因此改写 parameterMap / getParameter()
  *
  * @author shijianhang
  * @date 2016-10-6 上午9:27:56
@@ -98,23 +99,11 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	public lateinit var routeParams:Map<String, String>;
 
 	/**
-	 * 请求参数
-	 *    兼容上传文件的情况, 但由于value类型是 Array<String?>, 因此不兼容File字段值
-	 *    for jkerp
-	 */
-	public val httpParams: Map<String, Array<String?>> by lazy{
-			if(isUpload()) // 上传请求的参数类型：Map<String, Array<String>|File>, 但不兼容File字段值
-				partMap as Map<String, Array<String?>>
-			else // 非上传请求的参数类型：Map<String, Array<String>>
-				req.parameterMap
-		}
-
-	/**
 	 * 全部参数 = 路由参数 + 请求参数
 	 *    路由参数的value类型是String, 请求参数的value类型是 Array<String?>, 因此统一改为String
 	 */
 	public val allParams:Map<String, String?> by lazy{
-		CompositeMap(routeParams, HttpParamMap(httpParams)) as Map<String, String>
+		CompositeMap(routeParams, HttpParamMap(req.parameterMap)) as Map<String, String>
 	}
 
 	/**
@@ -203,13 +192,12 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 */
 	public operator inline fun <reified T:Any> get(key: String, defaultValue: T? = null): T?
 	{
-		// 先取get/post参数
-		if(containsParameter(key))
-			return getParameter(key)!!.to(T::class) as T
+		// 获得参数值
+		var value: String? = getParameter(key) // 先取get/post参数
+							?: routeParams[key] // 再取路由参数
 
-		// 再取路由参数
-		if(routeParams.containsKey(key))
-			return routeParams[key]!!.to(T::class) as T
+		if (value != null)
+			return value.to(T::class) as T
 
 		return defaultValue;
 	}
@@ -242,16 +230,14 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	public inline fun <reified T:Any> getAndValidate(key: String, rule: String, defaultValue: T? = null): T?
 	{
 		// 获得参数值
-		var value:String? = null
-		if(routeParams.containsKey(key)) // 先取路由参数
-			value = routeParams[key]!!
-		else if(containsParameter(key)) // 再取get/post参数
-			value = getParameter(key)!!
-		else
-			return defaultValue
+		var value: String? = getParameter(key) // 先取get/post参数
+							?: routeParams[key] // 再取路由参数
 
 		// 校验参数值
-		return validateValue(key, value, rule).toNullable(T::class)
+		if (value != null)
+			return validateValue(key, value, rule).toNullable(T::class)
+
+		return defaultValue
 	}
 
 	/**
@@ -405,67 +391,28 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		return getRouteParameter(key, defaultValue)
 	}
 
-	/*************************** get/post/upload参数 *****************************/
+	/*************************** get/post参数 *****************************/
 	/**
-	 * 检查是否有get/post/upload的参数
-	 *    兼容上传文件的情况
+	 * 检查是否有get/post的参数
      * @param key
      * @return
 	 */
 	public fun containsParameter(key: String): Boolean {
-		return httpParams.contains(key)
+		return getParameter(key) != null
 	}
 
 	/**
-	 * 检查get/post/upload参数是否为空
+	 * 检查get/post参数是否为空
 	 *
 	 * @param key 参数名
 	 * @return
 	 */
 	public fun isEmptyParameter(key: String): Boolean {
-		return !containsParameter(key) || getParameter(key).isNullOrEmpty()
+		return getParameter(key).isNullOrEmpty()
 	}
 
 	/**
-	 * 获得get/post/upload的参数名的枚举
-	 *    兼容上传文件的情况
-	 * @return
-	 */
-	public override fun getParameterNames():Enumeration<String>{
-		if(isUpload())
-			return getPartNames()
-
-		return req.parameterNames;
-	}
-
-	/**
-	 * 获得get/post/upload的参数值
-	 *    兼容上传文件的情况
-	 * @param key
-	 * @return
-	 */
-	public override fun getParameter(key: String): String? {
-		if(isUpload())
-			return getPartTexts(key)?.first()
-
-		return req.getParameter(key)
-	}
-
-	/**
-	 * 获得get/post/upload的参数值
-	 *    兼容上传文件的情况
-	 * @param key
-	 * @return
-	 */
-	public override fun getParameterValues(key: String): Array<String>? {
-		if(isUpload())
-			return getPartTexts(key)
-
-		return req.getParameterValues(key)
-	}
-
-	/**
-	 * 获得get/post/upload参数值
+	 * 获得get/post参数值
 	 *   注：调用时需明确指定返回类型，来自动转换参数值为指定类型
 	 *
 	 * @param key 参数名
@@ -477,7 +424,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	}
 
 	/**
-	 * 获得并校验get/post/upload参数值
+	 * 获得并校验get/post参数值
 	 *   注：调用时需明确指定返回类型，来自动转换参数值为指定类型
 	 *
 	 * @param key 参数名
@@ -491,7 +438,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	}
 
 	/**
-	 * 获得int类型的get/post/upload的参数值
+	 * 获得int类型的get/post的参数值
 	 *
 	 * @param key 参数名
 	 * @param defaultValue 单个参数的默认值
@@ -502,7 +449,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	}
 
 	/**
-	 * 获得long类型的get/post/upload的参数值
+	 * 获得long类型的get/post的参数值
 	 *
 	 * @param key 参数名
 	 * @param defaultValue 单个参数的默认值
@@ -513,7 +460,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	}
 
 	/**
-	 * 获得boolean类型的get/post/upload的参数值
+	 * 获得boolean类型的get/post的参数值
 	 *
 	 * @param key 参数名
 	 * @param defaultValue 单个参数的默认值
@@ -524,7 +471,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	}
 
 	/**
-	 * 获得Date类型的get/post/upload的参数值
+	 * 获得Date类型的get/post的参数值
 	 *
 	 * @param key 参数名
 	 * @param defaultValue 单个参数的默认值
@@ -535,7 +482,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	}
 
 	/**
-	 * 获得float类型的get/post/upload的参数值
+	 * 获得float类型的get/post的参数值
 	 *
 	 * @param key 参数名
 	 * @param defaultValue 单个参数的默认值
@@ -546,7 +493,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	}
 
 	/**
-	 * 获得double类型的get/post/upload的参数值
+	 * 获得double类型的get/post的参数值
 	 *
 	 * @param key 参数名
 	 * @param defaultValue 单个参数的默认值
@@ -557,7 +504,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	}
 
 	/**
-	 * 获得short类型的get/post/upload的参数值
+	 * 获得short类型的get/post的参数值
 	 *
 	 * @param key 参数名
 	 * @param defaultValue 单个参数的默认值
@@ -610,8 +557,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 * @return
 	 */
 	public override fun getQueryString(): String {
-		val result = super.getQueryString()
-		return if(result == null) "" else result
+		return super.getQueryString() ?: ""
 	}
 
 	/**

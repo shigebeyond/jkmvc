@@ -61,6 +61,14 @@ open class JkFilter() : Filter {
             return;
         }
 
+        // bug: 上传文件报错: No multipart config for servlet
+        // fix: web.xml 中 <filter> 不支持 <multipart-config> 配置, 只有 <servlet> 才支持, 因此只能硬编码设置上传配置
+        // TODO 临时处理, 只对jetty有效, 参考 https://stackoverflow.com/questions/52514462/jetty-no-multipart-config-for-servlet-problem
+        if(req.isUpload()) {
+            val multipartConfig = MultipartConfigElement("/tmp")
+            req.setAttribute("org.eclipse.jetty.multipartConfig", multipartConfig)
+        }
+
         // 1 异步处理
         if(req.isAsyncSupported) {
             // 异步上下文, 在完成异步操作后, 需要调用 actx.complete() 来关闭异步响应, 调用下放到 RequestHandler.handle()
