@@ -19,7 +19,8 @@ import javax.servlet.http.HttpServletRequest
 
 /**
  * 请求对象
- *    servlet3, 对上传请求中文本字段的获取 跟在普通请求中一样, 直接使用 parameterMap / getParameter() 就行, 因此改写 parameterMap / getParameter()
+ *    对上传请求中文本字段, 在 servlet3 中跟在普通请求中一样, 直接使用 parameterMap / getParameter() 来获取, 因此不用改写 parameterMap / getParameter()
+ *    对上传请求中文件字段, 设计单独的api来获取: partFileMap/partFileNames/getPartFile()/getPartFileValues()
  *
  * @author shijianhang
  * @date 2016-10-6 上午9:27:56

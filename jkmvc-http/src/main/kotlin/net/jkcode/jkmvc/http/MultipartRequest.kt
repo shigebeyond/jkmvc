@@ -11,7 +11,10 @@ import javax.servlet.http.HttpServletRequestWrapper
 import kotlin.collections.HashMap
 
 /**
- * 多部分参数(包含文本/文件类型)的请求, 即上传请求
+ * 处理多部分参数(包含文本/文件类型)的请求, 即上传请求
+ *   对上传请求中文本字段, 在 servlet3 中跟在普通请求中一样, 直接使用 parameterMap / getParameter() 来获取, 因此不用改写 parameterMap / getParameter()
+ *   对上传请求中文件字段, 设计单独的api来获取: partFileMap/partFileNames/getPartFile()/getPartFileValues()
+ *
  *   Servlet3.0中提供了对文件上传的原生支持，我们不需要借助任何第三方上传组件(如Apache的commons-fileupload组件)，直接使用Servlet3.0提供的API就行。
  *   1. 一个参数封装为类型 Part, 他的值有2种类型: 1 文本值 2 文件的二进制数据
  *   2. 限制文件大小是在 web.xml 的 <servlet> 内部配置, 单位是byte
