@@ -152,11 +152,11 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 	 * 响应视图
 	 *
 	 * @param file 视图文件
-	 * @param data 局部变量
+	 * @param vm 视图模型
 	 */
-	public fun renderView(file:String, data:Map<String, Any?> = emptyData)
+	public fun renderView(file:String, vm:Map<String, Any?> = emptyData)
 	{
-		renderView(View(HttpRequest.current(), this, file, data))
+		renderView(View(HttpRequest.current(), this, file, vm))
 	}
 
 	/**

@@ -4,6 +4,7 @@ import net.jkcode.jkutil.ttl.SttlCurrentHolder
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.view.View
+import net.jkcode.jkutil.collection.LazyAllocatedMap
 import net.jkcode.jkutil.ttl.HttpRequestScopedTransferableThreadLocal
 
 /**
@@ -29,6 +30,14 @@ abstract class Controller : IController {
     override lateinit var res: HttpResponse
 
     /**
+     * 视图模型
+     */
+    override val vm:MutableMap<String, Any?> by lazy {
+        LazyAllocatedMap<String, Any?>()
+    }
+
+    /**
+     * todo: 删掉
      * for jkerp
      */
     val request: HttpRequest
@@ -37,8 +46,14 @@ abstract class Controller : IController {
     /**
      * for jkerp
      */
-    val response: HttpResponse
-        get() = res
+    val model: MutableMap<String, Any?>
+        get() = vm
+
+    /**
+     * for jkerp
+     */
+    val map: MutableMap<String, Any?>
+        get() = vm
 
     init {
         setCurrent(this)

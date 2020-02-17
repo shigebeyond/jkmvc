@@ -14,7 +14,7 @@ import java.util.*
  * @author shijianhang<772910474@qq.com>
  * @date 8/25/17 9:49 AM
  */
-class VelocityView(req: HttpRequest /* 请求对象 */, res: HttpResponse /* 响应对象 */, file:String/* 视图文件 */, data:MutableMap<String, Any?> /* 局部变量 */): View(req, res, file, data) {
+class VelocityView(req: HttpRequest /* 请求对象 */, res: HttpResponse /* 响应对象 */, file:String/* 视图文件 */, vm: MutableMap<String, Any?> /* 视图模型 */): View(req, res, file, vm) {
 
     /**
      * 渲染Velocity模板
@@ -47,7 +47,7 @@ class VelocityView(req: HttpRequest /* 请求对象 */, res: HttpResponse /* 响
         val template = instance.getTemplate(file + ".html", "UTF-8");
 
         // 构建上下文：要渲染的数据
-        val context = VelocityContext(data)
+        val context = VelocityContext(vm)
 
         // 渲染模板
         var vwriter: VelocityWriter? = null

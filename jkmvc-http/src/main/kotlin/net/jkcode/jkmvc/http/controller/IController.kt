@@ -28,6 +28,11 @@ interface IController{
     var res: HttpResponse
 
     /**
+     * 视图模型
+     */
+    val vm:MutableMap<String, Any?>
+
+    /**
      * 视图
      * @param file 视图文件
      * @param data 视图变量
@@ -80,12 +85,16 @@ interface IController{
             return
 
         // 渲染视图
-        if (result is View)
+        if (result is View) {
+            result.mergeVm(vm)
             res.renderView(result)
+        }
 
-        // 渲染文本
-        if (result is String)
-            res.renderString(result)
+        // 渲染视图
+        if (result is String) {
+            //res.renderString(result)
+            res.renderView(result, vm) // 渲染视图的场景比渲染文本的多, 因此直接渲染视图啦
+        }
 
         // 渲染文件
         if (result is File)

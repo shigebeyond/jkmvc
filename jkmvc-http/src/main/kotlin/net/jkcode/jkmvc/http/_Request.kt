@@ -201,20 +201,26 @@ public fun Part.isFile(): Boolean {
  */
 public fun Orm.fromRequest(req: HttpRequest, expected: List<String> = emptyList()) {
     // 1 文本参数
-    // 默认为请求中的所有列
-    val columns = if (expected.isEmpty()) req.parameterNames.iterator() else expected!!.iterator()
+    // 默认所有列
+    val columns = if (expected.isEmpty()) this.ormMeta.props else expected
 
     // 取得请求中的指定参数
-    for (column in columns)
-        setFromRequest(column, req.getParameter(column))
+    for (column in columns) {
+        // 1 文本参数
+        val value = req.getParameter(column)
+        if(value != null) {
+            setFromRequest(column, value)
+            continue
+        }
 
-    // 2 文件参数
-    for(column in req.partFileNames){
+        // 2 文件参数
         val file = req.getPartFile(column)
-        // 先保存文件
-        val path = file!!.storeAndGetRelativePath()
-        // 属性值为文件相对路径
-        set(column, path)
+        if(file != null) {
+            // 先保存文件
+            val path = file!!.storeAndGetRelativePath()
+            // 属性值为文件相对路径
+            set(column, path)
+        }
     }
 }
 

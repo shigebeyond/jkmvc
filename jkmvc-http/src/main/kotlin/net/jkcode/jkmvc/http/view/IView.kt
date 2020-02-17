@@ -27,17 +27,24 @@ interface IView
 	val file:String
 
 	/**
-	 * 局部变量
+	 * 视图模型
 	 */
-	var data:MutableMap<String, Any?>
+	var vm:MutableMap<String, Any?>
 
 	/**
-	 * 设置局部变量
+	 * 设置视图模型
 	 * @param key
 	 * @param value
 	 * @return
 	 */
-	public operator fun set(key:String, value:Any?): View;
+	operator fun set(key:String, value:Any?): View;
+
+	/**
+	 * 合并视图模型
+	 * @param vm
+	 * @return
+	 */
+	fun mergeVm(vm: Map<String, Any?>)
 
 	/**
 	 * 渲染视图
