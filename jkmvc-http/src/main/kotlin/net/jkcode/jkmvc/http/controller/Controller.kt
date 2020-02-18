@@ -6,6 +6,7 @@ import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jkutil.collection.LazyAllocatedMap
 import net.jkcode.jkutil.ttl.HttpRequestScopedTransferableThreadLocal
+import java.io.Writer
 
 /**
  * 控制器
@@ -54,6 +55,12 @@ abstract class Controller : IController {
      */
     val map: MutableMap<String, Any?>
         get() = vm
+
+    /**
+     * for jkerp
+     */
+    val writer: Writer
+        get() = res.writer
 
     init {
         setCurrent(this)

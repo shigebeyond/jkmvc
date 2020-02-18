@@ -3,6 +3,7 @@ package net.jkcode.jkmvc.http
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
+import net.jkcode.jkmvc.orm.IOrm
 import net.jkcode.jkmvc.orm.IRelationMeta
 import net.jkcode.jkmvc.orm.Orm
 import net.jkcode.jkmvc.orm.RelationType
@@ -199,7 +200,7 @@ public fun Part.isFile(): Boolean {
  * @param values   字段值的数组：<字段名 to 字段值>
  * @param expected 要设置的字段名的数组
  */
-public fun Orm.fromRequest(req: HttpRequest, expected: List<String> = emptyList()) {
+public fun <T: Orm> T.fromRequest(req: HttpRequest, expected: List<String> = emptyList()): T {
     // 1 文本参数
     // 默认所有列
     val columns = if (expected.isEmpty()) this.ormMeta.props else expected
@@ -222,6 +223,7 @@ public fun Orm.fromRequest(req: HttpRequest, expected: List<String> = emptyList(
             set(column, path)
         }
     }
+    return this
 }
 
 /**

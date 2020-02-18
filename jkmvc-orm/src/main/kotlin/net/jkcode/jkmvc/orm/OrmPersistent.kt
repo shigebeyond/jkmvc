@@ -84,6 +84,9 @@ abstract class OrmPersistent : OrmValid() {
 		if(_dirty.isEmpty())
 			throw OrmException("No data to create"); // 没有要创建的数据
 
+		// 触发前置事件
+		beforeValidate()
+
 		// 校验
 		validate();
 
@@ -187,6 +190,9 @@ abstract class OrmPersistent : OrmValid() {
 			dbLogger.debug("No data to update") // 没有要更新的数据
 			return true;
 		}
+
+		// 触发前置事件
+		beforeValidate()
 
 		// 校验
 		validate();

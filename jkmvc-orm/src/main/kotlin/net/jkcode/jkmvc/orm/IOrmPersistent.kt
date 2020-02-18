@@ -121,6 +121,11 @@ interface IOrmPersistent : IOrmValid {
 
 	/************************************ 持久化事件 *************************************/
 	/**
+	 * 处理validate前置事件
+	 */
+	fun beforeValidate(){}
+
+	/**
 	 * 处理create前置事件
 	 */
 	fun beforeCreate(){}
