@@ -25,6 +25,7 @@ class ErrorsTag : HtmlTag(null, true){
     public var delimiter = "<br/>"
 
     override fun writeBody(writer: JspWriter) {
+        // 无错不输出
         if(!isError)
             return
 
