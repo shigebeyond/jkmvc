@@ -106,12 +106,6 @@ abstract class BaseBoundTag: TagSupport() {
      */
     public val isError: Boolean
         get(){
-            if(boundError == null)
-                return false
-
-            if(boundError is Map<*, *> && (boundError as Map<*, *>).isEmpty())
-                return false
-
-            return true
+            return !(boundError == null || boundError is Map<*, *> && (boundError as Map<*, *>).isEmpty()) // 不为空
         }
 }

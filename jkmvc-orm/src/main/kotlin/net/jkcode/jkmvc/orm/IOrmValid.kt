@@ -1,5 +1,7 @@
 package net.jkcode.jkmvc.orm
 
+import net.jkcode.jkutil.validator.ValidateResult
+
 /**
  * ORM之数据校验
  *
@@ -11,8 +13,16 @@ interface IOrmValid : IOrmEntity {
 
     /**
      * 校验数据
+     * @return
      */
-    fun validate();
+    fun validate(): ValidateResult;
+
+    /**
+     * 校验数据
+     */
+    fun validateOrThrow() {
+        validate().getOrThrow()
+    }
 
     /**
      * 标记字段为脏

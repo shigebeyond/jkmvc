@@ -88,7 +88,7 @@ abstract class OrmPersistent : OrmValid() {
 		beforeValidate()
 
 		// 校验
-		validate();
+		validateOrThrow();
 
 		// 事务
 		return ormMeta.transactionWhenHandlingEvent("beforeCreate|afterCreate|beforeSave|afterSave", withHasRelations) {
@@ -195,7 +195,7 @@ abstract class OrmPersistent : OrmValid() {
 		beforeValidate()
 
 		// 校验
-		validate();
+		validateOrThrow();
 
 		// 事务
 		return ormMeta.transactionWhenHandlingEvent("beforeUpdate|afterUpdate|beforeSave|afterSave", withHasRelations) {

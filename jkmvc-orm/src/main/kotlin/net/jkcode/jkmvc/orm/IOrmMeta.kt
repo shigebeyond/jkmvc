@@ -5,6 +5,7 @@ import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkutil.validator.IValidator
 import net.jkcode.jkutil.validator.RuleValidator
 import net.jkcode.jkutil.validator.ValidateLambda
+import net.jkcode.jkutil.validator.ValidateResult
 import kotlin.reflect.KClass
 
 /**
@@ -182,8 +183,9 @@ interface IOrmMeta {
     /**
      * 校验orm对象数据
      * @param item
+     * @return
      */
-    fun validate(item: IOrmEntity)
+    fun validate(item: IOrmEntity): ValidateResult
 
     /**
      * 添加规则

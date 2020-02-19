@@ -9,6 +9,7 @@ import net.jkcode.jkutil.collection.FixedKeyMapFactory
 import net.jkcode.jkutil.common.*
 import net.jkcode.jkutil.validator.IValidator
 import net.jkcode.jkutil.validator.ValidateException
+import net.jkcode.jkutil.validator.ValidateResult
 import java.util.*
 import kotlin.collections.set
 import kotlin.reflect.KClass
@@ -219,8 +220,9 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     /**
      * 校验orm对象数据
      * @param item
+     * @return
      */
-    public override fun validate(item: IOrmEntity) {
+    public override fun validate(item: IOrmEntity): ValidateResult {
         // 逐个属性校验
         val errors = HashMap<String, String>()
         for ((field, rule) in rules) {
@@ -232,7 +234,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
             // 3 校验失败, 记录错误
             if(result.error != null) {
-                errors[field] = result.error!!
+                errors[field] = result.error as String
                 continue
             }
 
@@ -241,8 +243,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
                 item[field] = result.value;
         }
 
-        if(errors.isNotEmpty())
-            throw ValidateException("Fail to validate $name model", name, errors)
+        return ValidateResult(item, errors, name)
     }
 
     /********************************* 缓存 **************************************/
