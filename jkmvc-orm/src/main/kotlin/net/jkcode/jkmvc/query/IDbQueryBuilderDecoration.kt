@@ -272,6 +272,18 @@ interface IDbQueryBuilderDecoration{
     }
 
     /**
+     * Creates a "GROUP BY ..." filter.
+     *
+     * @param   columns  column name
+     * @return
+     */
+    fun groupBys(columns: List<String>): IDbQueryBuilder {
+        for (col in columns)
+            groupBy(col)
+        return this as IDbQueryBuilder
+    }
+
+    /**
      * Alias of andHaving()
      *
      * @param   column  column name or DbExpr
@@ -302,6 +314,35 @@ interface IDbQueryBuilderDecoration{
      * @return
      */
     fun orHaving(column: String, op: String, value: Any?): IDbQueryBuilder;
+
+    /**
+     * Alias of andHavingCondition()
+     *
+     * @param   condition  condition expression
+     * @param   params
+     * @return
+     */
+    fun havingCondition(condition: String, params: List<*> = emptyList<Any>()): IDbQueryBuilder {
+        return andHavingCondition(condition)
+    }
+
+    /**
+     * Creates a new "AND HAVING" condition for the query.
+     *
+     * @param   condition  condition expression
+     * @param   params
+     * @return
+     */
+    fun andHavingCondition(condition: String, params: List<*> = emptyList<Any>()): IDbQueryBuilder
+
+    /**
+     * Creates a new "OR HAVING" condition for the query.
+     *
+     * @param   condition  condition expression
+     * @param   params
+     * @return
+     */
+    fun orHavingCondition(condition: String, params: List<*> = emptyList<Any>()): IDbQueryBuilder
 
     /**
      * Alias of andHavingOpen()
