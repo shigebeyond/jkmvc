@@ -70,9 +70,7 @@ res.setHeader(name:String, value:String) | 设置响应头
 
 ## 5 Action 操作
 
-Action 操作，其实就是控制器的一个方法，但定义必须满足以下条件
-1. public方法
-2. 以 `Action` 作为后缀
+Action 操作，其实就是控制器的一个public方法
 
 操作是真正处理请求的方法，包含所有逻辑代码。
 
@@ -81,7 +79,7 @@ Action 操作，其实就是控制器的一个方法，但定义必须满足以�
 我们来看看一个简单的操作方法，如加载 [view](view.cn.md) 视图文件
 
 ```
-	public function indexAction()
+	public function index()
 	{
 		res.renderView(view("user/detail")); // This will load webapps/user/detail.jsp
 	}
@@ -112,7 +110,7 @@ default:
 ### 6.2 在控制器中获得路由参数
 
 ```
-	public function detailAction()
+	public function detail()
 	{
 		val id:Int = req.getRouteParameter('id');
 		val action:String = req.getRouteParameter('action');
@@ -140,7 +138,7 @@ class UserController: Controller()
     /**
      * 用户详情页
      */
-    public fun detailAction()
+    public fun detail()
     {
         // 获得路由参数id: 2种写法
         // val id = req.getIntRouteParameter("id"); // req.getRouteParameter["xxx"]

@@ -44,7 +44,7 @@ The method has actual parameter:
 All models automatically validate their own data by calling `Orm.validate()` when `Orm::save()`, `Orm::update()`, or `Orm::create()` is called. Because of this, you should always expect these methods to throw an `net.jkcode.jkmvc.validator.ValidateException` when the model's data is invalid.
 
 ```
-public fun createAction()
+public fun create()
 {
 	try
 	{

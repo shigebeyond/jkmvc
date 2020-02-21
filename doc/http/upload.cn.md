@@ -44,7 +44,7 @@ uploadDomain | 访问上传文件的域名，结合它可以获得访问上传�
 /**
  * 上传头像
  */
-public fun uploadAvatarAction()
+public fun uploadAvatar()
 {
     // 查询单个用户
     val id: Int = req["id"]!!

@@ -59,22 +59,22 @@ Jkmvc路由使用`kotlin.text.Regex`来匹配uri。每个参数(就是被`<>`包
 
 注意: 参数`controller` 与 `action` 必须要有值，否则无法正常处理请求，因此你要不在uri中定义这些参数，要不就给它们一个默认值.
 
-注意: Jkmvc会根据标准的命名约定，自动将参数`controller` 与 `action`转换为对应的类与方法来调用。 如对uri `/user/detail/123`，Jkmvc会找到配置文件`http.yaml` 的配置项 `controllerPackages` 定义的包路径下的类`UserController`，并调用其方法 `detailAction()`。
+注意: Jkmvc会根据标准的命名约定，自动将参数`controller` 与 `action`转换为对应的类与方法来调用。 如对uri `/user/detail/123`，Jkmvc会找到配置文件`http.yaml` 的配置项 `controllerPackages` 定义的包路径下的类`UserController`，并调用其方法 `detail()`。
 
-在默认路由中，所有的参数都是可选的，同时参数`controller` 与 `action`都有默认值。 如果我们访问一个空的url，将调用默认的控制器与操作方法 `WelcomeController::indexAction()`。 
+在默认路由中，所有的参数都是可选的，同时参数`controller` 与 `action`都有默认值。 如果我们访问一个空的url，将调用默认的控制器与操作方法 `WelcomeController::index()`。
 
-如果我们访问 `user`，只会应用默认的操作方法，所以它会调用 `UserController::indexAction()` .
+如果我们访问 `user`，只会应用默认的操作方法，所以它会调用 `UserController::index()` .
 
-最后，如果我们访问 `user/detail`，不会应用控制器与操作方法的默认值，所以它会调用 `UserController::detailAction()`。
+最后，如果我们访问 `user/detail`，不会应用控制器与操作方法的默认值，所以它会调用 `UserController::detail()`。
 
 ### 1.5 默认路由的解析例子
 
 uri | controller#action
 --- | ---
-/ | WelcomeController#indexAction()
-user | UserController#indexAction()
-user/detail | UserController#detailAction()
-user/detail/1 | UserController#detailAction()，其中通过`req.req.getIntRouteParameter("id")` 可获得id参数值为1
+/ | WelcomeController#index()
+user | UserController#index()
+user/detail | UserController#detail()
+user/detail/1 | UserController#detail()，其中通过`req.req.getIntRouteParameter("id")` 可获得id参数值为1
 
 ## 2 获得路由参数
 
@@ -120,12 +120,12 @@ default:
     action: index
 ```
 
-如果当前url匹配该路由，则调用 `AdsController::indexAction()` 来处理请求。在 Controller 中你可以通过 `req.getRouteParameter(key)` 来访问路由参数：
+如果当前url匹配该路由，则调用 `AdsController::index()` 来处理请求。在 Controller 中你可以通过 `req.getRouteParameter(key)` 来访问路由参数：
 
 ```
 class WelcomeController: Controller() {
 
-    public fun indexAction() {
+    public fun index() {
         val ad:String = req.getRouteParameter("ad")!!
         val affiliate:String? = req.getRouteParameter("affiliate", null) // 第二个参数用来设置参数默认值
     }

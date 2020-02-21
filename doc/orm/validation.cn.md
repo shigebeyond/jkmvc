@@ -44,7 +44,7 @@ Jkmvc通过`Orm.validate（）`方法执行验证。
 当调用`Orm.validate()`/`Orm::save()`/`Orm::update()`方法时，模型都会自动调用`Orm.validate()`来验证自己的数据。 因此当发现模型的数据无效时，会抛出校验异常`net.jkcode.jkmvc.validator.ValidateException`。
 
 ```
-public fun createAction()
+public fun create()
 {
 	try
 	{

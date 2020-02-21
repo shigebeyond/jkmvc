@@ -73,7 +73,7 @@ res.setHeader(name:String, value:String) | Set HTTP headers to return with the r
 
 ## 5 Action method
 
-You create actions for your controller by defining a public function with an `Action` postfix.
+You create actions for your controller just by defining a public function.
 
 An action method handles the current request, it contains all logic code for this request. 
 
@@ -82,7 +82,7 @@ Every action should call `res.renderXXX(sth)` to send sth to the browser, unless
 A very basic action method that simply loads a [view](view.md) file.
 
 ```
-	public function indexAction()
+	public function index()
 	{
 		res.renderView(view("user/detail")); // This will load webapps/user/detail.jsp
 	}
@@ -113,7 +113,7 @@ default:
 ### 6.2 Get route parameters in Controller
 
 ```
-	public function detailAction()
+	public function detail()
 	{
 		val id:Int = req.getRouteParameter('id');
 		val action:String = req.getRouteParameter('action');
@@ -139,7 +139,7 @@ class UserController: Controller()
     /**
      * user detail page
      */
-    public fun detailAction()
+    public fun detail()
     {
         // 2 ways to get route parameter: "id"
         // val id = req.getIntRouteParameter("id"); // req.getRouteParameter["xxx"]

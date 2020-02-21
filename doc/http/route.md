@@ -59,9 +59,9 @@ If a key in a route is optional (or not present in the route), you can provide a
 
 [!!] The `controller` and `action` key must always have a value, so they either need to be required in your route (not inside of parentheses) or have a default value provided.
 
-[!!] Jkmvc automatically converts controllers to follow the standard naming convention. For example /user/detail/123 would look for the controller `UserController` in `controllerPackages` configured in `http.yaml` and trigger the `detailAction()` method on it.
+[!!] Jkmvc automatically converts controllers to follow the standard naming convention. For example /user/detail/123 would look for the controller `UserController` in `controllerPackages` configured in `http.yaml` and trigger the `detail()` method on it.
 
-In the default route, all the keys are optional, and the controller and action are given a default.   If we called an empty url, the defaults would fill in and `WelcomeController::indexAction()` would be called.  If we called `user` then only the default for action would be used, so it would call `UserController::indexAction()` and finally, if we called `user/detail` then neither default would be used and `UserController::detailAction()` would be called.
+In the default route, all the keys are optional, and the controller and action are given a default.   If we called an empty url, the defaults would fill in and `WelcomeController::index()` would be called.  If we called `user` then only the default for action would be used, so it would call `UserController::index()` and finally, if we called `user/detail` then neither default would be used and `UserController::detail()` would be called.
 
 You can also use defaults to set a key that isn't in the route at all.
 
@@ -69,10 +69,10 @@ You can also use defaults to set a key that isn't in the route at all.
 
 uri | controller#action
 --- | ---
-/ | WelcomeController#indexAction()
-user | UserController#indexAction()
-user/detail | UserController#detailAction()
-user/detail/1 | UserController#detailAction()，you can call `req.req.getIntRouteParameter("id")` to get route parameter `id`
+/ | WelcomeController#index()
+user | UserController#index()
+user/detail | UserController#detail()
+user/detail/1 | UserController#detail()，you can call `req.req.getIntRouteParameter("id")` to get route parameter `id`
 
 ## 2 Get routing parameters
 
@@ -118,12 +118,12 @@ default:
     action: index
 ```
 
-If a url matches the route, then `AdsController::indexAction()` will be called.  You can access the parameters by using  `req.getRouteParameter(key)` in controller.
+If a url matches the route, then `AdsController::index()` will be called.  You can access the parameters by using  `req.getRouteParameter(key)` in controller.
 
 ```
 class WelcomeController: Controller() {
 
-    public fun indexAction() {
+    public fun index() {
         val ad:String = req.getRouteParameter("ad")!!
         val affiliate:String? = req.getRouteParameter("affiliate", null) // second parameter for default value
     }

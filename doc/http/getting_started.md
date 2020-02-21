@@ -143,7 +143,7 @@ class WelcomeController: Controller() {
     /**
      * homepage
      */
-    public fun indexAction() {
+    public fun index() {
         res.renderString("hello world");
     }
 

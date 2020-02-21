@@ -43,7 +43,7 @@ The form is defined with `enctype =" multipart / form-data "` property.
 /**
  * upload avatar
  */
-public fun uploadAvatarAction()
+public fun uploadAvatar()
 {
     // find a user
     val id: Int = req["id"]!!

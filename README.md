@@ -61,7 +61,7 @@ class WelcomeController: Controller() {
     /**
      * 主页
      */
-    public fun indexAction() {
+    public fun index() {
         res.renderString("hello world");
     }
 
@@ -136,7 +136,7 @@ class WelcomeController: Controller() {
      * 显示jsp视图
      * render jsp view
      */
-    public fun jspAction(){
+    public fun jsp(){
         res.renderView(view("index" /* view file */, mapOf("name" to "shijianhang") /* view data */))
     }
 
@@ -366,7 +366,7 @@ class UserController: Controller()
      * 列表页
      * list page
      */
-    public fun indexAction()
+    public fun index()
     {
         val query: OrmQueryBuilder = UserModel.queryBuilder()
         // 统计用户个数 | count users
@@ -382,7 +382,7 @@ class UserController: Controller()
      * 详情页
      * detail page
      */
-    public fun detailAction()
+    public fun detail()
     {
         // 获得路由参数id: 2种写法 | 2 ways to get route parameter: "id"
         // val id = req.getIntRouteParameter("id"); // req.getRouteParameter["xxx"]
@@ -404,7 +404,7 @@ class UserController: Controller()
      * 新建页
      * new page
      */
-    public fun newAction()
+    public fun new()
     {
         // 处理请求 | handle request
         if(req.isPost()){ //  post请求：保存表单数据 | post request: save form data
@@ -434,7 +434,7 @@ class UserController: Controller()
      * 编辑页
      * edit page
      */
-    public fun editAction()
+    public fun edit()
     {
         // 查询单个用户 | find a user
         val id: Int = req["id"]!!
@@ -470,7 +470,7 @@ class UserController: Controller()
      * 删除
      * delete action
      */
-    public fun deleteAction()
+    public fun delete()
     {
         val id:Int? = req["id"]
         // 查询单个用户 | find a user
@@ -489,7 +489,7 @@ class UserController: Controller()
      * 上传头像
      * upload avatar
      */
-    public fun uploadAvatarAction()
+    public fun uploadAvatar()
     {
         // 查询单个用户 | find a user
         val id: Int = req["id"]!!
@@ -512,7 +512,7 @@ class UserController: Controller()
     /**
      * 登录
      */
-    public fun loginAction(){
+    public fun login(){
         if(req.isPost()){ // post请求
             val user = Auth.instance().login(req["username"]!!, req["password"]!!);
             if(user == null)
@@ -527,7 +527,7 @@ class UserController: Controller()
     /**
      * 登录
      */
-    public fun logoutAction(){
+    public fun logout(){
         Auth.instance().logout()
         redirect("user/login")
     }
