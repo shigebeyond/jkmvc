@@ -19,8 +19,11 @@ import javax.servlet.http.HttpServletRequest
 
 /**
  * 请求对象
+ *    1 上传请求
  *    对上传请求中文本字段, 在 servlet3 中跟在普通请求中一样, 直接使用 parameterMap / getParameter() 来获取, 因此不用改写 parameterMap / getParameter()
  *    对上传请求中文件字段, 设计单独的api来获取: partFileMap/partFileNames/getPartFile()/getPartFileValues()
+ *    2 参数获取
+ *    先取get/post参数, 再取路由参数, 防止重名的情况
  *
  * @author shijianhang
  * @date 2016-10-6 上午9:27:56
@@ -123,6 +126,35 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		else
 			URI(referer).host
 	}
+
+	/**
+	 * 登录后要跳转的url
+	 */
+	public var redirectUrl: String?
+		// 1 未登录时记录当前url为要跳转的url 2 登录跳转后删除
+		set(value) {
+			if(value == null) // null则删除
+				session.removeAttribute("_redirectUrl")
+			else
+				session.setAttribute("_redirectUrl", value)
+		}
+		get(){
+			return session.getAttribute("_redirectUrl") as String?
+		}
+
+	/**
+	 * 将当前url作为登录后要跳转的url
+	 */
+	public fun asRedirectUrl(){
+		redirectUrl = requestURL.toString()
+	}
+
+	/**
+	 * 真正登录后要跳转的url
+	 */
+	public val savedUrl: String?
+		get() = redirectUrl ?: referer
+
 	init{
 		// 中文编码
 		req.characterEncoding = "UTF-8";

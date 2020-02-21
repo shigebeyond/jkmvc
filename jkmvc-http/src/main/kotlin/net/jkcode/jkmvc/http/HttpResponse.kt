@@ -12,6 +12,7 @@ import net.jkcode.jkmvc.orm.toJson
 import net.jkcode.jkutil.collection.LazyAllocatedMap
 import net.jkcode.jkutil.common.writeFile
 import net.jkcode.jkutil.common.writeFromInput
+import org.apache.commons.lang.StringEscapeUtils
 import java.io.*
 import java.net.URLEncoder
 import javax.servlet.http.HttpServletResponse
@@ -355,6 +356,27 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 	 */
 	public fun renderJson(data: Any) {
 		renderString(data.toJson())
+	}
+
+	/**
+	 * 渲染jsonp
+	 * @param data
+	 * @param callback
+	 */
+	public fun renderJsonp(data: Any, callback: String) {
+		rendered = true
+		val writer = prepareWriter()
+		writer.apply {
+			if(!callback.isNullOrBlank()) {
+				print(StringEscapeUtils.escapeHtml(callback))
+				print("(")
+			}
+
+			print(data.toJson())
+
+			if(!callback.isNullOrBlank()) {
+				print(")")
+		}
 	}
 
 	/**
