@@ -47,6 +47,12 @@ abstract class Controller : IController {
     /**
      * for jkerp
      */
+    val response: HttpResponse
+        get() = res
+
+    /**
+     * for jkerp
+     */
     val model: MutableMap<String, Any?>
         get() = vm
 
