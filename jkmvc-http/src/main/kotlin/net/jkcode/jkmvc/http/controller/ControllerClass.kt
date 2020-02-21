@@ -4,6 +4,7 @@ import net.jkcode.jkutil.common.getConstructorOrNull
 import net.jkcode.jkutil.common.lcFirst
 import net.jkcode.jkmvc.http.router.RouteException
 import net.jkcode.jkutil.common.Config
+import java.lang.reflect.Modifier
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -65,9 +66,9 @@ class ControllerClass(public override val clazz: KClass<*> /* controller类 */):
      */
     private fun parseActionMethods() {
         for (func in clazz.memberFunctions) {
-            if (func.name.endsWith("Action") || func.parameters.isEmpty()) { // 以Action结尾 + 无参数
-                // action名: 去掉Action结尾
-                val action = func.name.substringBefore("Action")
+            if (Modifier.isPublic(func.javaMethod!!.modifiers) || func.parameters.isEmpty()) { // public + 无参数
+                // action名 = 方法名
+                val action = func.name
                 // 缓存action
                 actions[action] = func;
                 // 检测路由注解
