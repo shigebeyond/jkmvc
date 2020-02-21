@@ -15,7 +15,7 @@ import kotlin.reflect.KFunction2
  * @author shijianhang
  * @date 2016-10-12
  */
-abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
+abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
 
     /**
      * where/group by/having/order by/limit子句的数组
@@ -426,6 +426,36 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction(){
             return this;
 
         havingClause.addSubexp(arrayOf(column, prepareOperator(column, op, value), value), "OR");
+        return this;
+    }
+
+    /**
+     * Creates a new "AND HAVING" condition for the query.
+     *
+     * @param   condition  condition expression
+     * @param   params
+     * @return
+     */
+    public override fun andHavingCondition(condition: String, params: List<*>): IDbQueryBuilder{
+        if(condition.isBlank())
+            return this
+
+        havingClause.addSubexp(arrayOf(DbCondition(condition, params)), "AND");
+        return this;
+    }
+
+    /**
+     * Creates a new "OR HAVING" condition for the query.
+     *
+     * @param   condition  condition expression
+     * @param   params
+     * @return
+     */
+    public override fun orHavingCondition(condition: String, params: List<*>): IDbQueryBuilder{
+        if(condition.isBlank())
+            return this
+
+        havingClause.addSubexp(arrayOf(DbCondition(condition, params)), "OR");
         return this;
     }
 
