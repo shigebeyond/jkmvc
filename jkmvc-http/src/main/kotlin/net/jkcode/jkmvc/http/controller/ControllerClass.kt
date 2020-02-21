@@ -65,10 +65,9 @@ class ControllerClass(public override val clazz: KClass<*> /* controller类 */):
      */
     private fun parseActionMethods() {
         for (func in clazz.memberFunctions) {
-            val funname = func.name
-            if (funname.endsWith("Action") || func.parameters.isEmpty()) { // 以Action结尾 + 无参数
+            if (func.name.endsWith("Action") || func.parameters.isEmpty()) { // 以Action结尾 + 无参数
                 // action名: 去掉Action结尾
-                val action = funname.substring(0, funname.length - 6)
+                val action = func.name.substringBefore("Action")
                 // 缓存action
                 actions[action] = func;
                 // 检测路由注解
