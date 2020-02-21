@@ -84,21 +84,30 @@ interface IController{
                 || res.rendered) // 渲染过
             return
 
+        // 渲染视图或重定向
+        if (result is String) {
+            if(result.startsWith("redirect:")){ // 重定向
+                val url = result.substringAfter("redirect:")
+                res.sendRedirect(url)
+            }else { // 渲染视图
+                res.renderView(result, vm) // 渲染视图的场景比渲染文本的多, 因此直接渲染视图啦
+            }
+
+            return
+        }
+
         // 渲染视图
         if (result is View) {
             result.mergeVm(vm)
             res.renderView(result)
-        }
-
-        // 渲染视图
-        if (result is String) {
-            //res.renderString(result)
-            res.renderView(result, vm) // 渲染视图的场景比渲染文本的多, 因此直接渲染视图啦
+            return
         }
 
         // 渲染文件
-        if (result is File)
+        if (result is File) {
             res.renderFile(result)
+            return
+        }
 
         // 渲染json
         res.renderJson(result)
