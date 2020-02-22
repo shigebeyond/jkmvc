@@ -15,7 +15,7 @@ interface IAuth {
      * 获得当前登录用户
      * @return
      */
-    public fun getUser(): IAuthUserModel?
+    public fun getCurrentUser(): IAuthUserModel?
 
     /**
      * 登录验证

@@ -27,7 +27,7 @@ class SessionAuth : Auth() {
      * 获得当前登录用户
      * @return
      */
-    public override fun getUser(): IAuthUserModel?{
+    public override fun getCurrentUser(): IAuthUserModel?{
         // 从session中读取登录用户
         return getSession(false)?.getAttribute("user") as IAuthUserModel?
     }

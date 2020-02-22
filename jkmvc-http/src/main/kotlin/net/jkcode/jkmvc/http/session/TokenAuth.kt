@@ -54,7 +54,7 @@ class TokenAuth : Auth() {
      * 获得当前登录用户
      * @return
      */
-    public override fun getUser(): IAuthUserModel?{
+    public override fun getCurrentUser(): IAuthUserModel?{
         return users.get()
     }
 
