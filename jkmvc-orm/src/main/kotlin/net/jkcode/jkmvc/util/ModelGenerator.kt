@@ -30,14 +30,6 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
     private val config = Config.instance("meta-define.${db.dbType}", "yaml")
 
     /**
-     * 获得查询字段的sql
-     * @return
-     */
-    private fun getColumnsSql():String{
-        return config.getString("columnsSql")!!
-    }
-
-    /**
      * 获得字段的对应的属性名
      * @return
      */
@@ -53,7 +45,7 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
         // 物理类型 -> java类, 用于根据表结构来生成model时确定字段的Java类
         val mapping:Map<String, String> = config["physicalType2javaClass"]!!
         for((typeRegex, propType) in mapping){
-            if(typeRegex.toRegex().containsMatchIn(columnType))
+            if(typeRegex.toRegex(RegexOption.IGNORE_CASE).containsMatchIn(columnType))
                 return propType
         }
         return "*"
@@ -94,14 +86,13 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
      */
     public fun genenateModelClass(model:String, label:String, table: String): String {
         // 查询字段的sql
-        val sql = config.getString("columnsSql")!!
-        val fields = db.queryMaps(sql, listOf(table, db.schema)) // org.apache.commons.collections.map.HashedMap.HashedMap(java.util.Map)
+        val fields = db.getColumnsByTable(table)
         // 找到主键
         val pks = ArrayList<Pair<String, String>>() // 主键的字段名+类型
         for (field in fields){
-            if(field["COLUMN_KEY"] == "PRI"){
-                val name = field["COLUMN_NAME"] as String
-                val type = getType(field["COLUMN_TYPE"] as String)
+            if(field.name == "PRI"){
+                val name = field.name
+                val type = getType(field.physicalType!!)
                 pks.add(name to type)
             }
         }
@@ -141,9 +132,9 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
         code.append("\t// 代理属性读写")
         // 遍历字段来生成属性
         for (field in fields){
-            val name = getProp(field["COLUMN_NAME"] as String)
-            val type = getType(field["COLUMN_TYPE"] as String)
-            val comment = field["COLUMN_COMMENT"]
+            val name = getProp(field.name)
+            val type = getType(field.physicalType!!)
+            val comment = field.comment
             code.append("\n\tpublic var $name:$type by property() // $comment \n")
         }
         code.append("\n}")

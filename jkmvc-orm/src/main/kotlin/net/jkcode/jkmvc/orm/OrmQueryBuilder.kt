@@ -1,7 +1,6 @@
 package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkutil.common.isArrayOrCollection
-import net.jkcode.jkutil.common.isNullOrEmpty
 import net.jkcode.jkutil.common.iteratorArrayOrCollection
 import net.jkcode.jkutil.common.map
 import net.jkcode.jkmvc.db.DbResultRow
@@ -9,6 +8,7 @@ import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.DbQueryBuilder
 import net.jkcode.jkmvc.query.IDbQueryBuilder
+import net.jkcode.jkutil.common.mapToArray
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.collections.component1
@@ -80,6 +80,29 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         for(name in names)
             with(name)
         return this
+    }
+
+    /**
+     * 联查多表, 支持多级路径
+     *
+     * @param paths 关联关系路径的数组, 支持多级路径, 用.分割
+     * @return
+     */
+    public fun withPaths(vararg paths: String): OrmQueryBuilder {
+        val cols = paths.mapToArray { path ->
+            if(path.contains('.')){ // 多级路径
+                val names = path.split('.').asReversed()
+                var col: Any = emptyList<Any>()
+                for (name in names){
+                    col = name to col
+                }
+                col
+            }else{ // 单级路径
+                path
+            }
+        }
+
+        return selectWiths(*cols)
     }
 
     /**

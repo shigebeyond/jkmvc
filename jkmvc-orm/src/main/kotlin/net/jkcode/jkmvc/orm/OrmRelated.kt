@@ -364,4 +364,19 @@ abstract class OrmRelated : OrmPersistent() {
             removeRelations(name)
         }
     }
+
+    /**
+     * 查询关联表
+     *    自动根据关联关系，来构建查询条件
+     *
+     * @param name 关系名
+     * @param fkInMany hasMany关系下的单个外键值，如果为null，则更新所有关系, 否则更新单个关系
+     * @param withTableAlias 是否带表前缀
+     * @return
+     */
+    fun queryRelated(name: String, fkInMany: Any? = null, withTableAlias:Boolean = true): OrmQueryBuilder?{
+        // 获得关联关系
+        val relation = ormMeta.getRelation(name)
+        return relation?.queryRelated(this, fkInMany, withTableAlias)
+    }
 }

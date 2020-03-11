@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.serializer.SerializerFeature
 import net.jkcode.jkutil.common.decorateIterator
 import net.jkcode.jkmvc.db.DbResultRow
-import net.jkcode.jkutil.common.to
 import java.io.Serializable
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -65,21 +64,21 @@ object OrmListPropDelegater: ReadWriteProperty<IOrmEntity, Any?>, Serializable {
  * orm map属性代理
  *    TODO: 只是简单将list转为map, 只读
  */
-class OrmMapPropDelegater protected constructor (public val key:String): ReadWriteProperty<IOrmEntity, Any?>, Serializable {
+class OrmMapPropDelegater protected constructor (public val keys: DbKeyNames): ReadWriteProperty<IOrmEntity, Any?>, Serializable {
 
     companion object{
 
         /**
          * 单例池: <类 to 单例>
          */
-        private val insts: ConcurrentHashMap<String, OrmMapPropDelegater> = ConcurrentHashMap();
+        private val insts: ConcurrentHashMap<DbKeyNames, OrmMapPropDelegater> = ConcurrentHashMap();
 
         /**
          * 获得单例
          */
-        public fun instance(key:String): OrmMapPropDelegater {
-            return insts.getOrPut(key){
-                OrmMapPropDelegater(key)
+        public fun instance(keys: DbKeyNames): OrmMapPropDelegater {
+            return insts.getOrPut(keys){
+                OrmMapPropDelegater(keys)
             }
         }
     }
@@ -90,7 +89,12 @@ class OrmMapPropDelegater protected constructor (public val key:String): ReadWri
         if(list == null)
             return emptyMap<Any, Any?>()
 
-        return list.associateBy { thisRef.get<Any?>(key) }
+        return list.associateBy {
+            keys.columns.joinToString("::") { key ->
+                thisRef.get<Any?>(key).toString()
+            }
+
+        }
     }
 
     // 设置属性

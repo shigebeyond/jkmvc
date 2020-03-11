@@ -25,6 +25,20 @@ class PartFile(protected val part: Part): Part by part {
     protected var relativePath: String? = null
 
     /**
+     * 转为字节数组
+     */
+    public fun readBytes(): ByteArray{
+        return inputStream.readBytes()
+    }
+
+    /**
+     * 转为文本
+     */
+    public fun readText(): String {
+        return inputStream.reader().readText()
+    }
+
+    /**
      * 获得存储后的文件名
      */
     public val storedFileName: String

@@ -565,6 +565,70 @@ interface IOrmMeta {
     ): IOrmMeta
 
     /**
+     * 通过2层关系来设置关联关系(has one)
+     *
+     * 公式：中间表.外键 = 主表.主键
+     *      中间表.远端外键 = 远端主表.远端主键
+     *           外键默认值 = 主表_主键（= 本表_主键）
+     *           主键默认值 = 主表的主键（= 本表的主键）
+     *           中间表默认值 = 主表_从表
+     *           远端外键默认值 = 远端主表_主键（= 从表_主键）
+     *           远端主键默认值 = 远端主表的主键（= 从表的主键）
+     *
+     *
+     *    其中本表有一个关联表，因此 本表是主表，中间表与关联表是从表
+     *
+     *    如 hasOneThrough2LevelRelations("reportWorkflowPackage", ReportWorkflowPackage::class, "reportWorkflowProcess", "reportWorkflowPackage") // 通过2层关系来关联
+     *
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param relationName1 第1层关系
+     * @param relationName2 第2层关系
+     * @return
+     */
+    fun hasOneThrough2LevelRelations(name: String,
+                      relatedModel: KClass<out IOrm>,
+                      relationName1:String, // 第1层关系
+                      relationName2:String, // 第2层关系
+                      conditions: Map<String, Any?> = emptyMap()
+    ): IOrmMeta{
+        // 第1层关系
+        val relation1 = getRelation(relationName1)
+        if(relation1 == null)
+            throw IllegalArgumentException("模型[${this.name}]不存在关系: $relationName1")
+
+        // 第2层关系
+        val meta1 = relation1.model.modelOrmMeta
+        val relation2 = meta1.getRelation(relationName2)
+        if(relation2 == null)
+            throw IllegalArgumentException("模型[${meta1.name}]不存在关系: $relationName2")
+
+        // 目标表对中间表是hasOne/hasMany关系的话, 则名称映射相同, 否则相反
+
+        var foreignKey:DbKeyNames // 外键
+        var primaryKey:DbKeyNames // 主键
+        if(relation1.type == RelationType.BELONGS_TO){ // 从属于, 名称映射相反
+            foreignKey = relation1.primaryKey
+            primaryKey = relation1.foreignKey
+        }else{ // 有一个
+            foreignKey = relation1.foreignKey
+            primaryKey = relation1.primaryKey
+        }
+
+        var farForeignKey:DbKeyNames // 远端主表_主键 = 从表_主键
+        var farPrimaryKey:DbKeyNames // 从表的主键
+        if(relation2.type == RelationType.BELONGS_TO){ // 从属于, 名称映射相同
+            farForeignKey = relation2.foreignKey
+            farPrimaryKey = relation2.primaryKey
+        }else{ // 有一个
+            farForeignKey = relation2.primaryKey
+            farPrimaryKey = relation2.foreignKey
+        }
+
+        return hasOneThrough(name, relatedModel, foreignKey, primaryKey, meta1.table, farForeignKey, farPrimaryKey, conditions)
+    }
+
+    /**
      * 设置关联关系(has many)
      *
      * 公式：中间表.外键 = 主表.主键
@@ -597,6 +661,68 @@ interface IOrmMeta {
                        farPrimaryKey:DbKeyNames = relatedModel.modelOrmMeta.primaryKey, // 从表的主键 
                        conditions: Map<String, Any?> = emptyMap()
     ): IOrmMeta
+
+    /**
+     * 通过2层关系来设置关联关系(has many)
+     *
+     * 公式：中间表.外键 = 主表.主键
+     *      中间表.远端外键 = 远端主表.远端主键
+     *           外键默认值 = 主表_主键（= 本表_主键）
+     *           主键默认值 = 主表的主键（= 本表的主键）
+     *           中间表默认值 = 主表_从表
+     *           远端外键默认值 = 远端主表_主键（= 从表_主键）
+     *           远端主键默认值 = 远端主表的主键（= 从表的主键）
+     *
+     *
+     *    其中本表有一个关联表，因此 本表是主表，中间表与关联表是从表
+     *
+     * @param name 字段名
+     * @param relatedModel 关联模型
+     * @param relationName1 第1层关系
+     * @param relationName2 第2层关系
+     * @return
+     */
+    fun hasManyThrough2LevelRelations(name: String,
+                      relatedModel: KClass<out IOrm>,
+                      relationName1:String, // 第1层关系
+                      relationName2:String, // 第2层关系
+                      conditions: Map<String, Any?> = emptyMap()
+    ): IOrmMeta{
+        // 第1层关系
+        val relation1 = getRelation(relationName1)
+        if(relation1 == null)
+            throw IllegalArgumentException("模型[$name]不存在关系: $relationName1")
+
+        // 第2层关系
+        val meta1 = relation1.model.modelOrmMeta
+        val relation2 = meta1.getRelation(relationName2)
+        if(relation2 == null)
+            throw IllegalArgumentException("模型[${meta1.name}]不存在关系: $relationName2")
+
+        // 目标表对中间表是hasOne/hasMany关系的话, 则名称映射相同, 否则相反
+
+        var foreignKey:DbKeyNames // 外键
+        var primaryKey:DbKeyNames // 主键
+        if(relation1.type == RelationType.BELONGS_TO){ // 从属于, 名称映射相反
+            foreignKey = relation1.primaryKey
+            primaryKey = relation1.foreignKey
+        }else{ // 有一个
+            foreignKey = relation1.foreignKey
+            primaryKey = relation1.primaryKey
+        }
+
+        var farForeignKey:DbKeyNames // 远端主表_主键 = 从表_主键
+        var farPrimaryKey:DbKeyNames // 从表的主键
+        if(relation2.type == RelationType.BELONGS_TO){ // 从属于, 名称映射相同
+            farForeignKey = relation2.foreignKey
+            farPrimaryKey = relation2.primaryKey
+        }else{ // 有一个
+            farForeignKey = relation2.primaryKey
+            farPrimaryKey = relation2.foreignKey
+        }
+
+        return hasManyThrough(name, relatedModel, foreignKey, primaryKey, meta1.table, farForeignKey, farPrimaryKey, conditions)
+    }
 
     /************************************ 添加关联关系: 单主键版本, 主外键类型为 String *************************************/
     /**

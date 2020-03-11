@@ -11,10 +11,10 @@ import java.util.*
  *  2 计划分类： 构成2层树形
  */
 data class TreeNode<T>(
-        override val id:T /* 节点id */,
-        val name:String /* 节点名 */,
-        override val pid:T? = null, /* 父节点id */
-        val data: Any? = null, /* 其他数据 */
+        override val id:T, // 节点id 
+        val name:String, // 节点名 
+        override val pid:T? = null, // 父节点id 
+        val data: Any? = null, // 其他数据 
         override val children: MutableList<ITreeNode<T>> = LinkedList()
 ) : ITreeNode<T>() {
 

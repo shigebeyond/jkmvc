@@ -42,11 +42,11 @@ interface IOrmEntity {
 
     /**
      * 获得哈希属性代理
-     * @param key 作为键的字段名
+     * @param keys 作为键的字段名
      * @return
      */
-    public fun <T: Map<*, *>> mapProperty(key: String): ReadWriteProperty<IOrmEntity, T> {
-        return OrmMapPropDelegater.instance(key) as ReadWriteProperty<IOrmEntity, T>;
+    public fun <T: Map<*, *>> mapProperty(vararg keys: String): ReadWriteProperty<IOrmEntity, T> {
+        return OrmMapPropDelegater.instance(DbKeyNames(keys as Array<String>)) as ReadWriteProperty<IOrmEntity, T>;
     }
 
     /**
