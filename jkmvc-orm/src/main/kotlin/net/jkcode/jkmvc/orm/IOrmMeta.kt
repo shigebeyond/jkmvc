@@ -162,7 +162,7 @@ interface IOrmMeta {
     /**
      * 是否缓存
      */
-    val cached: Boolean
+    val cacheMeta: OrmCacheMeta?
 
     /**
      * 读缓存, 无则读db

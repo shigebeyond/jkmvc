@@ -8,7 +8,6 @@ import net.jkcode.jkutil.cache.ICache
 import net.jkcode.jkutil.collection.FixedKeyMapFactory
 import net.jkcode.jkutil.common.*
 import net.jkcode.jkutil.validator.IValidator
-import net.jkcode.jkutil.validator.ValidateException
 import net.jkcode.jkutil.validator.ValidateResult
 import java.util.*
 import kotlin.collections.set
@@ -30,7 +29,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
                    public override val label: String = model.modelName, // 模型中文名
                    public override var table: String = model.modelName, // 表名，假定model类名, 都是以"Model"作为后缀
                    public override var primaryKey:DbKeyNames = DbKeyNames("id"), // 主键
-                   public override val cached: Boolean = false, // 是否缓存
+                   public override val cacheMeta: OrmCacheMeta?? = null, // 是否缓存
                    public override val dbName: String = "default", // 数据库名
                    public override val pkEmptyRule: PkEmptyRule = PkEmptyRule.default // 检查主键为空的规则
 ) : IOrmMeta {
@@ -40,10 +39,10 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             label: String, // 模型中文名
             table: String, // 表名，假定model类名, 都是以"Model"作为后缀
             primaryKey:String, // 主键
-            cacheType: Boolean = false, // 是否缓存
+            cacheMeta: OrmCacheMeta? = null, // 是否缓存
             dbName: String = "default", // 数据库名
             pkEmptyRule: PkEmptyRule = PkEmptyRule.default // 检查主键为空的规则
-    ):this(model, label, table, DbKeyNames(primaryKey), cacheType, dbName, pkEmptyRule)
+    ):this(model, label, table, DbKeyNames(primaryKey), cacheMeta, dbName, pkEmptyRule)
 
     init{
         // 检查 model 类的默认构造函数
@@ -57,13 +56,6 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
          * orm配置
          */
         public val config: Config = Config.instance("orm")
-
-        /**
-         * 缓存
-         *    你可以修改配置项 cacheType 来控制使用本地缓存or外部缓存
-         *    TODO: 最好在每个模型类都可以指定使用本地缓存or外部缓存, 只能修改 OrmMeta.cached 的语义
-         */
-        private val cache: ICache = ICache.instance(config["cacheType"]!!)
     }
 
     /**
@@ -250,11 +242,19 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
     /********************************* 缓存 **************************************/
     /**
+     * 缓存
+     *    对每个模型类都可以指定 cacheMeta 来使用本地缓存or外部缓存
+     */
+    private val cache: ICache by lazy{
+        ICache.instance(cacheMeta!!.cacheType)
+    }
+
+    /**
      * 删除缓存
      * @param item
      */
     public override fun removeCache(item: IOrm){
-        if(!cached)
+        if(cacheMeta == null)
             return
 
         val key = item.pk.columns.joinToString("_", "${dbName}_")
@@ -270,7 +270,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun <T:IOrm> getOrPutCache(pk: DbKeyValues, item: T?, expires:Long): T? {
         // 无需缓存
-        if(!cached){
+        if(cacheMeta == null){
             return innerloadByPk(pk, item)
         }
 
@@ -337,7 +337,13 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         if(isPkEmpty(pk))
             return null
 
-        return queryBuilder().where(primaryKey, pk).findRow{
+        val query = queryBuilder()
+        // 缓存时联查
+        if(cacheMeta != null && cacheMeta!!.withs.isNotEmpty()){
+            query.withs(*cacheMeta!!.withs)
+        }
+        // 查询主键
+        return query.where(primaryKey, pk).findRow{
             (item ?: model.java.newInstance() as T).apply {
                 setOriginal(it)
             }
