@@ -60,6 +60,8 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
         /**
          * 缓存
+         *    你可以修改配置项 cacheType 来控制使用本地缓存or外部缓存
+         *    TODO: 最好在每个模型类都可以指定使用本地缓存or外部缓存, 只能修改 OrmMeta.cached 的语义
          */
         private val cache: ICache = ICache.instance(config["cacheType"]!!)
     }
