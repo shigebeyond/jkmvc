@@ -47,7 +47,9 @@ public enum class DbColumnLogicType(
 
     DATE("date", Types.DATE),
     TIMESTAMP("timestamp", Types.TIMESTAMP),
-    TIME("time", Types.TIME);
+    TIME("time", Types.TIME),
+
+    OBJECT("object", Types.OTHER);
 
     companion object{
 

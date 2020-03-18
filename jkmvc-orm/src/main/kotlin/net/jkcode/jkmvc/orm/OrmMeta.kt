@@ -29,7 +29,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
                    public override val label: String = model.modelName, // 模型中文名
                    public override var table: String = model.modelName, // 表名，假定model类名, 都是以"Model"作为后缀
                    public override var primaryKey:DbKeyNames = DbKeyNames("id"), // 主键
-                   public override val cacheMeta: OrmCacheMeta?? = null, // 是否缓存
+                   public override val cacheMeta: OrmCacheMeta? = null, // 缓存配置
                    public override val dbName: String = "default", // 数据库名
                    public override val pkEmptyRule: PkEmptyRule = PkEmptyRule.default // 检查主键为空的规则
 ) : IOrmMeta {
@@ -39,7 +39,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             label: String, // 模型中文名
             table: String, // 表名，假定model类名, 都是以"Model"作为后缀
             primaryKey:String, // 主键
-            cacheMeta: OrmCacheMeta? = null, // 是否缓存
+            cacheMeta: OrmCacheMeta? = null, // 缓存配置
             dbName: String = "default", // 数据库名
             pkEmptyRule: PkEmptyRule = PkEmptyRule.default // 检查主键为空的规则
     ):this(model, label, table, DbKeyNames(primaryKey), cacheMeta, dbName, pkEmptyRule)

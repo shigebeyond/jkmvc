@@ -77,8 +77,9 @@ class ModelGeneratorTests{
 //        generator.genenateModelFile("SharkActivityState", "", "SHKActivityStates")
 //        generator.genenateModelFile("SharkActivity", "", "SHKActivities")
 //        generator.genenateModelFile("SharkProcess", "", "SHKProcesses")
-        generator.genenateModelFile("Workitem", "工作项", "app_inst_workitems")
-        generator.genenateModelFile("Process", "流程实例", "app_inst_process")
+//        generator.genenateModelFile("Workitem", "工作项", "app_inst_workitems")
+//        generator.genenateModelFile("Process", "流程实例", "app_inst_process")
+        generator.genenateModelFile("Versions", "版本", "app_version")
 
     }
 }

@@ -13,17 +13,17 @@ import kotlin.reflect.KClass
 open class GeneralOrmMeta(label: String, // 模型中文名
                            table: String, // 表名
                            primaryKey:DbKeyNames = DbKeyNames("id"), // 主键
-                           cached: Boolean = false, // 是否缓存
+                           cacheMeta: OrmCacheMeta? = null, // 缓存配置
                            dbName: String = "default" // 数据库名
-): OrmMeta(GeneralModel::class, label, table, primaryKey, cached, dbName){
+): OrmMeta(GeneralModel::class, label, table, primaryKey, cacheMeta, dbName){
 
     public constructor(
             label: String, // 模型中文名
             table: String, // 表名，假定model类名, 都是以"Model"作为后缀
             primaryKey: String, // 主键
-            cached: Boolean = false, // 是否缓存
+            cacheMeta: OrmCacheMeta? = null, // 缓存配置
             dbName: String = "default" // 数据库名
-    ) : this(label, table, DbKeyNames(primaryKey), cached, dbName)
+    ) : this(label, table, DbKeyNames(primaryKey), cacheMeta, dbName)
 
     /**
      * 改写 queryBuilder(), 返回 GeneralOrmQueryBuilder
