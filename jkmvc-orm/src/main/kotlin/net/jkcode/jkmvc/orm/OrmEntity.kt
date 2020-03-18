@@ -143,21 +143,23 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      * 从map中设置字段值
      *   子类会改写
      * @param from   字段值的哈希：<字段名 to 字段值>
-     * @param expected 要设置的字段名的列表
+     * @param include 要设置的字段名的列表
+     * @param exclude 要排除的字段名的列表
      */
-    public override fun fromMap(from: Map<String, Any?>, expected: List<String>) {
-        copyMap(from, _data, expected)
+    public override fun fromMap(from: Map<String, Any?>, include: List<String>, exclude: List<String>) {
+        copyMap(from, _data, include, exclude)
     }
 
     /**
      * 获得字段值 -- 转为Map
      *     子类会改写
      * @param to
-     * @param expected 要设置的字段名的列表
+     * @param include 要设置的字段名的列表
+     * @param exclude 要排除的字段名的列表
      * @return
      */
-    public override fun toMap(to: MutableMap<String, Any?>, expected: List<String>): MutableMap<String, Any?> {
-        return copyMap(_data, to, expected)
+    public override fun toMap(to: MutableMap<String, Any?>, include: List<String>, exclude: List<String>): MutableMap<String, Any?> {
+        return copyMap(_data, to, include, exclude)
     }
 
     /**
@@ -165,19 +167,24 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      *
      * @param from 源map
      * @param to 目标map
-     * @param expected 要设置的字段名的列表
+     * @param include 要设置的字段名的列表
+     * @param exclude 要排除的字段名的列表
      * @return
      */
-    protected fun copyMap(from: Map<String, Any?>, to: MutableMap<String, Any?>, expected: List<String> = emptyList()): MutableMap<String, Any?> {
+    protected fun copyMap(from: Map<String, Any?>, to: MutableMap<String, Any?>, include: List<String> = emptyList(), exclude: List<String> = emptyList()): MutableMap<String, Any?> {
         // 复制全部字段
-        if(expected.isEmpty()) {
+        if(include.isEmpty() && exclude.isEmpty()) {
             to.putAll(from)
             return to
         }
 
         // 复制指定字段
-        for (column in expected)
-            to[column] = from[column]
+        val include = if(include.isEmpty()) from.keys else include
+        for(column in include){
+            if(!exclude.contains(column)){
+                to[column] = from[column]
+            }
+        }
         return to
     }
 

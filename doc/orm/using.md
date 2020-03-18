@@ -89,7 +89,7 @@ user.delete();
 
 1. from `Map`
 
-To set multiple values at once, use `Orm::fromMap(values: Map<String, Any?>, expected: List<String> = emptyList())`
+To set multiple values at once, use `Orm::fun fromMap(from: Map<String, Any?>, include: List<String> = emptyList(), exclude: List<String> = emptyList())`
 
 ```
 val user = UserModel(20)

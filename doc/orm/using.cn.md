@@ -91,7 +91,7 @@ user.delete();
 
 1. 从 `Map` 中赋值
 
-如果你要批量赋值，请使用 `Orm::fromMap(values: Map<String, Any?>, expected: List<String> = emptyList())`
+如果你要批量赋值，请使用 `Orm::fun fromMap(from: Map<String, Any?>, include: List<String> = emptyList(), exclude: List<String> = emptyList())`
 
 ```
 val user = UserModel(20)

@@ -89,15 +89,19 @@ abstract class OrmRelated : OrmPersistent() {
      *    对于关联对象字段值的设置: 只考虑一对一的关联对象, 不考虑一对多的关联对象
      *
      * @param from   字段值的哈希：<字段名 to 字段值>
-     * @param expected 要设置的字段名的列表
+     * @param include 要设置的字段名的列表
+     * @param exclude 要排除的字段名的列表
      */
-    public override fun fromMap(from: Map<String, Any?>, expected: List<String>) {
-        val columns = if (expected.isEmpty())
-                            ormMeta.defaultExpectedProps
+    public override fun fromMap(from: Map<String, Any?>, include: List<String>, exclude: List<String>) {
+        val columns = if (include.isEmpty())
+                            ormMeta.propsAndRelations
                         else
-                            expected
+                            include
 
         for(column in columns){
+            if(exclude.contains(column))
+                continue
+
             val value = from[column]
             if(value is Map<*, *>){ // 如果是map，则为关联对象
                 val realValue = related(column, true) // 创建关联对象
@@ -110,14 +114,27 @@ abstract class OrmRelated : OrmPersistent() {
     /**
      * 获得字段值 -- 转为Map
      * @param to
-     * @param expected 要设置的字段名的列表
+     * @param include 要设置的字段名的列表
+     * @param exclude 要排除的字段名的列表
      * @return
      */
-    public override fun toMap(to: MutableMap<String, Any?>, expected: List<String>): MutableMap<String, Any?> {
-        // 1 转关联对象
+    public override fun toMap(to: MutableMap<String, Any?>, include: List<String>, exclude: List<String>): MutableMap<String, Any?> {
+        val columns = if (include.isEmpty())
+            ormMeta.props // 只补全到当前对象属性, 不包含关联对象(后面单独处理): 由于关联对象联查时不处理null值, 因此关联对象会缺少null值的字段，这里要补上
+        else
+            include
+
+        // 1 转当前对象
+        super.toMap(to, include, exclude)
+
+        // 2 转关联对象
         for((name, relation) in ormMeta.relations){
+            val need = (include.isEmpty() || include.contains(name)) && !exclude.contains(name)
+            if(!need)
+                continue
+
             val value = _data[name]
-            if(value != null){
+            if(value != null){ // 有才输出
                 to[name] = when(value){
                     is Collection<*> -> (value as Collection<IOrm>).itemToMap() // 有多个
                     is IOrm -> value.toMap()  // 有一个
@@ -126,9 +143,6 @@ abstract class OrmRelated : OrmPersistent() {
             }
         }
 
-        // 2 转当前对象：由于关联对象联查时不处理null值, 因此关联对象会缺少null值的字段，这里要补上
-        for(prop in ormMeta.props)
-            to[prop] = _data[prop]
 
         return to;
     }

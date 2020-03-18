@@ -3,7 +3,6 @@ package net.jkcode.jkmvc.http
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
-import net.jkcode.jkmvc.orm.IOrm
 import net.jkcode.jkmvc.orm.IRelationMeta
 import net.jkcode.jkmvc.orm.Orm
 import net.jkcode.jkmvc.orm.RelationType
@@ -196,17 +195,22 @@ public fun Part.isFile(): Boolean {
 /****************************** Orm扩展 *******************************/
 /**
  * 从请求中解析并设置多个字段值
+ *    只处理当前对象属性, 不处理关联对象属性
  *
  * @param values   字段值的数组：<字段名 to 字段值>
- * @param expected 要设置的字段名的数组
+ * @param include 要设置的字段名的数组
+ * @param exclude 要排除的字段名的列表
  */
-public fun <T: Orm> T.fromRequest(req: HttpRequest, expected: List<String> = emptyList()): T {
+public fun <T: Orm> T.fromRequest(req: HttpRequest, include: List<String> = emptyList(), exclude: List<String> = emptyList()): T {
     // 1 文本参数
     // 默认所有列
-    val columns = if (expected.isEmpty()) this.ormMeta.props else expected
+    val columns = if (include.isEmpty()) this.ormMeta.props else include
 
     // 取得请求中的指定参数
     for (column in columns) {
+        if(exclude.contains(column))
+            continue
+
         // 1 文本参数
         val value = req.getParameter(column)
         if(value != null) {

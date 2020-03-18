@@ -134,17 +134,19 @@ interface IOrmEntity {
      * 从map中设置字段值
      *
      * @param from   字段值的哈希：<字段名 to 字段值>
-     * @param expected 要设置的字段名的列表
+     * @param include 要设置的字段名的列表
+     * @param exclude 要排除的字段名的列表
      */
-    fun fromMap(from: Map<String, Any?>, expected: List<String> = emptyList())
+    fun fromMap(from: Map<String, Any?>, include: List<String> = emptyList(), exclude: List<String> = emptyList())
 
     /**
      * 获得字段值 -- 转为Map
      * @param to
-     * @param expected 要设置的字段名的列表
+     * @param include 要设置的字段名的列表
+     * @param exclude 要排除的字段名的列表
      * @return
      */
-    fun toMap(to: MutableMap<String, Any?> = HashMap(), expected: List<String> = emptyList()): MutableMap<String, Any?>;
+    fun toMap(to: MutableMap<String, Any?> = HashMap(), include: List<String> = emptyList(), exclude: List<String> = emptyList()): MutableMap<String, Any?>;
 
     /**
      * 序列化

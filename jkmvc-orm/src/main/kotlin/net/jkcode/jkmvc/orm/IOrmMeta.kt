@@ -90,20 +90,20 @@ interface IOrmMeta {
     val columns: Collection<String>
 
     /**
-     * 对象属性
+     * 对象属性名
      */
     val props: List<String>
+
+    /**
+     * 对象属性名+关系名
+     */
+    val propsAndRelations: List<String>
 
     /**
      * 要序列化的对象属性
      *   写时序列化, 读时反序列化
      */
     val serializingProps: List<String>
-
-    /**
-     * 默认要设置的字段名
-     */
-    val defaultExpectedProps: List<String>
 
     /**
      * 数据的工厂

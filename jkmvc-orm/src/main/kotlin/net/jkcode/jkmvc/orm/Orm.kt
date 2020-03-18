@@ -54,15 +54,16 @@ abstract class Orm(pk: Array<Any> = emptyArray() /* 主键值, 非null */) : Orm
     /**
      * 从orm对象中设置字段值
      * @param from   字段值的哈希：<字段名 to 字段值>
-     * @param expected 要设置的字段名的列表
+     * @param include 要设置的字段名的列表
+     * @param exclude 要排除的字段名的列表
      */
-    public fun fromOrm(from: Orm, expected: List<String> = emptyList()) {
+    public fun fromOrm(from: Orm, include: List<String> = emptyList(), exclude: List<String> = emptyList()) {
         val hasRelated = ormMeta.relations.keys.any {
             from._data.containsKey(it)
         }
         if(hasRelated)
             throw UnsupportedOperationException("不支持复制关联属性")
 
-        fromMap(from._data, expected)
+        fromMap(from._data, include, exclude)
     }
 }
