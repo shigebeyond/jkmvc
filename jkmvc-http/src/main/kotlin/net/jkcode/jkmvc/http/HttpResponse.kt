@@ -367,15 +367,16 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 		rendered = true
 		val writer = prepareWriter()
 		writer.apply {
-			if(!callback.isNullOrBlank()) {
+			if (!callback.isNullOrBlank()) {
 				print(StringEscapeUtils.escapeHtml(callback))
 				print("(")
 			}
 
 			print(data.toJson())
 
-			if(!callback.isNullOrBlank()) {
+			if (!callback.isNullOrBlank()) {
 				print(")")
+			}
 		}
 	}
 

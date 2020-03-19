@@ -149,6 +149,16 @@ interface IOrmEntity {
     fun toMap(to: MutableMap<String, Any?> = HashMap(), include: List<String> = emptyList(), exclude: List<String> = emptyList()): MutableMap<String, Any?>;
 
     /**
+     * 获得字段值 -- 转为Map
+     * @param include 要设置的字段名的列表
+     * @param exclude 要排除的字段名的列表
+     * @return
+     */
+    fun toMap(include: List<String>, exclude: List<String> = emptyList()): MutableMap<String, Any?>{
+        return toMap(HashMap(), include, exclude)
+    }
+
+    /**
      * 序列化
      * @return
      */

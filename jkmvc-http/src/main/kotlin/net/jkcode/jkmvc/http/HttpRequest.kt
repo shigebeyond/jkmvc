@@ -549,6 +549,12 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 
 	/*************************** 其他 *****************************/
 	/**
+	 * 会话id
+	 */
+	public val sessionId: String
+		get() = getCookie("JSESSIONID").value
+
+	/**
 	 * 获得cookie值
 	 *
 	 * <code>

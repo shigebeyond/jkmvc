@@ -1,9 +1,7 @@
 package net.jkcode.jkmvc.orm
 
-import com.alibaba.fastjson.JSON
-import com.alibaba.fastjson.serializer.SerializerFeature
-import net.jkcode.jkutil.common.decorateIterator
 import net.jkcode.jkmvc.db.DbResultRow
+import net.jkcode.jkutil.common.decorateIterator
 import java.io.Serializable
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -201,13 +199,15 @@ public fun <T: IEntitiableOrm<E>, E: OrmEntity> KClass<T>.entityRowTransformer(e
 
 /**
  * orm列表获得字段值
+ * @param include 要输出的字段名的列表
+ * @return
  */
-fun Collection<out IOrm>.itemToMap(): List<Map<String, Any?>> {
+fun Collection<out IOrm>.itemToMap(include: List<String> = emptyList()): List<Map<String, Any?>> {
     if(this.isEmpty())
         return emptyList()
 
     return this.map {
-        it.toMap()
+        it.toMap(include)
     }
 }
 
@@ -299,31 +299,4 @@ public fun Collection<out IOrm>.columnIterator(key:String):Iterator<Any?>{
         //it[key] as Any
         it.get<Any?>(key)
     }
-}
-
-/**
- * 标准化orm数据
- *    对orm对象要转map
- * @param data
- * @return
- */
-public fun normalizeOrmData(data: Any?): Any? {
-    // 对orm对象要转map
-    if (data is IOrm)
-        return data.toMap()
-
-    // 对orm列表要转map
-    if(data is List<*> && data.isNotEmpty() && data.first() is IOrm)
-        return (data as List<IOrm>).itemToMap()
-
-    return data
-}
-
-/**
- * 对象转json
- * @return
- */
-public fun Any.toJson(): String {
-    //data.toJSONString()
-    return JSON.toJSONString(normalizeOrmData(this), SerializerFeature.WriteDateUseDateFormat /* Date格式化 */, SerializerFeature.WriteMapNullValue /* 输出null值 */)
 }
