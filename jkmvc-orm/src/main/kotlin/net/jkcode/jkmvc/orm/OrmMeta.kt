@@ -8,6 +8,7 @@ import net.jkcode.jkutil.cache.ICache
 import net.jkcode.jkutil.collection.FixedKeyMapFactory
 import net.jkcode.jkutil.common.*
 import net.jkcode.jkutil.validator.IValidator
+import net.jkcode.jkutil.validator.ModelValidateResult
 import net.jkcode.jkutil.validator.ValidateResult
 import java.util.*
 import kotlin.collections.set
@@ -211,7 +212,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param item
      * @return
      */
-    public override fun validate(item: IOrmEntity): ValidateResult {
+    public override fun validate(item: IOrmEntity): ModelValidateResult {
         // 逐个属性校验
         val errors = HashMap<String, String>()
         for ((field, rule) in rules) {

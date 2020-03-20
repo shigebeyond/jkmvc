@@ -2,10 +2,7 @@ package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkutil.collection.FixedKeyMapFactory
 import net.jkcode.jkmvc.db.IDb
-import net.jkcode.jkutil.validator.IValidator
-import net.jkcode.jkutil.validator.RuleValidator
-import net.jkcode.jkutil.validator.ValidateLambda
-import net.jkcode.jkutil.validator.ValidateResult
+import net.jkcode.jkutil.validator.*
 import kotlin.reflect.KClass
 
 /**
@@ -185,7 +182,7 @@ interface IOrmMeta {
      * @param item
      * @return
      */
-    fun validate(item: IOrmEntity): ValidateResult
+    fun validate(item: IOrmEntity): ModelValidateResult
 
     /**
      * 添加规则

@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.orm
 
+import net.jkcode.jkutil.validator.ModelValidateResult
 import net.jkcode.jkutil.validator.ValidateResult
 
 
@@ -61,7 +62,7 @@ abstract class OrmValid : IOrm, OrmEntity() {
      * 校验数据
      * @return
      */
-    public override fun validate(): ValidateResult {
+    public override fun validate(): ModelValidateResult {
         return ormMeta.validate(this)
     }
 
