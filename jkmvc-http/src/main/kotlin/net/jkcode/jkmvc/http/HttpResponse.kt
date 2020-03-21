@@ -2,16 +2,13 @@ package net.jkcode.jkmvc.http
 
 import com.alibaba.fastjson.JSONObject
 import net.jkcode.jkmvc.http.controller.Controller
-import net.jkcode.jkutil.common.Config
-import net.jkcode.jkutil.common.httpLogger
 import net.jkcode.jkmvc.http.util.AllPagination
 import net.jkcode.jkmvc.http.util.Pagination
 import net.jkcode.jkmvc.http.view.View
-import net.jkcode.jkmvc.orm.normalizeOrmData
+import net.jkcode.jkmvc.orm.normalizeData
 import net.jkcode.jkmvc.orm.toJson
 import net.jkcode.jkutil.collection.LazyAllocatedMap
-import net.jkcode.jkutil.common.writeFile
-import net.jkcode.jkutil.common.writeFromInput
+import net.jkcode.jkutil.common.*
 import org.apache.commons.lang.StringEscapeUtils
 import java.io.*
 import java.net.URLEncoder
@@ -257,7 +254,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 	/**
 	 * 设置响应缓存
 	 *
-	 * @param expires 过期时间
+	 * @param expires 过期时间, 单位秒
 	 * @return
 	 */
 	public fun setCache(expires:Long): HttpResponse {
@@ -265,7 +262,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 		if (expires > 0) { // 有过期时间, 则缓存
 			val now:Long =  System.currentTimeMillis()
 			this.addDateHeader("Last-Modified", now);
-			this.addDateHeader("Expires", now + expires);
+			this.addDateHeader("Expires", now + expires * 1000);
 			this.addHeader("Cache-Control", "max-age=$expires");
 			this.addHeader("Pragma", "Pragma")
 		}else{ // 否则, 不缓存
@@ -361,9 +358,9 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 	/**
 	 * 渲染jsonp
 	 * @param data
-	 * @param callback
+	 * @param callback 回调函数
 	 */
-	public fun renderJsonp(data: Any, callback: String) {
+	public fun renderJson(data: Any, callback: String?) {
 		rendered = true
 		val writer = prepareWriter()
 		writer.apply {
@@ -378,6 +375,18 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 				print(")")
 			}
 		}
+	}
+
+	/**
+	 * 渲染选项
+	 * @param data
+	 * @param withEmpty 是否带空选项
+	 * @param callback 回调函数
+	 * @param transform
+	 */
+	public fun <T> renderOptions(data: Collection<T>, withEmpty: Boolean = false, callback: String? = null, transform: (T) -> Pair<String, String>?){
+		val options = data.toOptions(withEmpty, transform)
+		renderJson(options, callback)
 	}
 
 	/**
@@ -396,7 +405,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 		val obj = JSONObject()
 		obj["code"] = code
 		obj["message"] = message
-		obj["data"] = normalizeOrmData(data)
+		obj["data"] = normalizeData(data)
 		renderJson(obj)
 	}
 
@@ -417,7 +426,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 		val obj = JSONObject()
 		obj["code"] = code
 		obj["message"] = message
-		obj["data"] = normalizeOrmData(items)
+		obj["data"] = normalizeData(items)
 
 		// 构造分页json
 		if(pagination != null)

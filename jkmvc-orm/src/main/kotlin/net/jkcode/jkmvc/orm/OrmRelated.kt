@@ -136,13 +136,12 @@ abstract class OrmRelated : OrmPersistent() {
             val value = _data[name]
             if(value != null){ // 有才输出
                 to[name] = when(value){
-                    is Collection<*> -> (value as Collection<IOrm>).itemToMap() // 有多个
+                    is Collection<*> -> (value as Collection<IOrm>).toMaps() // 有多个
                     is IOrm -> value.toMap()  // 有一个
                     else -> value
                 }
             }
         }
-
 
         return to;
     }

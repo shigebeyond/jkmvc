@@ -5,6 +5,7 @@ import net.jkcode.jkutil.common.decorateIterator
 import java.io.Serializable
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
@@ -97,7 +98,7 @@ class OrmMapPropDelegater protected constructor (public val keys: DbKeyNames): R
 
     // 设置属性
     public override operator fun setValue(thisRef: IOrmEntity, property: KProperty<*>, value: Any?) {
-        val list = (value as Map<Any, Any?>?)?.map { it.value }
+        val list = (value as Map<Any, Any?>?)?.mapTo(HashSet()) { it.value }
         thisRef[property.name] = list
     }
 }
@@ -196,25 +197,10 @@ public fun <T: IEntitiableOrm<E>, E: OrmEntity> KClass<T>.entityRowTransformer(e
     }
 }
 
-
-/**
- * orm列表获得字段值
- * @param include 要输出的字段名的列表
- * @return
- */
-fun Collection<out IOrm>.itemToMap(include: List<String> = emptyList()): List<Map<String, Any?>> {
-    if(this.isEmpty())
-        return emptyList()
-
-    return this.map {
-        it.toMap(include)
-    }
-}
-
 /**
  * orm列表转为实体列表
  */
-fun <T: OrmEntity> Collection<out IEntitiableOrm<T>>.itemToEntity(): List<T> {
+fun <T: OrmEntity> Collection<out IEntitiableOrm<T>>.toEntities(): List<T> {
     if(this.isEmpty())
         return emptyList()
 
@@ -234,13 +220,11 @@ fun <K, V> Collection<out IOrm>.toMap(keyField:String, valueField:String?): Map<
     if(this.isEmpty())
         return emptyMap()
 
-    val result = HashMap<K, V?>()
-    this.forEach {
+    return this.associate {
         val key:K = it[keyField]
         val value:V = if(valueField == null) it as V else it[valueField]
-        result[key] = value
+        key to value
     }
-    return result
 }
 
 /**

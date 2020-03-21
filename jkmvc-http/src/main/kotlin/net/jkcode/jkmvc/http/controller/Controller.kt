@@ -7,6 +7,7 @@ import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jkutil.collection.LazyAllocatedMap
 import net.jkcode.jkutil.ttl.HttpRequestScopedTransferableThreadLocal
 import java.io.Writer
+import javax.servlet.ServletOutputStream
 
 /**
  * 控制器
@@ -67,6 +68,12 @@ abstract class Controller : IController {
      */
     val writer: Writer
         get() = res.writer
+
+    /**
+     * for jkerp
+     */
+    val out: ServletOutputStream
+        get() = res.outputStream
 
     init {
         setCurrent(this)

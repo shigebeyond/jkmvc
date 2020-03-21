@@ -46,7 +46,7 @@ interface IEntitiableOrm<E: OrmEntity>: IOrm {
             val value: Any? = this[name]
             if(value != null){
                 entity[name] = when(value){
-                    is Collection<*> -> (value as Collection<IEntitiableOrm<OrmEntity>>).itemToEntity() // 有多个
+                    is Collection<*> -> (value as Collection<IEntitiableOrm<OrmEntity>>).toEntities() // 有多个
                     is IEntitiableOrm<*> -> value.toEntity()  // 有一个
                     else -> value
                 }
