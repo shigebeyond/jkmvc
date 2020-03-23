@@ -3,14 +3,14 @@
 default:
   # 主库
   master:
-    driverClass: com.mysql.jdbc.Driver
+    driverClassName: com.mysql.jdbc.Driver
     url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
     username: root
     password: root
   # 多个从库, 可省略
   slaves:
     -
-      driverClass: com.mysql.jdbc.Driver
+      driverClassName: com.mysql.jdbc.Driver
       url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
       username: root
       password: root
@@ -18,7 +18,7 @@ default:
 # sql server, 命名: 小写+下划线
 #default:
 #  master:
-#    driverClass: com.microsoft.sqlserver.jdbc.SQLServerDriver
+#    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
 #    url: jdbc:sqlserver://192.168.0.56:1433;databaseName=tempdb
 #    username: sa
 #    password: '111111'
@@ -26,7 +26,7 @@ default:
 # oracle, 命名: 大写+下划线
 #default:
 #  master:
-#    driverClass: oracle.jdbc.driver.OracleDriver
+#    driverClassName: oracle.jdbc.driver.OracleDriver
 #    url: jdbc:oracle:thin:@127.0.0.1:ORCL
 #    # schema - oracle的概念，代表一组数据库对象，在 Db.tables 中延迟加载表字段时，用来过滤 DYPT 库的表，可省略，默认值=username
 #    # schema: admin

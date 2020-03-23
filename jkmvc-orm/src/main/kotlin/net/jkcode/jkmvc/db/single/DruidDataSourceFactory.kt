@@ -27,7 +27,7 @@ object DruidDataSourceFactory : IDataSourceFactory() {
         ds.setUrl(config["url"])
         ds.setUsername(config["username"])
         ds.setPassword(config["password"])
-        val driverClass: String = config["driverClass"]!!
+        val driverClass: String = config["driverClassName"]!!
         ds.setDriverClassName(driverClass)
 
         // 其他属性
