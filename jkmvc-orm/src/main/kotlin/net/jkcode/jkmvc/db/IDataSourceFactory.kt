@@ -16,7 +16,7 @@ abstract class IDataSourceFactory : ClosingOnShutdown() {
     /**
      * 缓存数据源
      */
-    private val dataSources: ConcurrentHashMap<String, DataSource> = ConcurrentHashMap();
+    private val dataSources: ConcurrentHashMap<String, ClosableDataSource> = ConcurrentHashMap();
 
     /**
      * 获得数据源
@@ -24,9 +24,9 @@ abstract class IDataSourceFactory : ClosingOnShutdown() {
      * @param name 数据源名
      * @return
      */
-    public fun getDataSource(name: String): DataSource {
+    public fun getDataSource(name: String): ClosableDataSource {
         return dataSources.getOrPutOnce(name){
-            buildDataSource(name)
+            ClosableDataSource(buildDataSource(name)) // 可关闭
         }
     }
 

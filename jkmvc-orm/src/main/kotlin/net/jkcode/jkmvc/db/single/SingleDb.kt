@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.db.single
 
+import net.jkcode.jkmvc.db.ClosableDataSource
 import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.randomInt
 import net.jkcode.jkmvc.db.Db
@@ -35,11 +36,20 @@ class SingleDb(name:String /* 标识 */) : Db(name) {
     protected var connUsed: Int = 0
 
     /**
+     * 获得数据源
+     * @param name 数据源名
+     * @return
+     */
+    protected fun getDataSource(name: String): ClosableDataSource {
+        return DruidDataSourceFactory.getDataSource(name);
+    }
+
+    /**
      * 主库连接
      */
     protected override val masterConn: Connection by lazy{
         //获得主库数据源
-        val dataSource = DruidDataSourceFactory.getDataSource("$name.master");
+        val dataSource = getDataSource("$name.master");
         // 记录用到主库
         connUsed = connUsed or 1
         // 新建连接
@@ -55,7 +65,7 @@ class SingleDb(name:String /* 标识 */) : Db(name) {
         } else{ // 随机选个从库
             val i = randomInt(slaveNum)
             //获得从库数据源
-            val dataSource = DruidDataSourceFactory.getDataSource("$name.slaves.$i");
+            val dataSource = getDataSource("$name.slaves.$i");
             // 记录用到从库
             connUsed = connUsed or 2
             // 新建连接

@@ -10,8 +10,7 @@ import io.shardingjdbc.transaction.bed.async.NestedBestEffortsDeliveryJob
 import net.jkcode.jkmvc.db.single.DruidDataSourceFactory
 import javax.sql.DataSource
 import io.shardingjdbc.core.jdbc.core.ShardingContext
-
-
+import net.jkcode.jkmvc.db.ClosableDataSource
 
 
 /**
@@ -29,7 +28,7 @@ class ShardingDb(name:String /* 标识 */) : Db(name) {
         /**
          * 事务日志的数据源
          */
-        protected val transactionLogDataSource: DataSource
+        protected val transactionLogDataSource: ClosableDataSource
             get() = DruidDataSourceFactory.getDataSource("default.master");
     }
 
@@ -41,7 +40,7 @@ class ShardingDb(name:String /* 标识 */) : Db(name) {
     /**
      * 数据源
      */
-    protected val dataSource: DataSource by lazy{
+    protected val dataSource: ClosableDataSource by lazy{
         ShardingDataSourceFactory.getDataSource(name)
     }
 
