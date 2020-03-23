@@ -26,14 +26,14 @@ import kotlin.collections.ArrayList
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-15 9:03 PM
  */
-internal class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
+internal class DbMeta(public override val name: CharSequence /* 标识 */) : IDbMeta {
 
     companion object {
 
         /**
          * 缓存db元数据
          */
-        protected val metas: ConcurrentHashMap<String, DbMeta> = ConcurrentHashMap();
+        protected val metas: ConcurrentHashMap<CharSequence, DbMeta> = ConcurrentHashMap();
 
         /**
          * 获得db元数据
@@ -41,7 +41,7 @@ internal class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
          * @param name 数据源名
          * @return
          */
-        public fun get(name: String): DbMeta {
+        public fun get(name: CharSequence): DbMeta {
             return metas.getOrPut(name){
                 DbMeta(name)
             }
@@ -53,12 +53,12 @@ internal class DbMeta(public override val name:String /* 标识 */) : IDbMeta {
     /**
      * 字段有下划线
      */
-    protected val columnUnderline: Boolean = DbConfig.isColumnUnderline(name)
+    protected val columnUnderline: Boolean = DbConfig.isColumnUnderline(name.toString())
 
     /**
      * 字段全大写
      */
-    protected val columnUpperCase: Boolean = DbConfig.isColumnUpperCase(name)
+    protected val columnUpperCase: Boolean = DbConfig.isColumnUpperCase(name.toString())
 
     /**
      * 任意连接

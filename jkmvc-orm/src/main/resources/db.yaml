@@ -9,3 +9,5 @@ columnUnderlineDbs: default,test
 # 字段名全大写的数据库名, 用逗号分隔
 # Column name is all uppercase for these database names
 columnUpperCaseDbs:
+# 自定义db实现类
+#customDbClass:

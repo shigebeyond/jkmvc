@@ -20,8 +20,8 @@ import java.util.*
  * @date 2016-10-8 下午8:02:47
  */
 abstract class Db protected constructor(
-        public override val name:String /* 标识 */,
-        public override val dbMeta: IDbMeta = DbMeta.get(name) /* 元数据 */
+        public override val name: CharSequence, // 标识
+        public override val dbMeta: IDbMeta = DbMeta.get(name) // 元数据
 ) : IDb(), IDbMeta by dbMeta, Closeable {
 
     companion object {
@@ -31,7 +31,7 @@ abstract class Db protected constructor(
          *    每个线程有多个db, 一个名称各一个db对象
          *    每个请求都创建新的db对象, 请求结束要调用 close() 来关闭连接
          */
-        protected val dbs: AllRequestScopedTransferableThreadLocal<HashMap<String, Db>> = object: AllRequestScopedTransferableThreadLocal<HashMap<String, Db>>({HashMap()}){
+        protected val dbs: AllRequestScopedTransferableThreadLocal<HashMap<CharSequence, Db>> = object: AllRequestScopedTransferableThreadLocal<HashMap<CharSequence, Db>>({HashMap()}){
             public override fun endScope() {
                 // 请求结束要调用 close() 来关闭连接
                 val dbs = get()
@@ -50,13 +50,14 @@ abstract class Db protected constructor(
          * @param name
          * @return
          */
-        public fun instance(name: String = "default"):Db{
-            return dbs.get().getOrPut(name){
-                // 是否分库
-                if(DbConfig.isSharding(name))
-                    ShardingDb(name)
-                else
-                    SingleDb(name)
+        public fun instance(name: CharSequence = "default"): Db {
+            return dbs.get().getOrPut(name) {
+                if (DbConfig.customDbClass == null) // 自定义db类
+                    DbConfig.customDbClass!!.constructors.first().newInstance(name) as Db
+                else if (DbConfig.isSharding(name.toString())) // 分库
+                    ShardingDb(name.toString())
+                else // 单库
+                    SingleDb(name.toString())
             }
         }
 

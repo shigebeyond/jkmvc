@@ -9,13 +9,13 @@ interface IDbMeta: IDbIdentifierQuoter, IDbValueQuoter {
     /**
      * 标识名
      */
-    val name:String
+    val name: CharSequence
 
     /**
      * 获得数据库类型
      *   根据driverClass来获得
      */
-    val dbType:DbType
+    val dbType: DbType
 
     /**
      * sql标示符（表/字段）的转义字符
@@ -23,7 +23,7 @@ interface IDbMeta: IDbIdentifierQuoter, IDbValueQuoter {
      *   oracle为 "table"."column"
      *   sql server为 "table"."column" 或 [table].[column]
      */
-    val identifierQuoteString:String
+    val identifierQuoteString: String
 
     /**
      * catalog
@@ -37,7 +37,7 @@ interface IDbMeta: IDbIdentifierQuoter, IDbValueQuoter {
      *    在 Db.tables 中延迟加载表字段时，用来过滤 DYPT 库的表
      *    可省略，默认值=username
      */
-    val schema:String?
+    val schema: String?
 
     /**
      * 表

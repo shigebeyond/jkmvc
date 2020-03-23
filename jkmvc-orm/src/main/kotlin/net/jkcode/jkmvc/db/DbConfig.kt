@@ -53,4 +53,15 @@ object DbConfig {
     public fun isColumnUpperCase(db: String): Boolean {
         return columnUpperCaseDbs.contains(db)
     }
+
+    /**
+     * 自定义db实现类
+     */
+    public val customDbClass: Class<*>? by lazy{
+        val clazz: String? = config["customDbClass"]
+        if(clazz == null)
+            null
+        else
+            Class.forName(clazz)
+    }
 }

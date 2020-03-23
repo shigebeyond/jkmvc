@@ -21,6 +21,15 @@ object DruidDataSourceFactory : IDataSourceFactory() {
      */
     override fun buildDataSource(name:String): DataSource {
         val config: Config = Config.instance("dataSources.$name", "yaml")
+        return getDataSource(config)
+    }
+
+    /**
+     * 构建数据源
+     * @param config 数据源和配置
+     * @return
+     */
+    public fun getDataSource(config: Config): DruidDataSource {
         val ds: DruidDataSource = DruidDataSource()
 
         // 基本属性 url、user、password
@@ -58,7 +67,7 @@ object DruidDataSourceFactory : IDataSourceFactory() {
         ds.setMaxPoolPreparedStatementPerConnectionSize(config.getInt("maxPoolPreparedStatementPerConnectionSize", -1)!!)
 
         // 查询超时(秒)
-        if(config.containsKey("queryTimeOut"))
+        if (config.containsKey("queryTimeOut"))
             ds.setQueryTimeout(config.getInt("queryTimeOut", 3)!!);
 
         // 配置监控统计拦截的filters
