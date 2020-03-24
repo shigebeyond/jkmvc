@@ -20,6 +20,11 @@ class DbResultSet(
 ) : ResultSet by rs {
 
     /**
+     * 列数
+     */
+    public val columnCount = rs.metaData.columnCount
+
+    /**
      * 遍历结果集的每一行
      * @param action 访问者函数
      */

@@ -21,12 +21,24 @@ class DbResultRow(protected val rs: DbResultSet) {
     }
 
     /**
-     * 通过inline指定的值类型, 来获得结果集的单个值
+     * 通过inline指定的值类型, 来获得结果集的单个值, 超出列报错
      * @param i
      * @return
      */
     public inline operator fun <reified T: Any> get(i: Int): T?{
         return get(i, T::class) as T?
+    }
+
+    /**
+     * 通过inline指定的值类型, 来获得结果集的单个值, 超出列返回null
+     * @param i
+     * @return
+     */
+    public inline fun <reified T: Any> getOrNull(i: Int): T?{
+        if(i <= 0 && i > rs.columnCount)
+            return null
+
+        return get(i)
     }
 
     /**
@@ -43,7 +55,7 @@ class DbResultRow(protected val rs: DbResultSet) {
      * 遍历键值
      * @param action
      */
-    public inline fun forEach(action: (String, Any?) -> Unit) {
+    public inline fun forEach(action: (name: String, value: Any?) -> Unit) {
         for (i in 1..rs.metaData.columnCount) { // 多列
             val label: String = rs.metaData.getColumnLabel(i); // 字段名
             val value: Any? = rs.getValue(i) // 字段值
