@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.db
 
+import org.apache.commons.lang.mutable.Mutable
 import java.math.BigDecimal
 import java.sql.Blob
 import java.sql.Clob
@@ -36,11 +37,11 @@ class DbResultSet(
 
     /**
      * 对结果集的每一行进行转换, 来得到一个列表
+     * @param result
      * @param transform 行的转换函数
      * @return
      */
-    public inline fun <T> mapRows(transform: (DbResultRow) -> T): List<T> {
-        val result = LinkedList<T>()
+    public inline fun <T> mapRows(result: MutableList<T> = LinkedList<T>(), transform: (DbResultRow) -> T): List<T> {
         this.forEachRow { row ->
             result.add(transform(row));// 转换一行数据
         }

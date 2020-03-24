@@ -17,7 +17,7 @@ class DbResultRow(protected val rs: DbResultSet) {
      * @return
      */
     public inline operator fun <reified T: Any> get(column: String): T?{
-        return get(rs.findColumn(column))
+        return get(rs.findColumn(column)) // mysql jdbc就是这么实现的, 参考 com.mysql.jdbc.ResultSetImpl.getString(java.lang.String)
     }
 
     /**
@@ -60,6 +60,18 @@ class DbResultRow(protected val rs: DbResultSet) {
             val label: String = rs.metaData.getColumnLabel(i); // 字段名
             val value: Any? = rs.getValue(i) // 字段值
             action(label, value)
+        }
+    }
+
+    /**
+     * 遍历键值
+     * @param action
+     */
+    public inline fun forEachIndexed(action: (index: Int, name: String, value: Any?) -> Unit) {
+        for (i in 1..rs.metaData.columnCount) { // 多列
+            val label: String = rs.metaData.getColumnLabel(i); // 字段名
+            val value: Any? = rs.getValue(i) // 字段值
+            action(i, label, value)
         }
     }
 

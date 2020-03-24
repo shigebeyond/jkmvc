@@ -51,7 +51,7 @@ abstract class IDbQuery{
      */
     public open fun <T:Any> findRows(params: List<*> = emptyList<Any>(), db: IDb = defaultDb, transform: (DbResultRow) -> T): List<T>{
         return findResult(params, db){ rs ->
-            rs.mapRows(transform)
+            rs.mapRows(transform = transform)
         }
     }
 

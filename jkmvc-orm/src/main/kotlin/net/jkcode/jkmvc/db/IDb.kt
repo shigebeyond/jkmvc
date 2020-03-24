@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.db
 
+import java.util.*
 import kotlin.reflect.KClass
 
 /**
@@ -116,12 +117,13 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * 查询多行
      * @param sql
      * @param params 参数
+     * @param result
      * @param transform 转换行的函数
      * @return
      */
-    public fun <T> queryRows(sql: String, params: List<*> = emptyList<Any>(), transform: (DbResultRow) -> T): List<T>{
+    public fun <T> queryRows(sql: String, params: List<*> = emptyList<Any>(), result: MutableList<T> = LinkedList<T>(), transform: (DbResultRow) -> T): List<T>{
         return queryResult(sql, params){ rs ->
-            rs.mapRows(transform)
+            rs.mapRows(result, transform)
         }
     }
 
