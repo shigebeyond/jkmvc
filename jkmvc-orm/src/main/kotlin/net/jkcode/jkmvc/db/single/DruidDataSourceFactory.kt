@@ -21,7 +21,7 @@ object DruidDataSourceFactory : IDataSourceFactory() {
      */
     override fun buildDataSource(name:String): DataSource {
         val config: Config = Config.instance("dataSources.$name", "yaml")
-        return getDataSource(config)
+        return buildDataSource(config)
     }
 
     /**
@@ -29,7 +29,7 @@ object DruidDataSourceFactory : IDataSourceFactory() {
      * @param config 数据源和配置
      * @return
      */
-    public fun getDataSource(config: Config): DruidDataSource {
+    public fun buildDataSource(config: Config): DruidDataSource {
         val ds: DruidDataSource = DruidDataSource()
 
         // 基本属性 url、user、password

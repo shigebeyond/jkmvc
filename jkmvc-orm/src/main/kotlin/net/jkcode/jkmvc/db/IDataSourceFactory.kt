@@ -35,7 +35,7 @@ abstract class IDataSourceFactory : ClosingOnShutdown() {
      * @param name 数据源名
      * @return
      */
-    protected abstract fun buildDataSource(name:String): DataSource
+    public abstract fun buildDataSource(name:String): DataSource
 
     /**
      * 关闭所有数据源
