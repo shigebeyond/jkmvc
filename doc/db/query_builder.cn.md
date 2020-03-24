@@ -131,25 +131,25 @@ SELECT * FROM `posts` ORDER BY `published` DESC
 
 方法 | 作用
 --- | ---
-findResult(params: List<Any?>, db: IDb, transform: (DbResultSet) -> T): T? | 查询结果集，其中 `transform` 参数是一个lambda，用来转换结果集
-findRow(params: List<Any?>, db: IDb, transform: (DbResultRow) -> T): T? | 查询一条记录，其中 `transform` 参数是一个lambda，用来将数据库的一行，转换为一条记录
-findRows(params: List<Any?>, db: IDb, transform: (DbResultRow) -> T): List<T> | 查询多条记录，其中 `transform` 参数是一个lambda，用来将数据库的一行，转换为一条记录
-findColumn(params: List<Any?>, clazz: KClass<T>?, db: IDb): List<T> | 查询单列的多行数据
-inline findColumn(params: List<Any?>, db: IDb): List<T> | 查询单列的多行数据, 内联节省一个参数
-findValue(params: List<Any?>, clazz: KClass<T>?, db: IDb): T? | 查询一行一列
-inline findValue(params: List<Any?>, db: IDb): T? | 查询一行一列, 内联节省一个参数
+findResult(params: List<*>, db: IDb, transform: (DbResultSet) -> T): T? | 查询结果集，其中 `transform` 参数是一个lambda，用来转换结果集
+findRow(params: List<*>, db: IDb, transform: (DbResultRow) -> T): T? | 查询一条记录，其中 `transform` 参数是一个lambda，用来将数据库的一行，转换为一条记录
+findRows(params: List<*>, db: IDb, transform: (DbResultRow) -> T): List<T> | 查询多条记录，其中 `transform` 参数是一个lambda，用来将数据库的一行，转换为一条记录
+findColumn(params: List<*>, clazz: KClass<T>?, db: IDb): List<T> | 查询单列的多行数据
+inline findColumn(params: List<*>, db: IDb): List<T> | 查询单列的多行数据, 内联节省一个参数
+findValue(params: List<*>, clazz: KClass<T>?, db: IDb): T? | 查询一行一列
+inline findValue(params: List<*>, db: IDb): T? | 查询一行一列, 内联节省一个参数
 
 2. 自动转换的高层方法
 
 方法 | 作用
 --- | ---
-findMap(params: List<Any?>, convertingColumn: Boolean, db: IDb): T? |  查询一条Map记录, 不需要`transform` 参数，但是依赖于返回类型来转换数据
-findMaps(params: List<Any?>, convertingColumn: Boolean, db: IDb): List<T> | 查询多条Map记录, 不需要`transform` 参数，但是依赖于返回类型来转换数据
-inline findModel(params: List<Any?>, db: IDb): T? |  查询一条Orm记录, 不需要`transform` 参数，但是依赖于返回类型来转换数据
-inline findModels(params: List<Any?>, db: IDb): List<T> | 查询多条Orm记录, 不需要`transform` 参数，但是依赖于返回类型来转换数据
-inline findEntity(params: List<Any?>, db: IDb): T? |  查询一条OrmEntity记录, 不需要`transform` 参数，但是依赖于返回类型来转换数据
-inline findEntities(params: List<Any?>, db: IDb): List<T> | 查询多条OrmEntity记录, 不需要`transform` 参数，但是依赖于返回类型来转换数据
-count(params: List<Any?>, db: IDb):Long | 查询行数
+findMap(params: List<*>, convertingColumn: Boolean, db: IDb): T? |  查询一条Map记录, 不需要`transform` 参数，但是依赖于返回类型来转换数据
+findMaps(params: List<*>, convertingColumn: Boolean, db: IDb): List<T> | 查询多条Map记录, 不需要`transform` 参数，但是依赖于返回类型来转换数据
+inline findModel(params: List<*>, db: IDb): T? |  查询一条Orm记录, 不需要`transform` 参数，但是依赖于返回类型来转换数据
+inline findModels(params: List<*>, db: IDb): List<T> | 查询多条Orm记录, 不需要`transform` 参数，但是依赖于返回类型来转换数据
+inline findEntity(params: List<*>, db: IDb): T? |  查询一条OrmEntity记录, 不需要`transform` 参数，但是依赖于返回类型来转换数据
+inline findEntities(params: List<*>, db: IDb): List<T> | 查询多条OrmEntity记录, 不需要`transform` 参数，但是依赖于返回类型来转换数据
+count(params: List<*>, db: IDb):Long | 查询行数
 
 参考以下例子：
 

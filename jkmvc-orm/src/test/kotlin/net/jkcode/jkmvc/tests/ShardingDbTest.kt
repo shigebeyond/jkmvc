@@ -28,11 +28,11 @@ class ShardingDbTest {
     @Test
     fun testInsert() {
         for (i in 1..9) {
-            var orderId = db.execute("INSERT INTO t_order (user_id, status) VALUES (10, 'INIT')", emptyList(), "order_id") // 返回自增主键值
+            var orderId = db.execute("INSERT INTO t_order (user_id, status) VALUES (10, 'INIT')", emptyList<Any>(), "order_id") // 返回自增主键值
             db.execute("INSERT INTO t_order_item (order_id, user_id) VALUES (?, 10)", listOf(orderId))
             println("新增双数user_id的订单, 写入分库0")
 
-            orderId = db.execute("INSERT INTO t_order (user_id, status) VALUES (11, 'INIT')", emptyList(), "order_id")
+            orderId = db.execute("INSERT INTO t_order (user_id, status) VALUES (11, 'INIT')", emptyList<Any>(), "order_id")
             db.execute("INSERT INTO t_order_item (order_id, user_id) VALUES (?, 11)", listOf(orderId))
             println("新增单数user_id的订单, 写入分库1")
         }
@@ -40,7 +40,7 @@ class ShardingDbTest {
 
     @Test
     fun testFind(){
-        val row = db.queryMap("select * from t_order limit 1" /*sql*/, emptyList() /*参数*/) // 返回 Map 类型的一行数据
+        val row = db.queryMap("select * from t_order limit 1" /*sql*/, emptyList<Any>() /*参数*/) // 返回 Map 类型的一行数据
         println("查询user表：" + row)
     }
 
@@ -53,10 +53,10 @@ class ShardingDbTest {
     @Test
     fun testTransaction(){
         db.transaction {
-            var orderId = db.execute("INSERT INTO t_order (user_id, status) VALUES (10, 'INIT')", emptyList(), "order_id") // 返回自增主键值
+            var orderId = db.execute("INSERT INTO t_order (user_id, status) VALUES (10, 'INIT')", emptyList<Any>(), "order_id") // 返回自增主键值
             db.execute("INSERT INTO t_order_item (order_id, user_id) VALUES (?, 10)", listOf(orderId))
 
-            orderId = db.execute("INSERT INTO t_order (user_id, status) VALUES (11, 'INIT')", emptyList(), "order_id")
+            orderId = db.execute("INSERT INTO t_order (user_id, status) VALUES (11, 'INIT')", emptyList<Any>(), "order_id")
             db.execute("INSERT INTO t_order_item (order_id, user_id) VALUES (?, 11)", listOf(orderId))
         }
     }

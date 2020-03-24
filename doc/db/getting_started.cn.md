@@ -66,7 +66,7 @@ isInTransaction(): Boolean | 是否在事务中
 
 方法 | 作用
 --- | ---
-execute(sql: String, params: List<Any?> = emptyList(), generatedColumn: String? = null): Long | 执行更新
+execute(sql: String, params: List<*> = emptyList<Any>(), generatedColumn: String? = null): Long | 执行更新
 batchExecute(sql: String, paramses: List<Any?>): IntArray | 批量更新: 每次更新sql参数不一样
 
 ### 3.4 执行查询sql的方法
@@ -75,26 +75,26 @@ batchExecute(sql: String, paramses: List<Any?>): IntArray | 批量更新: 每次
 
 方法 | 作用
 --- | ---
-queryResult(sql: String, params: List<Any?> = emptyList(), transform: (DbResultSet) -> T): T | 查询多行
-queryRows(sql: String, params: List<Any?> = emptyList(), transform: (DbResultRow) -> T): List<T> | 查询多行
-queryRow(sql: String, params: List<Any?> = emptyList(), transform: (DbResultRow) -> T): T? | 查询一行(多列)
-queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): List<T?> | 查询一列(多行)
-inline queryColumn(sql: String, params: List<Any?> = emptyList()): List<T?> | 查询一列(多行), 内联省了最后一个参数
-queryValue(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): T? | 查询一行一列
-inline queryValue(sql: String, params: List<Any?> = emptyList()): T? | 查询一行一列, 内联省了最后一个参数
+queryResult(sql: String, params: List<*> = emptyList<Any>(), transform: (DbResultSet) -> T): T | 查询多行
+queryRows(sql: String, params: List<*> = emptyList<Any>(), transform: (DbResultRow) -> T): List<T> | 查询多行
+queryRow(sql: String, params: List<*> = emptyList<Any>(), transform: (DbResultRow) -> T): T? | 查询一行(多列)
+queryColumn(sql: String, params: List<*> = emptyList<Any>(), clazz: KClass<T>? = null): List<T?> | 查询一列(多行)
+inline queryColumn(sql: String, params: List<*> = emptyList<Any>()): List<T?> | 查询一列(多行), 内联省了最后一个参数
+queryValue(sql: String, params: List<*> = emptyList<Any>(), clazz: KClass<T>? = null): T? | 查询一行一列
+inline queryValue(sql: String, params: List<*> = emptyList<Any>()): T? | 查询一行一列, 内联省了最后一个参数
 
 2. 自动转换的高层方法
 
 方法 | 作用
 --- | ---
-queryMaps(sql: String, params: List<Any?> = emptyList(), convertingColumn: Boolean): List<Map<String, Any?>> | 查询多行, 并将每行转为 `Map`
-queryMap(sql: String, params: List<Any?> = emptyList(), convertingColumn: Boolean): Map<String, Any?>? | 查询一行, 并转为 `Map`
+queryMaps(sql: String, params: List<*> = emptyList<Any>(), convertingColumn: Boolean): List<Map<String, Any?>> | 查询多行, 并将每行转为 `Map`
+queryMap(sql: String, params: List<*> = emptyList<Any>(), convertingColumn: Boolean): Map<String, Any?>? | 查询一行, 并转为 `Map`
 
 ### 3.5 转义与预览的方法
 
 属性/方法 | 作用
 --- | ---
-previewSql(sql: String, params: List<Any?> = emptyList()): String | 预览sql
+previewSql(sql: String, params: List<*> = emptyList<Any>()): String | 预览sql
 quote(value: Any?): String | 转义值
 quoteColumn(column: CharSequence): String | 转义字段名
 quoteTable(table: CharSequence): String | 转义表名
@@ -130,7 +130,7 @@ db.transaction {
     println("插入user表：" + id)
 
     // 查询一条数据
-    val row = db.queryRow("select * from user limit 1" /*sql*/, emptyList() /*参数*/, true /* 将字段名转为属性名, 如 to_uid => toUid */) // 返回 Map 类型的一行数据
+    val row = db.queryRow("select * from user limit 1" /*sql*/, emptyList<Any>() /*参数*/, true /* 将字段名转为属性名, 如 to_uid => toUid */) // 返回 Map 类型的一行数据
     println("查询user表：" + row)
 
     // 统计行数
@@ -142,7 +142,7 @@ db.transaction {
     println("更新user表：" + f)
 
     // 查询多条数据
-    val rows = db.queryRows("select * from user limit 10" /*sql*/, emptyList() /*参数*/, true /* 将字段名转为属性名, 如 to_uid => toUid */) // 返回 Map 类型的多行数据
+    val rows = db.queryRows("select * from user limit 10" /*sql*/, emptyList<Any>() /*参数*/, true /* 将字段名转为属性名, 如 to_uid => toUid */) // 返回 Map 类型的多行数据
     println("查询user表：" + rows)
 
     // 删除 

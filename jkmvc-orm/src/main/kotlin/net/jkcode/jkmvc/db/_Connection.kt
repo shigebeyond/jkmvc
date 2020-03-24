@@ -15,7 +15,7 @@ typealias DbRow = Map<String, Any?>
  * @param length 要设置的参数的个数
  * @param
  */
-public inline fun PreparedStatement.setParameters(params: List<Any?>, start:Int = 0, length:Int = params.size): PreparedStatement {
+public inline fun PreparedStatement.setParameters(params: List<*>, start:Int = 0, length:Int = params.size): PreparedStatement {
     if(length < 0 || length > params.size)
         throw ArrayIndexOutOfBoundsException("预编译sql中设置参数错误：需要的参数个数为 $length, 实际参数个数为 ${params.size}")
 
@@ -71,7 +71,7 @@ public inline fun PreparedStatement.getGeneratedKey(): Long {
  *       注：mysql可以不指定自增主键名，但oracle必须指定，否则调用pst.getGeneratedKeys()报错：不允许的操作
  * @return
  */
-public inline fun Connection.execute(sql: String, params: List<Any?> = emptyList(), generatedColumn:String? = null): Long {
+public inline fun Connection.execute(sql: String, params: List<*> = emptyList<Any>(), generatedColumn:String? = null): Long {
     var pst: PreparedStatement? = null
     var rs: ResultSet? = null;
     try{
@@ -105,7 +105,7 @@ public inline fun Connection.execute(sql: String, params: List<Any?> = emptyList
  * @param lengthPerExec 一次处理的参数个数
  * @return
  */
-public inline fun Connection.batchExecute(sql: String, params: List<Any?>, lengthPerExec:Int): IntArray {
+public inline fun Connection.batchExecute(sql: String, params: List<*>, lengthPerExec:Int): IntArray {
     // 计算批处理的次数
     if(lengthPerExec <= 0 || params.size % lengthPerExec > 0)
         throw IllegalArgumentException("批处理sql中设置参数错误：一次处理需要的参数个数为$lengthPerExec, 全部参数个数为${params.size}, 后者必须是前者的整数倍");
@@ -138,7 +138,7 @@ public inline fun Connection.batchExecute(sql: String, params: List<Any?>, lengt
  * @param transform 结果转换函数
  * @return
  */
-public inline fun <T> Connection.queryResult(sql: String, params: List<Any?> = emptyList(), transform:(ResultSet) -> T): T {
+public inline fun <T> Connection.queryResult(sql: String, params: List<*> = emptyList<Any>(), transform:(ResultSet) -> T): T {
     var pst: PreparedStatement? = null;
     var rs: ResultSet? = null;
     try {

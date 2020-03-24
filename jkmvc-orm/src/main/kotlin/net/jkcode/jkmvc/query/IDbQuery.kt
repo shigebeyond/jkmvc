@@ -38,7 +38,7 @@ abstract class IDbQuery{
      * @param transform 结果转换函数
      * @return
      */
-    public abstract fun <T> findResult(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (DbResultSet) -> T): T
+    public abstract fun <T> findResult(params: List<*> = emptyList<Any>(), db: IDb = defaultDb, transform: (DbResultSet) -> T): T
 
     /**
      * 查找多个： select 语句
@@ -49,7 +49,7 @@ abstract class IDbQuery{
      * @param transform 行转换函数
      * @return 列表
      */
-    public open fun <T:Any> findRows(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (DbResultRow) -> T): List<T>{
+    public open fun <T:Any> findRows(params: List<*> = emptyList<Any>(), db: IDb = defaultDb, transform: (DbResultRow) -> T): List<T>{
         return findResult(params, db){ rs ->
             rs.mapRows(transform)
         }
@@ -63,7 +63,7 @@ abstract class IDbQuery{
      * @param transform 行转换函数
      * @return 一个数据
      */
-    public open fun <T:Any> findRow(params: List<Any?> = emptyList(), db: IDb = defaultDb, transform: (DbResultRow) -> T): T?{
+    public open fun <T:Any> findRow(params: List<*> = emptyList<Any>(), db: IDb = defaultDb, transform: (DbResultRow) -> T): T?{
         return findResult(params, db) { rs ->
             rs.mapRow(transform)
         }
@@ -77,7 +77,7 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return
      */
-    public fun <T:Any> findColumn(params: List<Any?> = emptyList(), clazz: KClass<T>? = null, db: IDb = defaultDb): List<T>{
+    public fun <T:Any> findColumn(params: List<*> = emptyList<Any>(), clazz: KClass<T>? = null, db: IDb = defaultDb): List<T>{
         return findResult(params, db){ rs ->
             rs.mapRows{ row ->
                 row.get(1, clazz) as T
@@ -92,7 +92,7 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return
      */
-    public inline fun <reified T:Any> findColumn(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<T> {
+    public inline fun <reified T:Any> findColumn(params: List<*> = emptyList<Any>(), db: IDb = defaultDb): List<T> {
         return findColumn(params, T::class, db)
     }
 
@@ -104,7 +104,7 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return
      */
-    public fun <T:Any> findValue(params: List<Any?> = emptyList(), clazz: KClass<T>? = null, db: IDb = defaultDb): T?{
+    public fun <T:Any> findValue(params: List<*> = emptyList<Any>(), clazz: KClass<T>? = null, db: IDb = defaultDb): T?{
         return findResult(params, db){ rs ->
             rs.mapRow{ row ->
                 row.get(1, clazz) as T?
@@ -119,7 +119,7 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return
      */
-    public inline fun <reified T:Any> findValue(params: List<Any?> = emptyList(), db: IDb = defaultDb): T? {
+    public inline fun <reified T:Any> findValue(params: List<*> = emptyList<Any>(), db: IDb = defaultDb): T? {
         return findValue(params, T::class, db)
     }
 
@@ -132,7 +132,7 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return 列表
      */
-    public fun findMaps(params: List<Any?> = emptyList(), convertingColumn: Boolean = false, db: IDb = defaultDb): List<Map<String, Any?>>{
+    public fun findMaps(params: List<*> = emptyList<Any>(), convertingColumn: Boolean = false, db: IDb = defaultDb): List<Map<String, Any?>>{
         return findRows(params, db){ row ->
             row.toMap(convertingColumn)
         }
@@ -146,7 +146,7 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return 一个数据
      */
-    public fun findMap(params: List<Any?> = emptyList(), convertingColumn: Boolean = false, db: IDb = defaultDb): Map<String, Any?>?{
+    public fun findMap(params: List<*> = emptyList<Any>(), convertingColumn: Boolean = false, db: IDb = defaultDb): Map<String, Any?>?{
         return findRow(params, db){ row ->
             row.toMap(convertingColumn)
         }
@@ -159,7 +159,7 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return 列表
      */
-    public inline fun <reified T: IOrm> findModels(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<T> {
+    public inline fun <reified T: IOrm> findModels(params: List<*> = emptyList<Any>(), db: IDb = defaultDb): List<T> {
         return findRows(params, db, T::class.modelRowTransformer)
     }
 
@@ -170,7 +170,7 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return 一个数据
      */
-    public inline fun <reified T: IOrm> findModel(params: List<Any?> = emptyList(), db: IDb = defaultDb): T? {
+    public inline fun <reified T: IOrm> findModel(params: List<*> = emptyList<Any>(), db: IDb = defaultDb): T? {
         return findRow(params, db, T::class.modelRowTransformer)
     }
 
@@ -181,7 +181,7 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return 一个数据
      */
-    public inline fun <reified T: IEntitiableOrm<E>, reified E: OrmEntity> findEntities(params: List<Any?> = emptyList(), db: IDb = defaultDb): List<E> {
+    public inline fun <reified T: IEntitiableOrm<E>, reified E: OrmEntity> findEntities(params: List<*> = emptyList<Any>(), db: IDb = defaultDb): List<E> {
         return findRows(params, db, T::class.entityRowTransformer(E::class))
     }
 
@@ -192,7 +192,7 @@ abstract class IDbQuery{
      * @param db 数据库连接
      * @return 一个数据
      */
-    public inline fun <reified T: IEntitiableOrm<E>, reified E: OrmEntity> findEntity(params: List<Any?> = emptyList(), db: IDb = defaultDb): E? {
+    public inline fun <reified T: IEntitiableOrm<E>, reified E: OrmEntity> findEntity(params: List<*> = emptyList<Any>(), db: IDb = defaultDb): E? {
         return findRow(params, db, T::class.entityRowTransformer(E::class))
     }
 

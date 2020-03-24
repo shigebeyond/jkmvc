@@ -89,7 +89,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param dynamicParamses 动态参数
      * @return
      */
-    public override fun buildParams(dynamicParams: List<Any?>):List<Any?>{
+    public override fun buildParams(dynamicParams: List<*>):List<Any?>{
         if(dynamicParams.isEmpty())
             return staticParams;
 
@@ -114,7 +114,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param fromIndex 动态参数的开始索引
      * @return
      */
-    protected fun collectParams(result: ArrayList<Any?>, dynamicParams: List<Any?>, fromIndex:Int = 0): ArrayList<Any?> {
+    protected fun collectParams(result: ArrayList<Any?>, dynamicParams: List<*>, fromIndex:Int = 0): ArrayList<Any?> {
         // 构建实际参数：将静态参数中?，替换为动态参数
         var i = 0; // 动态变量的迭代索引
         for (v in staticParams) {
@@ -169,7 +169,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param db 数据库连接
      * @return
      */
-    public override fun previewSql(dynamicParams: List<Any?>, fromIndex: Int, db: IDb): String {
+    public override fun previewSql(dynamicParams: List<*>, fromIndex: Int, db: IDb): String {
         // 替换实参
         var i = 0 // 静态变量的迭代索引
         var j = fromIndex // 动态变量的迭代索引
@@ -189,7 +189,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param transform 行转换函数
      * @return 列表
      */
-    public override fun <T> findResult(params: List<Any?>, db: IDb, transform: (DbResultSet) -> T): T{
+    public override fun <T> findResult(params: List<*>, db: IDb, transform: (DbResultSet) -> T): T{
         // 执行 select
         return db.queryResult(sql, buildParams(params), transform)
     }
@@ -201,7 +201,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * @param generatedColumn 返回的自动生成的主键名
      * @return 影响行数|新增id
      */
-    public override fun execute(params: List<Any?>, generatedColumn:String?, db: IDb): Long {
+    public override fun execute(params: List<*>, generatedColumn:String?, db: IDb): Long {
         return db.execute(sql, buildParams(params), generatedColumn);
     }
 

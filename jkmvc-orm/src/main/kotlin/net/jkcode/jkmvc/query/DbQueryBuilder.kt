@@ -89,7 +89,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      * @param transform 结果转换函数
      * @return
      */
-    public override fun <T> findResult(params: List<Any?>, db: IDb, transform: (DbResultSet) -> T): T{
+    public override fun <T> findResult(params: List<*>, db: IDb, transform: (DbResultSet) -> T): T{
         // 编译 + 执行
         return compile(SqlType.SELECT, db).findResult(params, db, transform)
     }
@@ -101,7 +101,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      * @param db 数据库连接
      * @return
      */
-    public override fun count(params: List<Any?>, db: IDb):Int {
+    public override fun count(params: List<*>, db: IDb):Int {
         // 1 编译
         selectColumns.clear() // 清空多余的select
         val csql = select(DbExpr("count(1)", "NUM", false) /* oracle会自动转为全大写 */).compile(SqlType.SELECT, db);
@@ -117,7 +117,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      * @param db 数据库连接
      * @return
      */
-    public override fun incr(column: String, step: Int, params: List<Any?>, db: IDb): Boolean {
+    public override fun incr(column: String, step: Int, params: List<*>, db: IDb): Boolean {
         // 1 编译
         set(column, DbExpr("$column + $step", false)) // Equals: set(column, "$column + $step", true)
         val csql = compile(SqlType.UPDATE, db);

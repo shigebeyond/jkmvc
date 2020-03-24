@@ -104,7 +104,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      * @param db 数据库连接
      * @return
      */
-    public abstract fun count(params: List<Any?> = emptyList(), db: IDb = defaultDb):Int;
+    public abstract fun count(params: List<*> = emptyList<Any>(), db: IDb = defaultDb):Int;
 
     /**
      * 编译 + 执行
@@ -125,7 +125,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      *  @param db 数据库连接
      * @return 新增的id
      */
-    public fun insert(generatedColumn:String? = null, params: List<Any?> = emptyList(), db: IDb = defaultDb): Long {
+    public fun insert(generatedColumn:String? = null, params: List<*> = emptyList<Any>(), db: IDb = defaultDb): Long {
         return execute(SqlType.INSERT, params, generatedColumn, db);
     }
 
@@ -136,7 +136,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      * @param db 数据库连接
      * @return
      */
-    public fun update(params: List<Any?> = emptyList(), db: IDb = defaultDb): Boolean {
+    public fun update(params: List<*> = emptyList<Any>(), db: IDb = defaultDb): Boolean {
         return execute(SqlType.UPDATE, params, null, db) > 0;
     }
 
@@ -147,7 +147,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      * @param db 数据库连接
      * @return
      */
-    public fun delete(params: List<Any?> = emptyList(), db: IDb = defaultDb): Boolean {
+    public fun delete(params: List<*> = emptyList<Any>(), db: IDb = defaultDb): Boolean {
         return execute(SqlType.DELETE, params, null, db) > 0;
     }
 
@@ -158,7 +158,7 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      * @param db 数据库连接
      * @return
      */
-    public abstract fun incr(column: String, step: Int = 1, params: List<Any?> = emptyList(), db: IDb = defaultDb): Boolean
+    public abstract fun incr(column: String, step: Int = 1, params: List<*> = emptyList<Any>(), db: IDb = defaultDb): Boolean
 
     /**
      * 批量更新有参数的sql

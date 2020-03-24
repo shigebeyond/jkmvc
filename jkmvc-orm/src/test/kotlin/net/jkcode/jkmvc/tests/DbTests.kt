@@ -99,14 +99,14 @@ class DbTests{
 
     @Test
     fun testFind(){
-        //val row = db.queryMap("select * from user limit 1" /*sql*/, emptyList() /*参数*/, true /* 是否转换字段名 */) // 返回 Map 类型的一行数据
+        //val row = db.queryMap("select * from user limit 1" /*sql*/, emptyList<Any>() /*参数*/, true /* 是否转换字段名 */) // 返回 Map 类型的一行数据
         val row = db.queryMap("select * from user where ? between age and id limit 1" /*sql*/, listOf(3) /*参数*/, true /* 是否转换字段名 */) // 返回 Map 类型的一行数据
         println("查询user表：" + row)
     }
 
     @Test
     fun testFindAll(){
-        val rows = db.queryMaps("select * from user limit 10" /*sql*/, emptyList() /*参数*/, true /* 是否转换字段名 */) // 返回 Map 类型的多行数据
+        val rows = db.queryMaps("select * from user limit 10" /*sql*/, emptyList<Any>() /*参数*/, true /* 是否转换字段名 */) // 返回 Map 类型的多行数据
         println("查询user表：" + rows)
     }
 

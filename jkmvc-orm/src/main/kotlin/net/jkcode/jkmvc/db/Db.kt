@@ -52,7 +52,7 @@ abstract class Db protected constructor(
          */
         public fun instance(name: CharSequence = "default"): Db {
             return dbs.get().getOrPut(name) {
-                if (DbConfig.customDbClass == null) // 自定义db类
+                if (DbConfig.customDbClass != null) // 自定义db类
                     DbConfig.customDbClass!!.constructors.first().newInstance(name) as Db
                 else if (DbConfig.isSharding(name.toString())) // 分库
                     ShardingDb(name.toString())
@@ -241,7 +241,7 @@ abstract class Db protected constructor(
      * @param params sql参数
      * @return
      */
-    public override fun previewSql(sql: String, params: List<Any?>): String {
+    public override fun previewSql(sql: String, params: List<*>): String {
         // 1 无参数
         if(params.isEmpty())
             return sql
@@ -268,7 +268,7 @@ abstract class Db protected constructor(
      * @param generatedColumn 返回的自动生成的主键名
      * @return
      */
-    public override fun execute(sql: String, params: List<Any?>, generatedColumn:String?): Long {
+    public override fun execute(sql: String, params: List<*>, generatedColumn:String?): Long {
         try{
             return masterConn.execute(sql, params, generatedColumn);
         }catch (e:Exception){
@@ -302,7 +302,7 @@ abstract class Db protected constructor(
      * @param transform 结果转换函数
      * @return
      */
-    public override fun <T> queryResult(sql: String, params: List<Any?>, transform: (DbResultSet) -> T): T {
+    public override fun <T> queryResult(sql: String, params: List<*>, transform: (DbResultSet) -> T): T {
         try{
             return conn.queryResult(sql, params){
                 transform(DbResultSet(this, it))

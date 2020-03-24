@@ -6,7 +6,7 @@ import kotlin.reflect.KClass
  * 封装db操作
  *
  *  注：为什么不是接口，而是抽象类？
- *    因为我需要实现 inline public abstract fun <reified T:Any> queryValue(sql: String, params: List<Any?> = emptyList()): T?
+ *    因为我需要实现 inline public abstract fun <reified T:Any> queryValue(sql: String, params: List<*> = emptyList<Any>()): T?
  *    该方法都需要具体化泛型，因此需要内联实现inline，但是inline不能用于接口方法/抽象方法，因此我直接在该类中实现该方法，该类也只能由接口变为抽象类
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
@@ -81,7 +81,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * @param params sql参数
      * @return
      */
-    public abstract fun previewSql(sql: String, params: List<Any?> = emptyList()): String
+    public abstract fun previewSql(sql: String, params: List<*> = emptyList<Any>()): String
 
     /**
      * 执行更新
@@ -90,7 +90,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * @param generatedColumn 返回的自动生成的主键名
      * @return
      */
-    public abstract fun execute(sql: String, params: List<Any?> = emptyList(), generatedColumn:String? = null): Long;
+    public abstract fun execute(sql: String, params: List<*> = emptyList<Any>(), generatedColumn:String? = null): Long;
 
     /**
      * 批量更新: 每次更新sql参数不一样
@@ -110,7 +110,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * @param transform 结果转换函数
      * @return
      */
-    public abstract fun <T> queryResult(sql: String, params: List<Any?> = emptyList(), transform: (DbResultSet) -> T): T;
+    public abstract fun <T> queryResult(sql: String, params: List<*> = emptyList<Any>(), transform: (DbResultSet) -> T): T;
 
     /**
      * 查询多行
@@ -119,7 +119,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * @param transform 转换行的函数
      * @return
      */
-    public fun <T> queryRows(sql: String, params: List<Any?> = emptyList(), transform: (DbResultRow) -> T): List<T>{
+    public fun <T> queryRows(sql: String, params: List<*> = emptyList<Any>(), transform: (DbResultRow) -> T): List<T>{
         return queryResult(sql, params){ rs ->
             rs.mapRows(transform)
         }
@@ -133,7 +133,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * @param transform 转换行的函数
      * @return
      */
-    public fun <T> queryRow(sql: String, params: List<Any?> = emptyList(), transform: (DbResultRow) -> T): T?{
+    public fun <T> queryRow(sql: String, params: List<*> = emptyList<Any>(), transform: (DbResultRow) -> T): T?{
         return queryResult(sql, params){ rs ->
             rs.mapRow(transform)
         }
@@ -147,7 +147,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * @param clazz 值类型
      * @return
      */
-    public fun <T:Any> queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): List<T>{
+    public fun <T:Any> queryColumn(sql: String, params: List<*> = emptyList<Any>(), clazz: KClass<T>? = null): List<T>{
         return queryResult(sql, params){ rs ->
             rs.mapRows{ row ->
                 row.get(1, clazz) as T
@@ -163,7 +163,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * @param clazz 值类型
      * @return
      */
-    public inline fun <reified T:Any> queryColumn(sql: String, params: List<Any?> = emptyList()): List<T>{
+    public inline fun <reified T:Any> queryColumn(sql: String, params: List<*> = emptyList<Any>()): List<T>{
         return queryColumn(sql, params, T::class)
     }
 
@@ -175,7 +175,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * @param clazz 值类型
      * @return
      */
-    public fun <T:Any> queryValue(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): T?{
+    public fun <T:Any> queryValue(sql: String, params: List<*> = emptyList<Any>(), clazz: KClass<T>? = null): T?{
         return queryResult(sql, params){ rs ->
             rs.mapRow{ row ->
                 row.get(1, clazz) as T?
@@ -190,7 +190,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * @param params 参数
      * @return
      */
-    public inline fun <reified T:Any> queryValue(sql: String, params: List<Any?> = emptyList()): T? {
+    public inline fun <reified T:Any> queryValue(sql: String, params: List<*> = emptyList<Any>()): T? {
         return queryValue(sql, params, T::class)
     }
 
@@ -202,7 +202,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * @param convertingColumn 是否转换字段名
      * @return
      */
-    public fun queryMaps(sql: String, params: List<Any?> = emptyList(), convertingColumn: Boolean = false): List<Map<String, Any?>>{
+    public fun queryMaps(sql: String, params: List<*> = emptyList<Any>(), convertingColumn: Boolean = false): List<Map<String, Any?>>{
         return queryResult(sql, params){ rs ->
             rs.toMaps(convertingColumn)
         }
@@ -217,7 +217,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * @param convertingColumn 是否转换字段名
      * @return
      */
-    public fun queryMap(sql: String, params: List<Any?> = emptyList(), convertingColumn: Boolean = false): Map<String, Any?>?{
+    public fun queryMap(sql: String, params: List<*> = emptyList<Any>(), convertingColumn: Boolean = false): Map<String, Any?>?{
         return queryRow(sql, params){ row ->
             row.toMap(convertingColumn)
         }

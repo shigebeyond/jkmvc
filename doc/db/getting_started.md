@@ -65,7 +65,7 @@ isInTransaction(): Boolean | Check whether in a transaction
 
 Method | Function
 --- --- --- ---
-execute(sql: String, params: List<Any?> = emptyList(), generatedColumn: String? = null): Long | Execute a update-sql
+execute(sql: String, params: List<*> = emptyList<Any>(), generatedColumn: String? = null): Long | Execute a update-sql
 batchExecute(sql: String, paramses: List<Any?>): IntArray | Batch update
 
 ### 3.4 Query-sql executing method
@@ -74,26 +74,26 @@ batchExecute(sql: String, paramses: List<Any?>): IntArray | Batch update
 
 Method | Function
 --- --- --- ---
-queryResult(sql: String, params: List<Any?> = emptyList(), transform: (DbResultSet) -> T): T | Query and get result with lambda
-queryRows(sql: String, params: List<Any?> = emptyList(), transform: (DbResultRow) -> T): List<T> | Query multiple rows
-queryRow(sql: String, params: List<Any?> = emptyList(), transform: (DbResultRow) -> T): T? | Query one row
-queryColumn(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): List<T> | Query a column in multiple rows
-inline queryColumn(sql: String, params: List<Any?> = emptyList()): List<T> | Query a column in multiple rows, `inline` saves a parameter
-queryValue(sql: String, params: List<Any?> = emptyList(), clazz: KClass<T>? = null): T? | Query a value in a row
-inline queryValue(sql: String, params: List<Any?> = emptyList()): T? | Query a value in a row, `inline` saves a parameter
+queryResult(sql: String, params: List<*> = emptyList<Any>(), transform: (DbResultSet) -> T): T | Query and get result with lambda
+queryRows(sql: String, params: List<*> = emptyList<Any>(), transform: (DbResultRow) -> T): List<T> | Query multiple rows
+queryRow(sql: String, params: List<*> = emptyList<Any>(), transform: (DbResultRow) -> T): T? | Query one row
+queryColumn(sql: String, params: List<*> = emptyList<Any>(), clazz: KClass<T>? = null): List<T> | Query a column in multiple rows
+inline queryColumn(sql: String, params: List<*> = emptyList<Any>()): List<T> | Query a column in multiple rows, `inline` saves a parameter
+queryValue(sql: String, params: List<*> = emptyList<Any>(), clazz: KClass<T>? = null): T? | Query a value in a row
+inline queryValue(sql: String, params: List<*> = emptyList<Any>()): T? | Query a value in a row, `inline` saves a parameter
 
 2. High level method, which auto transform to target class's object
 
 Method | Function
 --- --- --- ---
-queryMaps(sql: String, params: List<Any?> = emptyList(), convertingColumn: Boolean): List<Map<String, Any?>> | Query multiple rows, transform each row into `Map`
-queryMap(sql: String, params: List<Any?> = emptyList(), convertingColumn: Boolean): Map<String, Any?>? | Query one row, and transform it into `Map`
+queryMaps(sql: String, params: List<*> = emptyList<Any>(), convertingColumn: Boolean): List<Map<String, Any?>> | Query multiple rows, transform each row into `Map`
+queryMap(sql: String, params: List<*> = emptyList<Any>(), convertingColumn: Boolean): Map<String, Any?>? | Query one row, and transform it into `Map`
 
 ### 3.5 Quote / Preview sql methods
 
 Property / Method | Function
 --- --- --- ---
-previewSql(sql: String, params: List<Any?> = emptyList()): String | preview sql
+previewSql(sql: String, params: List<*> = emptyList<Any>()): String | preview sql
 quote(value: Any?): String | quote value
 quoteColumn(column: CharSequence): String | Quoted column name
 quoteTable(table: CharSequence): String | Quoted table name
@@ -129,7 +129,7 @@ db.transaction {
     println("insert a user：" + id)
 
     // select single row
-    val row = db.queryMap("select * from user limit 1" /*sql*/, emptyList() /*sql parameters*/) // return a row as `Map` object
+    val row = db.queryMap("select * from user limit 1" /*sql*/, emptyList<Any>() /*sql parameters*/) // return a row as `Map` object
     println("select a user：" + row)
 
     // count
@@ -141,7 +141,7 @@ db.transaction {
     println("update a user：" + f)
 
     // select multiple rows
-    val rows = db.queryMaps("select * from user limit 10" /*sql*/, emptyList() /*sql parameters*/, true /* convert column name into property name, eg: to_uid => toUid */) // return multiple rows as `Map` objects
+    val rows = db.queryMaps("select * from user limit 10" /*sql*/, emptyList<Any>() /*sql parameters*/, true /* convert column name into property name, eg: to_uid => toUid */) // return multiple rows as `Map` objects
     println("select multiple users: " + rows)
 
     // delete

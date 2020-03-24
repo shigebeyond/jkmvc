@@ -45,7 +45,7 @@ abstract class ICompiledSql: IDbQuery() {
      * @param dynamicParams 动态参数
      * @return
      */
-    public abstract fun buildParams(dynamicParams: List<Any?> = emptyList()): List<Any?>
+    public abstract fun buildParams(dynamicParams: List<*> = emptyList<Any>()): List<Any?>
 
     /**
      * 构建实际参数 = 静态参数 + 动态参数
@@ -83,7 +83,7 @@ abstract class ICompiledSql: IDbQuery() {
      * @param generatedColumn 返回的自动生成的主键名
      * @return 影响行数|新增id
      */
-    public abstract fun execute(params: List<Any?>, generatedColumn:String?, db: IDb): Long
+    public abstract fun execute(params: List<*>, generatedColumn:String?, db: IDb): Long
 
     /**
      * 批量更新有参数的sql

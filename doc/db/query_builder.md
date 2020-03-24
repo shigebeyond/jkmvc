@@ -126,25 +126,25 @@ SELECT * FROM `posts` ORDER BY `published` DESC
 
 method | usage
 --- | ---
-findResult(params: List<Any?>, db: IDb, transform: (DbResultSet) -> T): T? | find result set，the `transform` parameter is a lambda which transforms result set into target class' object
-findRow(params: List<Any?>, db: IDb, transform: (DbResultRow) -> T): T? | find single row, the `transform` parameter is a lambda which transforms db row to result row
-findRows(params: List<Any?>, db: IDb, transform: (DbResultRow) -> T): List<T> | find multiple rows, the `transform` parameter is a lambda which transforms db row to result row
-findColumn(params: List<Any?>, clazz: KClass<T>?, db: IDb): List<T> | find multiple row in single column
-inline findColumn(params: List<Any?>, db: IDb): List<T> | find multiple row in single column, `inline` saves the a parameter
-findValue(params: List<Any?>, clazz: KClass<T>?, db: IDb): T? | find a value in a row
-inline findValue(params: List<Any?>, db: IDb): T? | find a value in a row, `inline` saves a parameter
+findResult(params: List<*>, db: IDb, transform: (DbResultSet) -> T): T? | find result set，the `transform` parameter is a lambda which transforms result set into target class' object
+findRow(params: List<*>, db: IDb, transform: (DbResultRow) -> T): T? | find single row, the `transform` parameter is a lambda which transforms db row to result row
+findRows(params: List<*>, db: IDb, transform: (DbResultRow) -> T): List<T> | find multiple rows, the `transform` parameter is a lambda which transforms db row to result row
+findColumn(params: List<*>, clazz: KClass<T>?, db: IDb): List<T> | find multiple row in single column
+inline findColumn(params: List<*>, db: IDb): List<T> | find multiple row in single column, `inline` saves the a parameter
+findValue(params: List<*>, clazz: KClass<T>?, db: IDb): T? | find a value in a row
+inline findValue(params: List<*>, db: IDb): T? | find a value in a row, `inline` saves a parameter
 
 2. High level method, which auto transform to target class's object
 
 method | usage
 --- | ---
-findMap(params: List<Any?>, convertingColumn: Boolean, db: IDb): T? |  find single `Map` object, it needs no `transform` parameter, but depends on the return type for transforming
-findMaps(params: List<Any?>, convertingColumn: Boolean, db: IDb): List<T> | find multiple `Map` object, it needs no `transform` parameter, but depends on the return type for transforming
-inline findModel(params: List<Any?>, db: IDb): T? |  find single `Orm` object, it needs no `transform` parameter, but depends on the return type for transforming
-inline findModels(params: List<Any?>, db: IDb): List<T> | find multiple `Orm` object, it needs no `transform` parameter, but depends on the return type for transforming
-inline findEntity(params: List<Any?>, db: IDb): T? | find single `OrmEntity` object, it needs no `transform` parameter, but depends on the return type for transforming
-inline findEntities(params: List<Any?>, db: IDb): List<T> | find multiple `OrmEntity` object, it needs no `transform` parameter, but depends on the return type for transforming
-count(params: List<Any?>, db: IDb):Long | count rows
+findMap(params: List<*>, convertingColumn: Boolean, db: IDb): T? |  find single `Map` object, it needs no `transform` parameter, but depends on the return type for transforming
+findMaps(params: List<*>, convertingColumn: Boolean, db: IDb): List<T> | find multiple `Map` object, it needs no `transform` parameter, but depends on the return type for transforming
+inline findModel(params: List<*>, db: IDb): T? |  find single `Orm` object, it needs no `transform` parameter, but depends on the return type for transforming
+inline findModels(params: List<*>, db: IDb): List<T> | find multiple `Orm` object, it needs no `transform` parameter, but depends on the return type for transforming
+inline findEntity(params: List<*>, db: IDb): T? | find single `OrmEntity` object, it needs no `transform` parameter, but depends on the return type for transforming
+inline findEntities(params: List<*>, db: IDb): List<T> | find multiple `OrmEntity` object, it needs no `transform` parameter, but depends on the return type for transforming
+count(params: List<*>, db: IDb):Long | count rows
 
 
 There are some examples:

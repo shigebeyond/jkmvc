@@ -40,7 +40,7 @@ class GeneralOrmQueryBuilder(ormMeta: IOrmMeta /* orm元数据 */,
      * @param transform 行转换函数
      * @return 单个数据
      */
-    public override fun <T:Any> findRow(params: List<Any?>, db: IDb, transform: (DbResultRow) -> T): T?{
+    public override fun <T:Any> findRow(params: List<*>, db: IDb, transform: (DbResultRow) -> T): T?{
         return super.findRow(params, db, wrapRowTransform(transform) /* 包装行转换函数 */)
     }
 
@@ -51,7 +51,7 @@ class GeneralOrmQueryBuilder(ormMeta: IOrmMeta /* orm元数据 */,
      * @param transform 行转换函数
      * @return 列表
      */
-    public override fun <T:Any> findRows(params: List<Any?>, db: IDb, transform: (DbResultRow) -> T): List<T>{
+    public override fun <T:Any> findRows(params: List<*>, db: IDb, transform: (DbResultRow) -> T): List<T>{
         return super.findRows(params, db, wrapRowTransform(transform) /* 包装行转换函数 */)
     }
 }

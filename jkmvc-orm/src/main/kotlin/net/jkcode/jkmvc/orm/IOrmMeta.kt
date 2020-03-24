@@ -248,7 +248,7 @@ interface IOrmMeta {
      * @param rows 查询行数
      * @return
      */
-    fun queryBuilder(condition: String, params: List<Any?> = emptyList(), sort: String? = null, desc: Boolean? = null, start: Int? = null, rows: Int? = null): OrmQueryBuilder {
+    fun queryBuilder(condition: String, params: List<*> = emptyList<Any>(), sort: String? = null, desc: Boolean? = null, start: Int? = null, rows: Int? = null): OrmQueryBuilder {
         val query = queryBuilder(sort, desc, start, rows)
         query.whereCondition(condition, params)
         return query
