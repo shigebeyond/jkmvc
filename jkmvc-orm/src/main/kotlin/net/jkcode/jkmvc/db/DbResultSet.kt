@@ -9,7 +9,7 @@ import java.util.*
 import kotlin.reflect.KClass
 
 /**
- * 结果集的一行
+ * 结果集
  *    生命周期只在转换结果集阶段, 不能被外部引用
  *
  * @author shijianhang<772910474@qq.com>
@@ -18,47 +18,31 @@ import kotlin.reflect.KClass
 class DbResultSet(
         public val db: IDbMeta,
         protected val rs: ResultSet
-) : ResultSet by rs {
+) : ResultSet by rs, Iterable<DbResultRow> {
+
+    /**
+     * 迭代器
+     */
+    override fun iterator(): Iterator<DbResultRow> {
+        return DbResultSetIterator(this)
+    }
 
     /**
      * 列数
      */
-    public val columnCount = rs.metaData.columnCount
+    public val columnCount: Int
+        get() = rs.metaData.columnCount
 
     /**
-     * 遍历结果集的每一行
-     * @param action 访问者函数
+     * 列
      */
-    public inline fun forEachRow(action: (DbResultRow) -> Unit) {
-        while(next()){
-            action(DbResultRow(this))
+    public val columns: List<String>
+        get() {
+            val md = rs.metaData
+            return (0 until md.columnCount).map { i ->
+                md.getColumnLabel(i)
+            }
         }
-    }
-
-    /**
-     * 对结果集的每一行进行转换, 来得到一个列表
-     * @param result
-     * @param transform 行的转换函数
-     * @return
-     */
-    public inline fun <T> mapRows(result: MutableList<T> = LinkedList<T>(), transform: (DbResultRow) -> T): List<T> {
-        this.forEachRow { row ->
-            result.add(transform(row));// 转换一行数据
-        }
-        return result
-    }
-
-    /**
-     * 转换第一行
-     * @param transform 行的转换函数
-     * @return
-     */
-    public inline fun <T> mapRow(transform: (DbResultRow) -> T): T? {
-        if(rs.next())
-            return transform(DbResultRow(this))
-
-        return null
-    }
 
     /**
      * 转换为map
@@ -67,8 +51,8 @@ class DbResultSet(
      * @param convertingColumn 是否转换字段名
      * @return
      */
-    public fun toMaps(convertingColumn: Boolean = false): List<Map<String, Any?>>{
-        return mapRows { row ->
+    public fun toMaps(convertingColumn: Boolean = false): List<Map<String, Any?>> {
+        return map { row ->
             row.toMap(convertingColumn)
         }
     }
@@ -82,7 +66,7 @@ class DbResultSet(
      * @return
      */
     public inline fun get(i: Int, clazz: KClass<*>? = null): Any? {
-        return when(clazz){
+        return when (clazz) {
             null -> getValue(i)
 
             String::class -> rs.getString(i)
@@ -116,9 +100,9 @@ class DbResultSet(
      * @param i
      * @return
      */
-    public fun getValue(i:Int): Any? {
+    public fun getValue(i: Int): Any? {
         val obj: Any? = rs.getObject(i)
-        if(obj == null)
+        if (obj == null)
             return null
 
         // 二进制大对象

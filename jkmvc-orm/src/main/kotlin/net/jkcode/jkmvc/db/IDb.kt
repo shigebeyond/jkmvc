@@ -123,7 +123,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      */
     public fun <T> queryRows(sql: String, params: List<*> = emptyList<Any>(), result: MutableList<T> = LinkedList<T>(), transform: (DbResultRow) -> T): List<T>{
         return queryResult(sql, params){ rs ->
-            rs.mapRows(result, transform)
+            rs.mapTo(result, transform)
         }
     }
 
@@ -137,7 +137,9 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      */
     public fun <T> queryRow(sql: String, params: List<*> = emptyList<Any>(), transform: (DbResultRow) -> T): T?{
         return queryResult(sql, params){ rs ->
-            rs.mapRow(transform)
+            rs.firstOrNull()?.let { row ->
+                transform(row)
+            }
         }
     }
 
@@ -151,7 +153,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      */
     public fun <T:Any> queryColumn(sql: String, params: List<*> = emptyList<Any>(), clazz: KClass<T>? = null): List<T>{
         return queryResult(sql, params){ rs ->
-            rs.mapRows{ row ->
+            rs.map{ row ->
                 row.get(1, clazz) as T
             }
         }
@@ -179,7 +181,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      */
     public fun <T:Any> queryValue(sql: String, params: List<*> = emptyList<Any>(), clazz: KClass<T>? = null): T?{
         return queryResult(sql, params){ rs ->
-            rs.mapRow{ row ->
+            rs.firstOrNull()?.let { row ->
                 row.get(1, clazz) as T?
             }
         }

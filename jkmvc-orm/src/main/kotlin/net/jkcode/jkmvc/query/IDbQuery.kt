@@ -51,7 +51,7 @@ abstract class IDbQuery{
      */
     public open fun <T:Any> findRows(params: List<*> = emptyList<Any>(), db: IDb = defaultDb, transform: (DbResultRow) -> T): List<T>{
         return findResult(params, db){ rs ->
-            rs.mapRows(transform = transform)
+            rs.map(transform = transform)
         }
     }
 
@@ -65,7 +65,9 @@ abstract class IDbQuery{
      */
     public open fun <T:Any> findRow(params: List<*> = emptyList<Any>(), db: IDb = defaultDb, transform: (DbResultRow) -> T): T?{
         return findResult(params, db) { rs ->
-            rs.mapRow(transform)
+            rs.firstOrNull()?.let { row ->
+                transform(row)
+            }
         }
     }
 
@@ -79,7 +81,7 @@ abstract class IDbQuery{
      */
     public fun <T:Any> findColumn(params: List<*> = emptyList<Any>(), clazz: KClass<T>? = null, db: IDb = defaultDb): List<T>{
         return findResult(params, db){ rs ->
-            rs.mapRows{ row ->
+            rs.map{ row ->
                 row.get(1, clazz) as T
             }
         }
@@ -106,7 +108,7 @@ abstract class IDbQuery{
      */
     public fun <T:Any> findValue(params: List<*> = emptyList<Any>(), clazz: KClass<T>? = null, db: IDb = defaultDb): T?{
         return findResult(params, db){ rs ->
-            rs.mapRow{ row ->
+            rs.firstOrNull()?.let { row ->
                 row.get(1, clazz) as T?
             }
         }

@@ -105,6 +105,21 @@ class SingleDb(name:String /* 标识 */) : Db(name) {
     }
 
     /**
+     * catalog
+     */
+    public override var catalog: String?
+        get() = conn.catalog
+        set(value){
+            // 关闭主库连接
+            if(connUsed and 1 > 0)
+                masterConn.catalog = value
+            // 关闭从库连接
+            if(connUsed and 2 > 0)
+                slaveConn.catalog = value
+        }
+
+
+    /**
      * 关闭
      */
     public override fun close(){

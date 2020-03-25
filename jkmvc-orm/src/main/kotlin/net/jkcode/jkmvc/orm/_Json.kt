@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.orm
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.serializer.SerializerFeature
+import net.jkcode.jkutil.common.getPathPropertyValue
 import net.jkcode.jkutil.common.getPropertyValue
 
 /**
@@ -30,13 +31,13 @@ public fun normalizeData(data: Any?, include: List<String> = emptyList()): Any? 
  */
 public fun Any.toMap(include: List<String> = emptyList()): MutableMap<String, Any?> {
     // 1 orm对象
-    // 问题: IOrmEntity.toMap() 只能转内部属性 _data, 不能转getter方法
+    // 问题: IOrmEntity.toMap() 只能转内部属性 _data, 不能转getter方法, 而且不能支持多级属性
 //    if (this is IOrm)
 //        return this.toMap(include)
 
     // 2 普通对象
     return include.associate { prop ->
-        val value = this.getPropertyValue(prop)
+        val value = this.getPathPropertyValue(prop) // 支持多级属性
         prop to value
     } as MutableMap
 }

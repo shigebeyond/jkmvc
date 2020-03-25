@@ -7,6 +7,8 @@ import net.jkcode.jkmvc.db.sharding.ShardingDb
 import net.jkcode.jkmvc.db.single.SingleDb
 import net.jkcode.jkutil.ttl.AllRequestScopedTransferableThreadLocal
 import java.io.Closeable
+import java.io.InputStream
+import java.lang.StringBuilder
 import java.sql.Connection
 import java.util.*
 
@@ -91,6 +93,15 @@ abstract class Db protected constructor(
                 return masterConn
 
             return slaveConn
+        }
+
+    /**
+     * catalog
+     */
+    public override var catalog: String?
+        get() = conn.catalog
+        set(value){
+            conn.catalog = value
         }
 
     /**
@@ -322,5 +333,38 @@ abstract class Db protected constructor(
         close()
         // 清理ThreadLocal
         dbs.get().remove(name)
+    }
+
+    /**
+     * 执行脚本, 包含多个sql, 以;为分割
+     * @param input
+     */
+    public fun runScript(input: InputStream){
+        val script = input.reader().readText()
+        runScript(script)
+    }
+
+    /**
+     * 执行脚本, 包含多个sql, 以;为分割
+     * @param script
+     */
+    public fun runScript(script: String){
+        // ; 还要跟换行, 才能识别一条sql, 因为可能字段值有;
+        val sqls = ";\\s*\n".toRegex().split(script)
+        val msg = StringBuilder()
+        this.transaction {
+            for(sql in sqls) {
+                this.queryResult(sql) { rs ->
+                    // 输出列
+                    rs.columns.joinTo(msg, "\t")
+                    // 输出值
+                    rs.forEach { r ->
+                        msg.append("\n")
+                        r.joinTo(msg, "\t")
+                    }
+                }
+            }
+        }
+        dbLogger.debug(msg.toString())
     }
 }

@@ -100,16 +100,6 @@ internal class DbMeta(public override val name: CharSequence /* 标识 */) : IDb
     }
 
     /**
-     * 获得表
-     *
-     * @param table
-     * @return
-     */
-    override fun getTable(table:String): DbTable?{
-        return tables[table]
-    }
-
-    /**
      * 表的字段
      */
     public override val tables: Map<String, DbTable> by lazy {
@@ -131,6 +121,16 @@ internal class DbMeta(public override val name: CharSequence /* 标识 */) : IDb
         }
 
         tables
+    }
+
+    /**
+     * 获得表
+     *
+     * @param table
+     * @return
+     */
+    override fun getTable(table:String): DbTable?{
+        return tables[table]
     }
 
     /**

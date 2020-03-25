@@ -9,7 +9,14 @@ import kotlin.reflect.KClass
  * @author shijianhang<772910474@qq.com>
  * @date 2019-11-21 4:27 PM
  */
-class DbResultRow(protected val rs: DbResultSet) {
+class DbResultRow(public val rs: DbResultSet): Iterable<Pair<String, Any?>> {
+
+    /**
+     * 迭代器
+     */
+    override fun iterator(): Iterator<Pair<String, Any?>> {
+        return DbResultRowIterator(this)
+    }
 
     /**
      * 通过inline指定的值类型, 来获得结果集的单个值
@@ -52,37 +59,13 @@ class DbResultRow(protected val rs: DbResultSet) {
     }
 
     /**
-     * 遍历键值
-     * @param action
-     */
-    public inline fun forEach(action: (name: String, value: Any?) -> Unit) {
-        for (i in 1..rs.metaData.columnCount) { // 多列
-            val label: String = rs.metaData.getColumnLabel(i); // 字段名
-            val value: Any? = rs.getValue(i) // 字段值
-            action(label, value)
-        }
-    }
-
-    /**
-     * 遍历键值
-     * @param action
-     */
-    public inline fun forEachIndexed(action: (index: Int, name: String, value: Any?) -> Unit) {
-        for (i in 1..rs.metaData.columnCount) { // 多列
-            val label: String = rs.metaData.getColumnLabel(i); // 字段名
-            val value: Any? = rs.getValue(i) // 字段值
-            action(i, label, value)
-        }
-    }
-
-    /**
      * 转换为map
      * @param convertingColumn 是否转换字段名
      * @param to
      * @return
      */
     public fun toMap(convertingColumn: Boolean = false, to: MutableMap<String, Any?> = HashMap()): Map<String, Any?>{
-        forEach { col, value ->
+        forEach { (col, value) ->
             val key = if(convertingColumn) rs.db.column2Prop(col) else col
             to[key] = value;
         }
