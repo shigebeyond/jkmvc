@@ -575,7 +575,7 @@ interface IOrmMeta {
      *
      *    其中本表有一个关联表，因此 本表是主表，中间表与关联表是从表
      *
-     *    如 hasOneThrough2LevelRelations("reportWorkflowPackage", ReportWorkflowPackage::class, "reportWorkflowProcess", "reportWorkflowPackage") // 通过2层关系来关联
+     *    如 hasOneThrough2LevelRelations("reportWorkflowPackage", ReportWorkflowPackage::class, "ReportProcess", "reportWorkflowPackage") // 通过2层关系来关联
      *
      * @param name 字段名
      * @param relatedModel 关联模型

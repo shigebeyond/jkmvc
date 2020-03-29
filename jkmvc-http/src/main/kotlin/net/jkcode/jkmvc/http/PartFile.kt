@@ -2,9 +2,14 @@ package net.jkcode.jkmvc.http
 
 import net.jkcode.jkutil.common.*
 import java.io.File
+import java.io.FileInputStream
+import java.io.InputStream
 import java.net.URLDecoder
 import java.nio.file.FileSystems
 import javax.servlet.http.Part
+import org.mozilla.universalchardet.Constants
+import java.io.Reader
+import java.nio.charset.Charset
 
 /**
  * 上传的文件
@@ -23,6 +28,13 @@ class PartFile(protected val part: Part): Part by part {
      * 存储的相对路径
      */
     protected var relativePath: String? = null
+
+    /**
+     * reader
+     */
+    public fun reader(charset: Charset = Charsets.UTF_8): Reader{
+        return inputStream.reader()
+    }
 
     /**
      * 转为字节数组
@@ -85,6 +97,20 @@ class PartFile(protected val part: Part): Part by part {
 
         // 返回相对路径
         return relativePath!!
+    }
+
+    /**
+     * 是否utf8编码
+     */
+    public fun isValidUTF8(): Boolean {
+        return Constants.CHARSET_UTF_8.equals(this.detectedCharset())
+    }
+
+    /**
+     * 识别编码
+     */
+    public fun detectedCharset(): String {
+        return inputStream.detectedCharset()
     }
 
 }

@@ -55,7 +55,7 @@ class ModelGeneratorTests{
 //        generator.genenateModelFile("PluginDefaultProperties", "", "app_plugin_default")
 //        generator.genenateModelFile("FormDataAuditTrail", "", "app_form_data_audit_trail")
 //        generator.genenateModelFile("FormRow", "Represents a row of form data", "app_fd")
-//        generator.genenateModelFile("ReportWorkflowProcess", "", "app_report_process")
+//        generator.genenateModelFile("ReportProcess", "", "app_report_process")
 //        generator.genenateModelFile("ReportApp", "", "app_report_app")
 //        generator.genenateModelFile("ReportWorkflowActivityInstance", "", "app_report_activity_instance")
 //        generator.genenateModelFile("ReportWorkflowCase", "", "app_report_case")

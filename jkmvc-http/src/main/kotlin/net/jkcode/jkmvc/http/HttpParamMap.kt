@@ -11,7 +11,7 @@ import org.apache.commons.collections.keyvalue.DefaultMapEntry
  * @author shijianhang<772910474@qq.com>
  * @date 2019-11-20 21:20:33
  */
-class HttpParamMap(public val params: Map<String, Array<String?>>): Map<String, String?> by params as Map<String, String?>{
+class HttpParamMap(public val params: Map<String, Array<String>>): Map<String, String?> by params as Map<String, String?>{
 
     /**
      * 是否包含值
