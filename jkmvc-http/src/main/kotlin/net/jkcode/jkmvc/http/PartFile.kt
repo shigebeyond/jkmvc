@@ -1,15 +1,11 @@
 package net.jkcode.jkmvc.http
 
-import net.jkcode.jkutil.common.*
+import net.jkcode.jkutil.common.detectedCharset
 import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
-import java.net.URLDecoder
-import java.nio.file.FileSystems
-import javax.servlet.http.Part
-import org.mozilla.universalchardet.Constants
 import java.io.Reader
+import java.net.URLDecoder
 import java.nio.charset.Charset
+import javax.servlet.http.Part
 
 /**
  * 上传的文件
@@ -103,7 +99,7 @@ class PartFile(protected val part: Part): Part by part {
      * 是否utf8编码
      */
     public fun isValidUTF8(): Boolean {
-        return Constants.CHARSET_UTF_8.equals(this.detectedCharset())
+        return "UTF-8".equals(this.detectedCharset(), true)
     }
 
     /**

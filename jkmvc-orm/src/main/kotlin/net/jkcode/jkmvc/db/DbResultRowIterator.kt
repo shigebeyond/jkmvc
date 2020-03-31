@@ -7,6 +7,7 @@ class DbResultRowIterator(public val row: DbResultRow): Iterator<Pair<String, An
 
     /**
      * 当前序号
+     *   rs.getObject(i)获取列值时，下标是从“1”开始
      */
     protected var _curr = 0
 
@@ -16,7 +17,8 @@ class DbResultRowIterator(public val row: DbResultRow): Iterator<Pair<String, An
 
     override fun next(): Pair<String, Any?> {
         val rs = row.rs
-        if(_curr >= rs.columnCount)
+        // rs.getObject(i)获取列值时，下标是从“1”开始
+        if(_curr++ >= rs.columnCount)
             throw IndexOutOfBoundsException("超过列数")
 
         val label: String = rs.metaData.getColumnLabel(_curr); // 字段名

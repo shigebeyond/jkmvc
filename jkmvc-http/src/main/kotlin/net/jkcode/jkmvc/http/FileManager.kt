@@ -163,7 +163,7 @@ object FileManager {
         var width = thumbWidth ?: THUMBNAIL_SIZE
         var height = thumbHeight ?: THUMBNAIL_SIZE
 
-        val imageFile = File(baseDirectory, URLDecoder.decode(path, "UTF-8"))
+        val imageFile = File(uploadRootDirectory, URLDecoder.decode(path, "UTF-8"))
         val image = Toolkit.getDefaultToolkit().getImage(imageFile.absolutePath)
         val mediaTracker = MediaTracker(Container())
         mediaTracker.addImage(image, 0)
