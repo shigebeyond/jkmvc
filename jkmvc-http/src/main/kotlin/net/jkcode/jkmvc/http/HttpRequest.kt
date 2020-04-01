@@ -604,11 +604,44 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 * @return
 	 */
 	public fun buildCurlCommand(): String {
-		// get请求
+		/*// get请求
 		if(isGet())
 			return "curl '${requestURL}?${queryString}'";
 
 		// post请求
 		return "curl -d '${parameterMap.toQueryString()}' '${requestURL}?${queryString}'"
+		*/
+		// curl命令
+		val cmd = StringBuilder("curl ")
+
+		// 方法
+		if ("GET".equals(method, ignoreCase = true))
+			cmd.append("-G ")
+
+		// 路径: '$url'
+		cmd.append('\'').append(requestURL).append('?').append(queryString ?: "").append('\'')
+
+		//请求头： -H '$k:$v' -H '$k:$v'
+		val headerNames = headerNames
+		for(k in headerNames){
+			val v = getHeader(k)
+			// -H '$k:$v'
+			cmd.append("-H '").append(k).append(':').append(v).append("' ")
+		}
+
+		// post参数： -d '$k=$v&$k=$v&'
+		if (isPost()) {
+			//-d '
+			cmd.append("-d '")
+			for(k in headerNames){
+				val v = getParameter(k)
+				// $k=$v&
+				cmd.append(k).append('=').append(v).append('&')
+			}
+			// '
+			cmd.append("' ")
+		}
+
+		return cmd.toString()
 	}
 }
