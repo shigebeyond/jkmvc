@@ -11,7 +11,7 @@ import java.sql.Types
  * @author shijianhang
  * @date 2020-2-4 下午8:02:47
  */
-public enum class DbColumnLogicType(
+public enum class DbColumnLogicType private constructor(
         public val code: String, // 逻辑类型名, 枚举名的小写, 语法限制不能用 name, 因此只能用 code
         public val sqlType: Int // sql类型, 即jdbc类型
 ) {
@@ -105,6 +105,24 @@ public enum class DbColumnLogicType(
         return "$physicalType($precision, $scale)"
     }
 
+    /**
+     * 获得调用 cast() 时要转换的物理类型
+     * @param db
+     * @return
+     */
+    public fun getCastPhysicalType(db: IDb): String {
+        // mysql单独处理
+        if (db.dbType == DbType.Mysql) {
+            when (this) {
+                INT, BIGINT, SMALLINT -> return "signed"
+                FLOAT, NUMERIC, REAL -> return "decimal"
+                VARCHAR -> return "char"
+                VARBINARY -> return "binary"
+            }
+        }
 
+        // 其他直接转为对应的物理类型
+        return toPhysicalType(db)
+    }
 
 }
