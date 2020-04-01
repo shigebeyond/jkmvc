@@ -27,7 +27,7 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
     /**
      * 元数据定义的配置
      */
-    private val config = Config.instance("meta-define.${db.dbType}", "yaml")
+    private val config = Config.instance("db-meta.${db.dbType}", "yaml")
 
     /**
      * 获得字段的对应的属性名

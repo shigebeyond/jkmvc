@@ -64,7 +64,7 @@ data class DbColumn(
      */
     public fun generateDefineColumnSql(db: IDb): String {
         // 元数据定义的配置
-        val config = Config.instance("meta-define.${db.dbType}", "yaml")
+        val config = Config.instance("db-meta.${db.dbType}", "yaml")
         // 字段sql
         val columnSql: String = config["columnSql"]!!
 

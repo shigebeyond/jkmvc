@@ -89,7 +89,7 @@ public enum class DbColumnLogicType(
      */
     public fun toPhysicalType(db: IDb,  precision: Int? = null, scale: Int? = null): String {
         // 元数据定义的配置
-        val config = Config.instance("meta-define.${db.dbType}", "yaml")
+        val config = Config.instance("db-meta.${db.dbType}", "yaml")
         // 获得对应的物理类型表达式
         val mapping:Map<String, String> = config["logicalType2PhysicalType"]!!
         val physicalType = mapping[code] ?: throw IllegalArgumentException("无法找到逻辑类型[$code]对应的物理类型")

@@ -79,7 +79,7 @@ open class DbTable(
      */
     public fun generateCreateTableSql(db: IDb): String {
         // 元数据定义的配置
-        val config = Config.instance("meta-define.${db.dbType}", "yaml")
+        val config = Config.instance("db-meta.${db.dbType}", "yaml")
         // 建表sql
         val createTableSql: String = config["createTableSql"]!!
         // 生成字段定义sql
@@ -110,7 +110,7 @@ open class DbTable(
      */
     public fun generateAlterTableSqls(db: IDb): List<String>{
         // 元数据定义的配置
-        val config = Config.instance("meta-define.${db.dbType}", "yaml")
+        val config = Config.instance("db-meta.${db.dbType}", "yaml")
         // 建表sql
         val createTableSql: String = config["alterTableSql"]!!
 
@@ -145,7 +145,7 @@ open class DbTable(
      */
     public fun generateDropTableSql(db: IDb): String {
         // 元数据定义的配置
-        val config = Config.instance("meta-define.${db.dbType}", "yaml")
+        val config = Config.instance("db-meta.${db.dbType}", "yaml")
         // 建表sql
         val dropTableSql: String = config["createTableSql"]!!
 

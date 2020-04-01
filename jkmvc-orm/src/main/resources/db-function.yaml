@@ -1,0 +1,10 @@
+# jkmvc定义的函数, 转为各自db的sql函数
+# all
+All:
+
+#Oracle
+Oracle:
+#mysql
+Mysql:
+#sql server
+SqlServer:
