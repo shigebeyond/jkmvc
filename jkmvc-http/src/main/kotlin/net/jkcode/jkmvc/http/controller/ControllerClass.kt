@@ -10,7 +10,6 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.jvm.javaMethod
-import net.jkcode.jkmvc.http.router.annotation.Route as ARoute
 
 /**
  * 封装Controller类

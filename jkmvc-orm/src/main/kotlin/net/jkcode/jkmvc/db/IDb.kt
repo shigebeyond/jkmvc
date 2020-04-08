@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.db
 
+import net.jkcode.jkutil.common.trySupplierFinally
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -48,7 +49,26 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * @param statement db操作过程
      * @return
      */
-    public abstract fun <T> transaction(statement: () -> T):T;
+    /**
+     * 执行事务
+     *    兼容 statement 返回类型是CompletableFuture
+     *
+     * @param statement db操作过程
+     * @return
+     */
+    public inline fun <T> transaction(statement: () -> T):T{
+        begin(); // 开启事务
+
+        return trySupplierFinally(statement){ r, ex ->
+            if(ex != null){
+                rollback(); // 回滚事务
+                throw ex;
+            }
+
+            commit(); // 提交事务
+            r
+        }
+    }
 
     /**
      * 执行事务
@@ -56,7 +76,7 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
      * @param statement db操作过程
      * @return
      */
-    public fun <T> transaction(fake: Boolean, statement: () -> T):T{
+    public inline fun <T> transaction(fake: Boolean, statement: () -> T):T{
         if(fake)
             return statement()
 

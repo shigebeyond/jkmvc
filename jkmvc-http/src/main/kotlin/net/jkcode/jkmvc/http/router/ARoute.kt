@@ -1,7 +1,5 @@
-package net.jkcode.jkmvc.http.router.annotation
+package net.jkcode.jkmvc.http.router
 
-import net.jkcode.jkmvc.http.router.HttpMethod
-import net.jkcode.jkmvc.http.router.IRouter
 import net.jkcode.jkutil.common.getCachedAnnotation
 import java.lang.reflect.Method
 
@@ -14,15 +12,15 @@ import java.lang.reflect.Method
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class Route(
-     public val regex: String, // url正则
-     public val method: HttpMethod = HttpMethod.ALL // http方法
+annotation class ARoute(
+        public val regex: String, // url正则
+        public val method: HttpMethod = HttpMethod.ALL // http方法
 )
 
 /**
  * 获得路由注解
  */
-public val Method.route: Route?
+public val Method.route: ARoute?
     get(){
         return getCachedAnnotation()
     }

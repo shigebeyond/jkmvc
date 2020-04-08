@@ -3,7 +3,7 @@ package net.jkcode.jkmvc.http.controller
 import net.jkcode.jkmvc.http.router.Route
 import net.jkcode.jkmvc.http.router.Router
 import java.lang.reflect.Method
-import net.jkcode.jkmvc.http.router.annotation.Route as ARoute
+import net.jkcode.jkmvc.http.router.ARoute
 
 /**
  * 方法级路由的检测器

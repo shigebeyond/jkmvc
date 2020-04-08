@@ -130,28 +130,6 @@ abstract class Db protected constructor(
     }
 
     /**
-     * 执行事务
-     *    兼容 statement 返回类型是CompletableFuture
-     *
-     * @param statement db操作过程
-     * @return
-     */
-    public override fun <T> transaction(statement: () -> T):T{
-        begin(); // 开启事务
-
-        return trySupplierFinally(statement){ r, ex ->
-            if(ex != null){
-                rollback(); // 回滚事务
-                throw ex;
-            }
-
-            commit(); // 提交事务
-            r
-
-        }
-    }
-
-    /**
      * 添加事务完成后的回调
      * @param callback 回调函数, 只有一个Boolean参数, 代表是否提交
      * @return
