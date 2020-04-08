@@ -1,8 +1,12 @@
 package net.jkcode.jkmvc.http.router
 
+import net.jkcode.jkmvc.http.controller.ControllerClass
+import net.jkcode.jkmvc.http.controller.ControllerClassLoader
 import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.httpLogger
 import java.util.*
+import kotlin.reflect.KFunction
+import kotlin.reflect.jvm.javaMethod
 
 /**
  * 路由器
@@ -22,10 +26,18 @@ object Router: IRouter
 
 	/**
 	 * 全部路由规则
-	 *   有序, 但需要倒序插入, 也就是后添加的路由先匹配
+	 *   有序, 但需要遍历时需倒序, 也就是后添加的路由先匹配
 	 *   为什么要倒序? 是因为扫描加载controller类时, 会针对action方法解析路由注解, 并添加对应路由
 	 */
-	private val routes = LinkedList<Route>()
+	public val routes = LinkedList<Route>()
+
+	/**
+	 * 默认路由
+	 *    由于路由倒序, 则最后一个路由为默认路由, 应该配置文件 routes.yaml 中的 default 路由
+	 */
+	public val defaultRoute: Route by lazy{
+		routes.last
+	}
 
 	init {
 		// 加载配置的路由
@@ -48,8 +60,8 @@ object Router: IRouter
 	 * @parma route 路由对象
 	 */
 	public override fun addRoute(name:String, route: Route): Router {
-		// 倒序插入: 插入到尾部
-		routes.addLast(route);
+		// 倒序插入: 插入到头部
+		routes.addFirst(route);
 		httpLogger.info("添加路由[{}]: {}", name, route)
 		return this
 	}
@@ -60,23 +72,35 @@ object Router: IRouter
 	 * @param method
 	 * @return [路由参数, 路由规则]
 	 */
-	public override fun parse(uri: String, method: HttpMethod): ParamsAndRoute?
+	public override fun parse(uri: String, method: HttpMethod): RouteResult?
 	{
 		// 1 空uri: 直接取默认路由
 		if(uri.isBlank()){
-			// 由于路由倒序, 则最后一个路由为默认路由, 配置文件 routes.yaml 中的 default 路由
-			val defaultRoute = routes.last
-			if(defaultRoute == null || defaultRoute.defaults == null)
+			if(defaultRoute.defaults == null)
 				return null
-			return Pair(defaultRoute.defaults, defaultRoute)
+			return RouteResult(defaultRoute.defaults!!, defaultRoute)
 		}
 
 		// 2 逐个匹配路由规则
 		for(route in routes){
 			//匹配路由规则
 			val params = route.match(uri, method);
-			if(params != null)
-				return Pair(params, route); // 路由参数 + 路由规则
+			if(params != null) {
+				// 如果是默认路由(方法的路由注解的正则为空), 最后需要校验方法
+				if(route == defaultRoute){
+					// 1 获得controller类
+					val clazz: ControllerClass? = ControllerClassLoader.get(params["controller"]!!);
+					// 2 获得action方法
+					val action: KFunction<*>? = clazz?.getActionMethod(params["action"]!!);
+					// 3 匹配路由注解的方法
+					if(action != null){
+						val routeMethod = action.javaMethod!!.route?.method
+						if(routeMethod != null && !routeMethod.match(method)) // 不匹配方法, 返回null
+							return null
+					}
+				}
+				return RouteResult(params, route); // 路由参数 + 路由规则
+			}
 		}
 
 		// 3 无匹配

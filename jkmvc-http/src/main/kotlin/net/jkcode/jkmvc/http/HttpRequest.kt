@@ -4,10 +4,7 @@ import net.jkcode.jkutil.common.*
 import net.jkcode.jkmvc.http.controller.Controller
 import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
-import net.jkcode.jkmvc.http.router.HttpMethod
-import net.jkcode.jkmvc.http.router.Route
-import net.jkcode.jkmvc.http.router.RouteException
-import net.jkcode.jkmvc.http.router.Router
+import net.jkcode.jkmvc.http.router.*
 import net.jkcode.jkutil.validator.RuleValidator
 import org.apache.commons.collections.map.CompositeMap
 import java.net.URI
@@ -93,14 +90,15 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 									requestURI.trim(contextPath + '/', "/")
 
 	/**
-	 * 当前匹配的路由规则
+	 * 当前匹配的路由结果
 	 */
-	public lateinit var route: Route;
+	public lateinit var routeResult: RouteResult
 
 	/**
 	 * 当前匹配的路由参数
 	 */
-	public lateinit var routeParams:Map<String, String>;
+	public val routeParams:Map<String, String>
+		get() = routeResult.params
 
 	/**
 	 * 全部参数 = 路由参数 + 请求参数
@@ -170,8 +168,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		val result = Router.parse(routeUri, httpMethod);
 
 		if(result != null){
-			this.routeParams = result.component1();
-			this.route = result.component2();
+			this.routeResult = result
 			return true;
 		}
 

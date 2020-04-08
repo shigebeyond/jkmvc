@@ -7,6 +7,14 @@ package net.jkcode.jkmvc.http.router
  */
 enum class HttpMethod {
 
-    ALL, GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE
+    ALL, GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE;
 
+    /**
+     * 匹配方法
+     * @param method
+     * @return
+     */
+    public fun match(method: HttpMethod): Boolean {
+        return this == HttpMethod.ALL || this == method
+    }
 }

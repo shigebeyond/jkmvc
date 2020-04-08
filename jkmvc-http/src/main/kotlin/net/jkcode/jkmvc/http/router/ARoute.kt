@@ -13,7 +13,7 @@ import java.lang.reflect.Method
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class ARoute(
-        public val regex: String, // url正则
+        public val regex: String = "", // url正则
         public val method: HttpMethod = HttpMethod.ALL // http方法
 )
 

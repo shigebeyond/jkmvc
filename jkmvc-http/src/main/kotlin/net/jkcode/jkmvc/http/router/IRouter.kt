@@ -29,5 +29,5 @@ interface IRouter
 	 * @param method
 	 * @return [路由参数, 路由规则]
 	 */
-	fun parse(uri: String, method: HttpMethod): ParamsAndRoute?;
+	fun parse(uri: String, method: HttpMethod): RouteResult?;
 }

@@ -75,23 +75,31 @@ class Route(override val regex:String, // 原始正则: <controller>(\/<action>(
 	 */
 	protected var paramGroupMapping: MutableMap<String, Int>
 
+	/**
+	 * 快速匹配的子串
+	 */
+	protected var fastSubString: String
+
 
 	init {
-		// 对参数加括号，参数也变为子正则
-		groupRegex = "<\\w+>".toRegex().replace(regex){ result: MatchResult ->
-			"(${result.value})"
+		// 对参数加括号，参数也变为子正则, 用括号包住
+		groupRegex = "<[\\w\\d]+>".toRegex().replace(regex){ result: MatchResult ->
+			"(${result.value})" // 用括号包住, 变为子正则
 		}
 		// 计算子正则的范围
 		groupRangs = buildGroupRangs()
 		// 构建参数对子正则的映射
 		paramGroupMapping = buildParamGroupMapping()
 		// 编译参数正则: 将<参数>替换为对应的带参数的子正则
-		var compileRegex = "<(\\w+)>".toRegex().replace(groupRegex){ result: MatchResult ->
+		var compileRegex = "<([\\w\\d]+)>".toRegex().replace(groupRegex){ result: MatchResult ->
 			val paramName = result.groups[1]!!.value; // 参数名
 			paramRegex.getOrDefault(paramName, REGEX_PARAM)!! // 替换参数正则
 		}
 		compileRegex = "^$compileRegex$" // 匹配开头与结尾
 		this.compiledRegex = compileRegex.toRegex()
+
+		// 构建快速匹配的子串
+		this.fastSubString = buildFastSubString().trim()
 	}
 
 	/**
@@ -118,7 +126,7 @@ class Route(override val regex:String, // 原始正则: <controller>(\/<action>(
 	 * 构建参数对子正则的映射
 	 */
 	protected fun buildParamGroupMapping(): MutableMap<String, Int> {
-		val matches: Sequence<MatchResult> = "<(\\w+)>".toRegex().findAll(groupRegex)
+		val matches: Sequence<MatchResult> = "<([\\w\\d]+)>".toRegex().findAll(groupRegex)
 		val mapping:MutableMap<String, Int> = HashMap();
 		for(m in matches){
 			val param = m.groups[1]!!
@@ -146,6 +154,37 @@ class Route(override val regex:String, // 原始正则: <controller>(\/<action>(
 	}
 
 	/**
+	 * 构建快速匹配的子串
+	 * @return
+	 */
+	protected fun buildFastSubString(): String {
+		// 转为非正则
+		val delimiter = "???"
+		var noregx = regex.replace("\\(.+\\)\\??".toRegex(), delimiter) // 去掉()子表达式
+		noregx = noregx.replace("/?<[\\w\\d]+>".toRegex(), delimiter) // 去掉<参数>
+
+		// 拆分为非正则的子串
+		val substrs = noregx.split(delimiter)
+		// 取最长的子串
+		return substrs.maxBy {
+			it.length
+		}!!
+	}
+
+	/**
+	 * 快速匹配
+	 *    尝试用子串先快速匹配一下, 减少正则匹配
+	 *    如果快速匹配不通过, 则不用进行正则匹配了
+	 *
+	 * @param uri
+	 * @return
+	 */
+	protected fun fastMatch(uri: String): Boolean {
+		return fastSubString.isEmpty() // 无子串, 直接通过
+				|| uri.contains(fastSubString) // 匹配子串
+	}
+
+	/**
 	 * 检查uri是否匹配路由正则
 	 *
 	 * @param uri
@@ -154,10 +193,14 @@ class Route(override val regex:String, // 原始正则: <controller>(\/<action>(
 	 */
 	public override fun match(uri: String, method: HttpMethod):Map<String, String>?{
 		// 1 匹配方法
-		if(this.method != HttpMethod.ALL && this.method != method)
+		if(!this.method.match(method))
 			return null
 
-		// 2 匹配uri
+		// 2 先快速匹配子串
+		if(!fastMatch(uri))
+			return null
+
+		// 3 匹配正则
 		val matches:MatchResult? = compiledRegex.find(uri)
 		if(matches == null)
 			return null

@@ -21,15 +21,21 @@ open class MethodRouteDetector {
      * @parma method 方法
      */
     public fun detect(controller:String, action: String, method: Method) {
+        // 获得注解
         val annotation = method.getAnnotation(ARoute::class.java)
         if(annotation == null)
+            return
+        // 获得正则
+        val regex = annotation.regex.trim()
+        // 只有正则不为空才会添加路由, 否则都交给默认路由处理(默认路由最后需要校验方法)
+        if(regex.isEmpty())
             return
 
         val params = mapOf(
                 "controller" to controller,
                 "action" to action
         )
-        Router.addRoute("$controller#$action", Route(annotation.regex, emptyMap(), params, annotation.method))
+        Router.addRoute("$controller#$action", Route(regex, emptyMap(), params, annotation.method))
     }
 
 }

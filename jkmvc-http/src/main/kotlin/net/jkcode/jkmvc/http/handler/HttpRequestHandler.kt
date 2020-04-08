@@ -119,10 +119,8 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
 
         // 2 获得action方法
         val action: KFunction<*>? = clazz.getActionMethod(req.action);
-        if (action == null){
-            val method = "action" + req.action.ucFirst()
-            throw RouteException("控制器${req.controller}不存在方法：${method}()");
-        }
+        if (action == null)
+            throw RouteException("控制器${req.controller}不存在方法：${req.action}()");
 
         // 3 创建controller
         val controller: Controller = clazz.clazz.java.newInstance() as Controller;
