@@ -159,9 +159,10 @@ class Route(override val regex:String, // 原始正则: <controller>(\/<action>(
 	 */
 	protected fun buildFastSubString(): String {
 		// 转为非正则
-		val delimiter = "???"
+		val delimiter = "\n" // 换行符作为分隔符, 肯定没有人用换行符来写路由正则
 		var noregx = regex.replace("\\(.+\\)\\??".toRegex(), delimiter) // 去掉()子表达式
-		noregx = noregx.replace("/?<[\\w\\d]+>".toRegex(), delimiter) // 去掉<参数>
+		noregx = noregx.replace("<[\\w\\d]+>".toRegex(), delimiter) // 去掉<参数>
+		noregx = noregx.replace("[\\\\*+\\[\\](){}\\\$.?\\^|]".toRegex(), delimiter) // 去掉正则符号
 
 		// 拆分为非正则的子串
 		val substrs = noregx.split(delimiter)
