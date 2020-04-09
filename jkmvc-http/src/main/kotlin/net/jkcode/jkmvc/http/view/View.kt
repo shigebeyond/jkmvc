@@ -4,6 +4,7 @@ import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.setAttributes
 import net.jkcode.jkutil.collection.LazyAllocatedMap
+import net.jkcode.jkutil.common.Config
 import java.io.FileNotFoundException
 
 /**
@@ -18,6 +19,24 @@ open class View(override val req: HttpRequest, // 请求对象
 				override val file:String, // 视图文件
 				tmpVm:Map<String, Any?> // 视图模型
 ): IView {
+
+	companion object{
+
+		/**
+		 * http配置
+		 */
+		public val config = Config.instance("http", "yaml")
+
+		/**
+		 * 视图目录
+		 */
+		public val viewDir: String = config["viewDir"]!!
+	}
+
+	/**
+	 * 视图文件路径
+	 */
+	override val path:String = viewDir + file
 
 	/**
 	 * 视图模型
@@ -58,7 +77,7 @@ open class View(override val req: HttpRequest, // 请求对象
 		req.setAttributes(vm)
 
 		// 渲染jsp
-		val jsp = "/" + file + ".jsp"
+		val jsp = path + ".jsp"
 		val reqDispatcher = req.getRequestDispatcher(jsp)
 		if(reqDispatcher == null)
 			throw FileNotFoundException("RequestDispatcher for resource [$jsp] is null")

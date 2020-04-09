@@ -27,6 +27,11 @@ interface IView
 	val file:String
 
 	/**
+	 * 视图文件路径
+	 */
+	val path:String
+
+	/**
 	 * 视图模型
 	 */
 	var vm:MutableMap<String, Any?>

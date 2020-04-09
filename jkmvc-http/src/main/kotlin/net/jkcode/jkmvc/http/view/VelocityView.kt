@@ -44,7 +44,7 @@ class VelocityView(req: HttpRequest /* 请求对象 */, res: HttpResponse /* 响
         instance.init(props)
 
         // 获得模板文件
-        val template = instance.getTemplate(file + ".html", "UTF-8");
+        val template = instance.getTemplate(path + ".html", "UTF-8");
 
         // 构建上下文：要渲染的数据
         val context = VelocityContext(vm)
