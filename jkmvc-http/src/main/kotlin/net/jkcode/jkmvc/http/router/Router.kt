@@ -86,19 +86,10 @@ object Router: IRouter
 			//匹配路由规则
 			val params = route.match(uri, method);
 			if(params != null) {
-				// 如果是默认路由(方法的路由注解的正则为空), 最后需要校验方法
-				if(route == defaultRoute){
-					// 1 获得controller类
-					val clazz: ControllerClass? = ControllerClassLoader.get(params["controller"]!!);
-					// 2 获得action方法
-					val action: KFunction<*>? = clazz?.getActionMethod(params["action"]!!);
-					// 3 匹配路由注解的方法
-					if(action != null){
-						val routeMethod = action.javaMethod!!.route?.method
-						if(routeMethod != null && !routeMethod.match(method)) // 不匹配方法, 返回null
-							return null
-					}
-				}
+				// 如果是默认路由(方法的路由注解的正则为空), 最后需要匹配方法, 如不匹配则返回null
+				if(route == defaultRoute && !matchActionAnnotationMethod(params, method))
+					return null
+
 				return RouteResult(params, route); // 路由参数 + 路由规则
 			}
 		}
@@ -106,5 +97,28 @@ object Router: IRouter
 		// 3 无匹配
 		return null;
 	}
+
+	/**
+	 * 匹配action方法注解的http方法
+	 *   仅在默认路由匹配时调用
+	 * @param params 路由参数
+	 * @param method
+	 * @return
+	 */
+	private fun matchActionAnnotationMethod(params: Map<String, String>, method: HttpMethod): Boolean {
+		// 1 获得controller类
+		val clazz: ControllerClass? = ControllerClassLoader.get(params["controller"]!!);
+		// 2 获得action方法
+		val action: KFunction<*>? = clazz?.getActionMethod(params["action"]!!);
+		// 3 匹配路由注解的方法
+		if (action != null) {
+			val routeMethod = action.javaMethod!!.route?.method
+			if (routeMethod != null && !routeMethod.match(method)) // 匹配方法
+				return false
+		}
+
+		return true
+	}
+
 
 }

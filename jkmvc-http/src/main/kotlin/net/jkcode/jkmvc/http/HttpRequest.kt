@@ -31,12 +31,6 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	companion object{
 
 		/**
-		 * 全局的ServletContext
-		 *   fix bug: jetty异步请求后 req.contextPath/req.servletContext 居然为null, 因此直接在 JkFilter.init() 时记录ServletContext(包含contextPath), 反正他是全局不变的
-		 */
-		public lateinit var globalServletContext: ServletContext
-
-		/**
 		 * 可信任的代理服务器ip
 		 */
 		public val proxyips = arrayOf("127.0.0.1", "localhost", "localhost.localdomain");
@@ -57,6 +51,13 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 			return Controller.currentOrNull()?.req
 		}
 	}
+
+	/**
+	 * 全局的ServletContext
+	 *   fix bug: jetty异步请求后 req.contextPath/req.servletContext 居然为null, 因此直接在 JkFilter.init() 时记录ServletContext(包含contextPath), 反正他是全局不变的
+	 */
+	public val globalServletContext: ServletContext
+		get() = JkFilter.instance().servletContext
 
 	/**
 	 * 改写 contextPath
@@ -80,14 +81,15 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	public val httpMethod: HttpMethod = HttpMethod.valueOf(method.toUpperCase())
 
 	/**
-	 * 获得要解析的uri
-	 *   1 去掉头部的contextPath
+	 * 路由uri, 要进行路由解析
+	 *   1 去掉头部的contextPath + filter url前缀
 	 *   2 去掉末尾的/
 	 */
 	public val routeUri:String = if(contextPath == null)
 									throw RouteException("req.contextPath is null")
 								else
-									requestURI.trim(contextPath + '/', "/")
+									//requestURI.trim(contextPath + '/', "/")
+									requestURI.trim(contextPath + JkFilter.instance().urlPrefix).trim("/", "/")
 
 	/**
 	 * 当前匹配的路由结果

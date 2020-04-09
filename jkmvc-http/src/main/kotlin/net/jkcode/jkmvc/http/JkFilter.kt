@@ -2,53 +2,104 @@ package net.jkcode.jkmvc.http
 
 import net.jkcode.jkmvc.http.handler.HttpRequestHandler
 import net.jkcode.jkutil.common.*
+import java.lang.IllegalStateException
 import java.util.concurrent.RejectedExecutionException
 import javax.servlet.*
 import javax.servlet.http.HttpServletRequest
 
 /**
  * web入口
+ *   全局只有一个
  *
  * @author shijianhang
  * @date 2019-4-13 上午9:27:56
  */
 open class JkFilter() : Filter {
 
-    /**
-     * http配置
-     */
-    public val config = Config.instance("http", "yaml")
+    companion object{
+        /**
+         * http配置
+         */
+        public val config = Config.instance("http", "yaml")
+
+        /**
+         * 静态文件的扩展名
+         */
+        protected val staticFileExt = config.getString("staticFileExt", "gif|jpg|jpeg|png|bmp|ico|swf|js|css|eot|ttf|woff")
+
+        /**
+         * 静态文件uri的正则
+         */
+        protected val staticFileRegex: Regex = config.getString("staticFileExtends", ".*\\.($staticFileExt)$")!!.toRegex(RegexOption.IGNORE_CASE)
+
+        /**
+         * 插件配置
+         */
+        public val pluginConfig: Config = Config.instance("plugin", "yaml")
+
+        /**
+         * 插件列表
+         */
+        public val plugins: List<IPlugin> = pluginConfig.classes2Instances("interceptors")
+
+        /**
+         * 单例
+         */
+        protected var inst: JkFilter? = null
+        public fun instance(): JkFilter{
+            return inst ?: throw IllegalStateException("There is no JkFilter")
+        }
+    }
 
     /**
-     * 静态文件的扩展名
+     * 记录servletContext
+     *   fix bug: jetty异步请求后 req.contextPath/req.servletContext 居然为null, 因此直接在 JkFilter.init() 时记录ServletContext(包含contextPath), 反正他是全局不变的
      */
-    protected val staticFileExt = config.getString("staticFileExt", "gif|jpg|jpeg|png|bmp|ico|swf|js|css|eot|ttf|woff")
+    public lateinit var servletContext: ServletContext
 
     /**
-     * 静态文件uri的正则
+     * url前缀, 尾部无/
      */
-    protected val staticFileRegex: Regex = config.getString("staticFileExtends", ".*\\.($staticFileExt)$")!!.toRegex(RegexOption.IGNORE_CASE)
-
-    /**
-     * 插件配置
-     */
-    public val pluginConfig: Config = Config.instance("plugin", "yaml")
-
-    /**
-     * 插件列表
-     */
-    public val plugins: List<IPlugin> = pluginConfig.classes2Instances("interceptors")
+    public lateinit var urlPrefix: String
 
     /**
      * 初始化
      */
     override fun init(filterConfig: FilterConfig) {
-        // fix bug: jetty异步请求后 req.contextPath/req.servletContext 居然为null, 因此直接在 JkFilter.init() 时记录 contextPath, 反正他是全局不变的
-        HttpRequest.globalServletContext = filterConfig.servletContext
+        // 单例
+        if(inst != null)
+            throw IllegalStateException("Only 1 JkFilter can exist")
+        inst = this
+
+        // 记录servletContext -- fix bug: jetty异步请求后 req.contextPath/req.servletContext 居然为null, 因此直接在 JkFilter.init() 时记录 contextPath, 反正他是全局不变的
+        servletContext = filterConfig.servletContext
+
+        //根据filter配置的<url-pattern>(假定只有一个), 解析出url前缀
+        val reg: FilterRegistration = servletContext.getFilterRegistration(filterConfig.filterName)
+        val urlPattern = reg.urlPatternMappings.first()
+        // <url-pattern>规范: https://stackoverflow.com/questions/24652893/url-pattern-in-tomcat-and-jetty
+        //1. A string beginning with a ‘/’ character and ending with a ‘/*’ suffix is used for path mapping.
+        //2. A string beginning with a ‘*.’ prefix is used as an extension mapping.
+        //3. The empty string ("") is a special URL pattern that exactly maps to the application's context root, i.e., requests of the form  http://host:port/<contextroot>/. In this case the path info is ’/’ and the servlet path and context path is empty string (““).
+        //4. A string containing only the ’/’ character indicates the "default" servlet of the application. In this case the servlet path is the request URI minus the context path and the path info is null.
+        //5. All other strings are used for exact matches only.
+        // url前缀 = /*前面的子串
+        if(urlPattern.contains("/*"))
+            urlPrefix = urlPattern.substringBefore("/*")
+        else
+            urlPrefix = ""
+
 
         // 初始化插件
         for(p in plugins)
             p.start()
+    }
+
+    /**
+     * 从filter配置的<url-pattern>中解析出url前缀
+     */
+    protected fun parseUrlPrefix(){
+
     }
 
     /**
