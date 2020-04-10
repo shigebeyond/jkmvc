@@ -5,6 +5,7 @@ import net.jkcode.jkutil.common.camel2Underline
 import net.jkcode.jkutil.common.format
 import net.jkcode.jkutil.common.underline2Camel
 import java.sql.Connection
+import java.sql.SQLFeatureNotSupportedException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.ArrayList
@@ -68,25 +69,27 @@ internal class DbMeta(public override val name: CharSequence /* 标识 */) : IDb
         get() = Db.instance(name).conn
 
     /**
+     * 驱动类名
+     */
+    public override val driverName: String
+        get() = anyConn.metaData.driverName.
+            replace(" ", "") // fix bug: sqlserver的driverName居然有空格, 如 Microsoft JDBC Driver 6.5 for SQL Server
+
+    /**
+     * 连接url
+     */
+    public override val url: String
+        get() = anyConn.metaData.url
+
+    /**
      * 获得数据库类型
      *   根据driverClass来获得
      */
     public override val dbType:DbType by lazy{
         //通过driverName是否包含关键字判断
-        var driver: String = anyConn.metaData.driverName
-        // fix bug: sqlserver的driverName居然有空格, 如 Microsoft JDBC Driver 6.5 for SQL Server
-        driver = driver.replace(" ", "")
-        var result: DbType? = null
-        for(type in DbType.values()){
-            if (driver.contains(type.toString(), true)) {
-                result = type
-                break
-            }
-        }
-        if(result == null)
-            throw RuntimeException("Unknow database type")
-        else
-            result
+        DbType.values().firstOrNull{
+            driverName.contains(it.toString(), true) // 包含关键字
+        } ?:  throw RuntimeException("Unknow database type")
     }
 
     /**
@@ -201,12 +204,6 @@ internal class DbMeta(public override val name: CharSequence /* 标识 */) : IDb
     }
 
     /**
-     * 连接url
-     */
-    public override val url: String
-        get() = anyConn.metaData.url
-
-    /**
      * catalog
      */
     public override val catalog: String?
@@ -229,7 +226,11 @@ internal class DbMeta(public override val name: CharSequence /* 标识 */) : IDb
                     schema = m.groupValues[1]
             }
 
-            return schema ?: anyConn.schema
+            try {
+                return schema ?: anyConn.schema
+            }catch (e: SQLFeatureNotSupportedException){
+                return null
+            }
         }
 
     /**

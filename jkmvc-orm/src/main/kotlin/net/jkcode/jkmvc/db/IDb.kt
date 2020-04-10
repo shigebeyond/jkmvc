@@ -114,6 +114,16 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
     public abstract fun execute(sql: String, params: List<*> = emptyList<Any>(), generatedColumn:String? = null): Long;
 
     /**
+     * 执行更新, 并处理结果集
+     *
+     * @param sql
+     * @param params
+     * @param transform 结果转换函数
+     * @return
+     */
+    public abstract fun <T> execute(sql: String, params: List<*> = emptyList<Any>(), transform: (DbResultSet) -> T): T?;
+
+    /**
      * 批量更新: 每次更新sql参数不一样
      *
      * @param sql

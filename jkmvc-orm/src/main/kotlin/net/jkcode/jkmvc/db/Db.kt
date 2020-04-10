@@ -267,6 +267,25 @@ abstract class Db protected constructor(
     }
 
     /**
+     * 执行更新, 并处理结果集
+     *
+     * @param sql
+     * @param params
+     * @param transform 结果转换函数
+     * @return
+     */
+    public override fun <T> execute(sql: String, params: List<*>, transform: (DbResultSet) -> T): T? {
+        try{
+            return conn.execute(sql, params){
+                transform(DbResultSet(this, it))
+            }
+        }catch (e:Exception){
+            dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
+            throw  e
+        }
+    }
+
+    /**
      * 批量更新：每次更新sql参数不一样
      *
      * @param sql
@@ -327,12 +346,16 @@ abstract class Db protected constructor(
      * @param script
      */
     public fun runScript(script: String){
+        // 去掉注释行
+        var script = script.replace("\n--.+".toRegex(), "")
+        script = script.replace("\n/\\*.+\\*/;?".toRegex(), "")
+
         // ; 还要跟换行, 才能识别一条sql, 因为可能字段值有;
         val sqls = ";\\s*\n".toRegex().split(script)
         val msg = StringBuilder()
         this.transaction {
             for(sql in sqls) {
-                this.queryResult(sql) { rs ->
+                this.execute(sql) { rs ->
                     // 输出列
                     rs.columns.joinTo(msg, "\t")
                     // 输出值

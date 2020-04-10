@@ -28,6 +28,11 @@ interface IDbMeta: IDbIdentifierQuoter, IDbValueQuoter {
     val identifierQuoteString: String
 
     /**
+     * 驱动类名
+     */
+    val driverName: String
+
+    /**
      * 连接url
      */
     val url: String

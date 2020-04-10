@@ -73,7 +73,6 @@ public inline fun PreparedStatement.getGeneratedKey(): Long {
  */
 public inline fun Connection.execute(sql: String, params: List<*> = emptyList<Any>(), generatedColumn:String? = null): Long {
     var pst: PreparedStatement? = null
-    var rs: ResultSet? = null;
     try{
         // 准备sql语句
         pst = if(generatedColumn == null)
@@ -91,7 +90,34 @@ public inline fun Connection.execute(sql: String, params: List<*> = emptyList<An
         // 非insert语句，返回行数
         return rows.toLong()
     }finally{
-        rs?.close()
+        pst?.close()
+    }
+}
+
+/**
+ * Connection扩展
+ * 执行更新, 并处理结果集
+ *
+ * @param sql
+ * @param params 参数
+ * @param transform 结果转换函数
+ * @return
+ */
+public inline fun <T> Connection.execute(sql: String, params: List<*> = emptyList<Any>(), transform: (ResultSet) -> T): T? {
+    var pst: PreparedStatement? = null
+    try{
+        // 准备sql语句
+        pst = prepareStatement(sql)
+        // 设置参数
+        pst.setParameters(params)
+        // 执行
+        pst.executeUpdate()
+        // 处理结果集
+        val rs = pst.getResultSet()
+        return rs?.use {
+            transform(it)
+        }
+    }finally{
         pst?.close()
     }
 }
