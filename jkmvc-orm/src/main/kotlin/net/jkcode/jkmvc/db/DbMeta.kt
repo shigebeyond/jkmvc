@@ -201,6 +201,12 @@ internal class DbMeta(public override val name: CharSequence /* 标识 */) : IDb
     }
 
     /**
+     * 连接url
+     */
+    public override val url: String
+        get() = anyConn.metaData.url
+
+    /**
      * catalog
      */
     public override val catalog: String?
@@ -212,20 +218,25 @@ internal class DbMeta(public override val name: CharSequence /* 标识 */) : IDb
      *    在 Db.tables 中延迟加载表字段时，用来过滤 DYPT 库的表
      *    可省略，默认值=username
      */
-    public override val schema:String? by lazy {
-        // 主库配置, 只支持单机db, 不只是sharding db
-        val masterConfig: Config = Config.instance("dataSources.$name.master", "yaml")
-        if(dbType == DbType.Oracle) // oracle: 直接读db配置
-            masterConfig.getString("schema", masterConfig["username"])
-        else if(dbType == DbType.Mysql){ // mysql: 解析url
-            val m = "jdbc:mysql://[^/]+/([^\\?]+)".toRegex().find(masterConfig["url"]!!)
-            if(m != null)
-                m.groupValues[1]
-            else
-                null
-        }else
-        null
-    }
+    public override val schema:String?
+        get(){
+            var schema:String? = null
+            if(dbType == DbType.Oracle) { // oracle: 直接读db配置
+                schema = masterConfig.getString("schema", masterConfig["username"])
+            }else if(dbType == DbType.Mysql){ // mysql: 解析url
+                val m = "jdbc:mysql://[^/]+/([^\\?]+)".toRegex().find(url)
+                if(m != null)
+                    schema = m.groupValues[1]
+            }
+
+            return schema ?: anyConn.schema
+        }
+
+    /**
+     * 主库配置, 只支持单机db, 不支持sharding db
+     */
+    public override val masterConfig: Config
+        get() = Config.instance("dataSources.$name.master", "yaml")
 
     /************************** 属性名与字段名互转 ***************************/
     /**

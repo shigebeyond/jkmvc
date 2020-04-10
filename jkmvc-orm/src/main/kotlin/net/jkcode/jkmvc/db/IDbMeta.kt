@@ -1,5 +1,7 @@
 package net.jkcode.jkmvc.db
 
+import net.jkcode.jkutil.common.Config
+
 /**
  * db元数据
  *
@@ -26,6 +28,11 @@ interface IDbMeta: IDbIdentifierQuoter, IDbValueQuoter {
     val identifierQuoteString: String
 
     /**
+     * 连接url
+     */
+    val url: String
+
+    /**
      * catalog
      *   一般是db名, 就是 show databases; 中某个名字
      */
@@ -38,6 +45,11 @@ interface IDbMeta: IDbIdentifierQuoter, IDbValueQuoter {
      *    可省略，默认值=username
      */
     val schema: String?
+
+    /**
+     * 主库配置
+     */
+    val masterConfig: Config
 
     /**
      * 表
