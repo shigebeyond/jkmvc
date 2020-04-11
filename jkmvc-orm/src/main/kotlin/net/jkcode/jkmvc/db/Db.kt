@@ -347,14 +347,19 @@ abstract class Db protected constructor(
      */
     public fun runScript(script: String){
         // 去掉注释行
-        var script = script.replace("\n--.+".toRegex(), "")
-        script = script.replace("\n/\\*.+\\*/;?".toRegex(), "")
+        // -- 注释行, 是无用的
+        var script = script.replace("(^|\n) *--.*".toRegex(), "")
+        // /* */ 注释行, 但在mysql中 /*! ...*/ 不是注释，mysql为了保持兼容，它把一些特有的仅在mysql上用的语句放在/*!....*/中
+        //script = script.replace("\n/\\*.+\\*/;?".toRegex(), "")
 
         // ; 还要跟换行, 才能识别一条sql, 因为可能字段值有;
         val sqls = ";\\s*\n".toRegex().split(script)
         val msg = StringBuilder()
         this.transaction {
             for(sql in sqls) {
+                if(sql.isBlank())
+                    continue;
+
                 this.execute(sql) { rs ->
                     // 输出列
                     rs.columns.joinTo(msg, "\t")

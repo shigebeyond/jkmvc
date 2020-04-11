@@ -58,7 +58,7 @@ Mysql:
     int|decimal\(\d+,0\): Int
     float: Float
     double|decimal\(\d+,[1-9]: Double
-    char|text: String
+    char|text|longtext: String
     date|datetime|timestamp|time: Date
     binary|blob: ByteArray
 #sql server
