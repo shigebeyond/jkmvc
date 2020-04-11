@@ -60,6 +60,14 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		get() = JkFilter.instance().servletContext
 
 	/**
+	 * 改写 servletContext
+	 *   fix bug: jetty异步请求后 req.contextPath 居然为null, 直接使用全局 contextPath
+	 */
+	override fun getServletContext(): ServletContext {
+		return super.getServletContext() ?: globalServletContext
+	}
+
+	/**
 	 * 改写 contextPath
 	 *   fix bug: jetty异步请求后 req.contextPath 居然为null, 直接使用全局 contextPath
 	 */
