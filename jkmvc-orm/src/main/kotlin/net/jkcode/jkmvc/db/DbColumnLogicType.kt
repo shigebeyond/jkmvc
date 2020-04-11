@@ -1,55 +1,62 @@
 package net.jkcode.jkmvc.db
 
 import net.jkcode.jkutil.common.Config
+import java.math.BigDecimal
+import java.math.BigInteger
 import java.sql.Types
+import java.util.*
 
 /**
  * 列的逻辑类型
  *    TODO: 目前逻辑类型与sql类型是 1:1 绑定一起的, 以后要分离, 逻辑类型与sql类型是 m:n, 如逻辑类型 currency 对应2位精度的 float sql类型
- *    TODO: 初步预设：　逻辑类型->sql类型,　int->int, short->smallint, byte->tinyint
+ *    TODO: 初步预设：　逻辑类型->sql类型,　int->int, short->smallint, byte->tinyint, bigint->bigint
+ *    而sql类型对java类型的映射, 参考 https://docs.oracle.com/javase/6/docs/technotes/guides/jdbc/getstart/mapping.html#996857
  *
  * @author shijianhang
  * @date 2020-2-4 下午8:02:47
  */
 public enum class DbColumnLogicType private constructor(
         public val code: String, // 逻辑类型名, 枚举名的小写, 语法限制不能用 name, 因此只能用 code
-        public val sqlType: Int // sql类型, 即jdbc类型
+        public val sqlType: Int, // sql类型, 即jdbc类型
+        public val javaType: Class<*> // java类型
 ) {
-    BIT("bit", Types.BIT),
-    BOOLEAN("boolean", Types.BOOLEAN),
+    BIT("bit", Types.BIT, Boolean.javaClass),
+    BOOLEAN("boolean", Types.BOOLEAN, Boolean.javaClass),
 
-    TINYINT("tinyint", Types.TINYINT),
-    SMALLINT("smallint", Types.SMALLINT),
-    INT("int", Types.INTEGER),
-    BIGINT("bigint", Types.BIGINT),
+    TINYINT("tinyint", Types.TINYINT, Byte.javaClass),
+    SMALLINT("smallint", Types.SMALLINT, Short.javaClass),
+    INT("int", Types.INTEGER, Int.javaClass),
+    BIGINT("bigint", Types.BIGINT, Long.javaClass), // hibernate是 BigInteger::class.java
 
-    FLOAT("float", Types.FLOAT),
-    DOUBLE("double", Types.DOUBLE),
-    REAL("real", Types.REAL),
-    DECIMAL("decimal", Types.DECIMAL),
-    NUMERIC("numeric", Types.NUMERIC),
+    FLOAT("float", Types.FLOAT, Float.javaClass),
+    DOUBLE("double", Types.DOUBLE, Double.javaClass),
+    REAL("real", Types.REAL, Float.javaClass),
 
-    CHAR("char", Types.CHAR),
-    VARCHAR("varchar", Types.VARCHAR),
-    VARBINARY("varbinary", Types.VARBINARY),
+    // 在toJavaType()有特殊处理
+    DECIMAL("decimal", Types.DECIMAL, BigDecimal::class.java),
+    NUMERIC("numeric", Types.NUMERIC, BigDecimal::class.java),
 
-    LONGNVARCHAR("longnvarchar", Types.LONGNVARCHAR),
-    LONGVARBINARY("longvarbinary", Types.LONGVARBINARY),
-    LONGVARCHAR("longvarchar", Types.LONGVARCHAR),
+    CHAR("char", Types.CHAR, String::class.java),
+    VARCHAR("varchar", Types.VARCHAR, String::class.java),
+    VARBINARY("varbinary", Types.VARBINARY, String::class.java),
 
-    BINARY("binary", Types.BINARY),
-    BLOB("blob", Types.BLOB),
-    CLOB("clob", Types.CLOB),
+    LONGNVARCHAR("longnvarchar", Types.LONGNVARCHAR, String::class.java),
+    LONGVARBINARY("longvarbinary", Types.LONGVARBINARY, String::class.java),
+    LONGVARCHAR("longvarchar", Types.LONGVARCHAR, String::class.java),
 
-    NCHAR("nchar", Types.NCHAR),
-    NCLOB("nclob", Types.NCLOB),
-    NVARCHAR("nvarchar", Types.NVARCHAR),
+    BINARY("binary", Types.BINARY, ByteArray::class.java),
+    BLOB("blob", Types.BLOB, ByteArray::class.java),
+    CLOB("clob", Types.CLOB, String::class.java),
 
-    DATE("date", Types.DATE),
-    TIMESTAMP("timestamp", Types.TIMESTAMP),
-    TIME("time", Types.TIME),
+    NCHAR("nchar", Types.NCHAR, String::class.java),
+    NCLOB("nclob", Types.NCLOB, String::class.java),
+    NVARCHAR("nvarchar", Types.NVARCHAR, String::class.java),
 
-    OBJECT("object", Types.OTHER);
+    DATE("date", Types.DATE, Date::class.java),
+    TIMESTAMP("timestamp", Types.TIMESTAMP, Date::class.java),
+    TIME("time", Types.TIME, Date::class.java),
+
+    OBJECT("object", Types.OTHER, Any::class.java);
 
     companion object{
 
@@ -103,6 +110,41 @@ public enum class DbColumnLogicType private constructor(
 
         // 3 有指定精度
         return "$physicalType($precision, $scale)"
+    }
+
+    /**
+     * 转为java类型
+     *    用于根据表结构来生成model时确定字段的Java类
+     * @param tryPrimitiveType 尝试将 DECIMAL/NUMERIC 转为原始类型, 不过不是很准确, 特别是转为float/double会丢失精度, 生成代码后开发人员手动修正吧
+     * @param precision 长度
+     * @param scale 精度
+     * @return
+     */
+    public open fun toJavaType(tryPrimitiveType: Boolean,  precision: Int? = null, scale: Int? = null): Class<*>{
+        // 对 DECIMAL/NUMERIC 尝试转为原始类型
+        if(tryPrimitiveType && (this == DECIMAL || this == NUMERIC)){
+            if(scale == 0){ // 整型
+                if(precision == null)
+                    return BigInteger::class.java
+
+                // max int: 2147483647 --10位
+                if(precision <= 10)
+                    return Int.javaClass
+
+                // max long: 9223372036854775807 -- 19位
+                if(precision <= 10)
+                    return Long.javaClass
+            }else if(precision != null){ // 浮点型
+                // max float: 340282346638528860000000000000000000000 --39位
+                if(precision <= 39)
+                    return Float.javaClass
+
+                // max double: 179769313486231570000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 -- 309位
+                if(precision <= 309)
+                    return Double.javaClass
+            }
+        }
+        return javaType
     }
 
     /**

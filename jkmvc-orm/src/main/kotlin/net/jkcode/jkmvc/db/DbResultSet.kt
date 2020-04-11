@@ -1,11 +1,9 @@
 package net.jkcode.jkmvc.db
 
-import org.apache.commons.lang.mutable.Mutable
 import java.math.BigDecimal
 import java.sql.Blob
 import java.sql.Clob
 import java.sql.ResultSet
-import java.util.*
 import kotlin.reflect.KClass
 
 /**
@@ -104,6 +102,23 @@ class DbResultSet(
         val obj: Any? = rs.getObject(i)
         if (obj == null)
             return null
+
+        // 常用的直接返回
+        if (obj is Boolean || obj is Int || obj is Long || obj is String || obj is ByteArray)
+            return obj
+
+        // numeric
+        /*if (obj is Number) {
+            if (obj is BigDecimal) {
+                if (obj.scale() == 0)
+                    return obj.toBigInteger()
+
+                // we might loose precision here
+                return obj.toDouble()
+            }
+
+            return obj
+        }*/
 
         // 二进制大对象
         if (obj is Blob)

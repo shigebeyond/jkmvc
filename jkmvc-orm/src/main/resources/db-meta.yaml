@@ -19,15 +19,6 @@ Oracle:
     bigint: number(19,0)
     blob: blob
     clob: clob
-  # 物理类型 -> java类, 用于根据表结构来生成model时确定字段的Java类
-  physicalType2javaClass:
-    NUMBER\(1(,0)?\)|INT: Boolean
-    NUMBER\(\d+(,0)?\)|INT: Int
-    NUMBER\(\d+,\d+\)|FLOAT: Float
-    DOUBLE: Double
-    CHAR|LONG|CLOB|NCLOB|RAW: String
-    DATE|TIMESTAMP: Date
-    BLOB: ByteArray
 #mysql
 Mysql:
   dropTableSql: DROP TABLE IF EXISTS <table>;
@@ -51,16 +42,6 @@ Mysql:
     binary: binary
     blob: longblob
     clob: longtext
-  # 物理类型 -> java类, 用于根据表结构来生成model时确定字段的Java类
-  physicalType2javaClass:
-    bit: Boolean
-    bigint: Long
-    int|decimal\(\d+,0\): Int
-    float: Float
-    double|decimal\(\d+,[1-9]: Double
-    char|text|longtext: String
-    date|datetime|timestamp|time: Date
-    binary|blob: ByteArray
 #sql server
 SqlServer:
   dropTableSql:
@@ -79,13 +60,3 @@ SqlServer:
       varchar: varchar
       blob: varbinary(MAX)
       clob: varchar(MAX)
-  # 物理类型 -> java类, 用于根据表结构来生成model时确定字段的Java类
-  physicalType2javaClass:
-      bit: Boolean
-      bigint: Long
-      int: Int
-      float: Float
-      double|decimal: Double
-      char|text: String
-      date|datetime|timestamp|time: Date
-      binary|blob: ByteArray

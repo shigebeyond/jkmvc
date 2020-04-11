@@ -4,6 +4,7 @@ import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.format
 import net.jkcode.jkutil.common.prepareDirectory
 import net.jkcode.jkmvc.db.Db
+import net.jkcode.jkmvc.db.DbColumn
 import java.io.File
 import java.util.*
 
@@ -38,17 +39,13 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
     }
 
     /**
-     * 获得字段的类型
+     * 获得字段的java类型
+     * @param column 字段
      * @return
      */
-    private fun getType(columnType:String):String{
-        // 物理类型 -> java类, 用于根据表结构来生成model时确定字段的Java类
-        val mapping:Map<String, String> = config["physicalType2javaClass"]!!
-        for((typeRegex, propType) in mapping){
-            if(typeRegex.toRegex(RegexOption.IGNORE_CASE).containsMatchIn(columnType))
-                return propType
-        }
-        return "*"
+    private fun getType(column: DbColumn):String{
+        val clazz = column.logicType.toJavaType(true, column.precision, column.scale)
+        return clazz.name.replace("java.lang.", "")
     }
 
     /**
@@ -92,7 +89,7 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
         for (field in fields){
             if(field.name == "PRI"){
                 val name = field.name
-                val type = getType(field.physicalType!!)
+                val type = getType(field)
                 pks.add(name to type)
             }
         }
@@ -133,7 +130,7 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
         // 遍历字段来生成属性
         for (field in fields){
             val name = getProp(field.name)
-            val type = getType(field.physicalType!!)
+            val type = getType(field)
             val comment = field.comment
             code.append("\n\tpublic var $name:$type by property() // $comment \n")
         }
