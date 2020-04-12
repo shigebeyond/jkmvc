@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkutil.common.decorateIterator
+import net.jkcode.jkutil.common.lcFirst
 import java.io.Serializable
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -137,7 +138,7 @@ public fun Orm?.isLoaded(): Boolean {
  *   假定model类名, 都是以"Model"作为后缀
  */
 public val KClass<out IOrm>.modelName:String
-    get() = this.simpleName!!.removeSuffix("Model").toLowerCase();
+    get() = this.simpleName!!.removeSuffix("Model").lcFirst();
 
 /**
  * 根据模型类来获得模型元数据

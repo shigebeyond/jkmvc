@@ -11,7 +11,6 @@ import net.jkcode.jkutil.common.*
 import net.jkcode.jkutil.validator.IValidator
 import net.jkcode.jkutil.validator.ModelValidateResult
 import net.jkcode.jkutil.validator.ValidateResult
-import net.jkcode.jkutil.xml.IXStreamInitiator
 import java.util.*
 import kotlin.collections.set
 import kotlin.reflect.KClass
@@ -35,7 +34,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
                    public override val cacheMeta: OrmCacheMeta? = null, // 缓存配置
                    public override val dbName: String = "default", // 数据库名
                    public override val pkEmptyRule: PkEmptyRule = PkEmptyRule.default // 检查主键为空的规则
-) : IOrmMeta, IXStreamInitiator {
+) : IOrmMeta {
 
     public constructor(
             model: KClass<out IOrm>, // 模型类
@@ -176,7 +175,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     public override fun convertIntelligent(column:String, value:String):Any?
     {
         // 1 获得属性
-        val prop = model.getProperty(column)
+        val prop = model.getInheritProperty(column)
         if(prop == null)
             throw OrmException("类 ${model} 没有属性: $column");
 
@@ -681,12 +680,37 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         return this;
     }
 
+    /********************************* xstream **************************************/
     /**
-     * 初始化xstream
+     * 初始化xstream, 入口
+     * @param modelNameAsAlias 模型名作为别名
+     * @return
      */
-    override fun initXStream(xstream: XStream) {
-        // orm的转换器
+    public override fun initXStream(modelNameAsAlias: Boolean): XStream {
+        val xstream = XStream()
+        // 1 模型名作为别名
+        if(modelNameAsAlias)
+            xstream.alias(name, model.java)
+        // 2 orm的转换器
         xstream.registerConverter(OrmConverter(xstream))
+        // 3 当前模型的初始化
+        initXStream(xstream)
+        // 4 关联模型的初始化
+        for((name, relation) in relations){
+            val related = relation.ormMeta as OrmMeta
+            // 关联模型名作为别名
+            if(modelNameAsAlias)
+                xstream.alias(related.name, related.model.java)
+            // 关联模型的初始化
+            related.initXStream(xstream)
+        }
+        return xstream
+    }
+
+    /**
+     * 内部初始化xstream, 子类实现
+     */
+    protected open fun initXStream(xstream: XStream) {
     }
 
 }

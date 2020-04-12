@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.orm
 
+import com.thoughtworks.xstream.XStream
 import net.jkcode.jkutil.collection.FixedKeyMapFactory
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkutil.validator.*
@@ -912,4 +913,11 @@ interface IOrmMeta {
         return hasManyThrough(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), middleTable, DbKeyNames(farForeignKey), DbKeyNames(farPrimaryKey), conditions)
     }
 
+    /********************************* xstream **************************************/
+    /**
+     * 初始化xstream
+     * @param modelNameAsAlias 模型名作为别名
+     * @return
+     */
+    fun initXStream(modelNameAsAlias: Boolean = true): XStream
 }

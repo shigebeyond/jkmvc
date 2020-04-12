@@ -6,7 +6,7 @@ import com.thoughtworks.xstream.converters.MarshallingContext
 import com.thoughtworks.xstream.converters.UnmarshallingContext
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
-import net.jkcode.jkutil.common.getPropertyClass
+import net.jkcode.jkutil.common.getInheritPropertyClass
 import net.jkcode.jkutil.common.isSuperClass
 
 /**
@@ -72,10 +72,11 @@ class OrmConverter(protected val xstream: XStream): Converter {
             // value作为节点值
             var value: Any? = reader.value
             // 转换值
-            val propType = item::class.getPropertyClass(key)?.java // 属性类
+            val propType = item::class.getInheritPropertyClass(key)?.java // 属性类
 //            val converter = xstream.mapper.getConverterFromItemType(key, propType, type)
 //            value = converter.fromString(value)
-            value = context.convertAnother(value, propType)
+            if(propType != null)
+                value = context.convertAnother(value, propType)
 
             item[key] = value
             reader.moveUp()

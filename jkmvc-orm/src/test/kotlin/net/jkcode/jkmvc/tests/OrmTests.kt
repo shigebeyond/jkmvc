@@ -232,7 +232,7 @@ class OrmTests{
     }
 
     @Test
-    fun testXstream2Map() {
+    fun testXstream() {
         val user = UserModel()
         user.name = "shi";
         user.age = 12
@@ -242,11 +242,9 @@ class OrmTests{
         address.tel = "110"
         user.address = address // 关联对象引用
 
-        val xstream = XStream()
-        xstream.aliasField("username", UserModel::class.java, "name") // 属性别名
+        val xstream = UserModel.initXStream()
         // 自定义转换器
         //xstream.registerConverter(OrmConverter(xstream))
-        UserModel.initXStream(xstream)
 
         val xml = xstream.toXML(user)
         println("序列化到XML:\n$xml")

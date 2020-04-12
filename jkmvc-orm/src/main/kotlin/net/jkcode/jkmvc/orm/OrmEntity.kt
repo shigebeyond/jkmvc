@@ -220,7 +220,7 @@ abstract class OrmEntity : IOrmEntity, Serializable {
             return false;
 
         // 1 获得属性
-        val prop = this::class.getProperty(column) as KMutableProperty1?
+        val prop = this::class.getInheritProperty(column) as KMutableProperty1?
         if(prop == null)
             return false
 
