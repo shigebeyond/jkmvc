@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.http.router
 
 import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
+import net.jkcode.jkmvc.http.controller.IControllerClassLoader
 import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.httpLogger
 import java.lang.reflect.Method
@@ -37,6 +38,11 @@ object Router: IRouter
 	public val defaultRoute: Route by lazy{
 		routes.last
 	}
+
+	/**
+	 * ControllerClassLoader 必须随着 Router 一起加载, 否则会在路由解析时都未加载controller类及其action方法注解
+	 */
+	private val controllerClassLoader: IControllerClassLoader = ControllerClassLoader
 
 	init {
 		// 加载配置的路由
