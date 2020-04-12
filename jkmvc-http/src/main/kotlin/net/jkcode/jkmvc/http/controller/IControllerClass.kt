@@ -1,7 +1,7 @@
 package net.jkcode.jkmvc.http.controller
 
+import java.lang.reflect.Method
 import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
 
 /**
  * 封装Controller类
@@ -18,13 +18,13 @@ interface IControllerClass{
     /**
      * 所有action方法
      */
-    val actions: Map<String, KFunction<*>>;
+    val actions: Map<String, Method>;
 
     /**
      * 获得action方法
      * @return
      */
-    fun getActionMethod(name:String): KFunction<*>? {
+    fun getActionMethod(name:String): Method? {
         return actions.get(name);
     }
 }

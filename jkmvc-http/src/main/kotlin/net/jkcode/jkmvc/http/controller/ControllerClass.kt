@@ -1,13 +1,16 @@
 package net.jkcode.jkmvc.http.controller
 
-import net.jkcode.jkutil.common.getConstructorOrNull
-import net.jkcode.jkutil.common.lcFirst
 import net.jkcode.jkmvc.http.router.RouteException
 import net.jkcode.jkutil.common.Config
+import net.jkcode.jkutil.common.getConstructorOrNull
+import net.jkcode.jkutil.common.getSignature
+import net.jkcode.jkutil.common.lcFirst
+import java.lang.Throwable
+import java.lang.reflect.Method
 import java.lang.reflect.Modifier
+import java.lang.reflect.Proxy
 import java.util.*
 import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.jvm.javaMethod
 
@@ -35,6 +38,17 @@ class ControllerClass(public override val clazz: KClass<*> /* controller类 */):
             Class.forName(clazz).newInstance() as MethodRouteDetector
         }
 
+        /**
+         * 忽略的方法
+         */
+        public val ignoreMethods: Array<String> = arrayOf(
+                "before()",
+                "after()",
+                "hashCode()",
+                "toString()",
+                "equals(Object)"
+        )
+
     }
 
     /**
@@ -49,7 +63,7 @@ class ControllerClass(public override val clazz: KClass<*> /* controller类 */):
     /**
      * 所有action方法
      */
-    public override val actions: MutableMap<String, KFunction<*>> = HashMap();
+    public override val actions: MutableMap<String, Method> = HashMap();
 
     init{
         // 检查默认构造函数
@@ -65,13 +79,21 @@ class ControllerClass(public override val clazz: KClass<*> /* controller类 */):
      */
     private fun parseActionMethods() {
         for (func in clazz.memberFunctions) {
-            if (Modifier.isPublic(func.javaMethod!!.modifiers) || func.parameters.isEmpty()) { // public + 无参数
+            val method = func.javaMethod!!
+            // 忽略方法
+            val methodSignature = method.getSignature()
+            if(ignoreMethods.contains(methodSignature))
+                continue
+
+            // 过滤action方法: public + 无参数
+            if (Modifier.isPublic(method.modifiers)
+                    && method.parameterCount == 0) {
                 // action名 = 方法名
-                val action = func.name
+                val action = method.name
                 // 缓存action
-                actions[action] = func;
+                actions[action] = method;
                 // 检测路由注解
-                methodRoutDetector.detect(name, action, func.javaMethod!!)
+                methodRoutDetector.detect(name, action, method)
             }
         }
     }

@@ -9,7 +9,6 @@ import net.jkcode.jkmvc.http.router.RouteException
 import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.httpLogger
 import net.jkcode.jkutil.common.trySupplierFuture
-import net.jkcode.jkutil.common.ucFirst
 import net.jkcode.jkutil.interceptor.RequestInterceptorChain
 import net.jkcode.jkutil.scope.GlobalHttpRequestScope
 import java.lang.reflect.Method
@@ -18,8 +17,6 @@ import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import kotlin.reflect.KFunction
-import kotlin.reflect.jvm.javaMethod
 
 /**
  * http请求处理者
@@ -84,7 +81,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
 
         // 1 先解析路由: 因为interceptors可能依赖路由信息
         if (!req.parseRoute())
-            throw RouteException("当前uri没有匹配路由：" + req.requestURI);
+            throw RouteException("当前uri没有匹配路由：" + req.routeUri);
         if(debug)
             httpLogger.debug("当前uri匹配路由: controller=[{}], action=[{}]", req.controller, req.action)
 
@@ -118,7 +115,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
             throw RouteException("Controller类不存在：" + req.controller);
 
         // 2 获得action方法
-        val action: KFunction<*>? = clazz.getActionMethod(req.action);
+        val action: Method? = clazz.getActionMethod(req.action);
         if (action == null)
             throw RouteException("控制器${req.controller}不存在方法：${req.action}()");
 
@@ -130,7 +127,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
 
         // 4 调用controller的action方法
         //return controller.callActionMethod(action.javaMethod!!)
-        return guardInvoke(action.javaMethod!!, controller, emptyArray())
+        return guardInvoke(action, controller, emptyArray())
     }
 
     /**

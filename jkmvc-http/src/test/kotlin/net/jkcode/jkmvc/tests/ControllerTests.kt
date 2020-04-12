@@ -1,5 +1,7 @@
 package net.jkcode.jkmvc.tests
 
+import net.jkcode.jkmvc.http.controller.Controller
+import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkutil.common.travel
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
 import org.junit.Test
@@ -54,4 +56,16 @@ class ControllerTests{
         ControllerClassLoader.addPackage("net.jkcode.jkmvc.example.controller");
         println(ControllerClassLoader.get("user"))
     }
+
+    @Test
+    fun testControllerClass(){
+        val cc = ControllerClass(TestController::class)
+        cc.actions.forEach { (name, method) ->
+            println(name)
+        }
+    }
+}
+
+class TestController: Controller(){
+    fun index(){}
 }

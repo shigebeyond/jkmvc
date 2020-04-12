@@ -4,9 +4,8 @@ import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
 import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.httpLogger
+import java.lang.reflect.Method
 import java.util.*
-import kotlin.reflect.KFunction
-import kotlin.reflect.jvm.javaMethod
 
 /**
  * 路由器
@@ -109,10 +108,10 @@ object Router: IRouter
 		// 1 获得controller类
 		val clazz: ControllerClass? = ControllerClassLoader.get(params["controller"]!!);
 		// 2 获得action方法
-		val action: KFunction<*>? = clazz?.getActionMethod(params["action"]!!);
+		val action: Method? = clazz?.getActionMethod(params["action"]!!);
 		// 3 匹配路由注解的方法
 		if (action != null) {
-			val routeMethod = action.javaMethod!!.route?.method
+			val routeMethod = action.route?.method
 			if (routeMethod != null && !routeMethod.match(method)) // 匹配方法
 				return false
 		}
