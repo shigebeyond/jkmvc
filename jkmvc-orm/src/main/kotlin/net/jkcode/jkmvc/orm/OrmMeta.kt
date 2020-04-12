@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.orm
 
+import com.thoughtworks.xstream.XStream
 import net.jkcode.jkmvc.db.Db
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.model.GeneralModel
@@ -10,6 +11,7 @@ import net.jkcode.jkutil.common.*
 import net.jkcode.jkutil.validator.IValidator
 import net.jkcode.jkutil.validator.ModelValidateResult
 import net.jkcode.jkutil.validator.ValidateResult
+import net.jkcode.jkutil.xml.IXStreamInitiator
 import java.util.*
 import kotlin.collections.set
 import kotlin.reflect.KClass
@@ -33,7 +35,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
                    public override val cacheMeta: OrmCacheMeta? = null, // 缓存配置
                    public override val dbName: String = "default", // 数据库名
                    public override val pkEmptyRule: PkEmptyRule = PkEmptyRule.default // 检查主键为空的规则
-) : IOrmMeta {
+) : IOrmMeta, IXStreamInitiator {
 
     public constructor(
             model: KClass<out IOrm>, // 模型类
@@ -677,6 +679,14 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         }
 
         return this;
+    }
+
+    /**
+     * 初始化xstream
+     */
+    override fun initXStream(xstream: XStream) {
+        // orm的转换器
+        xstream.registerConverter(OrmConverter(xstream))
     }
 
 }

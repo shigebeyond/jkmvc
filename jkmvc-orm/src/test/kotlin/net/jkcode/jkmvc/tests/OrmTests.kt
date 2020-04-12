@@ -1,10 +1,12 @@
 package net.jkcode.jkmvc.tests
 
+import com.thoughtworks.xstream.XStream
 import net.jkcode.jkmvc.db.Db
 import net.jkcode.jkmvc.model.GeneralModel
 import net.jkcode.jkmvc.orm.*
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.tests.model.*
+import net.jkcode.jkutil.xml.StringMapConverter
 import org.junit.Test
 
 class OrmTests{
@@ -227,6 +229,30 @@ class OrmTests{
         u2.removeRelations("parcelSenders", u1)
         println("${u1.id} 有收件人${u2.id}? " + u1.hasRelation("parcelReceivers", u2))
         println("${u2.id} 有寄件人${u1.id}? " + u2.hasRelation("parcelSenders", u1))
+    }
+
+    @Test
+    fun testXstream2Map() {
+        val user = UserModel()
+        user.name = "shi";
+        user.age = 12
+
+        val address = AddressModel()
+        address.addr = "nanning"
+        address.tel = "110"
+        user.address = address // 关联对象引用
+
+        val xstream = XStream()
+        xstream.aliasField("username", UserModel::class.java, "name") // 属性别名
+        // 自定义转换器
+        //xstream.registerConverter(OrmConverter(xstream))
+        UserModel.initXStream(xstream)
+
+        val xml = xstream.toXML(user)
+        println("序列化到XML:\n$xml")
+
+        val obj = xstream.fromXML(xml)
+        println("反序列化Bean:\n$obj")
     }
 
 }
