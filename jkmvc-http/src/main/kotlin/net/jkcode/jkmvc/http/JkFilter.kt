@@ -96,13 +96,6 @@ open class JkFilter() : Filter {
     }
 
     /**
-     * 从filter配置的<url-pattern>中解析出url前缀
-     */
-    protected fun parseUrlPrefix(){
-
-    }
-
-    /**
      * 执行过滤
      */
     override fun doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) {

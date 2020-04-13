@@ -4,6 +4,7 @@ import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jkutil.collection.LazyAllocatedMap
+import net.jkcode.jkutil.common.DegradeCommandException
 import java.io.File
 import java.lang.reflect.Method
 import java.util.concurrent.CompletableFuture
@@ -59,14 +60,20 @@ interface IController{
      * @param action action方法
      */
     public fun callActionMethod(action: Method): Any? {
-        // 前置处理
-        before()
+        var result: Any? = null
+        try {
+            // 前置处理
+            before()
 
-        // 执行真正的处理方法
-        val result = action.invoke(this);
+            // 执行真正的处理方法
+            result = action.invoke(this);
 
-        // 后置处理
-        after()
+            // 后置处理
+            after()
+        }catch (ex: DegradeCommandException){
+            // 异常降级处理
+            result = ex.handleFallback()
+        }
 
         // 渲染结果
         if(result is CompletableFuture<*>)

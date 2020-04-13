@@ -156,9 +156,15 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 
 	/*************************** 合并http参数+路由参数 *****************************/
 	/**
+	 * 原始的请求参数
+	 */
+	public val httpParams: Map<String, Array<String>>
+		get() = req.getParameterMap()
+
+	/**
 	 * 全部参数 = 路由参数 + 请求参数
 	 */
-	protected val params: Map<String, Array<String>> by lazy{
+	protected val allParams: Map<String, Array<String>> by lazy{
 		mergeRouteParams()
 	}
 
@@ -183,15 +189,15 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	}
 
 	override fun getParameterMap(): Map<String, Array<String>> {
-		return params
+		return allParams
 	}
 
 	override fun getParameterNames(): Enumeration<String> {
-		return params.keys.enumeration()
+		return allParams.keys.enumeration()
 	}
 
 	override fun getParameterValues(key: String): Array<String>? {
-		return params[key]
+		return allParams[key]
 	}
 
 	/*************************** 参数的获取/判断/校验 *****************************/
@@ -269,7 +275,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 *    将value类型Array<String?>转为String
 	 */
 	public val validatingParams:Map<String, String?> by lazy{
-		HttpParamMap(params)
+		HttpParamMap(allParams)
 	}
 
 	/**
