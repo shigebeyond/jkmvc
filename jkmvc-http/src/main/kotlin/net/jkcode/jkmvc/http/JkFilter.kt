@@ -121,7 +121,7 @@ open class JkFilter() : Filter {
         }
 
         // 1 异步处理
-        if(req.isAsyncSupported) {
+        if(req.isAsyncSupported && !config.getBoolean("debug")!!) {
             // 异步上下文, 在完成异步操作后, 需要调用 actx.complete() 来关闭异步响应, 调用下放到 RequestHandler.handle()
             val actx = req.startAsync(req, res)
 

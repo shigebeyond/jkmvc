@@ -32,7 +32,11 @@ object ControllerClassLoader : IControllerClassLoader, ClassScanner() {
      */
     private val controllerClasses:MutableMap<String, ControllerClass> = HashMap()
 
-    init{
+    /**
+     * 加载controller类
+     *    在 Router 初始化时调用
+     */
+    public fun load(){
         // 加载配置的包路径
         val pcks:List<String>? = config["controllerPackages"]
         // 扫描包: 做了去重

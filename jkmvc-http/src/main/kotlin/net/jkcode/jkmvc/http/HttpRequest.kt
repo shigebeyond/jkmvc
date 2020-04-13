@@ -558,8 +558,8 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	/**
 	 * 会话id
 	 */
-	public val sessionId: String
-		get() = getCookie("JSESSIONID").value
+	public val sessionId: String?
+		get() = getCookie("JSESSIONID")?.value
 
 	/**
 	 * 获得cookie值
@@ -572,8 +572,8 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 * @param  default    默认值
 	 * @return
 	 */
-	public fun getCookie(name:String): Cookie {
-		return this.cookies.first(){
+	public fun getCookie(name:String): Cookie? {
+		return this.cookies?.firstOrNull{
 			it.name == name
 		}
 	}

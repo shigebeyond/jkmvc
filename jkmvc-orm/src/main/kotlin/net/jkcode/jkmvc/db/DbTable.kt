@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.db
 
 import net.jkcode.jkutil.common.Config
+import net.jkcode.jkutil.common.dbLogger
 import net.jkcode.jkutil.common.replacesFormat
 import java.util.LinkedHashMap
 
@@ -54,12 +55,16 @@ open class DbTable(
         // 1 如果表存在则改表
         if(db.queryTableExist(name)){
             val sqls = generateAlterTableSqls(db)
-            for (sql in sqls)
+            for (sql in sqls) {
+                dbLogger.info("改表[{}]: {}", name, sql)
                 db.execute(sql)
+            }
+            return
         }
 
         // 2 否则建表
         val sql = generateCreateTableSql(db)
+        dbLogger.info("建表[{}]: {}", name, sql)
         db.execute(sql)
     }
 

@@ -2,7 +2,6 @@ package net.jkcode.jkmvc.http.router
 
 import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
-import net.jkcode.jkmvc.http.controller.IControllerClassLoader
 import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.httpLogger
 import java.lang.reflect.Method
@@ -33,19 +32,12 @@ object Router: IRouter
 
 	/**
 	 * 默认路由
-	 *    由于路由倒序, 则最后一个路由为默认路由, 应该配置文件 routes.yaml 中的 default 路由
+	 *    配置文件 routes.yaml 中的 default 路由
 	 */
-	public val defaultRoute: Route by lazy{
-		routes.last
-	}
-
-	/**
-	 * ControllerClassLoader 必须随着 Router 一起加载, 否则会在路由解析时都未加载controller类及其action方法注解
-	 */
-	private val controllerClassLoader: IControllerClassLoader = ControllerClassLoader
+	public lateinit var defaultRoute: Route
 
 	init {
-		// 加载配置的路由
+		// 1. 加载配置的路由, 包含默认路由
 		val props = config.props as Map<String, Map<String, *>>
 		for ((name, item) in props) {
 			// url正则
@@ -55,8 +47,16 @@ object Router: IRouter
 			// 参数正则
 			val defaults = item["defaults"] as Map<String, String>
 			// 添加路由规则
-			addRoute(name, Route(regex, paramRegex, defaults))
+			val route = Route(regex, paramRegex, defaults)
+			addRoute(name, route)
+			// 识别默认路由
+			if(name == "default")
+				this.defaultRoute = route
 		}
+
+		// 2 加载controller类中注解定义的路由
+		// ControllerClassLoader 必须随着 Router 一起加载, 否则会在路由解析时都未加载controller类及其action方法注解
+		ControllerClassLoader.load()
 	}
 
 	/**

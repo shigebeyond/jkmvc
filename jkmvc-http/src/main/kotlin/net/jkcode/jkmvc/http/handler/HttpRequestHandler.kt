@@ -81,9 +81,9 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
 
         // 1 先解析路由: 因为interceptors可能依赖路由信息
         if (!req.parseRoute())
-            throw RouteException("当前uri没有匹配路由：" + req.routeUri);
+            throw RouteException("当前uri [${req.routeUri}] 没有匹配路由");
         if(debug)
-            httpLogger.debug("当前uri匹配路由: controller=[{}], action=[{}]", req.controller, req.action)
+            httpLogger.debug("当前uri [{}] 匹配路由: controller=[{}], action=[{}]", req.routeUri, req.controller, req.action)
 
         // 2 包装请求作用域的处理
         GlobalHttpRequestScope.sttlWrap {

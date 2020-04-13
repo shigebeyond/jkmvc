@@ -59,6 +59,14 @@ abstract class OrmValid : IOrm, OrmEntity() {
     }
 
     /**
+     * 检查字段是否为脏
+     * @param column 字段名
+     */
+    public override fun isDirty(column: String): Boolean {
+        return _dirty.containsKey(column)
+    }
+
+    /**
      * 校验数据
      * @return
      */

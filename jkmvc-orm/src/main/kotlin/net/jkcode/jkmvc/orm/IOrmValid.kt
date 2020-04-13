@@ -31,4 +31,10 @@ interface IOrmValid : IOrmEntity {
      */
     fun setDirty(column: String)
 
+    /**
+     * 检查字段是否为脏
+     * @param column 字段名
+     */
+    fun isDirty(column: String): Boolean
+
 }
