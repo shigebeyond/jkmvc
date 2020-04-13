@@ -28,56 +28,33 @@ isPost(): Boolean | check whether post request
 isStaticFile(): Boolean | check whether static file request
 isUpload(): Boolean | check whether upload request
 
-3. get routing parameter
+3. Get `get/post/route` parameter
 
 method | usage
 --- | ---
-containsRouteParameter(key: String): Boolean | Check whether contains rouinge parameter
-isEmptyRouteParameter(key: String): Boolean | Check whether routing parameter is empty
-getRouteParameter(key: String, defaultValue: T? = null): T? | Get routing parameter，Note: call it with a explicit  return type, so it will convert the parameter value to the specified type
-getBooleanRouteParameter(key: String, defaultValue: Boolean? = null): Boolean? | Get boolean type of routing parameter
-getDateRouteParameter(key: String, defaultValue: Date? = null): Date? | Get Date type of routing parameter
-getDoubleRouteParameter(key: String, defaultValue: Double? = null): Double? | Get double type of routing parameter
-getFloatRouteParameter(key: String, defaultValue: Float? = null): Float? | Get float type of routing parameter
-getIntRouteParameter(key: String, defaultValue: Int? = null): Int? | Get int type of routing parameter
-getLongRouteParameter(key: String, defaultValue: Long? = null): Long? | Get long type of routing parameter
-getShortRouteParameter(key: String, defaultValue: Short? = null): Short? | Get short type of routing parameter
+contains(key: String): Boolean | Check whether contains `get/post/route` parameter
+isEmpty(key: String): Boolean | Check whether `get/post/route` parameter is empty
+getParameter(key: String): String? | Get `get/post/route` parameter
+get(key: String, defaultValue: T?): T? | Get `get/post/route` parameter，Note: call it with a explicit  return type, so it will convert the parameter value to the specified type
+getBoolean(key: String, defaultValue: Boolean? = null): Boolean? | Get boolean type of `get/post/route` parameter
+getDate(key: String, defaultValue: Date? = null): Date? | Get Date type of `get/post/route` parameter
+getDouble(key: String, defaultValue: Double? = null): Double? | Get double type of `get/post/route` parameter
+getFloat(key: String, defaultValue: Float? = null): Float? | Get float type of `get/post/route` parameter
+getInt(key: String, defaultValue: Int? = null): Int? | Get int type of `get/post/route` parameter
+getLong(key: String, defaultValue: Long? = null): Long? | Get long type of `get/post/route` parameter
+getShort(key: String, defaultValue: Short? = null): Short? | Get short type of `get/post/route` parameter
 
-4. Get `get/post` parameter
-
-method | usage
---- | ---
-containsParameter(key: String): Boolean | Check whether contains `get/post` parameter 
-isEmptyParameter(key: String): Boolean | Check whether `get/post` parameter is empty
-getParameter(key: String, defaultValue: T?): T? | Get `get/post` parameter，Note: call it with a explicit  return type, so it will convert the parameter value to the specified type
-getParameter(key: String): String? | Get `get/post` parameter 
-getBooleanParameter(key: String, defaultValue: Boolean? = null): Boolean? | Get boolean type of `get/post` parameter
-getDateParameter(key: String, defaultValue: Date? = null): Date? | Get Date type of `get/post` parameter
-getDoubleParameter(key: String, defaultValue: Double? = null): Double? | Get double type of `get/post` parameter
-getFloatParameter(key: String, defaultValue: Float? = null): Float? | Get float type of `get/post` parameter
-getIntParameter(key: String, defaultValue: Int? = null): Int? | Get int type of `get/post` parameter
-getLongParameter(key: String, defaultValue: Long? = null): Long? | Get long type of `get/post` parameter
-getShortParameter(key: String, defaultValue: Short? = null): Short? | Get short type of `get/post` parameter
-
-5. Get uploaded file
+4. Get uploaded file
 
 method | usage
 --- | ---
 getPartFile(name: String): File? | Get a uploaded file
 storePartFileAndGetRelativePath(name: String): String | Save a uploaded file, and return its relative path where file is saved
 
-6. File Path vs Url
+5. File Path vs Url
 
 method | usage
 --- | ---
 getFileRelativePath(file: String): String | Obtain an relative path based on file
 getUploadUrl(relativePath: String): String | Obtain an absolute url based on the uploaded file's relative path
-
-7. Get request parameter（including routing paramter and `get/post` parameter）
-
-method | usage
---- | ---
-contains(key: String): Boolean | Check whether contains parameter
-isEmpty(key: String): Boolean | Check whether parameter is empty
-get(key: String, defaultValue: T? = null): T? | Get request parameter，Note: call it with a explicit  return type, so it will convert the parameter value to the specified type
 

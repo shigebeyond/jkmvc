@@ -87,7 +87,7 @@ Action 操作，其实就是控制器的一个public方法
 
 ## 6 路由参数
 
-你可以通过 `req.getRouteParameter('name')` 来访问路由参数，其中 `name` 是定义在路由规则中的参数名
+你可以通过 `req.get("name")` 或 `req.getParameter("name")` 来访问路由参数，其中 `name` 是定义在路由规则中的参数名
 
 ### 6.1 定义路由规则
 
@@ -112,9 +112,9 @@ default:
 ```
 	public function detail()
 	{
-		val id:Int = req.getRouteParameter('id');
-		val action:String = req.getRouteParameter('action');
-		val username:String = req.getRouteParameter('username', null); // 第二个参数设置默认值
+		val id:Int = req.get('id');
+		val action:String = req.get('action');
+		val username:String = req.get('username', null); // 第二个参数设置默认值
 	}
 ```
 
@@ -141,7 +141,7 @@ class UserController: Controller()
     public fun detail()
     {
         // 获得路由参数id: 2种写法
-        // val id = req.getIntRouteParameter("id"); // req.getRouteParameter["xxx"]
+        // val id = req.getInt("id");
         val id:Int? = req["id"] // req["xxx"]
         // 查询单个用户
         //val user = UserModel.queryBuilder().where("id", id).findModel<UserModel>()

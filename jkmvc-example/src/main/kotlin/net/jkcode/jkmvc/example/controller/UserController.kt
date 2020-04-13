@@ -58,7 +58,7 @@ class UserController: Controller()
     public fun detail()
     {
         // 获得路由参数id: 2种写法 | 2 ways to get route parameter: "id"
-        // val id = req.getIntRouteParameter("id"); // req.getRouteParameter["xxx"]
+        // val id = req.getInt("id");
         val id:Int? = req["id"] // req["xxx"]
         // 查询单个用户 | find a user
         //val user = UserModel.queryBuilder().where("id", id).findModel<UserModel>()
@@ -86,7 +86,7 @@ class UserController: Controller()
             // 获得请求参数：3种写法 | 3 ways to get request parameter
             /* // 1 req.getParameter("xxx");
             user.name = req.getParameter("name")!!;
-            user.age = req.getIntParameter("age", 0)!!; // 带默认值 | default value
+            user.age = req.getInt("age", 0)!!; // 带默认值 | default value
             */
             // 2 req["xxx"]
             user.name = req["name"]!!;
@@ -121,7 +121,7 @@ class UserController: Controller()
             // 获得请求参数：3种写法 | 3 way to get request parameter
             /* // 1 req.getParameter("xxx");
             user.name = req.getParameter("name")!!;
-            user.age = req.getIntParameter("age", 0)!!; // 带默认值 | default value
+            user.age = req.getInt("age", 0)!!; // 带默认值 | default value
             */
             /*// 2 req["xxx"]
             user.name = req["name"]!!;

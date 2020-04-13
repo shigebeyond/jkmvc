@@ -74,7 +74,7 @@ uri | controller#action
 / | WelcomeController#index()
 user | UserController#index()
 user/detail | UserController#detail()
-user/detail/1 | UserController#detail()，其中通过`req.req.getIntRouteParameter("id")` 可获得id参数值为1
+user/detail/1 | UserController#detail()，其中通过`req.req.getInt("id")` 可获得id参数值为1
 
 ## 2 获得路由参数
 
@@ -92,17 +92,18 @@ user/detail/1 | UserController#detail()，其中通过`req.req.getIntRouteParame
 	HttpRequest.current().directory;
 ```
 
-而其他路由参数，可以通过 `HttpRequest::getRouteParameter(key)` 来访问
+而其他路由参数，可以通过 `HttpRequest::get(key)` 或 `HttpRequest::getParameter(key)` 来访问
 
 ```
 	// 在 `Controller` 内:
-	req.getRouteParameter('key_name');
+	req.get('key_name'); // 返回泛型类型
+	req.getParameter('key_name'); // 返回 String 类型
 
 	// 在任何地方:
-	HttpRequest.current().getRouteParameter('key_name');
+	HttpRequest.current().get('key_name');
 ```
 
-在`HttpRequest.getRouteParameter(key, default)` 方法中，第二个参数是可选的，用来指定一个默认的返回值. 当路由参数中不存在名为 key 的参数，就会返回这个默认值。 如果没有给出 key，则返回所有的路由参数。
+在`HttpRequest.get(key, default)` 方法中，第二个参数是可选的，用来指定一个默认的返回值. 当路由参数中不存在名为 key 的参数，就会返回这个默认值。
 
 给出例子:
 
@@ -120,14 +121,14 @@ default:
     action: index
 ```
 
-如果当前url匹配该路由，则调用 `AdsController::index()` 来处理请求。在 Controller 中你可以通过 `req.getRouteParameter(key)` 来访问路由参数：
+如果当前url匹配该路由，则调用 `AdsController::index()` 来处理请求。在 Controller 中你可以通过 `req.get(key)` 或 `req.getParameter(key)` 来访问路由参数：
 
 ```
 class WelcomeController: Controller() {
 
     public fun index() {
-        val ad:String = req.getRouteParameter("ad")!!
-        val affiliate:String? = req.getRouteParameter("affiliate", null) // 第二个参数用来设置参数默认值
+        val ad:String = req.get("ad")!!
+        val affiliate:String? = req.get("affiliate", null) // 第二个参数用来设置参数默认值
     }
 }
 ```

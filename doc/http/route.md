@@ -72,7 +72,7 @@ uri | controller#action
 / | WelcomeController#index()
 user | UserController#index()
 user/detail | UserController#detail()
-user/detail/1 | UserController#detail()，you can call `req.req.getIntRouteParameter("id")` to get route parameter `id`
+user/detail/1 | UserController#detail()，you can call `req.req.getInt("id")` to get route parameter `id`
 
 ## 2 Get routing parameters
 
@@ -90,17 +90,18 @@ The `controller` and `action` can be accessed from the [HttpRequest](request.md)
 	HttpRequest.current().directory;
 ```
 
-All other keys specified in a route can be accessed via `HttpRequest::getRouteParameter(key)`:
+All other keys specified in a route can be accessed via `HttpRequest::get(key)` or `HttpRequest::getParameter(key)`:
 
 ```
 	// From within a controller:
-	req.getRouteParameter('key_name');
+	req.get('key_name'); // return T
+	req.getParameter('key_name'); // return String
 
 	// Can be used anywhere:
-	HttpRequest.current().getRouteParameter('key_name');
+	HttpRequest.current().get('key_name');
 ```
 
-The `HttpRequest.getRouteParameter(key, default)` method takes an optional second argument to specify a default return value in case the key is not set by the route. If no arguments are given, all keys are returned as an associative array.
+The `HttpRequest.get(key, default)` method takes an optional second argument to specify a default return value in case the key is not set by the route. If no arguments are given, all keys are returned as an associative array.
 
 For example, with the following route:
 
@@ -118,14 +119,14 @@ default:
     action: index
 ```
 
-If a url matches the route, then `AdsController::index()` will be called.  You can access the parameters by using  `req.getRouteParameter(key)` in controller.
+If a url matches the route, then `AdsController::index()` will be called.  You can access the parameters by using  `req.get(key)` or `req.getParameter(key)` in controller.
 
 ```
 class WelcomeController: Controller() {
 
     public fun index() {
-        val ad:String = req.getRouteParameter("ad")!!
-        val affiliate:String? = req.getRouteParameter("affiliate", null) // second parameter for default value
+        val ad:String = req.get("ad")!!
+        val affiliate:String? = req.get("affiliate", null) // second parameter for default value
     }
 }
 ```

@@ -90,7 +90,7 @@ A very basic action method that simply loads a [view](view.md) file.
 
 ## 6 Route parameters
 
-Route parameters are accessed by calling `req.getRouteParameter('name')` where `name` is the name defined in the route.
+Route parameters are accessed by calling `req.get('name')` or `req.getParameter('name')` where `name` is the parameter name defined in the route.
 
 ### 6.1 Define routing configuration
 
@@ -115,9 +115,9 @@ default:
 ```
 	public function detail()
 	{
-		val id:Int = req.getRouteParameter('id');
-		val action:String = req.getRouteParameter('action');
-		val username:String = req.getRouteParameter('username', null); // the second parameter will give default value if that param is not set.
+		val id:Int = req.get('id');
+		val action:String = req.get('action');
+		val username:String = req.get('username', null); // the second parameter will give default value if that param is not set.
 ```
 
 ## 7 `res`属性
@@ -142,7 +142,7 @@ class UserController: Controller()
     public fun detail()
     {
         // 2 ways to get route parameter: "id"
-        // val id = req.getIntRouteParameter("id"); // req.getRouteParameter["xxx"]
+        // val id = req.getInt("id");
         val id:Int? = req["id"] // req["xxx"]
         // find a user
         //val user = UserModel.queryBuilder().where("id", id).findModel<UserModel>()
