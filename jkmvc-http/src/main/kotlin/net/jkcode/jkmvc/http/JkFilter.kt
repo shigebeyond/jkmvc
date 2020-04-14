@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.http
 
 import net.jkcode.jkmvc.http.handler.HttpRequestHandler
 import net.jkcode.jkutil.common.*
+import java.io.FileNotFoundException
 import java.lang.IllegalStateException
 import java.util.concurrent.RejectedExecutionException
 import javax.servlet.*
@@ -25,12 +26,7 @@ open class JkFilter() : Filter {
         /**
          * 静态文件的扩展名
          */
-        protected val staticFileExts = config.getString("staticFileExts", "gif|jpg|jpeg|png|bmp|ico|swf|js|css|eot|ttf|woff")
-
-        /**
-         * 静态文件uri的正则
-         */
-        protected val staticFileRegex: Regex = config.getString("staticFileExtsends", ".*\\.($staticFileExts)$")!!.toRegex(RegexOption.IGNORE_CASE)
+        protected val staticFileExts: List<String> = config.getString("staticFileExts", "gif|jpg|jpeg|png|bmp|ico|swf|js|css|eot|ttf|woff")!!.split('|')
 
         /**
          * 插件配置
@@ -68,15 +64,15 @@ open class JkFilter() : Filter {
      * 初始化
      */
     override fun init(filterConfig: FilterConfig) {
-        // 单例
+        // 1 单例
         if(inst != null)
             throw IllegalStateException("Only 1 JkFilter can exist")
         inst = this
 
-        // 记录servletContext -- fix bug: jetty异步请求后 req.contextPath/req.servletContext 居然为null, 因此直接在 JkFilter.init() 时记录 contextPath, 反正他是全局不变的
+        // 2 记录servletContext -- fix bug: jetty异步请求后 req.contextPath/req.servletContext 居然为null, 因此直接在 JkFilter.init() 时记录 contextPath, 反正他是全局不变的
         servletContext = filterConfig.servletContext
 
-        //根据filter配置的<url-pattern>(假定只有一个), 解析出url前缀
+        // 3 根据filter配置的<url-pattern>(假定只有一个), 解析出url前缀
         val reg: FilterRegistration = servletContext.getFilterRegistration(filterConfig.filterName)
         val urlPattern = reg.urlPatternMappings.first()
         // <url-pattern>规范: https://stackoverflow.com/questions/24652893/url-pattern-in-tomcat-and-jetty
@@ -91,8 +87,7 @@ open class JkFilter() : Filter {
         else
             urlPrefix = ""
 
-
-        // 初始化插件
+        // 4 初始化插件
         for(p in plugins)
             p.start()
     }
@@ -100,11 +95,18 @@ open class JkFilter() : Filter {
     /**
      * 执行过滤
      */
-    override fun doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) {
-        //　静态文件请求，则交给下一个filter来使用默认servlet来处理
-        if(staticFileRegex.matches((req as HttpServletRequest).requestURI)) {
-            chain.doFilter(req, res)
-            return;
+    override fun doFilter(req0: ServletRequest, res: ServletResponse, chain: FilterChain) {
+        var req = req0 as HttpServletRequest
+        // include内部请求
+        if(req.dispatcherType == DispatcherType.INCLUDE){
+            req = IncludedRequest(req0) // 封装include请求, 其中 req0 是HttpRequest
+        }else {
+            //　静态文件请求，则交给下一个filter来使用默认servlet来处理
+            val ext = req.requestURI.substringAfterLast('.') // 获得后缀
+            if (staticFileExts.contains(ext)) { // 检查后缀
+                chain.doFilter(req, res)
+                return;
+            }
         }
 
         // bug: 上传文件报错: No multipart config for servlet
