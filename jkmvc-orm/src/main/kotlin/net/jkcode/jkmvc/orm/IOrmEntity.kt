@@ -46,7 +46,7 @@ interface IOrmEntity {
      * @return
      */
     public fun <T: Map<*, *>> mapProperty(vararg keys: String): ReadWriteProperty<IOrmEntity, T> {
-        return OrmMapPropDelegater.instance(DbKeyNames(keys as Array<String>)) as ReadWriteProperty<IOrmEntity, T>;
+        return OrmMapPropDelegater.instance(DbKeyNames(*keys)) as ReadWriteProperty<IOrmEntity, T>;
     }
 
     /**

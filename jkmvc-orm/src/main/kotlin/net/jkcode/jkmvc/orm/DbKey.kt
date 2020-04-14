@@ -23,38 +23,32 @@ import java.util.*
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-17 7:13 PM
  */
-data class DbKey<T>(val columns: Array<T>) {
+class DbKey<T> {
 
     companion object {
         /**
          * 空主键
          */
-        internal val empty:DbKey<*> = DbKey<Any>(emptyArray())
+        internal val empty:DbKey<*> = DbKey<Any>()
     }
 
-    // wrong: 主构造函数签名相同冲突
-    //public constructor(vararg cols:T):this(cols)
+    public lateinit var columns: Array<T>
 
-    // 逐个实现1个参数/2个参数/3个参数的构造函数
-    public constructor(a: T):this(toArray(a))
-
-    public constructor(a: T, b:T):this(toArray(a, b))
-
-    public constructor(a: T, b:T, c:T):this(toArray(a, b, c))
-
-    public constructor(a: T, b:T, c:T, d:T):this(toArray(a, b, c, d))
-
-    public constructor(a: T, b:T, c:T, d:T, e: T):this(toArray(a, b, c, d, e))
-
+    public constructor(vararg columns: T){
+        this.columns = columns as Array<T>
+    }
     /**
      * 字段个数
      */
-    public val size = columns.size
+    public val size
+        get() = columns.size
 
     /**
      * 第一个字段
      */
-    public fun first() = columns.first()
+    public fun first(): T {
+        return columns.first()
+    }
 
     /**
      * 遍历并生成新的主键
@@ -67,7 +61,7 @@ data class DbKey<T>(val columns: Array<T>) {
         forEachColumn { i, v ->
             newKeys[i] = transform(columns[i])
         }
-        return DbKey<R>(newKeys)
+        return DbKey(*newKeys)
     }
 
     /**
@@ -81,7 +75,7 @@ data class DbKey<T>(val columns: Array<T>) {
         forEachColumnWith(other){ col1, col2, i ->
             newKeys[i] = transform(col1, col2)
         }
-        return DbKey<R>(newKeys)
+        return DbKey(*newKeys)
     }
 
     /**
