@@ -10,6 +10,20 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpSession
 import javax.servlet.http.Part
 
+/****************************** HttpSession扩展 *******************************/
+
+/**
+ * 获得并删除属性
+ * @param key
+ * @return
+ */
+fun HttpSession.getAndRemoveAttribute(key: String): Any?{
+    val result = getAttribute(key)
+    if(result != null)
+        removeAttribute(key)
+    return result
+}
+
 /****************************** HttpServletRequest扩展 *******************************/
 
 /**

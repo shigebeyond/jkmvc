@@ -25,12 +25,12 @@ open class JkFilter() : Filter {
         /**
          * 静态文件的扩展名
          */
-        protected val staticFileExt = config.getString("staticFileExt", "gif|jpg|jpeg|png|bmp|ico|swf|js|css|eot|ttf|woff")
+        protected val staticFileExts = config.getString("staticFileExts", "gif|jpg|jpeg|png|bmp|ico|swf|js|css|eot|ttf|woff")
 
         /**
          * 静态文件uri的正则
          */
-        protected val staticFileRegex: Regex = config.getString("staticFileExtends", ".*\\.($staticFileExt)$")!!.toRegex(RegexOption.IGNORE_CASE)
+        protected val staticFileRegex: Regex = config.getString("staticFileExtsends", ".*\\.($staticFileExts)$")!!.toRegex(RegexOption.IGNORE_CASE)
 
         /**
          * 插件配置
@@ -46,6 +46,8 @@ open class JkFilter() : Filter {
          * 单例
          */
         protected var inst: JkFilter? = null
+
+        @JvmStatic
         public fun instance(): JkFilter{
             return inst ?: throw IllegalStateException("There is no JkFilter")
         }

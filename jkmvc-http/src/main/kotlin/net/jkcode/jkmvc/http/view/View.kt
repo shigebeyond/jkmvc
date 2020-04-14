@@ -30,7 +30,7 @@ open class View(override val req: HttpRequest, // 请求对象
 		/**
 		 * 视图目录
 		 */
-		public val viewDir: String = config["viewDir"]!!
+		public val viewDir: String = config["viewDir"] ?: "/"
 	}
 
 	/**

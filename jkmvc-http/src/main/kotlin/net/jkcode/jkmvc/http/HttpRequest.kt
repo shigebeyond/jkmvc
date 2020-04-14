@@ -73,7 +73,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 *   fix bug: jetty异步请求后 req.contextPath 居然为null, 直接使用全局 contextPath
 	 */
 	public override fun getContextPath(): String{
-		return globalServletContext.contextPath
+		return servletContext.contextPath
 	}
 
 	/**
@@ -81,7 +81,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 *   fix bug: jetty异步请求后的 req.servletContext 是 null, 因此 req.getRequestDispatcher() 也是 null, 因为他内部调用 req.servletContext => 直接使用全局 servletContext
 	 */
 	public override fun getRequestDispatcher(path: String): RequestDispatcher{
-		return globalServletContext.getRequestDispatcher(path)
+		return servletContext.getRequestDispatcher(path)
 	}
 
 	init{
@@ -454,7 +454,8 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		if(uri.startsWith("http"))
 			return uri;
 
-		return serverUrl + contextPath + '/' + uri;
+		val delimiter = if(uri.startsWith('/')) "" else "/"
+		return serverUrl + contextPath + delimiter + uri
 	}
 
 	/**
