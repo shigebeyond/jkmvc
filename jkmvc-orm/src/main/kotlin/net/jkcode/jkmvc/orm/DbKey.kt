@@ -57,11 +57,11 @@ class DbKey<T> {
      * @return
      */
     public inline fun <R> map(transform: (T) -> R): DbKey<R> {
-        val newKeys = columns.clone() as Array<R>
+        val newKeys = arrayOfNulls<Any>(columns.size)
         forEachColumn { i, v ->
             newKeys[i] = transform(columns[i])
         }
-        return DbKey(*newKeys)
+        return DbKey(*newKeys) as DbKey<R>
     }
 
     /**
@@ -71,11 +71,11 @@ class DbKey<T> {
      * @return
      */
     public inline fun <S, R> mapWith(other: DbKey<S>, transform: (T, S) -> R): DbKey<R> {
-        val newKeys = columns.clone() as Array<R>
+        val newKeys = arrayOfNulls<Any>(columns.size)
         forEachColumnWith(other){ col1, col2, i ->
             newKeys[i] = transform(col1, col2)
         }
-        return DbKey(*newKeys)
+        return DbKey(*newKeys) as DbKey<R>
     }
 
     /**

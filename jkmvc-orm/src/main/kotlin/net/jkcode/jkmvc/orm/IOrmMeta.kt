@@ -261,7 +261,7 @@ interface IOrmMeta {
      * @param item 要赋值的对象
      */
     public fun loadByPk(vararg pk: Any, item: IOrm){
-        loadByPk(DbKeyValues(pk),item)
+        loadByPk(DbKeyValues(*pk),item)
     }
 
     /**
@@ -277,7 +277,7 @@ interface IOrmMeta {
      * @return
      */
     public fun <T: IOrm> findByPk(vararg pk: Any): T?{
-        return findByPk(DbKeyValues(pk))
+        return findByPk(DbKeyValues(*pk))
     }
 
     /**
