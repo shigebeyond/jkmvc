@@ -2,7 +2,6 @@ package net.jkcode.jkmvc.http
 
 import net.jkcode.jkmvc.http.handler.HttpRequestHandler
 import net.jkcode.jkutil.common.*
-import java.io.FileNotFoundException
 import java.lang.IllegalStateException
 import java.util.concurrent.RejectedExecutionException
 import javax.servlet.*
@@ -97,9 +96,9 @@ open class JkFilter() : Filter {
      */
     override fun doFilter(req0: ServletRequest, res: ServletResponse, chain: FilterChain) {
         var req = req0 as HttpServletRequest
-        // include内部请求
-        if(req.dispatcherType == DispatcherType.INCLUDE){
-            req = IncludedRequest(req0) // 封装include请求, 其中 req0 是HttpRequest
+        // 内部请求
+        if(req0.dispatcherType == DispatcherType.INCLUDE || req0.dispatcherType == DispatcherType.FORWARD){
+            req = InnerHttpRequest(req0) // 封装include请求, 其中 req0 是HttpRequest
         }else {
             //　静态文件请求，则交给下一个filter来使用默认servlet来处理
             val ext = req.requestURI.substringAfterLast('.') // 获得后缀
