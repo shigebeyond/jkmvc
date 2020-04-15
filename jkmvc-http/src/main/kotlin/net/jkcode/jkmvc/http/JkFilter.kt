@@ -96,8 +96,9 @@ open class JkFilter() : Filter {
      */
     override fun doFilter(req0: ServletRequest, res: ServletResponse, chain: FilterChain) {
         var req = req0 as HttpServletRequest
-        // 内部请求
-        if(req0.dispatcherType == DispatcherType.INCLUDE || req0.dispatcherType == DispatcherType.FORWARD){
+        // 内部请求: INCLUDE/FORWARD
+        val isInnerReq = req0.dispatcherType == DispatcherType.INCLUDE || req0.dispatcherType == DispatcherType.FORWARD
+        if(isInnerReq){
             req = InnerHttpRequest(req0) // 封装include请求, 其中 req0 是HttpRequest
         }else {
             //　静态文件请求，则交给下一个filter来使用默认servlet来处理
@@ -117,7 +118,9 @@ open class JkFilter() : Filter {
         }
 
         // 1 异步处理
-        if(req.isAsyncSupported && !config.getBoolean("debug")!!) {
+        if(req.isAsyncSupported // 支持异常
+                && !isInnerReq // 非内部请求: 内部请求的处理还是放到跟父请求的同一个线程处理
+                && !config.getBoolean("debug")!!) { // 非调试
             // 异步上下文, 在完成异步操作后, 需要调用 actx.complete() 来关闭异步响应, 调用下放到 RequestHandler.handle()
             val actx = req.startAsync(req, res)
 

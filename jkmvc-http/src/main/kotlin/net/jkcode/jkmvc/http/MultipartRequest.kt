@@ -29,7 +29,7 @@ import kotlin.collections.HashMap
  * @author shijianhang<772910474@qq.com>
  * @date 6/23/17 7:58 PM
  */
-abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): HttpServletRequestWrapper(req){
+abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): IHttpRequest(req){
 
     companion object{
         /**

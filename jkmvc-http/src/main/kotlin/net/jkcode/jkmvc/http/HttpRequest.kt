@@ -1,10 +1,15 @@
 package net.jkcode.jkmvc.http
 
-import net.jkcode.jkutil.common.*
 import net.jkcode.jkmvc.http.controller.Controller
 import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
-import net.jkcode.jkmvc.http.router.*
+import net.jkcode.jkmvc.http.router.HttpMethod
+import net.jkcode.jkmvc.http.router.RouteException
+import net.jkcode.jkmvc.http.router.RouteResult
+import net.jkcode.jkmvc.http.router.Router
+import net.jkcode.jkutil.common.enumeration
+import net.jkcode.jkutil.common.toNullable
+import net.jkcode.jkutil.common.trim
 import net.jkcode.jkutil.validator.RuleValidator
 import java.net.URI
 import java.util.*
@@ -13,6 +18,13 @@ import javax.servlet.ServletContext
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import kotlin.collections.HashMap
+import kotlin.collections.Map
+import kotlin.collections.MutableMap
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.firstOrNull
+import kotlin.collections.iterator
+import kotlin.collections.set
 
 /**
  * 请求对象
@@ -52,6 +64,11 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		}
 	}
 
+	init{
+		// 中文编码
+		req.characterEncoding = "UTF-8";
+	}
+
 	/*************************** ServletContext改写 *****************************/
 	/**
 	 * 全局的ServletContext
@@ -70,10 +87,14 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 
 	/**
 	 * 改写 contextPath
-	 *   fix bug: jetty异步请求后 req.contextPath 居然为null, 直接使用全局 contextPath
+	 *   fix bug:
+	 *   1 jetty异步请求后, req.contextPath 居然为null
+	 *   2 内部请求时, req.contextPath 不为null, 但是空字符串, 叼
+	 *   => 直接使用全局 contextPath
 	 */
 	public override fun getContextPath(): String{
-		return servletContext.contextPath
+		///return super.getContextPath() ?: globalServletContext.contextPath
+		return globalServletContext.contextPath
 	}
 
 	/**
@@ -81,12 +102,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 *   fix bug: jetty异步请求后的 req.servletContext 是 null, 因此 req.getRequestDispatcher() 也是 null, 因为他内部调用 req.servletContext => 直接使用全局 servletContext
 	 */
 	public override fun getRequestDispatcher(path: String): RequestDispatcher{
-		return servletContext.getRequestDispatcher(path)
-	}
-
-	init{
-		// 中文编码
-		req.characterEncoding = "UTF-8";
+		return super.getRequestDispatcher(path) ?: globalServletContext.getRequestDispatcher(path)
 	}
 
 	/*************************** 路由解析与路由参数 *****************************/
@@ -463,7 +479,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 * @return
 	 */
 	public val webRootDirectory: String
-		get() = session.servletContext.getRealPath("/");
+		get() = servletContext.getRealPath("/");
 
 	/**
 	 * 对query string进行 null 转 空字符串

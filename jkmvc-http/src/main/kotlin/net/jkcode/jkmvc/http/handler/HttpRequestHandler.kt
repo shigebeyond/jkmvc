@@ -85,17 +85,20 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
         if(debug)
             httpLogger.debug("当前uri [{}] 匹配路由: controller=[{}], action=[{}]", req.routeUri, req.controller, req.action)
 
-        // 2 包装请求作用域的处理
-        GlobalHttpRequestScope.sttlWrap {
-            // 3 调用controller与action
-            val future = interceptorChain.intercept(req) {
-                callController(req, res)
-            }
+        // 2 调用controller与action, 并返回future(参考 invokeAfterGuard() 实现)
+        val future = if(req.isInner) // 内部请求: 不新开作用域, 也就是复用起始请求的作用域及资源(如db/当前用户)
+                        callController(req, res)
+                    else // 起始请求: 新开作用域
+                        GlobalHttpRequestScope.sttlWrap { // 包装请求作用域的处理
+                            httpLogger.debug("Request [{}] scope begin", req)
+                            callController(req, res)
+                        }
 
-            // 4 关闭请求(资源)
-            future.whenComplete{ r, ex ->
-                endRequest(req, ex) // 关闭请求(资源)
-            }
+        // 3 关闭请求(资源)
+        future.whenComplete{ r, ex ->
+            endRequest(req, ex) // 关闭异步请求
+            if(!req.isInner)
+                httpLogger.debug("Request [{}] scope end", req)
         }
 
         return true
@@ -108,30 +111,39 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      * @param res
      * @return
      */
-    private fun callController(req: HttpRequest, res: HttpResponse): Any? {
-        // 1 获得controller类
-        val clazz: ControllerClass? = ControllerClassLoader.get(req.controller);
-        if (clazz == null)
-            throw RouteException("Controller类不存在：" + req.controller);
+    private fun callController(req: HttpRequest, res: HttpResponse): CompletableFuture<Any?> {
+        val controller = Controller.current()
 
-        // 2 获得action方法
-        val action: Method? = clazz.getActionMethod(req.action);
-        if (action == null)
-            throw RouteException("控制器${req.controller}不存在方法：${req.action}()");
+        // 0 加拦截
+        return interceptorChain.intercept(req) {
+            // 1 获得controller类
+            val clazz: ControllerClass? = ControllerClassLoader.get(req.controller);
+            if (clazz == null)
+                throw RouteException("Controller类不存在：" + req.controller);
 
-        // 3 创建controller
-        val controller: Controller = clazz.clazz.java.newInstance() as Controller;
-        // 设置req/res属性
-        controller.req = req;
-        controller.res = res;
+            // 2 获得action方法
+            val action: Method? = clazz.getActionMethod(req.action);
+            if (action == null)
+                throw RouteException("控制器${req.controller}不存在方法：${req.action}()");
 
-        // 4 调用controller的action方法
-        //return controller.callActionMethod(action.javaMethod!!)
-        return guardInvoke(action, controller, emptyArray())
+            // 3 创建controller
+            val controller: Controller = clazz.clazz.java.newInstance() as Controller;
+            // 设置req/res属性
+            controller.req = req;
+            controller.res = res;
+
+            Controller.setCurrent(controller)
+
+            // 4 调用controller的action方法
+            //return controller.callActionMethod(action.javaMethod!!)
+            guardInvoke(action, controller, emptyArray())
+        }
+
+        Controller.setCurrent(controller)
     }
 
     /**
-     * 关闭请求(资源)
+     * 关闭异步请求
      * @param req
      * @param ex
      */
@@ -140,8 +152,8 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
         if(ex != null)
             ex.printStackTrace()
 
-        // 如果是异步操作, 则需要关闭异步响应
-        if (req.isAsyncStarted)
+        // 关闭异步请求, 仅非内部请求
+        if (req.isAsyncStarted && !req.isInner)
             req.asyncContext.complete()
     }
 

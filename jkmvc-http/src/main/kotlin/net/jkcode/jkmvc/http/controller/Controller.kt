@@ -75,10 +75,6 @@ abstract class Controller : IController {
     val out: ServletOutputStream
         get() = res.outputStream
 
-    init {
-        setCurrent(this)
-    }
-
     /**
      * 视图
      * @param file 视图文件
