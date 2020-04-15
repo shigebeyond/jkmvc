@@ -112,7 +112,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      * @return
      */
     private fun callController(req: HttpRequest, res: HttpResponse): CompletableFuture<Any?> {
-        val controller = Controller.current()
+        val controller = Controller.currentOrNull()
 
         // 0 加拦截
         return interceptorChain.intercept(req) {
@@ -139,7 +139,8 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
             guardInvoke(action, controller, emptyArray())
         }
 
-        Controller.setCurrent(controller)
+        if(controller != null)
+            Controller.setCurrent(controller)
     }
 
     /**
