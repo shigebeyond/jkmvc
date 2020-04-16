@@ -444,6 +444,16 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		get() = getCookie("JSESSIONID")?.value
 
 	/**
+	 * 获得
+	 */
+	public val cookiesMap: Map<String, Cookie>
+		get(){
+			return req.cookies.associate { cookie ->
+				cookie.name to cookie
+			}
+		}
+
+	/**
 	 * 获得cookie值
 	 *
 	 * <code>
