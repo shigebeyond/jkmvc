@@ -239,6 +239,18 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 	}
 
 	/**
+	 * 转发, 补全req.contextPath
+	 * @param location
+	 */
+	public fun redirectTo(location: String) {
+		var url = location
+		if(!url.startsWith("http"))
+			url = req.contextPath + url
+		sendRedirect(url)
+	}
+
+
+	/**
 	* 获得缓存时间
 	 */
 	public fun getCache():String?{

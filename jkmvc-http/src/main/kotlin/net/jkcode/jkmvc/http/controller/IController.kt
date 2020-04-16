@@ -5,7 +5,6 @@ import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jkutil.collection.LazyAllocatedMap
 import net.jkcode.jkutil.common.DegradeCommandException
-import java.io.File
 import java.io.Writer
 import java.lang.reflect.Method
 import java.util.concurrent.CompletableFuture
@@ -100,39 +99,7 @@ interface IController{
     /**
      * 渲染结果
      */
-    fun renderResult(result: Any?) {
-        if(result == null || result is Unit || result is Void // 无结果
-                || res.rendered) // 渲染过
-            return
-
-        // 渲染视图或重定向
-        if (result is String) {
-            if(result.startsWith("redirect:")){ // 重定向
-                val url = result.substringAfter("redirect:")
-                res.sendRedirect(url)
-            }else { // 渲染视图
-                res.renderView(result, vm) // 渲染视图的场景比渲染文本的多, 因此直接渲染视图啦
-            }
-
-            return
-        }
-
-        // 渲染视图
-        if (result is View) {
-            result.mergeVm(vm)
-            res.renderView(result)
-            return
-        }
-
-        // 渲染文件
-        if (result is File) {
-            res.renderFile(result)
-            return
-        }
-
-        // 渲染json
-        res.renderJson(result)
-    }
+    fun renderResult(result: Any?)
 
     /**
      * 前置处理
