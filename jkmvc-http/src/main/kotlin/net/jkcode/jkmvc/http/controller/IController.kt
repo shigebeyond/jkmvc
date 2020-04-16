@@ -6,8 +6,10 @@ import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jkutil.collection.LazyAllocatedMap
 import net.jkcode.jkutil.common.DegradeCommandException
 import java.io.File
+import java.io.Writer
 import java.lang.reflect.Method
 import java.util.concurrent.CompletableFuture
+import javax.servlet.ServletOutputStream
 
 /**
  * 控制器
@@ -27,6 +29,18 @@ interface IController{
      * 响应对象
      */
     var res: HttpResponse
+
+    /**
+     * 响应的writer
+     */
+    val writer: Writer
+        get() = res.writer
+
+    /**
+     * 响应的output
+     */
+    val out: ServletOutputStream
+        get() = res.outputStream
 
     /**
      * 视图模型

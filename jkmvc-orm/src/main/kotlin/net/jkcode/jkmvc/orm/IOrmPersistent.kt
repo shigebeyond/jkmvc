@@ -75,7 +75,7 @@ interface IOrmPersistent : IOrmValid {
 	 *    user.create();
 	 * </code>
 	 *
-	 * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系 for jkerp
+	 * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
 	 * @return 新增数据的主键
 	 */
 	fun create(withHasRelations: Boolean = false): Long;
@@ -89,7 +89,7 @@ interface IOrmPersistent : IOrmValid {
 	 *    user.update();
 	 * </code>
 	 *
-	 * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系 for jkerp
+	 * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
 	 * @return 
 	 */
 	fun update(withHasRelations: Boolean = false): Boolean;
@@ -102,7 +102,7 @@ interface IOrmPersistent : IOrmValid {
 	 *    user.delete();
 	 *　</code>
 	 *
-	 * @param withHasRelations 是否连带删除 hasOne/hasMany 的关联关系 for jkerp
+	 * @param withHasRelations 是否连带删除 hasOne/hasMany 的关联关系
 	 * @return 
 	 */
 	fun delete(withHasRelations: Boolean = false): Boolean;

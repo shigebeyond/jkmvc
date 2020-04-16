@@ -77,7 +77,7 @@ abstract class OrmPersistent : OrmValid() {
 	 *    user.create();
 	 * </code>
 	 *
-	 * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系 for jkerp
+	 * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
 	 * @return 新增数据的主键
 	 */
 	public override fun create(withHasRelations: Boolean): Long {
@@ -178,7 +178,7 @@ abstract class OrmPersistent : OrmValid() {
 	 *    user.update();
 	 * </code>
 	 *
-	 * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系 for jkerp
+	 * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
 	 * @return
 	 */
 	public override fun update(withHasRelations: Boolean): Boolean {
@@ -233,7 +233,7 @@ abstract class OrmPersistent : OrmValid() {
 	 *    user.delete();
 	 *　</code>
 	 *
-	 * @param withHasRelations 是否连带删除 hasOne/hasMany 的关联关系 for jkerp
+	 * @param withHasRelations 是否连带删除 hasOne/hasMany 的关联关系
 	 * @return
 	 */
 	public override fun delete(withHasRelations: Boolean): Boolean {
@@ -289,14 +289,14 @@ abstract class OrmPersistent : OrmValid() {
 	/**
 	 * 添加 _data 中的 hasOne/hasMany 的关联关系
 	 *   仅用在 create/update() 方法中
-	 *   for jkerp
+	 *
 	 */
 	internal abstract fun addHasNRelations()
 
 	/**
 	 * 删除 hasOne/hasMany 的关联关系
 	 *   仅用在 update()/delete() 方法中
-	 *   for jkerp
+	 *
 	 *
 	 * @param byDelete 是否delete()调用, 否则update()调用
 	 */

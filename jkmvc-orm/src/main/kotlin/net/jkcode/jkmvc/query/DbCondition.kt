@@ -2,7 +2,7 @@ package net.jkcode.jkmvc.query
 
 /**
  * Db条件, 带参数, 专门用于 DbQueryBuilderDecoration.andWhereCondition()/orWhereCondition(), 用来表示不转义不拼接的条件表达式, 生成sql时原样输出
- *   for jkerp
+ *
  *
  * @author shijianhang
  * @create 2017-11-19 下午1:47

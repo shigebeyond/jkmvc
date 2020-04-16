@@ -217,7 +217,7 @@ interface IOrmMeta {
 
     /**
      * 获得orm查询构建器
-     *   for jkerp
+     *
      *
      * @param sort 排序字段
      * @param desc 是否降序
@@ -239,7 +239,7 @@ interface IOrmMeta {
 
     /**
      * 获得orm查询构建器
-     *   for jkerp
+     *
      *
      * @param condition 条件
      * @param params 条件参数

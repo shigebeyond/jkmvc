@@ -17,7 +17,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
 
     /**
      * 获得sql查询构建器
-     *   for jkerp
+     *
      *
      * @param table
      * @param sort 排序字段
@@ -39,7 +39,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
 
     /**
      * 获得sql查询构建器
-     *   for jkerp
+     *
      *
      * @param table
      * @param condition 条件

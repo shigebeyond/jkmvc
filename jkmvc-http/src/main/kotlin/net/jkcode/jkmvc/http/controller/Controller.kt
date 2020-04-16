@@ -39,43 +39,6 @@ abstract class Controller : IController {
     }
 
     /**
-     * todo: 删掉
-     * for jkerp
-     */
-    val request: HttpRequest
-        get() = req
-
-    /**
-     * for jkerp
-     */
-    val response: HttpResponse
-        get() = res
-
-    /**
-     * for jkerp
-     */
-    val model: MutableMap<String, Any?>
-        get() = vm
-
-    /**
-     * for jkerp
-     */
-    val map: MutableMap<String, Any?>
-        get() = vm
-
-    /**
-     * for jkerp
-     */
-    val writer: Writer
-        get() = res.writer
-
-    /**
-     * for jkerp
-     */
-    val out: ServletOutputStream
-        get() = res.outputStream
-
-    /**
      * 视图
      * @param file 视图文件
      * @param data 视图变量
@@ -83,7 +46,7 @@ abstract class Controller : IController {
      */
     public override fun view(file:String, data:Map<String, Any?>): View
     {
-        return View(req, res, file, data);
+        return View(this.req, this.res, file, data);
     }
 
     /**
@@ -93,7 +56,7 @@ abstract class Controller : IController {
      */
     public override fun view(data:Map<String, Any?>): View
     {
-        return view(req.controller + "/" + req.action, data)
+        return view(this.req.controller + "/" + this.req.action, data)
     }
 
     /**
@@ -102,6 +65,6 @@ abstract class Controller : IController {
      */
     public override fun redirect(uri: String)
     {
-        res.sendRedirect(req.absoluteUrl(uri));
+        this.res.sendRedirect(this.req.absoluteUrl(uri));
     }
 }

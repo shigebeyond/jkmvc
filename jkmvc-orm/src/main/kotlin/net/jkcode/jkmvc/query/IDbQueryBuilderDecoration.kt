@@ -392,10 +392,10 @@ interface IDbQueryBuilderDecoration{
 
     /**
      * Applies sorting with "ORDER BY ..."
-     *    for jkerp
+     *
      *
      * @param   column     column name or DbExpr
-     * @param   desc       whether desc direction, for jkerp
+     * @param   desc       whether desc direction,
      * @return
      */
     fun orderBy(column: String, desc: Boolean?): IDbQueryBuilder {

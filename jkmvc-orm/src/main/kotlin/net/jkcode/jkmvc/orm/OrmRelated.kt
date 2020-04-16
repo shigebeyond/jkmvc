@@ -332,7 +332,7 @@ abstract class OrmRelated : OrmPersistent() {
      * 添加 _data 中的 hasOne/hasMany 的关联关系
      *   仅用在 create/update() 方法中
      *   针对 _data 中改过的关联关系
-     *   for jkerp
+     *
      */
     internal override fun addHasNRelations(){
         for((name, relation) in ormMeta.relations){
@@ -349,7 +349,7 @@ abstract class OrmRelated : OrmPersistent() {
     /**
      * 删除 hasOne/hasMany 的关联关系
      *   仅用在 update()/delete() 方法中
-     *   for jkerp
+     *
      *
      * @param byDelete 是否delete()调用, 否则update()调用
      */
