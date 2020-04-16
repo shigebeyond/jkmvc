@@ -63,7 +63,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
             httpLogger.debug("请求uri: {} {}, contextPath: {}", req.method, req.routeUri, req.contextPath)
 
             // curl命令
-            if(!req.isUpload()) // 上传请求，要等到设置了上传子目录，才能访问请求参数
+            if(!req.isInner && !req.isUpload()) // 上传请求，要等到设置了上传子目录，才能访问请求参数
                 httpLogger.debug(req.buildCurlCommand())
         }
 
@@ -106,12 +106,16 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
 
     /**
      * 调用controller与action
+     *   1 调用controller
+     *   2 记录与恢复原来的controller
+     *   3 拦截
      *
      * @param req
      * @param res
      * @return
      */
     private fun callController(req: HttpRequest, res: HttpResponse): CompletableFuture<Any?> {
+        // 当前请求与响应都放到当前controller中, 为了应对内部请求会修改当前controller, 需要记录与恢复原来的controller
         val controller = Controller.currentOrNull()
 
         // 0 加拦截
