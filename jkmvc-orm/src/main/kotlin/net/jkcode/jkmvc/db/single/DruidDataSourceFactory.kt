@@ -19,7 +19,7 @@ object DruidDataSourceFactory : IDataSourceFactory() {
      * @param name 数据源名
      * @return
      */
-    override fun buildDataSource(name:String): DataSource {
+    override fun buildDataSource(name: CharSequence): DataSource {
         val config: Config = Config.instance("dataSources.$name", "yaml")
         return buildDataSource(config)
     }

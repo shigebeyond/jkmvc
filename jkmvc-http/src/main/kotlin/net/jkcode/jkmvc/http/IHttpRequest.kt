@@ -46,6 +46,6 @@ abstract class IHttpRequest(req: HttpServletRequest): HttpServletRequestWrapper(
         get() = originalRequest.servletPath
 
     public override fun toString(): String {
-        return "${javaClass.name}{id=$id, servletPath=$servletPath, originalServletPath=$originalServletPath}"
+        return "${javaClass.simpleName}{id=$id, servletPath=$servletPath, originalServletPath=$originalServletPath}"
     }
 }

@@ -16,15 +16,15 @@ abstract class IDataSourceFactory : ClosingOnShutdown() {
     /**
      * 缓存数据源
      */
-    private val dataSources: ConcurrentHashMap<String, ClosableDataSource> = ConcurrentHashMap();
+    private val dataSources: ConcurrentHashMap<CharSequence, ClosableDataSource> = ConcurrentHashMap();
 
     /**
      * 获得数据源
      *    跨线程跨请求, 全局共有的数据源
-     * @param name 数据源名
+     * @param name 数据源名 或 配置
      * @return
      */
-    public fun getDataSource(name: String): ClosableDataSource {
+    public fun getDataSource(name: CharSequence): ClosableDataSource {
         return dataSources.getOrPutOnce(name){
             ClosableDataSource(buildDataSource(name)) // 可关闭
         }
@@ -32,10 +32,10 @@ abstract class IDataSourceFactory : ClosingOnShutdown() {
 
     /**
      * 构建数据源
-     * @param name 数据源名
+     * @param name 数据源名 或 配置
      * @return
      */
-    public abstract fun buildDataSource(name:String): DataSource
+    public abstract fun buildDataSource(name: CharSequence): DataSource
 
     /**
      * 关闭所有数据源
