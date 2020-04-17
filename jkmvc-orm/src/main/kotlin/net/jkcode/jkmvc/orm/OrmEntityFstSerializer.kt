@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.orm
 
+import net.jkcode.jkutil.collection.FixedKeyMapFactory
 import org.nustaq.serialization.FSTBasicObjectSerializer
 import org.nustaq.serialization.FSTClazzInfo
 import org.nustaq.serialization.FSTObjectInput
@@ -24,7 +25,10 @@ class OrmEntityFstSerializer : FSTBasicObjectSerializer() {
     public override fun writeObject(out: FSTObjectOutput, toWrite: Any, clzInfo: FSTClazzInfo, referencedBy: FSTClazzInfo.FSTFieldInfo, streamPosition: Int) {
         val entity = toWrite as OrmEntity
         // 写 OrmEntity._data
-        mapSerializer.writeObject(out, entity.getData(), clzInfo, referencedBy, streamPosition)
+        var data = entity.getData()
+        if(data is FixedKeyMapFactory.FixedKeyMap) // Orm._data is FixedKeyMap
+            data = HashMap(data)
+        mapSerializer.writeObject(out, data, clzInfo, referencedBy, streamPosition)
     }
 
     /**
