@@ -60,7 +60,8 @@ abstract class OrmRelated : OrmPersistent() {
         orgn.forEach { (column, value) ->
             // 关联查询时，会设置关联表字段的列别名（列别名 = 表别名 : 列名），可以据此来设置关联对象的字段值
             if (!column.contains(":")){ // 自身字段
-                setOriginal(column, value)
+                if(!column.endsWith('_') || ormMeta.columns.contains(column)) // 不是 中间表的外键字段别名, 用_后缀
+                    setOriginal(column, value)
             } else if (value !== null) {// 关联对象字段: 不处理null值, 因为left join查询时, 关联对象可能没有匹配的行
                 // 多层:
                 val cols = column.split(":")
