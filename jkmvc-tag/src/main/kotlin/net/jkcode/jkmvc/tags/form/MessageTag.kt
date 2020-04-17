@@ -1,14 +1,15 @@
 package net.jkcode.jkmvc.tags.form
 
-import net.jkcode.jkutil.common.getPropertyValue
+import net.jkcode.jkutil.common.getAccessibleField
 import net.jkcode.jkutil.message.MessageSource
 import org.apache.commons.lang.StringEscapeUtils
+import org.apache.taglibs.standard.tag.common.fmt.MessageSupport
 import java.io.IOException
 import javax.servlet.jsp.JspTagException
 import javax.servlet.jsp.tagext.Tag
 
 /**
- * 改进 jstl 中 <fmt:message>, 让他能够从多个bundle文件加载消息
+ * 改进 jstl 中 <form:message>, 让他能够从多个bundle文件加载消息
  *
  * @author shijianhang<772910474@qq.com>
  * @date 2019-12-24 10:43 AM
@@ -24,16 +25,14 @@ class MessageTag : org.apache.taglibs.standard.tag.rt.fmt.MessageTag() {
     }
 
     /**
-     * 获得父类私有属性var
+     * 父类私有属性var
      */
-    protected val `var`: String?
-        get() = this.getPropertyValue("var") as String?
+    protected val varField = MessageSupport::class.java.getAccessibleField("var")!!
 
     /**
-     * 获得父类私有属性scope
+     * 父类私有属性scope
      */
-    protected val scope: Int
-        get() = this.getPropertyValue("scope") as Int
+    protected val scopeField = MessageSupport::class.java.getAccessibleField("scope")!!
 
     /**
      * Resolves the message, escapes it if demanded,
@@ -59,8 +58,10 @@ class MessageTag : org.apache.taglibs.standard.tag.rt.fmt.MessageTag() {
         msg = StringEscapeUtils.escapeHtml(msg)
 
         // Expose as variable, if demanded, else write to the page.
-        if (this.`var` != null) {
-            pageContext.setAttribute(this.`var`, msg, this.scope)
+        val _var = varField.get(this) as String?
+        if (_var != null) {
+            val _scope = scopeField.get(this) as Int
+            pageContext.setAttribute(_var, msg, _scope)
         } else {
             writeMessage(msg)
         }
