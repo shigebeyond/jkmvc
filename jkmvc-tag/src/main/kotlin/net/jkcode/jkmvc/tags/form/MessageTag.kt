@@ -25,6 +25,11 @@ class MessageTag : org.apache.taglibs.standard.tag.rt.fmt.MessageTag() {
     }
 
     /**
+     * 是否html转码
+     */
+    public var htmlEscape: Boolean = false
+
+    /**
      * 父类私有属性var
      */
     protected val varField = MessageSupport::class.java.getAccessibleField("var")!!
@@ -55,7 +60,8 @@ class MessageTag : org.apache.taglibs.standard.tag.rt.fmt.MessageTag() {
 
         // key不为空, 则取消息
         var msg = MessageSource.instance().getMessage(key)
-        msg = StringEscapeUtils.escapeHtml(msg)
+        if(htmlEscape)
+            msg = StringEscapeUtils.escapeHtml(msg)
 
         // Expose as variable, if demanded, else write to the page.
         val _var = varField.get(this) as String?
