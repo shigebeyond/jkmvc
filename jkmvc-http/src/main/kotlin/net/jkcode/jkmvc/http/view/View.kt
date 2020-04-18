@@ -80,7 +80,11 @@ open class View(override val req: HttpRequest, // 请求对象
 		val jsp = path + ".jsp"
 		val reqDispatcher = req.getRequestDispatcher(jsp) ?: throw FileNotFoundException("RequestDispatcher for resource [$jsp] is null")
 		// 在 org.akhikhl.gretty 运行环境中只能使用原始的请求与响应
-		reqDispatcher.forward(req.request, res.response)
+		// If already included or response already committed, perform include, else forward.
+		if(req.isInner || res.isCommitted)
+			reqDispatcher.include(req.request, res.response)
+		else
+			reqDispatcher.forward(req.request, res.response)
 	}
 
 }
