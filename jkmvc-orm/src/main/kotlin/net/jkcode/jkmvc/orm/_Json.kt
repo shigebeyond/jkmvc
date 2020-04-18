@@ -32,8 +32,8 @@ public fun normalizeData(data: Any?, include: List<String> = emptyList()): Any? 
 public fun Any.toMap(include: List<String> = emptyList()): MutableMap<String, Any?> {
     // 1 orm对象
     // 问题: IOrmEntity.toMap() 只能转内部属性 _data, 不能转getter方法, 而且不能支持多级属性
-//    if (this is IOrm)
-//        return this.toMap(include)
+    if (this is IOrm && include.isEmpty())
+        return this.toMap()
 
     // 2 普通对象
     return include.associate { prop ->
@@ -63,6 +63,9 @@ public fun Collection<*>.toMaps(include: List<String> = emptyList()): List<Mutab
  */
 public fun Any.toJson(include: List<String> = emptyList()): String {
     //data.toJSONString()
-    val data = normalizeData(this, include)
+    val data = if(include.isEmpty())
+                    this
+                else
+                    normalizeData(this, include)
     return JSON.toJSONString(data, SerializerFeature.WriteDateUseDateFormat /* Date格式化 */, SerializerFeature.WriteMapNullValue /* 输出null值 */)
 }
