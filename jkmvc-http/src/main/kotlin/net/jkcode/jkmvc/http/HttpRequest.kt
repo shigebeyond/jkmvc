@@ -256,8 +256,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 * @param defaultValue 默认值
 	 * @return
 	 */
-	public operator inline fun <reified T:Any> get(key: String, defaultValue: T? = null): T?
-	{
+	public operator inline fun <reified T:Any> get(key: String, defaultValue: T? = null): T? {
 		return getParameter(key)?.toNullable(T::class, defaultValue)
 	}
 

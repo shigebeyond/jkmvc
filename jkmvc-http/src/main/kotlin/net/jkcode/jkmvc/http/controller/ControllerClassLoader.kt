@@ -1,10 +1,6 @@
 package net.jkcode.jkmvc.http.controller
 
-import net.jkcode.jkutil.common.ClassScanner
-import net.jkcode.jkutil.common.Config
-import net.jkcode.jkutil.common.classPath2class
-import net.jkcode.jkutil.common.isSuperClass
-import net.jkcode.jkutil.common.httpLogger
+import net.jkcode.jkutil.common.*
 import java.lang.reflect.Modifier
 import kotlin.collections.Collection
 import kotlin.collections.HashMap
@@ -56,9 +52,9 @@ object ControllerClassLoader : IControllerClassLoader, ClassScanner() {
 
         // 获得类
         val clazz = relativePath.classPath2class()
-        val modifiers = clazz.modifiers
         // 过滤Controller子类
-        if(Controller::class.java.isSuperClass(clazz) /* 继承Controller */ && !Modifier.isAbstract(modifiers) /* 非抽象类 */ && !Modifier.isInterface(modifiers) /* 非接口 */){
+        if(Controller::class.java.isSuperClass(clazz) // 继承Controller
+                && clazz.isNormal){ // 普通类
             // 收集controller的构造函数+所有action方法
             httpLogger.debug("收集controller: {}", clazz.name)
             val controllerClass = ControllerClass(clazz.kotlin)

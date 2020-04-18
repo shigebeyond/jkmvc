@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.http
 
 import net.jkcode.jkmvc.http.handler.HttpRequestHandler
+import net.jkcode.jkmvc.http.router.Router
 import net.jkcode.jkutil.common.*
 import java.lang.IllegalStateException
 import java.util.concurrent.RejectedExecutionException
@@ -89,6 +90,9 @@ open class JkFilter() : Filter {
         // 4 初始化插件
         for(p in plugins)
             p.start()
+
+        // 5 加载路由配置
+        Router.load()
     }
 
     /**

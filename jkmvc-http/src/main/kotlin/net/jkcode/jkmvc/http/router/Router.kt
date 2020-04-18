@@ -36,7 +36,10 @@ object Router: IRouter
 	 */
 	public lateinit var defaultRoute: Route
 
-	init {
+	/**
+	 * 加载路由配置
+	 */
+	public fun load() {
 		// 1. 加载配置的路由, 包含默认路由
 		val props = config.props as Map<String, Map<String, *>>
 		for ((name, item) in props) {

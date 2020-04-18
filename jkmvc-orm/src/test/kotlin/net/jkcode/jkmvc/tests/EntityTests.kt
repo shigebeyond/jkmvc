@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.tests
 
 import net.jkcode.jkutil.common.*
 import net.jkcode.jkmvc.orm.IOrm
+import net.jkcode.jkmvc.orm.toJson
 import net.jkcode.jkutil.serialize.ISerializer
 import net.jkcode.jkmvc.tests.entity.MessageEntity
 import net.jkcode.jkmvc.tests.model.MessageModel
@@ -9,6 +10,15 @@ import org.junit.Test
 import java.text.MessageFormat
 
 class EntityTests{
+
+    @Test
+    fun testJson(){
+        val data = listOf(
+                mapOf("id" to 1),
+                mapOf("id" to 2)
+        )
+        println(data.toJson())
+    }
 
     @Test
     fun testEntity(){
