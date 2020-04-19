@@ -10,7 +10,7 @@ import javax.servlet.jsp.JspWriter
  * @author shijianhang<772910474@qq.com>
  * @date 2019-12-24 10:43 AM
  */
-class FormTag: HtmlTag("from", true) {
+class FormTag: HtmlTag("form", true) {
 
     // 模型在请求属性名
     fun setModelAttribute(modelAttribute: String) {
@@ -49,7 +49,7 @@ class FormTag: HtmlTag("from", true) {
 
         if(action == null)
             throw IllegalArgumentException("action must not be null")
-        action = HttpRequest.current().absoluteUrl(action)
+        action = HttpRequest.current().absoluteUrl(action, false)
     }
 
 }
