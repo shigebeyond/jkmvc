@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.tags.form
 
-import net.jkcode.jkutil.common.PropertyHandler
+import net.jkcode.jkutil.common.PropertyUtil
 import net.jkcode.jkutil.common.trim
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.jsp.tagext.TagSupport
@@ -56,8 +56,8 @@ abstract class BaseBoundTag: TagSupport() {
         else {
             val keys = absolutePath!!.split("\\.".toRegex(), 2)
             var value = request.getAttribute(keys[0])
-            if (keys.size == 2)
-                value = PropertyHandler.getPath(value, keys[1])
+            if (value != null && keys.size == 2)
+                value = PropertyUtil.getPath(value, keys[1])
             value
         }
     }
@@ -72,7 +72,7 @@ abstract class BaseBoundTag: TagSupport() {
             val keys = absolutePath!!.split("\\.".toRegex(), 2)
             var value = request.getAttribute(keys[0])
             if (keys.size == 2)
-                PropertyHandler.getPathType(value, keys[1])
+                PropertyUtil.getPathType(value, keys[1])
             else
                 value.javaClass
         }
@@ -90,7 +90,7 @@ abstract class BaseBoundTag: TagSupport() {
                             absolutePath!!.trim(".*")
                         else // 单个错误
                             absolutePath!!
-            PropertyHandler.getPath(errors, path)
+            PropertyUtil.getPath(errors, path)
         }
     }
 

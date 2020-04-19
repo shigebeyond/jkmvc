@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.tags.form
 
-import net.jkcode.jkutil.common.PropertyHandler
+import net.jkcode.jkutil.common.PropertyUtil
 import net.jkcode.jkutil.common.iteratorArrayOrCollection
 import javax.servlet.jsp.JspException
 import javax.servlet.jsp.JspWriter
@@ -44,8 +44,8 @@ abstract class ItemsTag(
         if (items is Map<*, *>) {
             var i = 0
             for ((key, value) in items as Map<Any, Any?>) {
-                val renderValue = if (itemValue != null) PropertyHandler.get(key, itemValue!!) else key
-                val renderLabel = if (itemLabel != null) PropertyHandler.get(value, itemLabel!!) else value
+                val renderValue = if (itemValue != null) PropertyUtil.get(key, itemValue!!) else key
+                val renderLabel = if (itemLabel != null) PropertyUtil.get(value, itemLabel!!) else value
                 renderItem(writer, renderValue, renderLabel, i++)
             }
             return
@@ -55,8 +55,8 @@ abstract class ItemsTag(
             var i = 0
             val it = items!!.iteratorArrayOrCollection()!!
             for (item in it) {
-                val value = if (itemValue != null) PropertyHandler.get(item, itemValue!!) else item
-                val label = if (itemLabel != null) PropertyHandler.get(item, itemLabel!!) else item
+                val value = if (itemValue != null) PropertyUtil.get(item, itemValue!!) else item
+                val label = if (itemLabel != null) PropertyUtil.get(item, itemLabel!!) else item
                 renderItem(writer, value, label, i++)
             }
             return
