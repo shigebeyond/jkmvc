@@ -12,5 +12,4 @@ class HiddenInputTag: HtmlTag("input", false) {
     }
 
     public var value: Any? by property()
-
 }

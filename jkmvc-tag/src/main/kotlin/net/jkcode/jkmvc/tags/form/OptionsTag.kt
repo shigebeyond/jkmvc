@@ -28,7 +28,7 @@ open class OptionsTag: ItemsTag(null){
      */
     protected override fun renderItem(writer: JspWriter, value: Any?, label: Any?, i: Int) {
         val tag = optionTags.get()
-        tag.clear()
+        tag.reset()
         tag.value = value
         tag.setLabel(toDisplayString(label))
         // 等于父组件的值即选中

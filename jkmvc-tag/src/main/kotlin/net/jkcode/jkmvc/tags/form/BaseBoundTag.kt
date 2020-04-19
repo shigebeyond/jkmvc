@@ -7,10 +7,11 @@ import javax.servlet.jsp.tagext.TagSupport
 
 /**
  * 绑定值的标签
+ *    由于web容器(tomcat/jetty)会服用 Tag 实例, 因此本地属性不能用by lazy(有延迟取值需求的, 只能在get()中自行实现), 而且必须在 doEndTag() 中重置
  * @author shijianhang<772910474@qq.com>
  * @date 2019-12-25 3:35 PM
  */
-abstract class BaseBoundTag: TagSupport() {
+abstract class BaseBoundTag : TagSupport() {
 
     /**
      * 会话
@@ -33,65 +34,70 @@ abstract class BaseBoundTag: TagSupport() {
      * 属性的绝对路径
      *   暂时只支持2层
      */
-    public val absolutePath: String? by lazy{
-        if(path == null)
-            null
-        else { // 2层全路径
-            // 子路径
-            var absolutePath = path!!
-            // 父路径
-            val parent = findAncestorWithClass(this, BaseBoundTag::class.java) as BaseBoundTag?
-            if (parent?.path != null)
-                absolutePath = "${parent.path}.$absolutePath"
-            absolutePath
+    public var absolutePath: String? = null
+        get() {
+            // 初始化
+            if (field == null && path != null) { // 2层全路径
+                // 子路径
+                var absolutePath = path!!
+                // 父路径
+                val parent = findAncestorWithClass(this, BaseBoundTag::class.java) as BaseBoundTag?
+                if (parent?.path != null)
+                    absolutePath = "${parent.path}.$absolutePath"
+                field = absolutePath
+            }
+
+            return field
         }
-    }
 
     /**
      * 绑定值
      */
-    public val boundValue: Any? by lazy{
-        if(absolutePath == null)
-            null
-        else {
-            val keys = absolutePath!!.split("\\.".toRegex(), 2)
-            var value = request.getAttribute(keys[0])
-            if (value != null && keys.size == 2)
-                value = PropertyUtil.getPath(value, keys[1])
-            value
+    public var boundValue: Any? = null
+        get() {
+            if (field == null && absolutePath != null) {
+                val keys = absolutePath!!.split("\\.".toRegex(), 2)
+                var value = request.getAttribute(keys[0])
+                if (value != null && keys.size == 2)
+                    value = PropertyUtil.getPath(value, keys[1])
+                field = value
+            }
+
+            return field
         }
-    }
 
     /**
      * 绑定值类型
      */
-    public val boundType: Class<*>? by lazy{
-        if(absolutePath == null)
-            null
-        else {
-            val keys = absolutePath!!.split("\\.".toRegex(), 2)
-            var value = request.getAttribute(keys[0])
-            if (keys.size == 2)
-                PropertyUtil.getPathType(value, keys[1])
-            else
-                value.javaClass
+    public var boundType: Class<*>? = null
+        get() {
+            if (field == null && absolutePath != null) {
+                val keys = absolutePath!!.split("\\.".toRegex(), 2)
+                var value = request.getAttribute(keys[0])
+                field = if (keys.size == 2)
+                            PropertyUtil.getPathType(value, keys[1])
+                        else
+                            value.javaClass
+            }
+
+            return field
         }
-    }
 
     /**
      * 绑定的错误
      */
-    public val boundError: Any? by lazy{
-        if(absolutePath == null)
-            null
-        else {
-            val errors = request.getAttribute("_errors")
-            val path = if (absolutePath!!.endsWith(".*")) // 所有错误
-                            absolutePath!!.trim(".*")
-                        else // 单个错误
-                            absolutePath!!
-            PropertyUtil.getPath(errors, path)
-        }
+    public var boundError: Any? ? = null
+        get() {
+            if (field == null && absolutePath != null) {
+                val errors = request.getAttribute("_errors")
+                val path = if (absolutePath!!.endsWith(".*")) // 所有错误
+                                absolutePath!!.trim(".*")
+                            else // 单个错误
+                                absolutePath!!
+                field = PropertyUtil.getPath(errors, path)
+            }
+
+            return field
     }
 
     /**
@@ -105,7 +111,24 @@ abstract class BaseBoundTag: TagSupport() {
      * 是否有错
      */
     public val isError: Boolean
-        get(){
+        get() {
             return !(boundError == null || boundError is Map<*, *> && (boundError as Map<*, *>).isEmpty()) // 不为空
         }
+
+    /**
+     * 重置本地属性
+     */
+    public open fun reset(){
+        // 父类的属性
+        pageContext = null
+        parent = null
+        id = null
+
+        // 本类的属性
+        path = null
+        absolutePath = null
+        boundValue = null
+        boundType = null
+        boundError = null
+    }
 }

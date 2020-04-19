@@ -14,20 +14,32 @@ import javax.servlet.jsp.JspWriter
  */
 class ErrorsTag : HtmlTag(null, true){
 
+    companion object{
+
+        //　默认容器
+        public val DEFAULT_ELEMENT = "span"
+
+        // 默认分隔符
+        public val DEFAULT_DELIMITER = "<br/>"
+    }
+
     /**
      * 容器
      */
-    public var element = "span"
+    public var element: String? = null
 
     /**
      * 分隔符
      */
-    public var delimiter = "<br/>"
+    public var delimiter: String? = null
 
     override fun writeBody(writer: JspWriter) {
         // 无错不输出
         if(!isError)
             return
+
+        val element = this.element ?: DEFAULT_ELEMENT
+        val delimiter = this.delimiter ?: DEFAULT_DELIMITER
 
         // 容器头
         writer.append("<").append(element).append(">")
@@ -47,8 +59,13 @@ class ErrorsTag : HtmlTag(null, true){
 
         // 容器尾部
         writer.append("</").append(element).append(">")
-
     }
 
+    override fun reset() {
+        super.reset()
+
+        element = null
+        delimiter = null
+    }
 
 }

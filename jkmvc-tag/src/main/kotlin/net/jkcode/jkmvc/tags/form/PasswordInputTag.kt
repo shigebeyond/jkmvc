@@ -22,4 +22,10 @@ class PasswordInputTag : InputTag("password") {
             value = ""
     }
 
+    override fun reset() {
+        super.reset()
+
+        isShowPassword = false
+    }
+
 }

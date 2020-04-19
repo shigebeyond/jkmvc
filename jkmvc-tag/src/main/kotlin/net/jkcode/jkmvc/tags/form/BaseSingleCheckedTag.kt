@@ -64,7 +64,7 @@ open class BaseSingleCheckedTag(type: String = "") : InputTag(type) {
 
     override fun afterWriteTag(writer: JspWriter) {
         val tag = labelTags.get()
-        tag.clear()
+        tag.reset()
         tag.`for` = id
         tag.writeTag(writer)
     }

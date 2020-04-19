@@ -70,4 +70,12 @@ abstract class ItemsTag(
      * 输出单个项目
      */
     protected abstract fun renderItem(writer: JspWriter, value: Any?, label: Any?, i: Int)
+
+    override fun reset() {
+        super.reset()
+
+        items = null
+        itemValue = null
+        itemLabel = null
+    }
 }

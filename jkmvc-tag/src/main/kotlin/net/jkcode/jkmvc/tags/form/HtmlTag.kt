@@ -34,8 +34,8 @@ object AttrDelegater: ReadWriteProperty<HtmlTag, Any?> {
  * @date 2019-12-20 18:57:59
  */
 open class HtmlTag(
-        public var tag: String?, // 标签名
-        public var hasBody: Boolean // 是否有标签体
+        public val tag: String?, // 标签名
+        public val hasBody: Boolean // 是否有标签体
 ) : BaseBoundTag(), DynamicAttributes {
 
     companion object{
@@ -163,6 +163,9 @@ open class HtmlTag(
     override fun doEndTag(): Int {
         // 标签尾
         writeTagEnd(pageContext.out)
+
+        // 重置本地属性
+        reset()
 
         return EVAL_PAGE;
     }
@@ -306,13 +309,18 @@ open class HtmlTag(
     }
 
     /**
-     * 清空, 以便复用
+     * 重置本地属性
      */
-    public fun clear(){
+    public override fun reset(){
+        super.reset()
+
+        htmlEscape = false
+        body = null
         attrs.clear()
-        pageContext = null
-        parent = null
-        id = null
+
+        cssClass = null
+        cssErrorClass = null
+        cssStyle = null
     }
 
 }
