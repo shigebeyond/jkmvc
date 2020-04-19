@@ -35,18 +35,9 @@ object AttrDelegater: ReadWriteProperty<HtmlTag, Any?> {
  */
 open class HtmlTag(
         public val tag: String?, // 标签名
-        public val hasBody: Boolean // 是否有标签体
+        public val hasBody: Boolean, // 是否有标签体
+        public val idGenerator: IdGenerator = IdGenerator.No // id生成器
 ) : BaseBoundTag(), DynamicAttributes {
-
-    companion object{
-
-        /**
-         * id生成器
-         */
-        protected val idGenerators: AllRequestScopedTransferableThreadLocal<ConcurrentHashMap<String, AtomicLong>> = AllRequestScopedTransferableThreadLocal {
-            ConcurrentHashMap<String, AtomicLong>()
-        }
-    }
 
     /**
      * 是否转义html
@@ -81,10 +72,8 @@ open class HtmlTag(
     // id属性与 TagSupport的属性 重名了
     //public override var id: String? by property()
     override fun setId(id: String?) {
+        this.id = id
         attrs["id"] = id
-    }
-    override fun getId(): String? {
-        return attrs["id"] as String?
     }
 
     public var name: String? by property()
@@ -129,16 +118,6 @@ open class HtmlTag(
      */
     public override fun setDynamicAttribute(uri: String?, localName: String, value: Any?) {
         attrs[localName] = value
-    }
-
-    /**
-     * 生成id
-     */
-    protected fun nextId(): String {
-        val tag = this::class.simpleName!!.substringBefore("Tag")
-        return tag + idGenerators.get().getOrPut(tag){
-            AtomicLong(0)
-        }.incrementAndGet()
     }
 
     /**
@@ -192,13 +171,18 @@ open class HtmlTag(
         if (tag == null)
             return
 
-        // 默认id
-        if (id == null)
-            id = nextId()
-
         // 默认name
         if (name == null && path != null)
             name = path
+
+        // 默认id: generateId() 依赖于 name, 因此在设置了name之后才调用设置id
+        if (id == null) {
+            val newId = idGenerator.nextId(this)
+            if(newId != null) {
+                //id = newId // 不能直接用id, 而用基类改写的 setId()
+                setId(newId)
+            }
+        }
 
         // 样式
         if (isError && cssErrorClass != null) // 错误样式类

@@ -8,7 +8,7 @@ package net.jkcode.jkmvc.tags.form
 abstract class BaseInputTag(
         tag: String, // 标签名
         hasBody: Boolean // 是否有标签体
-): HtmlTag(tag, hasBody) {
+): HtmlTag(tag, hasBody, IdGenerator.ByName) {
 
     public var onfocus: String? by property()
 

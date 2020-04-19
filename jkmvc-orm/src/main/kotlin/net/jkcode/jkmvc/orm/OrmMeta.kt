@@ -300,7 +300,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             // 直接缓存Orm, 其序列化依靠 OrmEntityFstSerializer
             item ?: Unit // null则给一个空对象
         }.get()
-        return if(result is Unit) null else result as T
+        return if(result is Unit) null else result as T?
     }
 
     /**
