@@ -94,7 +94,8 @@ interface IRelationMeta {
      * @return
      */
     fun newModelInstance(): IOrm {
-        return model.java.newInstance();
+        //return model.java.newInstance();
+        return ormMeta.newInstance()
     }
 
     /**

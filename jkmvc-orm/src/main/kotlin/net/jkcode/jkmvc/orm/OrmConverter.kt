@@ -43,6 +43,10 @@ class OrmConverter(protected val xstream: XStream): Converter {
         val item = source as Orm
         // 遍历map创建子节点
         for((key, value) in item.getData()){
+            // fix bug: 属性值为null, 直接不输出, 否则就算输出空节点 <xxx />, 在反序列化时 `reader.value` 读到的值是空字符串, 也是无法反序列化的
+            if(value == null)
+                continue
+
             // key作为节点名
             // 支持别名
             //val key = xstream.mapper.aliasForAttribute(source.javaClass, key) // @deprecated

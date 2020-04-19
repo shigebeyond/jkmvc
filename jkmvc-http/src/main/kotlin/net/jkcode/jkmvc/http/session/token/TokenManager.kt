@@ -5,6 +5,7 @@ import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.generateId
 import net.jkcode.jkmvc.http.session.Auth
 import net.jkcode.jkmvc.http.session.IAuthUserModel
+import net.jkcode.jkmvc.orm.modelOrmMeta
 
 /**
  * 用缓存来管理token
@@ -65,7 +66,8 @@ object TokenManager : ITokenManager {
             return null
 
         // 创建用户模型
-        val user = Auth.userModel.java.newInstance() as IAuthUserModel
+        //val user = Auth.userModel.java.newInstance() as IAuthUserModel
+        val user = Auth.userModel.modelOrmMeta.newInstance() as IAuthUserModel
         user.fromMap(data)
 
         // 校验

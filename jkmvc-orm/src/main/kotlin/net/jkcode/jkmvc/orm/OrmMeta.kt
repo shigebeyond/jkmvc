@@ -422,9 +422,11 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         }
         // 查询主键
         return query.where(primaryKey, pk).findRow{
-            (item ?: model.java.newInstance() as T).apply {
-                setOriginal(it)
-            }
+            //val result = item ?: model.java.newInstance() as T
+            val result = item ?: newInstance() as T
+            result.setOriginal(it)
+            result
+
         }
     }
 
