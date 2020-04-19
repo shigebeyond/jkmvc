@@ -11,6 +11,7 @@ import net.jkcode.jkutil.common.*
 import net.jkcode.jkutil.validator.IValidator
 import net.jkcode.jkutil.validator.ModelValidateResult
 import net.jkcode.jkutil.validator.ValidateResult
+import java.lang.reflect.Constructor
 import java.util.*
 import kotlin.collections.set
 import kotlin.reflect.KClass
@@ -46,10 +47,25 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             pkEmptyRule: PkEmptyRule = PkEmptyRule.default // 检查主键为空的规则
     ):this(model, label, table, DbKeyNames(primaryKey), cacheMeta, dbName, pkEmptyRule)
 
+    /**
+     * 无参数的构造函数
+     */
+    protected var constructorNoarg: Constructor<out IOrm>? = null
+
+    /**
+     * 可变参数的构造函数
+     *   vararg pk?: Any
+     */
+    protected var constructorVararg: Constructor<out IOrm>? = null
+
     init{
         // 检查 model 类的默认构造函数
-        if(model != GeneralModel::class && model.java.getConstructorOrNull() == null)
-            throw OrmException("Model Class [$model] has no no-arg constructor") // Model类${clazz}无默认构造函数
+        if(model != GeneralModel::class){
+            constructorNoarg = model.java.getConstructorOrNull() // 无参数构造函数
+            constructorVararg = model.java.getConstructorOrNull(Array<Any>::class.java) // 可变参数构造函数
+            if(constructorNoarg == null && constructorVararg == null)
+                throw OrmException("Model Class [$model] has no no-arg constructor") // Model类${clazz}无默认构造函数
+        }
     }
 
     companion object{
@@ -148,6 +164,60 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     public override val serializingProps: List<String> = emptyList()
 
     /**
+     * 创建时间
+     */
+    public override val createdDateProp: String? by lazy{
+        getExistProp(config["createdDateProp"])
+    }
+
+    /**
+     * 创建人id
+     */
+    public override val createdByProp: String? by lazy{
+        getExistProp(config["createdByProp"])
+    }
+
+    /**
+     * 创建人名
+     */
+    public override val createdByNameProp: String? by lazy{
+        getExistProp(config["createdByNameProp"])
+    }
+
+    /**
+     * 修改时间
+     */
+    public override val modifiedDateProp: String? by lazy{
+        getExistProp(config["modifiedDateProp"])
+    }
+
+    /**
+     * 修改人id
+     */
+    public override val modifiedByProp: String? by lazy{
+        getExistProp(config["modifiedByProp"])
+    }
+
+    /**
+     * 修改人名
+     */
+    public override val modifiedByNameProp: String? by lazy{
+        getExistProp(config["modifiedByNameProp"])
+    }
+
+    /**
+     * 获得存在的属性, 如不存在则返回null
+     * @param prop
+     * @return
+     */
+    protected fun getExistProp(prop: String?): String? {
+        if(!prop.isNullOrEmpty() && props.contains(prop))
+            return prop
+
+        return null
+    }
+
+    /**
      * 数据的工厂
      */
     public override val dataFactory: FixedKeyMapFactory by lazy{
@@ -194,6 +264,17 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     public override fun <T> transactionWhenHandlingEvent(events:String, withHasRelations: Boolean, statement: () -> T): T{
         val needTrans = canHandleAnyEvent(events) || withHasRelations
         return db.transaction(!needTrans, statement)
+    }
+
+    /**
+     * 创建实例
+     *   使用无参数构造函数/可变参数构造参数来实例化
+     * @return
+     */
+    public override fun newInstance(): IOrm {
+        return constructorNoarg?.newInstance() // 无参数构造函数
+                ?: constructorVararg?.newInstance(emptyArray<Any>()) // 可变参数构造参数
+                ?: throw OrmException("Model Class [$model] has no no-arg constructor") // Model类${clazz}无默认构造函数
     }
 
     /********************************* 校验 **************************************/

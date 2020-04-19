@@ -2,6 +2,8 @@ package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkutil.common.associate
 import net.jkcode.jkutil.common.dbLogger
+import java.lang.UnsupportedOperationException
+import java.util.*
 
 /**
  * ORM之持久化，主要是负责数据库的增删改查
@@ -301,4 +303,52 @@ abstract class OrmPersistent : OrmValid() {
 	 * @param byDelete 是否delete()调用, 否则update()调用
 	 */
 	internal abstract fun removeHasNRelations(byDelete: Boolean)
+
+	/************************************ 持久化事件 *************************************/
+	/**
+	 * 获得当前登录在用户的id与名字
+	 * @return
+	 */
+	protected open fun getCurrentUserIdAndName(): Pair<Any, Any>? {
+		throw UnsupportedOperationException()
+	}
+
+	override fun beforeCreate() {
+		// 创建时间
+		val now = Date()
+		if(ormMeta.createdDateProp != null)
+			this[ormMeta.createdDateProp!!] = now
+		// 修改时间
+		if(ormMeta.modifiedDateProp != null)
+			this[ormMeta.modifiedDateProp!!] = now
+
+		val user = getCurrentUserIdAndName()
+		if(user != null) {
+			// 创建人id
+			val (uid, uname) = user
+			if (ormMeta.createdByProp != null)
+				this[ormMeta.createdByProp!!] = uid
+			// 创建人名
+			if (ormMeta.createdByNameProp != null)
+				this[ormMeta.createdByNameProp!!] = uname
+		}
+	}
+
+	override fun beforeUpdate() {
+		// 修改时间
+		val now = Date()
+		if(ormMeta.modifiedDateProp != null)
+			this[ormMeta.modifiedDateProp!!] = now
+
+		val user = getCurrentUserIdAndName()
+		if(user != null) {
+			// 修改人id
+			val (uid, uname) = user
+			if (ormMeta.modifiedByProp != null)
+				this[ormMeta.modifiedByProp!!] = uid
+			// 修改人名
+			if (ormMeta.modifiedByNameProp != null)
+				this[ormMeta.modifiedByNameProp!!] = uname
+		}
+	}
 }

@@ -156,7 +156,9 @@ public val <T:IOrm> KClass<T>.modelRowTransformer: (DbResultRow) -> T
         // 实例化函数
         return {
             // 实例化
-            val obj = java.newInstance() as IOrm
+            //val obj = java.newInstance() as IOrm
+            // 使用无参数构造函数/可变参数构造参数来实例化
+            val obj = this.modelOrmMeta.newInstance()
 
             // 设置字段值
             obj.setOriginal(it)

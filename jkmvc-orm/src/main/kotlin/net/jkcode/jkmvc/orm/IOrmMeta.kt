@@ -103,6 +103,37 @@ interface IOrmMeta {
      */
     val serializingProps: List<String>
 
+
+    /**
+     * 创建时间
+     */
+    val createdDateProp: String?
+
+    /**
+     * 创建人id
+     */
+    val createdByProp: String?
+
+    /**
+     * 创建人名
+     */
+    val createdByNameProp: String?
+
+    /**
+     * 修改时间
+     */
+    val modifiedDateProp: String?
+
+    /**
+     * 修改人id
+     */
+    val modifiedByProp: String?
+
+    /**
+     * 修改人名
+     */
+    val modifiedByNameProp: String?
+
     /**
      * 数据的工厂
      */
@@ -155,6 +186,13 @@ interface IOrmMeta {
      * @param value 字符串
      */
     fun convertIntelligent(column:String, value:String):Any?
+
+    /**
+     * 创建实例
+     *    使用无参数构造函数/可变参数构造参数来实例化
+     * @return
+     */
+    fun newInstance(): IOrm
 
     /************************************ 缓存 *************************************/
     /**

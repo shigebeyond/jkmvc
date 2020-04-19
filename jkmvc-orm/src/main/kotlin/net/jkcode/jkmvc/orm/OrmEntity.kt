@@ -36,11 +36,6 @@ abstract class OrmEntity : IOrmEntity, Serializable {
     companion object{
 
         /**
-         * orm配置
-         */
-        public val config: Config = Config.instance("orm")
-
-        /**
          * 序列器
          */
         public val serializer: FstSerializer = ISerializer.instance("fst") as FstSerializer

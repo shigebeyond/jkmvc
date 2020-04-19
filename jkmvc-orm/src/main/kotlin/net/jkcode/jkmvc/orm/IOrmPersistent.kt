@@ -1,5 +1,7 @@
 package net.jkcode.jkmvc.orm
 
+import java.lang.UnsupportedOperationException
+
 /**
  * ORM之持久化，主要是负责数据库的增删改查
  *
