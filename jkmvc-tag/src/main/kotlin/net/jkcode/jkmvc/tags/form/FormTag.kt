@@ -49,7 +49,9 @@ class FormTag: HtmlTag("form", true) {
 
         if(action == null)
             throw IllegalArgumentException("action must not be null")
-        action = HttpRequest.current().absoluteUrl(action, false)
+        // 我不管action了, 开发者自己拼好: 1 如果是当前站点, 自己加上 contextPath, 成为绝对路径 2 如果是外部站点, 自己加上协议ip端口
+        // 跟 html 原生 <form> 标签的 action 字段一样写法好了
+        //action = HttpRequest.current().absoluteUrl(action, false)
     }
 
 }

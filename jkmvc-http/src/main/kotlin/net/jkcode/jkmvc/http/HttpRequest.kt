@@ -472,15 +472,19 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	/**
 	 * 将相对路径转为绝对路径
 	 * @param uri 相对路径
+	 * @param withContextPath 是否要上 contextPath
+	 *        如果是java一般为true
+	 *        如果是jsp的url一般是相对于server根节点, 因此一般为false
 	 * @return 绝对路径
 	 */
-	public fun absoluteUrl(uri:String):String
+	public fun absoluteUrl(uri:String, addContextPath: Boolean = true):String
 	{
 		if(uri.startsWith("http"))
 			return uri;
 
+		val cp = if(addContextPath) contextPath else ""
 		val delimiter = if(uri.startsWith('/')) "" else "/"
-		return serverUrl + contextPath + delimiter + uri
+		return serverUrl + cp + delimiter + uri
 	}
 
 	/**
