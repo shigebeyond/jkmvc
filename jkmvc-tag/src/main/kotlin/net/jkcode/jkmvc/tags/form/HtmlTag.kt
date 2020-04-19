@@ -263,7 +263,10 @@ open class HtmlTag(
      */
     protected fun toDisplayString(obj: Any?): String {
         val str = toString(obj)
-        return if(htmlEscape) StringEscapeUtils.escapeHtml(str) else str
+        if(str.isNullOrEmpty() || !htmlEscape)
+            return str
+
+        return StringEscapeUtils.escapeHtml(str)
     }
 
     /**
@@ -272,7 +275,7 @@ open class HtmlTag(
      * @return
      */
     protected fun toString(obj: Any?): String {
-        if (obj == null) 
+        if (obj == null)
             return ""
 
         if(obj is Array<*>)

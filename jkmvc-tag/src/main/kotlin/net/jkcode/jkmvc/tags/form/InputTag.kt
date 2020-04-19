@@ -27,8 +27,9 @@ open class InputTag(type: String = "text" /* 类型, 子类可改写 */) : BaseI
     public var autocomplete: String? by property()
 
     override fun beforeWriteTag(writer: JspWriter) {
-        if(value == null && boundValue != null)
-            value = boundValue
+        // value 最好要输出的, 因为前端经常会访问该属性
+        if(value == null)
+            value = boundValue ?: ""
     }
 
 }
