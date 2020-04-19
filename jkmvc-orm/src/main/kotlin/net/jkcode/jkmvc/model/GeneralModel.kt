@@ -29,7 +29,7 @@ import net.jkcode.jkmvc.orm.*
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-17 3:38 PM
  */
-open class GeneralModel(myOrmMeta: IOrmMeta /* 自定义元数据 */) : Orm(emptyArray()) {
+open class GeneralModel(myOrmMeta: IOrmMeta /* 自定义元数据 */) : Orm() {
 
     public constructor(table: String /* 表名 */, primaryKey:String = "id" /* 主键 */):this(GeneralOrmMeta("`$table`'s general model", table, primaryKey))
 
