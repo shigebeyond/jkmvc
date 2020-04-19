@@ -60,7 +60,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
         val req = HttpRequest(request as HttpServletRequest);
         if(debug){
             // 路由
-            httpLogger.debug("请求uri: {} {}, contextPath: {}", req.method, req.routeUri, req.contextPath)
+            httpLogger.debug("{}请求uri: {} {}, contextPath: {}", if(req.isInner) "内部" else "", req.method, req.routeUri, req.contextPath)
 
             // curl命令
             if(!req.isInner && !req.isUpload()) // 上传请求，要等到设置了上传子目录，才能访问请求参数
