@@ -117,7 +117,7 @@ open class DbTable(
         // 元数据定义的配置
         val config = Config.instance("db-meta.${db.dbType}", "yaml")
         // 建表sql
-        val createTableSql: String = config["alterTableSql"]!!
+        val alterTableSql: String = config["alterTableSql"]!!
 
         // 获得旧的列
         val oldColumns = db.queryColumnsByTable(name).map { it.name }
@@ -132,13 +132,13 @@ open class DbTable(
             // 参数
             val data = mapOf(
                     "table" to db.quoteTable(name),
-                    "columnSql" to columnSql,
+                    "columnsSql" to columnSql,
                     "primaryKeys" to primaryKeys?.joinToString {
                         db.quoteColumn(it)
                     }
             )
             // 生成sql
-            createTableSql.replacesFormat(data, "<", ">")
+            alterTableSql.replacesFormat(data, "<", ">")
         }
 
     }
