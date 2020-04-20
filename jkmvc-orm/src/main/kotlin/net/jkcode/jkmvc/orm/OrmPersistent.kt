@@ -59,11 +59,11 @@ abstract class OrmPersistent : OrmValid() {
 	 * 根据主键值来加载数据
 	 *   如果是复合主键, 则参数按 ormMeta.primaryKey 中定义的字段的属性来传值
 	 *
-	 * @param pk
+	 * @param pks
 	 */
-	public override fun loadByPk(vararg pk: Any) {
-		if(pk.isNotEmpty()) {
-			val key = DbKeyValues(pk)
+	public override fun loadByPk(vararg pks: Any) {
+		if(pks.isNotEmpty()) {
+			val key = DbKeyValues(*pks)
 			if(!isPkEmpty(key))
 				 ormMeta.loadByPk(key, this) // 无缓存
 		}

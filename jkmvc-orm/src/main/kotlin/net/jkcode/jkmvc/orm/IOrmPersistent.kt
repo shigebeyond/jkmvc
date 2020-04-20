@@ -1,7 +1,5 @@
 package net.jkcode.jkmvc.orm
 
-import java.lang.UnsupportedOperationException
-
 /**
  * ORM之持久化，主要是负责数据库的增删改查
  *
@@ -50,9 +48,9 @@ interface IOrmPersistent : IOrmValid {
 	 * 根据主键值来加载数据
 	 *   如果是复合主键, 则参数按 ormMeta.primaryKey 中定义的字段的属性来传值
 	 *
-	 * @param pk
+	 * @param pks
 	 */
-	fun loadByPk(vararg pk: Any)
+	fun loadByPk(vararg pks: Any)
 
 	/**
 	 * 保存数据

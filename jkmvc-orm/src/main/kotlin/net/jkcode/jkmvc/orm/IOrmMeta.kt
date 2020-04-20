@@ -295,11 +295,11 @@ interface IOrmMeta {
 
     /**
      * 根据主键值来加载数据
-     * @param pk 要查询的主键
+     * @param pks 要查询的主键
      * @param item 要赋值的对象
      */
-    public fun loadByPk(vararg pk: Any, item: IOrm){
-        loadByPk(DbKeyValues(*pk),item)
+    public fun loadByPk(vararg pks: Any, item: IOrm){
+        loadByPk(DbKeyValues(*pks),item)
     }
 
     /**
@@ -311,11 +311,11 @@ interface IOrmMeta {
 
     /**
      * 根据主键值来查找数据
-     * @param pk 要查询的主键
+     * @param pks 要查询的主键
      * @return
      */
-    public fun <T: IOrm> findByPk(vararg pk: Any): T?{
-        return findByPk(DbKeyValues(*pk))
+    public fun <T: IOrm> findByPk(vararg pks: Any): T?{
+        return findByPk(DbKeyValues(*pks))
     }
 
     /**
@@ -327,21 +327,21 @@ interface IOrmMeta {
 
     /**
      * 检查是否存在主键值对应的数据
-     * @param pk 要检查的主键
+     * @param pks 要检查的主键
      * @return
      */
-    public fun existByPk(vararg pk: Any): Boolean {
-        return findByPk<IOrm>(*pk) != null
+    public fun existByPk(vararg pks: Any): Boolean {
+        return findByPk<IOrm>(*pks) != null
     }
 
     /**
      * 根据主键值来删除数据
-     * @param pk 要删除的主键
+     * @param pks 要删除的主键
      * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
      * @return
      */
-    public fun deleteByPk(vararg pk: Any, withHasRelations: Boolean = false): Boolean{
-        return deleteByPk(DbKeyValues(pk), withHasRelations)
+    public fun deleteByPk(vararg pks: Any, withHasRelations: Boolean = false): Boolean{
+        return deleteByPk(DbKeyValues(*pks), withHasRelations)
     }
 
     /**
