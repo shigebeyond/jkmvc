@@ -108,7 +108,7 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
             code.append("(${getProp(name)}:$type? = null): Orm(${getProp(name)}) {\n")
         }else { // 多主键
             // 默认构造函数
-            code.append("(pk: Array<Any> = emptyArray()): Orm(pk) {\n\n")
+            code.append("(vararg pks: Any): Orm(*pks) {\n\n")
 
             // 多参数构造函数
             // public constructor((name1:type1, name2:type2)
@@ -116,7 +116,7 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
                 "${getProp(name)}: $type"
             }
             // : Orm(name1, name2) {\n
-            pks.joinTo(code, ", ", " : this(arrayOf(", "))\n\n") { (name, type) ->
+            pks.joinTo(code, ", ", " : this(", ")\n\n") { (name, type) ->
                 getProp(name)
             }
         }
