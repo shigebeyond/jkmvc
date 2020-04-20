@@ -47,6 +47,18 @@ interface IRoute{
 	val method: HttpMethod
 
 	/**
+	 * controller
+	 *   仅当方法级注解路由时有效
+	 */
+	val controller: String?
+
+	/**
+	 * action
+	 *   仅当方法级注解路由时有效
+	 */
+	val action: String?
+
+	/**
 	 * 检查uri是否匹配路由正则
 	 *
 	 * @param uri

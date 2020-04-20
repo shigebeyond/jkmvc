@@ -154,7 +154,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 * @return
 	 */
 	public val controller: String
-		get() = getParameter("controller")!!
+		get() = routeResult.controller
 
 	/**
 	 * 获得当前controller类
@@ -168,7 +168,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 * @return
 	 */
 	public val action: String
-		get() = getParameter("action")!!
+		get() = routeResult.action
 
 	/*************************** 合并http参数+路由参数 *****************************/
 	/**
@@ -192,9 +192,14 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		if(routeParams.isEmpty())
 			return req.parameterMap
 
+		// 1 请求参数
 		val result = HashMap(req.parameterMap)
+		// 2 逐个合并路由参数
 		for((k, v) in routeParams){
-			result[k] = arrayOf(v)
+			// 全局配置路由: 不合并controller/action, 防止覆盖http请求参数
+			// 方法级注解路由: 压根没有获得controller/action路由参数的需求, 因为你在目标方法中开发了, 不至于反过来问是哪个方法
+			if(!(routeResult.route.isGlobal && (k == "controller" || k == "action")))
+				result[k] = arrayOf(v)
 		}
 		return result
 	}

@@ -40,7 +40,7 @@ uri是一个字符串，用于标识url中被匹配的部分。用 `<>` 包住�
 
 默认路由中的uri是 `<controller>(/<action>(/<id>)?)?`。 在这里我们有三个参数: `controller`，`action` 和 `id`，其中`action` 和 `id`是可选的，也就是可以省略。
 
-路由可以匹配一个空白uri，这时候匹配的 `controller` 与 `action`都是默认值(用 `defaults` 来设置的默认值)，这会调用 `WelcomeController.indexAction` 来处理请求。
+路由可以匹配一个空白uri，这时候匹配的 `controller` 与 `action`都是默认值(用 `defaults` 来设置的默认值)，这会调用 `WelcomeController.index` 来处理请求。
 
 关于参数名，你可以随意命名，但是以下的参数名在[HttpRequest](request.md)对象中有特殊含义的，会影响哪个 `controller` 与 `action` 被调用
 
@@ -92,7 +92,7 @@ user/detail/1 | UserController#detail()，其中通过`req.req.getInt("id")` 可
 	HttpRequest.current().directory;
 ```
 
-而其他路由参数，可以通过 `HttpRequest::get(key)` 或 `HttpRequest::getParameter(key)` 来访问
+而其他路由参数，可以通过 `HttpRequest::get(key)` 或 `HttpRequest::getParameter(key)` 来访问 (不包含默认路由中`controller`/`action`)
 
 ```
 	// 在 `Controller` 内:
@@ -121,7 +121,7 @@ default:
     action: index
 ```
 
-如果当前url匹配该路由，则调用 `AdsController::index()` 来处理请求。在 Controller 中你可以通过 `req.get(key)` 或 `req.getParameter(key)` 来访问路由参数：
+如果当前url匹配该路由，则调用 `AdsController::index()` 来处理请求。在 Controller 中你可以通过 `req.get(key)` 或 `req.getParameter(key)` 来访问路由参数(不包含默认路由中`controller`/`action`)：
 
 ```
 class WelcomeController: Controller() {

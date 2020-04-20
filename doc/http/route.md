@@ -40,7 +40,7 @@ The uri is a string that represents the format of urls that should be matched.  
 
 Lets look at the default route again, the uri is `<controller>(/<action>(/<id>)?)?`.  We have three keys or params: `controller`, `action`, and `id`. But `action` and `id` are optional.
 
-And a blank uri would match default controller and action (set by `defaults` configuration item) would be assumed resulting in the `WelcomeController` class being loaded and the `indexAction` method being called to handle the request.
+And a blank uri would match default controller and action (set by `defaults` configuration item) would be assumed resulting in the `WelcomeController` class being loaded and the `index` method being called to handle the request.
 
 You can use any name you want for your keys, but the following keys have special meaning to the [HttpRequest](request.md) object, and will influence which controller and action are called:
 
@@ -90,7 +90,7 @@ The `controller` and `action` can be accessed from the [HttpRequest](request.md)
 	HttpRequest.current().directory;
 ```
 
-All other keys specified in a route can be accessed via `HttpRequest::get(key)` or `HttpRequest::getParameter(key)`:
+All other keys specified in a route can be accessed via `HttpRequest::get(key)` or `HttpRequest::getParameter(key)`(exclude `controller`/`action` in default route):
 
 ```
 	// From within a controller:
@@ -119,7 +119,7 @@ default:
     action: index
 ```
 
-If a url matches the route, then `AdsController::index()` will be called.  You can access the parameters by using  `req.get(key)` or `req.getParameter(key)` in controller.
+If a url matches the route, then `AdsController::index()` will be called.  You can access the parameters by using  `req.get(key)` or `req.getParameter(key)` in controller (exclude `controller`/`action` in default route).
 
 ```
 class WelcomeController: Controller() {

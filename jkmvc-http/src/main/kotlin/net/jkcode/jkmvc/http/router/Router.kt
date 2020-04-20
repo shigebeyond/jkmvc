@@ -94,7 +94,7 @@ object Router: IRouter
 			//匹配路由规则
 			val params = route.match(uri, method);
 			if(params != null) {
-				// 如果是默认路由(方法的路由注解的正则为空), 最后需要匹配方法, 如不匹配则返回null
+				// 如果是默认路由(方法的路由注解的正则为空是交给默认路由处理), 最后需要匹配方法, 如不匹配则返回null
 				if(route == defaultRoute && !matchActionAnnotationMethod(params, method))
 					return null
 

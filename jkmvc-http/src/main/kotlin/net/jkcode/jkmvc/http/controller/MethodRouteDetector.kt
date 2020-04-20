@@ -31,11 +31,8 @@ open class MethodRouteDetector {
         if(regex.isEmpty())
             return
 
-        val params = mapOf(
-                "controller" to controller,
-                "action" to action
-        )
-        Router.addRoute("$controller#$action", Route(regex, emptyMap(), params, annotation.method))
+        val route = Route(regex, annotation.method, controller, action)
+        Router.addRoute("$controller#$action", route)
     }
 
 }

@@ -42,8 +42,17 @@ data class GroupRange(var start:Int, var end:Int){
 class Route(override val regex:String, // 原始正则: <controller>(\/<action>(\/<id>)?)?
 			override val paramRegex:Map<String, String> = emptyMap(), // 参数的子正则
 			override val defaults:Map<String, String>? = null, // 参数的默认值
-			override val method: HttpMethod = HttpMethod.ALL // http方法
+			override val method: HttpMethod = HttpMethod.ALL, // http方法
+			override val controller: String? = null, // controller, 仅当方法级注解路由时有效
+			override val action: String? = null // action, 仅当方法级注解路由时有效
 ): IRoute {
+
+	// 仅在方法级注解路由时调用
+	constructor(regex:String, // 原始正则: <controller>(\/<action>(\/<id>)?)?
+				method: HttpMethod, // http方法
+				controller: String?, // controller, 仅当方法级注解路由时有效
+				action: String? // action, 仅当方法级注解路由时有效
+	):this(regex, emptyMap(), emptyMap(), method, controller, action)
 
 	companion object{
 		/**
@@ -80,8 +89,23 @@ class Route(override val regex:String, // 原始正则: <controller>(\/<action>(
 	 */
 	protected var fastSubString: String
 
+	/**
+	 * 是否方法级注解的路由
+	 */
+	public val isMethodLevel: Boolean by lazy{
+		controller != null && action != null
+	}
+
+	/**
+	 * 是否全局配置的路由
+	 */
+	public val isGlobal: Boolean
+		get() = !isMethodLevel
 
 	init {
+		if(controller == null && action != null || controller != null && action == null)
+			throw IllegalArgumentException("controller/action参数要不全部为null, 要不全部不为null")
+
 		// 对参数加括号，参数也变为子正则, 用括号包住
 		groupRegex = "<[\\w\\d]+>".toRegex().replace(regex){ result: MatchResult ->
 			"(${result.value})" // 用括号包住, 变为子正则
