@@ -33,7 +33,7 @@ interface IController{
      * 响应的writer
      */
     val writer: Writer
-        get() = res.writer
+        get() = res.prepareWriter()
 
     /**
      * 响应的output
