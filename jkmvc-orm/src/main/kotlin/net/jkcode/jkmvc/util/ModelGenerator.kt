@@ -116,7 +116,7 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
                 "${getProp(name)}: $type"
             }
             // : Orm(name1, name2) {\n
-            pks.joinTo(code, ", ", " : this(", ")\n\n") { (name, type) ->
+            pks.joinTo(code, ", ", " : this(*arrayOf(", "))\n\n") { (name, type) ->
                 getProp(name)
             }
         }
