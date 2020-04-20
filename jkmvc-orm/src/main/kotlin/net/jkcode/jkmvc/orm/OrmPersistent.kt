@@ -98,10 +98,15 @@ abstract class OrmPersistent : OrmValid() {
 			beforeCreate()
 			beforeSave()
 
-			// 插入数据库
 			// 是否需要生成主键
 			val needPk = !ormMeta.primaryProp.isAllEmpty() // 有主键字段
 					&& !_data.containsAllKeys(ormMeta.primaryProp) // 但无主键值
+
+			// 删除缓存 -- 可能创建前先查了一下, 检查是否有重复数据, 因此要删除缓存
+			if(!needPk)
+				ormMeta.removeCache(this)
+
+			// 插入数据库
 			val generatedColumn = if (needPk) ormMeta.primaryKey.first() else null // 主键名
 			val pk = queryBuilder().value(buildDirtyData()).insert(generatedColumn);
 

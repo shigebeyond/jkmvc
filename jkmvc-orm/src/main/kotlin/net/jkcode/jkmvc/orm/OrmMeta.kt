@@ -328,14 +328,14 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     }
 
     /**
-     * 删除缓存
+     * 根据主键值来删除缓存
      * @param item
      */
     public override fun removeCache(item: IOrm){
         if(cacheMeta == null)
             return
 
-        val key = item.pk.columns.joinToString("_", "${dbName}_")
+        val key = getCacheKey(item.pk)
         cache.remove(key)
     }
 
@@ -348,9 +348,8 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun <T:IOrm> getOrPutCache(pk: DbKeyValues, item: T?, expires:Long): T? {
         // 无需缓存
-        if(cacheMeta == null){
+        if(cacheMeta == null)
             return innerloadByPk(pk, item)
-        }
 
         // 读缓存, 无则读db
         val cacheItem = innerGetOrPutCache(pk, item, expires)
@@ -375,13 +374,12 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     private fun <T : IOrm> innerGetOrPutCache(pk: DbKeyValues, item: T?, expires: Long): T? {
         // 读缓存, 无则读db
         val key = getCacheKey(pk)
-        val result = cache.getOrPut(key, expires) {
+        return cache.getOrPut(key, expires) {
             // 读db
             val item = innerloadByPk(pk, item)
             // 直接缓存Orm, 其序列化依靠 OrmEntityFstSerializer
-            item ?: Unit // null则给一个空对象
-        }.get()
-        return if(result is Unit) null else result as T?
+            item
+        }.get() as T?
     }
 
     /**

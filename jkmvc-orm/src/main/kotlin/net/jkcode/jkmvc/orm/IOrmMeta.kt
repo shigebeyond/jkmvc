@@ -210,7 +210,7 @@ interface IOrmMeta {
     fun <T:IOrm> getOrPutCache(pk: DbKeyValues, item: T? = null, expires:Long = 5 * 3600): T?
 
     /**
-     * 删除缓存
+     * 根据主键值来删除缓存
      * @param item
      */
     fun removeCache(item: IOrm)
