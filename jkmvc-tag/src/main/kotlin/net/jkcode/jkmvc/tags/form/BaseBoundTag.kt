@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.tags.form
 
+import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.PropertyUtil
 import net.jkcode.jkutil.common.trim
 import javax.servlet.http.HttpServletRequest
@@ -12,6 +13,16 @@ import javax.servlet.jsp.tagext.TagSupport
  * @date 2019-12-25 3:35 PM
  */
 abstract class BaseBoundTag : TagSupport() {
+
+    companion object{
+
+        val config = Config.instance("tag", "properties")
+
+        /**
+         * 请求中存储错误的属性名
+         */
+        val requestErrorAttrName: String = config["requestErrorAttrName"] ?: "errors"
+    }
 
     /**
      * 会话
@@ -86,10 +97,10 @@ abstract class BaseBoundTag : TagSupport() {
     /**
      * 绑定的错误
      */
-    public var boundError: Any? ? = null
+    public var boundError: Any? = null
         get() {
             if (field == null && absolutePath != null) {
-                val errors = request.getAttribute("_errors")
+                val errors = request.getAttribute(requestErrorAttrName)
                 val path = if (absolutePath!!.endsWith(".*")) // 所有错误
                                 absolutePath!!.trim(".*")
                             else // 单个错误
@@ -112,7 +123,9 @@ abstract class BaseBoundTag : TagSupport() {
      */
     public val isError: Boolean
         get() {
-            return !(boundError == null || boundError is Map<*, *> && (boundError as Map<*, *>).isEmpty()) // 不为空
+            return !(boundError == null
+                    || boundError is Map<*, *> && (boundError as Map<*, *>).isEmpty() // 不为空
+                    || boundError is Collection<*> && (boundError as Collection<*>).isEmpty()) // 不为空
         }
 
     /**

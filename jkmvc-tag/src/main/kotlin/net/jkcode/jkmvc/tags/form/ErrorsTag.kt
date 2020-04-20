@@ -44,18 +44,23 @@ class ErrorsTag : HtmlTag(null, true){
         // 容器头
         writer.append("<").append(element).append(">")
 
-        val error = boundError
-        if(error is Map<*, *>){ // 多个错误
+        // 尝试获得多个错误
+        var errors: Collection<*>? = null
+        if(boundError is Map<*, *>)
+            errors = (boundError as Map<*, *>).values
+        else if(boundError is Collection<*>)
+            errors = boundError as Collection<*>
+
+        if(errors != null){ // 多个错误
             var i = 0
-            error.forEach { field, err ->
+            errors.forEach { err ->
                 if(i++ > 0)
                     writer.append(delimiter)
                 writer.append(toDisplayString(err))
             }
         }else{ // 单个错误
-            writer.append(toDisplayString(error))
+            writer.append(toDisplayString(boundError))
         }
-
 
         // 容器尾部
         writer.append("</").append(element).append(">")
