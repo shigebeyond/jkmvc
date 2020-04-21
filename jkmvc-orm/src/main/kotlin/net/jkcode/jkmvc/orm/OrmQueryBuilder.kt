@@ -4,6 +4,7 @@ import net.jkcode.jkutil.common.isArrayOrCollection
 import net.jkcode.jkutil.common.iteratorArrayOrCollection
 import net.jkcode.jkutil.common.map
 import net.jkcode.jkmvc.db.DbResultRow
+import net.jkcode.jkmvc.db.DbResultSet
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.DbQueryBuilder
@@ -25,10 +26,11 @@ import kotlin.collections.set
  * @date 2016-10-16 下午8:02:28
  *
  */
-open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
-                          protected var convertingValue: Boolean = false /* 查询时是否智能转换字段值 */,
-                          protected var convertingColumn: Boolean = false /* 查询时是否智能转换字段名 */,
-                          protected var withSelect: Boolean = true /* with()联查时自动select关联表的字段 */
+open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
+                           protected var convertingValue: Boolean = false, // 查询时是否智能转换字段值
+                           protected var convertingColumn: Boolean = false, // 查询时是否智能转换字段名
+                           protected var withSelect: Boolean = true, // with()联查时自动select关联表的字段
+                           protected val beforeFind: ((OrmQueryBuilder)->Unit)? = null // 查询的前置处理
 ) : DbQueryBuilder(ormMeta.db) {
 
     init {
@@ -625,6 +627,12 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta /* orm元数据 */,
         val relation = joins[table]!!
         // 由关联模型来转
         return Pair(relation.ormMeta, column)
+    }
+
+    override fun <T> findResult(params: List<*>, db: IDb, transform: (DbResultSet) -> T): T {
+        // 查询的前置处理
+        beforeFind?.invoke(this)
+        return super.findResult(params, db, transform)
     }
 
 }

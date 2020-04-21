@@ -102,7 +102,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
     /**
      * 能处理的序列化事件
-     *   就是在子类中重写了事件处理函数
+     *   就是在Orm子类中重写了事件处理函数
      */
     public override val processableEvents: List<String> by lazy{
         "beforeCreate|afterCreate|beforeUpdate|afterUpdate|beforeSave|afterSave|beforeDelete|afterDelete".split('|').filter { event ->
@@ -254,7 +254,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     }
 
     /**
-     * 如果有要处理的事件，则开启事务
+     * 如果有要处理的事件(只是增删改, 不包含查)，则开启事务
      *
      * @param events 多个事件名，以|分隔，如 beforeCreate|afterCreate
      * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
@@ -401,7 +401,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @return
      */
     public override fun queryBuilder(convertingValue: Boolean, convertingColumn: Boolean, withSelect: Boolean): OrmQueryBuilder {
-        return OrmQueryBuilder(this, convertingValue, convertingColumn, withSelect);
+        return OrmQueryBuilder(this, convertingValue, convertingColumn, withSelect, this::beforeFind)
     }
 
     /**

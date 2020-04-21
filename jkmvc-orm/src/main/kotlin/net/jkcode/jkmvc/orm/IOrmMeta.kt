@@ -263,7 +263,7 @@ interface IOrmMeta {
      * @param rows 查询行数
      * @return
      */
-    fun queryBuilder(sort: String? = null, desc: Boolean? = null, start: Int? = null, rows: Int? = null): OrmQueryBuilder {
+    fun queryBuilder(sort: String?, desc: Boolean? = null, start: Int? = null, rows: Int? = null): OrmQueryBuilder {
         val query = queryBuilder()
 
         if (sort != null && sort != "")
@@ -411,12 +411,18 @@ interface IOrmMeta {
 
     /************************************ 事件 *************************************/
     /**
-     * 能处理的事件
+     * 处理 queryBuilder() 返回的查询对象的查询的前置事件
+     *   主要用于给子类重载, 以便对子类 queryBuilder 做全局的配置, 如添加全局的where条件
+     */
+    fun beforeFind(query: OrmQueryBuilder){}
+
+    /**
+     * 能处理的事件(只是增删改, 不包含查)
      */
     val processableEvents: List<String>
 
     /**
-     * 能否处理任一事件
+     * 能否处理任一事件(只是增删改, 不包含查)
      * @param events 多个事件名，以|分隔，如 beforeCreate|afterCreate
      * @return
      */
@@ -427,7 +433,7 @@ interface IOrmMeta {
     }
 
     /**
-     * 如果有要处理的事件，则开启事务
+     * 如果有要处理的事件(只是增删改, 不包含查)，则开启事务
      *
      * @param events 多个事件名，以|分隔，如 beforeCreate|afterCreate
      * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
