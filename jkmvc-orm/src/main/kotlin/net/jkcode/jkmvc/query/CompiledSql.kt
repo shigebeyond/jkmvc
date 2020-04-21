@@ -177,6 +177,8 @@ class CompiledSql : Cloneable, ICompiledSql() {
             var param = staticParams[i++] // 静态参数
             if(param == DbExpr.question && dynamicParams.isNotEmpty())// 如果参数值是?，则认为是动态参数
                 param = dynamicParams[j++]
+            if(param is String && param.contains("\n"))
+                param = param.replace("\n", "\t") + "\n\t"
             db.quote(param)
         }
     }
