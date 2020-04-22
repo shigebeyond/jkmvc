@@ -89,11 +89,10 @@ class OrmMapPropDelegater protected constructor (public val keys: DbKeyNames): R
         if(list == null)
             return emptyMap<Any, Any?>()
 
-        return list.associateBy {
+        return (list as List<IOrmEntity>).associateBy { item ->
             keys.columns.joinToString("::") { key ->
-                thisRef.get<Any?>(key).toString()
+                item[key]
             }
-
         }
     }
 
