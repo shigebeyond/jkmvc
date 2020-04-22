@@ -393,6 +393,12 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
     /********************************* query builder **************************************/
     /**
+     * 处理 queryBuilder() 返回的查询对象的事件
+     *   主要用于给子类重载, 以便对子类 queryBuilder 做全局的配置, 如添加全局的where条件
+     */
+    protected open val queryListener: OrmQueryBuilderListener? = null
+
+    /**
      * 获得orm查询构建器
      *
      * @param convertingValue 查询时是否智能转换字段值
@@ -401,7 +407,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @return
      */
     public override fun queryBuilder(convertingValue: Boolean, convertingColumn: Boolean, withSelect: Boolean): OrmQueryBuilder {
-        return OrmQueryBuilder(this, convertingValue, convertingColumn, withSelect, this::beforeFind)
+        return OrmQueryBuilder(this, convertingValue, convertingColumn, withSelect, queryListener)
     }
 
     /**

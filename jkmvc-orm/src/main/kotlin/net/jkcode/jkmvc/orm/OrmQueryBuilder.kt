@@ -9,6 +9,7 @@ import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.DbQueryBuilder
 import net.jkcode.jkmvc.query.IDbQueryBuilder
+import net.jkcode.jkmvc.query.SqlType
 import net.jkcode.jkutil.common.mapToArray
 import java.util.*
 import kotlin.collections.HashMap
@@ -30,7 +31,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
                            protected var convertingValue: Boolean = false, // 查询时是否智能转换字段值
                            protected var convertingColumn: Boolean = false, // 查询时是否智能转换字段名
                            protected var withSelect: Boolean = true, // with()联查时自动select关联表的字段
-                           protected val beforeFind: ((OrmQueryBuilder)->Unit)? = null // 查询的前置处理
+                           protected val listener: OrmQueryBuilderListener? = null // 事件处理
 ) : DbQueryBuilder(ormMeta.db) {
 
     init {
@@ -629,10 +630,30 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
         return Pair(relation.ormMeta, column)
     }
 
+    /**
+     * 改写 execute(), 添加更新的事件处理
+     */
+    override fun execute(action: SqlType, params: List<Any?>, generatedColumn: String?, db: IDb): Long {
+        // 更新的前置处理
+        listener?.beforeExecute(this)
+        // 执行更新
+        val result = super.execute(action, params, generatedColumn, db)
+        // 更新的后置处理
+        listener?.afterExecute(this)
+        return result
+    }
+
+    /**
+     * 改写 findResult(), 添加查询的事件处理
+     */
     override fun <T> findResult(params: List<*>, db: IDb, transform: (DbResultSet) -> T): T {
         // 查询的前置处理
-        beforeFind?.invoke(this)
-        return super.findResult(params, db, transform)
+        listener?.beforeFind(this)
+        // 查询
+        val result = super.findResult(params, db, transform)
+        // 查询的后置处理
+        listener?.afterFind(this)
+        return result
     }
 
 }

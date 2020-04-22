@@ -411,12 +411,6 @@ interface IOrmMeta {
 
     /************************************ 事件 *************************************/
     /**
-     * 处理 queryBuilder() 返回的查询对象的查询的前置事件
-     *   主要用于给子类重载, 以便对子类 queryBuilder 做全局的配置, 如添加全局的where条件
-     */
-    fun beforeFind(query: OrmQueryBuilder){}
-
-    /**
      * 能处理的事件(只是增删改, 不包含查)
      */
     val processableEvents: List<String>

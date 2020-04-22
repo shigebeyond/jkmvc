@@ -10,4 +10,14 @@ class OrmCacheMeta(
         public val cacheType: String= "lru", // 缓存类型, 如 lru/jedis
         public val withs: Array<String> = emptyArray() // 联查对象属性
 ) {
+
+    /**
+     * 是否联查某个关联属性
+     * @param name
+     * @return
+     */
+    public fun hasWithRelation(name: String): Boolean {
+        return withs.contains(name)
+    }
+
 }
