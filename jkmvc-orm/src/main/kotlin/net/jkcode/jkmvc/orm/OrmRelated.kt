@@ -388,7 +388,7 @@ abstract class OrmRelated : OrmPersistent() {
      * @param withTableAlias 是否带表前缀
      * @return
      */
-    fun queryRelated(name: String, fkInMany: Any? = null, withTableAlias:Boolean = true): OrmQueryBuilder?{
+    fun queryRelated(name: String, fkInMany: Any? = null, withTableAlias:Boolean = false): OrmQueryBuilder?{
         // 获得关联关系
         val relation = ormMeta.getRelation(name)
         return relation?.queryRelated(this, fkInMany, withTableAlias)

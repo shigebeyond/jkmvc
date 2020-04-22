@@ -357,7 +357,6 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 		return this;
 	}
 
-
 	/**************************************** 渲染json结果 ************************************************/
 	/**
 	 * 渲染任意对象

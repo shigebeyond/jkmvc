@@ -122,7 +122,7 @@ interface IRelationMeta {
      * @param withTableAlias 是否带表前缀
      * @return
      */
-    fun queryRelated(item: IOrm, fkInMany: Any? = null, withTableAlias:Boolean = true): OrmQueryBuilder?
+    fun queryRelated(item: IOrm, fkInMany: Any? = null, withTableAlias:Boolean = false): OrmQueryBuilder?
 
     /**
      * 查询关联表
@@ -133,7 +133,7 @@ interface IRelationMeta {
      * @param withTableAlias 是否带表前缀
      * @return
      */
-    fun queryRelated(item: IOrm, fkInMany: IOrm, withTableAlias:Boolean = true): OrmQueryBuilder?{
+    fun queryRelated(item: IOrm, fkInMany: IOrm, withTableAlias:Boolean = false): OrmQueryBuilder?{
         return queryRelated(item, fkInMany as Any, withTableAlias)
     }
 
