@@ -66,10 +66,12 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): IHt
             val map = HashMap<String, MutableList<PartFile>>()
             // 遍历每个部分, 一次性解析所有参数
             for (part in parts) {
-                val files = map.getOrPut(part.name) {
-                    LinkedList()
+                if(part.isFile()) {
+                    val files = map.getOrPut(part.name) {
+                        LinkedList()
+                    }
+                    files.add(PartFile(part))
                 }
-                files.add(PartFile(part))
             }
 
             map
