@@ -6,6 +6,7 @@ import net.jkcode.jkmvc.db.DbColumn
 import net.jkcode.jkmvc.db.DbColumnLogicType
 import net.jkcode.jkmvc.db.DbTable
 import net.jkcode.jkmvc.orm.DbKey
+import net.jkcode.jkmvc.orm.PkEmptyRule
 import org.junit.Test
 
 class DbTests{
@@ -16,6 +17,18 @@ class DbTests{
         val minId = db.queryValue<Int>("select id from user order by id limit 1" /*sql*/)!!
         println("随便选个id: " + minId)
         minId
+    }
+
+    @Test
+    fun testPkEmptyRule(){
+        val er = PkEmptyRule()
+        println(er.rule)
+        er.allow(0)
+        println(er.rule)
+        println(er.isAllow(1))
+        er.allow(1)
+        println(er.rule)
+        println(er.isAllow(1))
     }
 
     @Test
@@ -48,8 +61,10 @@ class DbTests{
         val table = DbTable("user")
         val id = DbColumn("id", DbColumnLogicType.INT, null,11, 2, null, false, "主键", true)
         val name = DbColumn("name", DbColumnLogicType.VARCHAR, null,10, null, "''")
+        val date = DbColumn("date", DbColumnLogicType.DATE, null,null, null, "null")
         table.addClumn(id)
         table.addClumn(name)
+        table.addClumn(date)
         table.primaryKeys = listOf("id")
         println(table.generateCreateTableSql(Db.instance()))
     }

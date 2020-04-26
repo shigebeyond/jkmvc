@@ -31,7 +31,6 @@ public fun normalizeData(data: Any?, include: List<String> = emptyList()): Any? 
  */
 public fun Any.toMap(include: List<String> = emptyList()): MutableMap<String, Any?> {
     // 1 orm对象
-    // 问题: IOrmEntity.toMap() 只能转内部属性 _data, 不能转getter方法, 而且不能支持多级属性
     if (this is IOrm && include.isEmpty())
         return this.toMap()
 

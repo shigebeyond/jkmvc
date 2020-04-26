@@ -121,9 +121,9 @@ abstract class OrmRelated : OrmPersistent() {
      */
     public override fun toMap(to: MutableMap<String, Any?>, include: List<String>, exclude: List<String>): MutableMap<String, Any?> {
         val columns = if (include.isEmpty())
-            ormMeta.props // 只补全到当前对象属性, 不包含关联对象(后面单独处理): 由于关联对象联查时不处理null值, 因此关联对象会缺少null值的字段，这里要补上
-        else
-            include
+                            ormMeta.props // 只补全到当前对象属性, 不包含关联对象(后面单独处理): 由于关联对象联查时不处理null值, 因此关联对象会缺少null值的字段，这里要补上
+                        else
+                            include
 
         // 1 转当前对象
         super.toMap(to, include, exclude)

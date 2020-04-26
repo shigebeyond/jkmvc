@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.orm
 
+import net.jkcode.jkutil.common.getPathPropertyValue
 import java.lang.UnsupportedOperationException
 
 /**
@@ -52,5 +53,28 @@ abstract class Orm(vararg pks: Any/* 主键值, 非null */) : OrmRelated() {
             throw UnsupportedOperationException("不支持复制关联属性")
 
         fromMap(from._data, include, exclude)
+    }
+
+    /**
+     * 获得字段值 -- 转为Map
+     * @param to
+     * @param include 要设置的字段名的列表
+     * @param exclude 要排除的字段名的列表
+     * @return
+     */
+    override fun toMap(to: MutableMap<String, Any?>, include: List<String>, exclude: List<String>): MutableMap<String, Any?> {
+         super.toMap(to, include, exclude)
+
+        for(column in include){
+            if(exclude.contains(column) // 排除
+                    || ormMeta.props.contains(column) // 自身属性
+                    || ormMeta.hasRelation(column) // 关联属性
+            )
+                continue
+
+            to[column] = this.getPathPropertyValue(column) // 支持多级属性
+        }
+
+        return to
     }
 }
