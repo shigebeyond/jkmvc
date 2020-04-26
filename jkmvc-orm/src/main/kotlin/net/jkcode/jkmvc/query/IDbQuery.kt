@@ -33,12 +33,12 @@ abstract class IDbQuery{
     /**
      * 查找结果： select 语句
      *
-     * @param sql
      * @param params
+     * @param single 是否查一条
      * @param transform 结果转换函数
      * @return
      */
-    public abstract fun <T> findResult(params: List<*> = emptyList<Any>(), db: IDb = defaultDb, transform: (DbResultSet) -> T): T
+    public abstract fun <T> findResult(params: List<*> = emptyList<Any>(), single: Boolean = false, db: IDb = defaultDb, transform: (DbResultSet) -> T): T
 
     /**
      * 查找多个： select 语句
@@ -50,7 +50,7 @@ abstract class IDbQuery{
      * @return 列表
      */
     public open fun <T:Any> findRows(params: List<*> = emptyList<Any>(), db: IDb = defaultDb, transform: (DbResultRow) -> T): List<T>{
-        return findResult(params, db){ rs ->
+        return findResult(params, false, db){ rs ->
             rs.map(transform = transform)
         }
     }
@@ -64,7 +64,7 @@ abstract class IDbQuery{
      * @return 一个数据
      */
     public open fun <T:Any> findRow(params: List<*> = emptyList<Any>(), db: IDb = defaultDb, transform: (DbResultRow) -> T): T?{
-        return findResult(params, db) { rs ->
+        return findResult(params, true, db) { rs ->
             rs.firstOrNull()?.let { row ->
                 transform(row)
             }
@@ -80,7 +80,7 @@ abstract class IDbQuery{
      * @return
      */
     public fun <T:Any> findColumn(params: List<*> = emptyList<Any>(), clazz: KClass<T>? = null, db: IDb = defaultDb): List<T>{
-        return findResult(params, db){ rs ->
+        return findResult(params, false, db){ rs ->
             rs.map{ row ->
                 row.get(1, clazz) as T
             }
@@ -107,7 +107,7 @@ abstract class IDbQuery{
      * @return
      */
     public fun <T:Any> findValue(params: List<*> = emptyList<Any>(), clazz: KClass<T>? = null, db: IDb = defaultDb): T?{
-        return findResult(params, db){ rs ->
+        return findResult(params, true, db){ rs ->
             rs.firstOrNull()?.let { row ->
                 row.get(1, clazz) as T?
             }

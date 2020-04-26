@@ -188,10 +188,11 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * 查找结果： select 语句
      *
      * @param params 动态参数
+     * @param single 是否查一条
      * @param transform 行转换函数
      * @return 列表
      */
-    public override fun <T> findResult(params: List<*>, db: IDb, transform: (DbResultSet) -> T): T{
+    public override fun <T> findResult(params: List<*>, single: Boolean, db: IDb, transform: (DbResultSet) -> T): T{
         // 执行 select
         return db.queryResult(sql, buildParams(params), transform)
     }

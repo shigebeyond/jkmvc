@@ -646,11 +646,11 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
     /**
      * 改写 findResult(), 添加查询的事件处理
      */
-    override fun <T> findResult(params: List<*>, db: IDb, transform: (DbResultSet) -> T): T {
+    override fun <T> findResult(params: List<*>, single: Boolean, db: IDb, transform: (DbResultSet) -> T): T {
         // 查询的前置处理
         listener?.beforeFind(this)
         // 查询
-        val result = super.findResult(params, db, transform)
+        val result = super.findResult(params, single, db, transform)
         // 查询的后置处理
         listener?.afterFind(this)
         return result

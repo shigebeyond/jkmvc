@@ -84,14 +84,17 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
     /**
      * 查找结果： select 语句
      *
-     * @param sql
      * @param params
+     * @param single 是否查一条
      * @param transform 结果转换函数
      * @return
      */
-    public override fun <T> findResult(params: List<*>, db: IDb, transform: (DbResultSet) -> T): T{
+    public override fun <T> findResult(params: List<*>, single: Boolean, db: IDb, transform: (DbResultSet) -> T): T{
+        if(single)
+            limit(1)
+
         // 编译 + 执行
-        return compile(SqlType.SELECT, db).findResult(params, db, transform)
+        return compile(SqlType.SELECT, db).findResult(params, single, db, transform)
     }
 
     /**

@@ -110,7 +110,8 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      * @return
      */
     internal fun quoteOrderDirection(db: IDb, direction: String?): String{
-        return if (direction != null && "^(ASC|DESC)$".toRegex().matches(direction))
+        return if (direction != null
+                && ("ASC".equals(direction, true) || "DESC".equals(direction, true)))
             direction;
         else
             "";
