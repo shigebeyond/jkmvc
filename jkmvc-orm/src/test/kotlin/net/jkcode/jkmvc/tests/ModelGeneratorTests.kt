@@ -79,7 +79,8 @@ class ModelGeneratorTests{
 //        generator.genenateModelFile("SharkProcess", "", "SHKProcesses")
 //        generator.genenateModelFile("Workitem", "工作项", "wf_workitems")
 //        generator.genenateModelFile("Process", "流程实例", "wf_process")
-        generator.genenateModelFile("Versions", "版本", "app_version")
+//        generator.genenateModelFile("Versions", "版本", "app_version")
+        generator.genenateModelFile("WfTrack", "流程跟踪", "wf_track")
 
     }
 }

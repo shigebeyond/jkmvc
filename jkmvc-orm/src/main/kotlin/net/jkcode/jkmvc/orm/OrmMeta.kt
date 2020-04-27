@@ -484,9 +484,15 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         if(items.isEmpty())
             return emptyIntArray()
 
-        // 校验
-        for (item in items)
+        // 校验 + 前置
+        for (item in items) {
             validate(item)
+
+            if(item is IOrm) {
+                item.beforeCreate()
+                item.beforeSave()
+            }
+        }
 
         // 构建insert语句
         // insert字段 -- 取全部字段, 不能取第一个元素的字段, 因为每个元素可能修改的字段都不一样, 这样会导致其他元素漏掉更新某些字段
@@ -509,7 +515,17 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         }
 
         // 批量插入
-        return query.batchInsert(params)
+        val result = query.batchInsert(params)
+
+        // 后置
+        for (item in items) {
+            if(item is IOrm) {
+                item.afterCreate()
+                item.afterSave()
+            }
+        }
+
+        return result
     }
 
     /**
@@ -523,9 +539,15 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         if(items.isEmpty())
             return emptyIntArray()
 
-        // 校验
-        for (item in items)
+        // 校验 + 前置
+        for (item in items) {
             validate(item)
+
+            if(item is IOrm) {
+                item.beforeUpdate()
+                item.beforeSave()
+            }
+        }
 
         // 构建update语句
         val query = queryBuilder()
@@ -551,7 +573,17 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         }
 
         // 批量更新
-        return query.batchUpdate(params);
+        val result = query.batchUpdate(params);
+
+        // 后置
+        for (item in items) {
+            if(item is IOrm) {
+                item.afterUpdate()
+                item.afterSave()
+            }
+        }
+
+        return result
     }
 
     /**
