@@ -30,13 +30,14 @@ class CompiledSql : Cloneable, ICompiledSql() {
      * 编译好的sql
      */
     public override var sql:String = ""
-        set(sql:String){
+        // 不在这里而在Db中预览
+        /*set(sql:String){
             field = sql;
 
             // 预览sql
             if(DbConfig.debug && sql != "")
                 dbLogger.debug("编译好的sql：{}", previewSql())
-        }
+        }*/
 
     /**
      * 编译后的sql参数 / 静态参数

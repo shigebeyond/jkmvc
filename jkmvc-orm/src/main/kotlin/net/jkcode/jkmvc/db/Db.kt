@@ -253,6 +253,21 @@ abstract class Db protected constructor(
     }
 
     /**
+     * 对执行sql操作包一层try/catch以便打印日志
+     */
+    protected inline fun <T> tryExecute(sql: String, params: List<*>, action: ()->T): T{
+        try{
+            val result = action.invoke()
+            if(dbLogger.isDebugEnabled)
+                dbLogger.debug("执行 sql: {}", previewSql(sql, params))
+            return result
+        }catch (e:Exception){
+            dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
+            throw  e
+        }
+    }
+
+    /**
      * 执行更新
      *
      * @param sql
@@ -261,11 +276,8 @@ abstract class Db protected constructor(
      * @return
      */
     public override fun execute(sql: String, params: List<*>, generatedColumn:String?): Long {
-        try{
-            return masterConn.execute(sql, params, generatedColumn);
-        }catch (e:Exception){
-            dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
-            throw  e
+        return tryExecute(sql, params){
+            masterConn.execute(sql, params, generatedColumn);
         }
     }
 
@@ -278,13 +290,10 @@ abstract class Db protected constructor(
      * @return
      */
     public override fun <T> execute(sql: String, params: List<*>, transform: (DbResultSet) -> T): T? {
-        try{
-            return conn.execute(sql, params){
+        return tryExecute(sql, params){
+            conn.execute(sql, params){
                 transform(DbResultSet(this, it))
             }
-        }catch (e:Exception){
-            dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
-            throw  e
         }
     }
 
@@ -298,7 +307,10 @@ abstract class Db protected constructor(
      */
     public override fun batchExecute(sql: String, paramses: List<Any?>, paramSize:Int): IntArray {
         try{
-            return masterConn.batchExecute(sql, paramses, paramSize)
+            val result = masterConn.batchExecute(sql, paramses, paramSize)
+            if(dbLogger.isDebugEnabled)
+                dbLogger.debug("执行 sql={}, params={}", sql, paramses)
+            return result
         }catch (e:Exception){
             dbLogger.error("出错[{}], sql={}, params={}", e.message, sql, paramses)
             throw  e
@@ -314,13 +326,10 @@ abstract class Db protected constructor(
      * @return
      */
     public override fun <T> queryResult(sql: String, params: List<*>, transform: (DbResultSet) -> T): T {
-        try{
-            return conn.queryResult(sql, params){
+        return tryExecute(sql, params){
+            conn.queryResult(sql, params){
                 transform(DbResultSet(this, it))
             }
-        }catch (e:Exception){
-            dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
-            throw  e
         }
     }
 
