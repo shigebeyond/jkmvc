@@ -1,5 +1,7 @@
 package net.jkcode.jkmvc.db
 
+import java.util.*
+import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 
 /**
@@ -67,7 +69,9 @@ class DbResultRow(public val rs: DbResultSet): Iterable<Pair<String, Any?>> {
     public fun toMap(convertingColumn: Boolean = false, to: MutableMap<String, Any?> = HashMap()): Map<String, Any?>{
         forEach { (col, value) ->
             val key = if(convertingColumn) rs.db.column2Prop(col) else col
-            to[key] = value;
+            val nullInvalid = value == null && to is Hashtable // 不允许null的情况
+            if(!nullInvalid)
+                to[key] = value;
         }
         return to
     }
