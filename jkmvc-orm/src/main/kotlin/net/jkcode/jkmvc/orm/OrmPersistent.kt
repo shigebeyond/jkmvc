@@ -319,16 +319,24 @@ abstract class OrmPersistent : OrmValid() {
 	}
 
 	override fun beforeCreate() {
+		setCreatedProps()
+		setUpdateProps()
+	}
+
+	override fun beforeUpdate() {
+		setUpdateProps()
+	}
+
+	/**
+	 * 设置创建时间/人的字段
+	 */
+	protected fun setCreatedProps() {
 		// 创建时间
-		val now = Date()
-		if(ormMeta.createdDateProp != null)
-			this[ormMeta.createdDateProp!!] = now
-		// 修改时间
-		if(ormMeta.modifiedDateProp != null)
-			this[ormMeta.modifiedDateProp!!] = now
+		if (ormMeta.createdDateProp != null)
+			this[ormMeta.createdDateProp!!] = Date()
 
 		val user = getCurrentUserIdAndName()
-		if(user != null) {
+		if (user != null) {
 			// 创建人id
 			val (uid, uname) = user
 			if (ormMeta.createdByProp != null)
@@ -339,14 +347,16 @@ abstract class OrmPersistent : OrmValid() {
 		}
 	}
 
-	override fun beforeUpdate() {
+	/**
+	 * 设置更新时间/人的字段
+	 */
+	protected fun setUpdateProps() {
 		// 修改时间
-		val now = Date()
-		if(ormMeta.modifiedDateProp != null)
-			this[ormMeta.modifiedDateProp!!] = now
+		if (ormMeta.modifiedDateProp != null)
+			this[ormMeta.modifiedDateProp!!] = Date()
 
 		val user = getCurrentUserIdAndName()
-		if(user != null) {
+		if (user != null) {
 			// 修改人id
 			val (uid, uname) = user
 			if (ormMeta.modifiedByProp != null)
