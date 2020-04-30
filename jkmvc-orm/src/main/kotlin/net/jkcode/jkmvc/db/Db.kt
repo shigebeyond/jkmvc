@@ -38,7 +38,7 @@ abstract class Db protected constructor(
                 // 请求结束要调用 close() 来关闭连接
                 val dbs = get()
                 for((name, db) in dbs) {
-                    dbLogger.debug("Close db: {}", name)
+                    //dbLogger.debug("Close db: {}", name)
                     db.close()
                 }
                 dbs.clear()
@@ -56,7 +56,7 @@ abstract class Db protected constructor(
          */
         public fun instance(name: CharSequence = "default"): Db {
             return dbs.get().getOrPut(name) {
-                dbLogger.debug("Create db: {}", name)
+                //dbLogger.debug("Create db: {}", name)
                 if (DbConfig.customDbClass != null) // 自定义db类
                     DbConfig.customDbClass!!.constructors.first().newInstance(name) as Db
                 else if (DbConfig.isSharding(name.toString())) // 分库

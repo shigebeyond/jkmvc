@@ -90,15 +90,15 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
                         callController(req, res)
                     else // 起始请求: 新开作用域
                         GlobalHttpRequestScope.sttlWrap { // 包装请求作用域的处理
-                            httpLogger.debug("Request [{}] scope begin", req)
+                            //httpLogger.debug("Request [{}] scope begin", req)
                             callController(req, res)
                         }
 
         // 3 关闭请求(资源)
         future.whenComplete{ r, ex ->
             endRequest(req, ex) // 关闭异步请求
-            if(!req.isInner)
-                httpLogger.debug("Request [{}] scope end", req)
+//            if(!req.isInner)
+//                httpLogger.debug("Request [{}] scope end", req)
         }
 
         return true
