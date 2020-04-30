@@ -3,9 +3,11 @@ package net.jkcode.jkmvc.http
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
+import io.netty.handler.codec.http.cookie.DefaultCookie
 import net.jkcode.jkmvc.orm.IRelationMeta
 import net.jkcode.jkmvc.orm.Orm
 import net.jkcode.jkmvc.orm.RelationType
+import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpSession
 import javax.servlet.http.Part
@@ -189,6 +191,21 @@ public fun HttpServletRequest.toCurlCommand(): String {
     }
 
     return cmd.toString()
+}
+
+/****************************** Cookie扩展 *******************************/
+
+/**
+ * 转为netty的cookie
+ */
+public fun Cookie.toNettyCookie(): DefaultCookie {
+    val result = DefaultCookie(this.name, this.value)
+    result.isHttpOnly = this.isHttpOnly
+    result.isSecure = this.secure
+    result.setDomain(this.domain)
+    result.setPath(this.path)
+    result.setMaxAge(this.maxAge.toLong())
+    return result
 }
 
 /****************************** Part扩展 *******************************/
