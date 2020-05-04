@@ -184,7 +184,7 @@ interface IDbQueryBuilderDecoration{
      * @return
      */
     fun whereCondition(condition: String, params: List<*> = emptyList<Any>()): IDbQueryBuilder {
-        return andWhereCondition(condition)
+        return andWhereCondition(condition, params)
     }
 
     /**
