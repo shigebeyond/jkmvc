@@ -1,10 +1,7 @@
 package net.jkcode.jkmvc.tests
 
+import net.jkcode.jkmvc.db.*
 import net.jkcode.jkutil.common.randomString
-import net.jkcode.jkmvc.db.Db
-import net.jkcode.jkmvc.db.DbColumn
-import net.jkcode.jkmvc.db.DbColumnLogicType
-import net.jkcode.jkmvc.db.DbTable
 import net.jkcode.jkmvc.orm.DbKey
 import net.jkcode.jkmvc.orm.PkEmptyRule
 import org.junit.Test
@@ -67,6 +64,18 @@ class DbTests{
         table.addClumn(date)
         table.primaryKeys = listOf("id")
         println(table.generateCreateTableSql(Db.instance()))
+    }
+
+    @Test
+    fun testFunction(){
+        val db = Db.instance()
+        // 确定参数
+        println(DbFunction.toPhysicalFunction(db, "cast", listOf("xxx", "varchar")))
+        println(DbFunction.toPhysicalQuery(db, "select cast(xxx as varchar)"));
+
+        // 不定参数: concat在oracle/sql server测试才有效, 他才是非函数调用的格式
+        println(DbFunction.toPhysicalFunction(db, "concat", listOf("xxx", "yyy")))
+        println(DbFunction.toPhysicalQuery(db, "select concat(xxx, yyy)"));
     }
 
     @Test

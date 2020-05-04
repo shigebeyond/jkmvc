@@ -158,7 +158,7 @@ public enum class DbColumnLogicType private constructor(
             when (this) {
                 INT, BIGINT, SMALLINT -> return "signed"
                 FLOAT, NUMERIC, REAL -> return "decimal"
-                VARCHAR -> return "char"
+                VARCHAR -> return "char" // cast(xxx as varchar) 报语法错误
                 VARBINARY -> return "binary"
             }
         }
