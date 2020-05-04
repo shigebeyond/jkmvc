@@ -98,6 +98,10 @@ abstract class OrmPersistent : OrmValid() {
 			beforeCreate()
 			beforeSave()
 
+			// 设置创建时间/人的字段
+			setCreatedProps()
+			setUpdateProps()
+
 			// 是否需要生成主键
 			val needPk = !ormMeta.primaryProp.isAllEmpty() // 有主键字段
 					&& !_data.containsAllKeys(ormMeta.primaryProp) // 但无主键值
@@ -210,6 +214,9 @@ abstract class OrmPersistent : OrmValid() {
 			beforeUpdate()
 			beforeSave()
 
+			// 设置更新时间/人的字段
+			setUpdateProps()
+
 			// 删除缓存
 			ormMeta.removeCache(this)
 
@@ -315,16 +322,7 @@ abstract class OrmPersistent : OrmValid() {
 	 * @return
 	 */
 	protected open fun getCurrentUserIdAndName(): Pair<Any, Any>? {
-		throw UnsupportedOperationException()
-	}
-
-	override fun beforeCreate() {
-		setCreatedProps()
-		setUpdateProps()
-	}
-
-	override fun beforeUpdate() {
-		setUpdateProps()
+		return null
 	}
 
 	/**

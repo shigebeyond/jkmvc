@@ -481,6 +481,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 *        如果是jsp的url一般是相对于server根节点, 因此一般为false
 	 * @return 绝对路径
 	 */
+	@JvmOverloads
 	public fun absoluteUrl(uri:String, addContextPath: Boolean = true):String{
 		if(uri.startsWith("http"))
 			return uri;
