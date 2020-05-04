@@ -48,26 +48,34 @@ object FileManager {
     }
 
     /**
+     * 准备好的子目录
+     */
+    private val preparedDirs: MutableSet<String> = HashSet<String>()
+
+    /**
      * 准备好上传目录 = 根目录/子目录
      *
      * @param uploadDirectory 上传子目录
      * @return
      */
     private fun prepareUploadDirectory(uploadDirectory: String): String {
-        // 1 绝对目录
+        /*// 1 绝对目录
         if(FileSystems.getDefault().getPath(uploadDirectory).isAbsolute){
             // 如果目录不存在，则创建
             uploadDirectory.prepareDirectory()
             return uploadDirectory
         }
-
+        */
         // 2 相对目录
         // 上传目录 = 根目录/子目录
         var path: String = uploadRootDirectory + File.separatorChar
         if(uploadDirectory != "")
             path = path + uploadDirectory + File.separatorChar
         // 如果目录不存在，则创建
-        path.prepareDirectory()
+        if(!preparedDirs.contains(uploadDirectory)) {
+            preparedDirs.add(uploadDirectory)
+            path.prepareDirectory()
+        }
         return path
     }
 

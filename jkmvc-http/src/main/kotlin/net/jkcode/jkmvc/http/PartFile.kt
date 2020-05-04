@@ -2,10 +2,13 @@ package net.jkcode.jkmvc.http
 
 import net.jkcode.jkutil.common.detectedCharset
 import java.io.File
+import java.io.FileInputStream
 import java.io.Reader
 import java.net.URLDecoder
 import java.nio.charset.Charset
 import javax.servlet.http.Part
+import net.jkcode.jkutil.common.writeFromInput
+import java.io.FileOutputStream
 
 /**
  * 上传的文件
@@ -72,7 +75,11 @@ class PartFile(protected val part: Part): Part by part {
         }
 
         // 另存文件
-        this.part.write(path)
+        // bug: 报错 FileNotFoundException, 参考 https://bz.apache.org/bugzilla/show_bug.cgi?id=54971
+        // 原因: 参数只能是文件的相对路径, 相对于 MultipartConfig.location, jetty/tomcat 会存入该目录
+        //this.part.write(path)
+        // 解决: 只能读 Part.inputStream 来写文件
+        FileOutputStream(path).writeFromInput(this.part.inputStream)
 
         // 返回相对路径
         this.relativePath = relativePath
