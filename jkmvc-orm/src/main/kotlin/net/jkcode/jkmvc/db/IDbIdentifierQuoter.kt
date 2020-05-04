@@ -68,7 +68,7 @@ interface IDbIdentifierQuoter{
         }
 
         // 字段别名
-        if(alias == null)
+        if(alias == null || col == alias)
             return if(table == "") col else "$table$col";
 
         return "$table$col AS ${quoteIdentifier(alias)}"; // 转义
