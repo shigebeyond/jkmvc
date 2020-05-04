@@ -1,11 +1,11 @@
 package net.jkcode.jkmvc.orm
 
 import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import com.alibaba.fastjson.serializer.SerializerFeature
 import net.jkcode.jkutil.common.PropertyUtil
 import net.jkcode.jkutil.common.getPathPropertyValue
-import net.jkcode.jkutil.common.getPropertyValue
 
 /**
  * 获得'.'分割的路径下的属性值
@@ -15,6 +15,20 @@ import net.jkcode.jkutil.common.getPropertyValue
  */
 public fun JSONObject.getPath(path: String): Any? {
     return PropertyUtil.getPath(this, path)
+}
+
+/**
+ * 累积
+ * @param key
+ * @param value
+ * @return
+ */
+fun JSONObject.accumulate(key: String, value: Any): JSONObject {
+    val arr = this.getOrPut(key){
+        JSONArray()
+    } as JSONArray
+    arr.add(value)
+    return this
 }
 
 /**
