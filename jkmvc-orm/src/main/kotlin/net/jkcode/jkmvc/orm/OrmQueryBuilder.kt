@@ -291,11 +291,11 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      * 联查中间表
      *     中间表.外键 = 主表.主键
      *
-     * @param slaveRelationName 从表关系
+     * @param slaveName 从表关系名
      * @return
      */
-    public fun joinMiddleTable(slaveRelationName: String): OrmQueryBuilder {
-        return joinMiddleTable(ormMeta.getRelation(slaveRelationName) as MiddleRelationMeta)
+    public fun joinMiddleTable(slaveName: String): OrmQueryBuilder {
+        return joinMiddleTable(ormMeta.getRelation(slaveName) as MiddleRelationMeta)
     }
 
     /**
@@ -318,6 +318,28 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
 
         // 查中间表
         return join(slaveRelation.middleTable).on(masterPk, "=", middleFk) as OrmQueryBuilder// 中间表.外键 = 主表.主键
+    }
+
+    /**
+     * 联查hasMany的表
+     *   1. with()的限制
+     *   一般而言, 通过 with() 方法联查的hasMany的关对象是分开一条sql来查询的, 这样才符合一对多关联关系的初衷
+     *   譬如 user:employee 是 1:10, 查user是一条sql, 查employee是另外一条sql, 然后合并数据即可, 那么查user是1条记录, 查employee是10条记录, 可以很好的组装关联关系
+     *   但如果查user/employee要合并为一条sql, 根据关系型db的笛卡尔积原理, 则会导致查user是10条记录, 查employee也是10条记录, 导致根本组装不了1:10的关联关系, 同查出的user是重复了10份
+     *
+     *   2.强制联查hasMany的表
+     *   如果查询条件限制关联对象(如employee)记录只有一条, 那么可以使用该方法来强制联查关联表, 而不能使用 with()
+     *
+     * @param slaveName 从表关系名
+     * @return
+     */
+    public fun joinHasMany(slaveName: String): OrmQueryBuilder{
+        val relation = ormMeta.getRelation(slaveName)!!
+        if(relation is MiddleRelationMeta) // 有中间表
+            this.joinSlaveThrough(ormMeta, ormMeta.name, relation, slaveName);
+        else // 无中间表
+            this.joinSlave(ormMeta, ormMeta.name, relation, slaveName);
+        return this
     }
 
     /**
