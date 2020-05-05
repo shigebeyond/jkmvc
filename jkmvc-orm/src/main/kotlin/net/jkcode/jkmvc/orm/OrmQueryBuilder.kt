@@ -47,7 +47,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      * 关联查询hasMany的关系，需单独处理，不在一个sql中联查，而是单独查询
      * <hasMany关系名, [子关系名+子关系字段]>
      */
-    protected val joinMany:MutableMap<String, SelectColumnList?> = HashMap()
+    protected val withMany:MutableMap<String, SelectColumnList?> = HashMap()
 
     /**
      * 清空条件
@@ -55,7 +55,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      */
     public override fun clear(): IDbQueryBuilder {
         joins.clear()
-        joinMany.clear()
+        withMany.clear()
         return super.clear()
     }
 
@@ -180,7 +180,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      */
     public fun withMany(name: String, columns: SelectColumnList? = null): OrmQueryBuilder {
         //数据结构：<hasMany关系名, 查询字段>
-        joinMany[name] = columns
+        withMany[name] = columns
         return this
     }
 
@@ -442,7 +442,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      */
     protected fun forEachManyQuery(orm:Any, action: ((name:String, relation:IRelationMeta, relatedItems:List<IOrm>)-> Unit)){
         // 联查hasMany的关系
-        for((name, columns) in joinMany){
+        for((name, columns) in withMany){
             // 获得hasMany的关系
             val relation = ormMeta.getRelation(name)!!
 
