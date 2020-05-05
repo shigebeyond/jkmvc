@@ -10,6 +10,7 @@ import java.io.Closeable
 import java.io.InputStream
 import java.lang.StringBuilder
 import java.sql.Connection
+import java.sql.SQLException
 import java.util.*
 
 /**
@@ -261,7 +262,7 @@ abstract class Db protected constructor(
             if(dbLogger.isDebugEnabled)
                 dbLogger.debug("执行 sql: {}", previewSql(sql, params))
             return result
-        }catch (e:Exception){
+        }catch (e:SQLException){
             dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
             throw  e
         }
@@ -311,7 +312,7 @@ abstract class Db protected constructor(
             if(dbLogger.isDebugEnabled)
                 dbLogger.debug("执行 sql={}, params={}", sql, paramses)
             return result
-        }catch (e:Exception){
+        }catch (e: SQLException){
             dbLogger.error("出错[{}], sql={}, params={}", e.message, sql, paramses)
             throw  e
         }
