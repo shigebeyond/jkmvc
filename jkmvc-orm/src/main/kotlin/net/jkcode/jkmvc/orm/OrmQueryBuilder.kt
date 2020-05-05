@@ -118,7 +118,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      */
     public fun with(name: CharSequence, select: Boolean = withSelect, columns: SelectColumnList? = null): OrmQueryBuilder {
         // select当前表字段
-        if (select && selectColumns.isEmpty())
+        if (selectColumns.isEmpty())
             select(ormMeta.name + ".*");
 
         // join关联表
