@@ -164,6 +164,22 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     public override val serializingProps: List<String> = emptyList()
 
     /**
+     * 如果是空字符串转为null的外键属性
+     */
+    public override val emptyToNullForeignProps: List<String> by lazy{
+        if(config["foreignPropEmptyToNull"]!!){
+            val props = ArrayList<String>()
+            for((name, relation) in relations){
+                if(relation.type == RelationType.BELONGS_TO) { // 只对belongsTo有效, 表示本模型有外键
+                    props.addAll(relation.foreignProp.columns)
+                }
+            }
+            props
+        }else
+            emptyList<String>()
+    }
+
+    /**
      * 创建时间
      */
     public override val createdDateProp: String? by lazy{
@@ -468,7 +484,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
         val item = findByPk<IOrm>(pk)
         if(item != null && item.loaded)
-            return item.delete()
+            return item.delete(withHasRelations)
 
         return true
     }

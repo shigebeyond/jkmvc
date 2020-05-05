@@ -105,6 +105,11 @@ interface IOrmMeta {
 
 
     /**
+     * 如果是空字符串转为null的外键属性
+     */
+    val emptyToNullForeignProps: List<String>
+
+    /**
      * 创建时间
      */
     val createdDateProp: String?

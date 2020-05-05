@@ -102,6 +102,9 @@ abstract class OrmPersistent : OrmValid() {
 			setCreatedProps()
 			setUpdateProps()
 
+			// 修正外键属性, 如果是空字符串转为null
+			setForeignPropEmptyToNull()
+
 			// 是否需要生成主键
 			val needPk = !ormMeta.primaryProp.isAllEmpty() // 有主键字段
 					&& !_data.containsAllKeys(ormMeta.primaryProp) // 但无主键值
@@ -217,6 +220,9 @@ abstract class OrmPersistent : OrmValid() {
 			// 设置更新时间/人的字段
 			setUpdateProps()
 
+			// 修正外键属性, 如果是空字符串转为null
+			setForeignPropEmptyToNull()
+
 			// 删除缓存
 			ormMeta.removeCache(this)
 
@@ -262,15 +268,15 @@ abstract class OrmPersistent : OrmValid() {
 			// 删除缓存
 			ormMeta.removeCache(this)
 
+			// 先删除 hasOne/hasMany 的关联关系, 否则本记录可能因仍有外键约束, 而导致本记录删除失败, 报错: Cannot delete or update a parent row: a foreign key constraint fails
+			if(withHasRelations)
+				removeHasNRelations(true)
+
 			// 删除数据
 			val result = queryBuilder().where(ormMeta.primaryKey, "=", pk).delete();
 
 			// 触发后置事件
 			afterDelete()
-
-			// 删除 hasOne/hasMany 的关联关系
-			if(withHasRelations)
-				removeHasNRelations(true)
 
 			// 更新内部数据
 			_data.clear() // delete事件据此来获得删除前的数据
@@ -316,7 +322,23 @@ abstract class OrmPersistent : OrmValid() {
 	 */
 	internal abstract fun removeHasNRelations(byDelete: Boolean)
 
-	/************************************ 持久化事件 *************************************/
+	/************************************ 持久化特别处理的字段 *************************************/
+
+	/**
+	 * 修正外键属性, 如果是空字符串转为null
+	 */
+	protected fun setForeignPropEmptyToNull(){
+		for(prop in ormMeta.emptyToNullForeignProps){
+			if(!isDirty(prop))
+				continue
+
+			val value = _data[prop]
+			// 如果是空字符串转为null
+			if(value is String && value.isBlank())
+				_data[prop] = null
+		}
+	}
+
 	/**
 	 * 获得当前登录在用户的id与名字
 	 * @return
@@ -364,4 +386,5 @@ abstract class OrmPersistent : OrmValid() {
 				this[ormMeta.modifiedByNameProp!!] = uname
 		}
 	}
+
 }

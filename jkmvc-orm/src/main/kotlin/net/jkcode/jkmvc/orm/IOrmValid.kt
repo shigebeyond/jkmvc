@@ -28,8 +28,9 @@ interface IOrmValid : IOrmEntity {
     /**
      * 标记字段为脏
      * @param column 字段名
+     * @param flag 是否脏
      */
-    fun setDirty(column: String)
+    fun setDirty(column: String, flag: Boolean = true)
 
     /**
      * 检查字段是否为脏
