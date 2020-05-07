@@ -135,6 +135,11 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 		return res.writer
 	}
 
+	override fun sendRedirect(location: String) {
+		super.sendRedirect(location)
+		httpLogger.debug("Redirect to: {}", location)
+	}
+
 	/**
 	 * 响应视图
 	 *
@@ -143,6 +148,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 	public fun renderView(view: View)
 	{
 		rendered = true
+		httpLogger.debug("Render view: {}", view)
 		view.render();
 	}
 
@@ -186,6 +192,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 	public fun renderFile(file: File)
 	{
 		rendered = true
+		httpLogger.debug("Render file: {}", file)
 
 		// 文件不存在
 		if (file == null || file.isDirectory || !file.exists()) {

@@ -5,6 +5,7 @@ import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jkutil.collection.LazyAllocatedMap
 import net.jkcode.jkutil.common.DegradeCommandException
+import net.jkcode.jkutil.common.httpLogger
 import java.io.Writer
 import java.lang.reflect.Method
 import java.util.concurrent.CompletableFuture
@@ -74,21 +75,28 @@ interface IController{
      */
     public fun callActionMethod(action: Method): Any? {
         var result: Any? = null
+        var ex: Exception? = null
         try {
-            // 前置处理
+            // 1 前置处理
             before()
 
-            // 执行真正的处理方法
+            // 2 执行真正的处理方法
             result = action.invoke(this);
-
-            // 后置处理
-            after()
-        }catch (ex: DegradeCommandException){
-            // 异常降级处理
-            result = ex.handleFallback()
+        }catch (e: Exception){
+            ex = e
         }
 
-        // 渲染结果
+        // 3 后置处理
+        // 异常自带降级处理
+        if(ex is DegradeCommandException)
+            result = ex.handleFallback()
+        else // 后置处理
+            result = after(result, ex)
+
+//        if(result == null)
+//            httpLogger.warn("controller=[{}] + action=[{}] 执行结果为null", req.controller, req.action)
+
+        // 4 渲染结果
         if(result is CompletableFuture<*>)
             return result.thenApply(::renderResult)
 
@@ -108,6 +116,12 @@ interface IController{
 
     /**
      * 后置处理
+     *   因为这是请求的最后处理(包含异常处理), 你最好不要再往上抛异常
+     *
+     * @param result action方法执行结果
+     * @param ex action方法执行抛出的异常
      */
-    fun after(){}
+    fun after(result: Any?, ex: Exception? = null): Any? {
+        return result
+    }
 }

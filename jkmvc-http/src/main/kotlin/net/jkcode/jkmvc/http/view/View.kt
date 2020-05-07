@@ -87,4 +87,9 @@ open class View(override val req: HttpRequest, // 请求对象
 			reqDispatcher.forward(req.request, res.response)
 	}
 
+	override fun toString(): String {
+		return "View(file='$file')"
+	}
+
+
 }
