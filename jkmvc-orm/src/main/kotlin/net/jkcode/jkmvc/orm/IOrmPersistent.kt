@@ -53,6 +53,11 @@ interface IOrmPersistent : IOrmValid {
 	fun loadByPk(vararg pks: Any)
 
 	/**
+	 * 重新加载
+	 */
+	fun reload()
+
+	/**
 	 * 保存数据
 	 *
 	 * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
@@ -122,6 +127,7 @@ interface IOrmPersistent : IOrmValid {
 	/************************************ 持久化事件 *************************************/
 	/**
 	 * 处理validate前置事件
+	 *   orm 的 validate() 可能直接调用, 而不一定通过 create()/update() 等间接调用
 	 */
 	fun beforeValidate(){}
 

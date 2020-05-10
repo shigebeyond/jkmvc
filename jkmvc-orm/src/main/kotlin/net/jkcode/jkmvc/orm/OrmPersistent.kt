@@ -70,6 +70,14 @@ abstract class OrmPersistent : OrmValid() {
 	}
 
 	/**
+	 * 重新加载
+	 */
+	public override fun reload(){
+		this.clear()
+		loadByPk(this.pk)
+	}
+
+	/**
 	 * 插入数据: insert sql
 	 *
 	 * <code>
@@ -86,21 +94,13 @@ abstract class OrmPersistent : OrmValid() {
 		if(_dirty.isEmpty())
 			throw OrmException("No data to create"); // 没有要创建的数据
 
-		// 触发前置事件
-		beforeValidate()
-
-		// 校验
-		validateOrThrow();
+		// 触发校验
+		triggerValidate()
 
 		// 事务
 		return ormMeta.transactionWhenHandlingEvent("beforeCreate|afterCreate|beforeSave|afterSave", withHasRelations) {
-			// 触发前置事件
-			beforeCreate()
-			beforeSave()
-
-			// 设置创建时间/人的字段
-			setCreatedProps()
-			setUpdateProps()
+			// 触发create前置事件
+			triggerBeforeCreate()
 
 			// 修正外键属性, 如果是空字符串转为null
 			setForeignPropEmptyToNull()
@@ -121,9 +121,8 @@ abstract class OrmPersistent : OrmValid() {
 			if (needPk)
 				_data[ormMeta.primaryProp.first()] = pk; // 主键
 
-			// 触发后置事件
-			afterCreate()
-			afterSave()
+			// 触发create后置事件
+			triggerAfterCreate()
 
 			// 添加 _data 中的 hasOne/hasMany 的关联关系
 			if(withHasRelations)
@@ -205,23 +204,13 @@ abstract class OrmPersistent : OrmValid() {
 			return true;
 		}
 
-		// 触发前置事件
-		beforeValidate()
-
-		// 校验
-		validateOrThrow();
+		// 触发校验
+		triggerValidate()
 
 		// 事务
 		return ormMeta.transactionWhenHandlingEvent("beforeUpdate|afterUpdate|beforeSave|afterSave", withHasRelations) {
-			// 触发前置事件
-			beforeUpdate()
-			beforeSave()
-
-			// 设置更新时间/人的字段
-			setUpdateProps()
-
-			// 修正外键属性, 如果是空字符串转为null
-			setForeignPropEmptyToNull()
+			// 触发update前置事件
+			triggerBeforeUpdate()
 
 			// 删除缓存
 			ormMeta.removeCache(this)
@@ -230,8 +219,7 @@ abstract class OrmPersistent : OrmValid() {
 			val result = queryBuilder().sets(buildDirtyData()).where(ormMeta.primaryKey, oldPk /* 原始主键，因为主键可能被修改 */).update();
 
 			// 触发后置事件
-			afterUpdate()
-			afterSave()
+			triggerAfterUpdate()
 
 			// 修改(先删后加) _data 中的 hasOne/hasMany 的关联关系
 			if(withHasRelations) {
@@ -322,7 +310,61 @@ abstract class OrmPersistent : OrmValid() {
 	 */
 	internal abstract fun removeHasNRelations(byDelete: Boolean)
 
-	/************************************ 持久化特别处理的字段 *************************************/
+	/************************************ 前置后置事件+触发 *************************************/
+	/**
+	 * 触发校验
+	 */
+	internal fun triggerValidate() {
+		// 触发前置事件
+		beforeValidate()
+
+		// 校验
+		validateOrThrow();
+	}
+
+	/**
+	 * 触发create前置事件
+	 */
+	internal fun triggerBeforeCreate() {
+		// 触发前置事件
+		beforeCreate()
+		beforeSave()
+
+		// 设置创建时间/人的字段
+		setCreatedProps()
+		setUpdateProps()
+	}
+
+	/**
+	 * 触发create后置事件
+	 */
+	internal fun triggerAfterCreate() {
+		afterCreate()
+		afterSave()
+	}
+
+	/**
+	 * 触发update前置事件
+	 */
+	internal fun triggerBeforeUpdate() {
+		beforeUpdate()
+		beforeSave()
+
+		// 设置更新时间/人的字段
+		setUpdateProps()
+
+		// 修正外键属性, 如果是空字符串转为null
+		setForeignPropEmptyToNull()
+	}
+
+
+	/**
+	 * 触发update后置事件
+	 */
+	internal fun triggerAfterUpdate() {
+		afterUpdate()
+		afterSave()
+	}
 
 	/**
 	 * 修正外键属性, 如果是空字符串转为null
