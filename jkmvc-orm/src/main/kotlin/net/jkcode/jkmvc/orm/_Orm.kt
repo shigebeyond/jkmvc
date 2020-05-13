@@ -50,7 +50,8 @@ object OrmListPropDelegater: ReadWriteProperty<IOrmEntity, Any?>, Serializable {
     // 获得属性
     public override operator fun getValue(thisRef: IOrmEntity, property: KProperty<*>): Any? {
         return thisRef.getOrPut(property.name){
-            LinkedList<Any?>()
+            //LinkedList<Any?>()
+            emptyList<Any?>()
         }
     }
 

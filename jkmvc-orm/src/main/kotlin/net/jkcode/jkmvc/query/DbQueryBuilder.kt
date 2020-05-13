@@ -114,6 +114,23 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
     }
 
     /**
+     * 加总列值： sum语句
+     *
+     * @param column 列
+     * @param params 参数
+     * @param db 数据库连接
+     * @return
+     */
+    public override fun sum(column: String, params: List<*>, db: IDb):Int {
+        // 1 编译
+        selectColumns.clear() // 清空多余的select
+        val csql = select(DbExpr("sum($column)", "NUM", false) /* oracle会自动转为全大写 */).compile(SqlType.SELECT, db);
+
+        // 2 执行 select
+        return csql.findValue<Int>(params, db)!!
+    }
+
+    /**
      * 自增
      *
      * @param params 参数

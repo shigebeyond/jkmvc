@@ -40,6 +40,13 @@ abstract class OrmEntity : IOrmEntity, Serializable {
          */
         public val serializer: FstSerializer = ISerializer.instance("fst") as FstSerializer
 
+        /**
+         * toString() 用于防止循环引用的栈
+         */
+        protected val stringifyStacks:ThreadLocal<Stack<Any>> = ThreadLocal.withInitial {
+            Stack<Any>()
+        }
+
     }
 
     /**
@@ -289,7 +296,18 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      *   => 将 toString() 归入 IOrm 接口
      */
     public override fun toString(): String{
-        return "${this.javaClass}: $_data"
+        // bug: 循环引用/输出, 导致异常 StackOverflowError
+        //return "${this.javaClass}: $_data"
+
+        // fix: 使用 stack 来记录正在输出的路径, 某对象输出前检查路径上是否有该对象正在输出, 是则表示循环引用/输出
+        val stack = stringifyStacks.get()
+        if(stack.contains(this))
+            return "\$ref"
+
+        stack.push(this)
+        val result = "${this.javaClass}: $_data"
+        stack.pop()
+        return result
     }
 
     /**

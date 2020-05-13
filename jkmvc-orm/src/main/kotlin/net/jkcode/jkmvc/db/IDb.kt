@@ -52,11 +52,12 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
     /**
      * 执行事务
      *    兼容 statement 返回类型是CompletableFuture
+     *    TODO: 为优化性能, 可使用inline, 但是这样在调试时 statement 代码块中的变量不能在 idea 的 Debugger 窗口中的 variables 板块中直接看到
      *
      * @param statement db操作过程
      * @return
      */
-    public inline fun <T> transaction(statement: () -> T):T{
+    public fun <T> transaction(statement: () -> T):T{
         begin(); // 开启事务
 
         return trySupplierFinally(statement){ r, ex ->
@@ -72,11 +73,13 @@ abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
 
     /**
      * 执行事务
+     *    TODO: 为优化性能, 可使用inline, 但是这样在调试时 statement 代码块中的变量不能在 idea 的 Debugger 窗口中的 variables 板块中直接看到
+     *
      * @param fake 不真正使用事务
      * @param statement db操作过程
      * @return
      */
-    public inline fun <T> transaction(fake: Boolean, statement: () -> T):T{
+    public fun <T> transaction(fake: Boolean, statement: () -> T):T{
         if(fake)
             return statement()
 

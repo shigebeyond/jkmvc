@@ -107,6 +107,16 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
     public abstract fun count(params: List<*> = emptyList<Any>(), db: IDb = defaultDb):Int;
 
     /**
+     * 加总列值： sum语句
+     *
+     * @param column 列
+     * @param params 参数
+     * @param db 数据库连接
+     * @return
+     */
+    public abstract fun sum(column: String, params: List<*> = emptyList<Any>(), db: IDb = defaultDb):Int;
+
+    /**
      * 编译 + 执行
      *
      * @param action sql动作：select/insert/update/delete
