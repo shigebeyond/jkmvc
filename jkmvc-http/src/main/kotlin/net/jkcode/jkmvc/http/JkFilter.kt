@@ -116,7 +116,7 @@ open class JkFilter() : Filter {
         // bug: 上传文件报错: No multipart config for servlet
         // fix: web.xml 中 <filter> 不支持 <multipart-config> 配置, 只有 <servlet> 才支持, 因此只能硬编码设置上传配置
         // TODO 临时处理, 只对jetty有效, 参考 https://stackoverflow.com/questions/52514462/jetty-no-multipart-config-for-servlet-problem
-        if(req.isUpload()) {
+        if(req.isUpload) {
             // val uploadDir = FileManager.uploadRootDirectory // TODO: 如果jetty的临时上传目录就是我们的业务上传目录, 则会节省另存为的成本
             val uploadDir = "/tmp"
             val multipartConfig = MultipartConfigElement(uploadDir)

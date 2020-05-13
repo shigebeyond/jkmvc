@@ -59,14 +59,14 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): IHt
      * 上传请求中文件参数
      */
     public val partFileMap: Map<String, List<PartFile>> by lazy{
-        if(!isUpload()){
+        if(!isUpload){
             //throw UnsupportedOperationException("当前请求不是上传文件的请求")
             emptyMap<String, List<PartFile>>()
         }else {
             val map = HashMap<String, MutableList<PartFile>>()
             // 遍历每个部分, 一次性解析所有参数
             for (part in parts) {
-                if(part.isFile()) {
+                if(part.isFile) {
                     val files = map.getOrPut(part.name) {
                         LinkedList()
                     }

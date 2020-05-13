@@ -21,14 +21,14 @@ parseRoute(): Boolean | 解析路由
 
 2. 检查 `http method` 的方法
 
-方法 | 作用
+属性/方法 | 作用
 --- | ---
-isAjax(): Boolean | 是否ajax请求
-isGet(): Boolean | 是否get请求
-isMultipartContent(): Boolean | 是否 multipart 请求
-isPost(): Boolean | 是否post请求
-isStaticFile(): Boolean | 是否是静态文件请求，如果是则不进行路由解析
-isUpload(): Boolean | 是否上传文件的请求
+isAjax: Boolean | 是否ajax请求
+isGet: Boolean | 是否get请求
+isMultipartContent: Boolean | 是否 multipart 请求
+isPost: Boolean | 是否post请求
+isOptions: Boolean | 是否是options请求
+isUpload: Boolean | 是否上传文件的请求
 
 3. 获得get/post/路由参数的方法
 

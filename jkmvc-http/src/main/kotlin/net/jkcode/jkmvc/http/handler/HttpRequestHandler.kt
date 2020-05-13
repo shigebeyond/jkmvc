@@ -63,7 +63,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
             httpLogger.debug("{}请求uri: {} {}, contextPath: {}", if(req.isInner) "内部" else "", req.method, req.routeUri, req.contextPath)
 
             // curl命令
-            if(!req.isInner && !req.isUpload()) // 上传请求，要等到设置了上传子目录，才能访问请求参数
+            if(!req.isInner && !req.isUpload) // 上传请求，要等到设置了上传子目录，才能访问请求参数
                 httpLogger.debug(req.buildCurlCommand())
         }
 
@@ -75,7 +75,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
             res.setHeader("Access-Control-Allow-Origin", "*");
             res.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS,PUT,DELETE,HEAD");
             res.setHeader("Access-Control-Allow-Headers", "origin,cache-control,content-type,accept,hash-referer,x-requested-with,token");// 跨域验证登录用户，要用到请求头中的token
-            if(req.isOptions())
+            if(req.isOptions)
                 return true;
         }
 

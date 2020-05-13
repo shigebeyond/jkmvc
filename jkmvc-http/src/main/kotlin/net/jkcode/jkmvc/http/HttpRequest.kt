@@ -396,23 +396,6 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 
 	/*************************** 其他 *****************************/
 	/**
-	 * 来源url
-	 */
-	public val referer: String? by lazy {
-		req.getHeader("referer")
-	}
-
-	/**
-	 * 来源主机
-	 */
-	public val refererHost: String? by lazy{
-		if(referer.isNullOrBlank())
-			null
-		else
-			URI(referer).host
-	}
-
-	/**
 	 * 登录后要跳转的url
 	 */
 	public var redirectUrl: String?
@@ -512,7 +495,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 */
 	public fun buildCurlCommand(): String {
 		/*// get请求
-		if(isGet())
+		if(isGet)
 			return "curl '${requestURL}?${queryString}'";
 
 		// post请求
@@ -537,7 +520,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		}
 
 		// post参数： -d '$k=$v&$k=$v&'
-		if (isPost()) {
+		if (isPost) {
 			//-d '
 			cmd.append("-d '")
 			for(k in headerNames){

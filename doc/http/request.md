@@ -19,14 +19,14 @@ parseRoute(): Boolean | parse uri and get route matched
 
 2. check `http method` 
 
-method | usage
+property/method | usage
 --- | ---
-isAjax(): Boolean | check whether ajax request
-isGet(): Boolean | check whether get request
-isMultipartContent(): Boolean | check whether ajax multipart request
-isPost(): Boolean | check whether post request
-isStaticFile(): Boolean | check whether static file request
-isUpload(): Boolean | check whether upload request
+isAjax: Boolean | check whether ajax request
+isGet: Boolean | check whether get request
+isMultipartContent: Boolean | check whether ajax multipart request
+isPost: Boolean | check whether post request
+isOptions: Boolean | check whether options request
+isUpload: Boolean | check whether upload request
 
 3. Get `get/post/route` parameter
 

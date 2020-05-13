@@ -54,7 +54,7 @@ public fun uploadAvatar()
     }
 
     // check and handle upload request
-    if(req.isUpload()){ // check upload request
+    if(req.isUpload){ // check upload request
         user.avatar = req.storePartFileAndGetRelativePath("avatar")
         user.update()
     }

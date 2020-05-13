@@ -55,7 +55,7 @@ public fun uploadAvatar()
     }
 
     // 检查并处理上传文件
-    if(req.isUpload()){ // 检查上传请求
+    if(req.isUpload){ // 检查上传请求
         user.avatar = req.storePartFileAndGetRelativePath("avatar")
         user.update()
     }

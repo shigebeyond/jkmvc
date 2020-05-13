@@ -16,7 +16,7 @@ import java.io.FileOutputStream
 class PartFile(protected val part: Part): Part by part {
 
     init {
-        if(part.isText())
+        if(part.isText)
             throw IllegalArgumentException("非文件域");
 
         if(FileManager.isForbiddenUploadFile(part.submittedFileName))

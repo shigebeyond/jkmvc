@@ -80,7 +80,7 @@ class UserController: Controller()
     public fun new()
     {
         // 处理请求 | handle request
-        if(req.isPost()){ //  post请求：保存表单数据 | post request: save form data
+        if(req.isPost){ //  post请求：保存表单数据 | post request: save form data
             // 创建空的用户 | create user model
             val user = UserModel()
             // 获得请求参数：3种写法 | 3 ways to get request parameter
@@ -117,7 +117,7 @@ class UserController: Controller()
             return
         }
         // 处理请求 | handle request
-        if(req.isPost()){ //  post请求：保存表单数据 | post request: save form data
+        if(req.isPost){ //  post请求：保存表单数据 | post request: save form data
             // 获得请求参数：3种写法 | 3 way to get request parameter
             /* // 1 req.getParameter("xxx");
             user.name = req.getParameter("name")!!;
@@ -173,7 +173,7 @@ class UserController: Controller()
         }
 
         // 检查并处理上传文件 | check and handle upload request
-        if(req.isUpload()){ // 检查上传请求 | check upload request
+        if(req.isUpload){ // 检查上传请求 | check upload request
             user.avatar = req.storePartFileAndGetRelativePath("avatar")!!
             user.update()
         }
@@ -186,7 +186,7 @@ class UserController: Controller()
      * 登录
      */
     public fun login(){
-        if(req.isPost()){ // post请求
+        if(req.isPost){ // post请求
             val user = Auth.instance().login(req["username"]!!, req["password"]!!);
             if(user == null)
                 res.renderString("登录失败")

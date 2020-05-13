@@ -7,6 +7,7 @@ import io.netty.handler.codec.http.cookie.DefaultCookie
 import net.jkcode.jkmvc.orm.IRelationMeta
 import net.jkcode.jkmvc.orm.Orm
 import net.jkcode.jkmvc.orm.RelationType
+import java.net.URI
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpSession
@@ -19,9 +20,9 @@ import javax.servlet.http.Part
  * @param key
  * @return
  */
-fun HttpSession.getAndRemoveAttribute(key: String): Any?{
+fun HttpSession.getAndRemoveAttribute(key: String): Any? {
     val result = getAttribute(key)
-    if(result != null)
+    if (result != null)
         removeAttribute(key)
     return result
 }
@@ -32,58 +33,84 @@ fun HttpSession.getAndRemoveAttribute(key: String): Any?{
  * 是否post请求
  * @return
  */
-public fun HttpServletRequest.isPost(): Boolean {
-    return method.equals("POST", true);
-}
+public val HttpServletRequest.isPost: Boolean
+    get() {
+        return method.equals("POST", true);
+    }
 
 /**
  * 是否option请求
  * @return
  */
-public fun HttpServletRequest.isOptions(): Boolean {
-    return method.equals("OPTIONS", true);
-}
+public val HttpServletRequest.isOptions: Boolean
+    get() {
+        return method.equals("OPTIONS", true);
+    }
 
 /**
  * 是否get请求
  * @return
  */
-public fun HttpServletRequest.isGet(): Boolean {
-    return method.equals("GET", true);
-}
+public val HttpServletRequest.isGet: Boolean
+    get() {
+        return method.equals("GET", true);
+    }
 
 /**
  * 是否 multipart 请求
  * @return
  */
-public fun HttpServletRequest.isMultipartContent(): Boolean{
-    if(contentType.isNullOrEmpty())
-        return false
+public val HttpServletRequest.isMultipartContent: Boolean
+    get() {
+        if (contentType.isNullOrEmpty())
+            return false
 
-    return contentType.startsWith("multipart/form-data", true)
-}
+        return contentType.startsWith("multipart/form-data", true)
+    }
 
 /**
  * 是否上传文件的请求
  * @return
  */
-public fun HttpServletRequest.isUpload(): Boolean{
-    return isPost() && isMultipartContent()
-}
+public val HttpServletRequest.isUpload: Boolean
+    get() {
+        return isPost && isMultipartContent
+    }
 
 /**
  * 是否ajax请求
  * @return
  */
-public fun HttpServletRequest.isAjax(): Boolean {
-    return "XMLHttpRequest".equals(getHeader("x-requested-with"), true) // // 通过XMLHttpRequest发送请求
-            && "text/javascript, application/javascript, */*".equals(getHeader("Accept"), true); // 通过jsonp来发送请求
-}
+public val HttpServletRequest.isAjax: Boolean
+    get() {
+        return "XMLHttpRequest".equals(getHeader("x-requested-with"), true) // // 通过XMLHttpRequest发送请求
+                && "text/javascript, application/javascript, */*".equals(getHeader("Accept"), true); // 通过jsonp来发送请求
+    }
+
+/**
+ * 来源url
+ */
+public val HttpServletRequest.referer: String?
+    get() {
+        return getHeader("referer")
+    }
+
+/**
+ * 来源主机
+ */
+public val HttpServletRequest.refererHost: String?
+    get() {
+        val referer = this.referer
+        if (referer.isNullOrBlank())
+            return null
+
+        return URI(referer).host
+    }
 
 /**
  * 设置多个属性
  */
-public fun HttpServletRequest.setAttributes(data:Map<String, Any?>) {
+public fun HttpServletRequest.setAttributes(data: Map<String, Any?>) {
     for ((k, v) in data)
         setAttribute(k, v);
 }
@@ -94,7 +121,7 @@ public fun HttpServletRequest.setAttributes(data:Map<String, Any?>) {
 public fun HttpServletRequest.getOrPutAttribute(key: String, default: () -> Any): Any {
     var value = getAttribute(key)
     // 如果没有则设置
-    if(value == null){
+    if (value == null) {
         value = default()
         setAttribute(key, value)
     }
@@ -107,7 +134,7 @@ public fun HttpServletRequest.getOrPutAttribute(key: String, default: () -> Any)
 public fun HttpSession.getOrPutAttribute(key: String, default: () -> Any): Any {
     var value = getAttribute(key)
     // 如果没有则设置
-    if(value == null){
+    if (value == null) {
         value = default()
         setAttribute(key, value)
     }
@@ -117,10 +144,10 @@ public fun HttpSession.getOrPutAttribute(key: String, default: () -> Any): Any {
 /**
  * 读取某个会过期的属性, 如果没有则设置, 如果过期则重新生成
  */
-public fun HttpSession.getOrPutExpiringAttribute(key: String, expireSencond:Long = 6000, default: () -> Any): Any? {
+public fun HttpSession.getOrPutExpiringAttribute(key: String, expireSencond: Long = 6000, default: () -> Any): Any? {
     var pair = getAttribute(key) as Pair<Any, Long>?
     // 如果没有/过期, 则设置
-    if(pair == null || pair.second < System.currentTimeMillis()){
+    if (pair == null || pair.second < System.currentTimeMillis()) {
         // 过期时间
         val expire = System.currentTimeMillis() + expireSencond
         // 值 + 过期时间
@@ -134,13 +161,13 @@ public fun HttpSession.getOrPutExpiringAttribute(key: String, expireSencond:Long
 /**
  * 读取某个会过期的属性, 过期则返回null
  */
-public fun HttpSession.getExpiringAttribute(key: String): Any?{
+public fun HttpSession.getExpiringAttribute(key: String): Any? {
     var pair = getAttribute(key) as Pair<Any, Long>?
-    if(pair == null)
+    if (pair == null)
         return null
 
     // 检查是否过期
-    if(pair.second < System.currentTimeMillis()){
+    if (pair.second < System.currentTimeMillis()) {
         removeAttribute(key)
         return null
     }
@@ -156,12 +183,12 @@ public fun HttpServletRequest.toCurlCommand(): String {
     val cmd = StringBuilder("curl ")
 
     // 方法
-    if (isGet())
+    if (isGet)
         cmd.append("-G ")
 
     // get参数
     var qs = queryString
-    qs = if(qs == null) "" else qs
+    qs = if (qs == null) "" else qs
 
     // 路径: '$url?$qs'
     cmd.append('\'').append(requestURL).append('?').append(qs).append('\'')
@@ -176,7 +203,7 @@ public fun HttpServletRequest.toCurlCommand(): String {
     }
 
     // post参数： -d '$k=$v&$k=$v&'
-    if (isPost()) {
+    if (isPost) {
         //-d '
         cmd.append("-d '")
         val pnames = parameterNames
@@ -212,16 +239,18 @@ public fun Cookie.toNettyCookie(): DefaultCookie {
 /**
  * 是否文本域
  */
-public fun Part.isText(): Boolean {
-    return submittedFileName == null // this is what Apache FileUpload does ...
-}
+public val Part.isText: Boolean
+    get() {
+        return submittedFileName == null // this is what Apache FileUpload does ...
+    }
 
 /**
  * 是否文件域
  */
-public fun Part.isFile(): Boolean {
-    return !isText()
-}
+public val Part.isFile: Boolean
+    get() {
+        return !isText
+    }
 
 /****************************** Orm扩展 *******************************/
 /**
@@ -232,26 +261,26 @@ public fun Part.isFile(): Boolean {
  * @param include 要设置的字段名的数组
  * @param exclude 要排除的字段名的列表
  */
-public fun <T: Orm> T.fromRequest(req: HttpRequest, include: List<String> = emptyList(), exclude: List<String> = emptyList()): T {
+public fun <T : Orm> T.fromRequest(req: HttpRequest, include: List<String> = emptyList(), exclude: List<String> = emptyList()): T {
     // 1 文本参数
     // 默认所有列
     val columns = if (include.isEmpty()) this.ormMeta.props else include
 
     // 取得请求中的指定参数
     for (column in columns) {
-        if(exclude.contains(column))
+        if (exclude.contains(column))
             continue
 
         // 1 文本参数
         val value = req.getParameter(column)
-        if(value != null) {
+        if (value != null) {
             setFromRequest(column, value)
             continue
         }
 
         // 2 文件参数
         val file = req.getPartFile(column)
-        if(file != null) {
+        if (file != null) {
             // 先保存文件
             val path = file!!.storeAndGetRelativePath()
             // 属性值为文件相对路径
@@ -268,7 +297,7 @@ public fun <T: Orm> T.fromRequest(req: HttpRequest, include: List<String> = empt
  * @param value 值
  */
 private fun Orm.setFromRequest(column: String, value: Any?) {
-    if(value == null)
+    if (value == null)
         return;
 
     // 获得关联属性
@@ -281,7 +310,7 @@ private fun Orm.setFromRequest(column: String, value: Any?) {
     }
 
     // 2 关联对象属性, 直接反json化
-    val json = if(value is String) JSON.parse(value) else value
+    val json = if (value is String) JSON.parse(value) else value
 
     // 2.1 有一个
     if (relation!!.type == RelationType.BELONGS_TO || relation.type == RelationType.HAS_ONE) {
@@ -291,7 +320,7 @@ private fun Orm.setFromRequest(column: String, value: Any?) {
     }
 
     // 2.2 有多个
-    if(json !is JSONArray)
+    if (json !is JSONArray)
         throw IllegalArgumentException("类[${javaClass}]的关联属性[${column}]赋值需要是JSONArray")
     val related = json.map {
         buildRelatedFromRequest(column, relation, it, "数组")
@@ -307,7 +336,7 @@ private fun Orm.setFromRequest(column: String, value: Any?) {
  * @return 关联对象
  */
 private fun Orm.buildRelatedFromRequest(column: String, relation: IRelationMeta, json: Any, postfix: String = ""): Orm {
-    if(json !is JSONObject)
+    if (json !is JSONObject)
         throw IllegalArgumentException("类[$javaClass]的关联属性[$column]赋值需要是JSONObject$postfix")
 
     val related = relation.newModelInstance() as Orm
