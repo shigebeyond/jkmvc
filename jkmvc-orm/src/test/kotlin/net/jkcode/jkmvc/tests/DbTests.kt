@@ -116,6 +116,15 @@ class DbTests{
     }
 
     @Test
+    fun testTransaction(){
+        val r = db.transaction {
+            testInsert()
+            true
+        }
+        println(r)
+    }
+
+    @Test
     fun testInsert(){
         val id = db.execute("insert into user(name, age) values(?, ?)" /*sql*/, listOf("shi", 1)/*参数*/, "id"/*自增主键字段名，作为返回值*/) // 返回自增主键值
         println("插入user表：" + id)
