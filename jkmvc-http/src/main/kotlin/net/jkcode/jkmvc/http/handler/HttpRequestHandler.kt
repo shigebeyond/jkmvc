@@ -115,9 +115,6 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      * @return
      */
     private fun callController(req: HttpRequest, res: HttpResponse): CompletableFuture<Any?> {
-        // 当前请求与响应都放到当前controller中, 为了应对内部请求会修改当前controller, 需要记录与恢复原来的controller
-        val controller = Controller.currentOrNull()
-
         // 0 加拦截
         return interceptorChain.intercept(req) {
             // 1 获得controller类
@@ -142,9 +139,6 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
             //return controller.callActionMethod(action.javaMethod!!)
             guardInvoke(action, controller, emptyArray())
         }
-
-        if(controller != null)
-            Controller.setCurrent(controller)
     }
 
     /**
