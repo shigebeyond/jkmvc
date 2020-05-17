@@ -80,7 +80,10 @@ abstract class Controller : IController {
         // 渲染视图或重定向
         if (result is String) {
             if(result.startsWith("redirect:")){ // 重定向
-                val url = req.contextPath + result.substringAfter("redirect:")
+                var url = result.substringAfter("redirect:")
+                // 相对url, 添加contextPath
+                if(!url.startsWith("http:") && !url.startsWith("https:"))
+                    url = req.contextPath + url
                 res.sendRedirect(url)
             }else { // 渲染视图
                 res.renderView(result, vm) // 渲染视图的场景比渲染文本的多, 因此直接渲染视图啦
