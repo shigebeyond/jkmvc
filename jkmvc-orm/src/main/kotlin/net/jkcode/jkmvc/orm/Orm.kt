@@ -42,23 +42,14 @@ abstract class Orm(vararg pks: Any/* 主键值, 非null */) : OrmRelated() {
 
     /**
      * 从orm对象中设置字段值
-     *   不支持复制关联属性, 因为无法判断关联对象是要新增或修改, 因此就干脆不做
      *
      * @param from   字段值的哈希：<字段名 to 字段值>
      * @param include 要设置的字段名的列表
      * @param exclude 要排除的字段名的列表
+     * @param includeRelated 是否包含关联属性, 仅当 include 为空时有效
      */
-    public fun fromOrm(from: Orm, include: List<String> = emptyList(), exclude: List<String> = emptyList()) {
-        // 是否复制关联属性: 只有include强制指定才有效, 默认是ormMeta.props(不包含关联属性)
-        val hasRelated = include.containsAny(ormMeta.relations.keys)
-        if(hasRelated)
-            throw UnsupportedOperationException("不支持复制关联属性")
-
-        val columns = if (include.isEmpty())
-                        ormMeta.props // 不包含关联属性
-                    else
-                        include
-        fromMap(from._data, columns, exclude)
+    public fun fromOrm(from: Orm, include: List<String> = emptyList(), exclude: List<String> = emptyList(), includeRelated: Boolean = false) {
+        fromMap(from._data, include, exclude, includeRelated)
     }
 
     /**

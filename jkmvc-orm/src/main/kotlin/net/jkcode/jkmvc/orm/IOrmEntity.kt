@@ -136,8 +136,9 @@ interface IOrmEntity {
      * @param from   字段值的哈希：<字段名 to 字段值>
      * @param include 要设置的字段名的列表
      * @param exclude 要排除的字段名的列表
+     * @param includeRelated 是否包含关联属性, 仅当 include 为空时有效
      */
-    fun fromMap(from: Map<String, Any?>, include: List<String> = emptyList(), exclude: List<String> = emptyList())
+    fun fromMap(from: Map<String, Any?>, include: List<String> = emptyList(), exclude: List<String> = emptyList(), includeRelated: Boolean = true)
 
     /**
      * 获得字段值 -- 转为Map

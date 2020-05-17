@@ -93,10 +93,14 @@ abstract class OrmRelated : OrmPersistent() {
      * @param from   字段值的哈希：<字段名 to 字段值>
      * @param include 要设置的字段名的列表
      * @param exclude 要排除的字段名的列表
+     * @param includeRelated 是否包含关联属性, 仅当 include 为空时有效
      */
-    public override fun fromMap(from: Map<String, Any?>, include: List<String>, exclude: List<String>) {
+    public override fun fromMap(from: Map<String, Any?>, include: List<String>, exclude: List<String>, includeRelated: Boolean) {
         val columns = if (include.isEmpty())
-                            ormMeta.propsAndRelations // 包含关联属性, 但要先普通属性, 后关联属性, 因为后面代码 related() 获得关联对象要用到普通(外键)属性
+                            if(includeRelated)
+                                ormMeta.propsAndRelations // 包含关联属性, 但要先普通属性, 后关联属性, 因为后面代码 related() 获得关联对象要用到普通(外键)属性
+                            else
+                                ormMeta.props // 不包含关联属性
                         else
                             include
 
@@ -105,7 +109,9 @@ abstract class OrmRelated : OrmPersistent() {
                     || !from.containsKey(column)) // 没有的
                 continue
 
-            val value = from[column]
+            var value = from[column]
+            if(value is Orm) // 被 fromOrm() 调用时, 属性值可能是Orm
+                value = value._data
 
             if(value is Map<*, *>){ // 如果是map，则为关联对象
                 val realValue = related(column, true) // 创建关联对象
