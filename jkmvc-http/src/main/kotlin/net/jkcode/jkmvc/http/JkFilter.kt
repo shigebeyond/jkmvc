@@ -101,7 +101,7 @@ open class JkFilter() : Filter {
     override fun doFilter(req0: ServletRequest, res: ServletResponse, chain: FilterChain) {
         var req = req0 as HttpServletRequest
         // 内部请求: INCLUDE/FORWARD
-        val isInnerReq = req0.dispatcherType == DispatcherType.INCLUDE || req0.dispatcherType == DispatcherType.FORWARD
+        val isInnerReq = req0.isInner
         if(isInnerReq){
             req = InnerHttpRequest(req0) // 封装include请求, 其中 req0 是HttpRequest
         }else {

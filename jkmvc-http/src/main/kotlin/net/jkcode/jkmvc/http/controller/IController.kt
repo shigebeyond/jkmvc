@@ -90,8 +90,10 @@ interface IController{
         // 异常自带降级处理
         if(ex is DegradeCommandException)
             result = ex.handleFallback()
-        else // 后置处理
+        else { // 后置处理
             result = after(result, ex)
+            ex?.printStackTrace()
+        }
 
 //        if(result == null)
 //            httpLogger.warn("controller=[{}] + action=[{}] 执行结果为null", req.controller, req.action)
@@ -120,6 +122,7 @@ interface IController{
      *
      * @param result action方法执行结果
      * @param ex action方法执行抛出的异常
+     * @return
      */
     fun after(result: Any?, ex: Exception? = null): Any? {
         return result

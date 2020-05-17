@@ -8,6 +8,7 @@ import net.jkcode.jkmvc.orm.IRelationMeta
 import net.jkcode.jkmvc.orm.Orm
 import net.jkcode.jkmvc.orm.RelationType
 import java.net.URI
+import javax.servlet.DispatcherType
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpSession
@@ -28,6 +29,13 @@ fun HttpSession.getAndRemoveAttribute(key: String): Any? {
 }
 
 /****************************** HttpServletRequest扩展 *******************************/
+
+/**
+ * 是否内部请求: INCLUDE/FORWARD
+ * @return
+ */
+public val HttpServletRequest.isInner: Boolean
+    get() = dispatcherType == DispatcherType.INCLUDE || dispatcherType == DispatcherType.FORWARD
 
 /**
  * 是否post请求

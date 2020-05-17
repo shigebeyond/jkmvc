@@ -228,7 +228,8 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 * @return
 	 */
 	public fun contains(key: String): Boolean {
-		return getParameter(key) != null
+		//return getParameter(key) != null
+		return allParams.contains(key)
 	}
 
 	/**
