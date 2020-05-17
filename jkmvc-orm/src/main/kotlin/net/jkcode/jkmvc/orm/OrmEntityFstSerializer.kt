@@ -28,6 +28,9 @@ class OrmEntityFstSerializer : FSTBasicObjectSerializer() {
         var data = entity.getData()
         if(data is FixedKeyMapFactory.FixedKeyMap) // Orm._data is FixedKeyMap
             data = HashMap(data)
+        // 写 Orm.loaded
+        if(entity is IOrm)
+            data["_loaded"] = entity.loaded
         mapSerializer.writeObject(out, data, clzInfo, referencedBy, streamPosition)
     }
 
@@ -35,8 +38,13 @@ class OrmEntityFstSerializer : FSTBasicObjectSerializer() {
      * 读
      */
     public override fun instantiate(objectClass: Class<*>, `in`: FSTObjectInput, serializationInfo: FSTClazzInfo, referencee: FSTClazzInfo.FSTFieldInfo, streamPosition: Int): Any {
-        val data = mapSerializer.instantiate(HashMap::class.java, `in`, serializationInfo, referencee, streamPosition) as HashMap<String, Any?>
         val entity = objectClass.newInstance() as OrmEntity
+        // 读 OrmEntity._data
+        val data = mapSerializer.instantiate(HashMap::class.java, `in`, serializationInfo, referencee, streamPosition) as HashMap<String, Any?>
+        // 读 Orm.loaded
+        if(entity is IOrm)
+            entity.loaded = data.remove("_loaded") as Boolean?
+                    ?: false
         entity.getData().putAll(data)
         return entity
     }
