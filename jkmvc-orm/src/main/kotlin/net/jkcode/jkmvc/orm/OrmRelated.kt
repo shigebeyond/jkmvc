@@ -88,6 +88,7 @@ abstract class OrmRelated : OrmPersistent() {
     /**
      * 从map中设置字段值
      *    对于关联对象字段值的设置: 只考虑一对一的关联对象, 不考虑一对多的关联对象
+     *    场景: 1 读cache 2 从map中赋值然后保存
      *
      * @param from   字段值的哈希：<字段名 to 字段值>
      * @param include 要设置的字段名的列表
@@ -95,15 +96,17 @@ abstract class OrmRelated : OrmPersistent() {
      */
     public override fun fromMap(from: Map<String, Any?>, include: List<String>, exclude: List<String>) {
         val columns = if (include.isEmpty())
-                            ormMeta.propsAndRelations
+                            ormMeta.propsAndRelations // 包含关联属性, 但要先普通属性, 后关联属性, 因为后面代码 related() 获得关联对象要用到普通(外键)属性
                         else
                             include
 
         for(column in columns){
-            if(exclude.contains(column))
+            if(exclude.contains(column) // 排除的
+                    || !from.containsKey(column)) // 没有的
                 continue
 
             val value = from[column]
+
             if(value is Map<*, *>){ // 如果是map，则为关联对象
                 val realValue = related(column, true) // 创建关联对象
                 (realValue as Orm).fromMap(value as Map<String, Any?>) // 递归设置关联对象的字段值
