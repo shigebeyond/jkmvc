@@ -15,7 +15,7 @@ import kotlin.reflect.KProperty
  * @author shijianhang<772910474@qq.com>
  * @date 2019-12-20 18:57:59
  */
-object AttrDelegater: ReadWriteProperty<HtmlTag, Any?> {
+object AttrDelegater : ReadWriteProperty<HtmlTag, Any?> {
     // 获得属性
     public override operator fun getValue(thisRef: HtmlTag, property: KProperty<*>): Any? {
         return thisRef.attrs[property.name]
@@ -136,7 +136,13 @@ open class HtmlTag(
         // 标签头
         writeTagStart(pageContext.out)
 
-        return if(hasBody) EVAL_BODY_INCLUDE else SKIP_BODY
+        // 有body：　输出body+子元素
+        if (hasBody) {
+            writeBody(pageContext.out) // 输出body
+            return EVAL_BODY_INCLUDE // 输出子元素
+        }
+
+        return SKIP_BODY
     }
 
     override fun doEndTag(): Int {
@@ -178,7 +184,7 @@ open class HtmlTag(
         // 默认id: generateId() 依赖于 name, 因此在设置了name之后才调用设置id
         if (id == null) {
             val newId = idGenerator.nextId(this)
-            if(newId != null) {
+            if (newId != null) {
                 //id = newId // 不能直接用id, 而用基类改写的 setId()
                 setId(newId)
             }
@@ -234,10 +240,10 @@ open class HtmlTag(
      * @param name
      * @param value
      */
-    protected fun writeAttr(writer: JspWriter, name: String, value: Any?){
+    protected fun writeAttr(writer: JspWriter, name: String, value: Any?) {
         writer.append(" ").append(name).append("=\"")
                 .append(toDisplayString(value)).append("\"")
-    
+
     }
 
     /**
@@ -247,7 +253,7 @@ open class HtmlTag(
      */
     protected fun toDisplayString(obj: Any?): String {
         val str = toString(obj)
-        if(str.isNullOrEmpty() || !htmlEscape)
+        if (str.isNullOrEmpty() || !htmlEscape)
             return str
 
         return StringEscapeUtils.escapeHtml(str)
@@ -262,34 +268,34 @@ open class HtmlTag(
         if (obj == null)
             return ""
 
-        if(obj is Array<*>)
+        if (obj is Array<*>)
             return obj.joinToString(",", "[", "]") { it.toString() }
-        
-        if (obj is String) 
+
+        if (obj is String)
             return obj
-        
+
         if (obj is BooleanArray)
             return obj.joinToString(",", "[", "]") { it.toString() }
-        
-        if (obj is ByteArray) 
+
+        if (obj is ByteArray)
             return obj.joinToString(",", "[", "]") { it.toString() }
-        
-        if (obj is CharArray) 
+
+        if (obj is CharArray)
             return obj.joinToString(",", "[", "]") { it.toString() }
-        
-        if (obj is DoubleArray) 
+
+        if (obj is DoubleArray)
             return obj.joinToString(",", "[", "]") { it.toString() }
-        
-        if (obj is FloatArray) 
+
+        if (obj is FloatArray)
             return obj.joinToString(",", "[", "]") { it.toString() }
-        
-        if (obj is IntArray) 
+
+        if (obj is IntArray)
             return obj.joinToString(",", "[", "]") { it.toString() }
-        
-        if (obj is LongArray) 
+
+        if (obj is LongArray)
             return obj.joinToString(",", "[", "]") { it.toString() }
-        
-        if (obj is ShortArray) 
+
+        if (obj is ShortArray)
             return obj.joinToString(",", "[", "]") { it.toString() }
 
         return obj.toString()
@@ -298,7 +304,7 @@ open class HtmlTag(
     /**
      * 重置本地属性
      */
-    public override fun reset(){
+    public override fun reset() {
         super.reset()
 
         htmlEscape = false

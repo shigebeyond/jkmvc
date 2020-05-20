@@ -29,6 +29,7 @@ open class OptionsTag: ItemsTag(null){
     protected override fun renderItem(writer: JspWriter, value: Any?, label: Any?, i: Int) {
         val tag = optionTags.get()
         tag.reset()
+        tag.parent = this // 必须设置parent, 否则 OptionTag.selectTag 抛null异常, 因为需要往上找祖先<select>
         tag.value = value
         tag.setLabel(toDisplayString(label))
         // 等于父组件的值即选中
