@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.http.handler
 
 import net.jkcode.jkmvc.http.IHttpRequestInterceptor
+import java.util.concurrent.CompletableFuture
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 
@@ -23,8 +24,8 @@ interface IHttpRequestHandler {
      *
      * @param HttpServletRequest req
      * @param HttpServletResponse res
-     * @return 是否处理，如果没有处理（如静态文件请求），则交给下一个filter/默认servlet来处理
+     * @return
      */
-    fun handle(request: ServletRequest, response: ServletResponse): Boolean
+    fun handle(request: ServletRequest, response: ServletResponse): CompletableFuture<*>
 
 }

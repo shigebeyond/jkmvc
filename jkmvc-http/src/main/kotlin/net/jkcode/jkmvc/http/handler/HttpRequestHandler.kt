@@ -6,9 +6,7 @@ import net.jkcode.jkmvc.http.controller.Controller
 import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
 import net.jkcode.jkmvc.http.router.RouteException
-import net.jkcode.jkutil.common.Config
-import net.jkcode.jkutil.common.httpLogger
-import net.jkcode.jkutil.common.trySupplierFuture
+import net.jkcode.jkutil.common.*
 import net.jkcode.jkutil.interceptor.RequestInterceptorChain
 import net.jkcode.jkutil.scope.GlobalHttpRequestScope
 import java.lang.reflect.Method
@@ -53,9 +51,9 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      *
      * @param req
      * @param res
-     * @return 是否处理，如果没有处理（如静态文件请求），则交给下一个filter/默认servlet来处理
+     * @return
      */
-    public override fun handle(request: ServletRequest, response: ServletResponse): Boolean {
+    public override fun handle(request: ServletRequest, response: ServletResponse): CompletableFuture<*> {
         //　构建请求对象
         val req = HttpRequest(request as HttpServletRequest);
         if (debug) {
@@ -76,12 +74,18 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
             res.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS,PUT,DELETE,HEAD");
             res.setHeader("Access-Control-Allow-Headers", "origin,cache-control,content-type,accept,hash-referer,x-requested-with,token");// 跨域验证登录用户，要用到请求头中的token
             if (req.isOptions)
-                return true;
+                return VoidFuture
         }
 
         // 1 先解析路由: 因为interceptors可能依赖路由信息
-        if (!req.parseRoute())
-            throw RouteException("当前uri [${req.routeUri}] 没有匹配路由");
+        if (!req.parseRoute()){
+            val ex = RouteException("当前uri [${req.routeUri}] 没有匹配路由");
+            httpLogger.errorAndPrint(ex.message, ex)
+            return CompletableFuture<Any?>().apply {
+                completeExceptionally(ex)
+            }
+        }
+
         if (debug)
             httpLogger.debug("当前uri [{}] 匹配路由: controller=[{}], action=[{}]", req.routeUri, req.controller, req.action)
 
@@ -96,13 +100,11 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
             }
 
         // 3 关闭请求(资源)
-        future.whenComplete { r, ex ->
+        return future.whenComplete { r, ex ->
             endRequest(req, ex) // 关闭异步请求
 //            if(!req.isInner)
 //                httpLogger.debug("Request [{}] scope end", req)
         }
-
-        return true
     }
 
     /**

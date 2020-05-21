@@ -4,6 +4,7 @@ import net.jkcode.jkmvc.http.handler.HttpRequestHandler
 import net.jkcode.jkmvc.http.router.Router
 import net.jkcode.jkutil.common.*
 import java.lang.IllegalStateException
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.RejectedExecutionException
 import javax.servlet.*
 import javax.servlet.http.HttpServletRequest
@@ -106,8 +107,7 @@ open class JkFilter() : Filter {
             req = InnerHttpRequest(req0) // 封装include请求, 其中 req0 是HttpRequest
         }else {
             //　静态文件请求，则交给下一个filter来使用默认servlet来处理
-            val ext = req.requestURI.substringAfterLast('.') // 获得后缀
-            if (staticFileExts.contains(ext)) { // 检查后缀
+            if (isStaticFileRequest(req)) { // 检查后缀
                 chain.doFilter(req, res)
                 return;
             }
@@ -133,8 +133,7 @@ open class JkFilter() : Filter {
             // 异步处理请求
             try {
                 //actx.start { // web server线程池
-                CommonThreadPool.execute {
-                    // 其他线程池
+                CommonThreadPool.execute { // 其他线程池
                     handleRequest(actx.request, actx.response, chain)
                 }
             }catch (e: RejectedExecutionException){
@@ -148,22 +147,28 @@ open class JkFilter() : Filter {
     }
 
     /**
-     * 处理请求
+     * 检查是否静态文件请求
+     * @param req
+     * @return
      */
-    protected fun handleRequest(req: ServletRequest, res: ServletResponse, chain: FilterChain) {
-        try{
-            // 处理请求
-            val handled = HttpRequestHandler.handle(req, res)
-
-            //　如果没有处理，则交给下一个filter来使用默认servlet来处理
-            // if not handled, we delegate to next filter to use the default servlets
-            if (!handled)
-                chain.doFilter(req, res)
-        }catch (e: Exception){
-            httpLogger.errorAndPrint("JkFilter处理请求错误: $req", e)
-        }
+    protected open fun isStaticFileRequest(req: HttpServletRequest): Boolean {
+        val ext = req.requestURI.substringAfterLast('.') // 获得后缀
+        return staticFileExts.contains(ext)
     }
 
+    /**
+     * 处理请求
+     * @param req
+     * @param res
+     * @return
+     */
+    protected open fun handleRequest(req: ServletRequest, res: ServletResponse, chain: FilterChain): CompletableFuture<*> {
+        return HttpRequestHandler.handle(req, res)
+    }
+
+    /**
+     * 析构
+     */
     override fun destroy() {
         // 关闭插件
         for(p in plugins)
