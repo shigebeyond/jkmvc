@@ -5,7 +5,7 @@ import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jkutil.collection.LazyAllocatedMap
 import net.jkcode.jkutil.common.DegradeCommandException
-import net.jkcode.jkutil.common.httpLogger
+import net.jkcode.jkutil.common.trySupplierFuture
 import java.io.Writer
 import java.lang.reflect.Method
 import java.util.concurrent.CompletableFuture
@@ -73,38 +73,28 @@ interface IController{
      *   注意：为了区别业务action，该方法不能命名为callAction
      * @param action action方法
      */
-    public fun callActionMethod(action: Method): Any? {
-        var result: Any? = null
-        var ex: Exception? = null
-        try {
-            // 1 前置处理
-            before()
+    public fun callActionMethod(action: Method): CompletableFuture<Any?> {
+        return trySupplierFuture {
+                // 1 前置处理
+                before()
 
-            // 2 执行真正的处理方法
-            result = action.invoke(this);
-        }catch (e: Exception){
-            ex = e
-        }
+                // 2 执行真正的处理方法
+                action.invoke(this);
+            }.whenComplete{ r, ex ->
+                // 3 后置处理
+                var result = r
+                if(ex is DegradeCommandException) // 异常自带降级处理
+                    result = ex.handleFallback()
+                else { // 后置处理
+                    result = after(result, ex)
+                    ex?.printStackTrace()
+                }
 
-        // 3 后置处理
-        // 异常自带降级处理
-        if(ex is DegradeCommandException)
-            result = ex.handleFallback()
-        else { // 后置处理
-            result = after(result, ex)
-            ex?.printStackTrace()
-        }
-
-//        if(result == null)
-//            httpLogger.warn("controller=[{}] + action=[{}] 执行结果为null", req.controller, req.action)
-
-        // 4 渲染结果
-        if(result is CompletableFuture<*>)
-            return result.thenApply(::renderResult)
-
-        renderResult(result)
-        return result
+                // 4 渲染结果
+                renderResult(result)
+            }
     }
+
 
     /**
      * 渲染结果
@@ -121,10 +111,10 @@ interface IController{
      *   因为这是请求的最后处理(包含异常处理), 你最好不要再往上抛异常
      *
      * @param result action方法执行结果
-     * @param ex action方法执行抛出的异常
+     * @param t action方法执行抛出的异常
      * @return
      */
-    fun after(result: Any?, ex: Exception? = null): Any? {
+    fun after(result: Any?, t: Throwable? = null): Any? {
         return result
     }
 }
