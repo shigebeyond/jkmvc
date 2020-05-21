@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.RejectedExecutionException
 import javax.servlet.*
 import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 /**
  * web入口
@@ -134,7 +135,7 @@ open class JkFilter() : Filter {
             try {
                 //actx.start { // web server线程池
                 CommonThreadPool.execute { // 其他线程池
-                    handleRequest(actx.request, actx.response, chain)
+                    handleRequest(actx.request as HttpServletRequest, actx.response as HttpServletResponse, chain)
                 }
             }catch (e: RejectedExecutionException){
                 httpLogger.errorAndPrint("JkFilter处理请求错误: 公共线程池已满", e)
@@ -143,7 +144,7 @@ open class JkFilter() : Filter {
         }
 
         // 2 同步处理
-        handleRequest(req, res, chain)
+        handleRequest(req, res as HttpServletResponse, chain)
     }
 
     /**
@@ -162,7 +163,7 @@ open class JkFilter() : Filter {
      * @param res
      * @return
      */
-    protected open fun handleRequest(req: ServletRequest, res: ServletResponse, chain: FilterChain): CompletableFuture<*> {
+    protected open fun handleRequest(req: HttpServletRequest, res: HttpServletResponse, chain: FilterChain): CompletableFuture<*> {
         return HttpRequestHandler.handle(req, res)
     }
 

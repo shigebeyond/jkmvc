@@ -4,6 +4,8 @@ import net.jkcode.jkmvc.http.IHttpRequestInterceptor
 import java.util.concurrent.CompletableFuture
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 /**
  * http请求处理者
@@ -26,6 +28,6 @@ interface IHttpRequestHandler {
      * @param HttpServletResponse res
      * @return
      */
-    fun handle(request: ServletRequest, response: ServletResponse): CompletableFuture<*>
+    fun handle(request: HttpServletRequest, response: HttpServletResponse): CompletableFuture<*>
 
 }

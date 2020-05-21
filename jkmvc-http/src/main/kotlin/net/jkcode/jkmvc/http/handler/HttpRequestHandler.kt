@@ -53,9 +53,9 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      * @param res
      * @return
      */
-    public override fun handle(request: ServletRequest, response: ServletResponse): CompletableFuture<*> {
+    public override fun handle(request: HttpServletRequest, response: HttpServletResponse): CompletableFuture<*> {
         //　构建请求对象
-        val req = HttpRequest(request as HttpServletRequest);
+        val req = HttpRequest(request);
         if (debug) {
             // 路由
             httpLogger.debug("{}请求uri: {} {}, contextPath: {}", if (req.isInner) "内部" else "", req.method, req.routeUri, req.contextPath)
@@ -66,7 +66,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
         }
 
         // 构建响应对象
-        val res = HttpResponse(response as HttpServletResponse, req);
+        val res = HttpResponse(response, req);
 
         // 允许跨域
         if (config.getBoolean("allowCrossDomain", false)!!) {
