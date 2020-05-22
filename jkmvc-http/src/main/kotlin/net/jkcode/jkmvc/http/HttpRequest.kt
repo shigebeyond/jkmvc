@@ -10,8 +10,8 @@ import net.jkcode.jkmvc.http.router.Router
 import net.jkcode.jkutil.common.enumeration
 import net.jkcode.jkutil.common.toNullable
 import net.jkcode.jkutil.common.trim
+import net.jkcode.jkutil.lock.IKeyLock
 import net.jkcode.jkutil.validator.RuleValidator
-import java.net.URI
 import java.net.URLDecoder
 import java.util.*
 import javax.servlet.RequestDispatcher
@@ -47,6 +47,21 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		 * 可信任的代理服务器ip
 		 */
 		public val proxyips = arrayOf("127.0.0.1", "localhost", "localhost.localdomain");
+
+		/**
+		 * session id的cookie名
+		 */
+		public val COOKIE_SESSION_ID = "JSESSIONID"
+
+		/**
+		 * 重定向url的session属性名
+		 */
+		public val SESSION_ATTR_REDIRECT_URL = "_redirectUrl"
+
+		/**
+		 * 写重定向url的锁
+		 */
+		public val redirectLock: IKeyLock = IKeyLock.instance("local")
 
 		/**
 		 * 获得当前请求
@@ -408,13 +423,21 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	public var redirectUrl: String?
 		// 1 未登录时记录当前url为要跳转的url 2 登录跳转后删除
 		set(value) {
-			if(value == null) // null则删除
-				session.removeAttribute("_redirectUrl")
-			else
-				session.setAttribute("_redirectUrl", value)
+			// null则删
+			if(value == null) { 
+				session.removeAttribute(SESSION_ATTR_REDIRECT_URL)
+				return
+			}
+
+			// 写: 锁session, 同一session只写一次
+			// synchronized(session)  // 锁session, wrong: 每个请求都创建新的session对象
+			redirectLock.quickLockCleanly(sessionId!!, 5){ // // 外部锁
+				if(session.getAttribute(SESSION_ATTR_REDIRECT_URL) == null)
+					session.setAttribute(SESSION_ATTR_REDIRECT_URL, value)
+			}
 		}
 		get(){
-			return session.getAttribute("_redirectUrl") as String?
+			return session.getAttribute(SESSION_ATTR_REDIRECT_URL) as String?
 		}
 
 	/**
@@ -434,7 +457,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 * 会话id
 	 */
 	public val sessionId: String?
-		get() = getCookie("JSESSIONID")?.value
+		get() = getCookie(COOKIE_SESSION_ID)?.value
 
 	/**
 	 * 获得

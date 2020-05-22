@@ -153,17 +153,26 @@ public fun HttpSession.getOrPutAttribute(key: String, default: () -> Any): Any {
  * 读取某个会过期的属性, 如果没有则设置, 如果过期则重新生成
  */
 public fun HttpSession.getOrPutExpiringAttribute(key: String, expireSencond: Long = 6000, default: () -> Any): Any? {
-    var pair = getAttribute(key) as Pair<Any, Long>?
+    // 读取
+    var result = getExpiringAttribute(key)
     // 如果没有/过期, 则设置
-    if (pair == null || pair.second < System.currentTimeMillis()) {
-        // 过期时间
-        val expire = System.currentTimeMillis() + expireSencond
-        // 值 + 过期时间
-        pair = default() to expire
-        setAttribute(key, pair)
+    if (result == null) {
+        result = default()
+        putExpiringAttribute(key, result, expireSencond)
     }
 
-    return pair.first
+    return result
+}
+
+/**
+ * 设置某个会过期的属性
+ */
+public fun HttpSession.putExpiringAttribute(key: String, value: Any, expireSencond: Long = 6000){
+    // 过期时间
+    val expire = System.currentTimeMillis() + expireSencond * 1000
+    // 值 + 过期时间
+    val pair = value to expire
+    setAttribute(key, pair)
 }
 
 /**
