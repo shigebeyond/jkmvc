@@ -12,6 +12,7 @@ import net.jkcode.jkutil.common.toNullable
 import net.jkcode.jkutil.common.trim
 import net.jkcode.jkutil.validator.RuleValidator
 import java.net.URI
+import java.net.URLDecoder
 import java.util.*
 import javax.servlet.RequestDispatcher
 import javax.servlet.ServletContext
@@ -114,13 +115,18 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	/**
 	 * 路由uri, 要进行路由解析
 	 *   1 去掉头部的contextPath + filter url前缀
-	 *   2 去掉末尾的/
+	 *   2 去掉首尾的/
 	 */
-	public val routeUri:String = if(contextPath == null)
-									throw RouteException("req.contextPath is null")
-								else
-									//requestURI.trim(contextPath + '/', "/")
-									requestURI.trim(contextPath + JkFilter.instance().urlPrefix).trim("/", "/")
+	public val routeUri:String by lazy {
+		if (contextPath == null)
+			throw RouteException("req.contextPath is null")
+
+		var uri = requestURI
+				.trim(contextPath + JkFilter.instance().urlPrefix) // 去掉filter url前缀
+				.trim("/", "/") // 去掉首尾的/
+		// 解码
+		URLDecoder.decode(uri, "UTF-8")
+	}
 
 	/**
 	 * 当前匹配的路由结果
@@ -415,7 +421,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 * 将当前url作为登录后要跳转的url
 	 */
 	public fun asRedirectUrl(){
-		redirectUrl = requestURL.toString()
+		redirectUrl = requestURL.toString() + "?" + queryString
 	}
 
 	/**
