@@ -80,15 +80,14 @@ interface IController{
 
                 // 2 执行真正的处理方法
                 action.invoke(this);
-            }.whenComplete{ r, ex ->
+            //}.whenComplete{ r, ex -> // 不转换结果, 还是会抛异常(如 DegradeCommandException, 不应该往上抛)
+            }.handle{ r, ex -> // whenComplete() + 转换结果
                 // 3 后置处理
                 var result = r
                 if(ex is DegradeCommandException) // 异常自带降级处理
                     result = ex.handleFallback()
-                else { // 后置处理
+                else  // 后置处理
                     result = after(result, ex)
-                    ex?.printStackTrace()
-                }
 
                 // 4 渲染结果
                 renderResult(result)
@@ -115,6 +114,13 @@ interface IController{
      * @return
      */
     fun after(result: Any?, t: Throwable? = null): Any? {
+        // 处理异常
+        if(t != null){
+            t.printStackTrace()
+            return null
+        }
+
+        // 处理结果
         return result
     }
 }
