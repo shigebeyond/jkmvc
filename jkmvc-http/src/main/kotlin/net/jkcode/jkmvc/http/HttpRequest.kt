@@ -431,7 +431,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 
 			// 写: 锁session, 同一session只写一次
 			// synchronized(session)  // 锁session, wrong: 每个请求都创建新的session对象
-			redirectLock.quickLockCleanly(sessionId!!, 5){ // // 外部锁
+			redirectLock.quickLockCleanly("REDIRECT_LOCK_" + sessionId!!, 5){ // // 外部锁
 				if(session.getAttribute(SESSION_ATTR_REDIRECT_URL) == null)
 					session.setAttribute(SESSION_ATTR_REDIRECT_URL, value)
 			}

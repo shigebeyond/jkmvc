@@ -104,14 +104,13 @@ open class JkFilter() : Filter {
         var req = req0 as HttpServletRequest
         // 内部请求: INCLUDE/FORWARD
         val isInnerReq = req0.isInner
-        if(isInnerReq){
-            req = InnerHttpRequest(req0) // 封装include请求, 其中 req0 是HttpRequest
-        }else {
-            //　静态文件请求，则交给下一个filter来使用默认servlet来处理
-            if (isStaticFileRequest(req)) { // 检查后缀
-                chain.doFilter(req, res)
-                return;
-            }
+        if(isInnerReq)
+            req = InnerHttpRequest(req0) // 封装include请求, 其中 req0 是HttpRequest => 后续在 isJspRequest(req) 中的 req.requestURI 才会获得真正的uri
+
+        //　静态文件/jsp请求，则交给下一个filter来使用默认servlet来处理
+        if (isStaticFileRequest(req) || isJspRequest(req)) { // 检查后缀
+            chain.doFilter(req0 /* 原始的请求 */, res)
+            return;
         }
 
         // bug: 上传文件报错: No multipart config for servlet
@@ -145,6 +144,16 @@ open class JkFilter() : Filter {
 
         // 2 同步处理
         handleRequest(req, res as HttpServletResponse, chain)
+    }
+
+    /**
+     * 检查是否jsp请求
+     *    filter也可能匹配到jsp页面, 但JkFilter不处理
+     * @param req
+     * @return
+     */
+    protected open fun isJspRequest(req: HttpServletRequest): Boolean {
+        return req.requestURI.endsWith(".jsp")
     }
 
     /**
