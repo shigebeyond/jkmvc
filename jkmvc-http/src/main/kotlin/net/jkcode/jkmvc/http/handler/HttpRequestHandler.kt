@@ -11,8 +11,6 @@ import net.jkcode.jkutil.interceptor.RequestInterceptorChain
 import net.jkcode.jkutil.scope.GlobalHttpRequestScope
 import java.lang.reflect.Method
 import java.util.concurrent.CompletableFuture
-import javax.servlet.ServletRequest
-import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -118,6 +116,8 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      * @return
      */
     private fun callController(req: HttpRequest, res: HttpResponse): CompletableFuture<Any?> {
+        val oldCtrl = Controller.currentOrNull() // 获得旧的当前controller
+
         // 0 加拦截
         return interceptorChain.intercept(req) {
             // 1 获得controller类
@@ -141,6 +141,10 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
             // 4 调用controller的action方法
             //return controller.callActionMethod(action.javaMethod!!)
             guardInvoke(action, controller, emptyArray())
+        }.whenComplete{ r, ex ->
+            // 5 对于内部请求, 需恢复旧的当前controller
+            if(oldCtrl != null)
+                Controller.setCurrent(oldCtrl)
         }
     }
 
