@@ -56,6 +56,18 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): IHt
         get() = request as HttpServletRequest
 
     /**
+     * 内部请求对象
+     *   如果不是内部请求, 则返回null
+     */
+    public val innerRequest: InnerHttpRequest?
+        get(){
+            if(isInner)
+                return request as InnerHttpRequest
+
+            return null
+        }
+
+    /**
      * 上传请求中文件参数
      */
     public val partFileMap: Map<String, List<PartFile>> by lazy{
