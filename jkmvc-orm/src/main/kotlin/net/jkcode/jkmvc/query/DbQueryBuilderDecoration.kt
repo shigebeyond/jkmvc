@@ -6,6 +6,7 @@ import net.jkcode.jkutil.common.isArrayOrCollectionEmpty
 import net.jkcode.jkmvc.db.DbException
 import net.jkcode.jkmvc.db.DbType
 import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkutil.common.dbLogger
 import java.util.*
 import kotlin.reflect.KFunction2
 
@@ -475,6 +476,8 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      * @return
      */
     public override fun limit(limit: Int, offset: Int): IDbQueryBuilder {
+        if(limitParams != null)
+            dbLogger.warn("Duplate setting limit, only use the last setting")
         limitParams = DbLimit(limit, offset)
         return this;
     }

@@ -7,7 +7,9 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import net.jkcode.jkutil.common.getInheritPropertyClass
+import net.jkcode.jkutil.common.getPropertyValue
 import net.jkcode.jkutil.common.isSuperClass
+import net.jkcode.jkutil.common.setPropertyValue
 
 /**
  * orm的xstream转换器
@@ -62,8 +64,13 @@ class OrmConverter(protected val xstream: XStream): Converter {
 
     // 反序列化
     override fun unmarshal(reader: HierarchicalStreamReader, context: UnmarshallingContext): Any {
-        val type = context.requiredType // 当前类
-        val item = type.newInstance() as Orm
+        val type = context.requiredType as Class<Orm> // 当前类
+
+        // fix bug: 实例化不能仅仅用默认构造函数, 还是参数是数组的构造函数
+        //val item = type.newInstance() as Orm
+        val ormMeta = type.kotlin.modelOrmMeta
+        val item = ormMeta.newInstance() as Orm
+
         // 遍历子节点来构建map
         while (reader.hasMoreChildren()) {
             reader.moveDown()
@@ -83,6 +90,12 @@ class OrmConverter(protected val xstream: XStream): Converter {
                 value = context.convertAnother(value, propType)
 
             item[key] = value
+            /*// fix bug: AppDefinition.id 只是setter, 不是字段
+            if(ormMeta.propsAndRelations.contains(key))
+                item[key] = value
+            else
+                item.setPropertyValue(key, value)
+            */
             reader.moveUp()
         }
         return item
