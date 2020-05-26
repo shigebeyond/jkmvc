@@ -8,7 +8,8 @@ package net.jkcode.jkmvc.orm
  */
 class OrmCacheMeta(
         public val cacheType: String= "lru", // 缓存类型, 如 lru/jedis
-        public val withs: Array<String> = emptyArray() // 联查对象属性
+        public val withs: Array<String> = emptyArray(), // 联查对象属性
+        public val initAll: Boolean = false // 一开始就缓存全部数据
 ) {
 
     /**

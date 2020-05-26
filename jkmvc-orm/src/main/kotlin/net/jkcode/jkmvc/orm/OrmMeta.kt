@@ -58,6 +58,14 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     protected var constructorVararg: Constructor<out IOrm>? = null
 
+    /**
+     * 缓存
+     *    对每个模型类都可以指定 cacheMeta 来使用本地缓存or外部缓存
+     */
+    private val cache: ICache by lazy {
+        ICache.instance(cacheMeta!!.cacheType)
+    }
+
     init {
         // 检查 model 类的默认构造函数
         if (model != GeneralModel::class) {
@@ -65,6 +73,24 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             constructorVararg = model.java.getConstructorOrNull(Array<Any>::class.java) // 可变参数构造函数
             if (constructorNoarg == null && constructorVararg == null)
                 throw OrmException("Model Class [$model] has no no-arg constructor") // Model类${clazz}无默认构造函数
+        }
+
+        // 一开始缓存全部
+        if (cacheMeta != null && cacheMeta!!.initAll) {
+            val query = queryBuilder()
+            // 缓存时联查
+            if(cacheMeta!!.withs.isNotEmpty())
+                query.withs(*cacheMeta!!.withs)
+            // 查询并缓存
+            val items = query.findRows {
+                val item = newInstance()
+                item.setOriginal(it)
+                item
+            }
+            for (item in items){
+                val key = getCacheKey(item.pk)
+                cache.put(key, item)
+            }
         }
     }
 
@@ -335,14 +361,6 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
     /********************************* 缓存 **************************************/
     /**
-     * 缓存
-     *    对每个模型类都可以指定 cacheMeta 来使用本地缓存or外部缓存
-     */
-    private val cache: ICache by lazy {
-        ICache.instance(cacheMeta!!.cacheType)
-    }
-
-    /**
      * 根据主键值来删除缓存
      * @param item
      */
@@ -445,7 +463,6 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             val result = item ?: newInstance() as T
             result.setOriginal(it)
             result
-
         }
     }
 
