@@ -64,8 +64,11 @@ data class SelectColumnList(
                     continue;
                 }
 
-                // 处理关联模型+字段
-                val selects = if(subcolumns == null) null else parse(relation.ormMeta, subcolumns) // 递归解析 关联模型的字段
+                // 递归解析 关联模型的字段
+                val selects = if(subcolumns == null)
+                                null
+                            else
+                                parse(relation.ormMeta, subcolumns) // 递归解析 关联模型的字段
                 relatedColumns.add(RelatedSelectColumnList(subname, selects))
             }
             return SelectColumnList(myColoumns, relatedColumns)
