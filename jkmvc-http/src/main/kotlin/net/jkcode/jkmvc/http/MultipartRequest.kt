@@ -7,7 +7,6 @@ import net.jkcode.jkutil.common.*
 import sun.misc.IOUtils
 import java.util.*
 import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletRequestWrapper
 import kotlin.collections.HashMap
 
 /**
@@ -133,7 +132,7 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): IHt
      * @return
      */
     public fun getFileRelativePath(file: String): String {
-        return FileManager.getFileRelativePath(file)
+        return UploadFileUtil.getFileRelativePath(file)
     }
 
     /**

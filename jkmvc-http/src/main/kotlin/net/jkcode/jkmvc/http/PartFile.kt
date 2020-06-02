@@ -3,7 +3,6 @@ package net.jkcode.jkmvc.http
 import net.jkcode.jkutil.common.detectedCharset
 import net.jkcode.jkutil.common.httpLogger
 import java.io.File
-import java.io.FileInputStream
 import java.io.Reader
 import java.net.URLDecoder
 import java.nio.charset.Charset
@@ -20,7 +19,7 @@ class PartFile(protected val part: Part): Part by part {
         if(part.isText)
             throw IllegalArgumentException("非文件域");
 
-        if(FileManager.isForbiddenUploadFile(part.submittedFileName))
+        if(UploadFileUtil.isForbiddenUploadFile(part.submittedFileName))
             throw UnsupportedOperationException("文件域[$name]的文件为[${part.submittedFileName}], 属于禁止上传的文件类型")
     }
 
@@ -67,7 +66,7 @@ class PartFile(protected val part: Part): Part by part {
      * @param uploadDirectory
      */
     public override fun write(path: String) {
-        val relativePath = FileManager.getFileRelativePath(path)
+        val relativePath = UploadFileUtil.getFileRelativePath(path)
         if(this.relativePath != null){
             if(this.relativePath != relativePath)
                 throw IllegalStateException("两次调用保存上传文件的目录不一致")
@@ -101,7 +100,7 @@ class PartFile(protected val part: Part): Part by part {
 
         fileName = URLDecoder.decode(fileName, "UTF-8")
         // 准备好上传文件路径
-        val file = FileManager.prepareUploadFile(fileName, uploadDirectory)
+        val file = UploadFileUtil.prepareUploadFile(fileName, uploadDirectory)
         // 另存文件
         write(file.absolutePath)
 

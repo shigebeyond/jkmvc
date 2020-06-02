@@ -14,9 +14,10 @@ import java.nio.file.FileSystems
 import javax.imageio.ImageIO
 
 /**
- * 文件管理器
+ * 上传文件工具类
+ * 　　原来 FileManager
  */
-object FileManager {
+object UploadFileUtil {
 
     /**
      * 上传配置
@@ -132,7 +133,7 @@ object FileManager {
         if (file != null && file.exists())
             file.delete()
 
-        if (directory != null && directory.exists())
+        if (directory != null && directory.exists() && !directory.absolutePath.endsWith(uploadRootDirectory))
             directory.delete()
     }
 
@@ -159,11 +160,14 @@ object FileManager {
 
     /**
      * Generates a thumbnail of a image file in temporary files folder by relative path
-     * @param path
+     * 创建缩略图
+     *   输出路径为: $path.thumb.jpg
+     * @param path 原始图的相对路径
      * @param thumbWidth
      * @param thumbHeight
+     * @return 相对路径
      */
-    fun createThumbnail(path: String, thumbWidth: Int?, thumbHeight: Int?) {
+    fun createThumbnail(path: String, thumbWidth: Int?, thumbHeight: Int?): String {
         var width = thumbWidth ?: THUMBNAIL_SIZE
         var height = thumbHeight ?: THUMBNAIL_SIZE
 
@@ -173,7 +177,7 @@ object FileManager {
         mediaTracker.addImage(image, 0)
         mediaTracker.waitForID(0)
 
-        val thumbRatio = width as Double / height as Double
+        val thumbRatio = width.toDouble() / height
         val imageWidth = image.getWidth(null)
         val imageHeight = image.getHeight(null)
         val imageRatio = imageWidth.toDouble() / imageHeight.toDouble()
@@ -188,10 +192,14 @@ object FileManager {
         graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR)
         graphics2D.drawImage(image, 0, 0, width, height, null)
 
-        BufferedOutputStream(FileOutputStream(imageFile.absolutePath + THUMBNAIL_EXT)).use { out ->
+        // 输出路径为: $path.thumb.jpg
+        val outputPath = imageFile.absolutePath + THUMBNAIL_EXT
+        BufferedOutputStream(FileOutputStream(outputPath)).use { out ->
             ImageIO.write(thumbImage, "jpeg", out)
             out.flush()
         }
 
+        // 返回相对路径
+        return path + THUMBNAIL_EXT
     }
 }
