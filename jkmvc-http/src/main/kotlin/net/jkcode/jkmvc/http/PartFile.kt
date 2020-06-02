@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.http
 
 import net.jkcode.jkutil.common.detectedCharset
+import net.jkcode.jkutil.common.httpLogger
 import java.io.File
 import java.io.FileInputStream
 import java.io.Reader
@@ -90,9 +91,15 @@ class PartFile(protected val part: Part): Part by part {
      * @param uploadDirectory
      * @return
      */
-    public fun storeAndGetRelativePath(uploadDirectory:String = ""): String {
+    public fun storeAndGetRelativePath(uploadDirectory:String = ""): String? {
         // 文件名
-        val fileName = URLDecoder.decode(part.submittedFileName, "UTF-8")
+        var fileName = part.submittedFileName
+        if(fileName.isNullOrEmpty() /* && part.size == 0L */){
+            httpLogger.warn("上传文件名为空")
+            return null
+        }
+
+        fileName = URLDecoder.decode(fileName, "UTF-8")
         // 准备好上传文件路径
         val file = FileManager.prepareUploadFile(fileName, uploadDirectory)
         // 另存文件
