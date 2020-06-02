@@ -115,9 +115,8 @@ object FileManager {
             return null
 
         val file = File(uploadRootDirectory, URLDecoder.decode(path, "UTF-8"))
-        if (file.exists() && !file.isDirectory) {
+        if (file.exists() && !file.isDirectory)
             return file
-        }
 
         return null
     }
@@ -130,13 +129,11 @@ object FileManager {
         val file = getFileByPath(path)
         val directory = file!!.parentFile
 
-        if (file != null && file.exists()) {
+        if (file != null && file.exists())
             file.delete()
-        }
 
-        if (directory != null && directory.exists()) {
+        if (directory != null && directory.exists())
             directory.delete()
-        }
     }
 
     /**
@@ -144,9 +141,8 @@ object FileManager {
      * @param file
      */
     fun deleteFile(file: File) {
-        if (!file.exists()) {
+        if (!file.exists())
             return
-        }
 
         if (file.isDirectory) {
             for (f in file.listFiles()!!) {

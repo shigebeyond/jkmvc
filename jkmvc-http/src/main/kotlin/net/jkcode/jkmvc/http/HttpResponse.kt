@@ -130,8 +130,12 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 	public fun prepareWriter(): PrintWriter
 	{
 		// 中文编码
-		res.characterEncoding = "UTF-8";
-		res.contentType = "text/html;charset=UTF-8";
+		if(res.characterEncoding.isNullOrBlank())
+			res.characterEncoding = "UTF-8";
+
+		if(res.contentType.isNullOrBlank())
+			res.contentType = "text/html;charset=UTF-8";
+
 		return res.writer
 	}
 
@@ -204,8 +208,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 
 		//通知客户端文件的下载    URLEncoder.encode解决文件名中文的问题
 		res.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(file.name, "utf-8"))
-		val contentType = req.session.servletContext.getMimeType(file.getName()) ?: "application/octet-stream"
-		res.setHeader("Content-Type", contentType)
+		res.contentType = req.session.servletContext.getMimeType(file.getName()) ?: "application/octet-stream"
 
 		// 输出文件
 		res.outputStream.writeFile(file)
@@ -225,8 +228,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 		//通知客户端文件的下载    URLEncoder.encode解决文件名中文的问题
 		if(name != null)
 			res.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(name, "utf-8"))
-		val contentType = req.session.servletContext.getMimeType(name) ?: "application/octet-stream"
-		res.setHeader("Content-Type", contentType)
+		res.contentType = req.session.servletContext.getMimeType(name) ?: "application/octet-stream"
 
 		// 输出文件
 		res.outputStream.writeFromInput(input)
@@ -370,6 +372,9 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 	 * @param data
 	 */
 	public fun renderJson(data: Any) {
+		if(res.contentType.isNullOrBlank())
+			res.contentType = "application/json;charset=UTF-8"
+
 		renderString(data.toJson())
 	}
 
@@ -379,6 +384,9 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 	 * @param callback 回调函数
 	 */
 	public fun renderJson(data: Any, callback: String?) {
+		if(res.contentType.isNullOrBlank())
+			res.contentType = "application/json;charset=UTF-8"
+
 		rendered = true
 		val writer = prepareWriter()
 		writer.apply {
