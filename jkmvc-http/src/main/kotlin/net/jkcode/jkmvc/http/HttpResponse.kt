@@ -372,8 +372,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 	 * @param data
 	 */
 	public fun renderJson(data: Any) {
-		if(res.contentType.isNullOrBlank())
-			res.contentType = "application/json;charset=UTF-8"
+		res.contentType = "application/json;charset=UTF-8"
 
 		renderString(data.toJson())
 	}
@@ -384,8 +383,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 	 * @param callback 回调函数
 	 */
 	public fun renderJson(data: Any, callback: String?) {
-		if(res.contentType.isNullOrBlank())
-			res.contentType = "application/json;charset=UTF-8"
+		res.contentType = "application/json;charset=UTF-8"
 
 		rendered = true
 		val writer = prepareWriter()
