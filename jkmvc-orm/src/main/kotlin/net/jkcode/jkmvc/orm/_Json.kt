@@ -92,10 +92,14 @@ public fun Collection<*>.toMaps(include: List<String> = emptyList()): List<Mutab
 
 /**
  * 对象转json
+ *   如果是字符串, 则认为自身就是json字符串, 不需要再进行json序列化
  * @param include 要输出的字段名的列表
  * @return
  */
 public fun Any.toJson(include: List<String> = emptyList()): String {
+    if(this is String) // 自身就是json字符串
+        return this
+
     //data.toJSONString()
     val data = if(include.isEmpty())
                     this

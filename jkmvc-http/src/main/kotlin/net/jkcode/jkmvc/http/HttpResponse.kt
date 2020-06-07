@@ -174,6 +174,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 	 */
 	public fun renderString(content:String)
 	{
+		res.contentType = "text/html;charset=UTF-8";
 		rendered = true
 		prepareWriter().print(content);
 	}
@@ -373,8 +374,9 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 	 */
 	public fun renderJson(data: Any) {
 		res.contentType = "application/json;charset=UTF-8"
-
-		renderString(data.toJson())
+		rendered = true
+		val json = data.toJson()
+		prepareWriter().print(json);
 	}
 
 	/**
@@ -384,7 +386,6 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 	 */
 	public fun renderJson(data: Any, callback: String?) {
 		res.contentType = "application/json;charset=UTF-8"
-
 		rendered = true
 		val writer = prepareWriter()
 		writer.apply {
