@@ -19,15 +19,24 @@ public fun JSONObject.getPath(path: String): Any? {
 
 /**
  * 累积
+ *   第一次是值, 第二次是数组, 来累积值
+ *
  * @param key
  * @param value
  * @return
  */
-fun JSONObject.accumulate(key: String, value: Any): JSONObject {
-    val arr = this.getOrPut(key){
-        JSONArray()
-    } as JSONArray
-    arr.add(value)
+fun JSONObject.accumulate(key: String, value: Any?): JSONObject {
+    val o = this.get(key)
+    if (o == null) { // 无值, 直接塞进去, 第一次是值
+        this.put(key, value)
+    } else if (o is MutableList<*>) { // 本身是list
+        (o as MutableList<Any?>).add(value)
+    }else { // 本身是单值
+        val arr = JSONArray()
+        arr.add(o)
+        arr.add(value)
+        this.put(key, arr)
+    }
     return this
 }
 
