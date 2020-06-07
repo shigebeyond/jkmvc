@@ -72,4 +72,12 @@ data class DbColumn(
         return columnSql.replacesFormat(toMap(db), "<", ">")
     }
 
+    override fun equals(other: Any?): Boolean {
+        return other is DbColumn && this.name == other.name
+    }
+
+    override fun hashCode(): Int {
+        return name.hashCode()
+    }
+
 }

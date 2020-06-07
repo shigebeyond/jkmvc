@@ -14,7 +14,7 @@ import java.util.LinkedHashMap
  * @author shijianhang
  * @date 2020-2-4 下午8:02:47
  */
-open class DbTable(
+data class DbTable(
     public val name: String, // 表名
     public val catalog: String? = null,
     public val schema: String? = null
@@ -31,11 +31,20 @@ open class DbTable(
     public var primaryKeys: Collection<String> = emptyList()
 
     /**
-     * 添加字段
+     * 添加单个字段
      * @param column
      */
-    public fun addClumn(column: DbColumn) {
+    public fun addColumn(column: DbColumn) {
         (columns as MutableMap)[column.name] = column
+    }
+
+    /**
+     * 添加多个字段
+     * @param columns
+     */
+    public fun addColumns(columns: Collection<DbColumn>) {
+        for (col in columns)
+            addColumn(col)
     }
 
     /**

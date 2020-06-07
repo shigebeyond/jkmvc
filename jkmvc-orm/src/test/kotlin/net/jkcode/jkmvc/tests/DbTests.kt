@@ -59,9 +59,9 @@ class DbTests{
         val id = DbColumn("id", DbColumnLogicType.INT, null,11, 2, null, false, "主键", true)
         val name = DbColumn("name", DbColumnLogicType.VARCHAR, null,10, null, "''")
         val date = DbColumn("date", DbColumnLogicType.DATE, null,null, null, "null")
-        table.addClumn(id)
-        table.addClumn(name)
-        table.addClumn(date)
+        table.addColumn(id)
+        table.addColumn(name)
+        table.addColumn(date)
         table.primaryKeys = listOf("id")
         println(table.generateCreateTableSql(Db.instance()))
     }

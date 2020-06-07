@@ -115,7 +115,7 @@ internal class DbMeta(public override val name: CharSequence /* 标识 */) : IDb
             val table = column.table
             tables.getOrPut(table) {
                 DbTable(table, catalog, schema)
-            }.addClumn(column);
+            }.addColumn(column);
         }
 
         // 查询主键
