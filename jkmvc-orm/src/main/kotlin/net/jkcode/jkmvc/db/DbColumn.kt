@@ -14,7 +14,7 @@ data class DbColumn(
         public val name: String, // 列名
         public val logicType: DbColumnLogicType, // 逻辑类型
         public val physicalType: String? = null, // 物理类型
-        public val length: Int? = null, // 长度, 一般是指字符串长度, 也用作数字长度
+        public var length: Int? = null, // 长度, 一般是指字符串长度, 也用作数字长度
         public val scale: Int? = null, // 精度
         public val default: String? = null, // 默认值, 转义后的值
         public val nullable: Boolean = true, // 是否可为null
@@ -22,6 +22,11 @@ data class DbColumn(
         public val autoIncr: Boolean = false, // 是否自增
         public val table: String = "" // 表名
 ) {
+
+    init {
+        if(length == null && logicType == DbColumnLogicType.VARCHAR && physicalType.isNullOrBlank())
+            length = 255
+    }
 
     /**
      * 数字长度, 直接用length
