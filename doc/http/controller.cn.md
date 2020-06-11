@@ -24,7 +24,7 @@ class WelcomeController: Controller() {
      * 操作方法，用于响应uri "welcome/index"
      */
     public fun actionIndex() {
-        res.renderString("hello world");
+        res.renderHtml("hello world");
     }
 }
 ```
@@ -62,7 +62,7 @@ req.routeParams | 匹配路由的所有参数，包含 controller / action
 属性/方法 | 作用
 --- | ---
 req.setStatus(status:Int)| 设置响应的状态码
-res.renderString(content:String) | 设置响应内容为文本
+res.renderHtml(content:String) | 设置响应内容为文本
 res.renderFile(file: File) | 设置响应内容为文件
 res.renderFile(file: String) | 设置响应内容为文件
 res.renderView(view:View) | 设置响应内容为视图
@@ -147,7 +147,7 @@ class UserController: Controller()
         //val user = UserModel.queryBuilder().where("id", id).findModel<UserModel>()
         val user = UserModel(id)
         if(!user.isLoaded()){
-            res.renderString("用户[$id]不存在")
+            res.renderHtml("用户[$id]不存在")
             return
         }
         // 渲染视图

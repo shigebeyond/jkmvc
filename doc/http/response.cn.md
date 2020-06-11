@@ -14,7 +14,11 @@ jkmvc的响应类是 `net.jkcode.jkmvc.http.HttpResponse`
 --- | ---
 setStatus(status: Int): Unit | 设置响应状态码
 renderView(view: View): Unit | 响应视图
-renderString(content: String): Unit | 响应字符串
+renderHtml(content: String): Unit | 响应html
+renderText(content: String): Unit | 响应文本
+renderJson(content: Any): Unit | 响应json
+renderXml(content: Any): Unit | 响应xml
+renderJs(content: Any): Unit | 响应js
 renderFile(file: File): Unit | 响应文件
 renderFile(file: String): Unit | 响应文件
 

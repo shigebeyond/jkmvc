@@ -144,7 +144,7 @@ class WelcomeController: Controller() {
      * homepage
      */
     public fun index() {
-        res.renderString("hello world");
+        res.renderHtml("hello world");
     }
 
 }

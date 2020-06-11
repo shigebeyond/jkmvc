@@ -11,7 +11,7 @@ class WelcomeController: Controller() {
      * 主页
      */
     public fun index() {
-        res.renderString("hello world");
+        res.renderHtml("hello world");
     }
 
     /**

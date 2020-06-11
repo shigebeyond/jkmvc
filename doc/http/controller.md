@@ -26,7 +26,7 @@ class WelcomeController: Controller() {
      * action，response to uri "welcome/index"
      */
     public fun actionIndex() {
-        res.renderString("hello world");
+        res.renderHtml("hello world");
     }
 }
 ```
@@ -64,7 +64,7 @@ Every controller has the `res` property which is the [HttpResponse](response.md)
 Property/method | What it does
 --- | ---
 req.setStatus(status:Int)|Set HTTP status for the request (200, 404, 500, etc.)
-res.renderString(content:String) | Set content to return for this request
+res.renderHtml(content:String) | Set content to return for this request
 res.renderFile(file: File) | Set file to return for this request
 res.renderFile(file: String) | Set file to return for this request
 res.renderView(view:View) | Set view to return for this request
@@ -148,7 +148,7 @@ class UserController: Controller()
         //val user = UserModel.queryBuilder().where("id", id).findModel<UserModel>()
         val user = UserModel(id)
         if(!user.isLoaded()){
-            res.renderString("user[$id] not exist")
+            res.renderHtml("user[$id] not exist")
             return
         }
         // render view

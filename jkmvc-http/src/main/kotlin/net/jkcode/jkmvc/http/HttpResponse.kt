@@ -168,15 +168,62 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 	}
 
 	/**
+	 * 响应js
+	 *
+	 * @param content
+	 * @param type
+	 */
+	public fun renderJs(content:String)
+	{
+		res.contentType = "application/javascript;charset=UTF-8";
+		rendered = true
+		prepareWriter().print(content);
+	}
+
+	/**
 	 * 响应字符串
 	 *
 	 * @param content
+	 * @param type
 	 */
-	public fun renderString(content:String)
+	protected fun renderString(content:String, type: String)
 	{
-		res.contentType = "text/html;charset=UTF-8";
+		res.contentType = "text/$type;charset=UTF-8";
 		rendered = true
 		prepareWriter().print(content);
+	}
+
+	/**
+	 * 响应html
+	 *
+	 * @param content
+	 */
+	public fun renderHtml(content:String)
+	{
+		// text/html
+		renderString(content, "html")
+	}
+
+	/**
+	 * 响应文本
+	 *
+	 * @param content
+	 */
+	public fun renderText(content:String)
+	{
+		// text/text
+		renderString(content, "text")
+	}
+
+	/**
+	 * 响应xml
+	 *
+	 * @param content
+	 */
+	public fun renderXml(content:String)
+	{
+		// text/xml
+		renderString(content, "xml")
 	}
 
 	/**

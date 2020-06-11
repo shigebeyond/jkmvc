@@ -30,9 +30,10 @@ class UserController: Controller()
     /**
      * action后置处理
      */
-    public override fun after() {
+    public override fun after(result: Any?, t: Throwable?): Any? {
         // 如记录日志
         httpLogger.info("action后置处理")
+        return super.after(result, t)
     }
 
     /**
@@ -64,7 +65,7 @@ class UserController: Controller()
         //val user = UserModel.queryBuilder().where("id", id).findModel<UserModel>()
         val user = UserModel(id)
         if(!user.isLoaded()){
-            res.renderString("用户[$id]不存在")
+            res.renderHtml("用户[$id]不存在")
             return
         }
         // 渲染视图 | render view
@@ -113,7 +114,7 @@ class UserController: Controller()
         val id: Int = req["id"]!!
         val user = UserModel(id)
         if(!user.isLoaded()){
-            res.renderString("用户[" + req["id"] + "]不存在")
+            res.renderHtml("用户[" + req["id"] + "]不存在")
             return
         }
         // 处理请求 | handle request
@@ -149,7 +150,7 @@ class UserController: Controller()
         // 查询单个用户 | find a user
         val user = UserModel(id)
         if(!user.isLoaded()){
-            res.renderString("用户[$id]不存在")
+            res.renderHtml("用户[$id]不存在")
             return
         }
         // 删除 | delete user
@@ -168,7 +169,7 @@ class UserController: Controller()
         val id: Int = req["id"]!!
         val user = UserModel(id)
         if(!user.isLoaded()){
-            res.renderString("用户[" + req["id"] + "]不存在")
+            res.renderHtml("用户[" + req["id"] + "]不存在")
             return
         }
 
@@ -189,7 +190,7 @@ class UserController: Controller()
         if(req.isPost){ // post请求
             val user = Auth.instance().login(req["username"]!!, req["password"]!!);
             if(user == null)
-                res.renderString("登录失败")
+                res.renderHtml("登录失败")
             else
                 redirect("user/login")
         }else{ // get请求
