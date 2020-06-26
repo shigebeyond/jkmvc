@@ -679,15 +679,16 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param columns 关联字段列表
      * @param lastName 上一级关系名, 类型 String|DbExpr(关系名+别名)
      * @param path 列名父路径
+     * @param queryAction 查询对象的回调函数
      * @return 关联关系
      */
-    public override fun joinRelated(query: OrmQueryBuilder, name: CharSequence, select: Boolean, columns: SelectColumnList?, lastName: CharSequence, path: String): IRelationMeta {
+    public override fun joinRelated(query: OrmQueryBuilder, name: CharSequence, select: Boolean, columns: SelectColumnList?, lastName: CharSequence, path: String, queryAction: ((OrmQueryBuilder)->Unit)?): IRelationMeta {
         // 获得当前关联关系
         val relation = getRelation(name.toString())!! // 兼容 name 类型是 DbExpr, 用 DbExpr.toString() 来引用关系名
         // 1 非hasMany关系：只处理一层
         if (relation.type == RelationType.HAS_MANY) {
             // 单独处理hasMany关系，不在一个sql中联查，而是单独查询
-            query.withMany(name.toString(), columns)
+            query.withMany(name.toString(), columns, queryAction)
             return relation;
         }
 

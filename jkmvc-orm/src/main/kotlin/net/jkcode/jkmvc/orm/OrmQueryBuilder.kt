@@ -18,6 +18,16 @@ import kotlin.collections.component2
 import kotlin.collections.set
 
 /**
+ * 一对多的联查信息
+ * @author shijianhang<772910474@qq.com>
+ * @date 2020-06-26 9:52 AM
+ */
+data class WithInfo(
+        public val columns: SelectColumnList?, // 查询列
+        public val queryAction: ((OrmQueryBuilder)->Unit)? // 查询对象的回调函数
+)
+
+/**
  * 面向orm对象的sql构建器
  *    当前表与关联表都带别名
  *    当前表的别名=ormMeta.name
@@ -45,9 +55,9 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
 
     /**
      * 关联查询hasMany的关系，需单独处理，不在一个sql中联查，而是单独查询
-     * <hasMany关系名, [子关系名+子关系字段]>
+     * <hasMany关系名, 联查信息>
      */
-    protected val withMany:MutableMap<String, SelectColumnList?> = HashMap()
+    protected val withMany:MutableMap<String, WithInfo?> = HashMap()
 
     /**
      * 清空条件
@@ -114,15 +124,16 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      * @param name 关联关系名
      * @param select 是否select关联表的字段
      * @param columns 关联模型的字段列表
+     * @param queryAction 查询对象的回调函数
      * @return
      */
-    public fun with(name: CharSequence, select: Boolean = withSelect, columns: SelectColumnList? = null): OrmQueryBuilder {
+    public fun with(name: CharSequence, select: Boolean = withSelect, columns: SelectColumnList? = null, queryAction: ((OrmQueryBuilder)->Unit)? = null): OrmQueryBuilder {
         // select当前表字段
         if (selectColumns.isEmpty())
             select(ormMeta.name + ".*");
 
         // join关联表
-        ormMeta.joinRelated(this, name, select, columns)
+        ormMeta.joinRelated(this, name, select, columns, queryAction = queryAction)
 
         return this
     }
@@ -175,12 +186,13 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      * 联查joinMany关系的子关系
      *
      * @param name joinMany关系名
-     *
+     * @param columns 查询字段
+     * @param queryAction 查询对象的回调函数
      * @return
      */
-    public fun withMany(name: String, columns: SelectColumnList? = null): OrmQueryBuilder {
-        //数据结构：<hasMany关系名, 查询字段>
-        withMany[name] = columns
+    public fun withMany(name: String, columns: SelectColumnList? = null, queryAction: ((OrmQueryBuilder)->Unit)?): OrmQueryBuilder {
+        //数据结构：<hasMany关系名, 联查信息>
+        withMany[name] = WithInfo(columns, queryAction)
         return this
     }
 
@@ -442,7 +454,9 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      */
     protected fun forEachManyQuery(orm:Any, action: ((name:String, relation:IRelationMeta, relatedItems:List<IOrm>)-> Unit)){
         // 联查hasMany的关系
-        for((name, columns) in withMany){
+        for((name, withInfo) in withMany){
+            val (columns, queryAction) = withInfo!!
+
             // 获得hasMany的关系
             val relation = ormMeta.getRelation(name)!!
 
@@ -454,6 +468,10 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
             // 设置查询字段 + 递归联查子关系
             if(columns != null)
                 query.selectWiths(columns)
+
+            // 调用查询对象的回调
+            if(queryAction != null)
+                queryAction.invoke(query)
 
             // 得结果
             val relatedItems = query.findRows(transform = relation.modelRowTransformer)

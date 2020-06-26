@@ -146,7 +146,11 @@ class OrmTests{
 //        println(addresses)
 
         // 多个user，联查多个address
-        var users = UserModel.queryBuilder().with("addresses").limit(100).findModels<UserModel>()
+        val query = UserModel.queryBuilder().with("addresses"){ query2 ->
+            // 动态操作查询对象, 如添加条件
+            query2.where("tel", "110").orderBy("addr")
+        }
+        var users = query.limit(100).findModels<UserModel>()
         for (user in users){
             println("user[${user.id}]: ${user.name}")
             for(address in user.addresses){
