@@ -123,3 +123,11 @@ catch (e: OrmException)
 
 [!!] Although the second argument is optional, it is *highly recommended* to specify the list of columns you expect to change. Not doing so will leave your code _vulnerable_ in case the attacker adds fields you didn't expect.
 
+## 8 Complicated query
+
+You can call the `Orm.queryBuilder()` method to get a query builder:
+
+```
+// get the OrmQueryBuilder object, it will set the model-related table, and easy to query related object.
+val query = UserModel.queryBuilder()
+```

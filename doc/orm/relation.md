@@ -153,3 +153,39 @@ To remove:
 ```
 post.removeRelation('categories', category);
 ```
+
+
+# Query related object
+
+use `OrmQueryBuilder.with()` to query related object
+
+```
+// Query 1:1 related object, it will merge into 1 sql
+val post = PostModel.queryBuilder()
+    .with("author")
+    .where("id", "=", 20)
+    .findModel<PostModel>();
+// Generate sql: SELECT ... FROM `post` `post` JOIN `user` `author` ON `post`.`author_id` = `author`.`id` WHERE `post`.`id` = 20:
+
+// -------------------------------
+// Query 1:N related objects, it will split into 2 sql
+val user = UserModel.queryBuilder()
+    .with("posts")
+    .where("id", "=", 20)
+    .findModel<UserModel>();
+// Generate 2 sql:
+// SELECT  `user`.* FROM `user` `user` WHERE `user`.`id` = 20
+// SELECT  * FROM `post` `post` WHERE  `post`.`author_id` IN (1)
+
+// -------------------------------
+// When you query 1:N related objects, you can dynamic call related query object
+val user = UserModel.queryBuilder()
+    .with("posts"){ query -> // call related query object, eg. add where condition or add order
+        query.where("visible", 1).orderBy("created")
+    }
+    .where("id", "=", 20)
+    .findModel<UserModel>();
+// Generate 2 sql:
+// SELECT  `user`.* FROM `user` `user` WHERE `user`.`id` = 20
+// SELECT  * FROM `post` `post` WHERE  `post`.`author_id` IN (1) AND `visible` = 1  ORDER BY `created`
+```

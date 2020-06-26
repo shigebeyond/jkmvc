@@ -125,3 +125,11 @@ catch (e: OrmException)
 
 [!!] 虽然方法的第二个参数是可选的，如果你不填的话，则将请求中的所有数据都赋值给模型对象。但我还是建议你要指定哪些字段要赋值，否则你的代码是不安全的，会让黑客会注入你不想赋值的属性。
 
+## 8 复杂的查询
+
+调用 `Orm.queryBuilder()` 方法来获得查询构建器，使用查询构建器来查询
+
+```
+// 获得 UserModel 相关的 OrmQueryBuilder 对象, 自动设置model相关的表名与关联查询
+val query = UserModel.queryBuilder()
+```

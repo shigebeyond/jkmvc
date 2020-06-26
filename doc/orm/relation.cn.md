@@ -153,3 +153,38 @@ post.addRelation('categories', category);
 ```
 post.removeRelation('categories', category);
 ```
+
+# 关联对象查询
+
+使用 `OrmQueryBuilder.with()` 来联查关联对象
+
+```
+// 联查一对一关联对象, 合并为1条sql查询
+val post = PostModel.queryBuilder()
+    .with("author")
+    .where("id", "=", 20)
+    .findModel<PostModel>();
+// 生成sql: SELECT ... FROM `post` `post` JOIN `user` `author` ON `post`.`author_id` = `author`.`id` WHERE `post`.`id` = 20:
+
+// -------------------------------
+// 联查一对多关联对象, 分开2条sql查询
+val user = UserModel.queryBuilder()
+    .with("posts")
+    .where("id", "=", 20)
+    .findModel<UserModel>();
+// 生成2条sql:
+// SELECT  `user`.* FROM `user` `user` WHERE `user`.`id` = 20
+// SELECT  * FROM `post` `post` WHERE  `post`.`author_id` IN (1)
+
+// -------------------------------
+// 联查一对多关联对象时, 可动态操作关联对象的查询对象
+val user = UserModel.queryBuilder()
+    .with("posts"){ query -> // 动态操作查询对象, 如添加条件与顺序
+        query.where("visible", 1).orderBy("created")
+    }
+    .where("id", "=", 20)
+    .findModel<UserModel>();
+// 生成2条sql:
+// SELECT  `user`.* FROM `user` `user` WHERE `user`.`id` = 20
+// SELECT  * FROM `post` `post` WHERE  `post`.`author_id` IN (1) AND `visible` = 1  ORDER BY `created`
+```
