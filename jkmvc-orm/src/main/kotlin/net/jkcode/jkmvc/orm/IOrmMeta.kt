@@ -410,7 +410,7 @@ interface IOrmMeta {
      * @param columns 关联字段列表
      * @param lastName 上一级关系名, 类型 String|DbExpr(关系名+别名)
      * @param path 列名父路径
-     * @param queryAction 查询对象的回调函数
+     * @param queryAction 查询对象的回调函数, 只针对 hasMany 关系
      * @return 关联关系
      */
     fun joinRelated(query: OrmQueryBuilder, name: CharSequence, select: Boolean, columns: SelectColumnList?, lastName:CharSequence = this.name, path:String = "", queryAction: ((OrmQueryBuilder)->Unit)? = null): IRelationMeta

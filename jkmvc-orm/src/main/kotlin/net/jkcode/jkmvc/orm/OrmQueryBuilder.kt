@@ -24,7 +24,7 @@ import kotlin.collections.set
  */
 data class WithInfo(
         public val columns: SelectColumnList?, // 查询列
-        public val queryAction: ((OrmQueryBuilder)->Unit)? // 查询对象的回调函数
+        public val queryAction: ((OrmQueryBuilder)->Unit)? // 查询对象的回调函数, 只针对 hasMany 关系
 )
 
 /**
@@ -124,7 +124,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      * @param name 关联关系名
      * @param select 是否select关联表的字段
      * @param columns 关联模型的字段列表
-     * @param queryAction 查询对象的回调函数
+     * @param queryAction 查询对象的回调函数, 只针对 hasMany 关系
      * @return
      */
     public fun with(name: CharSequence, select: Boolean = withSelect, columns: SelectColumnList? = null, queryAction: ((OrmQueryBuilder)->Unit)? = null): OrmQueryBuilder {
@@ -187,7 +187,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      *
      * @param name joinMany关系名
      * @param columns 查询字段
-     * @param queryAction 查询对象的回调函数
+     * @param queryAction 查询对象的回调函数, 只针对 hasMany 关系
      * @return
      */
     public fun withMany(name: String, columns: SelectColumnList? = null, queryAction: ((OrmQueryBuilder)->Unit)?): OrmQueryBuilder {
