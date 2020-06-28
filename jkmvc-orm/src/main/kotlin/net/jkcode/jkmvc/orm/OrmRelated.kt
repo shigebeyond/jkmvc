@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.db.DbResultRow
+import net.jkcode.jkmvc.query.DbExpr
 
 /**
  * ORM之关联对象操作
@@ -250,7 +251,10 @@ abstract class OrmRelated : OrmPersistent() {
             val subquery = relation.queryMiddleTable(this, fkInMany)
             if(subquery != null){
                 // 删除关联对象
-                relation.ormMeta.queryBuilder().whereIn(relation.farPrimaryKey, subquery.select(*relation.farForeignKey.columns)).delete()
+                relation.ormMeta.queryBuilder()
+                        .join(DbExpr(subquery.select(*relation.farForeignKey.columns), "_mid"), "INNER")
+                        .on(relation.farPrimaryKey, relation.farForeignKey.wrap("_mid") /*tableAlias + farForeignKey*/)
+                        .delete()
                 // 删除中间表
                 subquery.delete()
             }

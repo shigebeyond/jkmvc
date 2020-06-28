@@ -75,7 +75,7 @@ class MiddleRelationMeta(
         }
         return queryBuilder()
                 .select(model.modelName + ".*", *smfk.columns)
-                .join(middleTable).on(farForeignKey.wrap(middleTable + '.') /*middleTable + '.' + farForeignKey*/, "=", farPrimaryKey.wrap(model.modelName + '.') /*model.modelName + '.' + farPrimaryKey*/) as OrmQueryBuilder // 中间表.远端外键 = 从表.远端主键
+                .join(middleTable).on(farForeignKey.wrap(middleTable + '.') /*middleTable + '.' + farForeignKey*/,  farPrimaryKey.wrap(model.modelName + '.') /*model.modelName + '.' + farPrimaryKey*/) as OrmQueryBuilder // 中间表.远端外键 = 从表.远端主键
     }
 
     /**

@@ -1,6 +1,10 @@
 package net.jkcode.jkmvc.tests
 
 import net.jkcode.jkmvc.db.*
+import net.jkcode.jkmvc.orm.DbKey
+import net.jkcode.jkmvc.orm.DbKeyNames
+import net.jkcode.jkmvc.orm.DbKeyValues
+import net.jkcode.jkmvc.orm.whereIn
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.DbQueryBuilder
 import net.jkcode.jkmvc.query.IDbQueryBuilder
@@ -189,6 +193,16 @@ class QueryBuilderTests{
     fun testJoin(){
         val query = DbQueryBuilder().select("profiles.*", "posts.total_posts").from("profiles")
                 .join("posts", "INNER").on("profiles.username", "=", "posts.username");
+        val csql = query.compileSelect()
+        println(csql.previewSql())
+    }
+
+    /**
+     * 测试DbKey
+     */
+    @Test
+    fun testDbKey(){
+        val query = DbQueryBuilder().whereIn(DbKeyNames("appId", "version"), DbKey(listOf(1,1), listOf(2,3))).from("app")
         val csql = query.compileSelect()
         println(csql.previewSql())
     }

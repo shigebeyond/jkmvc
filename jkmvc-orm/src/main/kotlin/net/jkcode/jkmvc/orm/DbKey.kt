@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkutil.common.toArray
 import net.jkcode.jkmvc.query.IDbQueryBuilder
+import net.jkcode.jkutil.common.isSame
 import java.util.*
 
 /**
@@ -278,23 +279,34 @@ internal fun Collection<out IOrm>.collectColumn(names: DbKeyNames):DbKey<List<An
  * where in
  *
  * @param   columns  column name or DbExpr
- * @param   op      logic operator
  * @param   values   column value
  * @return
  */
-internal fun IDbQueryBuilder.whereIn(columns: DbKeyNames, values: Any?): IDbQueryBuilder {
-    if(columns.size !== 1)
-        throw IllegalArgumentException("DbKeyKt.whereIn()暂时只支持单主键")
+internal fun IDbQueryBuilder.whereIn(columns: DbKeyNames, values: DbKey<List<Any?>>): IDbQueryBuilder {
+    // 每列有多值
+    // 收集值不同的列
+    val diffValuesIndexs = ArrayList<Int>()
+    values.forEachColumn { i, value ->
+        if(!value.isSame())
+            diffValuesIndexs.add(i)
+    }
 
-    val value = if(values is DbKey<*>)
-                    values.single()
-                else
-                    values
-    return this.where(columns.single(), "IN", value)
+    // TODO: 如果不同值的有多列, 则可以拼接 or 条件
+    if(diffValuesIndexs.size !== 1)
+        throw IllegalArgumentException("DbKeyKt.whereIn()暂时只支持: 只有一列有不同值, 其他列有相同值")
+
+    columns.forEachNameValue(values){ name, value, i ->
+        if(diffValuesIndexs.contains(i)) // 不同值的列用 where in
+            IDbQueryBuilder@this.where(name, "IN", value)
+        else // 相同值的列用 where =
+            IDbQueryBuilder@this.where(name, (value as List<*>).first())
+    }
+
+    return this
 }
 
 /**
- * Alias of andWhere()
+ * where =
  *
  * @param   columns  column name or DbExpr
  * @param   values   column value
@@ -311,13 +323,12 @@ internal fun IDbQueryBuilder.where(columns: DbKeyNames, values: Any?): IDbQueryB
  * Adds "ON ..." conditions for the last created JOIN statement.
  *
  * @param   cols1  column name or DbExpr
- * @param   op  logic operator
  * @param   cols2  column name or DbExpr
  * @return
  */
-internal fun IDbQueryBuilder.on(cols1: DbKeyNames, op: String, cols2: DbKeyNames): IDbQueryBuilder {
+internal fun IDbQueryBuilder.on(cols1: DbKeyNames, cols2: DbKeyNames): IDbQueryBuilder {
     cols1.forEachColumnWith(cols2){ col1, col2, i ->
-        IDbQueryBuilder@this.on(col1, op, col2)
+        IDbQueryBuilder@this.on(col1, "=", col2)
     }
     return this
 }

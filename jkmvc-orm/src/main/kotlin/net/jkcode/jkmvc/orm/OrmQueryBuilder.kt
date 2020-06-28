@@ -224,7 +224,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
         }
 
         // 查主表
-        return join(DbExpr(master.table, masterName), "LEFT").on(masterPk, "=", slaveFk) as OrmQueryBuilder; // 主表.主键 = 从表.外键
+        return join(DbExpr(master.table, masterName), "LEFT").on(masterPk, slaveFk) as OrmQueryBuilder; // 主表.主键 = 从表.外键
     }
 
     /**
@@ -255,7 +255,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
         }
 
         // 查从表
-        return join(DbExpr(slave.table, slaveName), "LEFT").on(slaveFk, "=", masterPk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
+        return join(DbExpr(slave.table, slaveName), "LEFT").on(slaveFk, masterPk) as OrmQueryBuilder; // 从表.外键 = 主表.主键
     }
 
     /**
@@ -293,10 +293,10 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
         }
 
         // 查中间表
-        join(slaveRelation.middleTable).on(masterPk, "=", middleFk) // 中间表.外键 = 主表.主键
+        join(slaveRelation.middleTable).on(masterPk, middleFk) // 中间表.外键 = 主表.主键
 
         // 查从表
-        return join(DbExpr(slave.table, slaveName), "LEFT").on(slavePk2, "=", middleFk2) as OrmQueryBuilder; // 中间表.远端外键 = 从表.远端主键
+        return join(DbExpr(slave.table, slaveName), "LEFT").on(slavePk2, middleFk2) as OrmQueryBuilder; // 中间表.远端外键 = 从表.远端主键
     }
 
     /**
@@ -329,7 +329,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
         }
 
         // 查中间表
-        return join(slaveRelation.middleTable).on(masterPk, "=", middleFk) as OrmQueryBuilder// 中间表.外键 = 主表.主键
+        return join(slaveRelation.middleTable).on(masterPk, middleFk) as OrmQueryBuilder// 中间表.外键 = 主表.主键
     }
 
     /**
