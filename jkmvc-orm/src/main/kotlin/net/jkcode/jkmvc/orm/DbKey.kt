@@ -296,10 +296,11 @@ internal fun IDbQueryBuilder.whereIn(columns: DbKeyNames, values: DbKey<List<Any
         throw IllegalArgumentException("DbKeyKt.whereIn()暂时只支持: 只有一列有不同值, 其他列每列有相同值")
 
     columns.forEachNameValue(values){ name, value, i ->
+        val list = (value as List<*>)
         if(diffValuesIndexs.contains(i)) // 不同值的列用 where in
-            IDbQueryBuilder@this.where(name, "IN", value)
+            IDbQueryBuilder@this.where(name, "IN", list.toSet())
         else // 相同值的列用 where =
-            IDbQueryBuilder@this.where(name, (value as List<*>).first())
+            IDbQueryBuilder@this.where(name, list.first())
     }
 
     return this
