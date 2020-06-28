@@ -250,7 +250,7 @@ abstract class OrmRelated : OrmPersistent() {
             val subquery = relation.queryMiddleTable(this, fkInMany)
             if(subquery != null){
                 // 删除关联对象
-                relation.ormMeta.queryBuilder().where(relation.farPrimaryKey, "IN", subquery.select(*relation.farForeignKey.columns)).delete()
+                relation.ormMeta.queryBuilder().whereIn(relation.farPrimaryKey, subquery.select(*relation.farForeignKey.columns)).delete()
                 // 删除中间表
                 subquery.delete()
             }

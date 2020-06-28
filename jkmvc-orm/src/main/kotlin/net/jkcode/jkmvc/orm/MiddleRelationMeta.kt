@@ -176,6 +176,6 @@ class MiddleRelationMeta(
     public override fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder {
         // 通过join中间表 查从表
         return buildQuery() // 中间表.远端外键 = 从表.远端主键
-                .where(foreignKey.wrap(middleTable + '.')/*middleTable + '.' + foreignKey*/,  "IN", items.collectColumn(primaryProp)) as OrmQueryBuilder // 中间表.外键 = 主表.主键
+                .whereIn(foreignKey.wrap(middleTable + '.')/*middleTable + '.' + foreignKey*/, items.collectColumn(primaryProp)) as OrmQueryBuilder // 中间表.外键 = 主表.主键
     }
 }

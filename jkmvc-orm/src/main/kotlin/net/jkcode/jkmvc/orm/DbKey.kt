@@ -51,6 +51,13 @@ class DbKey<T> {
     }
 
     /**
+     * 唯一一个字段
+     */
+    public fun single(): T {
+        return columns.single()
+    }
+
+    /**
      * 遍历并生成新的主键
      *
      * @param transform 字段转换函数
@@ -171,10 +178,10 @@ internal inline fun DbKeyNames.forEachNameValue(values:Any?, action: (name: Stri
     }
 
     // 2 单值
-    if(columns.size != 1)
+    if(size != 1)
         throw IllegalArgumentException("遍历2个主键时size不匹配: 第一个size为${this.size}, 第二个是单值")
 
-    action(columns.single(), values, 0)
+    action(single(), values, 0)
 }
 
 /**
@@ -268,18 +275,22 @@ internal fun Collection<out IOrm>.collectColumn(names: DbKeyNames):DbKey<List<An
 
 /*************************** IDbQueryBuilder扩展 ******************************/
 /**
- * Alias of andWhere()
+ * where in
  *
  * @param   columns  column name or DbExpr
  * @param   op      logic operator
  * @param   values   column value
  * @return
  */
-internal fun IDbQueryBuilder.where(columns: DbKeyNames, op: String, values: Any?): IDbQueryBuilder {
-    columns.forEachNameValue(values){ name, value, i ->
-        IDbQueryBuilder@this.andWhere(name, op, value)
-    }
-    return this
+internal fun IDbQueryBuilder.whereIn(columns: DbKeyNames, values: Any?): IDbQueryBuilder {
+    if(columns.size !== 1)
+        throw IllegalArgumentException("DbKeyKt.whereIn()暂时只支持单主键")
+
+    val value = if(values is DbKey<*>)
+                    values.single()
+                else
+                    values
+    return this.where(columns.single(), "IN", value)
 }
 
 /**
