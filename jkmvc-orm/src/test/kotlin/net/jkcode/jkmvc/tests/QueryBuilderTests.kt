@@ -202,7 +202,7 @@ class QueryBuilderTests{
      */
     @Test
     fun testDbKey(){
-        val query = DbQueryBuilder().whereIn(DbKeyNames("appId", "version"), DbKey(listOf(1,1), listOf(2,3))).from("app")
+        val query = DbQueryBuilder().whereIn(DbKeyNames("appId", "version"), DbKey(listOf(1,1,1), listOf(2,3,4))).from("app")
         val csql = query.compileSelect()
         println(csql.previewSql())
     }
