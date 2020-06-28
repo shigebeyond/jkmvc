@@ -174,7 +174,7 @@ internal inline fun DbKeyNames.forEachNameValue(values:Any?, action: (name: Stri
     if(columns.size != 1)
         throw IllegalArgumentException("遍历2个主键时size不匹配: 第一个size为${this.size}, 第二个是单值")
 
-    action(columns.first(), values, 0)
+    action(columns.single(), values, 0)
 }
 
 /**
@@ -261,8 +261,8 @@ internal fun Collection<out IOrm>.collectColumn(names: DbKeyNames):DbKey<List<An
     if (this.isEmpty())
         return DbKey.empty as DbKey<List<Any?>>
 
-    return names.map {
-        this.collectColumn(it)
+    return names.map { name ->
+        this.collectColumn(name)
     }
 }
 
@@ -276,7 +276,10 @@ internal fun Collection<out IOrm>.collectColumn(names: DbKeyNames):DbKey<List<An
  * @return
  */
 internal fun IDbQueryBuilder.where(columns: DbKeyNames, op: String, values: Any?): IDbQueryBuilder {
-    return andWhere(columns, op, values);
+    columns.forEachNameValue(values){ name, value, i ->
+        IDbQueryBuilder@this.andWhere(name, op, value)
+    }
+    return this
 }
 
 /**
@@ -287,23 +290,8 @@ internal fun IDbQueryBuilder.where(columns: DbKeyNames, op: String, values: Any?
  * @return
  */
 internal fun IDbQueryBuilder.where(columns: DbKeyNames, values: Any?): IDbQueryBuilder {
-    columns.forEachNameValue(values) { name, value, i ->
-        IDbQueryBuilder@this.where(name, value)
-    }
-    return this
-}
-
-/**
- * Creates a new "AND WHERE" condition for the query.
- *
- * @param   columns  column name or DbExpr
- * @param   op      logic operator
- * @param   values   column value
- * @return
- */
-internal fun IDbQueryBuilder.andWhere(columns: DbKeyNames, op: String, values: Any?): IDbQueryBuilder {
     columns.forEachNameValue(values){ name, value, i ->
-        IDbQueryBuilder@this.andWhere(name, op, value)
+        IDbQueryBuilder@this.where(name, value)
     }
     return this
 }

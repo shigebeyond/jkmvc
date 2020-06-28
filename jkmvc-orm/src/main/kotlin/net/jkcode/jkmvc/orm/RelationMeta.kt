@@ -59,14 +59,14 @@ open class RelationMeta(
             val fk:DbKeyValues = item.gets(foreignProp)
             if(pkEmptyRule.isEmpty(fk)) // 如果外键为空，则联查为空
                 return null
-            return queryBuilder().where(primaryKey.wrap(tableAlias) /*tableAlias + primaryKey*/, "=", fk) as OrmQueryBuilder // 主表.主键 = 从表.外键
+            return queryBuilder().where(primaryKey.wrap(tableAlias) /*tableAlias + primaryKey*/, fk) as OrmQueryBuilder // 主表.主键 = 从表.外键
         }
 
         // 查从表
         val pk:DbKeyValues = item.gets(primaryProp) // 主键
         if(item.isPkEmpty(pk))
             return null
-        val query = queryBuilder().where(foreignKey.wrap(tableAlias) /*tableAlias + foreignKey*/, "=", pk) as OrmQueryBuilder// 从表.外键 = 主表.主键
+        val query = queryBuilder().where(foreignKey.wrap(tableAlias) /*tableAlias + foreignKey*/, pk) as OrmQueryBuilder// 从表.外键 = 主表.主键
         if(fkInMany != null) { // hasMany关系下过滤单个关系
             val fk = if(fkInMany is IOrm) fkInMany.gets(ormMeta.primaryProp) else fkInMany
             query.where(tableAlias + ormMeta.primaryKey, fk)

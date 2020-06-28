@@ -261,7 +261,7 @@ abstract class OrmPersistent : OrmValid() {
 				removeHasNRelations(true)
 
 			// 删除数据
-			val result = queryBuilder().where(ormMeta.primaryKey, "=", pk).delete();
+			val result = queryBuilder().where(ormMeta.primaryKey, pk).delete();
 
 			// 触发后置事件
 			afterDelete()

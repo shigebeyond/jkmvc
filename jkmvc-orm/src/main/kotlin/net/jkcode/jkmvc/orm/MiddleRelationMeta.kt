@@ -100,7 +100,7 @@ class MiddleRelationMeta(
         val pk: DbKeyValues = item.gets(primaryProp)
         if(item.isPkEmpty(pk))
             return null;
-        val query = DbQueryBuilder(ormMeta.db).from(middleTable).where(foreignKey, "=", pk)
+        val query = DbQueryBuilder(ormMeta.db).from(middleTable).where(foreignKey, pk)
         if (fkInMany != null) { // hasMany关系下过滤单个关系
             val farPk = if(fkInMany is IOrm) fkInMany.gets(farPrimaryProp) else fkInMany
             query.where(farForeignKey, fkInMany)
@@ -158,7 +158,7 @@ class MiddleRelationMeta(
             return null;
         val tableAlias = middleTable + '.'
         val query = buildQuery() // 中间表.远端外键 = 从表.远端主键
-                .where(foreignKey.wrap(tableAlias) /*tableAlias + foreignKey*/, "=", pk) as OrmQueryBuilder // 中间表.外键 = 主表.主键
+                .where(foreignKey.wrap(tableAlias) /*tableAlias + foreignKey*/, pk) as OrmQueryBuilder // 中间表.外键 = 主表.主键
         if (fkInMany != null) { // hasMany关系下过滤单个关系
             val farPk = if(fkInMany is IOrm) fkInMany.gets(farPrimaryProp) else fkInMany
             query.where(farForeignKey.wrap(tableAlias) /*tableAlias + farForeignKey*/, farPk)
