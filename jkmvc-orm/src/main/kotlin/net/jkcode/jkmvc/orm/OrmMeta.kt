@@ -75,6 +75,9 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
                 throw OrmException("Model Class [$model] has no no-arg constructor") // Model类${clazz}无默认构造函数
         }
 
+        // 关联 缓存配置 与 元数据
+        cacheMeta?.ormMeta = this
+
         // 一开始缓存全部
         if (cacheMeta != null && cacheMeta!!.initAll) {
             val query = queryBuilder()
@@ -373,11 +376,41 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param item
      */
     public override fun removeCache(item: IOrm) {
-        if (cacheMeta == null)
-            return
+        removeCache(item, true)
+    }
 
-        val key = getCacheKey(item.pk)
-        cache.remove(key)
+    /**
+     * 根据主键值来删除缓存
+     * @param item
+     * @param removingRelated 是否删除关联对象的缓存
+     */
+    protected fun removeCache(item: IOrm, removingRelated: Boolean) {
+        // 删除关联对象的缓存
+        if(removingRelated)
+            removeRelatedCache(item)
+
+        // 删除本对象的缓存
+        if (cacheMeta != null) {
+            val key = getCacheKey(item.pk)
+            cache.remove(key)
+        }
+    }
+
+    /**
+     * 删除关联对象的缓存
+     * @param item
+     */
+    fun removeRelatedCache(item: IOrm){
+        // 遍历每个关联关系, 看看他有没有缓存, 并且连带缓存当前模型
+        for((name, relation) in relations){
+            val relatedMeta = relation.ormMeta as OrmMeta
+            // 关联对象 连带缓存了当前模型
+            val hasCacheThis = relatedMeta.cacheMeta?.hasWithRelation(this)
+                    ?: false
+            // 删除关联对象的缓存
+            if(hasCacheThis)
+                relatedMeta.removeCache(item.get(name), false) // 递归调用, 但第二个参数表示只递归一层
+        }
     }
 
     /**

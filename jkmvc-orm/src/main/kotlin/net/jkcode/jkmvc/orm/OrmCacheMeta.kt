@@ -13,12 +13,32 @@ class OrmCacheMeta(
 ) {
 
     /**
+     * 模型元数据
+     */
+    public lateinit var ormMeta:IOrmMeta
+
+    /**
      * 是否联查某个关联属性
      * @param name
      * @return
      */
     public fun hasWithRelation(name: String): Boolean {
         return withs.contains(name)
+    }
+
+    /**
+     * 是否联查某个关联属性
+     * @param relatedMeta 关联模型的元数据
+     * @return
+     */
+    public fun hasWithRelation(relatedMeta: OrmMeta): Boolean {
+        // 遍历每个关联关系, 匹配关联模型的元数据
+        for((name, relation) in ormMeta.relations){
+            // 匹配关联模型的元数据 + 连带缓存了该关联对象
+            if(relation.ormMeta == relatedMeta && hasWithRelation(name))
+                return true
+        }
+        return false
     }
 
 }
