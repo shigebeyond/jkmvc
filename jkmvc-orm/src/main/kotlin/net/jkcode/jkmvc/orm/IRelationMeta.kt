@@ -17,6 +17,11 @@ import kotlin.reflect.KClass
 interface IRelationMeta {
 
     /**
+     * 关系名
+     */
+    val name: String
+
+    /**
      * 源模型元数据
      */
     val sourceMeta:IOrmMeta;
@@ -158,4 +163,11 @@ interface IRelationMeta {
      */
     fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder
 
+    /**
+     * 设置关系的属性值
+     *
+     * @param items 本模型对象
+     * @param relatedItems 关联模型对象
+     */
+    fun setRelationProp(items: List<IOrm>, relatedItems: List<IOrm>)
 }

@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.orm
 
+import java.util.*
 import kotlin.reflect.KClass
 
 /**
@@ -26,6 +27,11 @@ open class RelationMeta(
         public override val cascadeDeleted: Boolean = false, // 是否级联删除
         public override val pkEmptyRule: PkEmptyRule = model.modelOrmMeta.pkEmptyRule // 检查主键为空的规则
 ) : IRelationMeta {
+
+    /**
+     * 关系名
+     */
+    public override lateinit var name: String
 
     /**
      * 主键属性
@@ -89,6 +95,69 @@ open class RelationMeta(
             query.whereIn(foreignKey.wrap(model.modelName + '.') /*model.modelName + '.' + foreignKey*/, items.collectColumn(primaryProp)) // 从表.外键 = 主表.主键
         }
         return query
+    }
+
+    /**
+     * 设置关系的属性值, 即将关联模型对象 塞到 本模型对象的属性
+     *
+     * @param items 本模型对象
+     * @param relatedItems 关联模型对象
+     */
+    public override fun setRelationProp(items: List<IOrm>, relatedItems: List<IOrm>) {
+        if(items.isEmpty())
+            return
+
+        // 设置关联属性为空list, 否则会延迟加载查sql
+        if(relatedItems.isEmpty()){
+            for (item in items)
+                item[name] = emptyList<Any>()
+            return
+        }
+
+        // 获得本表键与关联表键
+        val thisProp:DbKeyNames
+        val relationProp:DbKeyNames
+        if(type == RelationType.BELONGS_TO){
+            thisProp = this.foreignProp // 从表.外键
+            relationProp = this.primaryProp // 主表.主键
+        }else {
+            thisProp = this.primaryProp // 主表.主键
+            relationProp = if (this is MiddleRelationMeta)
+                                this.middleForeignProp // 中间表.外键
+                            else
+                                this.foreignProp // 从表.外键
+        }
+
+        // 检查主外键的类型: 数据库中主外键字段类型可能不同，则无法匹配
+        val firstTk:DbKeyValues = items.first().gets(thisProp)
+        val firstRk:DbKeyValues = relatedItems.first().gets(relationProp)
+        firstTk.forEachColumnWith(firstRk){ pk, fk, i ->
+            if (pk != null && fk != null && pk::class != fk::class)
+                throw OrmException("模型[${ormMeta.name}]联查[${name}]关联对象失败: 本表键[${ormMeta.table}.${thisProp}]字段类型[${firstTk::class}]与关联表键[${this.model.modelOrmMeta.table}.${relationProp}]字段类型[${firstRk::class}]不一致，请改成一样的")
+        }
+
+        // 设置关联属性 -- 双循环匹配主外键
+        for (item in items) { // 遍历每个源对象，收集关联对象
+            for (relatedItem in relatedItems) { // 遍历每个关联对象，进行匹配
+                // 关系的匹配： 本表键=关联表键
+                val tk:DbKeyValues = item.gets(thisProp) // 本表键
+                val rk:DbKeyValues = relatedItem.gets(relationProp) // 关联表键
+                if (tk.equals(rk)) { // DbKey.equals()
+                    if(type == RelationType.HAS_MANY){ // hasMany关联对象是list
+                        val myRelated = item.getOrPut(name){
+                            LinkedList<IOrm>()
+                        } as LinkedList<IOrm>
+                        myRelated.add(relatedItem)
+                    }else{ // 其他关联对象是单个对象
+                        item[name] = relatedItem
+                    }
+
+                }
+            }
+        }
+
+        // 清空列表
+        (relatedItems as MutableList).clear()
     }
 
 }

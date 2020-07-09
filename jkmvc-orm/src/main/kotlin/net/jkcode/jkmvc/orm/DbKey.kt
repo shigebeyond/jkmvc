@@ -112,6 +112,32 @@ class DbKey<T> {
     }
 
     /**
+     * Returns `true` if at least one element matches the given [predicate].
+     *
+     * @sample samples.collections.Collections.Aggregates.anyWithPredicate
+     */
+    public inline fun <S> anyColumnWith(o: DbKey<S>, predicate: (T, S) -> Boolean): Boolean {
+        forEachColumnWith(o){ col1: T, col2: S, i:Int ->
+            if (predicate(col1, col2))
+                return true
+        }
+        return false
+    }
+
+    /**
+     * Returns `true` if all elements match the given [predicate].
+     *
+     * @sample samples.collections.Collections.Aggregates.all
+     */
+    public inline fun <S> allColumnWith(o: DbKey<S>, predicate: (T, S) -> Boolean): Boolean {
+        forEachColumnWith(o){ col1: T, col2: S, i:Int ->
+            if (!predicate(col1, col2))
+                return false
+        }
+        return true
+    }
+
+    /**
      * 访问字段
      * @param i
      * @return
@@ -121,7 +147,7 @@ class DbKey<T> {
     }
 
     /**
-     * 检查相等
+     * 检查元素值相等
      *    在 OrmQueryBuilder.setHasManyProp() 中用于匹配一对多的外键来设置关联属性
      */
     public override fun equals(o: Any?): Boolean {

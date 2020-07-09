@@ -22,6 +22,11 @@ class UserModel(id:Int? = null): Orm(id) {
             // add relaction for other model
             hasOne("address", AddressModel::class)
             hasMany("addresses", AddressModel::class)
+            // 通过回调动态获得对象的关联关系
+            /*cbHasMany("addresses", UserModel::id, AddressModel::userId){
+                // 自定义的查询, 可以是rpc
+                AddressModel.queryBuilder().where("user_id", "IN", it).findModels<AddressModel>()
+            }*/
 
             hasMany("parcels", ParcelModel::class)
             hasManyThrough("parcelSenders", UserModel::class, "receiver_id"/*外键*/, "id"/*主键*/, "parcel", "sender_id"/*远端外键*/, "id"/*远端主键*/)
