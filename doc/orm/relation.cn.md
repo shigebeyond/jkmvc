@@ -156,7 +156,7 @@ post.removeRelation('categories', category);
 
 # 关联对象查询
 
-使用 `OrmQueryBuilder.with()` 来联查关联对象
+使用 `OrmQueryBuilder.with()` 来联查关联对象, 框架会自动帮你解决联查放大问题
 
 ```
 // 联查一对一关联对象, 合并为1条sql查询

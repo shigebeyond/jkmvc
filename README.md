@@ -593,9 +593,10 @@ gradle :jkmvc-example:build -x test
 14. [relation](doc/orm/relation.md)
 15. [validation](doc/orm/validation.md)
 16. [using](doc/orm/using.md)
+17. [relation using callback](doc/orm/cbrelation.md)
 
 ## other
-17. [deploy](doc/deploy.md)
+18. [deploy](doc/deploy.md)
 
 # 中文文档
 
@@ -620,7 +621,8 @@ gradle :jkmvc-example:build -x test
 14. [关联关系](doc/orm/relation.cn.md)
 15. [校验](doc/orm/validation.cn.md)
 16. [使用](doc/orm/using.cn.md)
+17. [基于回调的关联关系](doc/orm/cbrelation.cn.md)
 
 ## 其他
-17. [部署](doc/deploy.cn.md)
-18. [changelog](doc/changelog.md)
+18. [部署](doc/deploy.cn.md)
+19. [changelog](doc/changelog.md)
