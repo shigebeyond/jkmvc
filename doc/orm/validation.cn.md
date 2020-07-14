@@ -8,7 +8,7 @@ Orm模型与[Validation](../common/validation/validation.cn.md)库紧密集成�
 
 每个规则是`net.jkcode.jkmvc.orm.RuleValidator`对象，它有2个属性：
 1. `label`：字段中文名
-2. `rule`：验证表达式
+2. `rule`：验证表达式, 可包含多个, 用空格分割
 
 有两种方法来定义规则
 1.重写`OrmMeta :: rules`属性
@@ -16,7 +16,7 @@ Orm模型与[Validation](../common/validation/validation.cn.md)库紧密集成�
 ```
 public override val rules: MutableMap<String, IValidator> = hashMapOf(
 	"userId" to RuleValidator("用户", "notEmpty"),
-	"age" to RuleValidator( "年龄", "between(1,120)")
+	"age" to RuleValidator( "年龄", "digit() between(1,120)")
 )
 ```
 
@@ -25,7 +25,7 @@ public override val rules: MutableMap<String, IValidator> = hashMapOf(
 ```
 // 添加标签 + 规则
 addRule("name", "姓名", "notEmpty");
-addRule("age", "年龄", "between(1,120)");
+addRule("age", "年龄", "digit() between(1,120)");
 ```
 
 ## 2执行验证

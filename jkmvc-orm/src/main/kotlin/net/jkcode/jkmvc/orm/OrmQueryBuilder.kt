@@ -54,10 +54,15 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
     protected val joins:MutableMap<String, IRelationMeta> = HashMap()
 
     /**
-     * 关联查询hasMany的关系，需单独处理，不在一个sql中联查，而是单独查询
+     * 关联查询hasMany的关系，需单独处理，不在一个sql中联查，而是单独一个sql查询
      * <hasMany关系名, 联查信息>
      */
     protected val withMany:MutableMap<String, WithInfo?> = HashMap()
+
+    /**
+     * 关联查询回调的关系名，需单独处理，不在一个sql中联查，而是单独调用回调来查询
+     */
+    protected val withCb:MutableList<String> = LinkedList()
 
     /**
      * 清空条件
@@ -66,6 +71,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
     public override fun clear(): IDbQueryBuilder {
         joins.clear()
         withMany.clear()
+        withCb.clear()
         return super.clear()
     }
 
@@ -131,6 +137,13 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
         // select当前表字段
         if (selectColumns.isEmpty())
             select(ormMeta.name + ".*");
+
+        // 处理回调关系
+        val cbRelation = ormMeta.getCbRelation(name.toString())
+        if(cbRelation != null){
+            withCb.add(cbRelation.name)
+            return this
+        }
 
         // join关联表
         ormMeta.joinRelated(this, name, select, columns, queryAction = queryAction)
@@ -366,9 +379,18 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
         // 联查hasMany
         if(result is IOrm){
             // 遍历每个hasMany关系的查询结果
-            forEachManyQuery(result){ name:String, relation:IRelationMeta, relatedItems:List<IOrm> ->
+            forEachManyQuery(result){ relation:IRelationMeta, relatedItems:List<IOrm> ->
                 // 设置关联属性
-                result[name] = relatedItems
+                result[relation.name] = relatedItems
+            }
+
+            // 遍历每个回调关系的查询结果
+            forEachCbRelationQuery(result){ relation:ICbRelationMeta<out IOrm, *, *>, relatedItems:List<*> ->
+                // 设置关联属性
+                result[relation.name] = if(relation.hasMany)
+                                            relatedItems
+                                        else
+                                            relatedItems.firstOrNull()
             }
         }
         return result
@@ -391,68 +413,25 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
             val items = result as List<IOrm>
 
             // 遍历每个hasMany关系的查询结果
-            forEachManyQuery(result){ name:String, relation:IRelationMeta, relatedItems:List<IOrm> ->
-                setHasManyProp(items, name, relation, relatedItems)
+            forEachManyQuery(result){ relation:IRelationMeta, relatedItems:List<IOrm> ->
+                relation.setRelationProp(items, relatedItems)
+            }
+
+            // 遍历每个回调关系的查询结果
+            forEachCbRelationQuery(result){ relation:ICbRelationMeta<out IOrm, *, *>, relatedItems:List<*> ->
+                relation.setRelationProp(items as List<Nothing>, relatedItems as List<Nothing>)
             }
         }
         return result
     }
 
     /**
-     * 设置hasMany关系的属性值
-     *
-     * @param items 本模型对象
-     * @param name 关系名
-     * @param relation 关联关系
-     * @param relatedItems 关联模型对象
-     */
-    protected fun setHasManyProp(items: List<IOrm>, name: String, relation: IRelationMeta, relatedItems: List<IOrm>) {
-        if(items.isEmpty())
-            return
-
-        if(relatedItems.isEmpty()){
-            // 设置关联属性为空list
-            for (item in items)
-                item[name] = emptyList<Any>()
-            return
-        }
-
-        // 检查主外键的类型: 数据库中主外键字段类型可能不同，则无法匹配
-        val primaryProp = relation.primaryProp // 主表.主键
-        val foreignProp = if (relation is MiddleRelationMeta)
-            relation.middleForeignProp // 中间表.外键
-        else
-            relation.foreignProp // 从表.外键
-        val firstPk:DbKeyValues = items.first().gets(primaryProp)
-        val firstFk:DbKeyValues = relatedItems.first().gets(foreignProp)
-        if (firstPk::class != firstFk::class) {
-            throw OrmException("模型[${ormMeta.name}]联查[${name}]的hasMany类型的关联对象失败: 主键[${ormMeta.table}.${relation.primaryKey}]字段类型[${firstPk::class}]与外键[${relation.model.modelOrmMeta.table}.${relation.foreignKey}]字段类型[${firstFk::class}]不一致，请改成一样的")
-        }
-
-        // 设置关联属性 -- 双循环匹配主外键
-        for (item in items) { // 遍历每个源对象，收集关联对象
-            val myRelated = LinkedList<IOrm>()
-            for (relatedItem in relatedItems) { // 遍历每个关联对象，进行匹配
-                // hasMany关系的匹配：主表.主键 = 从表.外键
-                val pk:DbKeyValues = item.gets(primaryProp) // 主表.主键
-                val fk:DbKeyValues = relatedItem.gets(foreignProp) // 从表.外键
-                if (pk.equals(fk)) // DbKey.equals()
-                    myRelated.add(relatedItem)
-            }
-            item[name] = myRelated
-        }
-
-        // 清空列表
-        (relatedItems as MutableList).clear()
-    }
-
-    /**
      * 遍历每个hasMany关系的查询结果
      *
      * @param orm Orm对象或列表
-     * @param action 处理关联查询结果的lambda，有2个参数: 1 name 关联关系名 2 查询结果
+     * @param action 处理关联查询结果的lambda，有2个参数: 1 relation 关联关系 2 查询结果
      */
-    protected fun forEachManyQuery(orm:Any, action: ((name:String, relation:IRelationMeta, relatedItems:List<IOrm>)-> Unit)){
+    protected fun forEachManyQuery(orm:Any, action: ((relation:IRelationMeta, relatedItems:List<IOrm>)-> Unit)){
         // 联查hasMany的关系
         for((name, withInfo) in withMany){
             val (columns, queryAction) = withInfo!!
@@ -477,7 +456,28 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
             val relatedItems = query.findRows(transform = relation.modelRowTransformer)
 
             // 处理查询结果
-            action(name, relation, relatedItems)
+            action(relation, relatedItems)
+        }
+    }
+
+
+    /**
+     * 遍历每个回调关系的查询结果
+     *
+     * @param orm Orm对象或列表
+     * @param action 处理关联查询结果的lambda，有2个参数: 1 relation 关联关系 2 查询结果
+     */
+    protected fun forEachCbRelationQuery(orm:Any, action: ((relation:ICbRelationMeta<out IOrm, *, *>, relatedItems:List<*>)-> Unit)){
+        // 联查回调的关系
+        for(name in withCb){
+            // 获得回调的关系
+            val relation = ormMeta.getCbRelation(name)!!
+
+            // 关联查询
+            val relatedItems = relation.findAllRelated(orm)
+
+            // 处理查询结果
+            action(relation, relatedItems)
         }
     }
 

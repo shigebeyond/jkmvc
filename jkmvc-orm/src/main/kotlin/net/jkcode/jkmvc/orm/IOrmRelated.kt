@@ -30,6 +30,14 @@ interface IOrmRelated : IOrmPersistent
 	fun related(name:String, newed:Boolean = false, vararg columns:String): Any?;
 
 	/**
+	 * 获得回调的关联对象
+	 *
+	 * @param name 关联对象名
+	 * @return
+	 */
+	fun cbRelated(name: String): Any?
+
+	/**
 	 * 检查是否有关联对象
 	 *    一般只用于一对多 hasMany 的关系
 	 *    一对一关系，你还统计个数干啥？

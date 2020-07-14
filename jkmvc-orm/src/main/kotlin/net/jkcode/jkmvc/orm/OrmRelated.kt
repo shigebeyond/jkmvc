@@ -45,6 +45,10 @@ abstract class OrmRelated : OrmPersistent() {
         if (ormMeta.hasRelation(column))
             return related(column, false) as T;
 
+        // 获得回调的关联对象
+        if (ormMeta.hasCbRelation(column))
+            return cbRelated(column) as T;
+
         return super.get(column, defaultValue);
     }
 
@@ -191,6 +195,27 @@ abstract class OrmRelated : OrmPersistent() {
         }
 
         return _data[name];
+    }
+
+    /**
+     * 获得回调的关联对象
+     *
+     * @param name 关联对象名
+     * @return
+     */
+    public override fun cbRelated(name: String): Any? {
+        if (name !in _data){
+            // 获得关联关系
+            val relation = ormMeta.getCbRelation(name)!!;
+
+            var result = relation.findAllRelated(this)
+            _data[name] = if(relation.hasMany)
+                            result
+                        else
+                            result.firstOrNull()
+        }
+
+        return _data[name]
     }
 
     /**

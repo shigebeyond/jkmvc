@@ -123,6 +123,13 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     }
 
     /**
+     * 通过回调动态获得对象的关联关系
+     */
+    public val cbRelations: MutableMap<String, ICbRelationMeta<out IOrm, *, *>> by lazy {
+        HashMap<String, ICbRelationMeta<out IOrm, *, *>>()
+    }
+
+    /**
      * 每个字段的校验规则
      */
     public override val rules: MutableMap<String, IValidator> by lazy {
@@ -183,7 +190,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * 对象属性名+关系名
      */
     public override val propsAndRelations: List<String> by lazy {
-        props + relations.keys
+        props + relations.keys + cbRelations.keys
     }
 
     /**
@@ -275,6 +282,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
                 if (relation is MiddleRelationMeta)
                     keys.addAll(relation.middleForeignProp.columns)
             }
+            keys.addAll(cbRelations.keys) // 4 回调的关联属性
             return keys
         }
 
@@ -768,6 +776,18 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     }
 
     /**
+     * 添加关联关系
+     * @param name
+     * @param relation
+     * @return
+     */
+    public fun addRelation(name: String, relation: IRelationMeta): OrmMeta {
+        relations.put(name, relation)
+        (relation as RelationMeta).name = name
+        return this
+    }
+
+    /**
      * 获得某个关联关系
      * @param name
      * @return
@@ -788,11 +808,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun belongsTo(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, conditions: Map<String, Any?>): IOrmMeta {
         // 设置关联关系
-        relations.getOrPut(name) {
-            RelationMeta(this, RelationType.BELONGS_TO, relatedModel, foreignKey, primaryKey, conditions)
-        }
-
-        return this;
+        return addRelation(name, RelationMeta(this, RelationType.BELONGS_TO, relatedModel, foreignKey, primaryKey, conditions))
     }
 
     /**
@@ -807,11 +823,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, conditions: Map<String, Any?>, cascadeDeleted: Boolean): IOrmMeta {
         // 设置关联关系
-        relations.getOrPut(name) {
-            RelationMeta(this, RelationType.HAS_ONE, relatedModel, foreignKey, primaryKey, conditions, cascadeDeleted)
-        }
-
-        return this;
+        return addRelation(name, RelationMeta(this, RelationType.HAS_ONE, relatedModel, foreignKey, primaryKey, conditions, cascadeDeleted))
     }
 
     /**
@@ -826,11 +838,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, conditions: Map<String, Any?>, cascadeDeleted: Boolean): IOrmMeta {
         // 设置关联关系
-        relations.getOrPut(name) {
-            RelationMeta(this, RelationType.HAS_MANY, relatedModel, foreignKey, primaryKey, conditions, cascadeDeleted)
-        }
-
-        return this;
+        return addRelation(name, RelationMeta(this, RelationType.HAS_MANY, relatedModel, foreignKey, primaryKey, conditions, cascadeDeleted))
     }
 
     /**
@@ -847,11 +855,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun hasOneThrough(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, middleTable: String, farForeignKey: DbKeyNames, farPrimaryKey: DbKeyNames, conditions: Map<String, Any?>): IOrmMeta {
         // 设置关联关系
-        relations.getOrPut(name) {
-            MiddleRelationMeta(this, RelationType.HAS_ONE, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey, conditions)
-        }
-
-        return this;
+        return addRelation(name, MiddleRelationMeta(this, RelationType.HAS_ONE, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey, conditions))
     }
 
     /**
@@ -868,11 +872,65 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun hasManyThrough(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, middleTable: String, farForeignKey: DbKeyNames, farPrimaryKey: DbKeyNames, conditions: Map<String, Any?>): IOrmMeta {
         // 设置关联关系
-        relations.getOrPut(name) {
-            MiddleRelationMeta(this, RelationType.HAS_MANY, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey, conditions)
-        }
+        return addRelation(name, MiddleRelationMeta(this, RelationType.HAS_MANY, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey, conditions))
+    }
 
-        return this;
+    /********************************* 通过回调动态获得对象的关联关系 **************************************/
+    /**
+     * 是否有某个回调的关联关系
+     * @param name
+     * @return
+     */
+    public override fun hasCbRelation(name: String): Boolean {
+        //return name in relations; // 坑爹啊，ConcurrentHashMap下的 in 语义是调用 contains()，但是我想调用 containsKey()
+        return relations.containsKey(name)
+    }
+
+    /**
+     * 添加回调的关联关系
+     * @param name
+     * @param relation
+     * @return
+     */
+    public fun addCbRelation(name: String, relation: ICbRelationMeta<out IOrm, *, *>): OrmMeta {
+        cbRelations.put(name, relation)
+        (relation as CbRelationMeta).name = name
+        return this
+    }
+
+    /**
+     * 获得某个回调的关联关系
+     * @param name
+     * @return
+     */
+    public override fun getCbRelation(name: String): ICbRelationMeta<out IOrm, *, *>? {
+        return cbRelations.get(name);
+    }
+
+    /**
+     * 设置通过回调动态获得对象的关联关系(has one)
+     * @param name 字段名
+     * @param pkGetter 当前模型的主键的getter
+     * @param fkGetter 关联对象的外键的getter
+     * @param relatedSupplier 批量获取关联对象的回调
+     * @return
+     */
+    public override fun <M:IOrm, K, R> cbHasOne(name: String, pkGetter: (M)->K, fkGetter: (R)->K, relatedSupplier:(List<K>) -> List<R>): IOrmMeta {
+        // 设置关联关系
+        return addCbRelation(name, CbRelationMeta(false, pkGetter, fkGetter, relatedSupplier))
+    }
+
+    /**
+     * 设置通过回调动态获得对象的关联关系(has many)
+     * @param name 字段名
+     * @param pkGetter 当前模型的主键的getter
+     * @param fkGetter 关联对象的外键的getter
+     * @param relatedSupplier 批量获取关联对象的回调
+     * @return
+     */
+    public override fun <M:IOrm, K, R> cbHasMany(name: String, pkGetter: (M)->K, fkGetter: (R)->K, relatedSupplier:(List<K>) -> List<R>): IOrmMeta {
+        // 设置关联关系
+        return addCbRelation(name, CbRelationMeta(true, pkGetter, fkGetter, relatedSupplier))
     }
 
     /********************************* xstream **************************************/

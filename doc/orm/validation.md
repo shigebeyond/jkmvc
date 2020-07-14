@@ -8,7 +8,7 @@ Validation rules are defined in the `OrmMeta::rules` property. This property is 
 
 Each rule is `net.jkcode.jkmvc.orm.RuleValidator` object, which has 2 properties:
 1. `label`: A label is a human-readable version of the field name.
-2. `rule`: A validation expression
+2. `rule`: A validation expressions, split by space
 
 There are 2 way to define rules
 1. override `OrmMeta::rules` property
@@ -16,7 +16,7 @@ There are 2 way to define rules
 ```
 public override val rules: MutableMap<String, IValidator> = hashMapOf(
 	"userId" to RuleValidator("Id label", "notEmpty"),
-	"age" to RuleValidator( "Age label", "between(1,120)")
+	"age" to RuleValidator( "Age label", "digit() between(1,120)")
 )
 ```
 
@@ -25,7 +25,7 @@ public override val rules: MutableMap<String, IValidator> = hashMapOf(
 ```
 // add label and rule for field
 addRule("name", "Name label", "notEmpty");
-addRule("age", "Age label", "between(1,120)");
+addRule("age", "Age label", "digit() between(1,120)");
 ```
 
 ## 2 Execute validation

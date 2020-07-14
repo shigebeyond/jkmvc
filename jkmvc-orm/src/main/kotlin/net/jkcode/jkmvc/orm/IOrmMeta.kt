@@ -957,6 +957,41 @@ interface IOrmMeta {
         return hasManyThrough(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), middleTable, DbKeyNames(farForeignKey), DbKeyNames(farPrimaryKey), conditions)
     }
 
+    /********************************* 通过回调动态获得对象的关联关系 **************************************/
+    /**
+     * 是否有某个回调的关联关系
+     * @param name
+     * @return
+     */
+    fun hasCbRelation(name: String): Boolean
+
+    /**
+     * 获得某个回调的关联关系
+     * @param name
+     * @return
+     */
+    fun getCbRelation(name: String): ICbRelationMeta<out IOrm, *, *>?
+
+    /**
+     * 设置通过回调动态获得对象的关联关系(has one)
+     * @param name 字段名
+     * @param pkGetter 当前模型的主键的getter
+     * @param fkGetter 关联对象的外键的getter
+     * @param relatedSupplier 批量获取关联对象的回调
+     * @return
+     */
+    fun <M:IOrm, K, R> cbHasOne(name: String, pkGetter: (M)->K, fkGetter: (R)->K, relatedSupplier:(List<K>) -> List<R>): IOrmMeta
+
+    /**
+     * 设置通过回调动态获得对象的关联关系(has many)
+     * @param name 字段名
+     * @param pkGetter 当前模型的主键的getter
+     * @param fkGetter 关联对象的外键的getter
+     * @param relatedSupplier 批量获取关联对象的回调
+     * @return
+     */
+    fun <M:IOrm, K, R> cbHasMany(name: String, pkGetter: (M)->K, fkGetter: (R)->K, relatedSupplier:(List<K>) -> List<R>): IOrmMeta
+
     /********************************* xstream **************************************/
     /**
      * 初始化xstream
