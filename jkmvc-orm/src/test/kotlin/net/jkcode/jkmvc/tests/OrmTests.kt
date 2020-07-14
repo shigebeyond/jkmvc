@@ -1,12 +1,10 @@
 package net.jkcode.jkmvc.tests
 
-import com.thoughtworks.xstream.XStream
 import net.jkcode.jkmvc.db.Db
 import net.jkcode.jkmvc.model.GeneralModel
 import net.jkcode.jkmvc.orm.*
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.tests.model.*
-import net.jkcode.jkutil.xml.StringMapConverter
 import org.junit.Test
 
 class OrmTests{
@@ -129,12 +127,12 @@ class OrmTests{
         // 1 延迟加载
         //val user = UserModel(id)
         // 2 with() 联查
-        //val user = UserModel.queryBuilder().with("address").where("user.id", id).findModel<UserModel>()
+        //val user = UserModel.queryBuilder().with("home").where("user.id", id).findModel<UserModel>()
         // 3 selectWiths() 联查
-        //val user = UserModel.queryBuilder().selectWiths("address" to listOf("*")).where("user.id", id).findModel<UserModel>()
+        //val user = UserModel.queryBuilder().selectWiths("home" to listOf("*")).where("user.id", id).findModel<UserModel>()
         // 4 selectWiths() 联查 + 表别名
-        val user = UserModel.queryBuilder().selectWiths(DbExpr("address", "a") to listOf("*")).where("user.id", id).findModel<UserModel>()
-        val address = user?.address
+        val user = UserModel.queryBuilder().selectWiths(DbExpr("home", "a") to listOf("*")).where("user.id", id).findModel<UserModel>()
+        val address = user?.home
         println(address)
     }
 
@@ -167,6 +165,7 @@ class OrmTests{
 //        address.tel = "110a" // wrong
         address.tel = "110"
         address.user = user;
+        address.isHome = 1;
         address.create()
         println("创建地址: $address")
     }
@@ -174,7 +173,7 @@ class OrmTests{
     @Test
     fun testRelateUpdate(){
         val user = UserModel(id)
-        val address = user.address
+        val address = user.home
         if(!address.isLoaded()){
             println("用户[$user]没有地址")
             return
@@ -189,7 +188,7 @@ class OrmTests{
     @Test
     fun testRelateDelete(){
         val user = UserModel(id)
-        val address = user.address
+        val address = user.home
         if(!address.isLoaded()){
             println("用户[$user]没有地址")
             return
@@ -202,7 +201,7 @@ class OrmTests{
     fun testRelationManage(){
         // 有几个关系
         val user = UserModel(id)
-        val oldAddress = user.address ?: AddressModel.queryBuilder().findModel<AddressModel>()
+        val oldAddress = user.home ?: AddressModel.queryBuilder().findModel<AddressModel>()
         var count = user.countRelation("addresses")
         println("用户[${user.name}]有 $count 个地址")
 
@@ -244,7 +243,7 @@ class OrmTests{
         val address = AddressModel()
         address.addr = "nanning"
         address.tel = "110"
-        user.address = address // 关联对象引用
+        user.home = address // 关联对象引用
 
         val xstream = UserModel.initXStream()
         // 自定义转换器

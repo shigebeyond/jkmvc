@@ -20,7 +20,7 @@ class UserModel(id:Int? = null): Orm(id) {
 
             // 添加关联关系
             // add relaction for other model
-            hasOne("address", AddressModel::class)
+            hasOne("home", AddressModel::class, conditions = mapOf("is_home" to 1))
             hasMany("addresses", AddressModel::class)
 
             hasMany("parcels", ParcelModel::class)
@@ -39,9 +39,9 @@ class UserModel(id:Int? = null): Orm(id) {
 
     public var avatar:String? by property();
 
-    // 关联地址：一个用户有一个地址
-    // relate to AddressModel: user has an address
-    public var address: AddressModel? by property();
+    // 关联地址：一个用户有一个家庭地址
+    // relate to AddressModel: user has a home address
+    public var home: AddressModel? by property();
 
     // 关联地址：一个用户有多个地址
     // relate to AddressModel: user has many addresses

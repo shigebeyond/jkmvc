@@ -39,6 +39,8 @@ class AddressModel(id:Int? = null): Orm(id) {
 
     public var tel:String by property();
 
+    public var isHome:Int by property();
+
     // 关联用户：一个地址从属于一个用户
     public var user:UserModel by property()
 }
