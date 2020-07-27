@@ -7,7 +7,7 @@ class ModelGeneratorTests{
 
     @Test
     fun testCodeModel() {
-        val generator = ModelGenerator("/home/shi/code/java/jkerp/wfengine/src/main/kotlin/org/joget/workflow/xpdl/beyond", "net.jkcode.jkerp.app", "default", "shijianhang")
+        val generator = ModelGenerator("/home/shi/code/java/jkerp/wfengine/src/main/kotlin/net/jkcode/jkerp/workflow/xpdl/beyond", "net.jkcode.jkerp.app", "default", "shijianhang")
 
         // 测试
         // 生成model文件
