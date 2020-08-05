@@ -1,6 +1,8 @@
 package net.jkcode.jkmvc.http
 
 import net.jkcode.jkutil.common.*
+import net.jkcode.jkutil.common.createOrRename
+import net.jkcode.jkutil.common.prepareDirectory
 import java.awt.Container
 import java.awt.MediaTracker
 import java.awt.RenderingHints
@@ -10,7 +12,6 @@ import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URLDecoder
-import java.nio.file.FileSystems
 import javax.imageio.ImageIO
 
 /**
