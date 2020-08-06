@@ -133,7 +133,7 @@ open class JkFilter() : Filter {
             // 异步处理请求
             try {
                 //actx.start { // web server线程池
-                CommonThreadPool.execute { // 其他线程池
+                CommonExecutor.execute { // 其他线程池
                     handleRequest(actx.request as HttpServletRequest, actx.response as HttpServletResponse, chain)
                 }
             }catch (e: RejectedExecutionException){
