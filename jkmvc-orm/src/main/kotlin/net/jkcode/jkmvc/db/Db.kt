@@ -292,7 +292,7 @@ abstract class Db protected constructor(
      */
     public override fun <T> execute(sql: String, params: List<*>, transform: (DbResultSet) -> T): T? {
         return tryExecute(sql, params){
-            conn.execute(sql, params){
+            masterConn.execute(sql, params){
                 transform(DbResultSet(this, it))
             }
         }
