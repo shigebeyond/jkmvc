@@ -63,6 +63,12 @@ subprojects{
         }
     }
 
+    dependencies {
+        // test: 单元测试在每个工程必须显式声明依赖，不能靠依赖的工程来跨级依赖
+        testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+        testCompile 'junit:junit:4.11'
+    }
+
     sourceSets {
         main {
             java {
