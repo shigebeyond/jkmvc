@@ -89,13 +89,12 @@ class OrmConverter(protected val xstream: XStream): Converter {
             if(propType != null)
                 value = context.convertAnother(value, propType)
 
-            item[key] = value
-            /*// fix bug: AppDefinition.id 只是setter, 不是字段
+            // fix bug: AppDefinition.id 只是setter, 不是字段
+            //item[key] = value
             if(ormMeta.propsAndRelations.contains(key))
                 item[key] = value
             else
                 item.setPropertyValue(key, value)
-            */
             reader.moveUp()
         }
         return item
