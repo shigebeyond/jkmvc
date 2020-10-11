@@ -145,8 +145,8 @@ open class RelationMeta(
                 if (tk.equals(rk)) { // DbKey.equals()
                     if(type == RelationType.HAS_MANY){ // hasMany关联对象是list
                         val myRelated = item.getOrPut(name){
-                            LinkedList<IOrm>()
-                        } as LinkedList<IOrm>
+                            ArrayList<IOrm>()
+                        } as MutableList<IOrm>
                         myRelated.add(relatedItem)
                     }else{ // 其他关联对象是单个对象
                         item[name] = relatedItem
