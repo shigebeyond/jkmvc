@@ -49,6 +49,10 @@ class OrmConverter(protected val xstream: XStream): Converter {
             if(value == null)
                 continue
 
+            // 忽略属性
+            if(!xstream.mapper.shouldSerializeMember(source.javaClass, key))
+                continue
+
             // key作为节点名
             // 支持别名
             //val key = xstream.mapper.aliasForAttribute(source.javaClass, key) // @deprecated

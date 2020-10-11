@@ -13,6 +13,7 @@ import net.jkcode.jkutil.validator.ModelValidateResult
 import net.jkcode.jkutil.validator.ValidateResult
 import java.lang.reflect.Constructor
 import java.util.*
+import kotlin.collections.HashSet
 import kotlin.collections.set
 import kotlin.reflect.KClass
 import kotlin.reflect.full.declaredFunctions
@@ -948,39 +949,53 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
     /********************************* xstream **************************************/
     /**
-     * 初始化xstream, 如果 xstream 为null, 则是入口
-     *   支持递归调用关联模型
+     * 初始化xstream, 入口
      * @param modelNameAsAlias 模型名作为别名
-     * @param xstream xstream对象, 如果为null, 则表示是第一层调用, 否则表示内部调用
      * @return
      */
-    public override fun initXStream(modelNameAsAlias: Boolean, xstream0: XStream?): XStream {
-        var xstream = xstream0
-        // 如果为null, 则表示是第一层调用, 需要实例化XStream
-        if(xstream === null) {
-            xstream = XStream()
-            // 1 orm的转换器
-            xstream.registerConverter(OrmConverter(xstream))
-        }
-        // 2 模型名作为别名
+    public override fun initXStream(modelNameAsAlias: Boolean): XStream {
+        val xstream = XStream()
+        // 1 orm的转换器
+        xstream.registerConverter(OrmConverter(xstream))
+
+        // 2 初始化当前模型+关联模型的xstream
+        initXStreamWithRelated(modelNameAsAlias, xstream)
+        return xstream
+    }
+
+    /**
+     * 初始化当前模型+关联模型的xstream
+     *   递归调用关联模型, 需要考虑去重, 否则死循环
+     *
+     * @param modelNameAsAlias 模型名作为别名
+     * @param xstream
+     */
+    protected fun initXStreamWithRelated(modelNameAsAlias: Boolean, xstream: XStream, doneModels: MutableSet<KClass<*>> = HashSet()) {
+        // 0 去重
+        if(doneModels.contains(model))
+            return
+        doneModels.add(model)
+
+        // 1 模型名作为别名
         if (modelNameAsAlias)
             xstream.alias(name, model.java)
-        // 3 当前模型的初始化
+
+        // 2 当前模型的初始化
         initXStream(xstream)
-        // 4 关联模型的初始化
+
+        // 3 关联模型的初始化
         for ((name, relation) in relations) {
             val related = relation.ormMeta as OrmMeta
             // 关联模型名作为别名
             if (modelNameAsAlias)
                 xstream.alias(related.name, related.model.java)
             // 关联模型的初始化
-            related.initXStream(modelNameAsAlias, xstream)
+            related.initXStreamWithRelated(modelNameAsAlias, xstream, doneModels)
         }
-        return xstream
     }
 
     /**
-     * 内部初始化xstream, 子类实现
+     * 内部初始化当前模型的xstream, 子类实现
      */
     protected open fun initXStream(xstream: XStream) {
     }

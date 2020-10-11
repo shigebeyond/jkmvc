@@ -1000,10 +1000,9 @@ interface IOrmMeta {
 
     /********************************* xstream **************************************/
     /**
-     * 初始化xstream, 如果 xstream 为null, 则是入口
+     * 初始化xstream, 入口
      * @param modelNameAsAlias 模型名作为别名
-     * @param xstream xstream对象, 如果为null, 则表示是第一层调用, 否则表示内部调用
      * @return
      */
-    fun initXStream(modelNameAsAlias: Boolean = true, xstream: XStream? = null): XStream
+    fun initXStream(modelNameAsAlias: Boolean = true): XStream
 }
