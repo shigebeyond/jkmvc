@@ -111,7 +111,7 @@ abstract class OrmPersistent : OrmValid() {
 
 			// 删除缓存 -- 可能创建前先查了一下, 检查是否有重复数据, 因此要删除缓存
 			if(!needPk)
-				ormMeta.removeCache(this)
+				removeCache()
 
 			// 插入数据库
 			val generatedColumn = if (needPk) ormMeta.primaryKey.first() else null // 主键名
@@ -213,7 +213,7 @@ abstract class OrmPersistent : OrmValid() {
 			triggerBeforeUpdate()
 
 			// 删除缓存
-			ormMeta.removeCache(this)
+			removeCache()
 
 			// 更新数据库
 			val result = queryBuilder().sets(buildDirtyData()).where(ormMeta.primaryKey, oldPk /* 原始主键，因为主键可能被修改 */).update();
@@ -254,7 +254,7 @@ abstract class OrmPersistent : OrmValid() {
 			beforeDelete()
 
 			// 删除缓存
-			ormMeta.removeCache(this)
+			removeCache()
 
 			// 先删除 hasOne/hasMany 的关联关系, 否则本记录可能因仍有外键约束, 而导致本记录删除失败, 报错: Cannot delete or update a parent row: a foreign key constraint fails
 			if(withHasRelations)
@@ -272,6 +272,13 @@ abstract class OrmPersistent : OrmValid() {
 
 			result;
 		}
+	}
+
+	/**
+	 * 删除缓存
+	 */
+	protected fun removeCache() {
+		ormMeta.removeCache(this)
 	}
 
 	/**
