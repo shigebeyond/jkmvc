@@ -948,14 +948,20 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
     /********************************* xstream **************************************/
     /**
-     * 初始化xstream, 入口
+     * 初始化xstream, 如果 xstream 为null, 则是入口
+     *   支持递归调用关联模型
      * @param modelNameAsAlias 模型名作为别名
+     * @param xstream xstream对象, 如果为null, 则表示是第一层调用, 否则表示内部调用
      * @return
      */
-    public override fun initXStream(modelNameAsAlias: Boolean): XStream {
-        val xstream = XStream()
-        // 1 orm的转换器
-        xstream.registerConverter(OrmConverter(xstream))
+    public override fun initXStream(modelNameAsAlias: Boolean, xstream0: XStream?): XStream {
+        var xstream = xstream0
+        // 如果为null, 则表示是第一层调用, 需要实例化XStream
+        if(xstream === null) {
+            xstream = XStream()
+            // 1 orm的转换器
+            xstream.registerConverter(OrmConverter(xstream))
+        }
         // 2 模型名作为别名
         if (modelNameAsAlias)
             xstream.alias(name, model.java)
@@ -968,7 +974,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             if (modelNameAsAlias)
                 xstream.alias(related.name, related.model.java)
             // 关联模型的初始化
-            related.initXStream(xstream)
+            related.initXStream(modelNameAsAlias, xstream)
         }
         return xstream
     }
