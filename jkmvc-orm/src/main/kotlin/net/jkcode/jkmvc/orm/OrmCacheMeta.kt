@@ -41,4 +41,35 @@ class OrmCacheMeta(
         return false
     }
 
+    /**
+     * 对query builder应用联查
+     * @param query
+     */
+    public fun applyQueryWiths(query: OrmQueryBuilder) {
+        if(withs.isEmpty())
+            return
+
+        // fix bug: 不能联查下一级的
+        //query.withs(*withs)
+        query.selectWiths(*build2LevelWiths().toTypedArray())
+    }
+
+    /**
+     * 构建2级的联查对象属性, 其结果用在 OrmQueryBuilder.selectWiths(...)
+     *   TODO: 支持多级联查
+     */
+    protected fun build2LevelWiths(): List<Any> {
+        return withs.map { name ->
+            val relation = ormMeta.getRelation(name)!!
+            val nextOrmMeta = relation.ormMeta
+            val nextCacheMeta = nextOrmMeta.cacheMeta
+            if(nextCacheMeta?.withs.isNullOrEmpty()){ // 无下一级联查
+                name
+            }else{ // 有下一级联查
+                // name to nextCacheMeta!!.withs.toList() // 如果name是一对多的关系,会自动select *, 否则不会, 因此需要指定name对应模型的字段
+                // name to nextOrmMeta.props + nextCacheMeta!!.withs
+                name to listOf("*") + nextCacheMeta!!.withs // 简写
+            }
+        }
+    }
 }

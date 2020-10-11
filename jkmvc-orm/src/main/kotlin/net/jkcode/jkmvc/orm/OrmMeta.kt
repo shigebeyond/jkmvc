@@ -82,8 +82,8 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         if (cacheMeta != null && cacheMeta!!.initAll) {
             val query = queryBuilder()
             // 缓存时联查
-            if(cacheMeta!!.withs.isNotEmpty())
-                query.withs(*cacheMeta!!.withs)
+            cacheMeta!!.applyQueryWiths(query)
+
             // 查询并缓存
             val items = query.findRows {
                 val item = newInstance()
@@ -503,8 +503,8 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
         val query = queryBuilder()
         // 缓存时联查
-        if (cacheMeta != null && cacheMeta!!.withs.isNotEmpty()) {
-            query.withs(*cacheMeta!!.withs)
+        if (cacheMeta != null) {
+            cacheMeta!!.applyQueryWiths(query)
         }
         // 查询主键
         return query.where(primaryKey, pk).findRow {
