@@ -183,15 +183,16 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      * @return
      */
     public fun selectWiths(columns: SelectColumnList): OrmQueryBuilder {
+        // 查询本模型字段 -- 必须先于with()之前, 来select本模型对象字段, 否则with()会自动select *本模型全部字段
+        columns.forEachMyColumns {
+            select(ormMeta.name + '.' + convertColumn(it)); // 在每个select()处，智能转换字段名
+        }
+
         // 联查关联模型
         columns.forEachRelatedColumns { name: CharSequence, columns: SelectColumnList? ->
             with(name, columns)
         }
 
-        // 查询本模型字段
-        columns.forEachMyColumns {
-            select(ormMeta.name + '.' + convertColumn(it)); // 在每个select()处，智能转换字段名
-        }
         return this
     }
 
