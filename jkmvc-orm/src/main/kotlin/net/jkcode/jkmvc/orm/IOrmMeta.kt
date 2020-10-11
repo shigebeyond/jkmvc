@@ -451,6 +451,12 @@ interface IOrmMeta {
     fun hasRelation(name:String):Boolean;
 
     /**
+     * 是否有要级联删除的关联关系
+     * @return
+     */
+    fun hasCascadeDeletedRelation():Boolean;
+
+    /**
      * 获得某个关联关系
      * @param name
      * @return

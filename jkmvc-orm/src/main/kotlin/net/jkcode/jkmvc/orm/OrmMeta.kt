@@ -15,6 +15,7 @@ import java.lang.reflect.Constructor
 import java.util.*
 import kotlin.collections.set
 import kotlin.reflect.KClass
+import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.isSubclassOf
 
 /**
@@ -142,8 +143,10 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override val processableEvents: List<String> by lazy {
         "beforeCreate|afterCreate|beforeUpdate|afterUpdate|beforeSave|afterSave|beforeDelete|afterDelete".split('|').filter { event ->
+            //val method = model.declaredFunctions.any { it.name == event } // declaredFunctions只是获得当前类声明的方法, 但有可能在父类中定义了事件函数
             val method = model.java.getMethod(event)
-            method.declaringClass != OrmEntity::class.java // 实际上事件处理方法是定义在 IOrmPersistent 接口, 但反射中获得声明类却是 OrmEntity 抽象类
+            //method.declaringClass != OrmValid::class.java // 实际上事件处理方法是定义在 IOrmPersistent 接口, 但反射中获得声明类却是 OrmValid 抽象类
+            method.declaringClass.isSubClass(Orm::class.java) // 简写: 只要是orm子类即可
         }
     }
 
@@ -322,7 +325,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @return
      */
     public override fun <T> transactionWhenHandlingEvent(events: String, withHasRelations: Boolean, statement: () -> T): T {
-        val needTrans = canHandleAnyEvent(events) || withHasRelations
+        val needTrans = canHandleAnyEvent(events) || withHasRelations // || hasCascadeDeletedRelation() -- withHasRelations 是控制级联删除的, 因此不需要判断 hasCascadeDeletedRelation()
         return db.transaction(!needTrans, statement)
     }
 
@@ -776,6 +779,16 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     }
 
     /**
+     * 是否有要级联删除的关联关系
+     * @return
+     */
+    public override fun hasCascadeDeletedRelation():Boolean{
+        return relations.any { name, relation ->
+            relation.cascadeDeleted
+        }
+    }
+
+    /**
      * 添加关联关系
      * @param name
      * @param relation
@@ -941,11 +954,11 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun initXStream(modelNameAsAlias: Boolean): XStream {
         val xstream = XStream()
-        // 1 模型名作为别名
+        // 1 orm的转换器
+        xstream.registerConverter(OrmConverter(xstream))
+        // 2 模型名作为别名
         if (modelNameAsAlias)
             xstream.alias(name, model.java)
-        // 2 orm的转换器
-        xstream.registerConverter(OrmConverter(xstream))
         // 3 当前模型的初始化
         initXStream(xstream)
         // 4 关联模型的初始化

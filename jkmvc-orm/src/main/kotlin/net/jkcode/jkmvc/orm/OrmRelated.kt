@@ -327,7 +327,8 @@ abstract class OrmRelated : OrmPersistent() {
                 else
                     query.delete()
             }else{ // 无中间表: 改旧值
-                relation.queryRelated(this, fkInMany)!!.set(relation.foreignKey, nullValue).update()
+                val nullValue2 = relation.foreignKey.map { nullValue }
+                relation.queryRelated(this, fkInMany)!!.set(relation.foreignKey, nullValue2).update()
             }
         }
     }
@@ -400,14 +401,18 @@ abstract class OrmRelated : OrmPersistent() {
 
             // 1 删除关联对象(包含关系)
             if(byDelete && relation.cascadeDeleted) {
-                //deleteRelated(name) // 无法触发删除的前置后置回调
-                // 为了能触发删除的前置后置回调，　因此使用 Orm.delete()　实现
-                // 查询关联对象
-                val related = related(name, false)
-                // 逐个递归删除
-                when(related){
-                    is Collection<*> -> (related as Collection<IOrm>).forEach{ it.delete(true) }
-                    is IOrm -> related.delete(true)
+                val events = relation.ormMeta.processableEvents
+                if(events.contains("beforeDelete") || events.contains("afterDelete")){ // 有删除的前置后置回调
+                    // 为了能触发删除的前置后置回调，　因此使用 Orm.delete()　实现
+                    // 查询关联对象
+                    val related = related(name, false)
+                    // 逐个递归删除
+                    when(related){
+                        is Collection<*> -> (related as Collection<IOrm>).forEach{ it.delete(true) }
+                        is IOrm -> related.delete(true)
+                    }
+                }else{ // 无删除的前置后置回调
+                    deleteRelated(name) // 无法触发删除的前置后置回调
                 }
                 continue
             }
