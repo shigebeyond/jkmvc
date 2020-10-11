@@ -318,7 +318,7 @@ internal fun IDbQueryBuilder.whereIn(columns: DbKeyNames, values: DbKey<List<Any
     }
 
     // TODO: 如果不同值的有多列, 则可以拼接 or 条件
-    if(diffValuesIndexs.size !== 1)
+    if(diffValuesIndexs.size > 1)
         throw IllegalArgumentException("DbKeyKt.whereIn()暂时只支持: 只有一列有不同值, 其他列每列有相同值")
 
     columns.forEachNameValue(values){ name, value, i ->
