@@ -403,7 +403,7 @@ abstract class OrmRelated : OrmPersistent() {
                 //deleteRelated(name) // 无法触发删除的前置后置回调
                 // 为了能触发删除的前置后置回调，　因此使用 Orm.delete()　实现
                 // 查询关联对象
-                val related = related(name)
+                val related = related(name, false)
                 // 逐个递归删除
                 when(related){
                     is Collection<*> -> (related as Collection<IOrm>).forEach{ it.delete(true) }
