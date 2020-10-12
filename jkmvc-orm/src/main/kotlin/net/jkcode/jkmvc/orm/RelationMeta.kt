@@ -74,7 +74,7 @@ open class RelationMeta(
             return null
         val query = queryBuilder().where(foreignKey.wrap(tableAlias) /*tableAlias + foreignKey*/, pk) as OrmQueryBuilder// 从表.外键 = 主表.主键
         if(fkInMany != null) { // hasMany关系下过滤单个关系
-            val fk = if(fkInMany is IOrm) fkInMany.gets(ormMeta.primaryProp) else fkInMany
+            val fk = ormMeta.primaryProp.getsFrom(fkInMany)
             query.where(tableAlias + ormMeta.primaryKey, fk)
         }
         return query;

@@ -1,6 +1,5 @@
 package net.jkcode.jkmvc.orm
 
-import net.jkcode.jkutil.common.toArray
 import net.jkcode.jkmvc.query.IDbQueryBuilder
 import net.jkcode.jkutil.common.isSame
 import java.util.*
@@ -271,6 +270,22 @@ internal inline fun IOrm.gets(names: DbKeyNames): DbKeyValues{
     return names.map {
         get<Any?>(it)
     }
+}
+
+/**
+ * 获得对象字段
+ *
+ * @param item orm对象
+ * @return
+ */
+internal inline fun DbKeyNames.getsFrom(item: Any?): DbKeyValues{
+    if(item is IOrm)
+        return item.gets(this)
+
+    if(item is DbKey<*>)
+        return item as DbKeyValues
+
+    return this.map { item }
 }
 
 /**

@@ -102,8 +102,8 @@ class MiddleRelationMeta(
             return null;
         val query = DbQueryBuilder(ormMeta.db).from(middleTable).where(foreignKey, pk)
         if (fkInMany != null) { // hasMany关系下过滤单个关系
-            val farPk = if(fkInMany is IOrm) fkInMany.gets(farPrimaryProp) else fkInMany
-            query.where(farForeignKey, fkInMany)
+            val farPk = farPrimaryProp.getsFrom(fkInMany)
+            query.where(farForeignKey, farPk)
         }
         return query;
     }
@@ -137,9 +137,17 @@ class MiddleRelationMeta(
      */
     public fun insertMiddleTable(pk:Any, farPk:Any): Long {
         val query = DbQueryBuilder(ormMeta.db).from(middleTable).insertColumns(*foreignKey.columns, *farForeignKey.columns)
-        val pk2 = if(pk is IOrm) pk.gets(primaryProp) else pk
-        val farPk2 = if(farPk is IOrm) farPk.gets(farPrimaryProp) else farPk
-        return query.insertValue(pk2, farPk2).insert()
+        val pk2 = primaryProp.getsFrom(pk)
+        if(farPk is Collection<*>) { // 多个
+            for (farPkItem in farPk) {
+                val farPk2 = farPrimaryProp.getsFrom(farPkItem)
+                query.insertValue(pk2, farPk2)
+            }
+        }else{ // 单个
+            val farPk2 = farPrimaryProp.getsFrom(farPk)
+            query.insertValue(pk2, farPk2)
+        }
+        return query.insert()
     }
 
     /**
@@ -160,7 +168,7 @@ class MiddleRelationMeta(
         val query = buildQuery() // 中间表.远端外键 = 从表.远端主键
                 .where(foreignKey.wrap(tableAlias) /*tableAlias + foreignKey*/, pk) as OrmQueryBuilder // 中间表.外键 = 主表.主键
         if (fkInMany != null) { // hasMany关系下过滤单个关系
-            val farPk = if(fkInMany is IOrm) fkInMany.gets(farPrimaryProp) else fkInMany
+            val farPk = farPrimaryProp.getsFrom(fkInMany)
             query.where(farForeignKey.wrap(tableAlias) /*tableAlias + farForeignKey*/, farPk)
         }
         return query

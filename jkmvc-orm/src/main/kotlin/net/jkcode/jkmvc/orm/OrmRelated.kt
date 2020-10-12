@@ -302,7 +302,15 @@ abstract class OrmRelated : OrmPersistent() {
             if(relation is MiddleRelationMeta) { // 有中间表: 插入中间表记录
                 relation.insertMiddleTable(this, value) > 0
             }else{ // 无中间表: 更新从表外键
-                relation.queryBuilder().where(relation.ormMeta.primaryKey, value).set(relation.foreignKey, this.pk).update()
+                val query = relation.queryBuilder()
+                val relatedPrimaryKey = relation.ormMeta.primaryKey
+                if(value is Collection<*>) { // 多个
+                    query.whereIn(relatedPrimaryKey, (value as Collection<out IOrm>).collectColumn(relatedPrimaryKey))
+                }else{ // 单个
+                    val relatedPk = relatedPrimaryKey.getsFrom(value)
+                    query.where(relatedPrimaryKey, relatedPk)
+                }
+                query.set(relation.foreignKey, this.pk).update()
             }
         }
     }
@@ -313,11 +321,11 @@ abstract class OrmRelated : OrmPersistent() {
      *     至于 belongsTo 关系的主对象中只要主键，没有外键，你只能清空本对象的外键咯
      *
      * @param name 关系名
-     * @param nullValue 外键的空值, 标识删除关系, 默认null
      * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
+     * @param nullValue 外键的空值, 标识删除关系, 默认null
      * @return
      */
-    public override fun removeRelations(name:String, nullValue: Any?, fkInMany: Any?): Boolean {
+    public override fun removeRelations(name:String, fkInMany: Any?, nullValue: Any?): Boolean {
         //更新外键
         return updateForeighKey(name, nullValue, fkInMany){ relation: IRelationMeta -> // hasOne/hasMany的关联关系的外键手动更新
             if(relation is MiddleRelationMeta) { // 有中间表: 删除中间表记录
@@ -347,7 +355,7 @@ abstract class OrmRelated : OrmPersistent() {
         val relation = ormMeta.getRelation(name)!!;
         // 1 belongsTo：更新本对象的外键
         if(relation.type == RelationType.BELONGS_TO){
-            val value2 = if (value is IOrm) value.gets(relation.primaryProp) else value
+            val value2 = relation.primaryProp.getsFrom(value)
             this.sets(relation.foreignProp, value2)
             return this.update()
         }
