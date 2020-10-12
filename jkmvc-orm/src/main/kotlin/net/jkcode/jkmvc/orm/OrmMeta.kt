@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.orm
 
 import com.thoughtworks.xstream.XStream
+import com.thoughtworks.xstream.converters.basic.DateConverter
 import net.jkcode.jkmvc.db.Db
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.model.GeneralModel
@@ -16,7 +17,6 @@ import java.util.*
 import kotlin.collections.HashSet
 import kotlin.collections.set
 import kotlin.reflect.KClass
-import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.isSubclassOf
 
 /**
@@ -955,7 +955,14 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun initXStream(modelNameAsAlias: Boolean): XStream {
         val xstream = XStream()
-        // 1 orm的转换器
+
+        // 1 自定义转换器
+        // 日期转换
+        // fix bug: xstream默认不能识别 2020-10-10 21:32:15 的日期格式, 因此需要单独指定
+        // 注意第二个参数acceptableFormats表示可接收的多种日期格式, 后续根据需求添加, 可参考私有属性 DateConverter.DEFAULT_ACCEPTABLE_FORMATS
+        xstream.registerConverter(DateConverter("yyyy-MM-dd HH:mm:ss", null, TimeZone.getTimeZone("GMT+8")))
+        //xstream.registerConverter(DateConverter("yyyy-MM-dd HH:mm:ss", arrayOf("yyyy-MM-dd", "HH:mm:ss", "yyyyMMdd", "HHmmss", "yyyyMMdd HHmmss", "yyyyMMddHHmmss"), TimeZone.getTimeZone("Asia/Shanghai")))
+        // orm转换
         xstream.registerConverter(OrmConverter(xstream))
 
         // 2 初始化当前模型+关联模型的xstream
