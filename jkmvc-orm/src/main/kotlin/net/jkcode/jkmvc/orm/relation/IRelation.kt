@@ -18,6 +18,29 @@ import kotlin.reflect.KClass
 interface IRelation {
 
     /**
+     * 是否一对一, 否则一对多
+     */
+    val one2one: Boolean
+
+    /**
+     * 是否是`有一个`关系
+     *    当前表是主表, 关联表是从表
+     */
+    val isBelongsTo: Boolean
+
+    /**
+     * 是否是`从属于`关系
+     *    当前表是从表, 关联表是主表
+     */
+    val isHasOne: Boolean
+
+    /**
+     * 是否是`有多个`关系
+     * 	当前表是主表, 关联表是从表
+     */
+    val isHasMany: Boolean
+
+    /**
      * 关系名
      */
     val name: String
@@ -26,11 +49,6 @@ interface IRelation {
      * 源模型元数据
      */
     val sourceMeta: IOrmMeta;
-
-    /**
-     *  关联关系
-     */
-    val type: RelationType;
 
     /**
      * 关联模型类型
@@ -73,6 +91,21 @@ interface IRelation {
      *  外键属性
      */
     val foreignProp: DbKeyNames
+
+    /**
+     * 本模型键属性
+     */
+    val thisProp: DbKeyNames
+
+    /**
+     *  关联模型键属性
+     */
+    val relatedProp: DbKeyNames
+
+    /**
+     * 空值
+     */
+    val emptyValue: Any?
 
     /**
      * 获得关联模型的元数据
@@ -165,10 +198,38 @@ interface IRelation {
     fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder
 
     /**
-     * 设置关系的属性值
+     * 对query builder联查关联表
+     *
+     * @param query
+     * @param thisName 当前表别名
+     * @param relatedName 关联表别名
+     * @return
+     */
+    fun applyQueryJoinRelated(query: OrmQueryBuilder, thisName:String, relatedName: String)
+
+    /**
+     * 批量设置关系的属性值
      *
      * @param items 本模型对象
      * @param relatedItems 关联模型对象
      */
-    fun setRelationProp(items: List<IOrm>, relatedItems: List<IOrm>)
+    fun batchSetRelationProp(items: List<IOrm>, relatedItems: List<IOrm>)
+
+    /**
+     * 添加关系（添加从表的外键值）
+     *
+     * @param item
+     * @param value 外键值Any | 关联对象IOrm
+     * @return
+     */
+    fun addRelation(item: IOrm, value: Any): Boolean
+
+    /**
+     * 添加关系（删除从表的外键值）
+     *
+     * @param item
+     * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
+     * @return
+     */
+    fun removeRelation(item: IOrm, fkInMany: Any? = null): Boolean
 }

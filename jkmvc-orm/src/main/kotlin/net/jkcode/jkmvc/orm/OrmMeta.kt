@@ -212,7 +212,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         if (config["foreignPropEmptyToNull"]!!) {
             val props = ArrayList<String>()
             for ((name, relation) in relations) {
-                if (relation.type == RelationType.BELONGS_TO) { // 只对belongsTo有效, 表示本模型有外键
+                if (relation.isBelongsTo) { // 只对belongsTo有效, 表示本模型有外键
                     props.addAll(relation.foreignProp.columns)
                 }
             }
@@ -285,7 +285,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             keys.addAll(props) // 1 对象属性
             keys.addAll(relations.keys) // 2 关联属性
             for ((_, relation) in relations) { // 3 有中间表关联关系: 中间表的外键属性
-                if (relation is MiddleRelation)
+                if (relation is HasNThroughRelation)
                     keys.addAll(relation.middleForeignProp.columns)
             }
             keys.addAll(cbRelations.keys) // 4 回调的关联属性
@@ -734,7 +734,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         // 获得当前关联关系
         val relation = getRelation(name.toString())!! // 兼容 name 类型是 DbExpr, 用 DbExpr.toString() 来引用关系名
         // 1 hasMany关系：只处理一层
-        if (relation.type == RelationType.HAS_MANY) {
+        if (relation.isHasMany) {
             // 单独处理hasMany关系，不在一个sql中联查，而是单独查询
             query.withMany(name.toString(), columns, queryAction)
             return relation;
@@ -744,14 +744,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         val alias = if (name is DbExpr) name.alias!! else name.toString() // 当前关系别名, 用作表别名
         val lastAlias = if (lastName is DbExpr) lastName.alias!! else lastName.toString() // 上一级关系别名, 用作表别名
         // join关联表
-        if (relation.type == RelationType.BELONGS_TO) { // belongsto: join 主表
-            query.joinMaster(this, lastAlias, relation, alias);
-        } else { // hasxxx: join 从表
-            if (relation is MiddleRelation) // 有中间表
-                query.joinSlaveThrough(this, lastAlias, relation, alias);
-            else // 无中间表
-                query.joinSlave(this, lastAlias, relation, alias);
-        }
+        relation.applyQueryJoinRelated(query, lastAlias, alias)
 
         //列名父路径
         val path2 = if (path == "")
@@ -825,7 +818,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun belongsTo(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, conditions: Map<String, Any?>): IOrmMeta {
         // 设置关联关系
-        return addRelation(name, Relation(this, RelationType.BELONGS_TO, relatedModel, foreignKey, primaryKey, conditions))
+        return addRelation(name, BelongsToRelation(this, relatedModel, foreignKey, primaryKey, conditions))
     }
 
     /**
@@ -840,7 +833,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, conditions: Map<String, Any?>, cascadeDeleted: Boolean): IOrmMeta {
         // 设置关联关系
-        return addRelation(name, Relation(this, RelationType.HAS_ONE, relatedModel, foreignKey, primaryKey, conditions, cascadeDeleted))
+        return addRelation(name, HasNRelation(true, this, relatedModel, foreignKey, primaryKey, conditions, cascadeDeleted))
     }
 
     /**
@@ -855,7 +848,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, conditions: Map<String, Any?>, cascadeDeleted: Boolean): IOrmMeta {
         // 设置关联关系
-        return addRelation(name, Relation(this, RelationType.HAS_MANY, relatedModel, foreignKey, primaryKey, conditions, cascadeDeleted))
+        return addRelation(name, HasNRelation(false, this, relatedModel, foreignKey, primaryKey, conditions, cascadeDeleted))
     }
 
     /**
@@ -872,7 +865,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun hasOneThrough(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, middleTable: String, farForeignKey: DbKeyNames, farPrimaryKey: DbKeyNames, conditions: Map<String, Any?>): IOrmMeta {
         // 设置关联关系
-        return addRelation(name, MiddleRelation(this, RelationType.HAS_ONE, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey, conditions))
+        return addRelation(name, HasNThroughRelation(true, this, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey, conditions))
     }
 
     /**
@@ -889,7 +882,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun hasManyThrough(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, middleTable: String, farForeignKey: DbKeyNames, farPrimaryKey: DbKeyNames, conditions: Map<String, Any?>): IOrmMeta {
         // 设置关联关系
-        return addRelation(name, MiddleRelation(this, RelationType.HAS_MANY, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey, conditions))
+        return addRelation(name, HasNThroughRelation(false, this, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey, conditions))
     }
 
     /********************************* 通过回调动态获得对象的关联关系 **************************************/

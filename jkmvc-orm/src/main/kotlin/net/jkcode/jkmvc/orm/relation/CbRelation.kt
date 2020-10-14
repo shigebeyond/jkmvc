@@ -59,12 +59,12 @@ class CbRelation<M: IOrm, K, R> (
 
 
     /**
-     * 设置关系的属性值
+     * 批量设置关系的属性值
      *
      * @param items 本模型对象
      * @param relatedItems 关联模型对象
      */
-    override fun setRelationProp(items: List<M>, relatedItems: List<R>) {
+    override fun batchSetRelationProp(items: List<M>, relatedItems: List<R>) {
         if(items.isEmpty() || relatedItems.isEmpty())
             return
 

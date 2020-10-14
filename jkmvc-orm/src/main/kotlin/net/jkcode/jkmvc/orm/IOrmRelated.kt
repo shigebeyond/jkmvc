@@ -111,7 +111,7 @@ interface IOrmRelated : IOrmPersistent
 	}
 
 	/**
-	 * 添加关系（添加关联的外键值）
+	 * 添加关系（添加从表的外键值）
 	 *     一般用于添加 hasOne/hasMany 关系的从对象的外键值
 	 *     至于 belongsTo 关系的主对象中只要主键，没有外键，你只能添加本对象的外键咯
 	 *
@@ -122,7 +122,7 @@ interface IOrmRelated : IOrmPersistent
 	fun addRelation(name:String, value: Any): Boolean
 
 	/**
-	 * 添加关系（添加关联的外键值）
+	 * 添加关系（添加从表的外键值）
 	 *     一般用于添加 hasOne/hasMany 关系的从对象的外键值
 	 *     至于 belongsTo 关系的主对象中只要主键，没有外键，你只能添加本对象的外键咯
 	 *

@@ -79,10 +79,10 @@ interface ICbRelation<M : IOrm, K, R> {
     fun findAllRelated(items: Collection<M>): List<R>
 
     /**
-     * 设置关系的属性值
+     * 批量设置关系的属性值
      *
      * @param items 本模型对象
      * @param relatedItems 关联模型对象
      */
-    fun setRelationProp(items: List<M>, relatedItems: List<R>)
+    fun batchSetRelationProp(items: List<M>, relatedItems: List<R>)
 }

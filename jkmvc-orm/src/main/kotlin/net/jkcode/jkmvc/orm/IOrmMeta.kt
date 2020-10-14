@@ -1,12 +1,14 @@
 package net.jkcode.jkmvc.orm
 
 import com.thoughtworks.xstream.XStream
-import net.jkcode.jkutil.collection.FixedKeyMapFactory
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.orm.relation.ICbRelation
 import net.jkcode.jkmvc.orm.relation.IRelation
-import net.jkcode.jkmvc.orm.relation.RelationType
-import net.jkcode.jkutil.validator.*
+import net.jkcode.jkutil.collection.FixedKeyMapFactory
+import net.jkcode.jkutil.validator.IValidator
+import net.jkcode.jkutil.validator.ModelValidateResult
+import net.jkcode.jkutil.validator.RuleValidator
+import net.jkcode.jkutil.validator.ValidateLambda
 import kotlin.reflect.KClass
 
 /**
@@ -671,10 +673,9 @@ interface IOrmMeta {
             throw IllegalArgumentException("Model [${meta1.name}] has no relation: $relationName2")
 
         // 目标表对中间表是hasOne/hasMany关系的话, 则名称映射相同, 否则相反
-
         var foreignKey:DbKeyNames // 外键
         var primaryKey:DbKeyNames // 主键
-        if(relation1.type == RelationType.BELONGS_TO){ // 从属于, 名称映射相反
+        if(relation1.isBelongsTo){ // 从属于, 名称映射相反
             foreignKey = relation1.primaryKey
             primaryKey = relation1.foreignKey
         }else{ // 有一个
@@ -684,7 +685,7 @@ interface IOrmMeta {
 
         var farForeignKey:DbKeyNames // 远端主表_主键 = 从表_主键
         var farPrimaryKey:DbKeyNames // 从表的主键
-        if(relation2.type == RelationType.BELONGS_TO){ // 从属于, 名称映射相同
+        if(relation2.isBelongsTo){ // 从属于, 名称映射相同
             farForeignKey = relation2.foreignKey
             farPrimaryKey = relation2.primaryKey
         }else{ // 有一个
@@ -770,7 +771,7 @@ interface IOrmMeta {
 
         var foreignKey:DbKeyNames // 外键
         var primaryKey:DbKeyNames // 主键
-        if(relation1.type == RelationType.BELONGS_TO){ // 从属于, 名称映射相反
+        if(relation1.isBelongsTo){ // 从属于, 名称映射相反
             foreignKey = relation1.primaryKey
             primaryKey = relation1.foreignKey
         }else{ // 有一个
@@ -780,7 +781,7 @@ interface IOrmMeta {
 
         var farForeignKey:DbKeyNames // 远端主表_主键 = 从表_主键
         var farPrimaryKey:DbKeyNames // 从表的主键
-        if(relation2.type == RelationType.BELONGS_TO){ // 从属于, 名称映射相同
+        if(relation2.isBelongsTo){ // 从属于, 名称映射相同
             farForeignKey = relation2.foreignKey
             farPrimaryKey = relation2.primaryKey
         }else{ // 有一个

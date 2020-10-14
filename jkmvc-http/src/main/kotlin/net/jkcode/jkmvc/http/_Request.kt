@@ -4,9 +4,8 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import io.netty.handler.codec.http.cookie.DefaultCookie
-import net.jkcode.jkmvc.orm.relation.IRelation
 import net.jkcode.jkmvc.orm.Orm
-import net.jkcode.jkmvc.orm.relation.RelationType
+import net.jkcode.jkmvc.orm.relation.IRelation
 import java.net.URI
 import javax.servlet.DispatcherType
 import javax.servlet.http.Cookie
@@ -330,7 +329,7 @@ private fun Orm.setFromRequest(column: String, value: Any?) {
     val json = if (value is String) JSON.parse(value) else value
 
     // 2.1 有一个
-    if (relation!!.type == RelationType.BELONGS_TO || relation.type == RelationType.HAS_ONE) {
+    if (relation.isBelongsTo || relation.isHasOne) {
         val related = buildRelatedFromRequest(column, relation, json)
         set(column, related)
         return

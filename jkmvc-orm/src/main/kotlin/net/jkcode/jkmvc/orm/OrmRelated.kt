@@ -1,9 +1,7 @@
 package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.db.DbResultRow
-import net.jkcode.jkmvc.orm.relation.IRelation
-import net.jkcode.jkmvc.orm.relation.MiddleRelation
-import net.jkcode.jkmvc.orm.relation.RelationType
+import net.jkcode.jkmvc.orm.relation.HasNThroughRelation
 import net.jkcode.jkmvc.orm.serialize.toMaps
 import net.jkcode.jkmvc.query.DbExpr
 
@@ -29,7 +27,7 @@ abstract class OrmRelated : OrmPersistent() {
             // 设置关联对象
             _data[column] = value;
             // 如果关联的是主表，则更新从表的外键
-            if (value != null && relation.type == RelationType.BELONGS_TO)
+            if (value != null && relation.isBelongsTo)
                 sets(relation.foreignProp, (value as Orm).pk); // 更新字段
             return;
         }
@@ -188,7 +186,7 @@ abstract class OrmRelated : OrmPersistent() {
                     return null;
 
                 query.select(*columns) // 查字段
-                if (relation.type == RelationType.HAS_MANY) { // 查多个
+                if (relation.isHasMany) { // 查多个
                     result = query.findRows(transform = relation.modelRowTransformer)
                 } else { // 查一个
                     result = query.findRow(transform = relation.modelRowTransformer)
@@ -253,11 +251,11 @@ abstract class OrmRelated : OrmPersistent() {
         val relation = ormMeta.getRelation(name)!!;
 
         // 不能删除 belongsTo 关联对象
-        if(relation.type == RelationType.BELONGS_TO)
+        if(relation.isBelongsTo)
             throw OrmException("Cannot delete model [${ormMeta.name}] 's `belongsTo` related object [$name]");
 
         // 1 有中间表的关联对象
-        if(relation is MiddleRelation)
+        if(relation is HasNThroughRelation)
             return deleteMiddleRelated(relation, fkInMany)
 
         // 2 普通关联对象
@@ -273,7 +271,7 @@ abstract class OrmRelated : OrmPersistent() {
      * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
      * @return
      */
-    protected fun deleteMiddleRelated(relation: MiddleRelation, fkInMany: Any?): Boolean {
+    protected fun deleteMiddleRelated(relation: HasNThroughRelation, fkInMany: Any?): Boolean {
         val db = ormMeta.db
         return db.transaction {
             // 子查询
@@ -292,7 +290,7 @@ abstract class OrmRelated : OrmPersistent() {
     }
 
     /**
-     * 添加关系（添加关联的外键值）
+     * 添加关系（添加从表的外键值）
      *     一般用于添加 hasOne/hasMany 关系的从对象的外键值
      *     至于 belongsTo 关系的主对象中只要主键，没有外键，你只能添加本对象的外键咯
      *
@@ -301,22 +299,10 @@ abstract class OrmRelated : OrmPersistent() {
      * @return
      */
     public override fun addRelation(name:String, value: Any): Boolean {
-        //更新外键
-        return updateForeighKey(name, value){ relation: IRelation -> // hasOne/hasMany的关联关系的外键手动更新
-            if(relation is MiddleRelation) { // 有中间表: 插入中间表记录
-                relation.insertMiddleTable(this, value) > 0
-            }else{ // 无中间表: 更新从表外键
-                val query = relation.queryBuilder()
-                val relatedPrimaryKey = relation.ormMeta.primaryKey
-                if(value is Collection<*>) { // 多个
-                    query.whereIn(relatedPrimaryKey, (value as Collection<out IOrm>).collectColumn(relatedPrimaryKey))
-                }else{ // 单个
-                    val relatedPk = relatedPrimaryKey.getsFrom(value)
-                    query.where(relatedPrimaryKey, relatedPk)
-                }
-                query.set(relation.foreignKey, this.pk).update()
-            }
-        }
+        // 获得关联关系
+        val relation = ormMeta.getRelation(name)!!;
+        // 添加关系
+        return relation.addRelation(this, value)
     }
 
     /**
@@ -330,54 +316,10 @@ abstract class OrmRelated : OrmPersistent() {
      * @return
      */
     public override fun removeRelations(name:String, fkInMany: Any?, nullValue: Any?): Boolean {
-        //更新外键
-        return updateForeighKey(name, nullValue, fkInMany){ relation: IRelation -> // hasOne/hasMany的关联关系的外键手动更新
-            if(relation is MiddleRelation) { // 有中间表: 删除中间表记录
-                val query = relation.queryMiddleTable(this, fkInMany)
-                if (query == null)
-                    true
-                else
-                    query.delete()
-            }else{ // 无中间表: 改旧值
-                val nullValue2 = relation.foreignKey.map { nullValue }
-                relation.queryRelated(this, fkInMany)!!.set(relation.foreignKey, nullValue2).update()
-            }
-        }
-    }
-
-    /**
-     * 更新关系外键
-     *
-     * @param name 关系名
-     * @param value 外键值Any | 关联对象IOrm
-     * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则更新所有关系, 否则更新单个关系
-     * @param hasNRelationForeighKeyUpdater hasOne/hasMany的关联关系的外键更新函数
-     * @return
-     */
-    protected fun updateForeighKey(name:String, value: Any?, fkInMany: Any? = null, hasNRelationForeighKeyUpdater: ((relation: IRelation) -> Boolean)): Boolean {
         // 获得关联关系
         val relation = ormMeta.getRelation(name)!!;
-        // 1 belongsTo：更新本对象的外键
-        if(relation.type == RelationType.BELONGS_TO){
-            val value2 = relation.primaryProp.getsFrom(value)
-            this.sets(relation.foreignProp, value2)
-            return this.update()
-        }
-
-        // 2 hasOne/hasMany
-        // 2.1 有中间表： 手动更新
-        if(relation is MiddleRelation)
-            return hasNRelationForeighKeyUpdater(relation)
-
-        // 2.2 无中间表：更新关联对象的外键
-        // 2.2.1 orm对象自动更新
-        if(value is IOrm){
-            //value[relation.foreignProp] = this[relation.primaryProp]
-            value.sets(relation.foreignProp, this.gets(relation.primaryProp))
-            return value.update()
-        }
-        // 2.2.2 手动更新 改旧值
-        return hasNRelationForeighKeyUpdater(relation)
+        // 删除关系
+        return relation.removeRelation(this, fkInMany)
     }
 
     /**
@@ -389,7 +331,7 @@ abstract class OrmRelated : OrmPersistent() {
     internal override fun addHasNRelations(){
         for((name, relation) in ormMeta.relations){
             // 仅处理 hasOne/hasMany 的关联关系
-            if(relation.type == RelationType.BELONGS_TO)
+            if(relation.isBelongsTo)
                 continue
 
             val value = _data[name]
@@ -408,7 +350,7 @@ abstract class OrmRelated : OrmPersistent() {
     internal override fun removeHasNRelations(byDelete: Boolean) {
         for((name, relation) in ormMeta.relations){
             // 仅处理 hasOne/hasMany 的关联关系
-            if(relation.type == RelationType.BELONGS_TO)
+            if(relation.isBelongsTo)
                 continue
 
             // 1 删除关联对象(包含关系)

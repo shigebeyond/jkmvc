@@ -27,9 +27,9 @@ import kotlin.reflect.KClass
  *      对 belongsTo, 你敢删除 belongsTo 关系的主对象？
  *      对 hasOneThrough/hasManyThrough, 都通过中间表来关联了, 两者之间肯定是独立维护的, 只删除关联关系就好, 不删除关联对象
  */
-class MiddleRelation(
+class HasNThroughRelation(
+        one2one: Boolean, // 是否一对一, 否则一对多
         sourceMeta: IOrmMeta, // 源模型元数据
-        type: RelationType, // 关联关系
         model:KClass<out IOrm>, // 关联模型类型
         foreignKey: DbKeyNames, // 外键
         primaryKey: DbKeyNames, // 主键
@@ -38,7 +38,19 @@ class MiddleRelation(
         public val farPrimaryKey: DbKeyNames, // 远端主键
         conditions:Map<String, Any?> = emptyMap(), // 查询条件
         pkEmptyRule: PkEmptyRule = model.modelOrmMeta.pkEmptyRule // 检查主键为空的规则
-) : Relation(sourceMeta, type, model, foreignKey, primaryKey, conditions, false, pkEmptyRule) {
+) : Relation(one2one, sourceMeta, model, foreignKey, primaryKey, conditions, false, pkEmptyRule) {
+
+    /**
+     * 本模型键属性
+     */
+    override val thisProp: DbKeyNames
+        get() = primaryProp // 主表.主键
+
+    /**
+     *  关联模型键属性
+     */
+    override val relatedProp: DbKeyNames
+        get() = middleForeignProp // 中间表.外键
 
     /**
      * 远端主键属性
@@ -120,39 +132,6 @@ class MiddleRelation(
     }
 
     /**
-     * 插入中间表
-     *
-     * @param pk IOrm 主对象
-     * @param farPk IOrm 从对象
-     * @return
-     */
-    public fun insertMiddleTable(pk: IOrm, farPk: IOrm): Long {
-        return insertMiddleTable(pk as Any, farPk as Any)
-    }
-
-    /**
-     * 插入中间表
-     *
-     * @param pk Any主表主键 | IOrm 主对象
-     * @param farPk Any从表主键 | IOrm 从对象
-     * @return
-     */
-    public fun insertMiddleTable(pk:Any, farPk:Any): Long {
-        val query = DbQueryBuilder(ormMeta.db).from(middleTable).insertColumns(*foreignKey.columns, *farForeignKey.columns)
-        val pk2 = primaryProp.getsFrom(pk)
-        if(farPk is Collection<*>) { // 多个
-            for (farPkItem in farPk) {
-                val farPk2 = farPrimaryProp.getsFrom(farPkItem)
-                query.insertValue(pk2, farPk2)
-            }
-        }else{ // 单个
-            val farPk2 = farPrimaryProp.getsFrom(farPk)
-            query.insertValue(pk2, farPk2)
-        }
-        return query.insert()
-    }
-
-    /**
      * 查询从表
      *     根据hasMany/hasOne的关联关系，来构建查询条件
      *
@@ -187,5 +166,92 @@ class MiddleRelation(
         // 通过join中间表 查从表
         return buildQuery() // 中间表.远端外键 = 从表.远端主键
                 .whereIn(foreignKey.wrap(middleTable + '.')/*middleTable + '.' + foreignKey*/, items.collectColumn(primaryProp)) as OrmQueryBuilder // 中间表.外键 = 主表.主键
+    }
+
+    /**
+     * 对query builder联查关联表(通过中间表联查从表)
+     *    中间表.外键 = 主表.主键
+     *    中间表.远端外键 = 从表.远端主键
+     *
+     * @param query
+     * @param thisName 当前表别名 = 主表别名
+     * @param relatedName 关联表别名 = 从表别名
+     * @return
+     */
+    override fun applyQueryJoinRelated(query: OrmQueryBuilder, thisName:String, relatedName: String) {
+        val master = ormMeta
+        val masterName = thisName
+        val slaveRelation = this
+        val slaveName = relatedName
+
+        // 检查并添加联查关系
+        if(!query.addJoinOne(slaveName))
+            return
+
+        // 准备条件
+        val masterPk:DbKeyNames = slaveRelation.primaryKey.map {  // 主表.主键
+            masterName + "." + it // masterName + "." + slaveRelation.primaryKey
+        };
+        val middleFk:DbKeyNames = slaveRelation.foreignKey.map { // 中间表.外键
+            slaveRelation.middleTable + '.' + it // slaveRelation.middleTable + '.' + slaveRelation.foreignKey
+        }
+
+        val slave = slaveRelation.ormMeta
+        val slavePk2:DbKeyNames = slaveRelation.farPrimaryKey.map { // 从表.远端主键
+            slaveName + "." + it // slaveName + "." + slaveRelation.farPrimaryKey
+        }
+        val middleFk2:DbKeyNames = slaveRelation.farForeignKey.map {  // 中间表.远端外键
+            slaveRelation.middleTable + '.' + it // slaveRelation.middleTable + '.' + slaveRelation.farForeignKey
+        }
+
+        // 查中间表
+        query.join(slaveRelation.middleTable).on(masterPk, middleFk) // 中间表.外键 = 主表.主键
+
+        // 查从表
+        query.join(DbExpr(slave.table, slaveName), "LEFT").on(slavePk2, middleFk2) // 中间表.远端外键 = 从表.远端主键
+    }
+
+    /**
+     * 添加关系（插入中间表）
+     *
+     * @param item (主表)本模型对象
+     * @param value (从表)外键值Any | 关联对象IOrm
+     * @return
+     */
+    override fun addRelation(item: IOrm, value: Any): Boolean{
+        // 插入中间表
+        val query = DbQueryBuilder(ormMeta.db)
+                .from(middleTable)
+                .insertColumns(*foreignKey.columns, *farForeignKey.columns)
+        // 中间表.外键 = 主表.主键
+        val pk = primaryProp.getsFrom(item)
+        if(value is Collection<*>) { // 多个
+            for (farPkItem in value) {
+                //中间表.远端外键 = 从表.远端主键
+                val farPk = farPrimaryProp.getsFrom(farPkItem)
+                query.insertValue(pk, farPk)
+            }
+        }else{ // 单个
+            //中间表.远端外键 = 从表.远端主键
+            val farPk = farPrimaryProp.getsFrom(value)
+            query.insertValue(pk, farPk)
+        }
+        return query.insert() > 0
+    }
+
+    /**
+     * 添加关系（删除中间表记录）
+     *
+     * @param item
+     * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
+     * @return
+     */
+    override fun removeRelation(item: IOrm, fkInMany: Any?): Boolean{
+        // 删除中间表记录
+        val query = queryMiddleTable(item, fkInMany)
+        return if (query == null)
+                    true
+                else
+                    query.delete()
     }
 }
