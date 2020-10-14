@@ -1,4 +1,4 @@
-package net.jkcode.jkmvc.orm
+package net.jkcode.jkmvc.orm.serialize
 
 import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.converters.Converter
@@ -6,8 +6,9 @@ import com.thoughtworks.xstream.converters.MarshallingContext
 import com.thoughtworks.xstream.converters.UnmarshallingContext
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
+import net.jkcode.jkmvc.orm.Orm
+import net.jkcode.jkmvc.orm.modelOrmMeta
 import net.jkcode.jkutil.common.getInheritPropertyClass
-import net.jkcode.jkutil.common.getPropertyValue
 import net.jkcode.jkutil.common.isSuperClass
 import net.jkcode.jkutil.common.setPropertyValue
 

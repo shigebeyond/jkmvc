@@ -1,4 +1,4 @@
-package net.jkcode.jkmvc.orm
+package net.jkcode.jkmvc.orm.relation
 
 /**
  * 关联类型

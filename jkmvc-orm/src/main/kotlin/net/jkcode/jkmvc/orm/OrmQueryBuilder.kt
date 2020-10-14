@@ -6,6 +6,10 @@ import net.jkcode.jkutil.common.map
 import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.db.DbResultSet
 import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkmvc.orm.relation.ICbRelationMeta
+import net.jkcode.jkmvc.orm.relation.IRelation
+import net.jkcode.jkmvc.orm.relation.MiddleRelation
+import net.jkcode.jkmvc.orm.relation.RelationType
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.DbQueryBuilder
 import net.jkcode.jkmvc.query.IDbQueryBuilder
@@ -51,7 +55,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
     /**
      * 关联查询的记录，用于防止重复join同一个表
      */
-    protected val joins:MutableMap<String, IRelationMeta> = HashMap()
+    protected val joins:MutableMap<String, IRelation> = HashMap()
 
     /**
      * 关联查询hasMany的关系，需单独处理，不在一个sql中联查，而是单独一个sql查询
@@ -220,7 +224,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      * @param masterName 主表别名
      * @return
      */
-    public fun joinMaster(slave: IOrmMeta, slaveName:String, masterRelation: IRelationMeta, masterName: String): OrmQueryBuilder {
+    public fun joinMaster(slave: IOrmMeta, slaveName:String, masterRelation: IRelation, masterName: String): OrmQueryBuilder {
         // 检查并添加关联查询记录
         if(joins.containsKey(masterName))
             return this;
@@ -251,7 +255,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      * @param slaveName 从表别名
      * @return
      */
-    public fun joinSlave(master: IOrmMeta, masterName:String, slaveRelation: IRelationMeta, slaveName: String): OrmQueryBuilder {
+    public fun joinSlave(master: IOrmMeta, masterName:String, slaveRelation: IRelation, slaveName: String): OrmQueryBuilder {
         // 检查并添加关联查询记录
         if(joins.containsKey(slaveName))
             return this;
@@ -283,7 +287,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      * @param slaveName 从表别名
      * @return
      */
-    public fun joinSlaveThrough(master: IOrmMeta, masterName:String, slaveRelation: MiddleRelationMeta, slaveName: String): OrmQueryBuilder {
+    public fun joinSlaveThrough(master: IOrmMeta, masterName:String, slaveRelation: MiddleRelation, slaveName: String): OrmQueryBuilder {
         // 检查并添加关联查询记录
         if(joins.containsKey(slaveName))
             return this;
@@ -321,7 +325,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      * @return
      */
     public fun joinMiddleTable(slaveName: String): OrmQueryBuilder {
-        return joinMiddleTable(ormMeta.getRelation(slaveName) as MiddleRelationMeta)
+        return joinMiddleTable(ormMeta.getRelation(slaveName) as MiddleRelation)
     }
 
     /**
@@ -331,7 +335,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      * @param slaveRelation 从表关系
      * @return
      */
-    public fun joinMiddleTable(slaveRelation: MiddleRelationMeta): OrmQueryBuilder {
+    public fun joinMiddleTable(slaveRelation: MiddleRelation): OrmQueryBuilder {
         val masterName = ormMeta.name
 
         // 准备条件
@@ -361,7 +365,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      */
     public fun joinHasMany(slaveName: String): OrmQueryBuilder{
         val relation = ormMeta.getRelation(slaveName)!!
-        if(relation is MiddleRelationMeta) // 有中间表
+        if(relation is MiddleRelation) // 有中间表
             this.joinSlaveThrough(ormMeta, ormMeta.name, relation, slaveName);
         else // 无中间表
             this.joinSlave(ormMeta, ormMeta.name, relation, slaveName);
@@ -380,13 +384,13 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
         // 联查hasMany
         if(result is IOrm){
             // 遍历每个hasMany关系的查询结果
-            forEachManyQuery(result){ relation:IRelationMeta, relatedItems:List<IOrm> ->
+            forEachManyQuery(result){ relation: IRelation, relatedItems:List<IOrm> ->
                 // 设置关联属性
                 result[relation.name] = relatedItems
             }
 
             // 遍历每个回调关系的查询结果
-            forEachCbRelationQuery(result){ relation:ICbRelationMeta<out IOrm, *, *>, relatedItems:List<*> ->
+            forEachCbRelationQuery(result){ relation: ICbRelationMeta<out IOrm, *, *>, relatedItems:List<*> ->
                 // 设置关联属性
                 result[relation.name] = if(relation.hasMany)
                                             relatedItems
@@ -414,12 +418,12 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
             val items = result as List<IOrm>
 
             // 遍历每个hasMany关系的查询结果
-            forEachManyQuery(result){ relation:IRelationMeta, relatedItems:List<IOrm> ->
+            forEachManyQuery(result){ relation: IRelation, relatedItems:List<IOrm> ->
                 relation.setRelationProp(items, relatedItems)
             }
 
             // 遍历每个回调关系的查询结果
-            forEachCbRelationQuery(result){ relation:ICbRelationMeta<out IOrm, *, *>, relatedItems:List<*> ->
+            forEachCbRelationQuery(result){ relation: ICbRelationMeta<out IOrm, *, *>, relatedItems:List<*> ->
                 relation.setRelationProp(items as List<Nothing>, relatedItems as List<Nothing>)
             }
         }
@@ -432,7 +436,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      * @param orm Orm对象或列表
      * @param action 处理关联查询结果的lambda，有2个参数: 1 relation 关联关系 2 查询结果
      */
-    protected fun forEachManyQuery(orm:Any, action: ((relation:IRelationMeta, relatedItems:List<IOrm>)-> Unit)){
+    protected fun forEachManyQuery(orm:Any, action: ((relation: IRelation, relatedItems:List<IOrm>)-> Unit)){
         // 联查hasMany的关系
         for((name, withInfo) in withMany){
             val (columns, queryAction) = withInfo!!
@@ -468,7 +472,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      * @param orm Orm对象或列表
      * @param action 处理关联查询结果的lambda，有2个参数: 1 relation 关联关系 2 查询结果
      */
-    protected fun forEachCbRelationQuery(orm:Any, action: ((relation:ICbRelationMeta<out IOrm, *, *>, relatedItems:List<*>)-> Unit)){
+    protected fun forEachCbRelationQuery(orm:Any, action: ((relation: ICbRelationMeta<out IOrm, *, *>, relatedItems:List<*>)-> Unit)){
         // 联查回调的关系
         for(name in withCb){
             // 获得回调的关系
@@ -490,7 +494,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      * @param columns 查询的列
      * @param path 之前的路径
      */
-    public fun selectRelated(relation: IRelationMeta, relationName: String, columns: List<String>? = null, path: String = ""): OrmQueryBuilder {
+    public fun selectRelated(relation: IRelation, relationName: String, columns: List<String>? = null, path: String = ""): OrmQueryBuilder {
         // 单独处理hasMany关系，不在一个sql中联查，而是单独查询
         if(relation.type == RelationType.HAS_MANY){
             return this;

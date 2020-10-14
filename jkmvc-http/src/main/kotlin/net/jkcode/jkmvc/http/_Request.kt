@@ -4,9 +4,9 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import io.netty.handler.codec.http.cookie.DefaultCookie
-import net.jkcode.jkmvc.orm.IRelationMeta
+import net.jkcode.jkmvc.orm.relation.IRelation
 import net.jkcode.jkmvc.orm.Orm
-import net.jkcode.jkmvc.orm.RelationType
+import net.jkcode.jkmvc.orm.relation.RelationType
 import java.net.URI
 import javax.servlet.DispatcherType
 import javax.servlet.http.Cookie
@@ -352,7 +352,7 @@ private fun Orm.setFromRequest(column: String, value: Any?) {
  * @param json 列的值
  * @return 关联对象
  */
-private fun Orm.buildRelatedFromRequest(column: String, relation: IRelationMeta, json: Any, postfix: String = ""): Orm {
+private fun Orm.buildRelatedFromRequest(column: String, relation: IRelation, json: Any, postfix: String = ""): Orm {
     if (json !is JSONObject)
         throw IllegalArgumentException("class [$javaClass]'s related property [$column] only accept JSONObject$postfix")
 

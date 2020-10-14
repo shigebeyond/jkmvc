@@ -1,12 +1,14 @@
-package net.jkcode.jkmvc.orm
+package net.jkcode.jkmvc.orm.relation
 
+import net.jkcode.jkmvc.orm.*
+import net.jkcode.jkmvc.orm.DbKeyValues
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.DbQueryBuilder
 import net.jkcode.jkmvc.query.IDbQueryBuilder
 import kotlin.reflect.KClass
 
 /**
- * 有中间表的关联关系的元数据
+ * 有中间表的关联关系
  *
  * 特征
  *   1 用中间表来存储两表的关联关系
@@ -25,43 +27,43 @@ import kotlin.reflect.KClass
  *      对 belongsTo, 你敢删除 belongsTo 关系的主对象？
  *      对 hasOneThrough/hasManyThrough, 都通过中间表来关联了, 两者之间肯定是独立维护的, 只删除关联关系就好, 不删除关联对象
  */
-class MiddleRelationMeta(
-        sourceMeta:IOrmMeta, // 源模型元数据
-        type:RelationType, // 关联关系
+class MiddleRelation(
+        sourceMeta: IOrmMeta, // 源模型元数据
+        type: RelationType, // 关联关系
         model:KClass<out IOrm>, // 关联模型类型
-        foreignKey:DbKeyNames, // 外键
-        primaryKey:DbKeyNames, // 主键
+        foreignKey: DbKeyNames, // 外键
+        primaryKey: DbKeyNames, // 主键
         public val middleTable:String, // 中间表
-        public val farForeignKey:DbKeyNames, // 远端外键
-        public val farPrimaryKey:DbKeyNames, // 远端主键
+        public val farForeignKey: DbKeyNames, // 远端外键
+        public val farPrimaryKey: DbKeyNames, // 远端主键
         conditions:Map<String, Any?> = emptyMap(), // 查询条件
         pkEmptyRule: PkEmptyRule = model.modelOrmMeta.pkEmptyRule // 检查主键为空的规则
-) : RelationMeta(sourceMeta, type, model, foreignKey, primaryKey, conditions, false, pkEmptyRule) {
+) : Relation(sourceMeta, type, model, foreignKey, primaryKey, conditions, false, pkEmptyRule) {
 
     /**
      * 远端主键属性
      *   与 farPrimaryKey 对应
      */
-    public val farPrimaryProp:DbKeyNames = sourceMeta.columns2Props(farPrimaryKey)
+    public val farPrimaryProp: DbKeyNames = sourceMeta.columns2Props(farPrimaryKey)
 
     /**
      *  远端外键属性
      *    与 farForeignKey 对应
      */
-    public val farForeignProp:DbKeyNames = sourceMeta.columns2Props(farForeignKey)
+    public val farForeignProp: DbKeyNames = sourceMeta.columns2Props(farForeignKey)
 
     /**
      * 中间表的外键字段别名
      *    用在 OrmQueryBuilder.findRows() 联查从表时，绑定主对象
      *    不能使用foreignKey, 因为中间表的该字段可能与从表字段重名
      */
-    public val middleForeignKey:DbKeyNames = foreignKey.wrap("", "_") // foreignKey + '_'
+    public val middleForeignKey: DbKeyNames = foreignKey.wrap("", "_") // foreignKey + '_'
 
     /**
      * 中间表的外键属性
      *    与 middleForeignKey 对应
      */
-    public val middleForeignProp:DbKeyNames = sourceMeta.columns2Props(middleForeignKey)
+    public val middleForeignProp: DbKeyNames = sourceMeta.columns2Props(middleForeignKey)
 
     /**
      * 构建查询：通过join中间表来查询从表
@@ -70,7 +72,7 @@ class MiddleRelationMeta(
     protected fun buildQuery(): OrmQueryBuilder {
         // select关联字段：中间表.外键 = 主表.主键，用在 OrmQueryBuilder.findRows() 联查从表时，绑定主对象
          //val smfk = DbExpr(middleTable + '.' + foreignKey, middleForeignKey)
-        val smfk:DbKey<DbExpr> = foreignKey.mapWith(middleForeignKey){ fk, mfk ->
+        val smfk: DbKey<DbExpr> = foreignKey.mapWith(middleForeignKey){ fk, mfk ->
             DbExpr(middleTable + '.' + fk, mfk)
         }
         return queryBuilder()
@@ -124,7 +126,7 @@ class MiddleRelationMeta(
      * @param farPk IOrm 从对象
      * @return
      */
-    public fun insertMiddleTable(pk:IOrm, farPk:IOrm): Long {
+    public fun insertMiddleTable(pk: IOrm, farPk: IOrm): Long {
         return insertMiddleTable(pk as Any, farPk as Any)
     }
 
@@ -161,7 +163,7 @@ class MiddleRelationMeta(
      */
     public override fun queryRelated(item: IOrm, fkInMany: Any?, withTableAlias:Boolean): OrmQueryBuilder? {
         // 通过join中间表 查从表
-        val pk:DbKeyValues = item.gets(primaryProp) // 主键
+        val pk: DbKeyValues = item.gets(primaryProp) // 主键
         if(item.isPkEmpty(pk))
             return null;
         val tableAlias = middleTable + '.'

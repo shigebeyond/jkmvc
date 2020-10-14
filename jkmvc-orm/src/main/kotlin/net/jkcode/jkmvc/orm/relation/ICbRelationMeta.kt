@@ -1,7 +1,9 @@
-package net.jkcode.jkmvc.orm
+package net.jkcode.jkmvc.orm.relation
+
+import net.jkcode.jkmvc.orm.IOrm
 
 /**
- * 通过回调动态获得对象的关联关系的元数据
+ * 通过回调动态获得对象的关联关系
  *   回调可以是rpc
  *
  * @author shijianhang<772910474@qq.com>

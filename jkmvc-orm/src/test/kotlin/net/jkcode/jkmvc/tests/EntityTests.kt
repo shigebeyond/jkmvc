@@ -2,7 +2,7 @@ package net.jkcode.jkmvc.tests
 
 import net.jkcode.jkutil.common.*
 import net.jkcode.jkmvc.orm.IOrm
-import net.jkcode.jkmvc.orm.toJson
+import net.jkcode.jkmvc.orm.serialize.toJson
 import net.jkcode.jkutil.serialize.ISerializer
 import net.jkcode.jkmvc.tests.entity.MessageEntity
 import net.jkcode.jkmvc.tests.model.MessageModel

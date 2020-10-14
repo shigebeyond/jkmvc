@@ -1,9 +1,10 @@
-package net.jkcode.jkmvc.orm
+package net.jkcode.jkmvc.orm.serialize
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import com.alibaba.fastjson.serializer.SerializerFeature
+import net.jkcode.jkmvc.orm.IOrm
 import net.jkcode.jkutil.common.PropertyUtil
 import net.jkcode.jkutil.common.getPathPropertyValue
 
@@ -104,6 +105,6 @@ public fun Any.toJson(include: List<String> = emptyList()): String {
     val data = if(include.isEmpty())
                     this
                 else
-                    normalizeData(this, include)
+        normalizeData(this, include)
     return JSON.toJSONString(data, SerializerFeature.WriteDateUseDateFormat /* Date格式化 */, SerializerFeature.WriteMapNullValue /* 输出null值 */)
 }

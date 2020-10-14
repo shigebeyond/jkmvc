@@ -3,6 +3,9 @@ package net.jkcode.jkmvc.orm
 import com.thoughtworks.xstream.XStream
 import net.jkcode.jkutil.collection.FixedKeyMapFactory
 import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkmvc.orm.relation.ICbRelationMeta
+import net.jkcode.jkmvc.orm.relation.IRelation
+import net.jkcode.jkmvc.orm.relation.RelationType
 import net.jkcode.jkutil.validator.*
 import kotlin.reflect.KClass
 
@@ -60,7 +63,7 @@ interface IOrmMeta {
     /**
      * 关联关系
      */
-    val relations: Map<String, IRelationMeta>
+    val relations: Map<String, IRelation>
 
     /**
      * 每个字段的规则
@@ -429,7 +432,7 @@ interface IOrmMeta {
      * @param queryAction 查询对象的回调函数, 只针对 hasMany 关系
      * @return 关联关系
      */
-    fun joinRelated(query: OrmQueryBuilder, name: CharSequence, select: Boolean, columns: SelectColumnList?, lastName:CharSequence = this.name, path:String = "", queryAction: ((OrmQueryBuilder)->Unit)? = null): IRelationMeta
+    fun joinRelated(query: OrmQueryBuilder, name: CharSequence, select: Boolean, columns: SelectColumnList?, lastName:CharSequence = this.name, path:String = "", queryAction: ((OrmQueryBuilder)->Unit)? = null): IRelation
 
     /************************************ 事件 *************************************/
     /**
@@ -477,7 +480,7 @@ interface IOrmMeta {
      * @param name
      * @return
      */
-    fun getRelation(name:String): IRelationMeta?;
+    fun getRelation(name:String): IRelation?;
 
     /************************************ 添加关联关系: 复合主键版本, 主外键类型为 DbKeyNames *************************************/
     /**

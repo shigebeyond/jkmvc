@@ -5,8 +5,8 @@ import net.jkcode.jkmvc.http.controller.Controller
 import net.jkcode.jkmvc.http.util.AllPagination
 import net.jkcode.jkmvc.http.util.Pagination
 import net.jkcode.jkmvc.http.view.View
-import net.jkcode.jkmvc.orm.normalizeData
-import net.jkcode.jkmvc.orm.toJson
+import net.jkcode.jkmvc.orm.serialize.normalizeData
+import net.jkcode.jkmvc.orm.serialize.toJson
 import net.jkcode.jkutil.collection.LazyAllocatedMap
 import net.jkcode.jkutil.common.*
 import org.apache.commons.lang.StringEscapeUtils

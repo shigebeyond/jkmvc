@@ -1,5 +1,7 @@
-package net.jkcode.jkmvc.orm
+package net.jkcode.jkmvc.orm.serialize
 
+import net.jkcode.jkmvc.orm.IOrm
+import net.jkcode.jkmvc.orm.OrmEntity
 import net.jkcode.jkutil.collection.FixedKeyMapFactory
 import org.nustaq.serialization.FSTBasicObjectSerializer
 import org.nustaq.serialization.FSTClazzInfo

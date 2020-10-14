@@ -1,10 +1,11 @@
-package net.jkcode.jkmvc.orm
+package net.jkcode.jkmvc.orm.relation
 
 import net.jkcode.jkmvc.db.DbResultRow
+import net.jkcode.jkmvc.orm.*
 import kotlin.reflect.KClass
 
 /**
- * 关联关系的元数据
+ * 关联关系
  *
  * 关于 cascadeDeleted:
  *      只对 hasOne/hasMany 有效, 对 belongsTo/hasOneThrough/hasManyThrough 无效
@@ -14,7 +15,7 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-10
  */
-interface IRelationMeta {
+interface IRelation {
 
     /**
      * 关系名
@@ -24,12 +25,12 @@ interface IRelationMeta {
     /**
      * 源模型元数据
      */
-    val sourceMeta:IOrmMeta;
+    val sourceMeta: IOrmMeta;
 
     /**
      *  关联关系
      */
-    val type:RelationType;
+    val type: RelationType;
 
     /**
      * 关联模型类型
@@ -41,12 +42,12 @@ interface IRelationMeta {
      *    一般情况下，是源模型中的主键（sourceMeta.primaryKey），不需要指定
      *    但是某些情况下，是源模型的业务主键，需要手动指定
      */
-    val primaryKey:DbKeyNames;
+    val primaryKey: DbKeyNames;
 
     /**
      *  外键
      */
-    val foreignKey:DbKeyNames;
+    val foreignKey: DbKeyNames;
 
     /**
      *  查询条件
@@ -66,12 +67,12 @@ interface IRelationMeta {
     /**
      * 主键属性
      */
-    val primaryProp:DbKeyNames
+    val primaryProp: DbKeyNames
 
     /**
      *  外键属性
      */
-    val foreignProp:DbKeyNames
+    val foreignProp: DbKeyNames
 
     /**
      * 获得关联模型的元数据
@@ -89,7 +90,7 @@ interface IRelationMeta {
     /**
      * 获得关联模型的查询器
      */
-    fun queryBuilder():OrmQueryBuilder {
+    fun queryBuilder(): OrmQueryBuilder {
         // 关联查询 + 条件
         return ormMeta.queryBuilder().wheres(conditions) as OrmQueryBuilder
     }
