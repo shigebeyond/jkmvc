@@ -6,7 +6,7 @@ import net.jkcode.jkutil.common.map
 import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.db.DbResultSet
 import net.jkcode.jkmvc.db.IDb
-import net.jkcode.jkmvc.orm.relation.ICbRelationMeta
+import net.jkcode.jkmvc.orm.relation.ICbRelation
 import net.jkcode.jkmvc.orm.relation.IRelation
 import net.jkcode.jkmvc.orm.relation.MiddleRelation
 import net.jkcode.jkmvc.orm.relation.RelationType
@@ -390,7 +390,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
             }
 
             // 遍历每个回调关系的查询结果
-            forEachCbRelationQuery(result){ relation: ICbRelationMeta<out IOrm, *, *>, relatedItems:List<*> ->
+            forEachCbRelationQuery(result){ relation: ICbRelation<out IOrm, *, *>, relatedItems:List<*> ->
                 // 设置关联属性
                 result[relation.name] = if(relation.hasMany)
                                             relatedItems
@@ -423,7 +423,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
             }
 
             // 遍历每个回调关系的查询结果
-            forEachCbRelationQuery(result){ relation: ICbRelationMeta<out IOrm, *, *>, relatedItems:List<*> ->
+            forEachCbRelationQuery(result){ relation: ICbRelation<out IOrm, *, *>, relatedItems:List<*> ->
                 relation.setRelationProp(items as List<Nothing>, relatedItems as List<Nothing>)
             }
         }
@@ -472,7 +472,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      * @param orm Orm对象或列表
      * @param action 处理关联查询结果的lambda，有2个参数: 1 relation 关联关系 2 查询结果
      */
-    protected fun forEachCbRelationQuery(orm:Any, action: ((relation: ICbRelationMeta<out IOrm, *, *>, relatedItems:List<*>)-> Unit)){
+    protected fun forEachCbRelationQuery(orm:Any, action: ((relation: ICbRelation<out IOrm, *, *>, relatedItems:List<*>)-> Unit)){
         // 联查回调的关系
         for(name in withCb){
             // 获得回调的关系

@@ -129,8 +129,8 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     /**
      * 通过回调动态获得对象的关联关系
      */
-    public val cbRelations: MutableMap<String, ICbRelationMeta<out IOrm, *, *>> by lazy {
-        HashMap<String, ICbRelationMeta<out IOrm, *, *>>()
+    public val cbRelations: MutableMap<String, ICbRelation<out IOrm, *, *>> by lazy {
+        HashMap<String, ICbRelation<out IOrm, *, *>>()
     }
 
     /**
@@ -909,9 +909,9 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param relation
      * @return
      */
-    public fun addCbRelation(name: String, relation: ICbRelationMeta<out IOrm, *, *>): OrmMeta {
+    public fun addCbRelation(name: String, relation: ICbRelation<out IOrm, *, *>): OrmMeta {
         cbRelations.put(name, relation)
-        (relation as CbRelationMeta).name = name
+        (relation as CbRelation).name = name
         return this
     }
 
@@ -920,7 +920,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param name
      * @return
      */
-    public override fun getCbRelation(name: String): ICbRelationMeta<out IOrm, *, *>? {
+    public override fun getCbRelation(name: String): ICbRelation<out IOrm, *, *>? {
         return cbRelations.get(name);
     }
 
@@ -934,7 +934,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun <M:IOrm, K, R> cbHasOne(name: String, pkGetter: (M)->K, fkGetter: (R)->K, relatedSupplier:(List<K>) -> List<R>): IOrmMeta {
         // 设置关联关系
-        return addCbRelation(name, CbRelationMeta(false, pkGetter, fkGetter, relatedSupplier))
+        return addCbRelation(name, CbRelation(false, pkGetter, fkGetter, relatedSupplier))
     }
 
     /**
@@ -947,7 +947,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun <M:IOrm, K, R> cbHasMany(name: String, pkGetter: (M)->K, fkGetter: (R)->K, relatedSupplier:(List<K>) -> List<R>): IOrmMeta {
         // 设置关联关系
-        return addCbRelation(name, CbRelationMeta(true, pkGetter, fkGetter, relatedSupplier))
+        return addCbRelation(name, CbRelation(true, pkGetter, fkGetter, relatedSupplier))
     }
 
     /********************************* xstream **************************************/

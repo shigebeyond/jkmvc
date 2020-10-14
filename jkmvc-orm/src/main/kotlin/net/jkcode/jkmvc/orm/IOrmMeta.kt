@@ -3,7 +3,7 @@ package net.jkcode.jkmvc.orm
 import com.thoughtworks.xstream.XStream
 import net.jkcode.jkutil.collection.FixedKeyMapFactory
 import net.jkcode.jkmvc.db.IDb
-import net.jkcode.jkmvc.orm.relation.ICbRelationMeta
+import net.jkcode.jkmvc.orm.relation.ICbRelation
 import net.jkcode.jkmvc.orm.relation.IRelation
 import net.jkcode.jkmvc.orm.relation.RelationType
 import net.jkcode.jkutil.validator.*
@@ -995,7 +995,7 @@ interface IOrmMeta {
      * @param name
      * @return
      */
-    fun getCbRelation(name: String): ICbRelationMeta<out IOrm, *, *>?
+    fun getCbRelation(name: String): ICbRelation<out IOrm, *, *>?
 
     /**
      * 设置通过回调动态获得对象的关联关系(has one)

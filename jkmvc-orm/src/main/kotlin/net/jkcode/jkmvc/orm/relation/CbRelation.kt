@@ -10,12 +10,12 @@ import java.util.*
  * @author shijianhang<772910474@qq.com>
  * @date 2020-7-9 7:13 PM
  */
-class CbRelationMeta<M: IOrm, K, R> (
+class CbRelation<M: IOrm, K, R> (
         override val hasMany: Boolean, // 是否一对多
         override val pkGetter: (M)->K, // 主模型的主键的getter
         override val fkGetter: (R)->K, // 从对象的外键的getter
         override val relatedSupplier:(List<K>) -> List<R> // 批量获取关联对象的回调
-) : ICbRelationMeta<M, K, R> {
+) : ICbRelation<M, K, R> {
 
     /**
      * 关系名

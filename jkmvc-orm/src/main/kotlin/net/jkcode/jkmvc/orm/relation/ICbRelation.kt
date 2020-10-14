@@ -9,7 +9,7 @@ import net.jkcode.jkmvc.orm.IOrm
  * @author shijianhang<772910474@qq.com>
  * @date 2020-7-9 7:13 PM
  */
-interface ICbRelationMeta<M : IOrm, K, R> {
+interface ICbRelation<M : IOrm, K, R> {
 
     /**
      * 关系名
