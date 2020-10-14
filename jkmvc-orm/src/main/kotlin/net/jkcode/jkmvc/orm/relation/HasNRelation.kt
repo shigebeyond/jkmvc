@@ -123,8 +123,8 @@ open class HasNRelation(
         // 更新关联对象的外键
         // 1 orm对象直接改外键值
         if(value is IOrm){
-            //value[relation.foreignProp] = this[relation.primaryProp]
-            value.sets(foreignProp, value.gets(primaryProp))
+            //value[foreignProp] = item[primaryProp]
+            value.sets(foreignProp, item.gets(primaryProp))
             return value.update()
         }
 
@@ -138,7 +138,7 @@ open class HasNRelation(
             query.where(relatedPrimaryKey, relatedPk)
         }
         // 更新关联对象的外键字段
-        return query.set(foreignKey, item.pk).update()
+        return query.set(foreignKey, item.gets(primaryProp)).update()
     }
 
     /**
