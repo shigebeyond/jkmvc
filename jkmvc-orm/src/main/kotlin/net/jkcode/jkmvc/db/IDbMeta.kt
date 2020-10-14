@@ -77,7 +77,7 @@ interface IDbMeta: IDbIdentifierQuoter, IDbValueQuoter {
      * @return
      */
     fun getColumnsByTable(table:String): Collection<DbColumn> {
-        return getTable(table)?.columns?.values ?: throw DbException("表[$table]不存在")
+        return getTable(table)?.columns?.values ?: throw DbException("Table [$table] not exists")
     }
 
     /**

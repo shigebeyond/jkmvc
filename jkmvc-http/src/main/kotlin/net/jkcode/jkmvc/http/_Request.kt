@@ -338,9 +338,9 @@ private fun Orm.setFromRequest(column: String, value: Any?) {
 
     // 2.2 有多个
     if (json !is JSONArray)
-        throw IllegalArgumentException("类[${javaClass}]的关联属性[${column}]赋值需要是JSONArray")
+        throw IllegalArgumentException("Class [${javaClass}]'s related property [${column}] only accept JSONArray")
     val related = json.map {
-        buildRelatedFromRequest(column, relation, it, "数组")
+        buildRelatedFromRequest(column, relation, it, "Array")
     }
     set(column, related)
 }
@@ -354,7 +354,7 @@ private fun Orm.setFromRequest(column: String, value: Any?) {
  */
 private fun Orm.buildRelatedFromRequest(column: String, relation: IRelationMeta, json: Any, postfix: String = ""): Orm {
     if (json !is JSONObject)
-        throw IllegalArgumentException("类[$javaClass]的关联属性[$column]赋值需要是JSONObject$postfix")
+        throw IllegalArgumentException("class [$javaClass]'s related property [$column] only accept JSONObject$postfix")
 
     val related = relation.newModelInstance() as Orm
     for ((k, v) in json)

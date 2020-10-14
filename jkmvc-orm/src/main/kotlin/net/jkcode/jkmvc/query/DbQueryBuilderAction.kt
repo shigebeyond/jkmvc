@@ -256,7 +256,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      */
     public override fun compileAction(db: IDb, buffer: StringBuilder): DbQueryBuilderAction {
         if (action == null)
-            throw DbException("未设置sql动作");
+            throw DbException("Not set sql action");
 
         // 实际上是填充子句的参数，如将行参表名替换为真实表名
         var sql: String = SqlTemplates[action!!.ordinal];

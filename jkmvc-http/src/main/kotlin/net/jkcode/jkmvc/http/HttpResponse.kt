@@ -290,7 +290,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 	 */
 	public override fun setStatus(status: Int) {
 		if(!messages.containsKey(status))
-			throw IllegalArgumentException("无效响应状态码");
+			throw IllegalArgumentException("Invalid response status: $status");
 
 		res.setStatus(status)
 	}

@@ -114,7 +114,7 @@ interface IRelationMeta {
         return when(orm){
             is IOrm -> queryRelated(orm)
             is Collection<*> -> queryRelated(orm as Collection<out IOrm>)
-            else -> throw IllegalArgumentException("对relation.queryRelated(参数)方法，其参数必须是Orm对象或Orm列表")
+            else -> throw IllegalArgumentException("Method `relation.queryRelated(parameter)`，noly accept orm object/list as parameter")
         }
     }
 

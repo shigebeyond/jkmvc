@@ -71,7 +71,6 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): IHt
      */
     public val partFileMap: Map<String, List<PartFile>> by lazy{
         if(!isUpload){
-            //throw UnsupportedOperationException("当前请求不是上传文件的请求")
             emptyMap<String, List<PartFile>>()
         }else {
             val map = HashMap<String, MutableList<PartFile>>()

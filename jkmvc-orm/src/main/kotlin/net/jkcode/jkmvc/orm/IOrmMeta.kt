@@ -304,7 +304,8 @@ interface IOrmMeta {
      * @param item 要赋值的对象
      */
     public fun loadByPk(vararg pks: Any, item: IOrm){
-        loadByPk(DbKeyValues(*pks),item)
+        if(pks.isNotEmpty())
+            loadByPk(DbKeyValues(*pks), item)
     }
 
     /**
@@ -320,6 +321,9 @@ interface IOrmMeta {
      * @return
      */
     public fun <T: IOrm> findByPk(vararg pks: Any): T?{
+        if(pks.isEmpty())
+            return null
+
         return findByPk(DbKeyValues(*pks))
     }
 
@@ -336,7 +340,19 @@ interface IOrmMeta {
      * @return
      */
     public fun existByPk(vararg pks: Any): Boolean {
-        return findByPk<IOrm>(*pks) != null
+        if(pks.isEmpty())
+            return false
+
+        return existByPk(DbKeyValues(*pks))
+    }
+
+    /**
+     * 根据主键值来查找数据
+     * @param pk 要查询的主键
+     * @return
+     */
+    public fun existByPk(pk: DbKeyValues): Boolean{
+        return findByPk<IOrm>(pk) != null
     }
 
     /**
@@ -643,13 +659,13 @@ interface IOrmMeta {
         // 第1层关系
         val relation1 = getRelation(relationName1)
         if(relation1 == null)
-            throw IllegalArgumentException("模型[${this.name}]不存在关系: $relationName1")
+            throw IllegalArgumentException("Model [${this.name}] has no relation: $relationName1")
 
         // 第2层关系
         val meta1 = relation1.model.modelOrmMeta
         val relation2 = meta1.getRelation(relationName2)
         if(relation2 == null)
-            throw IllegalArgumentException("模型[${meta1.name}]不存在关系: $relationName2")
+            throw IllegalArgumentException("Model [${meta1.name}] has no relation: $relationName2")
 
         // 目标表对中间表是hasOne/hasMany关系的话, 则名称映射相同, 否则相反
 
@@ -739,13 +755,13 @@ interface IOrmMeta {
         // 第1层关系
         val relation1 = getRelation(relationName1)
         if(relation1 == null)
-            throw IllegalArgumentException("模型[$name]不存在关系: $relationName1")
+            throw IllegalArgumentException("Model [$name] has no relation: $relationName1")
 
         // 第2层关系
         val meta1 = relation1.model.modelOrmMeta
         val relation2 = meta1.getRelation(relationName2)
         if(relation2 == null)
-            throw IllegalArgumentException("模型[${meta1.name}]不存在关系: $relationName2")
+            throw IllegalArgumentException("Model [${meta1.name}] has no relation: $relationName2")
 
         // 目标表对中间表是hasOne/hasMany关系的话, 则名称映射相同, 否则相反
 

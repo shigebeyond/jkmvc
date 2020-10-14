@@ -2,7 +2,6 @@ package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkutil.common.associate
 import net.jkcode.jkutil.common.dbLogger
-import java.lang.UnsupportedOperationException
 import java.util.*
 
 /**
@@ -61,12 +60,9 @@ abstract class OrmPersistent : OrmValid() {
 	 *
 	 * @param pks
 	 */
-	public override fun loadByPk(vararg pks: Any) {
-		if(pks.isNotEmpty()) {
-			val key = DbKeyValues(*pks)
-			if(!isPkEmpty(key))
-				 ormMeta.loadByPk(key, this) // 无缓存
-		}
+	public override fun loadByPk(pk: DbKeyValues) {
+		if (!isPkEmpty(pk))
+			ormMeta.loadByPk(pk, this)
 	}
 
 	/**
@@ -88,14 +84,22 @@ abstract class OrmPersistent : OrmValid() {
 	 * </code>
 	 *
 	 * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
+	 * @param checkPkExists 是否检查主键存在
 	 * @return 新增数据的主键
 	 */
-	public override fun create(withHasRelations: Boolean): Long {
+	public override fun create(withHasRelations: Boolean, checkPkExists: Boolean): Long {
 		if(_dirty.isEmpty())
 			throw OrmException("No data to create"); // 没有要创建的数据
 
 		// 触发校验
 		triggerValidate()
+
+		// 有主键则检查主键是否存在
+		if(checkPkExists) {
+			val pk = this.pk
+			if (!ormMeta.isPkEmpty(pk) && ormMeta.existByPk(pk))
+				throw OrmException("Fail to create [${ormMeta.name}]: Primary key $pk exists")
+		}
 
 		// 事务
 		return ormMeta.transactionWhenHandlingEvent("beforeCreate|afterCreate|beforeSave|afterSave", withHasRelations) {

@@ -110,7 +110,7 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      */
     public override operator fun <T> get(column: String, defaultValue: T?): T {
         if (!hasColumn(column))
-            throw OrmException("类 ${this.javaClass} 没有字段 $column");
+            throw OrmException("Class ${this.javaClass} has no property: $column");
 
         return (_data[column] ?: defaultValue) as T
     }
@@ -234,7 +234,7 @@ abstract class OrmEntity : IOrmEntity, Serializable {
             prop.setter.call(this, param);
             return true
         }catch (e: Exception){
-            throw OrmException("智能设置属性[$column=$value]错误: ${e.message}", e)
+            throw OrmException("Fail to set property intelligently [$column=$value]: ${e.message}", e)
         }
     }
 

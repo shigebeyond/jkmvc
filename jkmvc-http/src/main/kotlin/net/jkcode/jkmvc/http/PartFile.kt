@@ -17,10 +17,10 @@ class PartFile(protected val part: Part): Part by part {
 
     init {
         if(part.isText)
-            throw IllegalArgumentException("非文件域");
+            throw IllegalArgumentException("Not file field");
 
         if(UploadFileUtil.isForbiddenUploadFile(part.submittedFileName))
-            throw UnsupportedOperationException("文件域[$name]的文件为[${part.submittedFileName}], 属于禁止上传的文件类型")
+            throw UnsupportedOperationException("File field [$name] has a forbidden file [${part.submittedFileName}]")
     }
 
     /**
@@ -32,7 +32,7 @@ class PartFile(protected val part: Part): Part by part {
      * reader
      */
     public fun reader(charset: Charset = Charsets.UTF_8): Reader{
-        return inputStream.reader()
+        return inputStream.reader(charset)
     }
 
     /**
@@ -54,9 +54,8 @@ class PartFile(protected val part: Part): Part by part {
      */
     public val storedFileName: String
         get() {
-            this.inputStream.reader()
             if (relativePath == null)
-                throw IllegalStateException("未存储");
+                throw IllegalStateException("Not stored, you must call storeAndGetRelativePath()/write() first");
 
             return relativePath!!.substringAfterLast(File.separatorChar)
         }
@@ -69,7 +68,7 @@ class PartFile(protected val part: Part): Part by part {
         val relativePath = UploadFileUtil.getFileRelativePath(path)
         if(this.relativePath != null){
             if(this.relativePath != relativePath)
-                throw IllegalStateException("两次调用保存上传文件的目录不一致")
+                throw IllegalStateException("Twice call write(path), and use different path")
 
             return
         }

@@ -103,7 +103,8 @@ class DbKey<T> {
      */
     public inline fun <S> forEachColumnWith(other: DbKey<S>, action: (col1: T, col2: S, i:Int) -> Unit) {
         if (this.size != other.size)
-            throw IllegalArgumentException("遍历2个主键时size不匹配: 第一个size为${this.size}, 第二个size为${other.size}")
+            //throw IllegalArgumentException("遍历2个主键时size不匹配: 第一个size为${this.size}, 第二个size为${other.size}")
+            throw IllegalArgumentException("Mismatch 2 DbKey's size: first size is [${this.size}], other size is [${other.size}]")
 
         this.forEachColumn { i, col1 ->
             action(col1, other.getColumn(i), i)
@@ -205,7 +206,7 @@ internal inline fun DbKeyNames.forEachNameValue(values:Any?, action: (name: Stri
 
     // 2 单值
     if(size != 1)
-        throw IllegalArgumentException("遍历2个主键时size不匹配: 第一个size为${this.size}, 第二个是单值")
+        throw IllegalArgumentException("Mismatch 2 DbKey's size: first size is [${this.size}], other size is single")
 
     action(single(), values, 0)
 }
@@ -334,7 +335,8 @@ internal fun IDbQueryBuilder.whereIn(columns: DbKeyNames, values: DbKey<List<Any
 
     // TODO: 如果不同值的有多列, 则可以拼接 or 条件
     if(diffValuesIndexs.size > 1)
-        throw IllegalArgumentException("DbKeyKt.whereIn()暂时只支持: 只有一列有不同值, 其他列每列有相同值")
+        //throw IllegalArgumentException("DbKeyKt.whereIn()暂时只支持: 只有一列有不同值, 其他列每列有相同值")
+        throw IllegalArgumentException("`DbKeyKt.whereIn()` temporarily only support: only one column's values can be diffrent, the other columns's values must be the same")
 
     columns.forEachNameValue(values){ name, value, i ->
         val list = (value as List<*>)

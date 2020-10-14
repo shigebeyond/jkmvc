@@ -52,7 +52,9 @@ data class SelectColumnList(
                         subname = col
                         subcolumns = null
                     }
-                    else -> throw IllegalArgumentException("查询字段参数类型必须是：1 String 本模型字段名 2 RelatedSelectColumnList 关系名 + 关联模型的字段列表")
+                    else ->
+                        //throw IllegalArgumentException("查询字段参数类型必须是：1 String 本模型字段名 2 RelatedSelectColumnList 关系名 + 关联模型的字段列表")
+                        throw IllegalArgumentException("Select column's class only accept：1 `String` then represent this model's field 2 `RelatedSelectColumnList` then represent relation name and related model's fields")
                 }
 
                 // 检查关系

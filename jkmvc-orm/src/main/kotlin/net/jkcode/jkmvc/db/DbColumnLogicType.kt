@@ -77,7 +77,7 @@ public enum class DbColumnLogicType private constructor(
         fun getBySqlType(sqlType: Int): DbColumnLogicType {
             return DbColumnLogicType.values().firstOrNull {
                 it.sqlType == sqlType
-            } ?: throw IllegalArgumentException("无法识别sql类型: $sqlType")
+            } ?: throw IllegalArgumentException("Unknow sql type: $sqlType")
         }
 
     }
@@ -99,7 +99,7 @@ public enum class DbColumnLogicType private constructor(
         val config = Config.instance("db-meta.${db.dbType}", "yaml")
         // 获得对应的物理类型表达式
         val mapping:Map<String, String> = config["logicalType2PhysicalType"]!!
-        val physicalType = mapping[code] ?: throw IllegalArgumentException("无法找到逻辑类型[$code]对应的物理类型")
+        val physicalType = mapping[code] ?: throw IllegalArgumentException("No physical type matching logical type [$code]")
         // 1 如果自带长度精度 或 没指定长度, 则直接输出
         if(physicalType.contains('(') || precision == null)
             return physicalType

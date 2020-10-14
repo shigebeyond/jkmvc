@@ -268,7 +268,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
             return "IS";
 
         if(op.equals("IN", true) && (value == null || value.isArrayOrCollectionEmpty())) // IN 空数组/集合
-            throw DbException("查询条件where(\"$column\", \"IN\", ?)中的值为空数组/集合");
+            throw DbException("Invalid call `where(\"$column\", \"IN\", ?)`: 3th parameter is empty array of collection");
 
         return op;
     }

@@ -123,12 +123,12 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
             // 1 获得controller类
             val clazz: ControllerClass? = ControllerClassLoader.get(req.controller);
             if (clazz == null)
-                throw RouteException("Controller类不存在：" + req.controller);
+                throw RouteException("Controller class not exists：" + req.controller);
 
             // 2 获得action方法
             val action: Method? = clazz.getActionMethod(req.action);
             if (action == null)
-                throw RouteException("控制器${req.controller}不存在方法：${req.action}()");
+                throw RouteException("Controller ${req.controller} has no method：${req.action}()");
 
             // 3 创建controller
             val controller: Controller = clazz.clazz.java.newInstance() as Controller;

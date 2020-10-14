@@ -50,7 +50,18 @@ interface IOrmPersistent : IOrmValid {
 	 *
 	 * @param pks
 	 */
-	fun loadByPk(vararg pks: Any)
+	fun loadByPk(vararg pks: Any) {
+		if(pks.isNotEmpty())
+			loadByPk(DbKeyValues(*pks)) // 有缓存
+	}
+
+	/**
+	 * 根据主键值来加载数据
+	 *   如果是复合主键, 则参数按 ormMeta.primaryKey 中定义的字段的属性来传值
+	 *
+	 * @param pks
+	 */
+	fun loadByPk(pk: DbKeyValues)
 
 	/**
 	 * 重新加载
@@ -81,9 +92,10 @@ interface IOrmPersistent : IOrmValid {
 	 * </code>
 	 *
 	 * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
+	 * @param checkPkExists 是否检查主键存在
 	 * @return 新增数据的主键
 	 */
-	fun create(withHasRelations: Boolean = false): Long;
+	fun create(withHasRelations: Boolean = false, checkPkExists: Boolean = false): Long;
 
 	/**
 	 * 更新数据: update sql

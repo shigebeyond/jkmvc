@@ -68,7 +68,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		 */
 		@JvmStatic
 		public fun current(): HttpRequest {
-			return currentOrNull() ?: throw IllegalStateException("当前非http环境")
+			return currentOrNull() ?: throw IllegalStateException("Not http server")
 		}
 
 		/**
@@ -295,7 +295,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 * @return
 	 */
 	public inline fun <reified T:Any> getNotNull(key: String): T{
-		return get(key) ?: throw IllegalArgumentException("缺少请求参数[$key]")
+		return get(key) ?: throw IllegalArgumentException("Miss request parameter [$key]")
 	}
 
 	/**
@@ -542,7 +542,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 			cmd.append("-G ")
 
 		// 路径: '$url'
-		cmd.append('\'').append(requestURL).append('?').append(queryString ?: "").append('\'')
+		cmd.append('\'').append(requestURL).append('?').append(queryString ?: "").append("' ")
 
 		//请求头： -H '$k:$v' -H '$k:$v'
 		val headerNames = headerNames

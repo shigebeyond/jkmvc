@@ -311,7 +311,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         // 1 获得属性
         val prop = model.getInheritProperty(column)
         if (prop == null)
-            throw OrmException("类 ${model} 没有属性: $column");
+            throw OrmException("Model Class ${model} has no property: $column");
 
         // 2 转换类型
         return value.to(prop.getter.returnType)
@@ -433,6 +433,10 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @return
      */
     public override fun <T : IOrm> getOrPutCache(pk: DbKeyValues, item: T?, expires: Long): T? {
+        // 如果主键为空, 则直接返回null, 不抛异常, 因为调用端可能需要根据返回值做检查(如existByPk()), 抛异常不合适
+        if (isPkEmpty(pk))
+            return null
+
         // 无需缓存
         if (cacheMeta == null)
             return innerloadByPk(pk, item)
@@ -502,9 +506,6 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param item 要赋值的对象
      */
     protected fun <T : IOrm> innerloadByPk(pk: DbKeyValues, item: T? = null): T? {
-        if (isPkEmpty(pk))
-            return null
-
         val query = queryBuilder()
         // 缓存时联查
         if (cacheMeta != null) {
@@ -958,7 +959,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
         // 1 自定义转换器
         // 日期转换
-        // fix bug: xstream默认不能识别 2020-10-10 21:32:15 的日期格式, 因此需要单独指定
+        // fix bug: xstream默认不能解析 2020-10-10 21:32:15 的日期格式, 因此需要单独指定
         // 注意第二个参数acceptableFormats表示可接收的多种日期格式, 后续根据需求添加, 可参考私有属性 DateConverter.DEFAULT_ACCEPTABLE_FORMATS
         xstream.registerConverter(DateConverter("yyyy-MM-dd HH:mm:ss", null, TimeZone.getTimeZone("GMT+8")))
         //xstream.registerConverter(DateConverter("yyyy-MM-dd HH:mm:ss", arrayOf("yyyy-MM-dd", "HH:mm:ss", "yyyyMMdd", "HHmmss", "yyyyMMdd HHmmss", "yyyyMMddHHmmss"), TimeZone.getTimeZone("Asia/Shanghai")))

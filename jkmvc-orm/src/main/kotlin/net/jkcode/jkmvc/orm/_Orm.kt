@@ -29,7 +29,7 @@ object OrmPropDelegater: ReadWriteProperty<IOrmEntity, Any?>, Serializable {
                 is Byte -> value > 0
                 is Float -> value > 0
                 is Double -> value > 0
-                else -> throw IllegalArgumentException("值[$value]不能自动转换为Boolean: ")
+                else -> throw IllegalArgumentException("Cannot auto convert [$value] into Boolean")
             }
         }
 

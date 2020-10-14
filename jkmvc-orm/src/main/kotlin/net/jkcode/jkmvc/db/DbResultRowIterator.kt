@@ -19,7 +19,7 @@ class DbResultRowIterator(public val row: DbResultRow): Iterator<Pair<String, An
         val rs = row.rs
         // rs.getObject(i)获取列值时，下标是从“1”开始
         if(_curr++ >= rs.columnCount)
-            throw IndexOutOfBoundsException("超过列数")
+            throw IndexOutOfBoundsException("Index exceed column count")
 
         val label: String = rs.metaData.getColumnLabel(_curr); // 字段名
         val value: Any? = rs.getValue(_curr) // 字段值

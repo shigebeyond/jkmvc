@@ -104,7 +104,7 @@ class Route(override val regex:String, // 原始正则: <controller>(\/<action>(
 
 	init {
 		if(controller == null && action != null || controller != null && action == null)
-			throw IllegalArgumentException("controller/action参数要不全部为null, 要不全部不为null")
+			throw IllegalArgumentException("controller/action must all-null or all-not-null")
 
 		// 对参数加括号，参数也变为子正则, 用括号包住
 		groupRegex = "<[\\w\\d]+>".toRegex().replace(regex){ result: MatchResult ->

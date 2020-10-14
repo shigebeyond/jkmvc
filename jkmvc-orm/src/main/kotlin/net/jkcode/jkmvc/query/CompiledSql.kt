@@ -97,7 +97,8 @@ class CompiledSql : Cloneable, ICompiledSql() {
         // 检查动态参数个数
         val size = dynamicParamsSize;
         if(dynamicParams.size != size)
-            throw IllegalArgumentException("动态参数个数不对：需要 $size 个，传递 ${dynamicParams.size} ");
+            //throw IllegalArgumentException("动态参数个数不对：需要 $size 个，传递 ${dynamicParams.size}")
+            throw IllegalArgumentException("Mismatch dynamic parameters size：It needs [$size], but you pass [${dynamicParams.size}]")
 
         // 全都是动态参数
         if(staticParams.size == size)
@@ -144,7 +145,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
 
         // 检查批处理的次数
         if(dynamicParamses.size % size > 0)
-            throw IllegalArgumentException("paramses 的大小必须是指定参数个数 $size 的整数倍");
+            throw IllegalArgumentException("Mismatch batch parameter size: Parameter `dynamicParamses`'s size [${dynamicParamses.size}] is not an integral multiple of [$size]");
 
         // 全都是动态参数
         if(staticParams.size == size)

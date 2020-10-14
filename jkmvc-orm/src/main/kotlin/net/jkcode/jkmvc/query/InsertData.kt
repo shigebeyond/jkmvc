@@ -26,15 +26,15 @@ class InsertData: Cloneable{
      */
     protected fun checkRowSize(rowSize:Int){
         if(isSubQuery())
-            throw DbException("已插入子查询，不能再插入值");
+            throw DbException("Already insert sub query， you cannot insert other value");
 
         if(columns.isEmpty())
-            throw DbException("请先调用insertColumn()来设置插入的字段名");
+            throw DbException("Must call insertColumn() to set inserting fields first");
 
         // 字段值数，是字段名数的整数倍
         val columnSize = columns.size
         if(rowSize % columnSize != 0)
-            throw IllegalArgumentException("请插入的字段值数[$rowSize]与字段名数[$columnSize]不匹配");
+            throw IllegalArgumentException("The inserting value size [$rowSize], mismatch inserting fields size [$columnSize]");
     }
 
     /**
@@ -71,7 +71,7 @@ class InsertData: Cloneable{
      */
     public fun add(subquery: IDbQueryBuilder): InsertData {
         if(rows.isNotEmpty())
-            throw DbException("已插入其他值，不能再插入子查询");
+            throw DbException("Already insert some value， you cannot insert sub query");
 
         rows.add(subquery)
         return this;

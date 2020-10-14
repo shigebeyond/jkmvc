@@ -43,11 +43,11 @@ data class DbExpr(public val exp:CharSequence, // 表达式, 可以是 String | 
     init {
         //表达式只能是 String | DbQueryBuilder
         if(exp !is String && exp !is IDbQueryBuilder){
-            throw IllegalArgumentException("表达式只能是 String 或 DbQueryBuilder 类型, 但现在是 ${exp.javaClass} 类型: $exp")
+            throw IllegalArgumentException("`DbExpr.exp` only accept `String` or `DbQueryBuilder` class, but now is `${exp.javaClass}` class: $exp")
         }
         // 检查子查询与转义不能并存
         if(exp is IDbQueryBuilder && expQuoting)
-            throw IllegalArgumentException("如果exp是子查询, 就不能指定expQuoting=true")
+            throw IllegalArgumentException("Cannot use `expQuoting=true` if `exp` is sub query")
     }
 
     /**

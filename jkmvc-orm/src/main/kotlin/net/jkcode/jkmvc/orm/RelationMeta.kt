@@ -133,7 +133,8 @@ open class RelationMeta(
         val firstRk:DbKeyValues = relatedItems.first().gets(relationProp)
         firstTk.forEachColumnWith(firstRk){ pk, fk, i ->
             if (pk != null && fk != null && pk::class != fk::class)
-                throw OrmException("模型[${ormMeta.name}]联查[${name}]关联对象失败: 本表键[${ormMeta.table}.${thisProp}]字段类型[${firstTk::class}]与关联表键[${this.model.modelOrmMeta.table}.${relationProp}]字段类型[${firstRk::class}]不一致，请改成一样的")
+                //throw OrmException("模型[${ormMeta.name}]联查[${name}]关联对象失败: 本表键[${ormMeta.table}.${thisProp}]字段类型[${firstTk::class}]与关联表键[${this.model.modelOrmMeta.table}.${relationProp}]字段类型[${firstRk::class}]不一致，请改成一样的")
+                throw OrmException("Fail to query model [${ormMeta.name}]'s related object [${name}]: this table key [${ormMeta.table}.${thisProp}]'s class [${firstTk::class}], mismatch the related table key [${this.model.modelOrmMeta.table}.${relationProp}]'s class [${firstRk::class}]")
         }
 
         // 设置关联属性 -- 双循环匹配主外键

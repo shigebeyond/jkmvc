@@ -38,7 +38,7 @@ abstract class OrmValid : IOrm, OrmEntity() {
      */
     public override operator fun set(column: String, value: Any?) {
         if (!hasColumn(column))
-            throw OrmException("类 ${this.javaClass} 没有字段 $column");
+            throw OrmException("Model class ${this.javaClass} has no property: $column");
 
         // 记录变化的字段名 + 原始值
         if(!_dirty.containsKey(column)

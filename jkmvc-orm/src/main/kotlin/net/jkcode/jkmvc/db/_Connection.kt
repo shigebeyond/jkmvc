@@ -17,7 +17,8 @@ typealias DbRow = Map<String, Any?>
  */
 public inline fun PreparedStatement.setParameters(params: List<*>, start:Int = 0, length:Int = params.size): PreparedStatement {
     if(length < 0 || length > params.size)
-        throw ArrayIndexOutOfBoundsException("预编译sql中设置参数错误：需要的参数个数为 $length, 实际参数个数为 ${params.size}")
+        //throw IllegalArgumentException("预编译sql中设置参数错误：需要的参数个数为 $length, 实际参数个数为 ${params.size}")
+        throw IllegalArgumentException("Mismatch `PreparedStatement` parameter size： It needs [$length], but pass [${params.size}]")
 
     // 设置参数
     for (i in 0..(length - 1)) {
@@ -134,7 +135,8 @@ public inline fun <T> Connection.execute(sql: String, params: List<*> = emptyLis
 public inline fun Connection.batchExecute(sql: String, params: List<*>, lengthPerExec:Int): IntArray {
     // 计算批处理的次数
     if(lengthPerExec <= 0 || params.size % lengthPerExec > 0)
-        throw IllegalArgumentException("批处理sql中设置参数错误：一次处理需要的参数个数为$lengthPerExec, 全部参数个数为${params.size}, 后者必须是前者的整数倍");
+        //throw IllegalArgumentException("批处理sql中设置参数错误：一次处理需要的参数个数为$lengthPerExec, 全部参数个数为${params.size}, 后者必须是前者的整数倍");
+        throw IllegalArgumentException("Mismatch `Connection.batchExecute()` parameter size：It handles [$lengthPerExec] paramters once, and only accepts an integral multiple of [$lengthPerExec], but you pass [${params.size}]");
 
     val batchNum:Int = params.size / lengthPerExec
 

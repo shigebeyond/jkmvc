@@ -250,7 +250,7 @@ abstract class OrmRelated : OrmPersistent() {
 
         // 不能删除 belongsTo 关联对象
         if(relation.type == RelationType.BELONGS_TO)
-            throw OrmException("不能删除模型[${ormMeta.name}]的 belongsTo 关联对象[$name]");
+            throw OrmException("Cannot delete model [${ormMeta.name}] 's `belongsTo` related object [$name]");
 
         // 1 有中间表的关联对象
         if(relation is MiddleRelationMeta)
