@@ -4,6 +4,8 @@ import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.orm.relation.HasNThroughRelation
 import net.jkcode.jkmvc.orm.serialize.toMaps
 import net.jkcode.jkmvc.query.DbExpr
+import java.util.*
+import kotlin.collections.HashSet
 
 /**
  * ORM之关联对象操作
@@ -55,32 +57,32 @@ abstract class OrmRelated : OrmPersistent() {
     }
 
     /**
-     * 设置原始的多个字段值
-     *    在从db中读数据时调用，来赋值给本对象属性
+     * 设置原始的一行多个字段值
+     *    在从db中读数据时调用，来赋值单行给本对象属性
      *    要做字段名转换：db字段名 -> 对象属性名
      *    要做字段值转换: 反序列化
      *
      * @param data
      */
     public override fun setOriginal(orgn: DbResultRow) {
-        // 设置属性值
+        // 遍历并设置每个属性值
+        val mayNullRelatedNames = HashSet<String>() // 可能为null的多层关联对象名
         orgn.forEach { (column, value) ->
             // 关联查询时，会设置关联表字段的列别名（列别名 = 表别名 : 列名），可以据此来设置关联对象的字段值
             if (!column.contains(":")){ // 自身字段
                 if(!column.endsWith('_') || ormMeta.columns.contains(column)) // 不是 中间表的外键字段别名, 用_后缀
-                    setOriginal(column, value)
-            } else if (value !== null) {// 关联对象字段: 不处理null值, 因为left join查询时, 关联对象可能没有匹配的行
-                // 多层:
-                val cols = column.split(":")
-                // 获得最后一层的关联对象
-                var obj:OrmRelated = this
-                for (i in 0..cols.size - 2){
-                    obj = obj.related(cols[i], true) as Orm; // 创建关联对象
-                }
-                // 设置最底层的属性值
-                obj.setOriginal(cols.last(), value)
+                    setOriginal(column, value) // 设置本层字段值
+            } else {// 关联对象字段
+                if (value == null){ // 特殊处理null值(可能他值本身是null, 也可能left join没有匹配的行(关联对象为null)), 不能立即设置多层关联对象为null, 因为其他非null字段可能在后面, 因此先标记为可能为null
+                    val name = column.substringBeforeLast(":") // 去掉最后一层, 即为关联对象名全路径
+                    mayNullRelatedNames.add(name)
+                } else  // 设置多层字段值
+                    setOriginalMultiLevel(column, value)
             }
         }
+
+        // 设置多层的关联对象为null, 防止后续获得关联属性时触发延迟查询
+        setNullRelatesMultiLevel(mayNullRelatedNames)
 
         // 标记已加载
         loaded = true;
@@ -90,6 +92,47 @@ abstract class OrmRelated : OrmPersistent() {
             if(value != null)
                 (value as Orm).loaded = true
         }
+    }
+
+    /**
+     * 设置多层的关联对象为null
+     *   mayNullRelatedNames只是可能而已, 如果 Orm::_data 中有设置过, 则表示不用再设为null
+     *   如果不设关联对象为null, 则后续获得关联对象属性也会触发延迟查询, 浪费一条sql
+     * @param mayNullRelatedNames 可能为null的多层关联对象名
+     */
+    protected fun setNullRelatesMultiLevel(mayNullRelatedNames: Set<String>){
+        for(path in mayNullRelatedNames){
+            val names = path.split(":")
+            // 逐层检查关联对象
+            var obj: OrmRelated = this
+            for (name in names) {
+                // 如果没有设置过关联对象, 则关联对象为null
+                if(name !in obj._data){
+                    obj._data[name] = null
+                    continue
+                }
+
+                // 继续下一层
+                obj = (obj._data[name] ?: continue) as OrmRelated
+            }
+        }
+    }
+
+    /**
+     * 设置多层的原始的单个字段值
+     * @param column 多层的字段名 = 表别名1 : 表别名2 : ... : 列名
+     * @param value 字段值
+     */
+    protected fun setOriginalMultiLevel(column: String, value: Any?) {
+        // 多层
+        val cols = column.split(":")
+        // 获得最后一层的关联对象
+        var obj: OrmRelated = this
+        for (i in 0..cols.size - 2) {
+            obj = obj.related(cols[i], true) as OrmRelated; // 创建关联对象
+        }
+        // 设置最底层的属性值
+        obj.setOriginal(cols.last(), value)
     }
 
     /**
