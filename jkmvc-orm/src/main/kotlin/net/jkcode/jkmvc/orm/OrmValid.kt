@@ -1,7 +1,6 @@
 package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkutil.validator.ModelValidateResult
-import net.jkcode.jkutil.validator.ValidateResult
 
 
 /**

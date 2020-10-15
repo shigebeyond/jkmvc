@@ -38,4 +38,13 @@ interface IOrmValid : IOrmEntity {
      */
     fun isDirty(column: String): Boolean
 
+    /**
+     * 检查字段是否为脏
+     * @param key 字段名
+     */
+    public fun isDirty(key: DbKeyNames): Boolean {
+        return key.columns.any { column ->
+            isDirty(column)
+        }
+    }
 }

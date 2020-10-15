@@ -325,13 +325,17 @@ abstract class OrmRelated : OrmPersistent() {
     /**
      * 添加 _data 中的 hasOne/hasMany 的关联关系
      *   仅用在 create/update() 方法中
-     *   针对 _data 中改过的关联关系
+     *   仅处理 _data 中改过的关联关系
      *
      */
     internal override fun addHasNRelations(){
         for((name, relation) in ormMeta.relations){
             // 仅处理 hasOne/hasMany 的关联关系
             if(relation.isBelongsTo)
+                continue
+
+            // 仅处理 _data 中改过的关联关系
+            if(!isDirty(name))
                 continue
 
             val value = _data[name]
@@ -343,7 +347,8 @@ abstract class OrmRelated : OrmPersistent() {
     /**
      * 删除 hasOne/hasMany 的关联关系
      *   仅用在 update()/delete() 方法中
-     *
+     *   update()仅处理 _data 中改过的关联关系
+     *   delete()需要根据 `relation.cascadeDeleted` 来确定是删除对象(包含关系), 还是仅删除关系
      *
      * @param byDelete 是否delete()调用, 否则update()调用
      */
@@ -353,8 +358,18 @@ abstract class OrmRelated : OrmPersistent() {
             if(relation.isBelongsTo)
                 continue
 
-            // 1 删除关联对象(包含关系)
-            if(byDelete && relation.cascadeDeleted) {
+            // update()仅处理 _data 中改过的关联关系
+            if(!byDelete){
+                if(!isDirty(name))
+                    continue
+
+                // 如果关系的主键被修改过, 则中断关联关系的删除
+                if(isDirty(relation.primaryProp))
+                    throw OrmException("Fail to remove model [${ormMeta.name}]'s `HasN` relations [${relation.primaryProp}]: primary key [${relation.primaryProp}] has been changed")
+            }
+
+            // 1 当delete()+级联删除时, 删除关联对象(包含关系)
+            if(byDelete && relation.cascadeDeleted) { // 级联删除
                 val events = relation.ormMeta.processableEvents
                 if(events.contains("beforeDelete") || events.contains("afterDelete")){ // 有删除的前置后置回调
                     // 为了能触发删除的前置后置回调，　因此使用 Orm.delete()　实现
