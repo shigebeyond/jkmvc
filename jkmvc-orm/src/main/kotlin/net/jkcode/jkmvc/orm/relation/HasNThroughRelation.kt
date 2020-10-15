@@ -95,17 +95,6 @@ class HasNThroughRelation(
      * 查询中间表
      *
      * @param item
-     * @param fkInMany hasMany关系下的单个关联对象，如果为null，则更新所有关系, 否则更新单个关系
-     * @return
-     */
-    public fun queryMiddleTable(item: IOrm, fkInMany: IOrm): IDbQueryBuilder? {
-        return queryMiddleTable(item, fkInMany as Any)
-    }
-
-    /**
-     * 查询中间表
-     *
-     * @param item
      * @param fkInMany hasMany关系下的单个外键值Any|对象IOrm，如果为null，则更新所有关系, 否则更新单个关系
      * @return
      */
@@ -135,7 +124,7 @@ class HasNThroughRelation(
      *     根据hasMany/hasOne的关联关系，来构建查询条件
      *     通过join中间表 查从表
      *
-     * @param item Orm对象
+     * @param item (主表)Orm对象
      * @param fkInMany hasMany关系下的单个外键值Any|对象IOrm，如果为null，则更新所有关系, 否则更新单个关系
      * @return
      */
@@ -158,8 +147,9 @@ class HasNThroughRelation(
     /**
      * 查询从表
      *     根据hasMany/hasOne的关联关系，来构建查询条件
+     *     通过join中间表 查从表
      *
-     * @param items Orm列表
+     * @param items (主表)Orm列表
      * @return
      */
     public override fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder? {
@@ -167,8 +157,27 @@ class HasNThroughRelation(
             return null
 
         // 通过join中间表 查从表
+        val tableAlias = middleTable + '.'
         return buildQuery() // 中间表.远端外键 = 从表.远端主键
-                .whereIn(foreignKey.wrap(middleTable + '.')/*middleTable + '.' + foreignKey*/, items.collectColumn(primaryProp)) as OrmQueryBuilder // 中间表.外键 = 主表.主键
+                .whereIn(foreignKey.wrap(tableAlias)/*middleTable + '.' + foreignKey*/, items.collectColumn(primaryProp)) as OrmQueryBuilder // 中间表.外键 = 主表.主键
+    }
+
+    /**
+     * 查询关联表
+     *    自动根据关联关系，来构建查询条件
+     *    通过join中间表 查从表
+     *    主要用于级联删除
+     *
+     * @param subquery (主表)子查询
+     * @return
+     */
+    override fun queryRelated(subquery: IDbQueryBuilder): OrmQueryBuilder?{
+        // 通过join中间表 查从表
+        val tableAlias = middleTable + '.'
+        val subQueryAlias = "sub_" + model.modelName
+        return buildQuery() // 中间表.远端外键 = 从表.远端主键
+                .join(DbExpr(subquery.select(*primaryKey.columns /* TODO: 加子查询内的表前缀 */), subQueryAlias), "INNER")
+                .on(foreignKey.wrap(tableAlias) /*middleTable + foreignKey*/, primaryKey.wrap(subQueryAlias + ".") /*subQueryAlias + primaryKey*/) as OrmQueryBuilder // 中间表.外键 = 主表.主键
     }
 
     /**

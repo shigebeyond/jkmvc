@@ -3,6 +3,7 @@ package net.jkcode.jkmvc.orm.relation
 import net.jkcode.jkmvc.orm.*
 import net.jkcode.jkmvc.orm.DbKeyValues
 import net.jkcode.jkmvc.query.DbExpr
+import net.jkcode.jkmvc.query.IDbQueryBuilder
 import kotlin.reflect.KClass
 
 /**
@@ -28,18 +29,18 @@ open class HasNRelation(
     /**
      * 查询关联表
      *     自动根据关联关系，来构建查询条件
+     *     查从表
      *
-     * @param items Orm列表
+     * @param items (主表)Orm列表
      * @return
      */
     public override fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder? {
         if(items.isEmpty())
             return null
 
-        val query = queryBuilder()
         // 查从表
-        query.whereIn(foreignKey.wrap(model.modelName + '.') /*model.modelName + '.' + foreignKey*/, items.collectColumn(primaryProp)) // 从表.外键 = 主表.主键
-        return query
+        val tableAlias = model.modelName + '.'
+        return queryBuilder().whereIn(foreignKey.wrap(tableAlias) /*model.modelName + '.' + foreignKey*/, items.collectColumn(primaryProp)) as OrmQueryBuilder // 从表.外键 = 主表.主键
     }
 
     /**
@@ -47,7 +48,7 @@ open class HasNRelation(
      *     自动根据关联关系，来构建查询条件
      *     查从表
      *
-     * @param item Orm对象
+     * @param item (主表)Orm对象
      * @param fkInMany hasMany关系下的单个外键值Any|对象IOrm，如果为null，则更新所有关系, 否则更新单个关系
      * @return
      */
@@ -64,6 +65,24 @@ open class HasNRelation(
             query.where(ormMeta.primaryKey.wrap(tableAlias), fk)
         }
         return query;
+    }
+
+    /**
+     * 查询关联表
+     *    自动根据关联关系，来构建查询条件
+     *    查从表
+     *    主要用于级联删除
+     *
+     * @param subquery (主表)子查询
+     * @return
+     */
+    override fun queryRelated(subquery: IDbQueryBuilder): OrmQueryBuilder?{
+        // 查从表
+        val tableAlias = model.modelName + '.'
+        val subQueryAlias = "sub_" + model.modelName
+        return queryBuilder()
+                .join(DbExpr(subquery.select(*primaryKey.columns /* TODO: 加子查询内的表前缀 */), subQueryAlias), "INNER")
+                .on(foreignKey.wrap(tableAlias) /*tableAlias + foreignKey*/, primaryKey.wrap(subQueryAlias + ".") /*subQueryAlias + primaryKey*/) as OrmQueryBuilder // 从表.外键 = 主表.主键
     }
 
     /**

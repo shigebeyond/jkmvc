@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.orm.relation
 
 import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.orm.*
+import net.jkcode.jkmvc.query.IDbQueryBuilder
 import kotlin.reflect.KClass
 
 /**
@@ -180,6 +181,7 @@ interface IRelation {
         return when(orm){
             is IOrm -> queryRelated(orm)
             is Collection<*> -> queryRelated(orm as Collection<out IOrm>)
+            is IDbQueryBuilder -> queryRelated(orm)
             else -> throw IllegalArgumentException("Method `relation.queryRelated(parameter)`，noly accept orm object/list as parameter")
         }
     }
@@ -198,23 +200,19 @@ interface IRelation {
      * 查询关联表
      *    自动根据关联关系，来构建查询条件
      *
-     * @param item Orm对象
-     * @param fkInMany hasMany关系下的单个外键值，如果为null，则更新所有关系, 否则更新单个关系
-     * @param withTableAlias 是否带表前缀
+     * @param items Orm列表
      * @return
      */
-    fun queryRelated(item: IOrm, fkInMany: IOrm): OrmQueryBuilder?{
-        return queryRelated(item, fkInMany as Any)
-    }
+    fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder?
 
     /**
      * 查询关联表
      *    自动根据关联关系，来构建查询条件
      *
-     * @param items Orm列表
+     * @param subquery 子查询
      * @return
      */
-    fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder?
+    fun queryRelated(subquery: IDbQueryBuilder): OrmQueryBuilder?
 
     /**
      * 对query builder联查关联表

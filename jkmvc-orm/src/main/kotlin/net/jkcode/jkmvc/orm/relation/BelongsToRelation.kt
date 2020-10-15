@@ -3,6 +3,7 @@ package net.jkcode.jkmvc.orm.relation
 import net.jkcode.jkmvc.orm.*
 import net.jkcode.jkmvc.orm.DbKeyValues
 import net.jkcode.jkmvc.query.DbExpr
+import net.jkcode.jkmvc.query.IDbQueryBuilder
 import kotlin.reflect.KClass
 
 /**
@@ -26,26 +27,10 @@ class BelongsToRelation(
     /**
      * 查询关联表
      *     自动根据关联关系，来构建查询条件
-     *
-     * @param items Orm列表
-     * @return
-     */
-    public override fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder? {
-        if(items.isEmpty())
-            return null
-
-        val query = queryBuilder()
-        query.whereIn(primaryKey.wrap(model.modelName + '.') /*model.modelName + '.' + primaryKey*/, items.collectColumn(foreignProp)) // 主表.主键 = 从表.外键
-        return query
-    }
-
-    /**
-     * 查询关联表
-     *     自动根据关联关系，来构建查询条件
      *     查主表
      *     对BelongsTo关系，如果外键为空，则联查为空
      *
-     * @param item Orm对象
+     * @param item (从表)Orm对象
      * @param fkInMany 无用, hasMany关系下的单个外键值Any|对象IOrm，如果为null，则更新所有关系, 否则更新单个关系
      * @return
      */
@@ -57,6 +42,40 @@ class BelongsToRelation(
 
         val tableAlias = model.modelName + '.'
         return queryBuilder().where(primaryKey.wrap(tableAlias) /*tableAlias + primaryKey*/, fk) as OrmQueryBuilder // 主表.主键 = 从表.外键
+    }
+
+    /**
+     * 查询关联表
+     *     自动根据关联关系，来构建查询条件
+     *     查主表
+     *
+     * @param items (从表)Orm列表
+     * @return
+     */
+    public override fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder? {
+        if(items.isEmpty())
+            return null
+
+        // 查主表
+        val tableAlias = model.modelName + '.'
+        return queryBuilder().whereIn(primaryKey.wrap(tableAlias) /*tableAlias + '.' + primaryKey*/, items.collectColumn(foreignProp)) as OrmQueryBuilder // 主表.主键 = 从表.外键
+    }
+
+    /**
+     * 查询关联表
+     *    自动根据关联关系，来构建查询条件
+     *    查主表
+     *
+     * @param subquery (从表)子查询
+     * @return
+     */
+    override fun queryRelated(subquery: IDbQueryBuilder): OrmQueryBuilder?{
+        // 查主表
+        val tableAlias = model.modelName + '.'
+        val subQueryAlias = "sub_" + model.modelName
+        return queryBuilder()
+                .join(DbExpr(subquery.select(*foreignKey.columns /* TODO: 加子查询内的表前缀 */), subQueryAlias), "INNER")
+                .on(primaryKey.wrap(tableAlias) /*tableAlias + primaryKey*/, foreignKey.wrap(subQueryAlias + ".") /*subQueryAlias + foreignKey*/) as OrmQueryBuilder // 主表.主键 = 从表.外键
     }
 
     /**
