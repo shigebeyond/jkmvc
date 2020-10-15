@@ -237,7 +237,8 @@ class OrmTests{
         println("${u1.id} 的收件人 " + u1.parcelReceivers.collectColumn("id"))
         println("${u2.id} 的寄件人 " + u2.parcelSenders.collectColumn("id"))
 
-        u2.removeRelations("parcelSenders", u1)
+        //u2.removeRelations("parcelSenders", u1)
+        u2.deleteRelated("parcelSenders", u1)
         println("${u1.id} 有收件人${u2.id}? " + u1.hasRelation("parcelReceivers", u2))
         println("${u2.id} 有寄件人${u1.id}? " + u2.hasRelation("parcelSenders", u1))
     }

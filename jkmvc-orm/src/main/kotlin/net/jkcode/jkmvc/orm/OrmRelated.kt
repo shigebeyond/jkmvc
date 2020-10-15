@@ -311,8 +311,13 @@ abstract class OrmRelated : OrmPersistent() {
 
         // 2 普通关联对象
         // 构建查询：自动构建查询条件
-        val query = relation.queryRelated(this)
-        return if(query == null) true else query.delete()
+        val query = relation.queryRelated(this, fkInMany)
+        if(query == null)
+            return true
+
+        // 级联删除
+
+        return query.delete()
     }
 
     /**
@@ -331,7 +336,7 @@ abstract class OrmRelated : OrmPersistent() {
                 // 删除关联对象
                 relation.ormMeta.queryBuilder()
                         .join(DbExpr(subquery.select(*relation.farForeignKey.columns), "_mid"), "INNER")
-                        .on(relation.farPrimaryKey, relation.farForeignKey.wrap("_mid") /*tableAlias + farForeignKey*/)
+                        .on(relation.farPrimaryKey.wrap(relation.ormMeta.name + "."), relation.farForeignKey.wrap("_mid.") /*tableAlias + farForeignKey*/)
                         .delete()
                 // 删除中间表
                 subquery.delete()
