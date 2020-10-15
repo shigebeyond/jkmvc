@@ -19,7 +19,7 @@ interface ICbRelation<M : IOrm, K, R> {
     /**
      * 是否一对多
      */
-    val hasMany: Boolean
+    val one2one: Boolean
 
     /**
      * 主模型的主键的getter

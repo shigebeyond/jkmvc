@@ -261,10 +261,11 @@ abstract class OrmRelated : OrmPersistent() {
             val relation = ormMeta.getCbRelation(name)!!;
 
             var result = relation.findAllRelated(this)
-            _data[name] = if(relation.hasMany)
-                            result
-                        else
+            _data[name] = if(relation.one2one)
                             result.firstOrNull()
+                        else
+                            result
+
         }
 
         return _data[name]

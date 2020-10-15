@@ -295,10 +295,10 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
             // 遍历每个回调关系的查询结果
             forEachCbRelationQuery(result){ relation: ICbRelation<out IOrm, *, *>, relatedItems:List<*> ->
                 // 设置关联属性
-                result[relation.name] = if(relation.hasMany)
-                                            relatedItems
-                                        else
+                result[relation.name] = if(relation.one2one)
                                             relatedItems.firstOrNull()
+                                        else
+                                            relatedItems
             }
         }
         return result

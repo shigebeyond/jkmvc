@@ -11,7 +11,7 @@ import java.util.*
  * @date 2020-7-9 7:13 PM
  */
 class CbRelation<M: IOrm, K, R> (
-        override val hasMany: Boolean, // 是否一对多
+        override val one2one: Boolean, // 是否一对一
         override val pkGetter: (M)->K, // 主模型的主键的getter
         override val fkGetter: (R)->K, // 从对象的外键的getter
         override val relatedSupplier:(List<K>) -> List<R> // 批量获取关联对象的回调
@@ -75,13 +75,13 @@ class CbRelation<M: IOrm, K, R> (
                 val pk = pkGetter.invoke(item) // 本表键
                 val fk = fkGetter.invoke(relatedItem) // 关联表键
                 if (pk != null && fk != null  && pk.equals(fk)) {
-                    if(hasMany){ // hasMany关联对象是list
+                    if(one2one){ // 一对一关联对象是单个对象
+                        item[name] = relatedItem
+                    }else{ // 一对多关联对象是list
                         val myRelated = item.getOrPut(name){
                             LinkedList<Any?>()
                         } as LinkedList<Any?>
                         myRelated.add(relatedItem)
-                    }else{ // 其他关联对象是单个对象
-                        item[name] = relatedItem
                     }
 
                 }

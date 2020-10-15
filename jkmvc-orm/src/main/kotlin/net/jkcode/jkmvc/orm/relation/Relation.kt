@@ -108,7 +108,7 @@ abstract class Relation(
                             ArrayList<IOrm>()
                         } as MutableList<IOrm>
                         myRelated.add(relatedItem)
-                    }else{ // 其他关联对象是单个对象
+                    }else{ // 一对一关联对象是单个对象
                         item[name] = relatedItem
                     }
 
