@@ -32,7 +32,10 @@ open class HasNRelation(
      * @param items Orm列表
      * @return
      */
-    public override fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder {
+    public override fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder? {
+        if(items.isEmpty())
+            return null
+
         val query = queryBuilder()
         // 查从表
         query.whereIn(foreignKey.wrap(model.modelName + '.') /*model.modelName + '.' + foreignKey*/, items.collectColumn(primaryProp)) // 从表.外键 = 主表.主键

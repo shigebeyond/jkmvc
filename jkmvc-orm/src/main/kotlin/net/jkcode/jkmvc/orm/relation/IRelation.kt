@@ -227,7 +227,7 @@ interface IRelation {
      * @param items Orm列表
      * @return
      */
-    fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder
+    fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder?
 
     /**
      * 对query builder联查关联表

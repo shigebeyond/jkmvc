@@ -145,6 +145,7 @@ class HasNThroughRelation(
         val pk: DbKeyValues = item.gets(primaryProp) // 主键
         if(item.isPkEmpty(pk))
             return null;
+
         val tableAlias = middleTable + '.'
         val query = buildQuery() // 中间表.远端外键 = 从表.远端主键
                 .where(foreignKey.wrap(tableAlias) /*tableAlias + foreignKey*/, pk) as OrmQueryBuilder // 中间表.外键 = 主表.主键
@@ -162,7 +163,10 @@ class HasNThroughRelation(
      * @param items Orm列表
      * @return
      */
-    public override fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder {
+    public override fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder? {
+        if(items.isEmpty())
+            return null
+
         // 通过join中间表 查从表
         return buildQuery() // 中间表.远端外键 = 从表.远端主键
                 .whereIn(foreignKey.wrap(middleTable + '.')/*middleTable + '.' + foreignKey*/, items.collectColumn(primaryProp)) as OrmQueryBuilder // 中间表.外键 = 主表.主键

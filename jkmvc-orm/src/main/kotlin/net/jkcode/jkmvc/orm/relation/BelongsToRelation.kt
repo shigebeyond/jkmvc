@@ -30,7 +30,10 @@ class BelongsToRelation(
      * @param items Orm列表
      * @return
      */
-    public override fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder {
+    public override fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder? {
+        if(items.isEmpty())
+            return null
+
         val query = queryBuilder()
         query.whereIn(primaryKey.wrap(model.modelName + '.') /*model.modelName + '.' + primaryKey*/, items.collectColumn(foreignProp)) // 主表.主键 = 从表.外键
         return query
