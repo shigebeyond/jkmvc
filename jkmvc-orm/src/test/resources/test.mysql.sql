@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS `address` (
   `user_id` int(11) unsigned NOT NULL COMMENT '用户编号',
   `addr` varchar(50) NOT NULL DEFAULT '' COMMENT '地址',
   `tel` varchar(50) NOT NULL DEFAULT '' COMMENT '电话',
+  `is_home` tinyint(4) unsigned NOT NULL DEFAULT '0' COMMENT '是否是家庭住址',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='地址';
 
