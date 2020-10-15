@@ -20,7 +20,7 @@ import kotlin.reflect.KClass
  */
 abstract class Relation(
         public override val one2one: Boolean, // 是否一对一, 否则一对多
-        public override val sourceMeta: IOrmMeta, // 源模型元数据
+        public override val srcOrmMeta: IOrmMeta, // 源模型元数据
         public override val model: KClass<out IOrm>, // 关联模型类型
         public override val foreignKey: DbKeyNames, // 外键
         public override val primaryKey: DbKeyNames, // 主键
@@ -59,13 +59,13 @@ abstract class Relation(
      * 主键属性
      *   与 primaryKey 对应
      */
-    public override val primaryProp: DbKeyNames = sourceMeta.columns2Props(primaryKey)
+    public override val primaryProp: DbKeyNames = srcOrmMeta.columns2Props(primaryKey)
 
     /**
      *  外键属性
      *   与 foreignKey 对应
      */
-    public override val foreignProp: DbKeyNames = sourceMeta.columns2Props(foreignKey)
+    public override val foreignProp: DbKeyNames = srcOrmMeta.columns2Props(foreignKey)
 
     /**
      * 空值

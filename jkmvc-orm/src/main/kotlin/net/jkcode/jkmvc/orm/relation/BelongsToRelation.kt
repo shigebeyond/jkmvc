@@ -10,13 +10,13 @@ import kotlin.reflect.KClass
  *
  */
 class BelongsToRelation(
-        sourceMeta: IOrmMeta, // 源模型元数据
+        srcOrmMeta: IOrmMeta, // 源模型元数据
         model: KClass<out IOrm>, // 关联模型类型
         foreignKey: DbKeyNames, // 外键
         primaryKey: DbKeyNames, // 主键
         conditions:Map<String, Any?> = emptyMap(), // 查询条件
         pkEmptyRule: PkEmptyRule = model.modelOrmMeta.pkEmptyRule // 检查主键为空的规则
-) : Relation(true, sourceMeta, model, foreignKey, primaryKey, conditions, false, pkEmptyRule) {
+) : Relation(true, srcOrmMeta, model, foreignKey, primaryKey, conditions, false, pkEmptyRule) {
 
     /**
      * 本模型键属性

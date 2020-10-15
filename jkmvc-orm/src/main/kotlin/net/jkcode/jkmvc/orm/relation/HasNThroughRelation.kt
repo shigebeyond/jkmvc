@@ -29,7 +29,7 @@ import kotlin.reflect.KClass
  */
 class HasNThroughRelation(
         one2one: Boolean, // 是否一对一, 否则一对多
-        sourceMeta: IOrmMeta, // 源模型元数据
+        srcOrmMeta: IOrmMeta, // 源模型元数据
         model:KClass<out IOrm>, // 关联模型类型
         foreignKey: DbKeyNames, // 外键
         primaryKey: DbKeyNames, // 主键
@@ -38,7 +38,7 @@ class HasNThroughRelation(
         public val farPrimaryKey: DbKeyNames, // 远端主键
         conditions:Map<String, Any?> = emptyMap(), // 查询条件
         pkEmptyRule: PkEmptyRule = model.modelOrmMeta.pkEmptyRule // 检查主键为空的规则
-) : Relation(one2one, sourceMeta, model, foreignKey, primaryKey, conditions, false, pkEmptyRule) {
+) : Relation(one2one, srcOrmMeta, model, foreignKey, primaryKey, conditions, false, pkEmptyRule) {
 
     /**
      * 本模型键属性
@@ -56,13 +56,13 @@ class HasNThroughRelation(
      * 远端主键属性
      *   与 farPrimaryKey 对应
      */
-    public val farPrimaryProp: DbKeyNames = sourceMeta.columns2Props(farPrimaryKey)
+    public val farPrimaryProp: DbKeyNames = srcOrmMeta.columns2Props(farPrimaryKey)
 
     /**
      *  远端外键属性
      *    与 farForeignKey 对应
      */
-    public val farForeignProp: DbKeyNames = sourceMeta.columns2Props(farForeignKey)
+    public val farForeignProp: DbKeyNames = srcOrmMeta.columns2Props(farForeignKey)
 
     /**
      * 中间表的外键字段别名
@@ -75,7 +75,7 @@ class HasNThroughRelation(
      * 中间表的外键属性
      *    与 middleForeignKey 对应
      */
-    public val middleForeignProp: DbKeyNames = sourceMeta.columns2Props(middleForeignKey)
+    public val middleForeignProp: DbKeyNames = srcOrmMeta.columns2Props(middleForeignKey)
 
     /**
      * 构建查询：通过join中间表来查询从表

@@ -48,7 +48,7 @@ interface IRelation {
     /**
      * 源模型元数据
      */
-    val sourceMeta: IOrmMeta;
+    val srcOrmMeta: IOrmMeta;
 
     /**
      * 关联模型类型
@@ -57,7 +57,7 @@ interface IRelation {
 
     /**
      *  主键
-     *    一般情况下，是源模型中的主键（sourceMeta.primaryKey），不需要指定
+     *    一般情况下，是源模型中的主键（srcOrmMeta.primaryKey），不需要指定
      *    但是某些情况下，是源模型的业务主键，需要手动指定
      */
     val primaryKey: DbKeyNames;

@@ -11,14 +11,14 @@ import kotlin.reflect.KClass
  */
 open class HasNRelation(
         one2one: Boolean, // 是否一对一, 否则一对多
-        sourceMeta: IOrmMeta, // 源模型元数据
+        srcOrmMeta: IOrmMeta, // 源模型元数据
         model: KClass<out IOrm>, // 关联模型类型
         foreignKey: DbKeyNames, // 外键
         primaryKey: DbKeyNames, // 主键
         conditions:Map<String, Any?> = emptyMap(), // 查询条件
         cascadeDeleted: Boolean = false, // 是否级联删除
         pkEmptyRule: PkEmptyRule = model.modelOrmMeta.pkEmptyRule // 检查主键为空的规则
-) : Relation(one2one, sourceMeta, model, foreignKey, primaryKey, conditions, cascadeDeleted, pkEmptyRule) {
+) : Relation(one2one, srcOrmMeta, model, foreignKey, primaryKey, conditions, cascadeDeleted, pkEmptyRule) {
 
     /**
      * 空值
