@@ -19,7 +19,7 @@ interface IOrmRelated : IOrmPersistent
 	fun setOriginal(orgn: DbResultRow)
 
 	/**
-	 * 获得关联对象
+	 * 获得关联对象, 如果没有则查询
 	 *
 	 * @param name 关联对象名
 	 * @param newed 是否创建新对象：在查询db后设置原始字段值data()时使用
@@ -27,7 +27,16 @@ interface IOrmRelated : IOrmPersistent
 	 * 						如 Array("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
 	 * @return
 	 */
-	fun related(name:String, newed:Boolean = false, vararg columns:String): Any?;
+	fun getRelatedOrQuery(name:String, vararg columns:String): Any?;
+
+	/**
+	 * 获得关联对象, 如果没有则创建新对象
+	 *
+	 * @param name 关联对象名
+	 * @param loaded 是否标记为已加载, 仅在查询db后设置原始字段值时调用
+	 * @return
+	 */
+	fun getRelatedOrNew(name:String, loaded: Boolean = false): Any?;
 
 	/**
 	 * 获得回调的关联对象

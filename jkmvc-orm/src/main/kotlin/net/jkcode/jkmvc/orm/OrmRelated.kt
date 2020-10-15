@@ -4,7 +4,6 @@ import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.orm.relation.HasNThroughRelation
 import net.jkcode.jkmvc.orm.serialize.toMaps
 import net.jkcode.jkmvc.query.DbExpr
-import java.util.*
 import kotlin.collections.HashSet
 
 /**
@@ -47,7 +46,7 @@ abstract class OrmRelated : OrmPersistent() {
     public override operator fun <T> get(column: String, defaultValue: T?): T {
         // 获得关联对象
         if (ormMeta.hasRelation(column))
-            return related(column, false) as T;
+            return getRelatedOrQuery(column) as T;
 
         // 获得回调的关联对象
         if (ormMeta.hasCbRelation(column))
@@ -86,12 +85,6 @@ abstract class OrmRelated : OrmPersistent() {
 
         // 标记已加载
         loaded = true;
-        // 只标记一层，防止递归死循环
-        for((name, relation) in ormMeta.relations){
-            val value = _data[name]
-            if(value != null)
-                (value as Orm).loaded = true
-        }
     }
 
     /**
@@ -129,7 +122,7 @@ abstract class OrmRelated : OrmPersistent() {
         // 获得最后一层的关联对象
         var obj: OrmRelated = this
         for (i in 0..cols.size - 2) {
-            obj = obj.related(cols[i], true) as OrmRelated; // 创建关联对象
+            obj = obj.getRelatedOrNew(cols[i], true) as OrmRelated; // 创建关联对象 + 标记为已加载
         }
         // 设置最底层的属性值
         obj.setOriginal(cols.last(), value)
@@ -164,7 +157,7 @@ abstract class OrmRelated : OrmPersistent() {
                 value = value._data
 
             if(value is Map<*, *>){ // 如果是map，则为关联对象
-                val realValue = related(column, true) // 创建关联对象
+                val realValue = getRelatedOrNew(column) // 创建关联对象
                 (realValue as Orm).fromMap(value as Map<String, Any?>) // 递归设置关联对象的字段值
             }else
                 set(column, value)
@@ -207,36 +200,50 @@ abstract class OrmRelated : OrmPersistent() {
     }
 
     /**
-     * 获得关联对象
+     * 获得关联对象, 如果没有则查询
      *
      * @param name 关联对象名
-     * @param 是否创建新对象：在查询db后设置原始字段值data()时使用
      * @param columns 字段名数组: Array(column1, column2, alias to column3),
      * 				如 Array("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
      * @return
      */
-    public override fun related(name: String, newed: Boolean, vararg columns: String): Any? {
+    public override fun getRelatedOrQuery(name: String, vararg columns: String): Any? {
         if (name !in _data){
             // 获得关联关系
             val relation = ormMeta.getRelation(name)!!;
 
-            var result: Any? = null;
-            if (newed) {  // 创建新对象
-                result = relation.newModelInstance();
-            }else{  // 根据关联关系来构建查询
-                val query:OrmQueryBuilder? = relation.queryRelated(this) // 自动构建查询条件
-                if(query == null) // 如果查询为空，说明主/外键为空，则数据有问题，则不查询不赋值（一般出现在调试过程中）
-                    return null;
+            // 根据关联关系来构建查询
+            val query:OrmQueryBuilder? = relation.queryRelated(this) // 自动构建查询条件
+            if(query == null) // 如果查询为空，说明主/外键为空，则数据有问题，则不查询不赋值（一般出现在调试过程中）
+                return null;
 
-                query.select(*columns) // 查字段
-                if (relation.isHasMany) { // 查多个
-                    result = query.findRows(transform = relation.modelRowTransformer)
-                } else { // 查一个
-                    result = query.findRow(transform = relation.modelRowTransformer)
-                }
-            }
+            query.select(*columns) // 查字段
+            _data[name] = if (relation.isHasMany) // 查多个
+                            query.findRows(transform = relation.modelRowTransformer)
+                        else  // 查一个
+                            query.findRow(transform = relation.modelRowTransformer)
+        }
 
-            _data[name] = result;
+        return _data[name];
+    }
+
+    /**
+     * 获得关联对象, 如果没有则创建新对象
+     *
+     * @param name 关联对象名
+     * @param loaded 是否标记为已加载, 仅在查询db后设置原始字段值时调用
+     * @return
+     */
+    public override fun getRelatedOrNew(name:String, loaded: Boolean): Any?{
+        if (name !in _data){
+            // 获得关联关系
+            val relation = ormMeta.getRelation(name)!!;
+            // 创建新对象
+            val related = relation.newModelInstance()
+            // 标记为已加载, 仅在查询db后设置原始字段值时调用
+            if(loaded)
+                related.loaded = true
+            _data[name] = related;
         }
 
         return _data[name];
@@ -417,7 +424,7 @@ abstract class OrmRelated : OrmPersistent() {
                 if(events.contains("beforeDelete") || events.contains("afterDelete")){ // 有删除的前置后置回调
                     // 为了能触发删除的前置后置回调，　因此使用 Orm.delete()　实现
                     // 查询关联对象
-                    val related = related(name, false)
+                    val related = getRelatedOrQuery(name)
                     // 逐个递归删除
                     when(related){
                         is Collection<*> -> (related as Collection<IOrm>).forEach{ it.delete(true) }

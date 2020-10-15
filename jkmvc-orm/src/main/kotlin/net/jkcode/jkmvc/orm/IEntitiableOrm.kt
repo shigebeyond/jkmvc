@@ -21,7 +21,7 @@ interface IEntitiableOrm<E: OrmEntity>: IOrm {
         for(column in ormMeta.propsAndRelations) {
             val value:Any? = from[column]
             if(value is IOrmEntity){ // 如果是IOrmEntity，则为关联对象
-                val realValue = related(column, true) // 创建关联对象
+                val realValue = getRelatedOrNew(column) // 创建关联对象
                 (realValue as IEntitiableOrm<*>).fromEntity(value) // 递归设置关联对象的字段值
             }else
                 set(column, value)
