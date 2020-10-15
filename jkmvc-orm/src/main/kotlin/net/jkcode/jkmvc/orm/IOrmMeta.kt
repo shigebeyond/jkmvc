@@ -465,17 +465,22 @@ interface IOrmMeta {
 
     /************************************ 关联关系 *************************************/
     /**
-     * 是否有某个关联关系
-     * @param name
-     * @return
+     * 要级联删除的关联关系
      */
-    fun hasRelation(name:String):Boolean;
+    val cascadeDeletedRelations: List<IRelation>
 
     /**
      * 是否有要级联删除的关联关系
      * @return
      */
     fun hasCascadeDeletedRelation():Boolean;
+
+    /**
+     * 是否有某个关联关系
+     * @param name
+     * @return
+     */
+    fun hasRelation(name:String):Boolean;
 
     /**
      * 获得某个关联关系
