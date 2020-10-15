@@ -11,7 +11,7 @@ create table "user"
 create table address
 (
 	id int identity(1,1),
-	user_id int default 0 ,
+	user_id int default 0,
 	addr varchar(50),
 	tel varchar(50) default '',
 	is_home int default 0
