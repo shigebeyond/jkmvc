@@ -22,8 +22,24 @@ interface IDbIdentifierQuoter{
      * @return
      */
     fun quoteTable(table:CharSequence):String {
-        return if(table is DbExpr) // 表与别名之间不加 as，虽然mysql可识别，但oracle不能识别
-                    table.quoteIdentifier(this, " ")
+        return if(table is DbExpr)
+                    table.quoteIdentifier(this)
+                else
+                    quoteIdentifier(table.toString())
+    }
+
+    /**
+     * 转义表别名
+     *   mysql为`table`
+     *   oracle为"table"
+     *   sql server为"table" [table]
+     *
+     * @param table 表名或别名 DbExpr
+     * @return
+     */
+    fun quoteTableAlias(table:CharSequence):String {
+        return if(table is DbExpr)
+                    table.quoteAlias(this)
                 else
                     quoteIdentifier(table.toString())
     }

@@ -8,6 +8,7 @@ import net.jkcode.jkmvc.db.DbType
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkutil.common.dbLogger
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.reflect.KFunction2
 
 /**
@@ -28,6 +29,11 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      *   联表数组，每个联表join = 表名 + 联表方式 | 每个联表条件on = 字段 + 运算符 + 字段
      */
     protected val joinClause: LinkedList<DbQueryBuilderDecorationClauses<*>> = LinkedList()
+
+    /**
+     * join的表名/子查询
+     */
+    protected val joinTables: LinkedList<CharSequence> = LinkedList()
 
     /**
      * where子句
@@ -128,6 +134,41 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
     }
 
     /**
+     * 编译多表删除表达式
+     * @param db 数据库连接
+     * @param sql 保存编译的sql
+     */
+    public fun compileDeleteMultiTable(db: IDb, sql: StringBuilder){
+        // 仅处理多表删除
+        if(action != SqlType.DELETE || joinTables.isEmpty())
+            return
+
+        val tables = ArrayList<CharSequence>(joinTables.size + 1)
+        tables.add(table)
+        for(table in joinTables) {
+            // 子查询不能删除
+            if(table is IDbQueryBuilder
+                    || table is DbExpr && table.exp is IDbQueryBuilder)
+                continue
+
+            tables.add(table)
+        }
+
+        if (db.dbType == DbType.Mysql) { // mysql
+            val tablesPart = tables.joinToString(", ", " ", " ") { table ->
+                db.quoteTableAlias(table)
+            }
+
+            val iSelect = "DELETE".length
+            //delete t1, t2 from t1 left join t2 on ...
+            sql.insert(iSelect, tablesPart) // 在 delete 之后插入多表
+            return
+        }
+
+        // todo: oracle/sql server
+    }
+
+    /**
      * 编译修饰子句
      * @param db 数据库连接
      * @param sql 保存编译的sql
@@ -143,6 +184,9 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
 
         // 单独编译limit表达式
         compileLimit(db, sql)
+
+        // 单独编译多表删除表达式
+        compileDeleteMultiTable(db, sql)
 
         return this;
     }
@@ -175,6 +219,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
             clause.clear();
         }
         joinClause.clear();
+        joinTables.clear()
         return super.clear();
     }
 
@@ -490,6 +535,8 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      * @return
      */
     public override fun join(table: CharSequence, type: String): IDbQueryBuilder {
+        joinTables.add(table)
+
         // join　子句
         val j = DbQueryBuilderDecorationClausesSimple("$type JOIN", arrayOf<KFunction2<IDb, *, String>?>(this::quoteTable));
         j.addSubexp(arrayOf(table));

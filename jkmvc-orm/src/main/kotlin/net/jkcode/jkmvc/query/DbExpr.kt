@@ -64,16 +64,17 @@ data class DbExpr(public val exp:CharSequence, // 表达式, 可以是 String | 
     }
 
     /**
-     * 转义
+     * 转义整体
      *   mysql为`xxx`
      *   oracle为"xxx"
      *   sql server为"xxx" [xxx]
      *
-     * @param identifierQuoteString 转义符
-     * @param delimiter 连接符, 连接表达式+别名
+     * @param quoter 转义器
      * @return
      */
-    public fun quoteIdentifier(quoter: IDbIdentifierQuoter, delimiter:String = " "): String{
+    public fun quoteIdentifier(quoter: IDbIdentifierQuoter): String{
+        // 连接符, 连接表达式+别名: 对于表别名, 表与别名之间不加 as，虽然mysql可识别，但oracle不能识别
+        val delimiter = " "
         // 转义别名
         val alias2 = if(alias == null)
                         ""
@@ -84,5 +85,20 @@ data class DbExpr(public val exp:CharSequence, // 表达式, 可以是 String | 
                     "${quoter.quoteIdentifier(exp.toString())}$delimiter$alias2"
                 else // 不转
                     "$exp$delimiter$alias2"
+    }
+
+    /**
+     * 转义别名
+     *   如果没别名, 则转义表达式
+     *
+     * @param quoter 转义器
+     * @return
+     */
+    public fun quoteAlias(quoter: IDbIdentifierQuoter): String{
+        val target = if(alias == null)
+                        exp.toString()
+                    else
+                        alias
+        return quoter.quoteIdentifier(target)
     }
 }
