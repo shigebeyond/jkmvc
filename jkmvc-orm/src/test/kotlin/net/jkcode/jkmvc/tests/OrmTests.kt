@@ -5,6 +5,7 @@ import net.jkcode.jkmvc.model.GeneralModel
 import net.jkcode.jkmvc.orm.*
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.tests.model.*
+import net.jkcode.jkutil.common.getConstructorOrNull
 import org.junit.Test
 
 class OrmTests{
@@ -76,6 +77,12 @@ class OrmTests{
             return
         }
         println("删除用户：$user, result: ${user.delete()}")
+    }
+
+    @Test
+    fun testGeneralModelConstructor(){
+        val c = GeneralModel::class.java.getConstructorOrNull() // 无参数构造函数
+        println(c)
     }
 
     @Test

@@ -55,6 +55,7 @@ open class HasNRelation(
     /**
      * 查询关联表
      *     自动根据关联关系，来构建查询条件
+     *     查从表
      *
      * @param item Orm对象
      * @param fkInMany hasMany关系下的单个外键值Any|对象IOrm，如果为null，则更新所有关系, 否则更新单个关系

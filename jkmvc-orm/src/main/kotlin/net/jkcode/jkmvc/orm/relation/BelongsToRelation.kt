@@ -46,6 +46,7 @@ class BelongsToRelation(
     /**
      * 查询关联表
      *     自动根据关联关系，来构建查询条件
+     *     查主表
      *     对BelongsTo关系，如果外键为空，则联查为空
      *
      * @param item Orm对象
