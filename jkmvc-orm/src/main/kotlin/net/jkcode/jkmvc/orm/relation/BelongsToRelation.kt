@@ -47,20 +47,15 @@ class BelongsToRelation(
      *
      * @param item Orm对象
      * @param fkInMany 无用, hasMany关系下的单个外键值Any|对象IOrm，如果为null，则更新所有关系, 否则更新单个关系
-     * @param withTableAlias 是否带表前缀
      * @return
      */
-    public override fun queryRelated(item: IOrm, fkInMany: Any?, withTableAlias:Boolean): OrmQueryBuilder? {
-        val tableAlias = if(withTableAlias)
-            model.modelName + '.'
-        else
-            ""
-
+    public override fun queryRelated(item: IOrm, fkInMany: Any?): OrmQueryBuilder? {
         // 查主表
         val fk: DbKeyValues = item.gets(foreignProp)
         if(pkEmptyRule.isEmpty(fk)) // 如果外键为空，则联查为空
             return null
 
+        val tableAlias = model.modelName + '.'
         return queryBuilder().where(primaryKey.wrap(tableAlias) /*tableAlias + primaryKey*/, fk) as OrmQueryBuilder // 主表.主键 = 从表.外键
     }
 

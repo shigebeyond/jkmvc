@@ -311,7 +311,7 @@ abstract class OrmRelated : OrmPersistent() {
 
         // 2 普通关联对象
         // 构建查询：自动构建查询条件
-        val query = relation.queryRelated(this, false)
+        val query = relation.queryRelated(this)
         return if(query == null) true else query.delete()
     }
 
@@ -448,12 +448,11 @@ abstract class OrmRelated : OrmPersistent() {
      *
      * @param name 关系名
      * @param fkInMany hasMany关系下的单个外键值，如果为null，则更新所有关系, 否则更新单个关系
-     * @param withTableAlias 是否带表前缀
      * @return
      */
-    fun queryRelated(name: String, fkInMany: Any? = null, withTableAlias:Boolean = false): OrmQueryBuilder?{
+    fun queryRelated(name: String, fkInMany: Any? = null): OrmQueryBuilder?{
         // 获得关联关系
         val relation = ormMeta.getRelation(name)
-        return relation?.queryRelated(this, fkInMany, withTableAlias)
+        return relation?.queryRelated(this, fkInMany)
     }
 }

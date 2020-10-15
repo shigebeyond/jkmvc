@@ -190,10 +190,9 @@ interface IRelation {
      *
      * @param item Orm对象
      * @param fkInMany hasMany关系下的单个外键值，如果为null，则更新所有关系, 否则更新单个关系
-     * @param withTableAlias 是否带表前缀
      * @return
      */
-    fun queryRelated(item: IOrm, fkInMany: Any? = null, withTableAlias:Boolean = false): OrmQueryBuilder?
+    fun queryRelated(item: IOrm, fkInMany: Any? = null): OrmQueryBuilder?
 
     /**
      * 查询关联表
@@ -204,20 +203,8 @@ interface IRelation {
      * @param withTableAlias 是否带表前缀
      * @return
      */
-    fun queryRelated(item: IOrm, fkInMany: IOrm, withTableAlias:Boolean = false): OrmQueryBuilder?{
-        return queryRelated(item, fkInMany as Any, withTableAlias)
-    }
-
-    /**
-     * 查询关联表
-     *    自动根据关联关系，来构建查询条件
-     *
-     * @param item Orm对象
-     * @param withTableAlias 是否带表前缀
-     * @return
-     */
-    fun queryRelated(item: IOrm, withTableAlias:Boolean): OrmQueryBuilder?{
-        return queryRelated(item, null, withTableAlias)
+    fun queryRelated(item: IOrm, fkInMany: IOrm): OrmQueryBuilder?{
+        return queryRelated(item, fkInMany as Any)
     }
 
     /**

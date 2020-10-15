@@ -137,10 +137,9 @@ class HasNThroughRelation(
      *
      * @param item Orm对象
      * @param fkInMany hasMany关系下的单个外键值Any|对象IOrm，如果为null，则更新所有关系, 否则更新单个关系
-     * @param withTableAlias 是否带表前缀
      * @return
      */
-    public override fun queryRelated(item: IOrm, fkInMany: Any?, withTableAlias:Boolean): OrmQueryBuilder? {
+    public override fun queryRelated(item: IOrm, fkInMany: Any?): OrmQueryBuilder? {
         // 通过join中间表 查从表
         val pk: DbKeyValues = item.gets(primaryProp) // 主键
         if(item.isPkEmpty(pk))
