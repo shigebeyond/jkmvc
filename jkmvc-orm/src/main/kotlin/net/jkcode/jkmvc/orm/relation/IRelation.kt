@@ -93,19 +93,51 @@ interface IRelation {
     val foreignProp: DbKeyNames
 
     /**
+     * 外键对应字段的默认值
+     */
+    val foreignKeyDefault: DbKeyValues
+
+    /**
+     * 本模型作为主表
+     */
+    val thisAsMaster: Boolean
+
+    /**
+     * 主表模型元数据
+     */
+    val masterOrmMeta: IOrmMeta
+        get() = if (thisAsMaster) srcOrmMeta else ormMeta
+
+    /**
+     * 从表模型元数据
+     */
+    val slaveOrmMeta: IOrmMeta
+        get() = if (thisAsMaster) ormMeta else srcOrmMeta
+
+    /**
      * 本模型键属性
      */
     val thisProp: DbKeyNames
+        get() = if(thisAsMaster)
+                    primaryProp // 主表.主键
+                else
+                    foreignProp // 从表.外键
 
     /**
      *  关联模型键属性
+     *    HasNThroughRelation 会改写
      */
     val relatedProp: DbKeyNames
+        get() = if(thisAsMaster)
+                    foreignProp // 从表.外键
+                else
+                    primaryProp // 主表.主键
 
     /**
-     * 空值
+     * 空值, 用作关联属性值
      */
     val emptyValue: Any?
+        get() = if(one2one) null else emptyList<Any>()
 
     /**
      * 获得关联模型的元数据

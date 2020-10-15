@@ -68,10 +68,15 @@ abstract class Relation(
     public override val foreignProp: DbKeyNames = srcOrmMeta.columns2Props(foreignKey)
 
     /**
-     * 空值
+     * 外键对应字段的默认值
      */
-    override val emptyValue: Any?
-        get() = null
+    override val foreignKeyDefault: DbKeyValues
+        get(){
+            val slave = slaveOrmMeta as OrmMeta
+            return foreignKey.map { col ->
+                slave.dbColumns[col]?.default
+            }
+        }
 
     /**
      * 批量设置关系的属性值, 即将关联模型对象 塞到 本模型对象的属性

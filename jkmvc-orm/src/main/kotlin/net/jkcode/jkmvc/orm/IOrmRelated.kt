@@ -108,11 +108,11 @@ interface IOrmRelated : IOrmPersistent
 	 * 删除关系，不删除关联对象，只是将关联的外键给清空
 	 *     一般用于清空 hasOne/hasMany 关系的从对象的外键值
 	 *     至于 belongsTo 关系的主对象中只要主键，没有外键，你只能清空本对象的外键咯
+	 *     关于外键的空值, 是外键字段的默认值(DbColumn.default), 如果没有设置字段默认值, 则为null
 	 *
 	 * @param name 关系名
 	 * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
-	 * @param nullValue 外键的空值, 标识删除关系, 默认null
 	 * @return
 	 */
-	fun removeRelations(name:String, fkInMany: Any? = null, nullValue: Any? = null): Boolean
+	fun removeRelations(name:String, fkInMany: Any? = null): Boolean
 }

@@ -52,6 +52,12 @@ class DbTests{
         println(k1.columns.first() == k2.columns.first()) // true
     }
 
+    @Test
+    fun testTable(){
+        val table = db.getTable("user")!!
+        println("table = $table")
+        println(table.columns)
+    }
 
     @Test
     fun testDefineTable(){

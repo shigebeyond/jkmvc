@@ -76,8 +76,9 @@ interface IDbMeta: IDbIdentifierQuoter, IDbValueQuoter {
      * @param table
      * @return
      */
-    fun getColumnsByTable(table:String): Collection<DbColumn> {
-        return getTable(table)?.columns?.values ?: throw DbException("Table [$table] not exists")
+    fun getColumnsByTable(table:String): Map<String, DbColumn> {
+        return getTable(table)?.columns
+                ?: throw DbException("Table [$table] not exists")
     }
 
     /**

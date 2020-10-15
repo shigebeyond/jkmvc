@@ -83,7 +83,7 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
      */
     public fun genenateModelClass(model:String, label:String, table: String): String {
         // 查询字段的sql
-        val fields = db.getColumnsByTable(table)
+        val fields = db.getColumnsByTable(table).values
         // 找到主键
         val pks = ArrayList<Pair<String, String>>() // 主键的字段名+类型
         for (field in fields){

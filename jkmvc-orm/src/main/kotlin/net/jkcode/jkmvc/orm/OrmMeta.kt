@@ -3,6 +3,7 @@ package net.jkcode.jkmvc.orm
 import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.converters.basic.DateConverter
 import net.jkcode.jkmvc.db.Db
+import net.jkcode.jkmvc.db.DbColumn
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.model.GeneralModel
 import net.jkcode.jkmvc.orm.relation.*
@@ -176,10 +177,17 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     }
 
     /**
+     * db列
+     */
+    internal val dbColumns: Map<String, DbColumn> by lazy{
+        db.getColumnsByTable(table)
+    }
+
+    /**
      * 表字段
      */
     public override val columns: Collection<String> by lazy {
-        db.getColumnsByTable(table).map { it.name }
+        dbColumns.keys
     }
 
     /**

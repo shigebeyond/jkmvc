@@ -21,22 +21,9 @@ open class HasNRelation(
 ) : Relation(one2one, srcOrmMeta, model, foreignKey, primaryKey, conditions, cascadeDeleted, pkEmptyRule) {
 
     /**
-     * 空值
+     * 本模型作为主表
      */
-    override val emptyValue: Any?
-        get() = if(one2one) null else emptyList<Any>()
-
-    /**
-     * 本模型键属性
-     */
-    override val thisProp: DbKeyNames
-        get() = primaryProp // 主表.主键
-
-    /**
-     *  关联模型键属性
-     */
-    override val relatedProp: DbKeyNames
-        get() = foreignProp // 从表.外键
+    override val thisAsMaster: Boolean = true
 
     /**
      * 查询关联表
@@ -75,7 +62,7 @@ open class HasNRelation(
         val query = queryBuilder().where(foreignKey.wrap(tableAlias) /*tableAlias + foreignKey*/, pk) as OrmQueryBuilder// 从表.外键 = 主表.主键
         if(fkInMany != null) { // hasMany关系下过滤单个关系
             val fk = ormMeta.primaryProp.getsFrom(fkInMany)
-            query.where(tableAlias + ormMeta.primaryKey, fk)
+            query.where(ormMeta.primaryKey.wrap(tableAlias), fk)
         }
         return query;
     }
@@ -151,7 +138,6 @@ open class HasNRelation(
      */
     override fun removeRelation(item: IOrm, fkInMany: Any?): Boolean{
         // 手动改外键值为null
-        val nullValue = foreignKey.map { null }
-        return queryRelated(item, fkInMany)!!.set(foreignKey, nullValue).update()
+        return queryRelated(item, fkInMany)!!.set(foreignKey, foreignKeyDefault).update()
     }
 }

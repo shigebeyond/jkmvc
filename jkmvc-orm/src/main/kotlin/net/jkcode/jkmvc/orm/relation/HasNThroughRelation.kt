@@ -41,10 +41,9 @@ class HasNThroughRelation(
 ) : Relation(one2one, srcOrmMeta, model, foreignKey, primaryKey, conditions, false, pkEmptyRule) {
 
     /**
-     * 本模型键属性
+     * 本模型作为主表
      */
-    override val thisProp: DbKeyNames
-        get() = primaryProp // 主表.主键
+    override val thisAsMaster: Boolean = true
 
     /**
      *  关联模型键属性

@@ -19,16 +19,9 @@ class BelongsToRelation(
 ) : Relation(true, srcOrmMeta, model, foreignKey, primaryKey, conditions, false, pkEmptyRule) {
 
     /**
-     * 本模型键属性
+     * 本模型不是主表, 是从表
      */
-    override val thisProp: DbKeyNames
-        get() = foreignProp // 从表.外键
-
-    /**
-     *  关联模型键属性
-     */
-    override val relatedProp: DbKeyNames
-        get() = primaryProp // 主表.主键
+    override val thisAsMaster: Boolean = false
 
     /**
      * 查询关联表
@@ -109,7 +102,7 @@ class BelongsToRelation(
      * @return
      */
     override fun addRelation(item: IOrm, value: Any): Boolean{
-        return setRelation(item, value)
+        return setRelation(item, primaryProp.getsFrom(value))
     }
 
     /**
@@ -120,8 +113,7 @@ class BelongsToRelation(
      * @return
      */
     override fun removeRelation(item: IOrm, fkInMany: Any?): Boolean{
-        val nullValue = null
-        return setRelation(item, nullValue)
+        return setRelation(item, foreignKeyDefault)
     }
 
     /**
@@ -132,8 +124,7 @@ class BelongsToRelation(
      * @return
      */
     protected fun setRelation(item: IOrm, value: Any?): Boolean {
-        val value2 = primaryProp.getsFrom(value)
-        item.sets(foreignProp, value2)
+        item.sets(foreignProp, value)
         return item.update()
     }
 

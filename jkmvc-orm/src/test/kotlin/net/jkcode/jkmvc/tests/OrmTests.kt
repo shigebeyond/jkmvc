@@ -208,16 +208,17 @@ class OrmTests{
     fun testRelationManage(){
         // 有几个关系
         val user = UserModel(id)
-        val oldAddress = user.home ?: AddressModel.queryBuilder().findModel<AddressModel>()
+        val oldAddress = user.home
         var count = user.countRelation("addresses")
         println("用户[${user.name}]有 $count 个地址")
 
         // 删除关系： 清空外键，不删除关联对象
-        val bool = user.removeRelations("addresses", 0)
+        val bool = user.removeRelations("addresses")
         println("用户[${user.name}] 删除地址的关系")
 
         // 添加关系
-        user.addRelation("addresses", oldAddress!!.id)
+        if(oldAddress != null)
+            user.addRelation("addresses", oldAddress.id)
         count = user.countRelation("addresses")
         println("用户[${user.name}]有 $count 个地址")
 
