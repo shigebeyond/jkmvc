@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.orm.relation
 
 import net.jkcode.jkmvc.orm.*
+import net.jkcode.jkmvc.query.IDbQueryBuilder
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -125,4 +126,49 @@ abstract class Relation(
         (relatedItems as MutableList).clear()
     }
 
+    /**
+     * 删除关联对象
+     *
+     * @param item (主表)本模型对象
+     * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
+     * @return
+     */
+    override fun deleteRelated(item: IOrm, fkInMany: Any?): Boolean{
+        // 构建查询：自动构建查询条件
+        val query = queryRelated(item, fkInMany)
+        if(query == null)
+            return true
+
+        // 级联删除
+        return deleteRelated(query)
+    }
+
+    /**
+     * 删除关联对象
+     *
+     * @param relatedQuery 关联对象的查询
+     * @return
+     */
+    override fun deleteRelated(relatedQuery: IDbQueryBuilder): Boolean{
+        val ret = doDeleteRelated(relatedQuery)
+
+        // 递归调用
+        for(relation in ormMeta.cascadeDeletedRelations){
+            // 构建下一层关联对象的查询
+            val nextQuery = relation.queryRelated(relatedQuery)
+            if(nextQuery != null)
+            // 递归删除下一层关联对象
+                relation.deleteRelated(nextQuery)
+        }
+
+        return ret
+    }
+
+    /**
+     * 真正的删除关联对象
+     *
+     * @param relatedQuery 关联对象的查询
+     * @return
+     */
+    protected abstract fun doDeleteRelated(relatedQuery: IDbQueryBuilder): Boolean
 }

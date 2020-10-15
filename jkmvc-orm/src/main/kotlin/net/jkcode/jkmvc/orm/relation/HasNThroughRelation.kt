@@ -102,6 +102,7 @@ class HasNThroughRelation(
         val pk: DbKeyValues = item.gets(primaryProp)
         if(item.isPkEmpty(pk))
             return null;
+
         val query = DbQueryBuilder(ormMeta.db).from(middleTable).where(foreignKey, pk)
         if (fkInMany != null) { // hasMany关系下过滤单个关系
             val farPk = farPrimaryProp.getsFrom(fkInMany)
@@ -254,7 +255,7 @@ class HasNThroughRelation(
     /**
      * 添加关系（删除中间表记录）
      *
-     * @param item
+     * @param item (主表)本模型对象
      * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
      * @return
      */
@@ -265,5 +266,15 @@ class HasNThroughRelation(
                     true
                 else
                     query.delete()
+    }
+
+    /**
+     * 真正的删除关联对象
+     *
+     * @param relatedQuery 关联对象的查询
+     * @return
+     */
+    protected override fun doDeleteRelated(relatedQuery: IDbQueryBuilder): Boolean {
+        return relatedQuery.delete()
     }
 }

@@ -235,7 +235,7 @@ interface IRelation {
     /**
      * 添加关系（添加从表的外键值）
      *
-     * @param item
+     * @param item 本模型对象
      * @param value 外键值Any | 关联对象IOrm
      * @return
      */
@@ -244,9 +244,30 @@ interface IRelation {
     /**
      * 添加关系（删除从表的外键值）
      *
-     * @param item
+     * @param item 本模型对象
      * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
      * @return
      */
     fun removeRelation(item: IOrm, fkInMany: Any? = null): Boolean
+
+    /**
+     * 删除关联对象
+     *    一般用于删除 hasOne/hasMany 关系的从对象
+     *    你敢删除 belongsTo 关系的主对象？
+     *
+     * @param item 本模型对象
+     * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
+     * @return
+     */
+    fun deleteRelated(item: IOrm, fkInMany: Any? = null): Boolean
+
+    /**
+     * 删除关联对象
+     *    一般用于删除 hasOne/hasMany 关系的从对象
+     *    你敢删除 belongsTo 关系的主对象？
+     *
+     * @param relatedQuery 关联对象的查询
+     * @return
+     */
+    fun deleteRelated(relatedQuery: IDbQueryBuilder): Boolean
 }

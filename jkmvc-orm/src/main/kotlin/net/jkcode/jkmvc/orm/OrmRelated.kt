@@ -300,49 +300,8 @@ abstract class OrmRelated : OrmPersistent() {
     public override fun deleteRelated(name: String, fkInMany: Any?): Boolean {
         // 获得关联关系
         val relation = ormMeta.getRelation(name)!!;
-
-        // 不能删除 belongsTo 关联对象
-        if(relation.isBelongsTo)
-            throw OrmException("Cannot delete model [${ormMeta.name}] 's `belongsTo` related object [$name]");
-
-        // 1 有中间表的关联对象
-        if(relation is HasNThroughRelation)
-            return deleteMiddleRelated(relation, fkInMany)
-
-        // 2 普通关联对象
-        // 构建查询：自动构建查询条件
-        val query = relation.queryRelated(this, fkInMany)
-        if(query == null)
-            return true
-
-        // 级联删除
-
-        return query.delete()
-    }
-
-    /**
-     * 删除有中间表的关联对象
-     *
-     * @param relation
-     * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
-     * @return
-     */
-    protected fun deleteMiddleRelated(relation: HasNThroughRelation, fkInMany: Any?): Boolean {
-        val db = ormMeta.db
-        return db.transaction {
-            // 子查询
-            val subquery = relation.queryMiddleTable(this, fkInMany)
-            if(subquery != null){
-                // 删除关联对象
-                relation.ormMeta.queryBuilder()
-                        .join(DbExpr(subquery.select(*relation.farForeignKey.columns), "_mid"), "INNER")
-                        .on(relation.farPrimaryKey.wrap(relation.ormMeta.name + "."), relation.farForeignKey.wrap("_mid.") /*tableAlias + farForeignKey*/)
-                        .delete()
-                // 删除中间表
-                subquery.delete()
-            }
-            true
-        }
+        // 删除关联对象
+        return relation.deleteRelated(this, fkInMany)
     }
 
     /**
