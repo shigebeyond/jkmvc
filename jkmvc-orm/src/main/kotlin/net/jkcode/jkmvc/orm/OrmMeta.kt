@@ -72,12 +72,11 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
     init {
         // 检查 model 类的默认构造函数
-        if (model != GeneralModel::class) {
-            constructorNoarg = model.java.getConstructorOrNull() // 无参数构造函数
+        constructorNoarg = model.java.getConstructorOrNull() // 无参数构造函数, 其中 GeneralModel 有个internal的无参构造函数
+        if(constructorNoarg == null)
             constructorVararg = model.java.getConstructorOrNull(Array<Any>::class.java) // 可变参数构造函数
-            if (constructorNoarg == null && constructorVararg == null)
-                throw OrmException("Model Class [$model] has no no-arg constructor") // Model类${clazz}无默认构造函数
-        }
+        if (constructorNoarg == null && constructorVararg == null)
+            throw OrmException("Model Class [$model] has no no-arg constructor") // Model类${clazz}无默认构造函数
 
         // 关联 缓存配置 与 元数据
         cacheMeta?.ormMeta = this
