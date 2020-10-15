@@ -190,7 +190,7 @@ interface IRelation {
      * 查询关联表
      *    自动根据关联关系，来构建查询条件
      *
-     * @param item Orm对象
+     * @param item 当前Orm对象
      * @param fkInMany hasMany关系下的单个外键值，如果为null，则更新所有关系, 否则更新单个关系
      * @return
      */
@@ -200,7 +200,7 @@ interface IRelation {
      * 查询关联表
      *    自动根据关联关系，来构建查询条件
      *
-     * @param items Orm列表
+     * @param items 当前Orm列表
      * @return
      */
     fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder?
@@ -209,7 +209,7 @@ interface IRelation {
      * 查询关联表
      *    自动根据关联关系，来构建查询条件
      *
-     * @param subquery 子查询
+     * @param subquery 当前子查询
      * @return
      */
     fun queryRelated(subquery: IDbQueryBuilder): OrmQueryBuilder?

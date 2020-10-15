@@ -30,7 +30,7 @@ class BelongsToRelation(
      *     查主表
      *     对BelongsTo关系，如果外键为空，则联查为空
      *
-     * @param item (从表)Orm对象
+     * @param item (从表)当前Orm对象
      * @param fkInMany 无用, hasMany关系下的单个外键值Any|对象IOrm，如果为null，则更新所有关系, 否则更新单个关系
      * @return
      */
@@ -49,7 +49,7 @@ class BelongsToRelation(
      *     自动根据关联关系，来构建查询条件
      *     查主表
      *
-     * @param items (从表)Orm列表
+     * @param items (从表)当前Orm列表
      * @return
      */
     public override fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder? {
@@ -66,7 +66,7 @@ class BelongsToRelation(
      *    自动根据关联关系，来构建查询条件
      *    查主表
      *
-     * @param subquery (从表)子查询
+     * @param subquery (从表)当前子查询
      * @return
      */
     override fun queryRelated(subquery: IDbQueryBuilder): OrmQueryBuilder?{

@@ -124,7 +124,7 @@ class HasNThroughRelation(
      *     根据hasMany/hasOne的关联关系，来构建查询条件
      *     通过join中间表 查从表
      *
-     * @param item (主表)Orm对象
+     * @param item (主表)当前Orm对象
      * @param fkInMany hasMany关系下的单个外键值Any|对象IOrm，如果为null，则更新所有关系, 否则更新单个关系
      * @return
      */
@@ -149,7 +149,7 @@ class HasNThroughRelation(
      *     根据hasMany/hasOne的关联关系，来构建查询条件
      *     通过join中间表 查从表
      *
-     * @param items (主表)Orm列表
+     * @param items (主表)当前Orm列表
      * @return
      */
     public override fun queryRelated(items: Collection<out IOrm>): OrmQueryBuilder? {
@@ -168,7 +168,7 @@ class HasNThroughRelation(
      *    通过join中间表 查从表
      *    主要用于级联删除
      *
-     * @param subquery (主表)子查询
+     * @param subquery (主表)当前子查询
      * @return
      */
     override fun queryRelated(subquery: IDbQueryBuilder): OrmQueryBuilder?{
