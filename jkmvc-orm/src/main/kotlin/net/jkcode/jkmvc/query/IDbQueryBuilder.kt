@@ -26,6 +26,15 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
         return super.clone()
     }
 
+    /**
+     * 克隆对象, 同clone(), 只转换下返回类型为 IDbQueryBuilder
+     *
+     * @return o
+     */
+    public fun copy(): IDbQueryBuilder{
+        return clone() as IDbQueryBuilder
+    }
+
     /****************************** 编译sql ********************************/
     /**
      * 编译sql

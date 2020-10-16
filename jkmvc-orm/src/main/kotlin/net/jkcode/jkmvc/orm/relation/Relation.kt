@@ -143,7 +143,9 @@ abstract class Relation(
         val deletedModels = mutableSetOf(srcOrmMeta)
 
         // 级联删除
-        return deleteRelated(query, deletedModels)
+        val ret = deleteRelated(query, deletedModels)
+        deletedModels.clear()
+        return ret
     }
 
     /**
@@ -163,14 +165,17 @@ abstract class Relation(
         for(relation in ormMeta.hasNOrThroughRelations){
             // 构建下一层关联对象的查询
             val nextQuery = relation.queryRelated(relatedQuery)
-            if(nextQuery != null)
-            // 递归删除下一层关联对象
-            relation.deleteRelated(nextQuery, deletedModels)
+            if(nextQuery == null)
+                continue
+
+            if(relation.cascadeDeleted) // 级联删除: 递归删除下一层关联对象
+                relation.deleteRelated(nextQuery, deletedModels)
+            else // 仅删除下一层关系
+                relation.removeRelation(nextQuery)
         }
 
         // 2 删除当前层关联对象
-        val ret = doDeleteRelated(relatedQuery)
-        return ret
+        return doDeleteRelated(relatedQuery)
     }
 
     /**

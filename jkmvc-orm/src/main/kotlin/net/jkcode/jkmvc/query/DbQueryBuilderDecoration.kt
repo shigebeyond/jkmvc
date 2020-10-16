@@ -230,7 +230,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
     public override fun clone(): Any {
         val o = super.clone()
         // 复制子句
-        o.cloneProperties(true,"clauses", "joinClause")
+        o.cloneProperties(true,"clauses", "joinClause", "joinTables")
         return o
     }
 

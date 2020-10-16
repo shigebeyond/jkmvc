@@ -9,6 +9,10 @@ import kotlin.collections.HashSet
 /**
  * ORM之关联对象操作
  *
+ * 关于关联删除:
+ *      1. deleteRelated() -- 删除关系 + 对象, 会级联删除
+ *      2. removeRelations() -- 仅删除关系, 不删除对象, 不会级联删除
+ *
  * @author shijianhang
  * @date 2016-10-10 上午12:52:34
  *

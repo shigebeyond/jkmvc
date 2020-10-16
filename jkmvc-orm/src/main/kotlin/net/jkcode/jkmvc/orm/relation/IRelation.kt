@@ -8,7 +8,11 @@ import kotlin.reflect.KClass
 /**
  * 关联关系
  *
- * 关于 cascadeDeleted:
+ * 关于关系删除:
+ *      1. deleteRelated() -- 删除关系 + 对象, 会级联删除, 由 cascadeDeleted=true 触发
+ *      2. removeRelations() -- 仅删除关系, 不删除对象, 不会级联删除, 由 cascadeDeleted=false 触发
+ *
+ * 关于级联删除 cascadeDeleted:
  *      只对 hasOne/hasMany 有效, 对 belongsTo/hasOneThrough/hasManyThrough 无效
  *      对 belongsTo, 你敢删除 belongsTo 关系的主对象？
  *      对 hasOneThrough/hasManyThrough, 都通过中间表来关联了, 两者之间肯定是独立维护的, 只删除关联关系就好, 不删除关联对象

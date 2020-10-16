@@ -17,7 +17,7 @@ interface ICbRelation<M : IOrm, K, R> {
     val name: String
 
     /**
-     * 是否一对多
+     * 是否一对一
      */
     val one2one: Boolean
 
