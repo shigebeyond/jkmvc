@@ -773,22 +773,14 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
     /********************************* 关联关系 **************************************/
     /**
-     * 要级联删除的关联关系
+     * hasN / hasNThrough关联关系
+     *   只有hasN / hasNThrough关联关系, 才能级联删除
      */
-    public override val cascadeDeletedRelations: List<IRelation>
-        get(){
-            return relations.values.filter { relation ->
-                relation.cascadeDeleted
-            }
-        }
-
-    /**
-     * 是否有要级联删除的关联关系
-     * @return
-     */
-    public override fun hasCascadeDeletedRelation():Boolean{
-        return relations.any { name, relation ->
-            relation.cascadeDeleted
+    public override val hasNOrThroughRelations: List<IRelation> by lazy{
+        relations.values.filter { relation ->
+            !relation.isBelongsTo // 过滤 hasN / hasNThrough
+        }.sortedBy { relation -> // // 从小到大
+            if(relation is HasNThroughRelation) 0 else 1 // 优先hasNThrough, 主要是用在关联删除时, 优先删除hasNThrough, 防止先删除[hasN 中间表],导致[hasNThrough 中间表]无数据可删
         }
     }
 

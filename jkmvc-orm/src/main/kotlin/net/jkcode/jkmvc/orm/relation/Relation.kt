@@ -160,7 +160,7 @@ abstract class Relation(
         deletedModels.add(ormMeta)
 
         // 1 递归删除下一层
-        for(relation in ormMeta.cascadeDeletedRelations){
+        for(relation in ormMeta.hasNOrThroughRelations){
             // 构建下一层关联对象的查询
             val nextQuery = relation.queryRelated(relatedQuery)
             if(nextQuery != null)

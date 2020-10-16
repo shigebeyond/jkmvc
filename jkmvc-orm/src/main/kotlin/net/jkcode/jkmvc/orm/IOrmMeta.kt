@@ -2,9 +2,11 @@ package net.jkcode.jkmvc.orm
 
 import com.thoughtworks.xstream.XStream
 import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkmvc.orm.relation.HasNThroughRelation
 import net.jkcode.jkmvc.orm.relation.ICbRelation
 import net.jkcode.jkmvc.orm.relation.IRelation
 import net.jkcode.jkutil.collection.FixedKeyMapFactory
+import net.jkcode.jkutil.common.any
 import net.jkcode.jkutil.validator.IValidator
 import net.jkcode.jkutil.validator.ModelValidateResult
 import net.jkcode.jkutil.validator.RuleValidator
@@ -465,15 +467,9 @@ interface IOrmMeta {
 
     /************************************ 关联关系 *************************************/
     /**
-     * 要级联删除的关联关系
+     * hasN关联关系
      */
-    val cascadeDeletedRelations: List<IRelation>
-
-    /**
-     * 是否有要级联删除的关联关系
-     * @return
-     */
-    fun hasCascadeDeletedRelation():Boolean;
+    public val hasNOrThroughRelations: List<IRelation>
 
     /**
      * 是否有某个关联关系

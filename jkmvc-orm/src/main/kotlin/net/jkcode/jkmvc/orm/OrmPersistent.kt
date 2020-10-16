@@ -195,10 +195,10 @@ abstract class OrmPersistent : OrmValid() {
 	 *    user.update();
 	 * </code>
 	 *
-	 * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
+	 * @param withHasRelations0 是否连带保存 hasOne/hasMany 的关联关系
 	 * @return
 	 */
-	public override fun update(withHasRelations: Boolean): Boolean {
+	public override fun update(withHasRelations0: Boolean): Boolean {
 		if(!loaded)
 			throw OrmException("Load before updating object[$this]"); // 更新对象[$this]前先检查是否存在
 
@@ -212,6 +212,7 @@ abstract class OrmPersistent : OrmValid() {
 		triggerValidate()
 
 		// 事务
+		val withHasRelations = withHasRelations0 && ormMeta.hasNOrThroughRelations.isNotEmpty()
 		return ormMeta.transactionWhenHandlingEvent("beforeUpdate|afterUpdate|beforeSave|afterSave", withHasRelations) {
 			// 触发update前置事件
 			triggerBeforeUpdate()
@@ -227,7 +228,7 @@ abstract class OrmPersistent : OrmValid() {
 
 			// 修改(先删后加) _data 中的 hasOne/hasMany 的关联关系
 			if(withHasRelations) {
-				removeHasNRelations(false) // 删除旧的关系
+				removeHasNRelationsByUpdate() // 删除旧的关系
 				addHasNRelations() // 添加新的关系
 			}
 
@@ -245,14 +246,15 @@ abstract class OrmPersistent : OrmValid() {
 	 *    user.delete();
 	 *　</code>
 	 *
-	 * @param withHasRelations 是否连带删除 hasOne/hasMany 的关联关系
+	 * @param withHasRelations0 是否连带删除 hasOne/hasMany 的关联关系
 	 * @return
 	 */
-	public override fun delete(withHasRelations: Boolean): Boolean {
+	public override fun delete(withHasRelations0: Boolean): Boolean {
 		if(!loaded)
 			throw OrmException("Load before deleting object[$this]"); // 删除对象[$this]前先检查是否存在
 
 		// 事务
+		val withHasRelations = withHasRelations0 && ormMeta.hasNOrThroughRelations.isNotEmpty()
 		return ormMeta.transactionWhenHandlingEvent("beforeDelete|afterDelete", withHasRelations) {
 			// 触发前置事件
 			beforeDelete()
@@ -262,7 +264,7 @@ abstract class OrmPersistent : OrmValid() {
 
 			// 先删除 hasOne/hasMany 的关联关系, 否则本记录可能因仍有外键约束, 而导致本记录删除失败, 报错: Cannot delete or update a parent row: a foreign key constraint fails
 			if(withHasRelations)
-				removeHasNRelations(true)
+				removeHasNRelationsByDelete()
 
 			// 删除数据
 			val result = queryBuilder().where(ormMeta.primaryKey, pk).delete();
@@ -313,13 +315,14 @@ abstract class OrmPersistent : OrmValid() {
 	internal abstract fun addHasNRelations()
 
 	/**
-	 * 删除 hasOne/hasMany 的关联关系
-	 *   仅用在 update()/delete() 方法中
-	 *
-	 *
-	 * @param byDelete 是否delete()调用, 否则update()调用
+	 * 删除 hasOne/hasMany 的关联关系, 由 delete() 触发
 	 */
-	internal abstract fun removeHasNRelations(byDelete: Boolean)
+	internal abstract fun removeHasNRelationsByDelete()
+
+	/**
+	 * 删除 hasOne/hasMany 的关联关系, 由 update() 触发
+	 */
+	internal abstract fun removeHasNRelationsByUpdate()
 
 	/************************************ 前置后置事件+触发 *************************************/
 	/**
