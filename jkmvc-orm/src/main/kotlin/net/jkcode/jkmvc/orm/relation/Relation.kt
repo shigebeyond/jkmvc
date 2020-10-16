@@ -127,9 +127,9 @@ abstract class Relation(
     }
 
     /**
-     * 删除关联对象
+     * 删除关联对象, 级联删除的源头
      *
-     * @param item (主表)本模型对象
+     * @param item 本模型对象
      * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
      * @return
      */
@@ -139,33 +139,42 @@ abstract class Relation(
         if(query == null)
             return true
 
+        // 因为是级联删除的源头, 因此记录源模型
+        val deletedModels = mutableSetOf(srcOrmMeta)
+
         // 级联删除
-        return deleteRelated(query)
+        return deleteRelated(query, deletedModels)
     }
 
     /**
      * 删除关联对象
      *
      * @param relatedQuery 关联对象的查询
+     * @param deletedModels 记录删除过的模型
      * @return
      */
-    override fun deleteRelated(relatedQuery: IDbQueryBuilder): Boolean{
-        val ret = doDeleteRelated(relatedQuery)
+    override fun deleteRelated(relatedQuery: IDbQueryBuilder, deletedModels: MutableSet<IOrmMeta>): Boolean{
+        // 去重: 已删除过
+        if(deletedModels.contains(ormMeta))
+            return true
+        deletedModels.add(ormMeta)
 
-        // 递归调用
+        // 1 递归删除下一层
         for(relation in ormMeta.cascadeDeletedRelations){
             // 构建下一层关联对象的查询
             val nextQuery = relation.queryRelated(relatedQuery)
             if(nextQuery != null)
             // 递归删除下一层关联对象
-                relation.deleteRelated(nextQuery)
+            relation.deleteRelated(nextQuery, deletedModels)
         }
 
+        // 2 删除当前层关联对象
+        val ret = doDeleteRelated(relatedQuery)
         return ret
     }
 
     /**
-     * 真正的删除关联对象
+     * 删除当前层关联对象
      *
      * @param relatedQuery 关联对象的查询
      * @return

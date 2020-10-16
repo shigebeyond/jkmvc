@@ -94,26 +94,6 @@ class HasNThroughRelation(
     /**
      * 查询中间表
      *
-     * @param item
-     * @param fkInMany hasMany关系下的单个外键值Any|对象IOrm，如果为null，则更新所有关系, 否则更新单个关系
-     * @return
-     */
-    public fun queryMiddleTable(item: IOrm, fkInMany: Any? = null): IDbQueryBuilder? {
-        val pk: DbKeyValues = item.gets(primaryProp)
-        if(item.isPkEmpty(pk))
-            return null;
-
-        val query = DbQueryBuilder(ormMeta.db).from(middleTable).where(foreignKey, pk)
-        if (fkInMany != null) { // hasMany关系下过滤单个关系
-            val farPk = farPrimaryProp.getsFrom(fkInMany)
-            query.where(farForeignKey, farPk)
-        }
-        return query;
-    }
-
-    /**
-     * 查询中间表
-     *
      * @return
      */
     public fun queryMiddleTable(): IDbQueryBuilder {
@@ -177,7 +157,7 @@ class HasNThroughRelation(
         val tableAlias = middleTable + '.'
         val subQueryAlias = "sub_" + model.modelName
         return buildQuery() // 中间表.远端外键 = 从表.远端主键
-                .join(DbExpr(subquery.select(*primaryKey.columns /* TODO: 加子查询内的表前缀 */), subQueryAlias), "INNER")
+                .join(DbExpr(subquery.select(*primaryKey.columns /* TODO: 加子查询内的表前缀 */), subQueryAlias), "INNER") // select 主表.主键
                 .on(foreignKey.wrap(tableAlias) /*middleTable + foreignKey*/, primaryKey.wrap(subQueryAlias + ".") /*subQueryAlias + primaryKey*/) as OrmQueryBuilder // 中间表.外键 = 主表.主键
     }
 
@@ -253,23 +233,43 @@ class HasNThroughRelation(
     }
 
     /**
-     * 添加关系（删除中间表记录）
+     * 删除关系（删除中间表记录）
      *
      * @param item (主表)本模型对象
      * @param fkInMany hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
      * @return
      */
     override fun removeRelation(item: IOrm, fkInMany: Any?): Boolean{
+        val pk: DbKeyValues = item.gets(primaryProp)
+        if(item.isPkEmpty(pk))
+            return false;
+
         // 删除中间表记录
-        val query = queryMiddleTable(item, fkInMany)
-        return if (query == null)
-                    true
-                else
-                    query.delete()
+        val query = queryMiddleTable().where(foreignKey, pk) // 中间表.外键 = 主表.主键
+        if (fkInMany != null) { // hasMany关系下过滤单个关系
+            val farPk = farPrimaryProp.getsFrom(fkInMany)
+            query.where(farForeignKey, farPk) // 中间表.远端外键 = 从表.远端主键
+        }
+
+        return query.delete()
     }
 
     /**
-     * 真正的删除关联对象
+     * 删除关系（删除中间表记录）
+     *
+     * @param @param relatedQuery (从表)关联对象的查询
+     * @return
+     */
+    override fun removeRelation(relatedQuery: IDbQueryBuilder): Boolean{
+        // 删除中间表记录
+        return queryMiddleTable()
+                .join(DbExpr(relatedQuery.select(*farPrimaryKey.columns), "_slave"), "INNER") // select 从表.远端主键
+                .on(farForeignKey.wrap(middleTable + "."), farPrimaryKey.wrap("_slave.")) // // 中间表.远端外键 = 从表.远端主键
+                .delete()
+    }
+
+    /**
+     * 删除当前层关联对象
      *
      * @param relatedQuery 关联对象的查询
      * @return

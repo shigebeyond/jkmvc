@@ -123,17 +123,6 @@ class BelongsToRelation(
     }
 
     /**
-     * 添加关系（删除从表的外键值）
-     *
-     * @param item (从表)本模型对象
-     * @param fkInMany 无用, hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
-     * @return
-     */
-    override fun removeRelation(item: IOrm, fkInMany: Any?): Boolean{
-        return setRelation(item, foreignKeyDefault)
-    }
-
-    /**
      * 设置关系（设置从表的外键值）
      *
      * @param item (从表)本模型对象
@@ -146,10 +135,37 @@ class BelongsToRelation(
     }
 
     /**
-     * 真正的删除关联对象
+     * 删除关系（删除从表的外键值）
+     *
+     * @param item (从表)本模型对象
+     * @param fkInMany 无用, hasMany关系下的单个外键值Any|关联对象IOrm，如果为null，则删除所有关系, 否则删除单个关系
+     * @return
+     */
+    override fun removeRelation(item: IOrm, fkInMany: Any?): Boolean{
+        return setRelation(item, foreignKeyDefault)
+    }
+
+    /**
+     * 删除关系（删除从表的外键值）
+     *
+     * @param @param relatedQuery (主表)关联对象的查询
+     * @return
+     */
+    override fun removeRelation(relatedQuery: IDbQueryBuilder): Boolean{
+        // 清空 从表.外键
+        val tableAlias = srcOrmMeta.name + '.'
+        return srcOrmMeta.queryBuilder()
+                .join(DbExpr(relatedQuery.select(*primaryKey.columns), "_master"), "INNER") // select 主表.主键
+                .on(foreignKey.wrap(tableAlias), primaryKey.wrap("_master.")) // 从表.外键 = 主表.主键
+                .set(foreignKey.wrap(tableAlias), foreignKeyDefault) // 清空外键
+                .update()
+    }
+
+    /**
+     * 删除当前层关联对象
      *    你敢删除 belongsTo 关系的主对象？
      *
-     * @param relatedQuery 关联对象的查询
+     * @param relatedQuery (主表)关联对象的查询
      * @return
      */
     protected override fun doDeleteRelated(relatedQuery: IDbQueryBuilder): Boolean {
