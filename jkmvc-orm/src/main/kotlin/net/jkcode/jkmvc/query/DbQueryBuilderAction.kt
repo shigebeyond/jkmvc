@@ -243,8 +243,10 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      */
     public override fun clone(): Any {
         val o = super.clone() as DbQueryBuilderAction
-        // 复制要操作的数据
-        o.cloneProperties(true, "manipulatedData")
+        // action参数不复制
+        o.action = null
+        // 复制复杂属性: 要操作的数据
+        o.cloneProperties(true, "table", "manipulatedData")
         return o;
     }
 

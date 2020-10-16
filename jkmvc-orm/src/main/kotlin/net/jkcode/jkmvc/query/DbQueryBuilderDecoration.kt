@@ -220,6 +220,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
         }
         joinClause.clear();
         joinTables.clear()
+        limitParams = null
         return super.clear();
     }
 
@@ -228,8 +229,10 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      * @return o
      */
     public override fun clone(): Any {
-        val o = super.clone()
-        // 复制子句
+        val o = super.clone() as DbQueryBuilderDecoration
+        // limit参数不复制
+        o.limitParams = null
+        // 复制复杂属性: 子句
         o.cloneProperties(true,"clauses", "joinClause", "joinTables")
         return o
     }

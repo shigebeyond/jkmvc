@@ -12,7 +12,7 @@ abstract class DbQueryBuilderQuoter: IDbQueryBuilder(){
     /**
      * 缓存编译好的sql
      */
-    protected val compiledSql: CompiledSql = CompiledSql();
+    protected var compiledSql: CompiledSql = CompiledSql();
 
     /**
      * 清空条件
@@ -29,8 +29,7 @@ abstract class DbQueryBuilderQuoter: IDbQueryBuilder(){
      */
     public override fun clone(): Any {
         val o = super.clone() as DbQueryBuilder
-        // 复制编译结果
-        o.cloneProperties("compiledSql")
+        o.compiledSql = CompiledSql()
         return o;
     }
 

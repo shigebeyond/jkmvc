@@ -100,7 +100,7 @@ class InsertData: Cloneable{
      */
     public override fun clone(): Any {
         val o = super.clone()
-        // 复制列/行
+        // 复制复杂属性: 列/行
         o.cloneProperties("columns", "rows")
         return o;
     }

@@ -100,7 +100,7 @@ class QueryBuilderTests{
     @Test
     fun testFindPage(){
         val query: IDbQueryBuilder = DbQueryBuilder().table("user")
-        val counter: IDbQueryBuilder = query.clone() as IDbQueryBuilder // 克隆query builder
+        val counter: IDbQueryBuilder = query.copy() // 克隆query builder
         val rows = query.orderBy("id").limit(10).findMaps() // 查分页数据
         val count = counter.count() // 查总数
         println("查询user表：总数: " + count + ", 分页数据：" + rows)

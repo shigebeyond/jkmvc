@@ -77,6 +77,9 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
         // 收集编译好的sql
         compiledSql.sql = sql.toString()
 
+        // 清空所有参数
+        clear()
+
         return compiledSql
     }
 

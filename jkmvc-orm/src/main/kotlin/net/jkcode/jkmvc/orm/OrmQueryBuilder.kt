@@ -1,8 +1,5 @@
 package net.jkcode.jkmvc.orm
 
-import net.jkcode.jkutil.common.isArrayOrCollection
-import net.jkcode.jkutil.common.iteratorArrayOrCollection
-import net.jkcode.jkutil.common.map
 import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.db.DbResultSet
 import net.jkcode.jkmvc.db.IDb
@@ -11,7 +8,7 @@ import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.DbQueryBuilder
 import net.jkcode.jkmvc.query.IDbQueryBuilder
 import net.jkcode.jkmvc.query.SqlType
-import net.jkcode.jkutil.common.mapToArray
+import net.jkcode.jkutil.common.*
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.collections.component1
@@ -64,6 +61,17 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      * 关联查询回调的关系名，需单独处理，不在一个sql中联查，而是单独调用回调来查询
      */
     protected val withCb:MutableList<String> = LinkedList()
+
+    /**
+     * 克隆对象
+     * @return o
+     */
+    public override fun clone(): Any {
+        val o = super.clone()
+        // 复制复杂属性: 子句
+        o.cloneProperties("joins", "withMany", "withCb")
+        return o
+    }
 
     /**
      * 清空条件

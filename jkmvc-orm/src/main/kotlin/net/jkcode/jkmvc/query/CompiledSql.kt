@@ -79,7 +79,7 @@ class CompiledSql : Cloneable, ICompiledSql() {
      */
     public override fun clone(): Any {
         val o = super.clone()
-        // 复制静态参数
+        // 复制复杂属性: 静态参数
         o.cloneProperties("staticParams")
         return o
     }

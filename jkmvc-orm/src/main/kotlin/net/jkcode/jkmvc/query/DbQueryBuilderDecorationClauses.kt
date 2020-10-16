@@ -51,7 +51,7 @@ abstract class DbQueryBuilderDecorationClauses<T>(protected val operator: String
      */
     public override fun clone(): Any {
         val o = super.clone()
-        // 复制子表达式
+        // 复制复杂属性: 子表达式
         o.cloneProperties("subexps")
         return o;
     }
