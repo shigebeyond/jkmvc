@@ -1,7 +1,7 @@
 package net.jkcode.jkmvc.query
 
 import net.jkcode.jkmvc.db.IDb
-import kotlin.reflect.KFunction2
+import kotlin.reflect.KFunction3
 
 /**
  * 分组子句
@@ -15,7 +15,7 @@ import kotlin.reflect.KFunction2
  * @date 2016-10-13
  */
 class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如where/group by */,
-                                           elementHandlers: Array<KFunction2 <IDb, *, String>?> /* 每个元素的处理器, 可视为列的处理*/
+                                           elementHandlers: Array<KFunction3<DbQueryBuilderDecoration, IDb, *, String>?> /* 每个元素的处理器, 可视为列的处理*/
 ) : DbQueryBuilderDecorationClauses<Any>/* subexps 是字符串 或 DbQueryBuilderDecorationClausesSimple */(operator, elementHandlers) {
     /**
      * 开启一个分组
@@ -77,13 +77,14 @@ class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如w
      *
      * @param subexp 子表达式
      * @param j 索引
+     * @param query 查询构建器
      * @param db 数据库连接
      * @param sql 保存编译的sql
      */
-    public override fun compileSubexp(subexp: Any, j:Int, db: IDb, sql: StringBuilder) {
+    public override fun compileSubexp(subexp: Any, j:Int, query: DbQueryBuilderDecoration, db: IDb, sql: StringBuilder) {
         // 子表达式是: string / DbQueryBuilderDecorationClausesSimple
         if (subexp is DbQueryBuilderDecorationClausesSimple) {
-            subexp.compile(db, sql);
+            subexp.compile(query, db, sql);
         }else{
             sql.append(subexp);
         }

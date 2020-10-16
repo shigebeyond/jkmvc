@@ -9,7 +9,7 @@ import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkutil.common.dbLogger
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.reflect.KFunction2
+import kotlin.reflect.KFunction3
 
 /**
  * sql构建器 -- 修饰子句: 由修饰词join/where/group by/order by/limit来构建的子句
@@ -42,7 +42,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
     protected val whereClause: DbQueryBuilderDecorationClauses<*>
         get(){
             return clauses.getOrPut(ClauseType.WHERE.ordinal){
-                DbQueryBuilderDecorationClausesGroup("WHERE", arrayOf<KFunction2<IDb, *, String>?>(this::quoteWhereColumn, null, this::quote));
+                DbQueryBuilderDecorationClausesGroup("WHERE", arrayOf(DbQueryBuilderDecoration::quoteWhereColumn, null, DbQueryBuilderDecoration::quote));
             } as DbQueryBuilderDecorationClauses<*>
         }
 
@@ -53,7 +53,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
     protected val groupByClause: DbQueryBuilderDecorationClauses<*>
         get(){
             return clauses.getOrPut(ClauseType.GROUP_BY.ordinal){
-                DbQueryBuilderDecorationClausesSimple("GROUP BY", arrayOf<KFunction2<IDb, *, String>?>(this::quoteColumn));
+                DbQueryBuilderDecorationClausesSimple("GROUP BY", arrayOf(DbQueryBuilderDecoration::quoteColumn));
             } as DbQueryBuilderDecorationClauses<*>
         }
 
@@ -64,7 +64,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
     protected val havingClause: DbQueryBuilderDecorationClauses<*>
         get(){
             return clauses.getOrPut(ClauseType.HAVING.ordinal){
-                DbQueryBuilderDecorationClausesGroup("HAVING", arrayOf<KFunction2<IDb, *, String>?>(this::quoteColumn, null, this::quote));
+                DbQueryBuilderDecorationClausesGroup("HAVING", arrayOf(DbQueryBuilderDecoration::quoteColumn, null, DbQueryBuilderDecoration::quote));
             } as DbQueryBuilderDecorationClauses<*>
         }
 
@@ -75,13 +75,13 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
     protected val orderByClause: DbQueryBuilderDecorationClauses<*>
         get(){
             return clauses.getOrPut(ClauseType.ORDER_BY.ordinal){
-                DbQueryBuilderDecorationClausesSimple("ORDER BY", arrayOf<KFunction2<IDb, *, String>?>(this::quoteColumn, this::quoteOrderDirection));
+                DbQueryBuilderDecorationClausesSimple("ORDER BY", arrayOf(DbQueryBuilderDecoration::quoteColumn, DbQueryBuilderDecoration::quoteOrderDirection));
             } as DbQueryBuilderDecorationClauses<*>
         }
 
     /**
      * limit参数: limit + offset
-     *    为了兼容不同db的特殊的limit语法，不使用 DbQueryBuilderDecorationClausesSimple("LIMIT", arrayOf<KFunction2 <IDb, *, String>?>(null));
+     *    为了兼容不同db的特殊的limit语法，不使用 DbQueryBuilderDecorationClausesSimple("LIMIT", arrayOf(null));
      *    直接硬编码
      */
     protected var limitParams: DbLimit? = null
@@ -178,7 +178,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
         sql.append(' ');
         // 逐个编译修饰表达式
         travelDecorationClauses { clause: IDbQueryBuilderDecorationClauses<*> ->
-            clause.compile(db, sql);
+            clause.compile(this, db, sql);
             sql.append(' ');
         }
 
@@ -541,11 +541,11 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
         joinTables.add(table)
 
         // join　子句
-        val j = DbQueryBuilderDecorationClausesSimple("$type JOIN", arrayOf<KFunction2<IDb, *, String>?>(this::quoteTable));
+        val j = DbQueryBuilderDecorationClausesSimple("$type JOIN", arrayOf(DbQueryBuilderDecoration::quoteTable));
         j.addSubexp(arrayOf(table));
 
         // on　子句 -- on总是追随最近的一个join
-        val on = DbQueryBuilderDecorationClausesGroup("ON", arrayOf<KFunction2<IDb, *, String>?>(this::quoteColumn, null, this::quoteColumn));
+        val on = DbQueryBuilderDecorationClausesGroup("ON", arrayOf(DbQueryBuilderDecoration::quoteColumn, null, DbQueryBuilderDecoration::quoteColumn));
 
         joinClause.add(j);
         joinClause.add(on);

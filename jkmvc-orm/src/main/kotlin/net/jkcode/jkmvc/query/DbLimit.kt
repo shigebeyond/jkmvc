@@ -5,7 +5,7 @@ import net.jkcode.jkmvc.db.IDb
 
 /**
  * 查询分页, sql中的limit参数: limit + offset
- *    为了兼容不同db的特殊的limit语法，不使用 DbQueryBuilderDecorationClausesSimple("LIMIT", arrayOf<KFunction2 <IDb, *, String>?>(null));
+ *    为了兼容不同db的特殊的limit语法，不使用 DbQueryBuilderDecorationClausesSimple("LIMIT", arrayOf<KFunction3<DbQueryBuilderDecoration, IDb, *, String>?>(null));
  *    直接硬编码
  *
  * @author shijianhang

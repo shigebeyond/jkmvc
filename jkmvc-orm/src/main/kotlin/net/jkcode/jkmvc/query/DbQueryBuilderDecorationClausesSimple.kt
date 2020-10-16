@@ -2,7 +2,7 @@ package net.jkcode.jkmvc.query
 
 import net.jkcode.jkmvc.db.IDb
 import kotlin.math.min
-import kotlin.reflect.KFunction2
+import kotlin.reflect.KFunction3
 
 /**
  * 单词+连接符
@@ -21,7 +21,7 @@ typealias WordsAndDelimiter = Pair<Array<Any?>, String>
  * @date 2016-10-13
  */
 class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如where/group by */,
-                                            elementHandlers: Array<KFunction2 <IDb, *, String>?> /* 每个元素的处理器, 可视为列的处理*/,
+                                            elementHandlers: Array<KFunction3<DbQueryBuilderDecoration, IDb, *, String>?> /* 每个元素的处理器, 可视为列的处理*/,
                                             protected val afterGroup:Boolean = false /* 跟在分组 DbQueryBuilderDecorationClausesGroup 后面 */
 ) : DbQueryBuilderDecorationClauses<WordsAndDelimiter>/* subexps 是单词+连接符(针对where子句，放子表达式前面) */(operator, elementHandlers) {
     /**
@@ -42,10 +42,11 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
      *
      * @param subexp 子表达式
      * @param j 索引
+     * @param query 查询构建器
      * @param db 数据库连接
      * @param sql 保存编译的sql
      */
-    public override fun compileSubexp(subexp: WordsAndDelimiter, j:Int, db: IDb, sql: StringBuilder) {
+    public override fun compileSubexp(subexp: WordsAndDelimiter, j:Int, query: DbQueryBuilderDecoration, db: IDb, sql: StringBuilder) {
         val (exp, delimiter) = subexp;
 
         // 针对where子句，要在前面插入连接符
@@ -56,11 +57,11 @@ class DbQueryBuilderDecorationClausesSimple(operator: String /* 修饰符， 如
         // 遍历处理器来处理对应元素(单词)
         val size = min(elementHandlers.size, exp.size)
         for (i in 0 until size) {
-            val handler: KFunction2 <IDb, *, String>? = elementHandlers[i];
+            val handler: KFunction3<DbQueryBuilderDecoration, IDb, *, String>? = elementHandlers[i];
             // 处理某个元素(单词)的值
             var value: Any? = exp[i];
             if (handler != null) {
-                value = handler.call(db, value); // 调用元素处理函数
+                value = handler.call(query, db, value); // 调用元素处理函数
             }
             sql.append(value).append(' '); // 用空格拼接多个元素
         }

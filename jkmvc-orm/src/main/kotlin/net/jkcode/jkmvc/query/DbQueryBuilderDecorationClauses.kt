@@ -3,7 +3,7 @@ package net.jkcode.jkmvc.query
 import net.jkcode.jkutil.common.cloneProperties
 import net.jkcode.jkmvc.db.IDb
 import java.util.*
-import kotlin.reflect.KFunction2
+import kotlin.reflect.KFunction3
 
 /**
  * sql修饰子句的模拟构建
@@ -14,7 +14,7 @@ import kotlin.reflect.KFunction2
  * @date 2016-10-13
  */
 abstract class DbQueryBuilderDecorationClauses<T>(protected val operator: String /* 修饰符， 如where/group by */,
-                                                  protected val elementHandlers: Array<KFunction2 <IDb, *, String>?> /* 每个元素的处理器, 可视为列的处理*/
+                                                  protected val elementHandlers: Array<KFunction3<DbQueryBuilderDecoration, IDb, *, String>?> /* 每个元素的处理器, 可视为列的处理*/
 ) : IDbQueryBuilderDecorationClauses<T>, Cloneable {
     /**
      * 子表达式, 可视为行
@@ -23,17 +23,18 @@ abstract class DbQueryBuilderDecorationClauses<T>(protected val operator: String
 
     /**
      * 编译多个子表达式
+     * @param query 查询构建器
      * @param db 数据库连接
      * @param sql 保存编译的sql
      */
-    public override fun compile(db: IDb, sql:StringBuilder) {
+    public override fun compile(query: DbQueryBuilderDecoration, db: IDb, sql:StringBuilder) {
         if (subexps.isEmpty())
             return;
 
         // 逐个子表达式编译+合并
         sql.append(operator).append(' ');
         for(i in 0..(subexps.size - 1))
-            compileSubexp(subexps[i], i, db, sql);
+            compileSubexp(subexps[i], i, query, db, sql);
     }
 
     /**
