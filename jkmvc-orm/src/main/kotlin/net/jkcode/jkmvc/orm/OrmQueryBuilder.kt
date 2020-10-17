@@ -49,7 +49,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
     /**
      * 联查的关系，用于防止重复join同一个表
      */
-    protected val joins:MutableSet<String> = HashSet()
+    protected val joins:HashSet<String> = HashSet()
 
     /**
      * 关联查询hasMany的关系，需单独处理，不在一个sql中联查，而是单独一个sql查询
@@ -74,14 +74,14 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
     }
 
     /**
-     * 清空条件
+     * 清空联查信息
+     *   不能在重写clear()时调用, 因为 withMany/withCb 的联查都是在查询完后再触发的
      * @return
      */
-    public override fun clear(): IDbQueryBuilder {
+    protected fun clearWith() {
         joins.clear()
         withMany.clear()
         withCb.clear()
-        return super.clear()
     }
 
     /**
@@ -220,14 +220,13 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
     }
 
     /**
-     * 添加联查的关系
+     * 添加联查的关系, 仅添加一次
      * @param name 关系名
      * @return 如果没有添加过则返回true, 否则false
      */
     internal fun addJoinOne(name: String): Boolean {
-        return joins.add(name)
+        return joins.add(name) // HashSet.add()仅添加一次
     }
-
 
     /**
      * 联查中间表
@@ -309,6 +308,10 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
                                             relatedItems
             }
         }
+
+        // 在联查完后, 才清空联查信息
+        clearWith()
+
         return result
     }
 
@@ -338,6 +341,10 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
                 relation.batchSetRelationProp(items as List<Nothing>, relatedItems as List<Nothing>)
             }
         }
+
+        // 在联查完后, 才清空联查信息
+        clearWith()
+
         return result
     }
 
