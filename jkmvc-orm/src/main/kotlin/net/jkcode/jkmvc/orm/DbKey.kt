@@ -64,7 +64,17 @@ class DbKey<T> {
      * @return
      */
     public inline fun <R> map(transform: (T) -> R): DbKey<R> {
-        val newKeys = arrayOfNulls<Any>(columns.size)
+        val newKeys = arrayOfNulls<Any>(size)
+        return mapTo(newKeys, transform)
+    }
+
+    /**
+     * 遍历并生成新的主键
+     *
+     * @param transform 字段转换函数
+     * @return
+     */
+    public inline fun <R> mapTo(newKeys: Array<Any?>, transform: (T) -> R): DbKey<R> {
         forEachColumn { i, v ->
             newKeys[i] = transform(columns[i])
         }
@@ -78,7 +88,7 @@ class DbKey<T> {
      * @return
      */
     public inline fun <S, R> mapWith(other: DbKey<S>, transform: (T, S) -> R): DbKey<R> {
-        val newKeys = arrayOfNulls<Any>(columns.size)
+        val newKeys = arrayOfNulls<Any>(size)
         forEachColumnWith(other){ col1, col2, i ->
             newKeys[i] = transform(col1, col2)
         }
@@ -219,7 +229,8 @@ internal inline fun DbKeyNames.forEachNameValue(values:Any?, action: (name: Stri
  * @return
  */
 internal inline fun DbKeyNames.wrap(prefix: CharSequence = "", postfix: CharSequence = ""): DbKeyNames {
-    return this.map {
+    val arr = arrayOfNulls<String>(size) // 类型要求: String[], 而不是 Object[]
+    return this.mapTo(arr as Array<Any?>) {
         "$prefix$it$postfix"
     }
 }
