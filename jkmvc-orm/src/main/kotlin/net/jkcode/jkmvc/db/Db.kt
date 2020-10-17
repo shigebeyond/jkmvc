@@ -260,10 +260,10 @@ abstract class Db protected constructor(
         try{
             val result = action.invoke()
             if(dbLogger.isDebugEnabled)
-                dbLogger.debug("执行 sql: {}", previewSql(sql, params))
+                dbLogger.debug("Execute sql: {}", previewSql(sql, params))
             return result
         }catch (e:SQLException){
-            dbLogger.error("出错[{}] sql: {}", e.message, previewSql(sql, params))
+            dbLogger.error("Error [{}] sql: {}", e.message, previewSql(sql, params))
             throw  e
         }
     }
@@ -310,10 +310,10 @@ abstract class Db protected constructor(
         try{
             val result = masterConn.batchExecute(sql, paramses, paramSize)
             if(dbLogger.isDebugEnabled)
-                dbLogger.debug("执行 sql={}, params={}", sql, paramses)
+                dbLogger.debug("Execute sql={}, params={}", sql, paramses)
             return result
         }catch (e: SQLException){
-            dbLogger.error("出错[{}], sql={}, params={}", e.message, sql, paramses)
+            dbLogger.error("Error [{}], sql={}, params={}", e.message, sql, paramses)
             throw  e
         }
     }
