@@ -29,11 +29,10 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
     /**
      * 克隆对象, 同clone(), 只转换下返回类型为 IDbQueryBuilder
      *
+     * @param clearSelect 清空select参数
      * @return o
      */
-    public fun copy(): IDbQueryBuilder{
-        return clone() as IDbQueryBuilder
-    }
+    public abstract fun copy(clearSelect: Boolean = false): IDbQueryBuilder
 
     /****************************** 编译sql ********************************/
     /**

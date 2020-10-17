@@ -3,6 +3,7 @@ package net.jkcode.jkmvc.query
 import net.jkcode.jkutil.common.*
 import net.jkcode.jkmvc.db.DbException
 import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkmvc.orm.DbKeyNames
 import java.util.*
 import kotlin.reflect.KFunction2
 
@@ -211,6 +212,16 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
     }
 
     /**
+     * 设置查询的字段, select时用
+     *
+     * @param key 字段名
+     * @return
+     */
+    override fun select(key: DbKeyNames): IDbQueryBuilder{
+        return select(*key.columns)
+    }
+
+    /**
      * 设置查询结果是否去重唯一
      *
      * @param value
@@ -248,6 +259,19 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
         // 复制复杂属性: 要操作的数据
         o.cloneProperties(true, "table", "manipulatedData")
         return o;
+    }
+
+    /**
+     * 克隆对象, 同clone(), 只转换下返回类型为 IDbQueryBuilder
+     *
+     * @param clearSelect 清空select参数
+     * @return o
+     */
+    public override fun copy(clearSelect: Boolean): IDbQueryBuilder{
+        val ret = clone() as DbQueryBuilderAction
+        if(clearSelect)
+            ret.selectColumns.clear()
+        return ret
     }
 
     /**

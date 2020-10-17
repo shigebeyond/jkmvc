@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.query
 
 import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkmvc.orm.DbKeyNames
 
 /**
  * sql构建器 -- 动作子句: 由动态select/insert/update/delete来构建的子句
@@ -140,6 +141,14 @@ interface IDbQueryBuilderAction {
      * @return
      */
     fun selects(columns:List<CharSequence>): IDbQueryBuilder;
+
+    /**
+     * 设置查询的字段, select时用
+     *
+     * @param key 字段名
+     * @return
+     */
+    fun select(key: DbKeyNames): IDbQueryBuilder;
 
     /**
      * 设置查询结果是否去重唯一
