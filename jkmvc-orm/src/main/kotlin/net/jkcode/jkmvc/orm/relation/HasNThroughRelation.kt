@@ -152,12 +152,12 @@ class HasNThroughRelation(
      * @param subquery (主表)当前子查询
      * @return
      */
-    override fun queryRelated(subquery: IDbQueryBuilder): OrmQueryBuilder?{
+    override fun queryRelated(subquery: IDbQueryBuilder): OrmQueryBuilder{
         // 通过join中间表 查从表
         val tableAlias = middleTable + '.'
         val subQueryAlias = "sub_" + model.modelName
         return buildQuery() // 中间表.远端外键 = 从表.远端主键
-                .join(DbExpr(subquery.copy().select(*primaryKey.columns /* TODO: 加子查询内的表前缀 */), subQueryAlias), "INNER") // select 主表.主键
+                .join(DbExpr(subquery.copy(true).select(primaryKey.wrap(subQueryAlias + ".") /* TODO: 加子查询内的表前缀 */), subQueryAlias), "INNER") // select 主表.主键
                 .on(foreignKey.wrap(tableAlias) /*middleTable + foreignKey*/, primaryKey.wrap(subQueryAlias + ".") /*subQueryAlias + primaryKey*/) as OrmQueryBuilder // 中间表.外键 = 主表.主键
     }
 
@@ -263,7 +263,7 @@ class HasNThroughRelation(
     override fun removeRelation(relatedQuery: IDbQueryBuilder): Boolean{
         // 删除中间表记录
         return queryMiddleTable()
-                .join(DbExpr(relatedQuery.copy().select(*farPrimaryKey.columns), "_slave"), "INNER") // select 从表.远端主键
+                .join(DbExpr(relatedQuery.copy(true).select(farPrimaryKey.wrap("_slave.")), "_slave"), "INNER") // select 从表.远端主键
                 .on(farForeignKey.wrap(middleTable + "."), farPrimaryKey.wrap("_slave.")) // // 中间表.远端外键 = 从表.远端主键
                 .delete()
     }

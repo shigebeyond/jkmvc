@@ -3,6 +3,7 @@ package net.jkcode.jkmvc.orm.relation
 import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.orm.*
 import net.jkcode.jkmvc.query.IDbQueryBuilder
+import java.util.*
 import kotlin.reflect.KClass
 
 /**
@@ -216,7 +217,7 @@ interface IRelation {
      * @param subquery 当前子查询
      * @return
      */
-    fun queryRelated(subquery: IDbQueryBuilder): OrmQueryBuilder?
+    fun queryRelated(subquery: IDbQueryBuilder): OrmQueryBuilder
 
     /**
      * 对query builder联查关联表
@@ -255,14 +256,6 @@ interface IRelation {
     fun removeRelation(item: IOrm, fkInMany: Any? = null): Boolean
 
     /**
-     * 删除关系（删除从表的外键值）
-     *
-     * @param @param relatedQuery 关联对象的查询
-     * @return
-     */
-    fun removeRelation(relatedQuery: IDbQueryBuilder): Boolean
-
-    /**
      * 删除关联对象
      *    一般用于删除 hasOne/hasMany 关系的从对象
      *    你敢删除 belongsTo 关系的主对象？
@@ -272,15 +265,4 @@ interface IRelation {
      * @return
      */
     fun deleteRelated(item: IOrm, fkInMany: Any? = null): Boolean
-
-    /**
-     * 删除关联对象
-     *    一般用于删除 hasOne/hasMany 关系的从对象
-     *    你敢删除 belongsTo 关系的主对象？
-     *
-     * @param relatedQuery 关联对象的查询
-     * @param deletedModels 记录删除过的模型
-     * @return
-     */
-    fun deleteRelated(relatedQuery: IDbQueryBuilder, deletedModels: MutableSet<IOrmMeta>): Boolean
 }

@@ -76,12 +76,12 @@ open class HasNRelation(
      * @param subquery (主表)当前子查询
      * @return
      */
-    override fun queryRelated(subquery: IDbQueryBuilder): OrmQueryBuilder?{
+    override fun queryRelated(subquery: IDbQueryBuilder): OrmQueryBuilder{
         // 查从表
         val tableAlias = model.modelName + '.'
         val subQueryAlias = "sub_" + model.modelName
         return queryBuilder()
-                .join(DbExpr(subquery.copy().select(*primaryKey.columns /* TODO: 加子查询内的表前缀 */), subQueryAlias), "INNER") // select 主表.主键
+                .join(DbExpr(subquery.copy(true).select(primaryKey.wrap(subQueryAlias + ".") /* TODO: 加子查询内的表前缀 */), subQueryAlias), "INNER") // select 主表.主键
                 .on(foreignKey.wrap(tableAlias) /*tableAlias + foreignKey*/, primaryKey.wrap(subQueryAlias + ".") /*subQueryAlias + primaryKey*/) as OrmQueryBuilder // 从表.外键 = 主表.主键
     }
 

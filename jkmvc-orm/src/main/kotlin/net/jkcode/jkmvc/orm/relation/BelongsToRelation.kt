@@ -69,12 +69,12 @@ class BelongsToRelation(
      * @param subquery (从表)当前子查询
      * @return
      */
-    override fun queryRelated(subquery: IDbQueryBuilder): OrmQueryBuilder?{
+    override fun queryRelated(subquery: IDbQueryBuilder): OrmQueryBuilder{
         // 查主表
         val tableAlias = model.modelName + '.'
         val subQueryAlias = "sub_" + model.modelName
         return queryBuilder()
-                .join(DbExpr(subquery.copy().select(*foreignKey.columns /* TODO: 加子查询内的表前缀 */), subQueryAlias), "INNER")
+                .join(DbExpr(subquery.copy(true).select(foreignKey.wrap(subQueryAlias + ".") /* TODO: 加子查询内的表前缀 */), subQueryAlias), "INNER")
                 .on(primaryKey.wrap(tableAlias) /*tableAlias + primaryKey*/, foreignKey.wrap(subQueryAlias + ".") /*subQueryAlias + foreignKey*/) as OrmQueryBuilder // 主表.主键 = 从表.外键
     }
 
@@ -155,7 +155,7 @@ class BelongsToRelation(
         // 清空 从表.外键
         val tableAlias = srcOrmMeta.name + '.'
         return srcOrmMeta.queryBuilder()
-                .join(DbExpr(relatedQuery.copy().select(*primaryKey.columns), "_master"), "INNER") // select 主表.主键
+                .join(DbExpr(relatedQuery.copy(true).select(primaryKey.wrap("_master.")), "_master"), "INNER") // select 主表.主键
                 .on(foreignKey.wrap(tableAlias), primaryKey.wrap("_master.")) // 从表.外键 = 主表.主键
                 .set(foreignKey.wrap(tableAlias), foreignKeyDefault) // 清空外键
                 .update()

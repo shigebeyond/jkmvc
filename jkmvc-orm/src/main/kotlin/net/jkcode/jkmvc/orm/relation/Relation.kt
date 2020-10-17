@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.orm.relation
 
 import net.jkcode.jkmvc.orm.*
 import net.jkcode.jkmvc.query.IDbQueryBuilder
+import net.jkcode.jkutil.common.dbLogger
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -134,49 +135,81 @@ abstract class Relation(
      * @return
      */
     override fun deleteRelated(item: IOrm, fkInMany: Any?): Boolean{
-        // 构建查询：自动构建查询条件
+        // 构建关联查询：自动构建查询条件
         val query = queryRelated(item, fkInMany)
         if(query == null)
             return true
 
-        // 因为是级联删除的源头, 因此记录源模型
-        val deletedModels = mutableSetOf(srcOrmMeta)
+        // 删过的模型: 因为是级联删除的源头, 因此记录源模型
+        val srcModel = srcOrmMeta.name
+        val deletedModels = mutableSetOf(srcModel)
+        // 当前关系的路径
+        val path = Stack<String>()
+        path.add(srcModel)
 
         // 级联删除
-        val ret = deleteRelated(query, deletedModels)
+        val ret = deleteRelated(query, deletedModels, path)
         deletedModels.clear()
         return ret
     }
 
     /**
-     * 删除关联对象
-     *
+     * 根据关联对象的查询, 来删除关联对象
+     *    级联删除: 组织->部门->雇员
      * @param relatedQuery 关联对象的查询
      * @param deletedModels 记录删除过的模型
+     * @param path 当前关系的路径
      * @return
      */
-    override fun deleteRelated(relatedQuery: IDbQueryBuilder, deletedModels: MutableSet<IOrmMeta>): Boolean{
+    protected fun deleteRelated(relatedQuery: IDbQueryBuilder, deletedModels: MutableSet<String>, path: Stack<String>): Boolean{
         // 去重: 已删除过
-        if(deletedModels.contains(ormMeta))
+        // model名, 如果有中间表, 则用中间表做前缀
+        var model = if(this is HasNThroughRelation)
+                        middleTable + ":" + ormMeta.name
+                    else
+                        ormMeta.name
+        val separator = "<-"
+        if(deletedModels.contains(model)) {
+            if(dbLogger.isDebugEnabled)
+                dbLogger.debug("Delete duplicated model [{}] when deleting related path: {}", model, path.joinToString(separator) + separator + model)
             return true
-        deletedModels.add(ormMeta)
+        }
+
+        deletedModels.add(model) // 记录删过模型
+        path.add(name) // 关系入栈
+
+        if(dbLogger.isDebugEnabled)
+            dbLogger.debug("Deleting related path: {}", model, path.joinToString(separator))
 
         // 1 递归删除下一层
-        for(relation in ormMeta.hasNOrThroughRelations){
+        for(relation in ormMeta.hasNOrThroughRelations as List<Relation>){
             // 构建下一层关联对象的查询
             val nextQuery = relation.queryRelated(relatedQuery)
             if(nextQuery == null)
                 continue
 
             if(relation.cascadeDeleted) // 级联删除: 递归删除下一层关联对象
-                relation.deleteRelated(nextQuery, deletedModels)
+                relation.deleteRelated(nextQuery, deletedModels, path)
             else // 仅删除下一层关系
                 relation.removeRelation(nextQuery)
         }
 
         // 2 删除当前层关联对象
-        return doDeleteRelated(relatedQuery)
+        val ret = doDeleteRelated(relatedQuery)
+
+        if(dbLogger.isDebugEnabled)
+            dbLogger.debug("Deleted related path: {}", model, path.joinToString(separator))
+        path.pop() // 关系出栈
+        return ret
     }
+
+    /**
+     * 删除关系（删除从表的外键值）
+     *
+     * @param @param relatedQuery 关联对象的查询
+     * @return
+     */
+    protected abstract fun removeRelation(relatedQuery: IDbQueryBuilder): Boolean
 
     /**
      * 删除当前层关联对象
