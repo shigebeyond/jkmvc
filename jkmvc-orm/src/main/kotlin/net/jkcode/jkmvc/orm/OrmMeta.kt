@@ -780,7 +780,11 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         relations.values.filter { relation ->
             !relation.isBelongsTo // 过滤 hasN / hasNThrough
         }.sortedBy { relation -> // // 从小到大
-            if(relation is HasNThroughRelation) 0 else 1 // 优先hasNThrough, 主要是用在关联删除时, 优先删除hasNThrough, 防止先删除[hasN 中间表],导致[hasNThrough 中间表]无数据可删
+            // 优先hasNThrough, 主要是用在关联删除时, 优先删除hasNThrough, 防止先删除[hasN 中间表],导致[hasNThrough 中间表]无数据可删
+            var sort = if(relation is HasNThroughRelation) 0 else 10000
+            // 优先条件更少的, 覆盖面更广
+            sort += relation.conditions.size
+            sort
         }
     }
 
