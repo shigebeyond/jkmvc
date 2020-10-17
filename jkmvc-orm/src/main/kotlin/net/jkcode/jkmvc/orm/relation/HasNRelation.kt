@@ -39,8 +39,7 @@ open class HasNRelation(
             return null
 
         // 查从表
-        val tableAlias = model.modelName + '.'
-        return queryBuilder().whereIn(foreignKey.wrap(tableAlias) /*model.modelName + '.' + foreignKey*/, items.collectColumn(primaryProp)) as OrmQueryBuilder // 从表.外键 = 主表.主键
+        return queryBuilder().whereIn(foreignKey.wrap(modelName + ".") /*modelName + "." + foreignKey*/, items.collectColumn(primaryProp)) as OrmQueryBuilder // 从表.外键 = 主表.主键
     }
 
     /**
@@ -58,7 +57,7 @@ open class HasNRelation(
         if(item.isPkEmpty(pk))
             return null
 
-        val tableAlias = model.modelName + '.'
+        val tableAlias = modelName + "."
         val query = queryBuilder().where(foreignKey.wrap(tableAlias) /*tableAlias + foreignKey*/, pk) as OrmQueryBuilder// 从表.外键 = 主表.主键
         if(fkInMany != null) { // hasMany关系下过滤单个关系
             val fk = ormMeta.primaryProp.getsFrom(fkInMany)
@@ -78,11 +77,10 @@ open class HasNRelation(
      */
     override fun queryRelated(subquery: IDbQueryBuilder): OrmQueryBuilder{
         // 查从表
-        val tableAlias = model.modelName + '.'
-        val subQueryAlias = "sub_" + model.modelName
+        val subqueryAlias = "sub_" + subquery.tableAlias
         return queryBuilder()
-                .join(DbExpr(subquery.copy(true).select(primaryKey.wrap(subQueryAlias + ".") /* TODO: 加子查询内的表前缀 */), subQueryAlias), "INNER") // select 主表.主键
-                .on(foreignKey.wrap(tableAlias) /*tableAlias + foreignKey*/, primaryKey.wrap(subQueryAlias + ".") /*subQueryAlias + primaryKey*/) as OrmQueryBuilder // 从表.外键 = 主表.主键
+                .join(DbExpr(subquery.copy(true).select(primaryKey.wrap(subquery.tableAlias + ".") /* TODO: 加子查询内的表前缀 */), subqueryAlias), "INNER") // select 主表.主键
+                .on(foreignKey.wrap(modelName + ".") /*modelName + "." + foreignKey*/, primaryKey.wrap(subqueryAlias + ".") /*subqueryAlias + primaryKey*/) as OrmQueryBuilder // 从表.外键 = 主表.主键
     }
 
     /**
@@ -164,12 +162,12 @@ open class HasNRelation(
     /**
      * 删除关系（删除从表的外键值）
      *
-     * @param @param relatedQuery (从表)关联对象的查询
+     * @param @param subquery (主表)当前对象的查询
      * @return
      */
-    override fun removeRelation(relatedQuery: IDbQueryBuilder): Boolean{
+    override fun removeRelation(subquery: IDbQueryBuilder): Boolean{
         // 清空 从表.外键, 与 `removeRelation(item: IOrm, fkInMany: Any?)` 实现一样
-        return relatedQuery
+        return queryRelated(subquery)
                 .set(foreignKey, foreignKeyDefault)
                 .update()
     }
@@ -177,10 +175,10 @@ open class HasNRelation(
     /**
      * 删除当前层关联对象
      *
-     * @param relatedQuery 关联对象的查询
+     * @param subquery (主表)当前子查询
      * @return
      */
-    protected override fun doDeleteRelated(relatedQuery: IDbQueryBuilder): Boolean {
-        return relatedQuery.delete()
+    protected override fun doDeleteRelated(subquery: IDbQueryBuilder): Boolean {
+        return queryRelated(subquery).delete()
     }
 }

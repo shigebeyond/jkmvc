@@ -22,6 +22,11 @@ interface IDbQueryBuilderAction {
     fun compileAction(db: IDb, sql: StringBuilder): IDbQueryBuilder;
 
     /**
+     * 表别名, 如果没有别名, 则表名
+     */
+    val tableAlias: String
+
+    /**
      * 设置表名
      *
      * @param table 表名

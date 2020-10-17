@@ -40,8 +40,7 @@ class BelongsToRelation(
         if(pkEmptyRule.isEmpty(fk)) // 如果外键为空，则联查为空
             return null
 
-        val tableAlias = model.modelName + '.'
-        return queryBuilder().where(primaryKey.wrap(tableAlias) /*tableAlias + primaryKey*/, fk) as OrmQueryBuilder // 主表.主键 = 从表.外键
+        return queryBuilder().where(primaryKey.wrap(modelName + ".") /*modelName + "." + primaryKey*/, fk) as OrmQueryBuilder // 主表.主键 = 从表.外键
     }
 
     /**
@@ -57,8 +56,7 @@ class BelongsToRelation(
             return null
 
         // 查主表
-        val tableAlias = model.modelName + '.'
-        return queryBuilder().whereIn(primaryKey.wrap(tableAlias) /*tableAlias + '.' + primaryKey*/, items.collectColumn(foreignProp)) as OrmQueryBuilder // 主表.主键 = 从表.外键
+        return queryBuilder().whereIn(primaryKey.wrap(modelName + ".") /*modelName + "." + primaryKey*/, items.collectColumn(foreignProp)) as OrmQueryBuilder // 主表.主键 = 从表.外键
     }
 
     /**
@@ -71,11 +69,10 @@ class BelongsToRelation(
      */
     override fun queryRelated(subquery: IDbQueryBuilder): OrmQueryBuilder{
         // 查主表
-        val tableAlias = model.modelName + '.'
-        val subQueryAlias = "sub_" + model.modelName
+        val subqueryAlias = "sub_" + subquery.tableAlias
         return queryBuilder()
-                .join(DbExpr(subquery.copy(true).select(foreignKey.wrap(subQueryAlias + ".") /* TODO: 加子查询内的表前缀 */), subQueryAlias), "INNER")
-                .on(primaryKey.wrap(tableAlias) /*tableAlias + primaryKey*/, foreignKey.wrap(subQueryAlias + ".") /*subQueryAlias + foreignKey*/) as OrmQueryBuilder // 主表.主键 = 从表.外键
+                .join(DbExpr(subquery.copy(true).select(foreignKey.wrap(subquery.tableAlias + ".") /* TODO: 加子查询内的表前缀 */), subqueryAlias), "INNER")
+                .on(primaryKey.wrap(modelName + ".") /*modelName + "." + primaryKey*/, foreignKey.wrap(subqueryAlias + ".") /*subqueryAlias + foreignKey*/) as OrmQueryBuilder // 主表.主键 = 从表.外键
     }
 
     /**
@@ -148,16 +145,12 @@ class BelongsToRelation(
     /**
      * 删除关系（删除从表的外键值）
      *
-     * @param @param relatedQuery (主表)关联对象的查询
+     * @param @param subquery (从表)当前对象的查询
      * @return
      */
-    override fun removeRelation(relatedQuery: IDbQueryBuilder): Boolean{
+    override fun removeRelation(subquery: IDbQueryBuilder): Boolean{
         // 清空 从表.外键
-        val tableAlias = srcOrmMeta.name + '.'
-        return srcOrmMeta.queryBuilder()
-                .join(DbExpr(relatedQuery.copy(true).select(primaryKey.wrap("_master.")), "_master"), "INNER") // select 主表.主键
-                .on(foreignKey.wrap(tableAlias), primaryKey.wrap("_master.")) // 从表.外键 = 主表.主键
-                .set(foreignKey.wrap(tableAlias), foreignKeyDefault) // 清空外键
+        return subquery.set(foreignKey.wrap(subquery.tableAlias + "."), foreignKeyDefault) // 清空外键
                 .update()
     }
 
@@ -165,10 +158,10 @@ class BelongsToRelation(
      * 删除当前层关联对象
      *    你敢删除 belongsTo 关系的主对象？
      *
-     * @param relatedQuery (主表)关联对象的查询
+     * @param subquery (从表)当前子查询
      * @return
      */
-    protected override fun doDeleteRelated(relatedQuery: IDbQueryBuilder): Boolean {
+    protected override fun doDeleteRelated(subquery: IDbQueryBuilder): Boolean {
         throw OrmException("Cannot delete model [${ormMeta.name}] 's `belongsTo` related object [$name]");
     }
 

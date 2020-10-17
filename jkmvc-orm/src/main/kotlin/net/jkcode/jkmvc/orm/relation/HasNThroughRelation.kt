@@ -154,11 +154,10 @@ class HasNThroughRelation(
      */
     override fun queryRelated(subquery: IDbQueryBuilder): OrmQueryBuilder{
         // 通过join中间表 查从表
-        val tableAlias = middleTable + '.'
-        val subQueryAlias = "sub_" + model.modelName
+        val subqueryAlias = "sub_" + subquery.tableAlias
         return buildQuery() // 中间表.远端外键 = 从表.远端主键
-                .join(DbExpr(subquery.copy(true).select(primaryKey.wrap(subQueryAlias + ".") /* TODO: 加子查询内的表前缀 */), subQueryAlias), "INNER") // select 主表.主键
-                .on(foreignKey.wrap(tableAlias) /*middleTable + foreignKey*/, primaryKey.wrap(subQueryAlias + ".") /*subQueryAlias + primaryKey*/) as OrmQueryBuilder // 中间表.外键 = 主表.主键
+                .join(DbExpr(subquery.copy(true).select(primaryKey.wrap(subquery.tableAlias + ".") /* TODO: 加子查询内的表前缀 */), subqueryAlias), "INNER") // select 主表.主键
+                .on(foreignKey.wrap(middleTable + '.') /*middleTable + foreignKey*/, primaryKey.wrap(subqueryAlias + ".") /*subqueryAlias + primaryKey*/) as OrmQueryBuilder // 中间表.外键 = 主表.主键
     }
 
     /**
@@ -257,24 +256,25 @@ class HasNThroughRelation(
     /**
      * 删除关系（删除中间表记录）
      *
-     * @param @param relatedQuery (从表)关联对象的查询
+     * @param @param subquery (主表)当前对象的查询
      * @return
      */
-    override fun removeRelation(relatedQuery: IDbQueryBuilder): Boolean{
+    override fun removeRelation(subquery: IDbQueryBuilder): Boolean{
         // 删除中间表记录
+        val subqueryAlias = "sub_" + subquery.tableAlias
         return queryMiddleTable()
-                .join(DbExpr(relatedQuery.copy(true).select(farPrimaryKey.wrap("_slave.")), "_slave"), "INNER") // select 从表.远端主键
-                .on(farForeignKey.wrap(middleTable + "."), farPrimaryKey.wrap("_slave.")) // // 中间表.远端外键 = 从表.远端主键
+                .join(DbExpr(subquery.copy(true).select(primaryKey.wrap(subquery.tableAlias + ".")), subqueryAlias), "INNER") // select 主表.主键
+                .on(foreignKey.wrap(middleTable + "."), primaryKey.wrap(subqueryAlias + ".")) // // 中间表.外键 = 主表.主键
                 .delete()
     }
 
     /**
      * 删除当前层关联对象
      *
-     * @param relatedQuery 关联对象的查询
+     * @param subquery (主表)当前子查询
      * @return
      */
-    protected override fun doDeleteRelated(relatedQuery: IDbQueryBuilder): Boolean {
-        return relatedQuery.delete()
+    protected override fun doDeleteRelated(subquery: IDbQueryBuilder): Boolean {
+        return queryRelated(subquery).delete()
     }
 }

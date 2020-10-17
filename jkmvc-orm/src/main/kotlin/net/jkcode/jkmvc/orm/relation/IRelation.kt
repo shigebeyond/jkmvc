@@ -153,6 +153,12 @@ interface IRelation {
         get() = model.modelOrmMeta
 
     /**
+     * 模型名
+     */
+    val modelName: String
+        get() = ormMeta.name
+
+    /**
      * 行转换器
      */
     val modelRowTransformer: (DbResultRow) -> IOrm

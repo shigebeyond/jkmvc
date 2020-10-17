@@ -183,15 +183,10 @@ abstract class Relation(
 
         // 1 递归删除下一层
         for(relation in ormMeta.hasNOrThroughRelations as List<Relation>){
-            // 构建下一层关联对象的查询
-            val nextQuery = relation.queryRelated(relatedQuery)
-            if(nextQuery == null)
-                continue
-
             if(relation.cascadeDeleted) // 级联删除: 递归删除下一层关联对象
-                relation.deleteRelated(nextQuery, deletedModels, path)
+                relation.deleteRelated(relatedQuery, deletedModels, path)
             else // 仅删除下一层关系
-                relation.removeRelation(nextQuery)
+                relation.removeRelation(relatedQuery)
         }
 
         // 2 删除当前层关联对象
@@ -206,16 +201,16 @@ abstract class Relation(
     /**
      * 删除关系（删除从表的外键值）
      *
-     * @param @param relatedQuery 关联对象的查询
+     * @param @param subquery 当前对象的查询
      * @return
      */
-    protected abstract fun removeRelation(relatedQuery: IDbQueryBuilder): Boolean
+    protected abstract fun removeRelation(subquery: IDbQueryBuilder): Boolean
 
     /**
      * 删除当前层关联对象
      *
-     * @param relatedQuery 关联对象的查询
+     * @param subquery 当前子查询
      * @return
      */
-    protected abstract fun doDeleteRelated(relatedQuery: IDbQueryBuilder): Boolean
+    protected abstract fun doDeleteRelated(subquery: IDbQueryBuilder): Boolean
 }

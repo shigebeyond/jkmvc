@@ -51,6 +51,12 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
     protected var table: DbExpr = DbExpr.empty
 
     /**
+     * 表别名, 如果没有别名, 则表名
+     */
+    override val tableAlias: String
+        get() = table.alias ?: table.toString()
+
+    /**
      * 要操作的数据：增改查的数据（没有删）
      *   操作数据的动作顺序 = SqlType中定义的动作顺序
      */
