@@ -1,8 +1,7 @@
 package net.jkcode.jkmvc.query
 
 import net.jkcode.jkmvc.db.IDb
-import kotlin.math.min
-import kotlin.reflect.KFunction2
+import net.jkcode.jkutil.common.findAllGroupValue
 import kotlin.reflect.KFunction3
 
 /**
@@ -23,15 +22,29 @@ class DbQueryPartTemplte(public val template: String) : IDbQueryPart{
         public val paramRegx = "<([^\\>]+)>".toRegex()
 
         /**
-         * 缓存字段填充方法
+         * 缓存参数填充方法
          */
-        protected val fieldFillers: Map<String, KFunction2<DbQueryBuilderAction, IDb, String>> = mapOf(
+        protected val paramsFillers: Map<String, KFunction3<DbQueryBuilderAction, IDb, StringBuilder, Unit>> = mapOf(
                 "table" to DbQueryBuilderAction::fillTable,
                 "columns" to DbQueryBuilderAction::fillColumns,
                 "values" to DbQueryBuilderAction::fillValues,
                 "columnValues" to DbQueryBuilderAction::fillColumnValues,
                 "distinct" to DbQueryBuilderAction::fillDistinct
         )
+    }
+
+    /**
+     * 文本部分
+     */
+    protected val texts: List<String> by lazy {
+        paramRegx.split(template)
+    }
+
+    /**
+     * 参数部分
+     */
+    protected val params: Collection<String> by lazy {
+        paramRegx.findAllGroupValue(template, 1)
     }
 
     /**
@@ -43,11 +56,30 @@ class DbQueryPartTemplte(public val template: String) : IDbQueryPart{
      */
     override fun compile(query: DbQueryBuilderDecoration, db: IDb, sql: StringBuilder) {
         // 替换参数: 表名/多个字段名/多个字段值
-        paramRegx.replace(template) { result: MatchResult ->
-            // 调用对应方法, 如 fillTable() / fillColumns() / fillValues() / fillDistinct() / fillColumnValues()
-            val method = fieldFillers[result.groupValues[1]];
-            method?.call(this, db).toString();
+        /*sql = paramRegx.replace(template) { result: MatchResult ->
+            val param = result.groupValues[1]
+            callParamFiller(param, db)
+        }*/
+        sql.append(texts[0]) // 填充文本
+        var i = 1
+        for (param in params){
+            callParamFiller(param, query, db, sql) // 填充参数
+            sql.append(texts[i++]) // 填充文本
         }
+    }
+
+    /**
+     * 调用参数对应方法, 来填充sql部分, 如表名/多个字段名/多个字段值
+     *   如 fillTable() / fillColumns() / fillValues() / fillDistinct() / fillColumnValues()
+     *
+     * @param param 参数名
+     * @param query 查询构建器
+     * @param db 数据库连接
+     * @param sql 保存编译sql
+     */
+    protected fun callParamFiller(param: String, query: DbQueryBuilderDecoration, db: IDb, sql: StringBuilder) {
+        val method = paramsFillers[param]
+        method?.call(query, db, sql);
     }
 
     /**
