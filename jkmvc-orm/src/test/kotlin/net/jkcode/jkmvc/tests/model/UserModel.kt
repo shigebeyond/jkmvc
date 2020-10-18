@@ -28,7 +28,6 @@ class UserModel(id:Int? = null): Orm(id) {
                 AddressModel.queryBuilder().where("user_id", "IN", it).findModels<AddressModel>()
             }*/
 
-            hasMany("parcels", ParcelModel::class)
             hasManyThrough("parcelSenders", UserModel::class, "receiver_id"/*外键*/, "id"/*主键*/, "parcel", "sender_id"/*远端外键*/, "id"/*远端主键*/)
             hasManyThrough("parcelReceivers", UserModel::class, "sender_id"/*外键*/, "id"/*主键*/, "parcel", "receiver_id"/*远端外键*/, "id"/*远端主键*/)
         }

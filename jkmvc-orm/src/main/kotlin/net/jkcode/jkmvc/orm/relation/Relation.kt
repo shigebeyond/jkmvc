@@ -168,7 +168,7 @@ abstract class Relation(
                         middleTable + ":" + ormMeta.name
                     else
                         ormMeta.name
-        val separator = "<-"
+        val separator = "->"
         if(deletedModels.contains(model)) {
             if(dbLogger.isDebugEnabled)
                 dbLogger.debug("Delete duplicated model [{}] when deleting related path: {}", model, path.joinToString(separator) + separator + model)
@@ -179,21 +179,21 @@ abstract class Relation(
         path.add(name) // 关系入栈
 
         if(dbLogger.isDebugEnabled)
-            dbLogger.debug("Deleting related path: {}", model, path.joinToString(separator))
+            dbLogger.debug("Deleting related path: {}", path.joinToString(separator))
 
         // 1 递归删除下一层
         for(relation in ormMeta.hasNOrThroughRelations as List<Relation>){
             if(relation.cascadeDeleted) // 级联删除: 递归删除下一层关联对象
                 relation.deleteRelated(relatedQuery, deletedModels, path)
-            else // 仅删除下一层关系
+            else { // 仅删除下一层关系
+                if(dbLogger.isDebugEnabled)
+                    dbLogger.debug("Deleting relation path: {}", path.joinToString(separator) + separator + relation.name)
                 relation.removeRelation(relatedQuery)
+            }
         }
 
         // 2 删除当前层关联对象
         val ret = doDeleteRelated(relatedQuery)
-
-        if(dbLogger.isDebugEnabled)
-            dbLogger.debug("Deleted related path: {}", model, path.joinToString(separator))
         path.pop() // 关系出栈
         return ret
     }

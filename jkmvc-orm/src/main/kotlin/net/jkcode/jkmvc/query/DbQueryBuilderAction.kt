@@ -37,6 +37,17 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
     protected var table: DbExpr = DbExpr.empty
 
     /**
+     * join子句
+     *   联表数组，每个联表join = 表名 + 联表方式 | 每个联表条件on = 字段 + 运算符 + 字段
+     */
+    protected val joinParts: LinkedList<DbQueryPart<*>> = LinkedList()
+
+    /**
+     * join的表名/子查询
+     */
+    protected val joinTables: LinkedList<CharSequence> = LinkedList()
+
+    /**
      * 表别名, 如果没有别名, 则表名
      */
     override val tableAlias: String
@@ -225,6 +236,43 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
     }
 
     /**
+     * Adds addition tables to "JOIN ...".
+     *
+     * @param   table  table name | DbExpr | subquery
+     * @param   type   joinParts type (LEFT, RIGHT, INNER, etc)
+     * @return
+     */
+    public override fun join(table: CharSequence, type: String): IDbQueryBuilder {
+        joinTables.add(table)
+
+        // join　子句
+        val j = DbQueryPartSimple("$type JOIN", arrayOf(DbQueryBuilderDecoration::quoteTable));
+        j.addSubexp(arrayOf(table));
+
+        // on　子句 -- on总是追随最近的一个join
+        val on = DbQueryPartGroup("ON", arrayOf(DbQueryBuilderDecoration::quoteColumn, null, DbQueryBuilderDecoration::quoteColumn));
+
+        joinParts.add(j);
+        joinParts.add(on);
+
+        return this;
+    }
+
+    /**
+     * Adds "ON ..." conditions for the last created JOIN statement.
+     *    on总是追随最近的一个join
+     *
+     * @param   c1  column name or DbExpr
+     * @param   op  logic operator
+     * @param   c2  column name or DbExpr
+     * @return
+     */
+    public override fun on(c1: String, op: String, c2: String): IDbQueryBuilder {
+        joinParts.last().addSubexp(arrayOf(c1, op, c2), "AND");
+        return this;
+    }
+
+    /**
      * 清空条件
      * @return
      */
@@ -237,6 +285,10 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
         action = null;
         table = DbExpr.empty;
         distinct = false;
+        joinParts.clear();
+        joinTables.clear()
+        for (part in joinParts)
+            part.clear()
         return this;
     }
 
@@ -249,7 +301,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
         // action参数不复制
         o.action = null
         // 复制复杂属性: 要操作的数据
-        o.cloneProperties(true, "table", "manipulatedData")
+        o.cloneProperties(true, "table", "joinParts", "joinTables", "manipulatedData")
         return o;
     }
 
@@ -286,12 +338,17 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @param db
      * @param buffer
      */
-    internal fun fillTable(db: IDb, buffer: StringBuilder){
-        val t = if(action == SqlAction.INSERT || action == SqlAction.DELETE) // mysql的insert/delete语句, 不支持表带别名
+    internal fun fillTables(db: IDb, buffer: StringBuilder){
+        // 填充本表
+        val tb = if(action == SqlAction.INSERT || action == SqlAction.DELETE) // mysql的insert/delete语句, 不支持表带别名
             quoteTable(db, table.exp)
         else
             quoteTable(db, table)
-        buffer.append(t)
+        buffer.append(tb)
+
+        // 填充联查的表
+        for (part in joinParts)
+            part.compile(this as DbQueryBuilderDecoration, db, buffer)
     }
 
     /**

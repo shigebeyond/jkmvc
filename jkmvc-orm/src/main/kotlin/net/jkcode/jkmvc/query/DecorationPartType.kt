@@ -5,7 +5,7 @@ package net.jkcode.jkmvc.query
  * @author shijianhang
  * @date 2016-10-10
  */
-enum class ClauseType {
+enum class DecorationPartType {
     WHERE,
     GROUP_BY,
     HAVING,

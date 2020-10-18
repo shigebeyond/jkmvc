@@ -12,7 +12,7 @@ import kotlin.reflect.KFunction3
  * @author shijianhang
  * @date 2016-10-13
  */
-class DbQueryPartTemplte(public val template: String) : IDbQueryPart{
+class DbQueryPartTemplate(public val template: String) : IDbQueryPart{
 
     companion object{
 
@@ -25,7 +25,7 @@ class DbQueryPartTemplte(public val template: String) : IDbQueryPart{
          * 缓存参数填充方法
          */
         protected val paramsFillers: Map<String, KFunction3<DbQueryBuilderAction, IDb, StringBuilder, Unit>> = mapOf(
-                "table" to DbQueryBuilderAction::fillTable,
+                "tables" to DbQueryBuilderAction::fillTables,
                 "columns" to DbQueryBuilderAction::fillColumns,
                 "values" to DbQueryBuilderAction::fillValues,
                 "columnValues" to DbQueryBuilderAction::fillColumnValues,

@@ -11,7 +11,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 /**
- * sql构建器 -- 修饰子句: 由修饰词join/where/group by/order by/limit来构建的子句
+ * sql构建器 -- 修饰子句: 由修饰词where/group by/order by/limit来构建的子句
  *
  * @author shijianhang
  * @date 2016-10-12
@@ -20,19 +20,10 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
 
     /**
      * where/group by/having/order by/limit子句的数组
+     *   where/group by/having/ordery by/limit 按顺序编译sql，否则sql无效
+     *   因此不能用map, 而用array中有序，下标=DecorationPartType枚举的序号
      */
-    protected val clauses: Array<DbQueryPart<*>?> = arrayOfNulls(5);
-
-    /**
-     * join子句
-     *   联表数组，每个联表join = 表名 + 联表方式 | 每个联表条件on = 字段 + 运算符 + 字段
-     */
-    protected val joinClause: LinkedList<DbQueryPart<*>> = LinkedList()
-
-    /**
-     * join的表名/子查询
-     */
-    protected val joinTables: LinkedList<CharSequence> = LinkedList()
+    protected val parts: Array<DbQueryPart<*>?> = arrayOfNulls(5);
 
     /**
      * where子句
@@ -40,7 +31,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      */
     protected val whereClause: DbQueryPart<*>
         get(){
-            return clauses.getOrPut(ClauseType.WHERE.ordinal){
+            return parts.getOrPut(DecorationPartType.WHERE.ordinal){
                 DbQueryPartGroup("WHERE", arrayOf(DbQueryBuilderDecoration::quoteWhereColumn, null, DbQueryBuilderDecoration::quote));
             } as DbQueryPart<*>
         }
@@ -51,7 +42,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      */
     protected val groupByClause: DbQueryPart<*>
         get(){
-            return clauses.getOrPut(ClauseType.GROUP_BY.ordinal){
+            return parts.getOrPut(DecorationPartType.GROUP_BY.ordinal){
                 DbQueryPartSimple("GROUP BY", arrayOf(DbQueryBuilderDecoration::quoteColumn));
             } as DbQueryPart<*>
         }
@@ -62,7 +53,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      */
     protected val havingClause: DbQueryPart<*>
         get(){
-            return clauses.getOrPut(ClauseType.HAVING.ordinal){
+            return parts.getOrPut(DecorationPartType.HAVING.ordinal){
                 DbQueryPartGroup("HAVING", arrayOf(DbQueryBuilderDecoration::quoteColumn, null, DbQueryBuilderDecoration::quote));
             } as DbQueryPart<*>
         }
@@ -73,7 +64,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      */
     protected val orderByClause: DbQueryPart<*>
         get(){
-            return clauses.getOrPut(ClauseType.ORDER_BY.ordinal){
+            return parts.getOrPut(DecorationPartType.ORDER_BY.ordinal){
                 DbQueryPartSimple("ORDER BY", arrayOf(DbQueryBuilderDecoration::quoteColumn, DbQueryBuilderDecoration::quoteOrderDirection));
             } as DbQueryPart<*>
         }
@@ -176,9 +167,11 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
     public override fun compileDecoration(db: IDb, sql: StringBuilder): IDbQueryBuilder {
         sql.append(' ');
         // 逐个编译修饰表达式
-        travelDecorationClauses { clause: DbQueryPart<*> ->
-            clause.compile(this, db, sql);
-            sql.append(' ');
+        for(part in parts){
+            if(part != null){
+                part.compile(this, db, sql);
+                sql.append(' ');
+            }
         }
 
         // 单独编译limit表达式
@@ -191,34 +184,14 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
     }
 
     /**
-     * 遍历修饰子句
-     * @param visitor 访问者函数，遍历时调用
-     */
-    protected fun travelDecorationClauses(visitor: (DbQueryPart<*>) -> Unit) {
-        // 逐个处理修饰词及其表达式
-        // 1 joinClause
-        for (j in joinClause)
-            visitor(j);
-
-        // 2 where/group by/having/ordery by/limit 按顺序编译sql，否则sql无效
-        /*for ((k, v) in clauses) // map中无序
-            visitor(v);*/
-        for(v in clauses) // array中有序，下标就是序号
-            if(v != null)
-                visitor(v);
-    }
-
-    /**
      * 清空条件
      * @return
      */
     public override fun clear(): IDbQueryBuilder {
         // 逐个清空修饰表达式
-        travelDecorationClauses { clause: DbQueryPart<*> ->
-            clause.clear();
+        for(part in parts){
+            part?.clear()
         }
-        joinClause.clear();
-        joinTables.clear()
         limitParams = null
         return super.clear();
     }
@@ -232,7 +205,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
         // limit参数不复制
         o.limitParams = null
         // 复制复杂属性: 子句
-        o.cloneProperties(true,"clauses", "joinClause", "joinTables")
+        o.cloneProperties(true,"parts")
         return o
     }
 
@@ -529,40 +502,4 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
         return this;
     }
 
-    /**
-     * Adds addition tables to "JOIN ...".
-     *
-     * @param   table  table name | DbExpr | subquery
-     * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
-     * @return
-     */
-    public override fun join(table: CharSequence, type: String): IDbQueryBuilder {
-        joinTables.add(table)
-
-        // join　子句
-        val j = DbQueryPartSimple("$type JOIN", arrayOf(DbQueryBuilderDecoration::quoteTable));
-        j.addSubexp(arrayOf(table));
-
-        // on　子句 -- on总是追随最近的一个join
-        val on = DbQueryPartGroup("ON", arrayOf(DbQueryBuilderDecoration::quoteColumn, null, DbQueryBuilderDecoration::quoteColumn));
-
-        joinClause.add(j);
-        joinClause.add(on);
-
-        return this;
-    }
-
-    /**
-     * Adds "ON ..." conditions for the last created JOIN statement.
-     *    on总是追随最近的一个join
-     *
-     * @param   c1  column name or DbExpr
-     * @param   op  logic operator
-     * @param   c2  column name or DbExpr
-     * @return
-     */
-    public override fun on(c1: String, op: String, c2: String): IDbQueryBuilder {
-        joinClause.last().addSubexp(arrayOf(c1, op, c2), "AND");
-        return this;
-    }
 }

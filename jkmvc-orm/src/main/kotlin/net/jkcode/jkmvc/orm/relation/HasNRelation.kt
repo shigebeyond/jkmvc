@@ -167,7 +167,7 @@ open class HasNRelation(
      */
     override fun removeRelation(subquery: IDbQueryBuilder): Boolean{
         // 清空 从表.外键, 与 `removeRelation(item: IOrm, fkInMany: Any?)` 实现一样
-        return queryRelated(subquery)
+        return queryRelated(subquery.copy())
                 .set(foreignKey, foreignKeyDefault)
                 .update()
     }
@@ -179,6 +179,6 @@ open class HasNRelation(
      * @return
      */
     protected override fun doDeleteRelated(subquery: IDbQueryBuilder): Boolean {
-        return queryRelated(subquery).delete()
+        return queryRelated(subquery.copy()).delete()
     }
 }

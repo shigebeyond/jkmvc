@@ -275,6 +275,6 @@ class HasNThroughRelation(
      * @return
      */
     protected override fun doDeleteRelated(subquery: IDbQueryBuilder): Boolean {
-        return queryRelated(subquery).delete()
+        return queryRelated(subquery.copy()).delete()
     }
 }

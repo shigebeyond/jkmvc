@@ -7,17 +7,17 @@ package net.jkcode.jkmvc.query
  */
 public enum class SqlAction {
     SELECT{  // 查
-        override val template: DbQueryPartTemplte = DbQueryPartTemplte("SELECT <distinct> <columns> FROM <table>")
+        override val template: DbQueryPartTemplate = DbQueryPartTemplate("SELECT <distinct> <columns> FROM <tables>")
     },
     INSERT{  // 增
-        override val template: DbQueryPartTemplte = DbQueryPartTemplte("INSERT INTO <table> (<columns>) <values>") // quoteColumn() 默认不加(), quote() 默认加()
+        override val template: DbQueryPartTemplate = DbQueryPartTemplate("INSERT INTO <tables> (<columns>) <values>") // quoteColumn() 默认不加(), quote() 默认加()
     },
     UPDATE{  // 改
-        override val template: DbQueryPartTemplte = DbQueryPartTemplte("UPDATE <table> SET <columnValues>")
+        override val template: DbQueryPartTemplate = DbQueryPartTemplate("UPDATE <tables> SET <columnValues>")
     },
     DELETE{  // 删
-        override val template: DbQueryPartTemplte = DbQueryPartTemplte("DELETE FROM <table>")
+        override val template: DbQueryPartTemplate = DbQueryPartTemplate("DELETE FROM <tables>")
     };
 
-    abstract val template: DbQueryPartTemplte;
+    abstract val template: DbQueryPartTemplate;
 }

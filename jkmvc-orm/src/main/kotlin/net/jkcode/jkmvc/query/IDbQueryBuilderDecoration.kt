@@ -20,18 +20,6 @@ interface IDbQueryBuilderDecoration{
     fun compileDecoration(db: IDb, sql: StringBuilder): IDbQueryBuilder;
 
     /**
-     * 多个on条件
-     * @param conditions
-     * @return
-     */
-    fun ons(conditions: Map<String, String>): IDbQueryBuilder {
-        for ((column, value) in conditions)
-            on(column, "=", value);
-
-        return this as IDbQueryBuilder
-    }
-
-    /**
      * 多个having条件
      * @param conditions
      * @return
@@ -446,23 +434,4 @@ interface IDbQueryBuilderDecoration{
      * @return
      */
     fun limit(limit: Int, offset: Int = 0): IDbQueryBuilder;
-
-    /**
-     * Adds addition tables to "JOIN ...".
-     *
-     * @param   table  table name | DbExpr | subquery
-     * @param   type   joinClause type (LEFT, RIGHT, INNER, etc)
-     * @return
-     */
-    fun join(table: CharSequence, type: String = "INNER"): IDbQueryBuilder
-
-    /**
-     * Adds "ON ..." conditions for the last created JOIN statement.
-     *
-     * @param   c1  column name or DbExpr
-     * @param   op  logic operator
-     * @param   c2  column name or DbExpr
-     * @return
-     */
-    fun on(c1: String, op: String, c2: String): IDbQueryBuilder;
 }
