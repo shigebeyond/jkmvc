@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-17 3:38 PM
  */
-open class EmptyOrmMeta(model: KClass<out IOrm> /* 模型类 */): OrmMeta(model, "?", "?", "?"){
+open class EmptyOrmMeta(model: KClass<out IOrm> /* 模型类 */): OrmMeta(model, "?", "?", "?", checkingTablePrimaryKey = false){
 
                         /**
      * 禁用 queryBuilder()

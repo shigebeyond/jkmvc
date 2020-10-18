@@ -40,7 +40,8 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
                    public override var primaryKey: DbKeyNames = DbKeyNames("id"), // 主键
                    public override val cacheMeta: OrmCacheMeta? = null, // 缓存配置
                    public override val dbName: String = "default", // 数据库名
-                   public override val pkEmptyRule: PkEmptyRule = PkEmptyRule.default // 检查主键为空的规则
+                   public override val pkEmptyRule: PkEmptyRule = PkEmptyRule.default, // 检查主键为空的规则
+                   checkingTablePrimaryKey: Boolean = true // 是否检查表与主键是否存在
 ) : IOrmMeta {
 
     public constructor(
@@ -50,8 +51,9 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             primaryKey: String, // 主键
             cacheMeta: OrmCacheMeta? = null, // 缓存配置
             dbName: String = "default", // 数据库名
-            pkEmptyRule: PkEmptyRule = PkEmptyRule.default // 检查主键为空的规则
-    ) : this(model, label, table, DbKeyNames(primaryKey), cacheMeta, dbName, pkEmptyRule)
+            pkEmptyRule: PkEmptyRule = PkEmptyRule.default, // 检查主键为空的规则
+            checkingTablePrimaryKey: Boolean = true // 是否检查表与主键是否存在
+    ) : this(model, label, table, DbKeyNames(primaryKey), cacheMeta, dbName, pkEmptyRule, checkingTablePrimaryKey)
 
     /**
      * 无参数的构造函数
@@ -73,14 +75,16 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     }
 
     init {
-        // 检查表
-        val dbTable = db.getTable(table)
-        if(dbTable == null)
-            throw OrmException("Table [$table] not exist")
+        if(checkingTablePrimaryKey) {
+            // 检查表
+            val dbTable = db.getTable(table)
+            if (dbTable == null)
+                throw OrmException("Table [$table] not exist")
 
-        // 检查主键
-        if(!dbTable.hasColumns(primaryKey))
-            throw OrmException("Table [$table] miss `primaryKey` columns: $primaryKey")
+            // 检查主键
+            if (!dbTable.hasColumns(primaryKey))
+                throw OrmException("Table [$table] miss `primaryKey` columns: $primaryKey")
+        }
 
         // 检查 model 类的默认构造函数
         constructorNoarg = model.java.getConstructorOrNull() // 无参数构造函数, 其中 GeneralModel 有个internal的无参构造函数
@@ -194,10 +198,12 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
     /**
      * db列
+     *   不用 by lazy, 因为在jkerp会子类改写
      */
-    override val dbColumns: Map<String, DbColumn> by lazy{
-        db.getColumnsByTable(table)
-    }
+    override val dbColumns: Map<String, DbColumn>
+        get(){
+            return db.getColumnsByTable(table)
+        }
 
     /**
      * 表字段
