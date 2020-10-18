@@ -158,10 +158,10 @@ class BelongsToRelation(
      * 删除当前层关联对象
      *    你敢删除 belongsTo 关系的主对象？
      *
-     * @param subquery (从表)当前子查询
+     * @param relatedQuery (主表)关联对象子查询
      * @return
      */
-    protected override fun doDeleteRelated(subquery: IDbQueryBuilder): Boolean {
+    protected override fun doDeleteRelated(relatedQuery: IDbQueryBuilder): Boolean {
         throw OrmException("Cannot delete model [${ormMeta.name}] 's `belongsTo` related object [$name]");
     }
 

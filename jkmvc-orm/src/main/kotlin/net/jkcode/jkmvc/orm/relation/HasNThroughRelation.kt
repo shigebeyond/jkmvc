@@ -300,10 +300,10 @@ class HasNThroughRelation(
     /**
      * 删除当前层关联对象
      *
-     * @param subquery (主表)当前子查询
+     * @param relatedQuery (从表)关联对象子查询
      * @return
      */
-    protected override fun doDeleteRelated(subquery: IDbQueryBuilder): Boolean {
-        return queryRelated(subquery.copy()).delete()
+    protected override fun doDeleteRelated(relatedQuery: IDbQueryBuilder): Boolean {
+        return relatedQuery.copy().delete()
     }
 }

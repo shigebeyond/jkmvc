@@ -153,8 +153,8 @@ abstract class Relation(
      */
     override fun deleteRelated(item: IOrm, fkInMany: Any?): Boolean{
         // 构建关联查询：自动构建查询条件
-        val query = queryRelated(item, fkInMany)
-        if(query == null)
+        val relatedQuery = queryRelated(item, fkInMany)
+        if(relatedQuery == null)
             return true
 
         // 删过的模型: 因为是级联删除的源头, 因此记录源模型
@@ -165,7 +165,7 @@ abstract class Relation(
         path.add(srcModel)
 
         // 级联删除
-        val ret = deleteRelated(query, deletedModels, path)
+        val ret = deleteRelated(relatedQuery, deletedModels, path)
         deletedModels.clear()
         return ret
     }
@@ -196,7 +196,7 @@ abstract class Relation(
         path.add(name) // 关系入栈
 
         if(dbLogger.isDebugEnabled)
-            dbLogger.debug("Deleting related path: {}", path.joinToString(separator))
+            dbLogger.debug("Deleting related path's next related: {}", path.joinToString(separator))
 
         // 1 递归删除下一层
         for(relation in ormMeta.hasNOrThroughRelations as List<Relation>){
@@ -210,6 +210,8 @@ abstract class Relation(
         }
 
         // 2 删除当前层关联对象
+        if(dbLogger.isDebugEnabled)
+            dbLogger.debug("Deleting related path: {}", path.joinToString(separator))
         val ret = doDeleteRelated(relatedQuery)
         path.pop() // 关系出栈
         return ret
@@ -226,8 +228,8 @@ abstract class Relation(
     /**
      * 删除当前层关联对象
      *
-     * @param subquery 当前子查询
+     * @param relatedQuery 关联对象子查询
      * @return
      */
-    protected abstract fun doDeleteRelated(subquery: IDbQueryBuilder): Boolean
+    protected abstract fun doDeleteRelated(relatedQuery: IDbQueryBuilder): Boolean
 }
