@@ -340,11 +340,11 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      */
     internal fun fillTables(db: IDb, buffer: StringBuilder){
         // 填充本表
-        val tb = if(action == SqlAction.INSERT || action == SqlAction.DELETE) // mysql的insert/delete语句, 不支持表带别名
+        val tb = if(action == SqlAction.INSERT || action == SqlAction.DELETE && joinParts.isEmpty()) // mysql的insert/delete单表语句, 不支持表带别名
             quoteTable(db, table.exp)
         else
             quoteTable(db, table)
-        buffer.append(tb)
+        buffer.append(tb).append(' ')
 
         // 填充联查的表
         for (part in joinParts)
