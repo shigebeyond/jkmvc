@@ -9,7 +9,6 @@ import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkutil.common.dbLogger
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.reflect.KFunction3
 
 /**
  * sql构建器 -- 修饰子句: 由修饰词join/where/group by/order by/limit来构建的子句
@@ -22,13 +21,13 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
     /**
      * where/group by/having/order by/limit子句的数组
      */
-    protected val clauses: Array<DbQueryBuilderDecorationClauses<*>?> = arrayOfNulls(5);
+    protected val clauses: Array<DbQueryPart<*>?> = arrayOfNulls(5);
 
     /**
      * join子句
      *   联表数组，每个联表join = 表名 + 联表方式 | 每个联表条件on = 字段 + 运算符 + 字段
      */
-    protected val joinClause: LinkedList<DbQueryBuilderDecorationClauses<*>> = LinkedList()
+    protected val joinClause: LinkedList<DbQueryPart<*>> = LinkedList()
 
     /**
      * join的表名/子查询
@@ -39,44 +38,44 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      * where子句
      *   条件数组, 每个条件 = 字段名 + 运算符 + 字段值
      */
-    protected val whereClause: DbQueryBuilderDecorationClauses<*>
+    protected val whereClause: DbQueryPart<*>
         get(){
             return clauses.getOrPut(ClauseType.WHERE.ordinal){
-                DbQueryBuilderDecorationClausesGroup("WHERE", arrayOf(DbQueryBuilderDecoration::quoteWhereColumn, null, DbQueryBuilderDecoration::quote));
-            } as DbQueryBuilderDecorationClauses<*>
+                DbQueryPartGroup("WHERE", arrayOf(DbQueryBuilderDecoration::quoteWhereColumn, null, DbQueryBuilderDecoration::quote));
+            } as DbQueryPart<*>
         }
 
     /**
      * group by子句
      *   字段数组
      */
-    protected val groupByClause: DbQueryBuilderDecorationClauses<*>
+    protected val groupByClause: DbQueryPart<*>
         get(){
             return clauses.getOrPut(ClauseType.GROUP_BY.ordinal){
-                DbQueryBuilderDecorationClausesSimple("GROUP BY", arrayOf(DbQueryBuilderDecoration::quoteColumn));
-            } as DbQueryBuilderDecorationClauses<*>
+                DbQueryPartSimple("GROUP BY", arrayOf(DbQueryBuilderDecoration::quoteColumn));
+            } as DbQueryPart<*>
         }
 
     /**
      * having子句
      *   条件数组, 每个条件 = 字段名 + 运算符 + 字段值
      */
-    protected val havingClause: DbQueryBuilderDecorationClauses<*>
+    protected val havingClause: DbQueryPart<*>
         get(){
             return clauses.getOrPut(ClauseType.HAVING.ordinal){
-                DbQueryBuilderDecorationClausesGroup("HAVING", arrayOf(DbQueryBuilderDecoration::quoteColumn, null, DbQueryBuilderDecoration::quote));
-            } as DbQueryBuilderDecorationClauses<*>
+                DbQueryPartGroup("HAVING", arrayOf(DbQueryBuilderDecoration::quoteColumn, null, DbQueryBuilderDecoration::quote));
+            } as DbQueryPart<*>
         }
 
     /**
      * order by子句
      *   排序数组, 每个排序 = 字段+方向
      */
-    protected val orderByClause: DbQueryBuilderDecorationClauses<*>
+    protected val orderByClause: DbQueryPart<*>
         get(){
             return clauses.getOrPut(ClauseType.ORDER_BY.ordinal){
-                DbQueryBuilderDecorationClausesSimple("ORDER BY", arrayOf(DbQueryBuilderDecoration::quoteColumn, DbQueryBuilderDecoration::quoteOrderDirection));
-            } as DbQueryBuilderDecorationClauses<*>
+                DbQueryPartSimple("ORDER BY", arrayOf(DbQueryBuilderDecoration::quoteColumn, DbQueryBuilderDecoration::quoteOrderDirection));
+            } as DbQueryPart<*>
         }
 
     /**
@@ -140,7 +139,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      */
     public fun compileDeleteMultiTable(db: IDb, sql: StringBuilder){
         // 仅处理多表删除
-        if(action != SqlType.DELETE || joinTables.isEmpty())
+        if(action != SqlAction.DELETE || joinTables.isEmpty())
             return
 
         val tables = ArrayList<CharSequence>(joinTables.size + 1)
@@ -177,7 +176,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
     public override fun compileDecoration(db: IDb, sql: StringBuilder): IDbQueryBuilder {
         sql.append(' ');
         // 逐个编译修饰表达式
-        travelDecorationClauses { clause: IDbQueryBuilderDecorationClauses<*> ->
+        travelDecorationClauses { clause: DbQueryPart<*> ->
             clause.compile(this, db, sql);
             sql.append(' ');
         }
@@ -195,7 +194,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      * 遍历修饰子句
      * @param visitor 访问者函数，遍历时调用
      */
-    protected fun travelDecorationClauses(visitor: (IDbQueryBuilderDecorationClauses<*>) -> Unit) {
+    protected fun travelDecorationClauses(visitor: (DbQueryPart<*>) -> Unit) {
         // 逐个处理修饰词及其表达式
         // 1 joinClause
         for (j in joinClause)
@@ -215,7 +214,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      */
     public override fun clear(): IDbQueryBuilder {
         // 逐个清空修饰表达式
-        travelDecorationClauses { clause: IDbQueryBuilderDecorationClauses<*> ->
+        travelDecorationClauses { clause: DbQueryPart<*> ->
             clause.clear();
         }
         joinClause.clear();
@@ -541,11 +540,11 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
         joinTables.add(table)
 
         // join　子句
-        val j = DbQueryBuilderDecorationClausesSimple("$type JOIN", arrayOf(DbQueryBuilderDecoration::quoteTable));
+        val j = DbQueryPartSimple("$type JOIN", arrayOf(DbQueryBuilderDecoration::quoteTable));
         j.addSubexp(arrayOf(table));
 
         // on　子句 -- on总是追随最近的一个join
-        val on = DbQueryBuilderDecorationClausesGroup("ON", arrayOf(DbQueryBuilderDecoration::quoteColumn, null, DbQueryBuilderDecoration::quoteColumn));
+        val on = DbQueryPartGroup("ON", arrayOf(DbQueryBuilderDecoration::quoteColumn, null, DbQueryBuilderDecoration::quoteColumn));
 
         joinClause.add(j);
         joinClause.add(on);

@@ -7,7 +7,7 @@ import net.jkcode.jkmvc.orm.relation.*
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.DbQueryBuilder
 import net.jkcode.jkmvc.query.IDbQueryBuilder
-import net.jkcode.jkmvc.query.SqlType
+import net.jkcode.jkmvc.query.SqlAction
 import net.jkcode.jkutil.common.*
 import java.util.*
 import kotlin.collections.HashMap
@@ -596,7 +596,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
     /**
      * 改写 execute(), 添加更新的事件处理
      */
-    override fun execute(action: SqlType, params: List<Any?>, generatedColumn: String?, db: IDb): Long {
+    override fun execute(action: SqlAction, params: List<Any?>, generatedColumn: String?, db: IDb): Long {
         // 更新的前置处理
         listener?.beforeExecute(this)
         // 执行更新

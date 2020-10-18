@@ -3,7 +3,6 @@ package net.jkcode.jkmvc.query
 import net.jkcode.jkmvc.db.Db
 import net.jkcode.jkmvc.db.DbResultSet
 import net.jkcode.jkmvc.db.IDb
-import net.jkcode.jkmvc.orm.OrmQueryBuilder
 
 /**
  * sql构建器
@@ -62,7 +61,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      * @param db 数据库连接
      * @return 编译好的sql
      */
-    public override fun compile(action: SqlType, db: IDb): CompiledSql {
+    public override fun compile(action: SqlAction, db: IDb): CompiledSql {
         // 清空编译结果
         compiledSql.clear();
 
@@ -97,7 +96,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
             limit(1)
 
         // 编译 + 执行
-        return compile(SqlType.SELECT, db).findResult(params, single, db, transform)
+        return compile(SqlAction.SELECT, db).findResult(params, single, db, transform)
     }
 
     /**
@@ -110,7 +109,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
     public override fun count(params: List<*>, db: IDb):Int {
         // 1 编译
         selectColumns.clear() // 清空多余的select
-        val csql = select(DbExpr("count(1)", "NUM", false) /* oracle会自动转为全大写 */).compile(SqlType.SELECT, db);
+        val csql = select(DbExpr("count(1)", "NUM", false) /* oracle会自动转为全大写 */).compile(SqlAction.SELECT, db);
 
         // 2 执行 select
         return csql.findValue<Int>(params, db)!!
@@ -127,7 +126,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
     public override fun sum(column: String, params: List<*>, db: IDb):Int {
         // 1 编译
         selectColumns.clear() // 清空多余的select
-        val csql = select(DbExpr("sum($column)", "NUM", false) /* oracle会自动转为全大写 */).compile(SqlType.SELECT, db);
+        val csql = select(DbExpr("sum($column)", "NUM", false) /* oracle会自动转为全大写 */).compile(SqlAction.SELECT, db);
 
         // 2 执行 select
         return csql.findValue<Int>(params, db)!!
@@ -143,7 +142,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
     public override fun incr(column: String, step: Int, params: List<*>, db: IDb): Boolean {
         // 1 编译
         set(column, DbExpr("$column + $step", false)) // Equals: set(column, "$column + $step", true)
-        val csql = compile(SqlType.UPDATE, db);
+        val csql = compile(SqlAction.UPDATE, db);
 
         // 2 执行 update
         return csql.execute(params, null, db) > 0
@@ -158,7 +157,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      * @param db 数据库连接
      * @return 影响行数|新增id
      */
-    public override fun execute(action: SqlType, params:List<Any?>, generatedColumn:String?, db: IDb): Long {
+    public override fun execute(action: SqlAction, params:List<Any?>, generatedColumn:String?, db: IDb): Long {
         // 编译 + 执行
         return compile(action, db).execute(params, generatedColumn, db)
     }
@@ -171,7 +170,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      * @param db 数据库连接
      * @return
      */
-    public override fun batchExecute(action: SqlType, paramses: List<Any?>, db: IDb): IntArray {
+    public override fun batchExecute(action: SqlAction, paramses: List<Any?>, db: IDb): IntArray {
         // 编译 + 执行
         return compile(action, db).batchExecute(paramses, db)
     }

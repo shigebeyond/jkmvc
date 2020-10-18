@@ -3,12 +3,11 @@ package net.jkcode.jkmvc.tests
 import net.jkcode.jkmvc.db.*
 import net.jkcode.jkmvc.orm.DbKey
 import net.jkcode.jkmvc.orm.DbKeyNames
-import net.jkcode.jkmvc.orm.DbKeyValues
 import net.jkcode.jkmvc.orm.whereIn
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.DbQueryBuilder
 import net.jkcode.jkmvc.query.IDbQueryBuilder
-import net.jkcode.jkmvc.query.SqlType
+import net.jkcode.jkmvc.query.SqlAction
 import org.junit.Test
 
 
@@ -136,7 +135,7 @@ class QueryBuilderTests{
                 .set("name", DbExpr.question)
                 .set("age", DbExpr.question)
                 .where("id", "=", DbExpr.question)
-                .batchExecute(SqlType.UPDATE, params)
+                .batchExecute(SqlAction.UPDATE, params)
     }
 
     @Test

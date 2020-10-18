@@ -5,7 +5,6 @@ import net.jkcode.jkmvc.db.DbException
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.orm.DbKeyNames
 import java.util.*
-import kotlin.reflect.KFunction2
 
 /**
  * sql构建器 -- 动作子句: 由动态select/insert/update/delete来构建的子句
@@ -23,27 +22,14 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
          *   sql模板的动作顺序 = SqlType中定义的动作顺序
          */
         protected val SqlTemplates:Array<String> = arrayOf(
-                "SELECT :distinct :columns FROM :table",
-                "INSERT INTO :table (:columns) :values", // quoteColumn() 默认不加(), quote() 默认加()
-                "UPDATE :table SET :column = :value",
-                "DELETE FROM :table"
-        );
 
-        /**
-         * 缓存字段填充方法
-         */
-        protected val fieldFillers: Map<String, KFunction2<DbQueryBuilderAction, IDb, String>> = mapOf(
-                "table" to DbQueryBuilderAction::fillTable,
-                "columns" to DbQueryBuilderAction::fillColumns,
-                "values" to DbQueryBuilderAction::fillValues,
-                "distinct" to DbQueryBuilderAction::fillDistinct
-        )
+        );
     }
 
     /**
      * 动作
      */
-    protected var action: SqlType? = null;
+    protected var action: SqlAction? = null;
 
     /**
      * 表名/子查询
@@ -67,7 +53,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      */
     public val selectColumns: HashSet<CharSequence>
         get(){
-            return manipulatedData.getOrPut(SqlType.SELECT.ordinal){
+            return manipulatedData.getOrPut(SqlAction.SELECT.ordinal){
                 HashSet<CharSequence>();
             } as HashSet<CharSequence>
         }
@@ -77,7 +63,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      */
     protected val insertRows: InsertData
         get(){
-            return manipulatedData.getOrPut(SqlType.INSERT.ordinal){
+            return manipulatedData.getOrPut(SqlAction.INSERT.ordinal){
                 InsertData()
             } as InsertData
         }
@@ -87,7 +73,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      */
     protected val updateRow: MutableMap<String, Any?>
         get(){
-            return manipulatedData.getOrPut(SqlType.UPDATE.ordinal){
+            return manipulatedData.getOrPut(SqlAction.UPDATE.ordinal){
                 HashMap<String, Any?>();
             } as HashMap<String, Any?>
         }
@@ -244,9 +230,9 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      */
     public override fun clear(): IDbQueryBuilder {
         when (action) {
-            SqlType.SELECT -> selectColumns.clear();
-            SqlType.INSERT -> insertRows.clear();
-            SqlType.UPDATE -> updateRow.clear();
+            SqlAction.SELECT -> selectColumns.clear();
+            SqlAction.INSERT -> insertRows.clear();
+            SqlAction.UPDATE -> updateRow.clear();
         }
         action = null;
         table = DbExpr.empty;
@@ -290,58 +276,44 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
         if (action == null)
             throw DbException("Not set sql action");
 
-        // 实际上是填充子句的参数，如将行参表名替换为真实表名
-        var sql: String = SqlTemplates[action!!.ordinal];
-
-        // 1 填充表名/多个字段名/多个字段值
-        // 针对 select :distinct :columns from :table / insert into :table :columns values :values / update :table
-        sql = ":(table|columns|values|distinct)".toRegex().replace(sql) { result: MatchResult ->
-            // 调用对应的方法: fillTable() / fillColumns() / fillValues() / fillDistinct()
-            val method = fieldFillers[result.groupValues[1]];
-            method?.call(this, db).toString();
-        };
-
-        // 2 填充字段名与字段值的表达式
-        // 针对 update :table set :column = :value
-        if(action == SqlType.UPDATE)
-            sql = ":column(.+):value".toRegex().replace(sql) { result: MatchResult ->
-                fillColumnValueExpr(db, result.groupValues[1]);
-            };
-
-        buffer.append(sql);
+        // 编译sql模板: 替换参数
+        action!!.template.compile(this as DbQueryBuilderDecoration, db, buffer)
         return this;
     }
 
     /**
      * 编译表名: 转义
      * @param db
-     * @return
+     * @param buffer
      */
-    internal fun fillTable(db: IDb): String {
-        if(action == SqlType.INSERT || action == SqlType.DELETE) // mysql的insert/delete语句, 不支持表带别名
-            return quoteTable(db, table.exp)
-
-        return quoteTable(db, table);
+    internal fun fillTable(db: IDb, buffer: StringBuilder){
+        val t = if(action == SqlAction.INSERT || action == SqlAction.DELETE) // mysql的insert/delete语句, 不支持表带别名
+            quoteTable(db, table.exp)
+        else
+            quoteTable(db, table)
+        buffer.append(t)
     }
 
     /**
      * 编译多个字段名: 转义
      *     select/insert时用
      * @param db
-     * @return
+     * @param buffer
      */
-    internal fun fillColumns(db: IDb): String {
+    internal fun fillColumns(db: IDb, buffer: StringBuilder){
         var cols: Iterator<CharSequence>
 
-        if (action == SqlType.SELECT) { // 1 select子句:  data是要查询的字段名
-            if (selectColumns.isEmpty())
-                return "*";
+        if (action == SqlAction.SELECT) { // 1 select子句:  data是要查询的字段名
+            if (selectColumns.isEmpty()){
+                buffer.append("*")
+                return
+            }
 
             cols = selectColumns.iterator()
         } else // 2 insert子句:  data是要插入的多行: columns + values
             cols = insertRows.columns.iterator()
 
-        return cols.joinToString(", ") {
+        cols.joinTo(buffer, ", ") {
             // 单个字段转义
             quoteColumn(db, it)
         }
@@ -351,60 +323,59 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * 编译多个字段值: 转义
      *     insert时用
      * @param db
-     * @return
+     * @param buffer
      */
-    internal fun fillValues(db: IDb): String {
+    internal fun fillValues(db: IDb, buffer: StringBuilder){
         // 1 insert...select..字句
-        if(insertRows.isSubQuery()) // 子查询
-            return quote(db, insertRows.getSubQuery())
+        if(insertRows.isSubQuery()) { // 子查询
+            buffer.append(quote(db, insertRows.getSubQuery()))
+            return
+        }
 
         // 2 insert子句:  data是要插入的多行: columns + values
-        val sql = StringBuilder("VALUES ");
+        buffer.append("VALUES ");
         //对每行构建()
         var i = 0
         val valueSize = insertRows.rows.size
         while(i < valueSize){ //insertRows.rows是多行数据，但是只有一维，需要按columns的大小，来拆分成多行
-            sql.append("(")
+            buffer.append("(")
             //对每值执行db.quote(value);
             val columnSize = insertRows.columns.size
             for (j in 0..(columnSize - 1)){
                 val v = insertRows.rows[i++]
-                sql.append(quote(db, v)).append(", ")
+                buffer.append(quote(db, v)).append(", ")
             }
-            sql.deleteSuffix(", ").append("), ")
+            buffer.deleteSuffix(", ").append("), ")
         }
-        return sql.deleteSuffix(", ").toString();
+        buffer.deleteSuffix(", ")
     }
 
     /**
      * 编译distinct
      *     select时用
      * @param db
-     * @return
+     * @param buffer
      */
-    internal fun fillDistinct(db: IDb): String {
-        return if (distinct) "distinct" else ""
+    internal fun fillDistinct(db: IDb, buffer: StringBuilder){
+        val part = if (distinct) "distinct" else ""
+        buffer.append(part)
     }
 
     /**
-     * 编译字段名与字段值的表达式: 转义 + 构建表达式 + 连接表达式
-     *    update时用
+     * 编译多个字段名等于字段值的表达式: 转义 + 连接
+     *    update时用, 即 field1 = value1, field2 = value2
      * @param db
-     * @param operator 一对字段名与字段值之间的操作符, 组成一个表达式
-     * @param delimiter 表达式之间的连接符
-     * @return
+     * @param buffer
      */
-    internal fun fillColumnValueExpr(db: IDb, operator: String, delimiter: String = ", "): String {
+    internal fun fillColumnValues(db: IDb, buffer: StringBuilder){
         // update子句:  data是要更新字段值: <column to value>
         if (updateRow.isEmpty())
-            return "";
+            return;
 
-        var sql: StringBuilder = StringBuilder();
         for ((column, value) in updateRow) {
             // column = value,
-            sql.append(quoteColumn(db, column)).append(" ").append(operator).append(" ").append(quote(db, value)).append(delimiter);
+            buffer.append(quoteColumn(db, column)).append(" = ").append(quote(db, value)).append(",");
         }
-
-        return sql.deleteSuffix(delimiter).toString();
+        buffer.deleteSuffix(",").toString();
     }
 }

@@ -14,16 +14,16 @@ import kotlin.reflect.KFunction3
  * @author shijianhang
  * @date 2016-10-13
  */
-class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如where/group by */,
-                                           elementHandlers: Array<KFunction3<DbQueryBuilderDecoration, IDb, *, String>?> /* 每个元素的处理器, 可视为列的处理*/
-) : DbQueryBuilderDecorationClauses<Any>/* subexps 是字符串 或 DbQueryBuilderDecorationClausesSimple */(operator, elementHandlers) {
+class DbQueryPartGroup(operator: String, // 修饰符， 如where/group by
+                       elementHandlers: Array<KFunction3<DbQueryBuilderDecoration, IDb, *, String>?> // 每个元素的处理器, 可视为列的处理
+) : DbQueryPart<Any>/* subexps 是字符串 或 DbQueryBuilderDecorationClausesSimple */(operator, elementHandlers) {
     /**
      * 开启一个分组
      *
      * @param  delimiter
      * @return
      */
-    public override fun open(delimiter: String): IDbQueryBuilderDecorationClauses<Any> {
+    public override fun open(delimiter: String): DbQueryPart<Any> {
         // 将连接符也记录到子表达式中, 忽略第一个子表达式
         val exp = if(subexps.isEmpty() || subexps.last == "(")  // "("表示子表达式的开始
                     "("
@@ -38,7 +38,7 @@ class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如w
      *
      * @return
      */
-    public override fun close(): IDbQueryBuilderDecorationClauses<Any> {
+    public override fun close(): DbQueryPart<Any> {
         subexps.add(")")
         return this;
     }
@@ -48,11 +48,11 @@ class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如w
      *
      * @return
      */
-    protected fun endSubexp(): DbQueryBuilderDecorationClausesSimple {
+    protected fun endSubexp(): DbQueryPartSimple {
         var last:Any? = if(subexps.isEmpty()) null else subexps.last()
-        if (last !is DbQueryBuilderDecorationClausesSimple) {
+        if (last !is DbQueryPartSimple) {
             val afterGroup = last == ")" // 跟在分组后面
-            last = DbQueryBuilderDecorationClausesSimple("", elementHandlers, afterGroup);
+            last = DbQueryPartSimple("", elementHandlers, afterGroup);
             subexps.add(last);
         }
 
@@ -66,7 +66,7 @@ class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如w
      * @param delimiter 连接符
      * @return
      */
-    public override fun addSubexp(subexp: Array<Any?>, delimiter: String): IDbQueryBuilderDecorationClauses<Any> {
+    public override fun addSubexp(subexp: Array<Any?>, delimiter: String): DbQueryPart<Any> {
         // 代理最后一个子表达式
         endSubexp().addSubexp(subexp, delimiter);
         return this;
@@ -83,7 +83,7 @@ class DbQueryBuilderDecorationClausesGroup(operator: String /* 修饰符， 如w
      */
     public override fun compileSubexp(subexp: Any, j:Int, query: DbQueryBuilderDecoration, db: IDb, sql: StringBuilder) {
         // 子表达式是: string / DbQueryBuilderDecorationClausesSimple
-        if (subexp is DbQueryBuilderDecorationClausesSimple) {
+        if (subexp is DbQueryPartSimple) {
             subexp.compile(query, db, sql);
         }else{
             sql.append(subexp);
