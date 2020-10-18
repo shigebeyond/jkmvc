@@ -1,6 +1,8 @@
 package net.jkcode.jkmvc.orm
 
 import com.thoughtworks.xstream.XStream
+import net.jkcode.jkmvc.db.DbColumn
+import net.jkcode.jkmvc.db.DbTable
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.orm.relation.HasNThroughRelation
 import net.jkcode.jkmvc.orm.relation.ICbRelation
@@ -83,6 +85,16 @@ interface IOrmMeta {
      * 数据库
      */
     val db: IDb
+
+    /**
+     * db表
+     */
+    val dbTable: DbTable
+
+    /**
+     * db列
+     */
+    val dbColumns: Map<String, DbColumn>
 
     /**
      * 检查主键为空的规则

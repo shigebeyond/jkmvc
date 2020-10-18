@@ -41,6 +41,35 @@ class HasNThroughRelation(
 ) : Relation(one2one, srcOrmMeta, model, foreignKey, primaryKey, conditions, false, pkEmptyRule) {
 
     /**
+     * 检查主键外键是否存在
+     */
+    override fun checkKeyExist() {
+//        *   2 farForeignKey： 中间表.远端外键 = 从表.远端主键
+        // 检查中间表是否存在
+        val midTable = ormMeta.db.getTable(middleTable)
+        if(midTable == null)
+            throw OrmException("Table [$middleTable] not exists")
+
+        // 检查主表.主键是否存在
+        val masterTable = masterOrmMeta.dbTable
+        if (!masterTable.hasColumns(primaryKey))
+            throw OrmException("Master table [${masterTable.name}] miss `primaryKey` columns: $primaryKey")
+
+        // 检查中间表.外键是否存在
+        if (!midTable.hasColumns(foreignKey))
+            throw OrmException("Middle table [${midTable.name}] miss `foreignKey` columns: $foreignKey")
+
+        // 检查中间表.远端外键是否存在
+        if (!midTable.hasColumns(farForeignKey))
+            throw OrmException("Middle table [${midTable.name}] miss `farForeignKey` columns: $farForeignKey")
+
+        // 检查从表.远端主键是否存在
+        val slaveTable = slaveOrmMeta.dbTable
+        if (!slaveTable.hasColumns(farPrimaryKey))
+            throw OrmException("Slave table [${slaveTable.name}] miss `farPrimaryKey` columns: $farPrimaryKey")
+    }
+
+    /**
      * 本模型作为主表
      */
     override val thisAsMaster: Boolean = true

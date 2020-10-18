@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.db
 
+import net.jkcode.jkmvc.orm.DbKeyNames
 import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.dbLogger
 import net.jkcode.jkutil.common.replacesFormat
@@ -54,6 +55,26 @@ data class DbTable(
      */
     public fun getColumn(name: String): DbColumn? {
         return columns[name]
+    }
+
+    /**
+     * 检查是否存在字段
+     * @param name
+     * @return
+     */
+    public fun hasColumn(name: String): Boolean {
+        return name in columns
+    }
+
+    /**
+     * 检查是否存在字段
+     * @param name
+     * @return
+     */
+    public fun hasColumns(names: DbKeyNames): Boolean {
+        return names.columns.all {
+            hasColumn(it)
+        }
     }
 
     /**

@@ -31,6 +31,8 @@ abstract class Relation(
         public override val pkEmptyRule: PkEmptyRule = model.modelOrmMeta.pkEmptyRule // 检查主键为空的规则
 ) : IRelation {
 
+
+
     /**
      * 是否是`有一个`关系
      *    当前表是主表, 关联表是从表
@@ -79,6 +81,21 @@ abstract class Relation(
                 slave.dbColumns[col]?.default
             }
         }
+
+    /**
+     * 检查主键外键是否存在
+     */
+    override fun checkKeyExist() {
+        // 检查主键是否存在
+        val masterTable = masterOrmMeta.dbTable
+        if (!masterTable.hasColumns(primaryKey))
+            throw OrmException("Master table [${masterTable.name}] miss `primaryKey` columns: $primaryKey")
+
+        // 检查外键是否存在
+        val slaveTable = slaveOrmMeta.dbTable
+        if (!slaveTable.hasColumns(foreignKey))
+            throw OrmException("Slave table [${slaveTable.name}] miss `foreignKey` columns: $foreignKey")
+    }
 
     /**
      * 批量设置关系的属性值, 即将关联模型对象 塞到 本模型对象的属性

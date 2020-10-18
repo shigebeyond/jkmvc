@@ -4,6 +4,7 @@ import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.converters.basic.DateConverter
 import net.jkcode.jkmvc.db.Db
 import net.jkcode.jkmvc.db.DbColumn
+import net.jkcode.jkmvc.db.DbTable
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.model.GeneralModel
 import net.jkcode.jkmvc.orm.relation.*
@@ -72,6 +73,15 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     }
 
     init {
+        // 检查表
+        val dbTable = db.getTable(table)
+        if(dbTable == null)
+            throw OrmException("Table [$table] not exist")
+
+        // 检查主键
+        if(!dbTable.hasColumns(primaryKey))
+            throw OrmException("Table [$table] miss `primaryKey` columns: $primaryKey")
+
         // 检查 model 类的默认构造函数
         constructorNoarg = model.java.getConstructorOrNull() // 无参数构造函数, 其中 GeneralModel 有个internal的无参构造函数
         if(constructorNoarg == null)
@@ -177,9 +187,15 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     }
 
     /**
+     * db表
+     */
+    override val dbTable: DbTable
+        get() = db.getTable(table)!!
+
+    /**
      * db列
      */
-    internal val dbColumns: Map<String, DbColumn> by lazy{
+    override val dbColumns: Map<String, DbColumn> by lazy{
         db.getColumnsByTable(table)
     }
 
@@ -805,6 +821,10 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @return
      */
     public fun addRelation(name: String, relation: IRelation): OrmMeta {
+        // 检查关系的主键外键是否存在
+        relation.checkKeyExist()
+
+        // 添加关系
         relations.put(name, relation)
         (relation as Relation).name = name
         return this

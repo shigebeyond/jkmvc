@@ -104,7 +104,7 @@ interface IRelation {
     val foreignKeyDefault: DbKeyValues
 
     /**
-     * 本模型作为主表
+     * 本模型是否作为主表
      */
     val thisAsMaster: Boolean
 
@@ -163,6 +163,12 @@ interface IRelation {
      */
     val modelRowTransformer: (DbResultRow) -> IOrm
         get()= model.modelRowTransformer
+
+    /**
+     * 检查主键外键是否存在
+     *   在 OrmMeta.addRelation() 中调用, 不在关系类的构造函数中调用, 因为子类会改写了checkKeyExist(), 在父类中调用会导致他引用子类的没有初始化的属性而报错
+     */
+    fun checkKeyExist()
 
     /**
      * 获得关联模型的查询器
