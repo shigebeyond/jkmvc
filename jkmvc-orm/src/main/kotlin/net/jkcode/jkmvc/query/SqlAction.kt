@@ -16,7 +16,7 @@ public enum class SqlAction {
         override val template: DbQueryPartTemplate = DbQueryPartTemplate("UPDATE <tables> SET <columnValues>")
     },
     DELETE{  // 删
-        override val template: DbQueryPartTemplate = DbQueryPartTemplate("DELETE FROM <tables>")
+        override val template: DbQueryPartTemplate = DbQueryPartTemplate("DELETE <delTables> FROM <tables>")
     };
 
     abstract val template: DbQueryPartTemplate;

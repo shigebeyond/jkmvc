@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.query
 
 import net.jkcode.jkutil.common.*
 import net.jkcode.jkmvc.db.DbException
+import net.jkcode.jkmvc.db.DbType
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.orm.DbKeyNames
 import java.util.*
@@ -321,48 +322,48 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
     /**
      * 编译动作子句
      * @param db
-     * @param buffer 记录编译后的sql
+     * @param sql 记录编译后的sql
      * @return
      */
-    public override fun compileAction(db: IDb, buffer: StringBuilder): DbQueryBuilderAction {
+    public override fun compileAction(db: IDb, sql: StringBuilder): DbQueryBuilderAction {
         if (action == null)
             throw DbException("Not set sql action");
 
         // 编译sql模板: 替换参数
-        action!!.template.compile(this as DbQueryBuilderDecoration, db, buffer)
+        action!!.template.compile(this as DbQueryBuilderDecoration, db, sql)
         return this;
     }
 
     /**
      * 编译表名: 转义
      * @param db
-     * @param buffer
+     * @param sql
      */
-    internal fun fillTables(db: IDb, buffer: StringBuilder){
+    internal fun fillTables(db: IDb, sql: StringBuilder){
         // 填充本表
-        val tb = if(action == SqlAction.INSERT || action == SqlAction.DELETE && joinParts.isEmpty()) // mysql的insert/delete单表语句, 不支持表带别名
-            quoteTable(db, table.exp)
-        else
-            quoteTable(db, table)
-        buffer.append(tb).append(' ')
+        val tb = if(action == SqlAction.INSERT)
+                    quoteTable(db, table.exp)
+                else
+                    quoteTable(db, table)
+        sql.append(tb).append(' ')
 
         // 填充联查的表
         for (part in joinParts)
-            part.compile(this as DbQueryBuilderDecoration, db, buffer)
+            part.compile(this as DbQueryBuilderDecoration, db, sql)
     }
 
     /**
      * 编译多个字段名: 转义
      *     select/insert时用
      * @param db
-     * @param buffer
+     * @param sql
      */
-    internal fun fillColumns(db: IDb, buffer: StringBuilder){
+    internal fun fillColumns(db: IDb, sql: StringBuilder){
         var cols: Iterator<CharSequence>
 
         if (action == SqlAction.SELECT) { // 1 select子句:  data是要查询的字段名
             if (selectColumns.isEmpty()){
-                buffer.append("*")
+                sql.append("*")
                 return
             }
 
@@ -370,7 +371,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
         } else // 2 insert子句:  data是要插入的多行: columns + values
             cols = insertRows.columns.iterator()
 
-        cols.joinTo(buffer, ", ") {
+        cols.joinTo(sql, ", ") {
             // 单个字段转义
             quoteColumn(db, it)
         }
@@ -380,59 +381,90 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * 编译多个字段值: 转义
      *     insert时用
      * @param db
-     * @param buffer
+     * @param sql
      */
-    internal fun fillValues(db: IDb, buffer: StringBuilder){
+    internal fun fillValues(db: IDb, sql: StringBuilder){
         // 1 insert...select..字句
         if(insertRows.isSubQuery()) { // 子查询
-            buffer.append(quote(db, insertRows.getSubQuery()))
+            sql.append(quote(db, insertRows.getSubQuery()))
             return
         }
 
         // 2 insert子句:  data是要插入的多行: columns + values
-        buffer.append("VALUES ");
+        sql.append("VALUES ");
         //对每行构建()
         var i = 0
         val valueSize = insertRows.rows.size
         while(i < valueSize){ //insertRows.rows是多行数据，但是只有一维，需要按columns的大小，来拆分成多行
-            buffer.append("(")
+            sql.append("(")
             //对每值执行db.quote(value);
             val columnSize = insertRows.columns.size
             for (j in 0..(columnSize - 1)){
                 val v = insertRows.rows[i++]
-                buffer.append(quote(db, v)).append(", ")
+                sql.append(quote(db, v)).append(", ")
             }
-            buffer.deleteSuffix(", ").append("), ")
+            sql.deleteSuffix(", ").append("), ")
         }
-        buffer.deleteSuffix(", ")
+        sql.deleteSuffix(", ")
     }
 
     /**
      * 编译distinct
      *     select时用
      * @param db
-     * @param buffer
+     * @param sql
      */
-    internal fun fillDistinct(db: IDb, buffer: StringBuilder){
+    internal fun fillDistinct(db: IDb, sql: StringBuilder){
         val part = if (distinct) "distinct" else ""
-        buffer.append(part)
+        sql.append(part)
     }
 
     /**
      * 编译多个字段名等于字段值的表达式: 转义 + 连接
      *    update时用, 即 field1 = value1, field2 = value2
      * @param db
-     * @param buffer
+     * @param sql
      */
-    internal fun fillColumnValues(db: IDb, buffer: StringBuilder){
+    internal fun fillColumnValues(db: IDb, sql: StringBuilder){
         // update子句:  data是要更新字段值: <column to value>
         if (updateRow.isEmpty())
             return;
 
         for ((column, value) in updateRow) {
             // column = value,
-            buffer.append(quoteColumn(db, column)).append(" = ").append(quote(db, value)).append(",");
+            sql.append(quoteColumn(db, column)).append(" = ").append(quote(db, value)).append(",");
         }
-        buffer.deleteSuffix(",").toString();
+        sql.deleteSuffix(",").toString();
+    }
+
+    /**
+     * 填充删除的多表
+     * @param db 数据库连接
+     * @param sql 保存编译的sql
+     */
+    public fun fillDelTables(db: IDb, sql: StringBuilder){
+        // 仅处理多表删除, 但mysql删除单表也是要处理的
+        if(action != SqlAction.DELETE || joinTables.isEmpty() && db.dbType != DbType.Mysql)
+            return
+
+        val tables = ArrayList<CharSequence>(joinTables.size + 1)
+//        if(joinTables.isEmpty() && db.dbType == DbType.Mysql && table is DbExpr && table.alias == null){
+//            // mysql删除单表, 且无表别名, 就不输出了
+//        }else
+            tables.add(table)
+        for(table in joinTables) {
+            // 子查询不能删除
+            if(table is IDbQueryBuilder
+                    || table is DbExpr && table.exp is IDbQueryBuilder)
+                continue
+
+            tables.add(table)
+        }
+
+        tables.joinTo(sql, ", ", " ", " ") { table ->
+            db.quoteTableAlias(table)
+        }
+
+        tables.clear()
     }
 }

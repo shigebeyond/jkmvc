@@ -29,7 +29,8 @@ class DbQueryPartTemplate(public val template: String) : IDbQueryPart{
                 "columns" to DbQueryBuilderAction::fillColumns,
                 "values" to DbQueryBuilderAction::fillValues,
                 "columnValues" to DbQueryBuilderAction::fillColumnValues,
-                "distinct" to DbQueryBuilderAction::fillDistinct
+                "distinct" to DbQueryBuilderAction::fillDistinct,
+                "delTables" to DbQueryBuilderAction::fillDelTables
         )
     }
 

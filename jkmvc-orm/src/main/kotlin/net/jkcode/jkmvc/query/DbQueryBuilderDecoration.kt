@@ -124,41 +124,6 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
     }
 
     /**
-     * 编译多表删除表达式
-     * @param db 数据库连接
-     * @param sql 保存编译的sql
-     */
-    public fun compileDeleteMultiTable(db: IDb, sql: StringBuilder){
-        // 仅处理多表删除
-        if(action != SqlAction.DELETE || joinTables.isEmpty())
-            return
-
-        val tables = ArrayList<CharSequence>(joinTables.size + 1)
-        tables.add(table)
-        for(table in joinTables) {
-            // 子查询不能删除
-            if(table is IDbQueryBuilder
-                    || table is DbExpr && table.exp is IDbQueryBuilder)
-                continue
-
-            tables.add(table)
-        }
-
-        if (db.dbType == DbType.Mysql) { // mysql
-            val tablesPart = tables.joinToString(", ", " ", " ") { table ->
-                db.quoteTableAlias(table)
-            }
-
-            val iSelect = "DELETE".length
-            //delete t1, t2 from t1 left join t2 on ...
-            sql.insert(iSelect, tablesPart) // 在 delete 之后插入多表
-            return
-        }
-
-        // todo: oracle/sql server
-    }
-
-    /**
      * 编译修饰子句
      * @param db 数据库连接
      * @param sql 保存编译的sql
@@ -176,9 +141,6 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
 
         // 单独编译limit表达式
         compileLimit(db, sql)
-
-        // 单独编译多表删除表达式
-        compileDeleteMultiTable(db, sql)
 
         return this;
     }
