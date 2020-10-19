@@ -80,6 +80,14 @@ class OrmTests{
     }
 
     @Test
+    fun testClone(){
+        val query = UserModel.queryBuilder().where("id", id).limit(1)
+        val query2 = query.copy()
+        val user = query.findModel<UserModel>()
+        query2.set("age", 0).update()
+    }
+
+    @Test
     fun testGeneralModelConstructor(){
         val c = GeneralModel::class.java.getConstructorOrNull() // 无参数构造函数
         println(c)

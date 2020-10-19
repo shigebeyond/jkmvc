@@ -251,7 +251,7 @@ abstract class OrmPersistent : OrmValid() {
 	 */
 	public override fun delete(withHasRelations0: Boolean): Boolean {
 		if(!loaded)
-			throw OrmException("Load before deleting object[$this]"); // 删除对象[$this]前先检查是否存在
+			throw OrmException("Must load before deleting object[$this]"); // 删除对象[$this]前先检查是否存在
 
 		// 事务
 		val withHasRelations = withHasRelations0 && ormMeta.hasNOrThroughRelations.isNotEmpty()
