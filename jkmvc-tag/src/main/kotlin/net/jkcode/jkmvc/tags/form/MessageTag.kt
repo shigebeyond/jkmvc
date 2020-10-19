@@ -25,6 +25,11 @@ class MessageTag : org.apache.taglibs.standard.tag.rt.fmt.MessageTag() {
     }
 
     /**
+     * key作为空消息的替代品
+     */
+    public var keyAsAlternative: Boolean = false
+
+    /**
      * 是否html转码
      */
     public var htmlEscape: Boolean = false
@@ -60,6 +65,8 @@ class MessageTag : org.apache.taglibs.standard.tag.rt.fmt.MessageTag() {
 
         // key不为空, 则取消息
         var msg = MessageSource.instance().getMessage(key)
+        if(msg.isNullOrBlank() && keyAsAlternative)
+            msg = key
         if(htmlEscape)
             msg = StringEscapeUtils.escapeHtml(msg)
 
