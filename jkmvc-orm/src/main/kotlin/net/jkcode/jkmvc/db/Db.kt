@@ -309,8 +309,7 @@ abstract class Db protected constructor(
     public override fun batchExecute(sql: String, paramses: List<Any?>, paramSize:Int): IntArray {
         try{
             val result = masterConn.batchExecute(sql, paramses, paramSize)
-            if(dbLogger.isDebugEnabled)
-                dbLogger.debug("Execute sql={}, params={}", sql, paramses)
+            dbLogger.debug("Execute sql={}, params={}", sql, paramses)
             return result
         }catch (e: SQLException){
             dbLogger.error("Error [{}], sql={}, params={}", e.message, sql, paramses)

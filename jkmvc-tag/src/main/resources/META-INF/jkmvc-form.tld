@@ -2509,6 +2509,14 @@
 			<required>false</required>
 			<rtexprvalue>false</rtexprvalue>
 		</attribute>
+		<attribute>
+			<description>
+				Key as message if message is null
+			</description>
+			<name>keyAsAlternative</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
 	</tag>
 	
 </taglib>

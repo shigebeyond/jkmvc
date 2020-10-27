@@ -357,7 +357,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @return
      */
     public override fun <T> transactionWhenHandlingEvent(events: String, withHasRelations: Boolean, statement: () -> T): T {
-        val needTrans = canHandleAnyEvent(events) || withHasRelations // || hasCascadeDeletedRelation() -- withHasRelations 是控制级联删除的, 因此不需要判断 hasCascadeDeletedRelation()
+        val needTrans = canHandleAnyEvent(events) || withHasRelations
         return db.transaction(!needTrans, statement)
     }
 
@@ -436,6 +436,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         if (cacheMeta != null) {
             val key = getCacheKey(item.pk)
             cache.remove(key)
+            dbLogger.debug("Remove orm [{}] cache: {}", model.qualifiedName, key)
         }
     }
 
