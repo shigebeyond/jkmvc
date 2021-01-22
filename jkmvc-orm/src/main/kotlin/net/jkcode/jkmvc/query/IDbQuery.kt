@@ -4,6 +4,7 @@ import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.db.DbResultSet
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.orm.*
+import net.jkcode.jkutil.common.Config
 import kotlin.reflect.KClass
 
 /**

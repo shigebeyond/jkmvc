@@ -65,6 +65,18 @@ abstract class DbQueryPart<T>(protected val operator: String /* 修饰符， 如
     public abstract fun addSubexp(subexp:Array<Any?>, delimiter:String = ", "): DbQueryPart<T>;
 
     /**
+     * 添加一个子表达式+连接符
+     *
+     * @param subexp 子表达式
+     * @param and 当前子表达式的连接符是and还是or
+     * @return
+     */
+    public fun addSubexp(subexp:Array<Any?>, and: Boolean): DbQueryPart<T>{
+        val delimiter = if (and) "AND" else "OR"
+        return addSubexp(subexp, delimiter)
+    }
+
+    /**
      * 编译一个子表达式
      *
      * @param subexp 子表达式
@@ -83,6 +95,17 @@ abstract class DbQueryPart<T>(protected val operator: String /* 修饰符， 如
      */
     public open fun open(delimiter: String): DbQueryPart<T> {
         throw UnsupportedOperationException("not implemented")
+    }
+
+    /**
+     * 开启一个分组
+     *
+     * @param and 连接符是and还是or
+     * @return
+     */
+    public open fun open(and: Boolean): DbQueryPart<T> {
+        val delimiter = if (and) "AND" else "OR"
+        return open(delimiter)
     }
 
     /**

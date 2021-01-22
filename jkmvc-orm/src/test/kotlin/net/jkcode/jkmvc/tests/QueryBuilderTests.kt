@@ -97,6 +97,16 @@ class QueryBuilderTests{
     }
 
     @Test
+    fun testSplitWhere(){
+        val rows = DbQueryBuilder().table("user")
+                .where("id&age", ">", 0) // &是and
+                //.where("name|avatar", "like", "%shi%") // |是or
+                .whereLike("name|avatar", "shi") // |是or
+                .findMaps()
+        println("查询user表：" + rows)
+    }
+
+    @Test
     fun testFindPage(){
         val query: IDbQueryBuilder = DbQueryBuilder().table("user")
         val counter: IDbQueryBuilder = query.copy() // 克隆query builder

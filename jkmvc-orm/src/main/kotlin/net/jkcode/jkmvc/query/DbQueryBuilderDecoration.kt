@@ -190,35 +190,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      * @return
      */
     public override fun andWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
-        if(op == "IN" && trySplitInParams(column, op, value, true))
-            return this;
-
-        whereClause.addSubexp(arrayOf(column, prepareOperator(column, op, value), value), "AND");
-        return this;
-    }
-
-    /**
-     * 拆分in参数
-     *
-     * @param   column  column name or DbExpr
-     * @param   op      logic operator
-     * @param   value   column value
-     * @param   and    and / or
-     * @return
-     */
-    protected fun trySplitInParams(column: String, op: String, value: Any?, and: Boolean): Boolean {
-        val maxInParamNum = 1000
-        if (value is List<*> && value.size > maxInParamNum) {
-            if(and) andWhereOpen() else orWhereOpen()
-            var i = 0;
-            while (i < value.size) {
-                orWhere(column, op, value.subList(i, minOf(i + maxInParamNum - 1, value.size - 1)))
-                i = i + maxInParamNum
-            }
-            if(and) andWhereClose() else orWhereClose()
-            return true
-        }
-        return false
+        return whav(column, op, value, true, true)
     }
 
     /**
@@ -230,11 +202,98 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      * @return
      */
     public override fun orWhere(column: String, op: String, value: Any?): IDbQueryBuilder {
-        if(op == "IN" && trySplitInParams(column, op, value, false))
+        return whav(column, op, value, true, false)
+    }
+
+    /**
+     * 兼容 andWhere()/orWhere()/andHaving()/orHaving()
+     *
+     * @param   column  column name or DbExpr
+     * @param   op      logic operator
+     * @param   value   column value
+     * @param   where   whether where/having
+     * @param   and     whether and/or
+     * @return
+     */
+    protected inline fun whav(column: String, op: String, value: Any?, where: Boolean, and: Boolean): IDbQueryBuilder {
+        if(trySplitWhere(column, op, value, where, and))
             return this;
 
-        whereClause.addSubexp(arrayOf(column, prepareOperator(column, op, value), value), "OR");
+        val clause = if(where) whereClause else havingClause
+        clause.addSubexp(arrayOf(column, prepareOperator(column, op, value), value), and);
         return this;
+    }
+
+    /**
+     * 拆分in参数
+     *
+     * @param   column  column name or DbExpr
+     * @param   op      logic operator
+     * @param   value   column value
+     * @param   where   whether where/having
+     * @param   and     whether and/or
+     * @return
+     */
+    protected inline fun trySplitWhere(column: String, op: String, value: Any?, where: Boolean, and: Boolean): Boolean {
+        return trySplitColumn(column, op, value, true, where, and) // 尝试根据 & (与)来分割(字段)子条件
+                || trySplitColumn(column, op, value, false, where, and) // 尝试根据 | (或)来分割(字段)子条件
+                || trySplitInParams(column, op, value, where, and) // 尝试拆分in参数
+    }
+    /**
+     * 尝试根据分隔符 |(或) 与 &(与) 来分割(字段)子条件
+     *   多个字段使用相同查询条件
+     * @param   column  column name or DbExpr
+     * @param   op      logic operator
+     * @param   value   column value
+     * @param   and     是否与(分隔符&), 否则或(分隔符|), 用于分割字段
+     * @param   where   whether where/having
+     * @param   outAnd  外部的and/or
+     * @return
+     */
+    protected fun trySplitColumn(column: String, op: String, value: Any?, and: Boolean, where: Boolean, outAnd: Boolean): Boolean{
+        val delimiter = if(and) '&' else '|'; // 分割符
+        // 无分隔符
+        if(!column.contains(delimiter))
+            return false
+
+        // 分割字段
+        val cols = column.split(delimiter);
+        whavOpen(where, outAnd)
+        for (col in cols){
+            // 拼接每个字段的条件
+            whav(col, op, value, where, and)
+        }
+        whavClose(where)
+        return true;
+    }
+    /**
+     * 尝试拆分in参数
+     *
+     * @param   column  column name or DbExpr
+     * @param   op      logic operator
+     * @param   value   column value
+     * @param   where   whether where/having
+     * @param   and     whether and/or
+     * @return
+     */
+    protected fun trySplitInParams(column: String, op: String, value: Any?, where: Boolean, and: Boolean): Boolean {
+        // 只处理in参数
+        if(op != "IN")
+            return false;
+
+        // 参数个数超过1000才拆分
+        val maxInParamNum = 1000
+        if (value is List<*> && value.size > maxInParamNum) {
+            whavOpen(where, and)
+            var i = 0;
+            while (i < value.size) {
+                whav(column, op, value.subList(i, minOf(i + maxInParamNum - 1, value.size - 1)), where, and)
+                i = i + maxInParamNum
+            }
+            whavClose(where)
+            return true
+        }
+        return false
     }
 
     /**
@@ -266,7 +325,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
         if(condition.isBlank())
             return this
 
-        whereClause.addSubexp(arrayOf(DbCondition(condition, params)), "AND");
+        whereClause.addSubexp(arrayOf<Any?>(DbCondition(condition, params)), true);
         return this;
     }
 
@@ -281,7 +340,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
         if(condition.isBlank())
             return this
 
-        whereClause.addSubexp(arrayOf(DbCondition(condition, params)), "OR");
+        whereClause.addSubexp(arrayOf<Any?>(DbCondition(condition, params)), false);
         return this;
     }
 
@@ -291,7 +350,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      * @return
      */
     public override fun andWhereOpen(): IDbQueryBuilder {
-        whereClause.open("AND");
+        whavOpen(true,true);
         return this;
     }
 
@@ -301,7 +360,19 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      * @return
      */
     public override fun orWhereOpen(): IDbQueryBuilder {
-        whereClause.open("OR");
+        whavOpen(true,false);
+        return this;
+    }
+
+    /**
+     * 兼容 andWhereOpen()/orWhereOpen()/andHavingOpen()/orHavingOpen()
+     * @param   where   whether where/having
+     * @param   and     whether and/or
+     * @return
+     */
+    protected inline fun whavOpen(where: Boolean, and: Boolean): IDbQueryBuilder {
+        val clause = if(where) whereClause else havingClause
+        clause.open(and);
         return this;
     }
 
@@ -311,8 +382,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      * @return
      */
     public override fun andWhereClose(): IDbQueryBuilder {
-        whereClause.close();
-        return this;
+        return whavClose(true)
     }
 
     /**
@@ -321,7 +391,17 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      * @return
      */
     public override fun orWhereClose(): IDbQueryBuilder {
-        whereClause.close();
+        return whavClose(true)
+    }
+
+    /**
+     * 兼容 andWhereClose()/orWhereClose()/andHavingClose()/orHavingClose()
+     * @param   where   whether where/having
+     * @return
+     */
+    protected inline fun whavClose(where: Boolean): IDbQueryBuilder {
+        val clause = if(where) whereClause else havingClause
+        clause.close();
         return this;
     }
 
@@ -345,11 +425,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      * @return
      */
     public override fun andHaving(column: String, op: String, value: Any?): IDbQueryBuilder {
-        if(op == "IN" && trySplitInParams(column, op, value, true))
-            return this;
-
-        havingClause.addSubexp(arrayOf(column, prepareOperator(column, op, value), value), "AND");
-        return this;
+        return whav(column, op, value, false, true)
     }
 
     /**
@@ -361,11 +437,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      * @return
      */
     public override fun orHaving(column: String, op: String, value: Any?): IDbQueryBuilder {
-        if(op == "IN" && trySplitInParams(column, op, value, false))
-            return this;
-
-        havingClause.addSubexp(arrayOf(column, prepareOperator(column, op, value), value), "OR");
-        return this;
+        return whav(column, op, value, false, false)
     }
 
     /**
@@ -379,7 +451,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
         if(condition.isBlank())
             return this
 
-        havingClause.addSubexp(arrayOf(DbCondition(condition, params)), "AND");
+        havingClause.addSubexp(arrayOf<Any?>(DbCondition(condition, params)), true);
         return this;
     }
 
@@ -394,7 +466,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
         if(condition.isBlank())
             return this
 
-        havingClause.addSubexp(arrayOf(DbCondition(condition, params)), "OR");
+        havingClause.addSubexp(arrayOf<Any?>(DbCondition(condition, params)), false);
         return this;
     }
 
@@ -404,8 +476,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      * @return
      */
     public override fun andHavingOpen(): IDbQueryBuilder {
-        havingClause.open("AND");
-        return this;
+        return whavOpen(false,true);
     }
 
     /**
@@ -414,8 +485,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      * @return
      */
     public override fun orHavingOpen(): IDbQueryBuilder {
-        havingClause.open("OR");
-        return this;
+        return whavOpen(false,false);
     }
 
     /**
@@ -424,8 +494,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      * @return
      */
     public override fun andHavingClose(): IDbQueryBuilder {
-        havingClause.close();
-        return this;
+        return whavClose(false)
     }
 
     /**
@@ -434,8 +503,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      * @return
      */
     public override fun orHavingClose(): IDbQueryBuilder {
-        havingClause.close();
-        return this;
+        return whavClose(false)
     }
 
     /**

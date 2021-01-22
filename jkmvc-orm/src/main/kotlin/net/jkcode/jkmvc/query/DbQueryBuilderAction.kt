@@ -269,7 +269,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @return
      */
     public override fun on(c1: String, op: String, c2: String): IDbQueryBuilder {
-        joinParts.last().addSubexp(arrayOf(c1, op, c2), "AND");
+        joinParts.last().addSubexp(arrayOf<Any?>(c1, op, c2), "AND");
         return this;
     }
 

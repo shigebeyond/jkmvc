@@ -44,7 +44,6 @@ class HasNThroughRelation(
      * 检查主键外键是否存在
      */
     override fun checkKeyExist() {
-//        *   2 farForeignKey： 中间表.远端外键 = 从表.远端主键
         // 检查中间表是否存在
         val midTable = ormMeta.db.getTable(middleTable)
         if(midTable == null)
