@@ -1,6 +1,10 @@
 package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.db.DbResultRow
+import net.jkcode.jkmvc.orm.prop.OrmListPropDelegater
+import net.jkcode.jkmvc.orm.prop.OrmMapPropDelegater
+import net.jkcode.jkmvc.orm.prop.OrmPropDelegater
+import net.jkcode.jkmvc.orm.prop.OrmSetPropDelegater
 import kotlin.properties.ReadWriteProperty
 
 /**

@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.orm
 
+import net.jkcode.jkutil.collection.FixedKeyMapFactory
 import net.jkcode.jkutil.validator.ModelValidateResult
 
 
@@ -16,7 +17,7 @@ abstract class OrmValid : IOrm, OrmEntity() {
      * 改写 OrmEntity 中的 data属性
      * 最新的字段值：<字段名 to 最新字段值>
      */
-    protected override val _data: MutableMap<String, Any?> by lazy{
+    protected override val _data: FixedKeyMapFactory.FixedKeyMap by lazy{
         ormMeta.dataFactory.createMap()
     }
 
