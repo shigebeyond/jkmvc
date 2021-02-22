@@ -278,7 +278,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      */
     protected fun trySplitInParams(column: String, op: String, value: Any?, where: Boolean, and: Boolean): Boolean {
         // 只处理in参数
-        if(op != "IN")
+        if(!op.equals("IN", true))
             return false;
 
         // 参数个数超过1000才拆分
