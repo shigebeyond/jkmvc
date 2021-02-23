@@ -434,4 +434,12 @@ interface IDbQueryBuilderDecoration{
      * @return
      */
     fun limit(limit: Int, offset: Int = 0): IDbQueryBuilder;
+
+    /**
+     * 设置查询加锁
+     *
+     * @param value
+     * @return
+     */
+    fun forUpdate(value: Boolean = true): IDbQueryBuilder
 }

@@ -88,7 +88,6 @@ class DbQueryPartTemplate(public val template: String) : IDbQueryPart{
      * @return
      */
     override fun clear() {
-        TODO("Not yet implemented")
     }
 
 }

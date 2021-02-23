@@ -74,7 +74,7 @@ class QueryBuilderTests{
 
     @Test
     fun testFind(){
-        val row = DbQueryBuilder().table("user").where("id", "=", id).findMap()
+        val row = DbQueryBuilder().table("user").where("id", "=", id).distinct().forUpdate().findMap()
         println("查询user表：" + row)
     }
 

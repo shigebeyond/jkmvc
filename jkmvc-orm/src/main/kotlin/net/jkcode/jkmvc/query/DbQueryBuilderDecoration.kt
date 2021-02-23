@@ -77,6 +77,22 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
     protected var limitParams: DbLimit? = null
 
     /**
+     * select语句中, 控制查询加锁
+     */
+    protected var forUpdate: Boolean = false;
+
+    /**
+     * 设置查询加锁
+     *
+     * @param value
+     * @return
+     */
+    public override fun forUpdate(value: Boolean): IDbQueryBuilder {
+        forUpdate = value;
+        return this;
+    }
+
+    /**
      * 转义where字段名, 存在以下2种情况
      *   1 普通字段(String|DbExpr): 转义
      *   2 条件表达式(DbCondition): 不转义
@@ -142,6 +158,10 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
         // 单独编译limit表达式
         compileLimit(db, sql)
 
+        // 单独编译for update
+        if(forUpdate)
+            sql.append(" FOR UPDATE")
+
         return this;
     }
 
@@ -155,6 +175,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
             part?.clear()
         }
         limitParams = null
+        forUpdate = false;
         return super.clear();
     }
 
