@@ -159,7 +159,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
         compileLimit(db, sql)
 
         // 单独编译for update
-        if(forUpdate)
+        if(action == SqlAction.SELECT && forUpdate)
             sql.append(" FOR UPDATE")
 
         return this;
