@@ -393,6 +393,10 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         // 逐个属性校验
         val errors = HashMap<String, String>()
         for ((field, rule) in rules) {
+            // 只处理脏字段
+            if(item is IOrm && !item.isDirty(field))
+                continue
+
             // 1 获得属性值
             val value: Any = item[field];
 
