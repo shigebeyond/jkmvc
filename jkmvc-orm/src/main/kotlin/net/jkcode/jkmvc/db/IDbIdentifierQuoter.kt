@@ -64,10 +64,18 @@ interface IDbIdentifierQuoter{
             colQuoting = column.expQuoting
         }else{
             col = column.toString()
+            // 空格分割别名, 如 "sum(a) num"
+            val iSpace = column.lastIndexOf(' '); // 空格位置
+            if(iSpace > -1){
+                alias = col.substring(iSpace + 1)
+                col = col.substring(0, iSpace)
+            }
+            // 非函数表达式才转义
+            colQuoting = "^\\w[\\w\\d_\\.\\*]*".toRegex().matches(col)
         }
 
-        // 转义字段 + 非函数表达式
-        if (colQuoting && "^\\w[\\w\\d_\\.\\*]*".toRegex().matches(col)) {
+        // 转义字段
+        if (colQuoting) {
             // 表名
             if(col.contains('.')){
                 var arr = col.split('.');

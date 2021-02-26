@@ -91,6 +91,12 @@ class QueryBuilderTests{
     }
 
     @Test
+    fun testColContainsOperator(){
+        val rows = DbQueryBuilder().table("user").where("id BETWEEN", Pair(1, 2)).findMaps()
+        println("查询user表：" + rows)
+    }
+
+    @Test
     fun testCondition(){
         val rows = DbQueryBuilder().table("user").whereCondition("id BETWEEN 1 and 10").findMaps()
         println("查询user表：" + rows)

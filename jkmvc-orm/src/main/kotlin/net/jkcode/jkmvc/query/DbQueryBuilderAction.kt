@@ -6,6 +6,7 @@ import net.jkcode.jkmvc.db.DbType
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.orm.DbKeyNames
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * sql构建器 -- 动作子句: 由动态select/insert/update/delete来构建的子句
@@ -193,8 +194,10 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * 设置查询的字段, select时用
      *
      * @param columns 字段名数组，其元素类型是 String 或 DbExpr
-     *                如 arrayOf(column1, column2, DbExpr(column3, alias)),
-     * 				  如 arrayOf("name", "age", DbExpr("birthday", "birt"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
+     *                select("id", "name") // 查询多个字段, 每个字段一个参数
+     *                select("id,name") // 查询多个字段, 多个字段用逗号拼接为一个参数
+     *                select(DbExpr("birthday", "birt")) // 字段带别名, 用DbExpr包装
+     *                select("create_time created") // 字段带别名, 用空格分开
      * @return
      */
     public override fun select(vararg columns: CharSequence): IDbQueryBuilder {
@@ -206,8 +209,10 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * 设置查询的字段, select时用
      *
      * @param columns 字段名数组，其元素类型是 String 或 DbExpr
-     *                如 arrayOf(column1, column2, DbExpr(column3, alias)),
-     * 				  如 arrayOf("name", "age", DbExpr("birthday", "birt"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
+     *                selects(listOf("id", "name")) // 查询多个字段, 每个字段一个参数
+     *                selects(listOf("id,name")) // 查询多个字段, 多个字段用逗号拼接为一个参数
+     *                selects(listOf(DbExpr("birthday", "birt"))) // 字段带别名, 用DbExpr包装
+     *                selects(listOf("create_time created")) // 字段带别名, 用空格分开
      * @return
      */
     public override fun selects(columns:List<CharSequence>): IDbQueryBuilder{
@@ -217,7 +222,6 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
 
     /**
      * 设置查询的字段, select时用
-     *
      * @param key 字段名
      * @return
      */
@@ -375,6 +379,28 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
             // 单个字段转义
             quoteColumn(db, it)
         }
+    }
+
+    /**
+     * 转义select字段名, 存在以下2种情况
+     *
+     * @param db
+     * @param table
+     * @return
+     */
+    internal fun quoteSelectColumn(db: IDb, column: CharSequence): String{
+        if(column is String && column.notContainsQuotationMarks()){
+            // 1 逗号分割多个字段
+            if(column.contains(',')){
+                val cols = column.splitOutsideFunc(',')
+                return cols.joinToString{
+                    quoteSelectColumn(db, it) // 递归调用
+                }
+            }
+        }
+
+        // 2 单个字段
+        return db.quoteColumn(column)
     }
 
     /**

@@ -46,33 +46,20 @@ interface IDbQueryBuilderDecoration{
     /**
      * Alias of andWhere()
      *
-     * @param   column  column name or DbExpr
+     * @param   column  column name or DbExpr, also support column+operator: "age >=" / "name like"
      * @param   value   column value
      * @return
      */
-    fun where(column: String, value: Any?): IDbQueryBuilder {
-        if (value == null)
-            return where(column, "IS", value);
-
-        if (value.isArrayOrCollection())
-            return where(column, "IN", value)
-
-        return where(column, "=", value);
-    }
+    fun where(column: String, value: Any?): IDbQueryBuilder
 
     /**
      * Creates a new "OR WHERE" condition for the query.
      *
-     * @param   column  column name or DbExpr
+     * @param   column  column name or DbExpr, also support column+operator: "age >=" / "name like"
      * @param   value   column value
      * @return
      */
-    fun orWhere(column: String, value: Any?): IDbQueryBuilder {
-        if (value.isArrayOrCollection())
-            return orWhere(column, "IN", value)
-
-        return orWhere(column, "=", value);
-    }
+    fun orWhere(column: String, value: Any?): IDbQueryBuilder
 
     /**
      * Creates a new "WHERE BETWEEN" condition for the query.
@@ -270,6 +257,24 @@ interface IDbQueryBuilderDecoration{
             groupBy(col)
         return this as IDbQueryBuilder
     }
+
+    /**
+     * Alias of andHaving()
+     *
+     * @param   column  column name or DbExpr, also support column+operator: "age >=" / "name like"
+     * @param   value   column value
+     * @return
+     */
+    fun having(column: String, value: Any?): IDbQueryBuilder
+
+    /**
+     * Alias of andHaving()
+     *
+     * @param   column  column name or DbExpr, also support column+operator: "age >=" / "name like"
+     * @param   value   column value
+     * @return
+     */
+    fun orHaving(column: String, value: Any?): IDbQueryBuilder
 
     /**
      * Alias of andHaving()

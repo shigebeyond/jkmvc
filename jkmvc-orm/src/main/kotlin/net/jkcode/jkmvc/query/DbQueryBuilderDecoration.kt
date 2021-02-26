@@ -1,12 +1,9 @@
 package net.jkcode.jkmvc.query
 
-import net.jkcode.jkutil.common.cloneProperties
-import net.jkcode.jkutil.common.getOrPut
-import net.jkcode.jkutil.common.isArrayOrCollectionEmpty
 import net.jkcode.jkmvc.db.DbException
 import net.jkcode.jkmvc.db.DbType
 import net.jkcode.jkmvc.db.IDb
-import net.jkcode.jkutil.common.dbLogger
+import net.jkcode.jkutil.common.*
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -199,7 +196,63 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
      * @return
      */
     public fun isOperator(str: String): Boolean {
-        return "(\\s|<|>|!|=|is|is not)".toRegex(RegexOption.IGNORE_CASE).matches(str);
+        return "(\\s|<|>|!|=|is|is not|like)".toRegex(RegexOption.IGNORE_CASE).matches(str);
+    }
+
+    /**
+     * Alias of andWhere()
+     *
+     * @param   column  column name or DbExpr, also support column+operator: "age >=" / "name like"
+     * @param   value   column value
+     * @return
+     */
+    override fun where(column: String, value: Any?): IDbQueryBuilder {
+        val (col, op) = splitOperator(column, value)
+        return where(col, op, value);
+    }
+
+    /**
+     * Creates a new "OR WHERE" condition for the query.
+     *
+     * @param   column  column name or DbExpr, also support column+operator: "age >=" / "name like"
+     * @param   value   column value
+     * @return
+     */
+    override fun orWhere(column: String, value: Any?): IDbQueryBuilder {
+        val (col, op) = splitOperator(column, value)
+        return orWhere(col, op, value);
+    }
+
+    /**
+     * 分割操作符
+     * @param   column  column name or DbExpr, also support column+operator: "age >=" / "name like"
+     * @param   value   column value
+     * @return
+     */
+    protected fun splitOperator(column: String, value: Any?): Pair<String, String> {
+        var op = "="
+        var col = column
+
+        // 1 空格分割操作符, 如 "age >=" 或 "name like"
+        val iSpace = col.lastIndexOf(' '); // 空格位置
+        if(iSpace > -1 && col.notContainsQuotationMarks()){
+            val iFunc = col.lastIndexOf(')') // 函数)的位置
+            // 无函数 或 函数在空格前
+            if(iFunc == -1 || iFunc < iSpace) {
+                op = col.substring(iSpace + 1)
+                col = col.substring(0, iSpace)
+                return col to op
+            }
+        }
+
+        // 2 无操作符
+        if (value == null)
+            op = "IS"
+
+        if (value.isArrayOrCollection())
+            op = "IN"
+
+        return col to op
     }
 
     /**
@@ -435,6 +488,30 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
     public override fun groupBy(column: String): IDbQueryBuilder {
         groupByClause.addSubexp(arrayOf(column));
         return this;
+    }
+
+    /**
+     * Alias of andHaving()
+     *
+     * @param   column  column name or DbExpr, also support column+operator: "age >=" / "name like"
+     * @param   value   column value
+     * @return
+     */
+    override fun having(column: String, value: Any?): IDbQueryBuilder{
+        val (col, op) = splitOperator(column, value)
+        return having(col, op, value);
+    }
+
+    /**
+     * Alias of andHaving()
+     *
+     * @param   column  column name or DbExpr, also support column+operator: "age >=" / "name like"
+     * @param   value   column value
+     * @return
+     */
+    override fun orHaving(column: String, value: Any?): IDbQueryBuilder{
+        val (col, op) = splitOperator(column, value)
+        return orHaving(col, op, value);
     }
 
     /**
