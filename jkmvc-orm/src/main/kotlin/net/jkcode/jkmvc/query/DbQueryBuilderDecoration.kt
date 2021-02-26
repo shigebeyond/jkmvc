@@ -1,11 +1,8 @@
 package net.jkcode.jkmvc.query
 
 import net.jkcode.jkmvc.db.DbException
-import net.jkcode.jkmvc.db.DbType
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkutil.common.*
-import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * sql构建器 -- 修饰子句: 由修饰词where/group by/order by/limit来构建的子句
@@ -14,6 +11,53 @@ import kotlin.collections.ArrayList
  * @date 2016-10-12
  */
 abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
+
+    companion object{
+
+        /**
+         * 空字段, 仅用于适配where第一个参数, 生成sql时不输出
+         */
+        val emptyColumn = DbExpr("", false)
+
+        /**
+         * 操作符的正则
+         *   空格 操作符 空格 结尾
+         */
+        val opRegx = " *([<>!=]+| IS( NOT)?|( NOT)? (EXISTS|BETWEEN|LIKE|IN)) *$".toRegex(RegexOption.IGNORE_CASE)
+
+        /**
+         * 分割操作符
+         * @param   column  column name or DbExpr, also support column+operator: "age >=" / "name like"
+         * @param   value   column value
+         * @return
+         */
+        protected fun splitOperator(column: String, value: Any?): Pair<String, String> {
+            var op = "="
+            var col = column
+
+            // 1 有操作符, 如 "age >=" 或 "name like"
+            val r = opRegx.find(column)
+            if(r != null && col.notContainsQuotationMarks()){
+                op = r.value
+                val iOp = col.length - op.length
+                val iFunc = col.lastIndexOf(')') // 函数)的位置
+                // 无函数 或 函数在空格前
+                if(iFunc == -1 || iFunc < iOp) {
+                    col = col.substring(0, iOp)
+                    return col to op
+                }
+            }
+
+            // 2 无操作符
+            if (value == null)
+                op = "IS"
+
+            if (value.isArrayOrCollection())
+                op = "IN"
+
+            return col to op
+        }
+    }
 
     /**
      * where/group by/having/order by/limit子句的数组
@@ -190,16 +234,6 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
     }
 
     /**
-     * 检查是否是sql操作符
-     *
-     * @param str
-     * @return
-     */
-    public fun isOperator(str: String): Boolean {
-        return "(\\s|<|>|!|=|is|is not|like)".toRegex(RegexOption.IGNORE_CASE).matches(str);
-    }
-
-    /**
      * Alias of andWhere()
      *
      * @param   column  column name or DbExpr, also support column+operator: "age >=" / "name like"
@@ -221,38 +255,6 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
     override fun orWhere(column: String, value: Any?): IDbQueryBuilder {
         val (col, op) = splitOperator(column, value)
         return orWhere(col, op, value);
-    }
-
-    /**
-     * 分割操作符
-     * @param   column  column name or DbExpr, also support column+operator: "age >=" / "name like"
-     * @param   value   column value
-     * @return
-     */
-    protected fun splitOperator(column: String, value: Any?): Pair<String, String> {
-        var op = "="
-        var col = column
-
-        // 1 空格分割操作符, 如 "age >=" 或 "name like"
-        val iSpace = col.lastIndexOf(' '); // 空格位置
-        if(iSpace > -1 && col.notContainsQuotationMarks()){
-            val iFunc = col.lastIndexOf(')') // 函数)的位置
-            // 无函数 或 函数在空格前
-            if(iFunc == -1 || iFunc < iSpace) {
-                op = col.substring(iSpace + 1)
-                col = col.substring(0, iSpace)
-                return col to op
-            }
-        }
-
-        // 2 无操作符
-        if (value == null)
-            op = "IS"
-
-        if (value.isArrayOrCollection())
-            op = "IN"
-
-        return col to op
     }
 
     /**
@@ -416,6 +418,30 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
 
         whereClause.addSubexp(arrayOf<Any?>(DbCondition(condition, params)), false);
         return this;
+    }
+
+    /**
+     * Creates a new "OR WHERE EXISTS" condition for the query.
+     *
+     * @param   subquery 子查询
+     * @return
+     */
+    public override fun whereExists(subquery: IDbQueryBuilder): IDbQueryBuilder {
+        // 不能直接调用 orWhere(), 因为字段emptyColumn不是String
+        whereClause.addSubexp(arrayOf<Any?>(emptyColumn, "EXISTS", subquery), false);
+        return this
+    }
+
+    /**
+     * Creates a new "WHERE EXISTS" condition for the query.
+     *
+     * @param   subquery 子查询
+     * @return
+     */
+    public override fun orWhereExists(subquery: IDbQueryBuilder): IDbQueryBuilder {
+        // 不能直接调用 where(), 因为字段emptyColumn不是String
+        whereClause.addSubexp(arrayOf<Any?>(emptyColumn, "EXISTS", subquery), true);
+        return this
     }
 
     /**

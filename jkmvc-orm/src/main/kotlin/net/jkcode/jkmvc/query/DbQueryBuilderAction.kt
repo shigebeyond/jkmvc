@@ -17,17 +17,6 @@ import kotlin.collections.ArrayList
  */
 abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
 
-    companion object {
-
-        /**
-         * 动作子句的sql模板
-         *   sql模板的动作顺序 = SqlType中定义的动作顺序
-         */
-        protected val SqlTemplates:Array<String> = arrayOf(
-
-        );
-    }
-
     /**
      * 动作
      */

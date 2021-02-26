@@ -1,6 +1,5 @@
 package net.jkcode.jkmvc.query
 
-import net.jkcode.jkutil.common.isArrayOrCollection
 import net.jkcode.jkmvc.db.IDb
 
 /**
@@ -106,6 +105,22 @@ interface IDbQueryBuilderDecoration{
         val exp = if (value.contains('%')) value else "%$value%"
         return orWhere(column, "LIKE", exp)
     }
+
+    /**
+     * Creates a new "OR WHERE EXISTS" condition for the query.
+     *
+     * @param   subquery 子查询
+     * @return
+     */
+    fun whereExists(subquery: IDbQueryBuilder): IDbQueryBuilder
+
+    /**
+     * Creates a new "WHERE EXISTS" condition for the query.
+     *
+     * @param   subquery 子查询
+     * @return
+     */
+    fun orWhereExists(subquery: IDbQueryBuilder): IDbQueryBuilder
 
     /**
      * Multiple Where

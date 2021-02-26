@@ -74,7 +74,7 @@ class QueryBuilderTests{
 
     @Test
     fun testFind(){
-        val row = DbQueryBuilder().table("user").where("id", "=", id).distinct().forUpdate().findMap()
+        val row = DbQueryBuilder().table("user").where("id", id).distinct().forUpdate().findMap()
         println("查询user表：" + row)
     }
 
@@ -249,6 +249,18 @@ class QueryBuilderTests{
         val csql = query.compileSelect()
 
         println(csql.previewSql())
+    }
+
+    /**
+     * db表达式
+     */
+    @Test
+    fun testExist(){
+        // 子查询
+        val sub = DbQueryBuilder().from("address").where("address.user_id", "=", DbExpr("user.id", false));
+
+        val users = DbQueryBuilder().from("user").whereExists(sub).findMaps()
+        println(users)
     }
 
     /**
