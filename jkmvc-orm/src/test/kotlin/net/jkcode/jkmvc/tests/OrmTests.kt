@@ -142,11 +142,11 @@ class OrmTests{
         // 1 延迟加载
         //val user = UserModel(id)
         // 2 with() 联查
-        //val user = UserModel.queryBuilder().with("home").where("user.id", id).findModel<UserModel>()
+        val user = UserModel.queryBuilder().with("home").where("user.id", id).findModel<UserModel>()
         // 3 selectWiths() 联查
         //val user = UserModel.queryBuilder().selectWiths("home" to listOf("*")).where("user.id", id).findModel<UserModel>()
         // 4 selectWiths() 联查 + 表别名
-        val user = UserModel.queryBuilder().selectWiths(DbExpr("home", "a") to listOf("*")).where("user.id", id).findModel<UserModel>()
+        //val user = UserModel.queryBuilder().selectWiths(DbExpr("home", "a") to listOf("*")).where("user.id", id).findModel<UserModel>()
         val address = user?.home
         println(address)
     }

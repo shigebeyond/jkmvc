@@ -277,7 +277,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
     public fun joinHasMany(slaveName: String): OrmQueryBuilder{
         val relation = ormMeta.getRelation(slaveName)!!
         if(relation.isHasMany)
-            relation.applyQueryJoinRelated(this, ormMeta.name, slaveName)
+            relation.applyQueryJoinRelatedAndCondition(this, ormMeta.name, slaveName)
 
         return this
     }

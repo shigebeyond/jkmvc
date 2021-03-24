@@ -36,7 +36,7 @@ class HasNThroughRelation(
         public val middleTable:String, // 中间表
         public val farForeignKey: DbKeyNames, // 远端外键
         public val farPrimaryKey: DbKeyNames, // 远端主键
-        conditions:Map<String, Any?> = emptyMap(), // 查询条件
+        conditions:RelationConditions = RelationConditions.EmptyConditions, // 查询条件
         pkEmptyRule: PkEmptyRule = model.modelOrmMeta.pkEmptyRule // 检查主键为空的规则
 ) : Relation(one2one, srcOrmMeta, model, foreignKey, primaryKey, conditions, false, pkEmptyRule) {
 

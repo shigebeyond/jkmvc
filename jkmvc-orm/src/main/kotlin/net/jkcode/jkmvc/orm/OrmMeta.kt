@@ -778,13 +778,13 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         val alias = if (name is DbExpr) name.alias!! else name.toString() // 当前关系别名, 用作表别名
         val lastAlias = if (lastName is DbExpr) lastName.alias!! else lastName.toString() // 上一级关系别名, 用作表别名
         // join关联表
-        relation.applyQueryJoinRelated(query, lastAlias, alias)
+        relation.applyQueryJoinRelatedAndCondition(query, lastAlias, alias)
 
         //列名父路径
         val path2 = if (path == "")
-            name.toString()
-        else
-            path + ":" + name
+                        name.toString()
+                    else
+                        path + ":" + name
 
         // 递归联查子关系
         columns?.forEachRelatedColumns { subname: CharSequence, subcolumns: SelectColumnList? ->
@@ -860,9 +860,9 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param cascadeDeleted 是否级联删除
      * @return
      */
-    public override fun belongsTo(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, conditions: Map<String, Any?>): IOrmMeta {
+    public override fun belongsTo(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, conditions: Map<String, Any?>, queryAction: ((OrmQueryBuilder)->Unit)?): IOrmMeta {
         // 设置关联关系
-        return addRelation(name, BelongsToRelation(this, relatedModel, foreignKey, primaryKey, conditions))
+        return addRelation(name, BelongsToRelation(this, relatedModel, foreignKey, primaryKey, RelationConditions(conditions, queryAction)))
     }
 
     /**
@@ -873,11 +873,12 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param primaryKey 主键
      * @param conditions 关联查询条件
      * @param cascadeDeleted 是否级联删除
+     * @param queryAction 查询对象的回调函数
      * @return
      */
-    public override fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, conditions: Map<String, Any?>, cascadeDeleted: Boolean): IOrmMeta {
+    public override fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, conditions: Map<String, Any?>, cascadeDeleted: Boolean, queryAction: ((OrmQueryBuilder)->Unit)?): IOrmMeta {
         // 设置关联关系
-        return addRelation(name, HasNRelation(true, this, relatedModel, foreignKey, primaryKey, conditions, cascadeDeleted))
+        return addRelation(name, HasNRelation(true, this, relatedModel, foreignKey, primaryKey, RelationConditions(conditions, queryAction), cascadeDeleted))
     }
 
     /**
@@ -888,11 +889,12 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param primaryKey 主键
      * @param conditions 关联查询条件
      * @param cascadeDeleted 是否级联删除
+     * @param queryAction 查询对象的回调函数
      * @return
      */
-    public override fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, conditions: Map<String, Any?>, cascadeDeleted: Boolean): IOrmMeta {
+    public override fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, conditions: Map<String, Any?>, cascadeDeleted: Boolean, queryAction: ((OrmQueryBuilder)->Unit)?): IOrmMeta {
         // 设置关联关系
-        return addRelation(name, HasNRelation(false, this, relatedModel, foreignKey, primaryKey, conditions, cascadeDeleted))
+        return addRelation(name, HasNRelation(false, this, relatedModel, foreignKey, primaryKey, RelationConditions(conditions, queryAction), cascadeDeleted))
     }
 
     /**
@@ -905,11 +907,12 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param farForeignKey 远端外键
      * @param farPrimaryKey 远端主键
      * @param conditions 关联查询条件
+     * @param queryAction 查询对象的回调函数
      * @return
      */
-    public override fun hasOneThrough(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, middleTable: String, farForeignKey: DbKeyNames, farPrimaryKey: DbKeyNames, conditions: Map<String, Any?>): IOrmMeta {
+    public override fun hasOneThrough(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, middleTable: String, farForeignKey: DbKeyNames, farPrimaryKey: DbKeyNames, conditions: Map<String, Any?>, queryAction: ((OrmQueryBuilder)->Unit)?): IOrmMeta {
         // 设置关联关系
-        return addRelation(name, HasNThroughRelation(true, this, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey, conditions))
+        return addRelation(name, HasNThroughRelation(true, this, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey, RelationConditions(conditions, queryAction)))
     }
 
     /**
@@ -922,11 +925,12 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param farForeignKey 远端外键
      * @param farPrimaryKey 远端主键
      * @param conditions 关联查询条件
+     * @param queryAction 查询对象的回调函数
      * @return
      */
-    public override fun hasManyThrough(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, middleTable: String, farForeignKey: DbKeyNames, farPrimaryKey: DbKeyNames, conditions: Map<String, Any?>): IOrmMeta {
+    public override fun hasManyThrough(name: String, relatedModel: KClass<out IOrm>, foreignKey: DbKeyNames, primaryKey: DbKeyNames, middleTable: String, farForeignKey: DbKeyNames, farPrimaryKey: DbKeyNames, conditions: Map<String, Any?>, queryAction: ((OrmQueryBuilder)->Unit)?): IOrmMeta {
         // 设置关联关系
-        return addRelation(name, HasNThroughRelation(false, this, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey, conditions))
+        return addRelation(name, HasNThroughRelation(false, this, relatedModel, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey, RelationConditions(conditions, queryAction)))
     }
 
     /********************************* 通过回调动态获得对象的关联关系 **************************************/

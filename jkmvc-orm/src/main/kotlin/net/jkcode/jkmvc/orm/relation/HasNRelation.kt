@@ -16,7 +16,7 @@ open class HasNRelation(
         model: KClass<out IOrm>, // 关联模型类型
         foreignKey: DbKeyNames, // 外键
         primaryKey: DbKeyNames, // 主键
-        conditions:Map<String, Any?> = emptyMap(), // 查询条件
+        conditions:RelationConditions = RelationConditions.EmptyConditions, // 查询条件
         cascadeDeleted: Boolean = false, // 是否级联删除
         pkEmptyRule: PkEmptyRule = model.modelOrmMeta.pkEmptyRule // 检查主键为空的规则
 ) : Relation(one2one, srcOrmMeta, model, foreignKey, primaryKey, conditions, cascadeDeleted, pkEmptyRule) {

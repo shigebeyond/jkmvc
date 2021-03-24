@@ -26,7 +26,7 @@ abstract class Relation(
         public override val model: KClass<out IOrm>, // 关联模型类型
         public override val foreignKey: DbKeyNames, // 外键
         public override val primaryKey: DbKeyNames, // 主键
-        public override val conditions:Map<String, Any?> = emptyMap(), // 查询条件
+        public override val conditions:RelationConditions = RelationConditions.EmptyConditions, // 查询条件
         public override val cascadeDeleted: Boolean = false, // 是否级联删除
         public override val pkEmptyRule: PkEmptyRule = model.modelOrmMeta.pkEmptyRule // 检查主键为空的规则
 ) : IRelation {

@@ -3,7 +3,6 @@ package net.jkcode.jkmvc.orm.relation
 import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.orm.*
 import net.jkcode.jkmvc.query.IDbQueryBuilder
-import java.util.*
 import kotlin.reflect.KClass
 
 /**
@@ -76,7 +75,7 @@ interface IRelation {
     /**
      *  查询条件
      */
-    val conditions:Map<String, Any?>
+    val conditions:RelationConditions
 
     /**
      * 是否级联删除
@@ -175,7 +174,9 @@ interface IRelation {
      */
     fun queryBuilder(): OrmQueryBuilder {
         // 关联查询 + 条件
-        return ormMeta.queryBuilder().wheres(conditions) as OrmQueryBuilder
+        val query = ormMeta.queryBuilder()
+        conditions.applyQuery(query)
+        return query
     }
 
     /**
@@ -240,6 +241,21 @@ interface IRelation {
      * @return
      */
     fun applyQueryJoinRelated(query: OrmQueryBuilder, thisName:String, relatedName: String)
+
+    /**
+     * 对query builder联查关联表+条件
+     *
+     * @param query
+     * @param thisName 当前表别名
+     * @param relatedName 关联表别名
+     * @return
+     */
+    fun applyQueryJoinRelatedAndCondition(query: OrmQueryBuilder, thisName:String, relatedName: String){
+        // 联查关联表
+        applyQueryJoinRelated(query, thisName, relatedName)
+        // 应用条件
+        conditions.applyQuery(query)
+    }
 
     /**
      * 批量设置关系的属性值
