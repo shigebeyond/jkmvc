@@ -4,6 +4,7 @@ import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.orm.relation.HasNThroughRelation
 import net.jkcode.jkmvc.orm.serialize.toMaps
 import net.jkcode.jkmvc.query.DbExpr
+import java.util.*
 import kotlin.collections.HashSet
 
 /**
@@ -57,6 +58,25 @@ abstract class OrmRelated : OrmPersistent() {
             return cbRelated(column) as T;
 
         return super.get(column, defaultValue);
+    }
+
+    /**
+     * 获得或设置列表类型的属性值
+     *   仅用于设置一对多的属性值
+     *   不能使用 get(key) 来获得原来属性值, 因为他会延迟加载关联对象
+     *
+     * @param key
+     * @return
+     */
+    internal fun getOrPutList(key: String): MutableList<Any?> {
+        // 获得属性值: 不能使用 get(key) 来获得原来属性值, 因为他会延迟加载关联对象
+        var value = _data[key] as MutableList<Any?>?
+        if (value == null) {
+            // 设置属性值
+            value = LinkedList()
+            _data[key] = value
+        }
+        return value
     }
 
     /**

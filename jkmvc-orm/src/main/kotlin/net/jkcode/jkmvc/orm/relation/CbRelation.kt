@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.orm.relation
 
 import net.jkcode.jkmvc.orm.IOrm
+import net.jkcode.jkmvc.orm.OrmRelated
 import java.util.*
 
 /**
@@ -70,22 +71,25 @@ class CbRelation<M: IOrm, K, R> (
 
         // 设置关联属性 -- 双循环匹配主外键
         for (item in items) { // 遍历每个源对象，收集关联对象
+            val pk = pkGetter.invoke(item) // 本表键
+            var match = false
             for (relatedItem in relatedItems) { // 遍历每个关联对象，进行匹配
                 // 关系的匹配： 本表键=关联表键
-                val pk = pkGetter.invoke(item) // 本表键
                 val fk = fkGetter.invoke(relatedItem) // 关联表键
                 if (pk != null && fk != null  && pk.equals(fk)) {
+                    match = true
                     if(one2one){ // 一对一关联对象是单个对象
                         item[name] = relatedItem
                     }else{ // 一对多关联对象是list
-                        val myRelated = item.getOrPut(name){
-                            LinkedList<Any?>()
-                        } as LinkedList<Any?>
+                        val myRelated = (item as OrmRelated).getOrPutList(name)
                         myRelated.add(relatedItem)
                     }
-
                 }
             }
+
+            // 没有匹配则给个空list
+            if(!match)
+                item[name] = emptyList<Any?>()
         }
 
         // 清空列表

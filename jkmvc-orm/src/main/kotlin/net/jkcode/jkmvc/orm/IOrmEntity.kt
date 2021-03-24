@@ -5,6 +5,8 @@ import net.jkcode.jkmvc.orm.prop.OrmListPropDelegater
 import net.jkcode.jkmvc.orm.prop.OrmMapPropDelegater
 import net.jkcode.jkmvc.orm.prop.OrmPropDelegater
 import net.jkcode.jkmvc.orm.prop.OrmSetPropDelegater
+import java.util.*
+import kotlin.collections.HashMap
 import kotlin.properties.ReadWriteProperty
 
 /**
@@ -79,14 +81,14 @@ interface IOrmEntity {
      */
     fun getOrPut(key: String, defaultValue: () -> Any?): Any? {
         // 获得字段值
-        val value: Any? = get(key)
-        if (value != null)
-            return value
+        var value: Any? = get(key)
+        if (value == null) {
+            // 设置字段值
+            value = defaultValue()
+            set(key, value)
+        }
 
-        // 设置字段值
-        val answer = defaultValue()
-        set(key, answer)
-        return answer
+        return value
     }
 
     /**
