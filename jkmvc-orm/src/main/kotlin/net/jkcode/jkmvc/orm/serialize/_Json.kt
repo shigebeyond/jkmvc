@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import com.alibaba.fastjson.serializer.SerializerFeature
+import com.google.common.collect.ImmutableList
 import net.jkcode.jkmvc.orm.IOrm
 import net.jkcode.jkutil.common.PropertyUtil
 import net.jkcode.jkutil.common.getPathPropertyValue
@@ -84,7 +85,9 @@ public fun Any.toMap(include: List<String> = emptyList()): MutableMap<String, An
  */
 public fun Collection<*>.toMaps(include: List<String> = emptyList()): List<MutableMap<String, Any?>>{
     if(this.isEmpty())
-        return emptyList()
+        // fix bug: 外部调用时将结果用DataListCollection包装报错: kotlin.collections.EmptyList cannot be cast to kotlin.collections.MutableList
+        //return emptyList()
+        return ImmutableList.of()
 
     return this.map {
         (it as Any).toMap(include)
