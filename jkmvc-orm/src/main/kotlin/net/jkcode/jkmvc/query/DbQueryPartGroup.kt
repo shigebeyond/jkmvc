@@ -16,7 +16,7 @@ import kotlin.reflect.KFunction3
  */
 class DbQueryPartGroup(operator: String, // 修饰符， 如where/group by
                        elementHandlers: Array<KFunction3<DbQueryBuilderDecoration, IDb, *, String>?> // 每个元素的处理器, 可视为列的处理
-) : DbQueryPart<Any>/* subexps 是字符串 或 DbQueryBuilderDecorationClausesSimple */(operator, elementHandlers) {
+) : DbQueryPart<Any>/* subexps 是字符串 或 DbQueryPartSimple */(operator, elementHandlers) {
     /**
      * 开启一个分组
      *
@@ -82,7 +82,7 @@ class DbQueryPartGroup(operator: String, // 修饰符， 如where/group by
      * @param sql 保存编译的sql
      */
     public override fun compileSubexp(subexp: Any, j:Int, query: DbQueryBuilderDecoration, db: IDb, sql: StringBuilder) {
-        // 子表达式是: string / DbQueryBuilderDecorationClausesSimple
+        // 子表达式是: string / DbQueryPartSimple
         if (subexp is DbQueryPartSimple) {
             subexp.compile(query, db, sql);
         }else{

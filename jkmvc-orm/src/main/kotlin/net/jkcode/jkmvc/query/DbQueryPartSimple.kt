@@ -23,7 +23,7 @@ typealias WordsAndDelimiter = Pair<Array<Any?>, String>
  */
 class DbQueryPartSimple(operator: String, // 修饰符， 如where/group by
                         elementHandlers: Array<KFunction3<DbQueryBuilderDecoration, IDb, *, String>?>, // 每个元素的处理器, 可视为列的处理
-                        protected val afterGroup:Boolean = false // 跟在分组 DbQueryBuilderDecorationClausesGroup 后面
+                        protected val afterGroup:Boolean = false // 跟在分组 DbQueryPartGroup 后面
 ) : DbQueryPart<WordsAndDelimiter>/* subexps 是单词+连接符(针对where子句，放子表达式前面) */(operator, elementHandlers) {
     /**
      * 添加一个子表达式+连接符

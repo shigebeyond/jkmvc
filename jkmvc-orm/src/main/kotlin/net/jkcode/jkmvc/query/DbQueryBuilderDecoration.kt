@@ -112,7 +112,7 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
 
     /**
      * limit参数: limit + offset
-     *    为了兼容不同db的特殊的limit语法，不使用 DbQueryBuilderDecorationClausesSimple("LIMIT", arrayOf(null));
+     *    为了兼容不同db的特殊的limit语法，不使用 DbQueryPartSimple("LIMIT", arrayOf(null));
      *    直接硬编码
      */
     protected var limitParams: DbLimit? = null

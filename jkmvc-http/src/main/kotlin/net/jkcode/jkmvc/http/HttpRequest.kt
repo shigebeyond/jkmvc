@@ -121,6 +121,15 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		return super.getRequestDispatcher(path) ?: globalServletContext.getRequestDispatcher(path)
 	}
 
+	/**
+	 * 改写　getRealPath()
+	 *   fix bug: jetty异步请求后的 req.servletContext 是 null, 因此 req.getRealPath() 也是 null, 因为他内部调用 req.servletContext => 直接使用全局 servletContext
+	 */
+	public override fun getRealPath(path: String?): String {
+		//return super.getRealPath(path)
+		return globalServletContext.getRealPath(path)
+	}
+
 	/*************************** 路由解析与路由参数 *****************************/
 	/**
 	 * http方法
