@@ -224,6 +224,7 @@ CREATE TABLE `address` (
   `addr` varchar(50) NOT NULL DEFAULT '' COMMENT '地址',
   `tel` varchar(50) NOT NULL DEFAULT '' COMMENT '电话',
   `name` varchar(50) NOT NULL DEFAULT '' COMMENT '用户名',
+  `is_home` tinyint(4) unsigned NOT NULL DEFAULT '0' COMMENT '是否是家庭住址',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8 COMMENT='地址';
 ```
@@ -254,7 +255,9 @@ class UserModel(id:Int? = null): Orm(id) {
 
             // 添加关联关系
             // add relaction for other model
-            hasOne("address", AddressModel::class)
+            hasOne("home", AddressModel::class){ query ->
+                query.where("is_home", 1)
+            }
             hasMany("addresses", AddressModel::class)
         }
     }
@@ -270,8 +273,8 @@ class UserModel(id:Int? = null): Orm(id) {
     public var avatar:String? by property<String?>();
 
     // 关联地址：一个用户有一个地址
-    // relate to AddressModel: user has an address
-    public var address:AddressModel by property<AddressModel>();
+    // relate to AddressModel: user has a home address
+    public var home:AddressModel by property<AddressModel>();
 
     // 关联地址：一个用户有多个地址
     // relate to AddressModel: user has many addresses
@@ -316,6 +319,8 @@ class AddressModel(id:Int? = null): Orm(id) {
     public var addr:String by property<String>();
 
     public var tel:String by property<String>();
+
+    public var isHome:Int by property();
 
     // 关联用户：一个地址从属于一个用户
     public var user:UserModel by property<UserModel>()

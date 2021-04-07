@@ -8,7 +8,7 @@ import net.jkcode.jkmvc.query.IDbQueryBuilder
 import kotlin.reflect.KClass
 
 /**
- * 有中间表的关联关系
+ * 有中间表的有几个关联关系
  *
  * 特征
  *   1 用中间表来存储两表的关联关系

@@ -42,12 +42,13 @@ class QueryBuilderTests{
 
     @Test
     fun testBatchInsert2(){
+        val start = System.currentTimeMillis()
         // 初始化查询
         val initQuery:(DbQueryBuilder)-> DbQueryBuilder = { query: DbQueryBuilder ->
             query.clear().table("user").insertColumns("name", "age") as DbQueryBuilder;
         }
         val query = initQuery(DbQueryBuilder())
-        for(i in 0..1){
+        for(i in 0..1000){
             for (j in 1..10){
                 query.value("shi-$j", j)
             }
@@ -55,13 +56,15 @@ class QueryBuilderTests{
             println("批量插入user表, 起始id：$id, 行数：10")
             initQuery(query) // 重新初始化插入
         }
+        println("耗时: " + (System.currentTimeMillis() - start) / 1000 + "s") // 5s
     }
 
     @Test
     fun testBatchInsert3(){
+        val start = System.currentTimeMillis()
         // 构建参数
         val params:ArrayList<Any?> = ArrayList()
-        for(i in 0..1){
+        for(i in 0..1000){
             for (j in 1..10){
                 params.add("shi-$j")
                 params.add(j)
@@ -70,6 +73,7 @@ class QueryBuilderTests{
 
         // 批量插入
         DbQueryBuilder().table("user").insertColumns("name", "age").value(DbExpr.question, DbExpr.question).batchInsert(params)
+        println("耗时: " + (System.currentTimeMillis() - start) / 1000 + "s") // 12s
     }
 
     @Test

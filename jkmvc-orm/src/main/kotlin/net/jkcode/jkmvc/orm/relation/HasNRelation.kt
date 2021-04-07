@@ -7,7 +7,7 @@ import net.jkcode.jkmvc.query.IDbQueryBuilder
 import kotlin.reflect.KClass
 
 /**
- * 从属于的关联关系
+ * 有几个的关联关系
  *
  */
 open class HasNRelation(
