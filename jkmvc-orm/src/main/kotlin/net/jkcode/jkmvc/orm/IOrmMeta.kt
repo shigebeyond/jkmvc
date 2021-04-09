@@ -533,7 +533,7 @@ interface IOrmMeta {
      * @return
      */
     fun belongsTo(name:String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames = relatedModel.modelOrmMeta.defaultForeignKey /* 主表_主键 = 关联表_主键 */, conditions:Map<String, Any?> = emptyMap(), queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
-        return belongsTo(name, relatedModel, foreignKey, relatedModel.modelOrmMeta.primaryKey /* 关联表的主键 */, conditions)
+        return belongsTo(name, relatedModel, foreignKey, relatedModel.modelOrmMeta.primaryKey /* 关联表的主键 */, conditions, queryAction)
     }
 
     /**
@@ -574,7 +574,7 @@ interface IOrmMeta {
      * @return
      */
     fun hasOne(name:String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames = this.defaultForeignKey /* 主表_主键 = 本表_主键 */, conditions:Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
-        return hasOne(name, relatedModel, foreignKey, this.primaryKey /* 本表的主键 */, conditions, cascadeDeleted)
+        return hasOne(name, relatedModel, foreignKey, this.primaryKey /* 本表的主键 */, conditions, cascadeDeleted, queryAction)
     }
 
     /**
@@ -615,7 +615,7 @@ interface IOrmMeta {
      * @return
      */
     fun hasMany(name:String, relatedModel: KClass<out IOrm>, foreignKey:DbKeyNames = this.defaultForeignKey /* 主表_主键 = 本表_主键 */, conditions:Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
-        return hasMany(name, relatedModel, foreignKey, this.primaryKey /* 本表的主键 */, conditions, cascadeDeleted)
+        return hasMany(name, relatedModel, foreignKey, this.primaryKey /* 本表的主键 */, conditions, cascadeDeleted, queryAction)
     }
 
     /**
@@ -717,7 +717,7 @@ interface IOrmMeta {
             farPrimaryKey = relation2.foreignKey
         }
 
-        return hasOneThrough(name, relatedModel, foreignKey, primaryKey, meta1.table, farForeignKey, farPrimaryKey, conditions)
+        return hasOneThrough(name, relatedModel, foreignKey, primaryKey, meta1.table, farForeignKey, farPrimaryKey, conditions, queryAction)
     }
 
     /**
@@ -818,7 +818,7 @@ interface IOrmMeta {
             farPrimaryKey = relation2.foreignKey
         }
 
-        return hasManyThrough(name, relatedModel, foreignKey, primaryKey, meta1.table, farForeignKey, farPrimaryKey, conditions)
+        return hasManyThrough(name, relatedModel, foreignKey, primaryKey, meta1.table, farForeignKey, farPrimaryKey, conditions, queryAction)
     }
 
     /************************************ 添加关联关系: 单主键版本, 主外键类型为 String *************************************/
@@ -839,7 +839,7 @@ interface IOrmMeta {
      * @return
      */
     fun belongsTo(name:String, relatedModel: KClass<out IOrm>, foreignKey:String, primaryKey:String, conditions:Map<String, Any?> = emptyMap(), queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
-        return  belongsTo(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), conditions)
+        return belongsTo(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), conditions, queryAction)
     }
 
     /**
@@ -859,7 +859,7 @@ interface IOrmMeta {
      * @return
      */
     fun belongsTo(name:String, relatedModel: KClass<out IOrm>, foreignKey:String, conditions:Map<String, Any?> = emptyMap(), queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
-        return belongsTo(name, relatedModel, foreignKey, relatedModel.modelOrmMeta.primaryKey.first() /* 关联表的主键 */, conditions)
+        return belongsTo(name, relatedModel, foreignKey, relatedModel.modelOrmMeta.primaryKey.first() /* 关联表的主键 */, conditions, queryAction)
     }
 
     /**
@@ -881,7 +881,7 @@ interface IOrmMeta {
      * @return
      */
     fun hasOne(name: String, relatedModel: KClass<out IOrm>, foreignKey:String, primaryKey:String, conditions: Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
-        return hasOne(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), conditions, cascadeDeleted)
+        return hasOne(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), conditions, cascadeDeleted, queryAction)
     }
 
     /**
@@ -902,7 +902,7 @@ interface IOrmMeta {
      * @return
      */
     fun hasOne(name:String, relatedModel: KClass<out IOrm>, foreignKey:String, conditions:Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
-        return hasOne(name, relatedModel, foreignKey, this.primaryKey.first() /* 本表的主键 */, conditions, cascadeDeleted)
+        return hasOne(name, relatedModel, foreignKey, this.primaryKey.first() /* 本表的主键 */, conditions, cascadeDeleted, queryAction)
     }
 
     /**
@@ -924,7 +924,7 @@ interface IOrmMeta {
      * @return
      */
     fun hasMany(name: String, relatedModel: KClass<out IOrm>, foreignKey:String, primaryKey:String, conditions: Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
-        return hasMany(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), conditions, cascadeDeleted)
+        return hasMany(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), conditions, cascadeDeleted, queryAction)
     }
 
     /**
@@ -945,7 +945,7 @@ interface IOrmMeta {
      * @return
      */
     fun hasMany(name:String, relatedModel: KClass<out IOrm>, foreignKey:String, conditions:Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
-        return hasMany(name, relatedModel, foreignKey, this.primaryKey.first() /* 本表的主键 */, conditions, cascadeDeleted)
+        return hasMany(name, relatedModel, foreignKey, this.primaryKey.first() /* 本表的主键 */, conditions, cascadeDeleted, queryAction)
     }
 
     /**
@@ -983,7 +983,7 @@ interface IOrmMeta {
                       conditions: Map<String, Any?> = emptyMap(),
                       queryAction: ((OrmQueryBuilder)->Unit)? = null
     ): IOrmMeta{
-        return hasOneThrough(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), middleTable, DbKeyNames(farForeignKey), DbKeyNames(farPrimaryKey), conditions)
+        return hasOneThrough(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), middleTable, DbKeyNames(farForeignKey), DbKeyNames(farPrimaryKey), conditions, queryAction)
     }
 
     /**
@@ -1021,7 +1021,7 @@ interface IOrmMeta {
                        conditions: Map<String, Any?> = emptyMap(),
                        queryAction: ((OrmQueryBuilder)->Unit)? = null
     ): IOrmMeta{
-        return hasManyThrough(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), middleTable, DbKeyNames(farForeignKey), DbKeyNames(farPrimaryKey), conditions)
+        return hasManyThrough(name, relatedModel, DbKeyNames(foreignKey), DbKeyNames(primaryKey), middleTable, DbKeyNames(farForeignKey), DbKeyNames(farPrimaryKey), conditions, queryAction)
     }
 
     /********************************* 通过回调动态获得对象的关联关系 **************************************/

@@ -18,45 +18,6 @@ abstract class DbQueryBuilderDecoration : DbQueryBuilderAction (){
          * 空字段, 仅用于适配where第一个参数, 生成sql时不输出
          */
         val emptyColumn = DbExpr("", false)
-
-        /**
-         * 操作符的正则
-         *   空格 操作符 空格 结尾
-         */
-        val opRegx = " *([<>!=]+| IS( NOT)?|( NOT)? (EXISTS|BETWEEN|LIKE|IN)) *$".toRegex(RegexOption.IGNORE_CASE)
-
-        /**
-         * 分割操作符
-         * @param   column  column name or DbExpr, also support column+operator: "age >=" / "name like"
-         * @param   value   column value
-         * @return
-         */
-        protected fun splitOperator(column: String, value: Any?): Pair<String, String> {
-            var op = "="
-            var col = column
-
-            // 1 有操作符, 如 "age >=" 或 "name like"
-            val r = opRegx.find(column)
-            if(r != null && col.notContainsQuotationMarks()){
-                op = r.value
-                val iOp = col.length - op.length
-                val iFunc = col.lastIndexOf(')') // 函数)的位置
-                // 无函数 或 函数在空格前
-                if(iFunc == -1 || iFunc < iOp) {
-                    col = col.substring(0, iOp)
-                    return col to op
-                }
-            }
-
-            // 2 无操作符
-            if (value == null)
-                op = "IS"
-
-            if (value.isArrayOrCollection())
-                op = "IN"
-
-            return col to op
-        }
     }
 
     /**

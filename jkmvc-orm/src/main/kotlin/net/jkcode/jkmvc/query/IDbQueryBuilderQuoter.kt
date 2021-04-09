@@ -45,10 +45,25 @@ interface IDbQueryBuilderQuoter {
     fun quoteSingleValue(db: IDb, value: Any?): String
 
     /**
+     * 转义字段名/值
+     *
+     * @param db
+     * @param colOrVal
+     * @return
+     */
+    fun quoteColumnOrValue(db: IDb, colOrVal: Pair<Any?, Boolean>): String{
+        val (cv, isCol) = colOrVal
+        if(isCol)
+            return quoteColumn(db, cv as CharSequence)
+
+        return quote(db, cv)
+    }
+
+    /**
      * 转义字段名
      *
      * @param db
-     * @param table
+     * @param column
      * @return
      */
     fun quoteColumn(db: IDb, column: CharSequence): String{

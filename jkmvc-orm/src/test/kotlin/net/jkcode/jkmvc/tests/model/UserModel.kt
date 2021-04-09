@@ -22,7 +22,7 @@ class UserModel(id:Int? = null): Orm(id) {
             // add relaction for other model
             //hasOne("home", AddressModel::class, conditions = mapOf("is_home" to 1))
             hasOne("home", AddressModel::class){ query ->
-                query.where("is_home", 1)
+                query.on("is_home", 1, false)
             }
             hasMany("addresses", AddressModel::class)
             // 通过回调动态获得对象的关联关系

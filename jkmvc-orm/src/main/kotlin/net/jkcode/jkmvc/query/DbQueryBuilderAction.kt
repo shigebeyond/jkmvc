@@ -17,6 +17,48 @@ import kotlin.collections.ArrayList
  */
 abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
 
+    companion object{
+        /**
+         * 操作符的正则
+         *   空格 操作符 空格 结尾
+         */
+        val opRegx = " *([<>!=]+| IS( NOT)?|( NOT)? (EXISTS|BETWEEN|LIKE|IN)) *$".toRegex(RegexOption.IGNORE_CASE)
+
+        /**
+         * 分割操作符
+         * @param   column  column name or DbExpr, also support column+operator: "age >=" / "name like"
+         * @param   value   column value
+         * @return
+         */
+        @JvmStatic
+        protected fun splitOperator(column: String, value: Any?): Pair<String, String> {
+            var op = "="
+            var col = column
+
+            // 1 有操作符, 如 "age >=" 或 "name like"
+            val r = opRegx.find(column)
+            if(r != null && col.notContainsQuotationMarks()){
+                op = r.value
+                val iOp = col.length - op.length
+                val iFunc = col.lastIndexOf(')') // 函数)的位置
+                // 无函数 或 函数在空格前
+                if(iFunc == -1 || iFunc < iOp) {
+                    col = col.substring(0, iOp)
+                    return col to op
+                }
+            }
+
+            // 2 无操作符
+            if (value == null)
+                op = "IS"
+
+            if (value.isArrayOrCollection())
+                op = "IN"
+
+            return col to op
+        }
+    }
+
     /**
      * 动作
      */
@@ -244,7 +286,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
         j.addSubexp(arrayOf(table));
 
         // on　子句 -- on总是追随最近的一个join
-        val on = DbQueryPartGroup("ON", arrayOf(DbQueryBuilderDecoration::quoteColumn, null, DbQueryBuilderDecoration::quoteColumn));
+        val on = DbQueryPartGroup("ON", arrayOf(DbQueryBuilderDecoration::quoteColumn, null, DbQueryBuilderDecoration::quoteColumnOrValue));
 
         joinParts.add(j);
         joinParts.add(on);
@@ -258,12 +300,33 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      *
      * @param   c1  column name or DbExpr
      * @param   op  logic operator
-     * @param   c2  column name or DbExpr
+     * @param   c2  column name or DbExpr or value
+     * @param   isCol whether is column name, or value
      * @return
      */
-    public override fun on(c1: String, op: String, c2: String): IDbQueryBuilder {
-        joinParts.last().addSubexp(arrayOf<Any?>(c1, op, c2), "AND");
+    public override fun on(c1: String, op: String, c2: Any?, isCol: Boolean): IDbQueryBuilder {
+        joinParts.last().addSubexp(arrayOf<Any?>(c1, op, Pair(c2, isCol)), "AND");
         return this;
+    }
+
+
+    /**
+     * Adds "ON ..." conditions for the last created JOIN statement.
+     *    on总是追随最近的一个join
+     *
+     * @param   c1  column name or DbExpr
+     * @param   c2  column name or DbExpr or value
+     * @param   isCol whether is column name, or value
+     * @return
+     */
+    public override fun on(c1: String, c2: Any?, isCol: Boolean): IDbQueryBuilder{
+        // 字段
+        if(isCol)
+            return on(c1, "=", c2, isCol)
+
+        // 值
+        val (col, op) = splitOperator(c1, c2)
+        return on(col, op, c2, isCol)
     }
 
     /**

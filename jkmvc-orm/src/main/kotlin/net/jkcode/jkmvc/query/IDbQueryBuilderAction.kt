@@ -189,19 +189,31 @@ interface IDbQueryBuilderAction {
      *
      * @param   c1  column name or DbExpr
      * @param   op  logic operator
-     * @param   c2  column name or DbExpr
+     * @param   c2  column name or DbExpr or value
+     * @param   isCol whether is column name, or value
      * @return
      */
-    fun on(c1: String, op: String, c2: String): IDbQueryBuilder;
+    fun on(c1: String, op: String, c2: Any?, isCol: Boolean = true): IDbQueryBuilder;
+
+    /**
+     * Adds "ON ..." conditions for the last created JOIN statement.
+     *    on总是追随最近的一个join
+     *
+     * @param   c1  column name or DbExpr
+     * @param   c2  column name or DbExpr or value
+     * @param   isCol whether is column name, or value
+     * @return
+     */
+    fun on(c1: String, c2: Any?, isCol: Boolean): IDbQueryBuilder
 
     /**
      * 多个on条件
      * @param conditions
      * @return
      */
-    fun ons(conditions: Map<String, String>): IDbQueryBuilder {
+    fun ons(conditions: Map<String, Any?>, isCol: Boolean = true): IDbQueryBuilder {
         for ((column, value) in conditions)
-            on(column, "=", value);
+            on(column, "=", value, isCol);
 
         return this as IDbQueryBuilder
     }

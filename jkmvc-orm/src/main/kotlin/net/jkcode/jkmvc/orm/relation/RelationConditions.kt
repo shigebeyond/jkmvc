@@ -27,7 +27,7 @@ data class RelationConditions(
      * @param query
      */
     public fun applyQuery(query: OrmQueryBuilder) {
-        query.wheres(conditions)
+        query.ons(conditions, false)
         queryAction?.invoke(query)
     }
 
