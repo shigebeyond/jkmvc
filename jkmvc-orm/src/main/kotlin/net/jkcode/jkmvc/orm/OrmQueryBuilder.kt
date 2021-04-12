@@ -142,6 +142,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      * @param queryAction 查询对象的回调函数, 只针对 hasMany 关系
      * @return
      */
+    @JvmOverloads
     public fun with(name: CharSequence, select: Boolean = withSelect, columns: SelectColumnList? = null, queryAction: ((OrmQueryBuilder)->Unit)? = null): OrmQueryBuilder {
         // select当前表字段
         if (selectColumns.isEmpty())

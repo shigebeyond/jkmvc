@@ -64,7 +64,7 @@ private val reusedModels:ThreadLocal<MutableMap<KClass<*>, Any?>> = ThreadLocal.
  * 获得实体类的行转换器
  * @return 转换的匿名函数
  */
-public fun <T: IEntitiableOrm<E>, E: OrmEntity> KClass<T>.entityRowTransformer(entityClass: KClass<E>): (DbResultRow) -> E {
+public fun <T: IEntitiableOrm<E>, E: OrmEntity> KClass<T>.entityRowTransformer(): (DbResultRow) -> E {
     // 实例化函数
     return {
         // 获得模型实例

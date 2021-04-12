@@ -155,6 +155,7 @@ abstract class IDbQuery{
         }
     }
 
+    /************************* inline依赖泛型类型的findModel()/findEntity() ****************************/
     /**
      * 查找多个： select 语句
      *
@@ -185,7 +186,7 @@ abstract class IDbQuery{
      * @return 一个数据
      */
     public inline fun <reified T: IEntitiableOrm<E>, reified E: OrmEntity> findEntities(params: List<*> = emptyList<Any>(), db: IDb = defaultDb): List<E> {
-        return findRows(params, db, T::class.entityRowTransformer(E::class))
+        return findRows(params, db, T::class.entityRowTransformer())
     }
 
     /**
@@ -196,7 +197,56 @@ abstract class IDbQuery{
      * @return 一个数据
      */
     public inline fun <reified T: IEntitiableOrm<E>, reified E: OrmEntity> findEntity(params: List<*> = emptyList<Any>(), db: IDb = defaultDb): E? {
-        return findRow(params, db, T::class.entityRowTransformer(E::class))
+        return findRow(params, db, T::class.entityRowTransformer())
+    }
+
+    /************************* 非inline依赖参数指定类型的findModel()/findEntity(), 给java调用 ****************************/
+    /**
+     * 查找多个： select 语句
+     *
+     * @param params 参数
+     * @param db 数据库连接
+     * @return 列表
+     */
+    @JvmOverloads
+    public fun <T: IOrm> findModels(clazz: Class<T>, params: List<*> = emptyList<Any>(), db: IDb = defaultDb): List<T> {
+        return findRows(params, db, clazz.kotlin.modelRowTransformer)
+    }
+
+    /**
+     * 查找一个： select ... limit 1语句
+     *
+     * @param params 参数
+     * @param db 数据库连接
+     * @return 一个数据
+     */
+    @JvmOverloads
+    public fun <T: IOrm> findModel(clazz: Class<T>, params: List<*> = emptyList<Any>(), db: IDb = defaultDb): T? {
+        return findRow(params, db, clazz.kotlin.modelRowTransformer)
+    }
+
+    /**
+     * 查找一个： select ... limit 1语句
+     *
+     * @param params 参数
+     * @param db 数据库连接
+     * @return 一个数据
+     */
+    @JvmOverloads
+    public fun <T: IEntitiableOrm<E>, E: OrmEntity> findEntities(clazz: Class<T>, params: List<*> = emptyList<Any>(), db: IDb = defaultDb): List<E> {
+        return findRows(params, db, clazz.kotlin.entityRowTransformer())
+    }
+
+    /**
+     * 查找一个： select ... limit 1语句
+     *
+     * @param params 参数
+     * @param db 数据库连接
+     * @return 一个数据
+     */
+    @JvmOverloads
+    public fun <T: IEntitiableOrm<E>, E: OrmEntity> findEntity(clazz: Class<T>, params: List<*> = emptyList<Any>(), db: IDb = defaultDb): E? {
+        return findRow(params, db, clazz.kotlin.entityRowTransformer())
     }
 
 }
