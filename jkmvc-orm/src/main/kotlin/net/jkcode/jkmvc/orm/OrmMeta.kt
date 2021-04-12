@@ -34,7 +34,7 @@ import kotlin.reflect.full.isSubclassOf
  *      对 belongsTo, 你敢删除 belongsTo 关系的主对象？
  *      对 hasOneThrough/hasManyThrough, 都通过中间表来关联了, 两者之间肯定是独立维护的, 只删除关联关系就好, 不删除关联对象
  */
-open class OrmMeta @JvmOverloads constructor(public override val model: KClass<out IOrm>, // 模型类
+open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
                    public override val label: String = model.modelName, // 模型中文名
                    public override var table: String = model.modelName, // 表名，假定model类名, 都是以"Model"作为后缀
                    public override var primaryKey: DbKeyNames = DbKeyNames("id"), // 主键
@@ -42,9 +42,8 @@ open class OrmMeta @JvmOverloads constructor(public override val model: KClass<o
                    public override val dbName: String = "default", // 数据库名
                    public override val pkEmptyRule: PkEmptyRule = PkEmptyRule.default, // 检查主键为空的规则
                    checkingTablePrimaryKey: Boolean = true // 是否检查表与主键是否存在
-) : IOrmMeta {
+) : IJavaOrmMeta() {
 
-    @JvmOverloads
     public constructor(
             model: KClass<out IOrm>, // 模型类
             label: String, // 模型中文名

@@ -1,12 +1,16 @@
 package net.jkcode.jkmvc.tests.model;
 
+import com.google.common.collect.Maps;
+import kotlin.Unit;
 import kotlin.jvm.internal.Reflection;
 import kotlin.reflect.KClass;
 import net.jkcode.jkmvc.orm.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.List;
+import kotlin.jvm.functions.Function1;
 
 public final class JavaUserModel extends Orm
 {
@@ -91,4 +95,18 @@ public final class JavaUserModel extends Orm
      * java orm类的元数据是名为`ormMeta`的属性
      */
     public static final OrmMeta ormMeta = new OrmMeta(JavaUserModel.class, "user", "user");
+    static{
+        ormMeta.addRule("name", "姓名", "notEmpty", null);
+        ormMeta.addRule("age", "年龄", "between(1,120)", null);
+        ormMeta.hasOne("home", AddressModel.class, "user_id", "id", Collections.emptyMap(), false,
+                new Function1<OrmQueryBuilder, Unit>(){
+
+                    @Override
+                    public Unit invoke(OrmQueryBuilder query) {
+                        query.on("is_home", 1, false);
+                        return null;
+                    }
+                });
+        ormMeta.hasMany("addresses", AddressModel.class);
+    }
 }
