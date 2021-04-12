@@ -67,10 +67,9 @@ interface IOrmEntity {
      * 获得对象字段
      *
      * @param column 字段名
-     * @param defaultValue 默认值
      * @return
      */
-    operator fun <T> get(column: String, defaultValue: T? = null): T;
+    operator fun <T> get(column: String): T;
 
     /**
      * 获得或设置字段值

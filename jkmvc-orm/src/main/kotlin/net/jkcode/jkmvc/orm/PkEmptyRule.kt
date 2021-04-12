@@ -11,11 +11,14 @@ class PkEmptyRule(public var rule: Int = 0) {
     companion object{
 
         // 允许数字0
+        @JvmStatic
         public val ALLOW_NUMBER_0: Int = 0
 
         // 允许空字符串
+        @JvmStatic
         public val ALLOW_STRING_EMPTY: Int = 1
-        
+
+        @JvmStatic
         public val default = PkEmptyRule(0)
     }
 

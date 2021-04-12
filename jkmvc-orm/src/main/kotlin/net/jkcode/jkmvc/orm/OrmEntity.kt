@@ -105,14 +105,13 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      *    子类会改写
      *
      * @param column 字段名
-     * @param defaultValue 默认值
      * @return
      */
-    public override operator fun <T> get(column: String, defaultValue: T?): T {
+    public override operator fun <T> get(column: String): T {
         if (!hasColumn(column))
             throw OrmException("Class ${this.javaClass} has no property: $column");
 
-        return (_data[column] ?: defaultValue) as T
+        return _data[column] as T
     }
 
     /**
