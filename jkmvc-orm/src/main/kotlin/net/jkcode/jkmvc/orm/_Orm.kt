@@ -2,6 +2,8 @@ package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkutil.common.decorateIterator
+import net.jkcode.jkutil.common.getStaticProperty
+import net.jkcode.jkutil.common.getStaticPropertyValue
 import net.jkcode.jkutil.common.lcFirst
 import java.util.*
 import kotlin.collections.HashMap
@@ -25,10 +27,18 @@ public val KClass<out IOrm>.modelName:String
 
 /**
  * 根据模型类来获得模型元数据
- *   随对象就是元数据
+ *   元数据 = kotlin类伴随对象 或 java类的静态属性ormMeta
  */
 public val KClass<out IOrm>.modelOrmMeta: IOrmMeta
-    get() = companionObjectInstance as IOrmMeta
+    get(){
+        val om = companionObjectInstance // kotlin类的伴随对象
+                ?: getStaticPropertyValue("ormMeta")
+
+        if(om is IOrmMeta)
+            return om
+
+        throw IllegalStateException("No OrmMeta definition for class: $this")
+    }
 
 /**
  * 获得模型类的行转换器

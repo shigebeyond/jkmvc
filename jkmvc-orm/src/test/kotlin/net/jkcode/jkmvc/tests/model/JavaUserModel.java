@@ -1,21 +1,21 @@
 package net.jkcode.jkmvc.tests.model;
 
 import kotlin.jvm.internal.Reflection;
+import kotlin.reflect.KClass;
 import net.jkcode.jkmvc.orm.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-/*
 
-public final class UserJavaModel extends Orm
+public final class JavaUserModel extends Orm
 {
 
     public final Integer getId() {
         return get("id");
     }
 
-    public final void setId(int value) {
+    public final void setId(Integer value) {
         set("id", value);
     }
 
@@ -87,6 +87,8 @@ public final class UserJavaModel extends Orm
         System.out.println("处理 afterDelete 事件");
     }
 
-    public static final OrmMeta m = new OrmMeta(Reflection.getOrCreateKotlinClass((Class)UserModel.class));
+    /**
+     * java orm类的元数据是名为`ormMeta`的属性
+     */
+    public static final OrmMeta ormMeta = new OrmMeta(JavaUserModel.class, "user", "user");
 }
-*/
