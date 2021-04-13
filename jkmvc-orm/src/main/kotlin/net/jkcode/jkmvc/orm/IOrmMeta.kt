@@ -273,9 +273,10 @@ interface IOrmMeta {
      * @param convertingValue 查询时是否智能转换字段值
      * @param convertingColumn 查询时是否智能转换字段名
      * @param withSelect with()联查时自动select关联表的字段
+     * @param reused 是否复用的
      * @return
      */
-    fun queryBuilder(convertingValue: Boolean = false, convertingColumn: Boolean = false, withSelect: Boolean = true): OrmQueryBuilder;
+    fun queryBuilder(convertingValue: Boolean = false, convertingColumn: Boolean = false, withSelect: Boolean = true, reused: Boolean = false): OrmQueryBuilder;
 
     /**
      * 获得orm查询构建器

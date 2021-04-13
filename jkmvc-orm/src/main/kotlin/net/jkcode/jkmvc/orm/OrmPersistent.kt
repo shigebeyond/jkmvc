@@ -51,7 +51,7 @@ abstract class OrmPersistent : OrmValid() {
 	 * @return
 	 */
 	public override fun queryBuilder(): OrmQueryBuilder {
-		return ormMeta.queryBuilder();
+		return ormMeta.queryBuilder(reused = true);
 	}
 
 	/**

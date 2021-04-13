@@ -14,7 +14,6 @@ import kotlin.jvm.functions.Function1;
 
 public final class JavaUserModel extends Orm
 {
-
     public final Integer getId() {
         return get("id");
     }
@@ -40,7 +39,6 @@ public final class JavaUserModel extends Orm
         set("age", value);
     }
 
-    @Nullable
     public final String getAvatar() {
         return get("avatar");
     }
@@ -49,7 +47,6 @@ public final class JavaUserModel extends Orm
         set("avatar", value);
     }
 
-    @Nullable
     public final AddressModel getHome() {
         return get("home");
     }

@@ -32,17 +32,22 @@ class OrmTests{
 
     @Test
     fun testFind(){
-        val user = UserModel.queryBuilder().where("id", id).findModel<UserModel>()
+        val user = UserModel.findByPk<UserModel>(id)
+//        val user = UserModel.queryBuilder().where("id", id).findModel<UserModel>()
 //        val user = UserModel(id)
         println("查找用户: $user" )
     }
 
     @Test
     fun testFindAll(){
-        val users = UserModel.queryBuilder().findModels<UserModel>()
+//        val users = UserModel.queryBuilder().findModels<UserModel>()
 //        val users = UserModel.queryBuilder().where("id", "=", 6).findModels<UserModel>()
 //        val users = UserModel.queryBuilder().where("id", "IN", arrayOf(6, 7)).findModels<UserModel>()
 //        val users = UserModel.queryBuilder(true).where("id", "IN", arrayOf("6", "100")).findModels<UserModel>()
+        val users = UserModel.queryBuilder()
+                .where("age", ">=", 20)
+                .orderBy("age")
+                .findModels<UserModel>()
         println("查找所有用户: $users" )
     }
 

@@ -63,6 +63,17 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
     protected val withCb:MutableList<String> = LinkedList()
 
     /**
+     * 复用查询构建器
+     */
+    internal fun reuse(convertingValue: Boolean, convertingColumn: Boolean, withSelect: Boolean){
+        this.convertingValue = convertingValue
+        this.convertingColumn = convertingColumn
+        this.withSelect = withSelect
+
+        from(ormMeta.table, ormMeta.name)
+    }
+
+    /**
      * 克隆对象
      * @return o
      */

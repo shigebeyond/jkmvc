@@ -7,7 +7,7 @@ class ModelGeneratorTests{
 
     @Test
     fun testCodeModel() {
-        val generator = ModelGenerator("/home/shi/code/java/jkerp/wfengine/src/main/kotlin/net/jkcode/jkerp/workflow/xpdl/beyond", "net.jkcode.jkerp.app", "default", "shijianhang")
+        val generator = ModelGenerator("/ohome/shi/code/java/jkmvc-benchmark/orm/jkorm-mybatis", "", "default", "shijianhang")
 
         // 测试
         // 生成model文件
@@ -80,7 +80,10 @@ class ModelGeneratorTests{
 //        generator.genenateModelFile("Workitem", "工作项", "wf_workitems")
 //        generator.genenateModelFile("Process", "流程实例", "wf_process")
 //        generator.genenateModelFile("Versions", "版本", "app_version")
-        generator.genenateModelFile("WfTrack", "流程跟踪", "wf_track")
+//        generator.genenateModelFile("WfTrack", "流程跟踪", "wf_track")
+
+        generator.genenateModelFile("Department", "部门", "department")
+        generator.genenateModelFile("Employee", "员工", "employee")
 
     }
 }

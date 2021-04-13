@@ -6,7 +6,6 @@ import net.jkcode.jkmvc.db.Db
 import net.jkcode.jkmvc.db.DbColumn
 import net.jkcode.jkmvc.db.DbTable
 import net.jkcode.jkmvc.db.IDb
-import net.jkcode.jkmvc.model.GeneralModel
 import net.jkcode.jkmvc.orm.relation.*
 import net.jkcode.jkmvc.orm.serialize.OrmConverter
 import net.jkcode.jkmvc.query.DbExpr
@@ -555,14 +554,30 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     protected open val queryListener: OrmQueryBuilderListener? = null
 
     /**
+     * 复用的查询构建器
+     */
+    protected val reusedQueryBuilders: ThreadLocal<OrmQueryBuilder> = ThreadLocal.withInitial {
+        queryBuilder();
+    }
+
+    /**
      * 获得orm查询构建器
      *
      * @param convertingValue 查询时是否智能转换字段值
      * @param convertingColumn 查询时是否智能转换字段名
      * @param withSelect with()联查时自动select关联表的字段
+     * @param reused 是否复用的
      * @return
      */
-    public override fun queryBuilder(convertingValue: Boolean, convertingColumn: Boolean, withSelect: Boolean): OrmQueryBuilder {
+    public override fun queryBuilder(convertingValue: Boolean, convertingColumn: Boolean, withSelect: Boolean, reused: Boolean): OrmQueryBuilder {
+        // 复用
+        if(reused){
+            val query = reusedQueryBuilders.get()
+            query.reuse(convertingValue, convertingColumn, withSelect)
+            return query
+        }
+
+        // 不复用
         return OrmQueryBuilder(this, convertingValue, convertingColumn, withSelect, queryListener)
     }
 
