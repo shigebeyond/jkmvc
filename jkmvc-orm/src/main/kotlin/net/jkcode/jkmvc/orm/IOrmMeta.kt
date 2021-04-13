@@ -282,12 +282,12 @@ interface IOrmMeta {
     /**
      * 获得插入的sql
      */
-    fun getInsertSql(insertCols: Collection<String>): CompiledSql
+    fun getInsertSql(insertProps: Collection<String>): CompiledSql
 
     /**
      * 获得更新的sql
      */
-    fun getUpdateSql(updateCols: Collection<String>): CompiledSql
+    fun getUpdateSql(updateProps: Collection<String>): CompiledSql
 
     /**
      * 获得orm查询构建器

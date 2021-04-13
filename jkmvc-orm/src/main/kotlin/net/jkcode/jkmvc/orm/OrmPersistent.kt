@@ -121,9 +121,8 @@ abstract class OrmPersistent : OrmValid() {
 			// 插入数据库
 			val generatedColumn = if (needPk) ormMeta.primaryKey.first() else null // 主键名
 			//val pk = queryBuilder().value(buildDirtyData()).insert(generatedColumn);
-			val dirty = buildDirtyData()
-			val params = ArrayList(dirty.values)
-			val pk = ormMeta.getInsertSql(dirty.keys).execute(params, generatedColumn, ormMeta.db)
+			val params = buildDirtyValues()
+			val pk = ormMeta.getInsertSql(_dirty.keys).execute(params, generatedColumn, ormMeta.db)
 
 			// 更新内部数据
 			if (needPk)
@@ -165,6 +164,25 @@ abstract class OrmPersistent : OrmValid() {
 				value
 			// 字段名 => 字段值
 			column to value2
+		}
+	}
+
+	/**
+	* 构建要改变的字段值
+	 *   在往db中写数据时调用，将本对象的变化属性值保存到db中
+	 *   要做字段值转换: 序列化
+	 *
+	 * @return
+	 */
+	protected fun buildDirtyValues(): List<Any?> {
+		// 挑出变化的属性
+		return _dirty.map { (prop, oldValue) ->
+			// 字段值
+			var value = _data[prop]
+			if(value != null && ormMeta.isSerializingProp(prop))
+				serializer.serialize(value)
+			else
+				value
 		}
 	}
 
@@ -226,10 +244,9 @@ abstract class OrmPersistent : OrmValid() {
 
 			// 更新数据库
 			//val result = queryBuilder().sets(buildDirtyData()).where(ormMeta.primaryKey, oldPk /* 原始主键，因为主键可能被修改 */).update();
-			val dirty = buildDirtyData()
-			val params = ArrayList(dirty.values)
+			val params = buildDirtyValues() as MutableList
 			params.addAll(oldPk.columns)// 原始主键，因为主键可能被修改
-			val result = ormMeta.getUpdateSql(dirty.keys).execute(params, null, ormMeta.db) > 0
+			val result = ormMeta.getUpdateSql(_dirty.keys).execute(params, null, ormMeta.db) > 0
 
 			// 触发后置事件
 			triggerAfterUpdate()

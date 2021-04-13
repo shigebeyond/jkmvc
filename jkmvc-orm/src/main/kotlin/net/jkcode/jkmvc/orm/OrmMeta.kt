@@ -592,17 +592,22 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
     /**
      * 获得插入的sql
+     * @param insertProps 用属性, 而非列, 是因为 props2bitSet() 不用转(dataFactory只认识属性), 而 getOrPut() 中就算要转为列也是一次性的
+     * @return
      */
-    override fun getInsertSql(insertCols: Collection<String>): CompiledSql{
+    override fun getInsertSql(insertProps: Collection<String>): CompiledSql{
         // 收集插入字段的位集
-        val bs = cols2bitSet(insertCols)
+        val bs = props2bitSet(insertProps)
 
         return insertSqls.getOrPut(bs){
-            val values = insertCols.mapToArray {
+            val colums = insertProps.mapToArray { prop ->
+                prop2Column(prop)
+            }
+            val values = insertProps.mapToArray {
                 DbExpr.question
             }
             queryBuilder(reused = true)
-                    .insertColumns(*insertCols.toTypedArray()) // 列
+                    .insertColumns(*colums) // 列
                     .value(*values) // 值
                     .compileInsert()
         }!!
@@ -615,29 +620,33 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
     /**
      * 获得更新的sql
+     * @param insertProps 用属性, 而非列, 是因为 props2bitSet() 不用转(dataFactory只认识属性), 而 getOrPut() 中就算要转为列也是一次性的
+     * @return
      */
-    override fun getUpdateSql(updateCols: Collection<String>): CompiledSql{
+    override fun getUpdateSql(updateProps: Collection<String>): CompiledSql{
         // 收集更新字段的位集
-        val bs = cols2bitSet(updateCols)
+        val bs = props2bitSet(updateProps)
 
         return updateSqls.getOrPut(bs){
             val query = queryBuilder(reused = true)
                     .where(primaryKey, DbExpr.question) // 过滤主键
-            for (col in updateCols)
+            for (prop in updateProps) {
+                val col = prop2Column(prop)
                 query.set(col, DbExpr.question) // 更新字段
+            }
             query.compileUpdate()
         }!!
     }
 
     /**
-     * 多列转位集
-     * @param cols 列
+     * 多属性转位集
+     *    dataFactory 的key是属性, 而非列
+     * @param props 属性
      * @return
      */
-    protected fun cols2bitSet(cols: Collection<String>): BitSet {
+    protected fun props2bitSet(props: Collection<String>): BitSet {
         val bs = BitSet()
-        for (col in cols){
-            val prop = column2Prop(col)
+        for (prop in props){
             bs.set(dataFactory.keyIndex(prop))
         }
         return bs
