@@ -178,9 +178,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
      * @return
      */
     public override fun value(row: Map<String, Any?>): IDbQueryBuilder {
-        insertRows.columns = row.keys.mapToArray {
-            it
-        }
+        insertRows.columns = row.keys.toTypedArray()
         insertRows.add(row.values)
         return this;
     }

@@ -7,6 +7,8 @@ import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.orm.relation.HasNThroughRelation
 import net.jkcode.jkmvc.orm.relation.ICbRelation
 import net.jkcode.jkmvc.orm.relation.IRelation
+import net.jkcode.jkmvc.query.CompiledSql
+import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkutil.collection.FixedKeyMapFactory
 import net.jkcode.jkutil.common.any
 import net.jkcode.jkutil.validator.IValidator
@@ -268,6 +270,26 @@ interface IOrmMeta {
 
     /************************************ query builder *************************************/
     /**
+     * 根据主键查询的sql
+     */
+    val selectSqlByPk: CompiledSql
+
+    /**
+     * 根据主键删除的sql
+     */
+    val deleteSqlByPk: CompiledSql
+
+    /**
+     * 获得插入的sql
+     */
+    fun getInsertSql(insertCols: Collection<String>): CompiledSql
+
+    /**
+     * 获得更新的sql
+     */
+    fun getUpdateSql(updateCols: Collection<String>): CompiledSql
+
+    /**
      * 获得orm查询构建器
      *
      * @param convertingValue 查询时是否智能转换字段值
@@ -410,14 +432,6 @@ interface IOrmMeta {
      * @return
      */
     fun batchUpdate(items: List<IOrmEntity>): IntArray
-
-    /**
-     * 单个删除
-     *
-     * @param pk 主键值, 可能是单主键(Any), 也可能是多主键(DbKey)
-     * @return
-     */
-    fun delete(pk: Any): Boolean
 
     /**
      * 批量删除

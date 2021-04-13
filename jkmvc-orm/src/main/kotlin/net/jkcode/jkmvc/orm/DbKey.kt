@@ -58,6 +58,13 @@ class DbKey<T> {
     }
 
     /**
+     * 转为列表
+     */
+    public fun toList(): List<T> {
+        return columns.toList()
+    }
+
+    /**
      * 遍历并生成新的主键
      *
      * @param transform 字段转换函数

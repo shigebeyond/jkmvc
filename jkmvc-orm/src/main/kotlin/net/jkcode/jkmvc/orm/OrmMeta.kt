@@ -8,6 +8,7 @@ import net.jkcode.jkmvc.db.DbTable
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.orm.relation.*
 import net.jkcode.jkmvc.orm.serialize.OrmConverter
+import net.jkcode.jkmvc.query.CompiledSql
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkutil.cache.ICache
 import net.jkcode.jkutil.collection.FixedKeyMapFactory
@@ -17,6 +18,7 @@ import net.jkcode.jkutil.validator.ModelValidateResult
 import net.jkcode.jkutil.validator.ValidateResult
 import java.lang.reflect.Constructor
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.HashSet
 import kotlin.collections.set
 import kotlin.reflect.KClass
@@ -561,6 +563,87 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     }
 
     /**
+     * 根据主键查询的sql
+     */
+    override val selectSqlByPk: CompiledSql by lazy{
+        val query = queryBuilder(reused = true)
+        // 缓存时联查
+        if (cacheMeta != null) {
+            cacheMeta!!.applyQueryWiths(query)
+        }
+        // 查询主键
+        query.where(primaryKey, DbExpr.question)
+                .compileSelectOne()
+    }
+
+    /**
+     * 根据主键删除的sql
+     */
+    override val deleteSqlByPk: CompiledSql by lazy{
+        queryBuilder(reused = true)
+            .where(primaryKey, DbExpr.question) // 查询主键
+            .compileDelete()
+    }
+
+    /**
+     * <插入字段 to 插入sql>
+     */
+    protected val insertSqls: ConcurrentHashMap<BitSet, CompiledSql> = ConcurrentHashMap()
+
+    /**
+     * 获得插入的sql
+     */
+    override fun getInsertSql(insertCols: Collection<String>): CompiledSql{
+        // 收集插入字段的位集
+        val bs = cols2bitSet(insertCols)
+
+        return insertSqls.getOrPut(bs){
+            val values = insertCols.mapToArray {
+                DbExpr.question
+            }
+            queryBuilder(reused = true)
+                    .insertColumns(*insertCols.toTypedArray()) // 列
+                    .value(*values) // 值
+                    .compileInsert()
+        }!!
+    }
+
+    /**
+     * <更新字段 to 更新sql>
+     */
+    protected val updateSqls: ConcurrentHashMap<BitSet, CompiledSql> = ConcurrentHashMap()
+
+    /**
+     * 获得更新的sql
+     */
+    override fun getUpdateSql(updateCols: Collection<String>): CompiledSql{
+        // 收集更新字段的位集
+        val bs = cols2bitSet(updateCols)
+
+        return updateSqls.getOrPut(bs){
+            val query = queryBuilder(reused = true)
+                    .where(primaryKey, DbExpr.question) // 过滤主键
+            for (col in updateCols)
+                query.set(col, DbExpr.question) // 更新字段
+            query.compileUpdate()
+        }!!
+    }
+
+    /**
+     * 多列转位集
+     * @param cols 列
+     * @return
+     */
+    protected fun cols2bitSet(cols: Collection<String>): BitSet {
+        val bs = BitSet()
+        for (col in cols){
+            val prop = column2Prop(col)
+            bs.set(dataFactory.keyIndex(prop))
+        }
+        return bs
+    }
+
+    /**
      * 获得orm查询构建器
      *
      * @param convertingValue 查询时是否智能转换字段值
@@ -587,13 +670,8 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param item 要赋值的对象
      */
     protected fun <T : IOrm> innerloadByPk(pk: DbKeyValues, item: T? = null): T? {
-        val query = queryBuilder()
-        // 缓存时联查
-        if (cacheMeta != null) {
-            cacheMeta!!.applyQueryWiths(query)
-        }
-        // 查询主键
-        return query.where(primaryKey, pk).findRow {
+        //return queryBuilder().where(primaryKey, pk).findRow
+        return selectSqlByPk.findRow(pk.toList()) {
             //val result = item ?: model.java.newInstance() as T
             val result = item ?: newInstance() as T
             result.setOriginal(it)
@@ -672,7 +750,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             // value字段值
             val values = DbExpr.question.repeateToArray(columns.size)
             // columns 顺序
-            val query = queryBuilder().insertColumns(*columns.toTypedArray()).value(*values)
+            val query = queryBuilder(reused = true).insertColumns(*columns.toTypedArray()).value(*values)
 
             // 构建参数
             val params: ArrayList<Any?> = ArrayList()
@@ -720,7 +798,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             }
 
             // 构建update语句
-            val query = queryBuilder()
+            val query = queryBuilder(reused = true)
             // set字段: 取全部字段, 不能取第一个元素的字段, 因为每个元素可能修改的字段都不一样, 这样会导致其他元素漏掉更新某些字段
             //val props = (items.first() as OrmEntity).getData().keys
             val props = ArrayList(this.props)
@@ -756,26 +834,6 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     }
 
     /**
-     * 单个删除
-     *
-     * @param pk 主键值, 可能是单主键(Any), 也可能是多主键(DbKey)
-     * @return
-     */
-    public override fun delete(pk: Any): Boolean {
-        // 构建delete语句
-        val query = queryBuilder().where(primaryKey, DbExpr.question)
-
-        // 构建参数
-        val params: ArrayList<Any?> = ArrayList()
-        if (pk is DbKey<*>)
-            params.addAll(pk.columns)
-        else
-            params.add(pk)
-
-        return query.delete(params)
-    }
-
-    /**
      * 批量删除
      *
      * @param pks 主键值列表, 主键值可能是单主键(Any), 也可能是多主键(DbKey)
@@ -783,7 +841,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun batchDelete(vararg pks: Any): IntArray {
         // 构建delete语句
-        val query = queryBuilder().where(primaryKey, DbExpr.question)
+        val query = queryBuilder(reused = true).where(primaryKey, DbExpr.question)
 
         // 构建参数
         val params: ArrayList<Any?> = ArrayList()

@@ -3,6 +3,7 @@ package net.jkcode.jkmvc.orm
 import net.jkcode.jkutil.common.associate
 import net.jkcode.jkutil.common.dbLogger
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * ORM之持久化，主要是负责数据库的增删改查
@@ -119,7 +120,10 @@ abstract class OrmPersistent : OrmValid() {
 
 			// 插入数据库
 			val generatedColumn = if (needPk) ormMeta.primaryKey.first() else null // 主键名
-			val pk = queryBuilder().value(buildDirtyData()).insert(generatedColumn);
+			//val pk = queryBuilder().value(buildDirtyData()).insert(generatedColumn);
+			val dirty = buildDirtyData()
+			val params = ArrayList(dirty.values)
+			val pk = ormMeta.getInsertSql(dirty.keys).execute(params, generatedColumn, ormMeta.db)
 
 			// 更新内部数据
 			if (needPk)
@@ -141,7 +145,7 @@ abstract class OrmPersistent : OrmValid() {
 	}
 
 	/**
-	* 构建要改变的数据
+	* 构建要改变的数据(字段名+字段值)
 	 *   在往db中写数据时调用，将本对象的变化属性值保存到db中
 	 *   要做字段名转换：对象属性名 -> db字段名
 	 *   要做字段值转换: 序列化
@@ -221,7 +225,11 @@ abstract class OrmPersistent : OrmValid() {
 			removeCache()
 
 			// 更新数据库
-			val result = queryBuilder().sets(buildDirtyData()).where(ormMeta.primaryKey, oldPk /* 原始主键，因为主键可能被修改 */).update();
+			//val result = queryBuilder().sets(buildDirtyData()).where(ormMeta.primaryKey, oldPk /* 原始主键，因为主键可能被修改 */).update();
+			val dirty = buildDirtyData()
+			val params = ArrayList(dirty.values)
+			params.addAll(oldPk.columns)// 原始主键，因为主键可能被修改
+			val result = ormMeta.getUpdateSql(dirty.keys).execute(params, null, ormMeta.db) > 0
 
 			// 触发后置事件
 			triggerAfterUpdate()
@@ -267,7 +275,8 @@ abstract class OrmPersistent : OrmValid() {
 				removeHasNRelationsByDelete()
 
 			// 删除数据
-			val result = queryBuilder().where(ormMeta.primaryKey, pk).delete();
+			//val result = queryBuilder().where(ormMeta.primaryKey, pk).delete();
+			val result = ormMeta.deleteSqlByPk.execute(pk.toList(), null, ormMeta.db) > 0
 
 			// 触发后置事件
 			afterDelete()
