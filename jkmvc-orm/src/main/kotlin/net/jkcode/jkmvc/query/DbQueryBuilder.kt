@@ -59,9 +59,10 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      * 编译sql
      * @param action sql动作：select/insert/update/delete
      * @param db 数据库连接
+     * @param clone 是否克隆, 默认是
      * @return 编译好的sql
      */
-    public override fun compile(action: SqlAction, db: IDb): CompiledSql {
+    public override fun compile(action: SqlAction, db: IDb, clone: Boolean): CompiledSql {
         // 清空编译结果
         compiledSql.clear();
 
@@ -78,6 +79,13 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
 
         // 清空所有参数
         clear()
+
+        // 克隆
+        if(clone){
+            val ret = compiledSql.clone() as CompiledSql
+            compiledSql.clear()
+            return ret
+        }
 
         return compiledSql
     }
@@ -96,7 +104,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
             limit(1)
 
         // 编译 + 执行
-        return compile(SqlAction.SELECT, db).findResult(params, single, db, transform)
+        return compile(SqlAction.SELECT, db, false).findResult(params, single, db, transform)
     }
 
     /**
@@ -109,7 +117,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
     public override fun count(params: List<*>, db: IDb):Int {
         // 1 编译
         selectColumns.clear() // 清空多余的select
-        val csql = select(DbExpr("count(1)", "NUM", false) /* oracle会自动转为全大写 */).compile(SqlAction.SELECT, db);
+        val csql = select(DbExpr("count(1)", "NUM", false) /* oracle会自动转为全大写 */).compile(SqlAction.SELECT, db, false);
 
         // 2 执行 select
         return csql.findValue<Int>(params, db)!!
@@ -126,7 +134,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
     public override fun sum(column: String, params: List<*>, db: IDb):Int {
         // 1 编译
         selectColumns.clear() // 清空多余的select
-        val csql = select(DbExpr("sum($column)", "NUM", false) /* oracle会自动转为全大写 */).compile(SqlAction.SELECT, db);
+        val csql = select(DbExpr("sum($column)", "NUM", false) /* oracle会自动转为全大写 */).compile(SqlAction.SELECT, db, false);
 
         // 2 执行 select
         return csql.findValue<Int>(params, db)!!
@@ -142,7 +150,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
     public override fun incr(column: String, step: Int, params: List<*>, db: IDb): Boolean {
         // 1 编译
         set(column, DbExpr("$column + $step", false)) // Equals: set(column, "$column + $step", true)
-        val csql = compile(SqlAction.UPDATE, db);
+        val csql = compile(SqlAction.UPDATE, db, false);
 
         // 2 执行 update
         return csql.execute(params, null, db) > 0
@@ -159,7 +167,7 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      */
     public override fun execute(action: SqlAction, params:List<Any?>, generatedColumn:String?, db: IDb): Long {
         // 编译 + 执行
-        return compile(action, db).execute(params, generatedColumn, db)
+        return compile(action, db, false).execute(params, generatedColumn, db)
     }
 
     /**
@@ -172,6 +180,6 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
      */
     public override fun batchExecute(action: SqlAction, paramses: List<Any?>, db: IDb): IntArray {
         // 编译 + 执行
-        return compile(action, db).batchExecute(paramses, db)
+        return compile(action, db, false).batchExecute(paramses, db)
     }
 }

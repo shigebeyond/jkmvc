@@ -40,9 +40,10 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
      *
      * @param action sql动作：select/insert/update/delete
      * @param db 数据库连接
+     * @param clone 是否克隆, 默认是
      * @return 编译好的sql
      */
-    public abstract fun compile(action: SqlAction, db: IDb = defaultDb): CompiledSql;
+    public abstract fun compile(action: SqlAction, db: IDb = defaultDb, clone: Boolean = true): CompiledSql;
 
     /**
      * 编译select语句
