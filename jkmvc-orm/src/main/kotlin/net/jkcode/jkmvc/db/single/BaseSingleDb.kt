@@ -8,12 +8,11 @@ import java.sql.Connection
 
 /**
  * 单机的db
- *    使用 druid 来获得连接
  *
  * @author shijianhang<772910474@qq.com>
  * @date 2019-08-23 10:31 AM
  */
-class SingleDb(name:String /* 标识 */) : Db(name) {
+abstract class BaseSingleDb(name:String /* 标识 */) : Db(name) {
 
     /**
      * 数据库配置
@@ -40,9 +39,7 @@ class SingleDb(name:String /* 标识 */) : Db(name) {
      * @param name 数据源名
      * @return
      */
-    protected fun getDataSource(name: String): ClosableDataSource {
-        return DruidDataSourceFactory.getDataSource(name);
-    }
+    protected abstract fun getDataSource(name: String): ClosableDataSource
 
     /**
      * 主库连接

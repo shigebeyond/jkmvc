@@ -11,7 +11,11 @@ dependencies{
 
     // datasource
     // single db
+    // druid
     compile 'com.alibaba:druid:1.1.6'
+    // Hikari
+    compile 'com.zaxxer:HikariCP:3.4.1'
+
     // sharding db
     compile "io.shardingjdbc:sharding-jdbc-transaction:2.0.3"
     compile "io.shardingjdbc:sharding-jdbc-core:2.0.3"

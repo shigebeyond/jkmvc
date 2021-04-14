@@ -6,31 +6,21 @@ import net.jkcode.jkmvc.db.IDataSourceFactory
 import javax.sql.DataSource
 
 /**
- * 数据源工厂
+ * druid数据源工厂
  *   参考了 jfinal 的 com.jfinal.plugin.druid.DruidPlugin
  *
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-object DruidDataSourceFactory : IDataSourceFactory() {
-
-    /**
-     * 构建数据源
-     * @param name 数据源名
-     * @return
-     */
-    override fun buildDataSource(name: CharSequence): DataSource {
-        val config: Config = Config.instance("dataSources.$name", "yaml")
-        return buildDataSource(config)
-    }
+object DruidDataSourceFactory : BaseDataSourceFactory() {
 
     /**
      * 构建数据源
      * @param config 数据源和配置
      * @return
      */
-    public fun buildDataSource(config: Config): DruidDataSource {
-        val ds: DruidDataSource = DruidDataSource()
+    public override fun buildDataSource(config: Config): DataSource {
+        val ds = DruidDataSource()
 
         // 基本属性 url、user、password
         ds.setUrl(config["url"])
@@ -52,7 +42,7 @@ object DruidDataSourceFactory : IDataSourceFactory() {
         ds.setMinEvictableIdleTimeMillis(config.getLong("minEvictableIdleTimeMillis", DruidDataSource.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS)!!) // 配置连接在池中最小生存的时间
 
         // 校验的sql
-        ds.setValidationQuery(config.get("validationQuery", getValidatioQuery(driverClass)))
+        ds.setValidationQuery(config.get("validationQuery", getValidationQuery(driverClass)))
         ds.setValidationQueryTimeout(config.get("validationQueryTimeout", 30)!!)
         ds.setTestWhileIdle(config.getBoolean("testWhileIdle", true)!!)
         ds.setTestOnBorrow(config.getBoolean("testOnBorrow", true)!!)
@@ -77,16 +67,4 @@ object DruidDataSourceFactory : IDataSourceFactory() {
 
         return ds;
     }
-
-    /**
-     * 获得校验sql
-     *
-     * @param driverClass
-     * @return
-     */
-    public fun getValidatioQuery(driverClass:String):String{
-        val config = Config.instance("validation-query")
-        return config[driverClass]!!
-    }
-
 }

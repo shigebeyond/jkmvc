@@ -2,9 +2,8 @@ package net.jkcode.jkmvc.db
 
 import net.jkcode.jkutil.common.dbLogger
 import net.jkcode.jkutil.common.mapToArray
-import net.jkcode.jkutil.common.trySupplierFinally
 import net.jkcode.jkmvc.db.sharding.ShardingDb
-import net.jkcode.jkmvc.db.single.SingleDb
+import net.jkcode.jkmvc.db.single.DruidSingleDb
 import net.jkcode.jkutil.ttl.AllRequestScopedTransferableThreadLocal
 import java.io.Closeable
 import java.io.InputStream
@@ -63,7 +62,7 @@ abstract class Db protected constructor(
                 else if (DbConfig.isSharding(name.toString())) // 分库
                     ShardingDb(name.toString())
                 else // 单库
-                    SingleDb(name.toString())
+                    DruidSingleDb(name.toString())
             }
         }
 
