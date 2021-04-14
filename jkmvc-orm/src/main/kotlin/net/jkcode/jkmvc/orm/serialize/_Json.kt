@@ -71,7 +71,20 @@ public fun Any.toMap(include: List<String> = emptyList()): MutableMap<String, An
     if (this is IOrm && include.isEmpty())
         return this.toMap()
 
-    // 2 普通对象
+    // 2 Map对象
+    if (this is Map<*, *>) {
+        if(include.isEmpty())
+            return this as MutableMap<String, Any?>
+
+        return include.associate { prop ->
+            prop to this[prop]
+        } as MutableMap
+    }
+
+    // 3 普通对象
+    if(include.isEmpty())
+        throw IllegalArgumentException("普通对象转Map, 必须指定字段")
+
     return include.associate { prop ->
         val value = this.getPathPropertyValue(prop) // 支持多级属性
         prop to value
@@ -108,6 +121,6 @@ public fun Any.toJson(include: List<String> = emptyList()): String {
     val data = if(include.isEmpty())
                     this
                 else
-        normalizeData(this, include)
+                    normalizeData(this, include)
     return JSON.toJSONString(data, SerializerFeature.WriteDateUseDateFormat /* Date格式化 */, SerializerFeature.WriteMapNullValue /* 输出null值 */)
 }

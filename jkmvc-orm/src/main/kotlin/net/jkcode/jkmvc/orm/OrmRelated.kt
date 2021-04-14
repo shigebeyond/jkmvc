@@ -224,13 +224,12 @@ abstract class OrmRelated : OrmPersistent() {
 
     /**
      * 获得关联对象, 如果没有则查询
+     *   原来是有参数指定查询列, 但为了优化联查sql的编译, 因此简化该参数
      *
      * @param name 关联对象名
-     * @param columns 字段名数组: Array(column1, column2, alias to column3),
-     * 				如 Array("name", "age", "birt" to "birthday"), 其中 name 与 age 字段不带别名, 而 birthday 字段带别名 birt
      * @return
      */
-    public override fun getRelatedOrQuery(name: String, vararg columns: String): Any? {
+    public override fun getRelatedOrQuery(name: String): Any? {
         if (name !in _data){
             // 获得关联关系
             val relation = ormMeta.getRelation(name)!!;
@@ -240,7 +239,6 @@ abstract class OrmRelated : OrmPersistent() {
             if(query == null) // 如果查询为空，说明主/外键为空，则数据有问题，则不查询不赋值（一般出现在调试过程中）
                 return null;
 
-            query.select(*columns) // 查字段
             _data[name] = if (relation.isHasMany) // 查多个
                             query.findRows(transform = relation.modelRowTransformer)
                         else  // 查一个
