@@ -22,7 +22,7 @@ import kotlin.collections.set
  */
 data class WithInfo(
         public val columns: SelectColumnList?, // 查询列
-        public val queryAction: ((OrmQueryBuilder)->Unit)? // 查询对象的回调函数, 只针对 hasMany 关系
+        public val queryAction: ((OrmQueryBuilder, Boolean)->Unit)? // 查询对象的回调函数, 只针对 hasMany 关系
 )
 
 /**
@@ -154,7 +154,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      * @return
      */
     @JvmOverloads
-    public fun with(name: CharSequence, select: Boolean = withSelect, columns: SelectColumnList? = null, queryAction: ((OrmQueryBuilder)->Unit)? = null): OrmQueryBuilder {
+    public fun with(name: CharSequence, select: Boolean = withSelect, columns: SelectColumnList? = null, queryAction: ((OrmQueryBuilder, Boolean)->Unit)? = null): OrmQueryBuilder {
         // select当前表字段
         if (selectColumns.isEmpty())
             select(ormMeta.name + ".*");
@@ -225,7 +225,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
      * @param queryAction 查询对象的回调函数, 只针对 hasMany 关系
      * @return
      */
-    public fun withMany(name: String, columns: SelectColumnList? = null, queryAction: ((OrmQueryBuilder)->Unit)?): OrmQueryBuilder {
+    public fun withMany(name: String, columns: SelectColumnList? = null, queryAction: ((OrmQueryBuilder, Boolean)->Unit)?): OrmQueryBuilder {
         //数据结构：<hasMany关系名, 联查信息>
         withMany[name] = WithInfo(columns, queryAction)
         return this
@@ -385,7 +385,7 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
 
             // 调用查询对象的回调
             if(queryAction != null)
-                queryAction.invoke(query)
+                queryAction.invoke(query, true /* 延迟加载 */)
 
             // 得结果
             val relatedItems = query.findRows(transform = relation.modelRowTransformer)

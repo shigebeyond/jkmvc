@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.tests.model;
 
 import com.google.common.collect.Maps;
 import kotlin.Unit;
+import kotlin.jvm.functions.Function2;
 import kotlin.jvm.internal.Reflection;
 import kotlin.reflect.KClass;
 import net.jkcode.jkmvc.orm.*;
@@ -96,11 +97,14 @@ public final class JavaUserModel extends Orm
         ormMeta.addRule("name", "姓名", "notEmpty", null);
         ormMeta.addRule("age", "年龄", "between(1,120)", null);
         ormMeta.hasOne("home", AddressModel.class, "user_id", "id", Collections.emptyMap(), false,
-                new Function1<OrmQueryBuilder, Unit>(){
+                new Function2<OrmQueryBuilder, Boolean, Unit>(){
 
                     @Override
-                    public Unit invoke(OrmQueryBuilder query) {
-                        query.on("is_home", 1, false);
+                    public Unit invoke(OrmQueryBuilder query, Boolean lazy) {
+                        if(lazy)
+                            query.where("is_home", 1);
+                        else
+                            query.on("is_home", 1, false);
                         return null;
                     }
                 });

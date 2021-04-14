@@ -175,7 +175,7 @@ interface IRelation {
     fun queryBuilder(): OrmQueryBuilder {
         // 关联查询 + 条件
         val query = ormMeta.queryBuilder()
-        conditions.applyQuery(query)
+        conditions.applyQuery(query, true /* 延迟加载 */)
         return query
     }
 
@@ -254,7 +254,7 @@ interface IRelation {
         // 联查关联表
         applyQueryJoinRelated(query, thisName, relatedName)
         // 应用条件
-        conditions.applyQuery(query)
+        conditions.applyQuery(query, false /* 非延迟加载 */)
     }
 
     /**

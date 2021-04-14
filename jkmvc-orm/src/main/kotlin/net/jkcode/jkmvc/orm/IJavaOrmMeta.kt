@@ -41,7 +41,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
      * @return
      */
     @JvmOverloads
-    fun belongsTo(name:String, relatedModel: Class<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions:Map<String, Any?> = emptyMap(), queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
+    fun belongsTo(name:String, relatedModel: Class<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions:Map<String, Any?> = emptyMap(), queryAction: ((OrmQueryBuilder, Boolean)->Unit)? = null): IOrmMeta{
         return belongsTo(name, relatedModel.kotlin, foreignKey, primaryKey, conditions, queryAction)
     }
 
@@ -62,7 +62,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
      * @return
      */
     @JvmOverloads
-    fun belongsTo(name:String, relatedModel: Class<out IOrm>, foreignKey:DbKeyNames = relatedModel.kotlin.modelOrmMeta.defaultForeignKey /* 主表_主键 = 关联表_主键 */, conditions:Map<String, Any?> = emptyMap(), queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
+    fun belongsTo(name:String, relatedModel: Class<out IOrm>, foreignKey:DbKeyNames = relatedModel.kotlin.modelOrmMeta.defaultForeignKey /* 主表_主键 = 关联表_主键 */, conditions:Map<String, Any?> = emptyMap(), queryAction: ((OrmQueryBuilder, Boolean)->Unit)? = null): IOrmMeta{
         return belongsTo(name, relatedModel.kotlin, foreignKey, relatedModel.kotlin.modelOrmMeta.primaryKey /* 关联表的主键 */, conditions, queryAction)
     }
 
@@ -85,7 +85,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
      * @return
      */
     @JvmOverloads
-    fun hasOne(name: String, relatedModel: Class<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions: Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
+    fun hasOne(name: String, relatedModel: Class<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions: Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder, Boolean)->Unit)? = null): IOrmMeta{
         return hasOne(name, relatedModel.kotlin, foreignKey, primaryKey, conditions, cascadeDeleted, queryAction)
     }
 
@@ -107,7 +107,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
      * @return
      */
     @JvmOverloads
-    fun hasOne(name:String, relatedModel: Class<out IOrm>, foreignKey:DbKeyNames = this.defaultForeignKey /* 主表_主键 = 本表_主键 */, conditions:Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
+    fun hasOne(name:String, relatedModel: Class<out IOrm>, foreignKey:DbKeyNames = this.defaultForeignKey /* 主表_主键 = 本表_主键 */, conditions:Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder, Boolean)->Unit)? = null): IOrmMeta{
         return hasOne(name, relatedModel.kotlin, foreignKey, this.primaryKey /* 本表的主键 */, conditions, cascadeDeleted, queryAction)
     }
 
@@ -130,7 +130,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
      * @return
      */
     @JvmOverloads
-    fun hasMany(name: String, relatedModel: Class<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions: Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
+    fun hasMany(name: String, relatedModel: Class<out IOrm>, foreignKey:DbKeyNames, primaryKey:DbKeyNames, conditions: Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder, Boolean)->Unit)? = null): IOrmMeta{
         return hasMany(name, relatedModel.kotlin, foreignKey, primaryKey, conditions, cascadeDeleted, queryAction)
     }
 
@@ -152,7 +152,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
      * @return
      */
     @JvmOverloads
-    fun hasMany(name:String, relatedModel: Class<out IOrm>, foreignKey:DbKeyNames = this.defaultForeignKey /* 主表_主键 = 本表_主键 */, conditions:Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
+    fun hasMany(name:String, relatedModel: Class<out IOrm>, foreignKey:DbKeyNames = this.defaultForeignKey /* 主表_主键 = 本表_主键 */, conditions:Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder, Boolean)->Unit)? = null): IOrmMeta{
         return hasMany(name, relatedModel.kotlin, foreignKey, this.primaryKey /* 本表的主键 */, conditions, cascadeDeleted, queryAction)
     }
 
@@ -190,7 +190,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
                       farForeignKey:DbKeyNames = relatedModel.kotlin.modelOrmMeta.defaultForeignKey, // 远端主表_主键 = 从表_主键 
                       farPrimaryKey:DbKeyNames = relatedModel.kotlin.modelOrmMeta.primaryKey, // 从表的主键 
                       conditions: Map<String, Any?> = emptyMap(),
-                      queryAction: ((OrmQueryBuilder)->Unit)? = null
+                      queryAction: ((OrmQueryBuilder, Boolean)->Unit)? = null
     ): IOrmMeta{
         return hasOneThrough(name, relatedModel.kotlin, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey, conditions, queryAction)
     }
@@ -225,7 +225,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
                                      relationName1:String, // 第1层关系
                                      relationName2:String, // 第2层关系
                                      conditions: Map<String, Any?> = emptyMap(),
-                                     queryAction: ((OrmQueryBuilder)->Unit)? = null
+                                     queryAction: ((OrmQueryBuilder, Boolean)->Unit)? = null
     ): IOrmMeta{
         return hasOneThrough2LevelRelations(name, relatedModel.kotlin, relationName1, relationName2, conditions, queryAction)
     }
@@ -264,7 +264,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
                        farForeignKey:DbKeyNames = relatedModel.kotlin.modelOrmMeta.defaultForeignKey, // 远端主表_主键 = 从表_主键 
                        farPrimaryKey:DbKeyNames = relatedModel.kotlin.modelOrmMeta.primaryKey, // 从表的主键 
                        conditions: Map<String, Any?> = emptyMap(),
-                       queryAction: ((OrmQueryBuilder)->Unit)? = null
+                       queryAction: ((OrmQueryBuilder, Boolean)->Unit)? = null
     ): IOrmMeta{
         return hasManyThrough(name, relatedModel.kotlin, foreignKey, primaryKey, middleTable, farForeignKey, farPrimaryKey, conditions, queryAction)
     }
@@ -297,7 +297,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
                                       relationName1:String, // 第1层关系
                                       relationName2:String, // 第2层关系
                                       conditions: Map<String, Any?> = emptyMap(),
-                                      queryAction: ((OrmQueryBuilder)->Unit)? = null
+                                      queryAction: ((OrmQueryBuilder, Boolean)->Unit)? = null
     ): IOrmMeta{
         return hasManyThrough2LevelRelations(name, relatedModel.kotlin, relationName1, relationName2, conditions, queryAction)
     }
@@ -320,7 +320,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
      * @return
      */
     @JvmOverloads
-    fun belongsTo(name:String, relatedModel: Class<out IOrm>, foreignKey:String, primaryKey:String, conditions:Map<String, Any?> = emptyMap(), queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
+    fun belongsTo(name:String, relatedModel: Class<out IOrm>, foreignKey:String, primaryKey:String, conditions:Map<String, Any?> = emptyMap(), queryAction: ((OrmQueryBuilder, Boolean)->Unit)? = null): IOrmMeta{
         return belongsTo(name, relatedModel.kotlin, DbKeyNames(foreignKey), DbKeyNames(primaryKey), conditions, queryAction)
     }
 
@@ -341,7 +341,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
      * @return
      */
     @JvmOverloads
-    fun belongsTo(name:String, relatedModel: Class<out IOrm>, foreignKey:String, conditions:Map<String, Any?> = emptyMap(), queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
+    fun belongsTo(name:String, relatedModel: Class<out IOrm>, foreignKey:String, conditions:Map<String, Any?> = emptyMap(), queryAction: ((OrmQueryBuilder, Boolean)->Unit)? = null): IOrmMeta{
         return belongsTo(name, relatedModel.kotlin, foreignKey, relatedModel.kotlin.modelOrmMeta.primaryKey.first() /* 关联表的主键 */, conditions, queryAction)
     }
 
@@ -364,7 +364,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
      * @return
      */
     @JvmOverloads
-    fun hasOne(name: String, relatedModel: Class<out IOrm>, foreignKey:String, primaryKey:String, conditions: Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
+    fun hasOne(name: String, relatedModel: Class<out IOrm>, foreignKey:String, primaryKey:String, conditions: Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder, Boolean)->Unit)? = null): IOrmMeta{
         return hasOne(name, relatedModel.kotlin, DbKeyNames(foreignKey), DbKeyNames(primaryKey), conditions, cascadeDeleted, queryAction)
     }
 
@@ -386,7 +386,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
      * @return
      */
     @JvmOverloads
-    fun hasOne(name:String, relatedModel: Class<out IOrm>, foreignKey:String, conditions:Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
+    fun hasOne(name:String, relatedModel: Class<out IOrm>, foreignKey:String, conditions:Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder, Boolean)->Unit)? = null): IOrmMeta{
         return hasOne(name, relatedModel.kotlin, foreignKey, this.primaryKey.first() /* 本表的主键 */, conditions, cascadeDeleted, queryAction)
     }
 
@@ -409,7 +409,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
      * @return
      */
     @JvmOverloads
-    fun hasMany(name: String, relatedModel: Class<out IOrm>, foreignKey:String, primaryKey:String, conditions: Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
+    fun hasMany(name: String, relatedModel: Class<out IOrm>, foreignKey:String, primaryKey:String, conditions: Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder, Boolean)->Unit)? = null): IOrmMeta{
         return hasMany(name, relatedModel.kotlin, DbKeyNames(foreignKey), DbKeyNames(primaryKey), conditions, cascadeDeleted, queryAction)
     }
 
@@ -431,7 +431,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
      * @return
      */
     @JvmOverloads
-    fun hasMany(name:String, relatedModel: Class<out IOrm>, foreignKey:String, conditions:Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder)->Unit)? = null): IOrmMeta{
+    fun hasMany(name:String, relatedModel: Class<out IOrm>, foreignKey:String, conditions:Map<String, Any?> = emptyMap(), cascadeDeleted: Boolean = false, queryAction: ((OrmQueryBuilder, Boolean)->Unit)? = null): IOrmMeta{
         return hasMany(name, relatedModel.kotlin, foreignKey, this.primaryKey.first() /* 本表的主键 */, conditions, cascadeDeleted, queryAction)
     }
 
@@ -469,7 +469,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
                       farForeignKey:String = relatedModel.kotlin.modelOrmMeta.defaultForeignKey.first(), // 远端主表_主键 = 从表_主键
                       farPrimaryKey:String = relatedModel.kotlin.modelOrmMeta.primaryKey.first(), // 从表的主键
                       conditions: Map<String, Any?> = emptyMap(),
-                      queryAction: ((OrmQueryBuilder)->Unit)? = null
+                      queryAction: ((OrmQueryBuilder, Boolean)->Unit)? = null
     ): IOrmMeta{
         return hasOneThrough(name, relatedModel.kotlin, DbKeyNames(foreignKey), DbKeyNames(primaryKey), middleTable, DbKeyNames(farForeignKey), DbKeyNames(farPrimaryKey), conditions, queryAction)
     }
@@ -508,7 +508,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
                        farForeignKey:String = relatedModel.kotlin.modelOrmMeta.defaultForeignKey.first(), // 远端主表_主键 = 从表_主键 
                        farPrimaryKey:String = relatedModel.kotlin.modelOrmMeta.primaryKey.first(), // 从表的主键 
                        conditions: Map<String, Any?> = emptyMap(),
-                       queryAction: ((OrmQueryBuilder)->Unit)? = null
+                       queryAction: ((OrmQueryBuilder, Boolean)->Unit)? = null
     ): IOrmMeta{
         return hasManyThrough(name, relatedModel.kotlin, DbKeyNames(foreignKey), DbKeyNames(primaryKey), middleTable, DbKeyNames(farForeignKey), DbKeyNames(farPrimaryKey), conditions, queryAction)
     }

@@ -9,7 +9,7 @@ import net.jkcode.jkmvc.orm.OrmQueryBuilder
  */
 data class RelationConditions(
         public val conditions :Map<String, Any?>, // 查询条件
-        public val queryAction: ((OrmQueryBuilder)->Unit)? // 查询对象的回调函数
+        public val queryAction: ((query: OrmQueryBuilder, lazy: Boolean)->Unit)? // 查询对象的回调函数
 ){
     companion object{
 
@@ -25,10 +25,15 @@ data class RelationConditions(
     /**
      * 对query builder应用联查
      * @param query
+     * @param lazy 是否延迟加载, 分2条sql, 否则同一条sql
      */
-    public fun applyQuery(query: OrmQueryBuilder) {
-        query.ons(conditions, false)
-        queryAction?.invoke(query)
+    public fun applyQuery(query: OrmQueryBuilder, lazy: Boolean) {
+        if(lazy)
+            query.wheres(conditions)
+        else
+            query.ons(conditions, false)
+
+        queryAction?.invoke(query, lazy)
     }
 
 }

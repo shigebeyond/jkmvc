@@ -168,7 +168,7 @@ class OrmTests{
 //        println(addresses)
 
         // 多个user，联查多个address
-        val query = UserModel.queryBuilder().with("addresses"){ query2 ->
+        val query = UserModel.queryBuilder().with("addresses"){ query2, lazy ->
             // 动态操作查询对象, 如添加条件
             query2.where("tel", "110").orderBy("addr")
         }
