@@ -121,6 +121,7 @@ abstract class OrmPersistent : OrmValid() {
 			// 插入数据库
 			val generatedColumn = if (needPk) ormMeta.primaryKey.first() else null // 主键名
 			//val pk = queryBuilder().value(buildDirtyData()).insert(generatedColumn);
+			// 优化性能: 使用编译好的sql
 			val params = buildDirtyValues()
 			val pk = ormMeta.getInsertSql(_dirty.keys).execute(params, generatedColumn, ormMeta.db)
 
@@ -244,6 +245,7 @@ abstract class OrmPersistent : OrmValid() {
 
 			// 更新数据库
 			//val result = queryBuilder().sets(buildDirtyData()).where(ormMeta.primaryKey, oldPk /* 原始主键，因为主键可能被修改 */).update();
+			// 优化性能: 使用编译好的sql
 			val params = buildDirtyValues() as MutableList
 			params.addAll(oldPk.columns)// 原始主键，因为主键可能被修改
 			val result = ormMeta.getUpdateSql(_dirty.keys).execute(params, null, ormMeta.db) > 0
@@ -293,6 +295,7 @@ abstract class OrmPersistent : OrmValid() {
 
 			// 删除数据
 			//val result = queryBuilder().where(ormMeta.primaryKey, pk).delete();
+			// 优化性能: 使用编译好的sql
 			val result = ormMeta.deleteSqlByPk.execute(pk.toList(), null, ormMeta.db) > 0
 
 			// 触发后置事件

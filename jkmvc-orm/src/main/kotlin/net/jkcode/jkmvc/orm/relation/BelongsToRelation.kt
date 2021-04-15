@@ -2,8 +2,10 @@ package net.jkcode.jkmvc.orm.relation
 
 import net.jkcode.jkmvc.orm.*
 import net.jkcode.jkmvc.orm.DbKeyValues
+import net.jkcode.jkmvc.query.CompiledSql
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.IDbQueryBuilder
+import net.jkcode.jkutil.common.mapToArray
 import kotlin.reflect.KClass
 
 /**
@@ -23,6 +25,18 @@ class BelongsToRelation(
      * 本模型不是主表, 是从表
      */
     override val thisAsMaster: Boolean = false
+
+    /**
+     * 延迟查询关联对象的sql
+     */
+    override val lazySelectRelatedSql: CompiledSql by lazy{
+        val fk = foreignProp.map {
+            DbExpr.question
+        }
+        queryBuilder().where(primaryKey.wrap(modelName + ".") /*modelName + "." + primaryKey*/, fk) // 主表.主键 = 从表.外键
+                .limit(1)
+                .compileSelect()
+    }
 
     /**
      * 查询关联表

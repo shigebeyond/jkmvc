@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.orm.relation
 
 import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.orm.*
+import net.jkcode.jkmvc.query.CompiledSql
 import net.jkcode.jkmvc.query.IDbQueryBuilder
 import kotlin.reflect.KClass
 
@@ -162,6 +163,11 @@ interface IRelation {
      */
     val modelRowTransformer: (DbResultRow) -> IOrm
         get()= model.modelRowTransformer
+
+    /**
+     * 延迟查询关联对象的sql
+     */
+    val lazySelectRelatedSql: CompiledSql
 
     /**
      * 检查主键外键是否存在

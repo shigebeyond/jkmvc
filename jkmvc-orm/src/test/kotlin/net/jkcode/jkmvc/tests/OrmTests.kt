@@ -21,21 +21,25 @@ class OrmTests{
 //        println(UserModel.m::class.jvmName) // net.jkcode.jkmvc.tests.MyTests$m
 //        println(UserModel.m::class.qualifiedName) // net.jkcode.jkmvc.tests.UserModel.m -- dot
 //        println(UserModel.m::class.simpleName) // m
-        println(UserModel.m::name) // m
-        println(UserModel.m.name) // user
-        println(UserModel::class.modelOrmMeta.name) // user
+//        println(UserModel.m::name) // m
+//        println(UserModel.m.name) // user
+//        println(UserModel::class.modelOrmMeta.name) // user
 //        println(UserModel.m::class.java.name) // net.jkcode.jkmvc.tests.MyTests$m
 //        println(UserModel.m::class.java.typeName) // net.jkcode.jkmvc.tests.MyTests$m
 //        println(UserModel.m::class.java.canonicalName) // net.jkcode.jkmvc.tests.UserModel.m -- dot
 //        println(UserModel.m::class.java.simpleName) // m
+
+        println(DbExpr::class.java.isArray())
     }
 
     @Test
     fun testFind(){
-        val user = UserModel.findByPk<UserModel>(id)
+        val user = UserModel.findByPk<UserModel>(id)!!
 //        val user = UserModel.queryBuilder().where("id", id).findModel<UserModel>()
 //        val user = UserModel(id)
         println("查找用户: $user" )
+//        println("查找用户地址: ${user.addresses}" )
+//        println("查找用户家庭地址: ${user.home}" )
     }
 
     @Test

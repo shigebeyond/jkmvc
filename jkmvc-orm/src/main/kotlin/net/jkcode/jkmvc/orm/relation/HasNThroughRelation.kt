@@ -2,9 +2,11 @@ package net.jkcode.jkmvc.orm.relation
 
 import net.jkcode.jkmvc.orm.*
 import net.jkcode.jkmvc.orm.DbKeyValues
+import net.jkcode.jkmvc.query.CompiledSql
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.DbQueryBuilder
 import net.jkcode.jkmvc.query.IDbQueryBuilder
+import net.jkcode.jkutil.common.mapToArray
 import kotlin.reflect.KClass
 
 /**
@@ -103,6 +105,22 @@ class HasNThroughRelation(
      *    与 middleForeignKey 对应
      */
     public val middleForeignProp: DbKeyNames = srcOrmMeta.columns2Props(middleForeignKey)
+
+    /**
+     * 延迟查询关联对象的sql
+     */
+    override val lazySelectRelatedSql: CompiledSql by lazy{
+        val pk = primaryProp.map {
+            DbExpr.question
+        }
+        // 通过join中间表 查从表
+        val tableAlias = middleTable + '.'
+        val query = buildQuery() // 中间表.远端外键 = 从表.远端主键
+                .where(foreignKey.wrap(tableAlias)/*middleTable + '.' + foreignKey*/, pk) // 中间表.外键 = 主表.主键
+        if(one2one)
+            query.limit(1)
+        query.compileSelect()
+    }
 
     /**
      * 构建查询：通过join中间表来查询从表

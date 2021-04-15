@@ -234,8 +234,9 @@ abstract class OrmRelated : OrmPersistent() {
             // 获得关联关系
             val relation = ormMeta.getRelation(name)!!;
 
+            /*
             // 根据关联关系来构建查询
-            val query:OrmQueryBuilder? = relation.queryRelated(this) // 自动构建查询条件
+            val query:OrmQueryBuilder? = relation.queryRelated(this)
             if(query == null) // 如果查询为空，说明主/外键为空，则数据有问题，则不查询不赋值（一般出现在调试过程中）
                 return null;
 
@@ -243,6 +244,14 @@ abstract class OrmRelated : OrmPersistent() {
                             query.findRows(transform = relation.modelRowTransformer)
                         else  // 查一个
                             query.findRow(transform = relation.modelRowTransformer)
+            */
+            // 优化性能: 使用编译好的sql
+            val sql = relation.lazySelectRelatedSql
+            val key = this.gets(relation.thisProp).toList()
+            _data[name] = if (relation.isHasMany) // 查多个
+                                sql.findRows(key, ormMeta.db, relation.modelRowTransformer)
+                            else  // 查一个
+                                sql.findRow(key, ormMeta.db, relation.modelRowTransformer)
         }
 
         return _data[name];
@@ -302,10 +311,8 @@ abstract class OrmRelated : OrmPersistent() {
      * @return
      */
     public override fun countRelation(name:String, fkInMany: Any?): Int {
-        // 获得关联关系
-        val relation = ormMeta.getRelation(name)!!;
-        // 构建查询：自动构建查询条件
-        val query = relation.queryRelated(this, fkInMany)
+        // 查询关联表
+        val query = queryRelated(name, fkInMany)
         return if(query == null) 0 else query.count()
     }
 
