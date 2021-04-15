@@ -1,12 +1,17 @@
 package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.db.DbResultRow
+import net.jkcode.jkmvc.orm.prop.OrmListPropDelegater
+import net.jkcode.jkmvc.orm.prop.OrmMapPropDelegater
+import net.jkcode.jkmvc.orm.prop.OrmPropDelegater
+import net.jkcode.jkmvc.orm.prop.OrmSetPropDelegater
 import net.jkcode.jkutil.common.*
 import net.jkcode.jkutil.serialize.FstSerializer
 import net.jkcode.jkutil.serialize.ISerializer
 import java.io.Serializable
 import java.math.BigDecimal
 import java.util.*
+import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KMutableProperty1
 
 /**
@@ -56,6 +61,42 @@ abstract class OrmEntity : IOrmEntity, Serializable {
      */
     protected open val _data: MutableMap<String, Any?> by lazy{
         HashMap<String, Any?>()
+    }
+
+    /**
+     * 获得属性代理
+     *    注意: 属性代理必须要inline
+     *    如果只是entity类是没问题的, entity实例化后才初始化属性(调用property()) => 正常
+     *    如果是model继承entity时, model的实例化=entity实例化+entity初始化完属性, 而entity初始化属性又依赖于model的实例化, 因此entity初始化属性时调用property()报空指针异常
+     * @return
+     */
+    public inline fun <T> property(): ReadWriteProperty<IOrmEntity, T> {
+        return OrmPropDelegater as ReadWriteProperty<IOrmEntity, T>;
+    }
+
+    /**
+     * 获得列表属性代理
+     * @return
+     */
+    public inline fun <T: List<*>> listProperty(): ReadWriteProperty<IOrmEntity, T> {
+        return OrmListPropDelegater as ReadWriteProperty<IOrmEntity, T>;
+    }
+
+    /**
+     * 获得集合属性代理
+     * @return
+     */
+    public inline fun <T: Set<*>> setProperty(): ReadWriteProperty<IOrmEntity, T> {
+        return OrmSetPropDelegater as ReadWriteProperty<IOrmEntity, T>;
+    }
+
+    /**
+     * 获得哈希属性代理
+     * @param keys 作为键的字段名
+     * @return
+     */
+    public inline fun <T: Map<*, *>> mapProperty(vararg keys: String): ReadWriteProperty<IOrmEntity, T> {
+        return OrmMapPropDelegater.instance(DbKeyNames(*keys)) as ReadWriteProperty<IOrmEntity, T>;
     }
 
     /**

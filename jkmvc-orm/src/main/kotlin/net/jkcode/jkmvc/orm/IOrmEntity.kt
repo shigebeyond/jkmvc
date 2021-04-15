@@ -1,13 +1,6 @@
 package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.db.DbResultRow
-import net.jkcode.jkmvc.orm.prop.OrmListPropDelegater
-import net.jkcode.jkmvc.orm.prop.OrmMapPropDelegater
-import net.jkcode.jkmvc.orm.prop.OrmPropDelegater
-import net.jkcode.jkmvc.orm.prop.OrmSetPropDelegater
-import java.util.*
-import kotlin.collections.HashMap
-import kotlin.properties.ReadWriteProperty
 
 /**
  * ORM之实体对象
@@ -21,39 +14,6 @@ import kotlin.properties.ReadWriteProperty
  *
  */
 interface IOrmEntity {
-
-    /**
-     * 获得属性代理
-     * @return
-     */
-    public fun <T> property(): ReadWriteProperty<IOrmEntity, T> {
-        return OrmPropDelegater as ReadWriteProperty<IOrmEntity, T>;
-    }
-
-    /**
-     * 获得列表属性代理
-     * @return
-     */
-    public fun <T: List<*>> listProperty(): ReadWriteProperty<IOrmEntity, T> {
-        return OrmListPropDelegater as ReadWriteProperty<IOrmEntity, T>;
-    }
-
-    /**
-     * 获得集合属性代理
-     * @return
-     */
-    public fun <T: Set<*>> setProperty(): ReadWriteProperty<IOrmEntity, T> {
-        return OrmSetPropDelegater as ReadWriteProperty<IOrmEntity, T>;
-    }
-
-    /**
-     * 获得哈希属性代理
-     * @param keys 作为键的字段名
-     * @return
-     */
-    public fun <T: Map<*, *>> mapProperty(vararg keys: String): ReadWriteProperty<IOrmEntity, T> {
-        return OrmMapPropDelegater.instance(DbKeyNames(*keys)) as ReadWriteProperty<IOrmEntity, T>;
-    }
 
     /**
      * 判断是否有某字段
