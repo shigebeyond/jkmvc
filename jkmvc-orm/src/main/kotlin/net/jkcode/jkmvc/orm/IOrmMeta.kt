@@ -247,7 +247,15 @@ interface IOrmMeta {
      * @param item
      * @return
      */
-    fun validate(item: IOrmEntity): ModelValidateResult
+    fun validate(item: IOrmEntity): ModelValidateResult?
+
+    /**
+     * 校验数据
+     * @param item
+     */
+    fun validateOrThrow(item: IOrmEntity) {
+        validate(item)?.getOrThrow()
+    }
 
     /**
      * 添加规则

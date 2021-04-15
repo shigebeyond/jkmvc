@@ -78,7 +78,7 @@ abstract class OrmValid : IOrm, OrmEntity() {
      * 校验数据
      * @return
      */
-    public override fun validate(): ModelValidateResult {
+    public override fun validate(): ModelValidateResult? {
         return ormMeta.validate(this)
     }
 

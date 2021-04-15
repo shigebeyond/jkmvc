@@ -16,13 +16,13 @@ interface IOrmValid : IOrmEntity {
      * 校验数据
      * @return
      */
-    fun validate(): ModelValidateResult;
+    fun validate(): ModelValidateResult?;
 
     /**
      * 校验数据
      */
     fun validateOrThrow() {
-        validate().getOrThrow()
+        validate()?.getOrThrow()
     }
 
     /**
