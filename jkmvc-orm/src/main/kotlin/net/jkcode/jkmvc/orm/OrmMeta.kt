@@ -420,7 +420,10 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param item
      * @return
      */
-    public override fun validate(item: IOrmEntity): ModelValidateResult {
+    public override fun validate(item: IOrmEntity): ModelValidateResult? {
+        if(rules.isEmpty())
+            return null
+
         // 逐个属性校验
         val errors = HashMap<String, String>()
         for ((field, rule) in rules) {
@@ -596,10 +599,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @return
      */
     override fun getInsertSql(insertProps: Collection<String>): CompiledSql{
-        // 收集插入字段的位集
-        val bs = props2bitSet(insertProps)
-
-        return insertSqls.getOrPut(bs){
+        return getSqlByProps(insertProps, insertSqls){
             val colums = insertProps.mapToArray { prop ->
                 prop2Column(prop)
             }
@@ -624,10 +624,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @return
      */
     override fun getUpdateSql(updateProps: Collection<String>): CompiledSql{
-        // 收集更新字段的位集
-        val bs = props2bitSet(updateProps)
-
-        return updateSqls.getOrPut(bs){
+        return getSqlByProps(updateProps, updateSqls){
             val query = queryBuilder(reused = true)
                     .where(primaryKey, DbExpr.question) // 过滤主键
             for (prop in updateProps) {
@@ -639,17 +636,52 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     }
 
     /**
+     * 复用BitSet
+     */
+    protected val reusedBitSets: ThreadLocal<BitSet> = ThreadLocal.withInitial {
+        BitSet()
+    }
+
+    /**
      * 多属性转位集
      *    dataFactory 的key是属性, 而非列
      * @param props 属性
+     * @param reused 是否复用 BitSet
      * @return
      */
-    protected fun props2bitSet(props: Collection<String>): BitSet {
-        val bs = BitSet()
+    protected fun props2bitSet(props: Collection<String>, reused: Boolean): BitSet {
+        val bs: BitSet
+        if(reused){
+            bs = reusedBitSets.get() // 复用 BitSet
+            bs.clear()
+        }else {
+            bs = BitSet()
+        }
         for (prop in props){
             bs.set(dataFactory.keyIndex(prop))
         }
         return bs
+    }
+
+    /**
+     * 根据属性来获得缓存的编译sql
+     *   为减少 BitSet 创建, 复用 BitSet
+     *
+     * @param props 多属性
+     * @param sqls 缓存的sql
+     * @param sqlFactory sql工厂,  如果不存在sql, 则创建
+     */
+    protected fun getSqlByProps(props: Collection<String>, sqls: ConcurrentHashMap<BitSet, CompiledSql>, sqlFactory: () -> CompiledSql): CompiledSql {
+        // 收集字段的位集
+        val bs = props2bitSet(props, true) // 复用 BitSet
+        // 对复用 BitSet 不能使用 getOrPut, 因为 复用 BitSet 会被改变
+        //return sqls.getOrPut(bs, sqlFactory)!!
+        var sql = sqls[bs]
+        if(sql == null){
+            sql = sqlFactory()
+            sqls.putIfAbsent(bs.clone() as BitSet, sql) // 设置key/value时, key必须用复制的 BitSet
+        }
+        return sql
     }
 
     /**
@@ -740,7 +772,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
         // 校验
         for (item in items) {
-            validate(item)
+            validateOrThrow(item)
         }
 
         return db.transaction {
@@ -796,7 +828,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
         // 校验
         for (item in items) {
-            validate(item)
+            validateOrThrow(item)
         }
 
         return db.transaction {
