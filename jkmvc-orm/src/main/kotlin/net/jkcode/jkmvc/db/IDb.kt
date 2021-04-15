@@ -13,7 +13,7 @@ import kotlin.reflect.KClass
  * @author shijianhang
  * @date 2016-10-8 下午8:02:47
  */
-abstract class IDb: IDbMeta, IDbValueQuoter, IDbIdentifierQuoter{
+abstract class IDb: IDbMeta{
 
     /**
      * db元数据

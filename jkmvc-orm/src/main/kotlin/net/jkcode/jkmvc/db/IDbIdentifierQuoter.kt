@@ -50,6 +50,8 @@ interface IDbIdentifierQuoter{
      *   oracle为"column"
      *   sql server为"column" [column]
      *
+     *   子类做缓存
+     *
      * @param column 字段名, 可能是别名 DbExpr
      * @return
      */

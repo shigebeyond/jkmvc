@@ -303,6 +303,11 @@ internal class DbMeta(public override val name: CharSequence /* 标识 */) : IDb
     protected val quotedIds: MutableMap<String, String> = HashMap()
 
     /**
+     * 缓存转义的列
+     */
+    protected val quotedCols: MutableMap<String, String> = HashMap()
+
+    /**
      * 是否关键字
      * @param col 列
      * @return
@@ -320,6 +325,25 @@ internal class DbMeta(public override val name: CharSequence /* 标识 */) : IDb
         return quotedIds.getOrPut(id) {
             "$identifierQuoteString$id$identifierQuoteString"
         }
+    }
+
+    /**
+     * 转义字段名
+     *   子类做缓存
+     *
+     * @param column 字段名, 可能是别名 DbExpr
+     * @return
+     */
+    override fun quoteColumn(column: CharSequence): String {
+        // 如果column是字符串, 则读缓存
+        if(column is String) {
+            return quotedCols.getOrPut(column) {
+                super.quoteColumn(column)
+            }
+        }
+
+        // 否则, 不读缓存
+        return super.quoteColumn(column)
     }
 
     /************************** 转义值 ***************************/
