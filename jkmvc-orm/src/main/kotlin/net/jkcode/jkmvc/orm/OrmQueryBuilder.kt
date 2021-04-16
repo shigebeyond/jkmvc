@@ -374,6 +374,13 @@ open class OrmQueryBuilder(protected val ormMeta: IOrmMeta, // orm元数据
             // 获得hasMany的关系
             val relation = ormMeta.getRelation(name)!!
 
+            // 如果主对象只有一个+没有自定义查询, 则可优化性能: 使用编译好的sql
+            if(orm is IOrm && columns == null && queryAction == null) {
+                val relatedItems = relation.lazySelectRelatedByCompiledSql(orm) as List<IOrm>
+                action(relation, relatedItems)
+                continue
+            }
+
             // 关联查询hasMany：自动构建查询条件
             val query = relation.queryRelated(orm)
             if(query == null)

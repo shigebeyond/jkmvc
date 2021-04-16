@@ -31,8 +31,6 @@ abstract class Relation(
         public override val pkEmptyRule: PkEmptyRule = model.modelOrmMeta.pkEmptyRule // 检查主键为空的规则
 ) : IRelation {
 
-
-
     /**
      * 是否是`有一个`关系
      *    当前表是主表, 关联表是从表
@@ -81,6 +79,19 @@ abstract class Relation(
                 slave.dbColumns[col]?.default
             }
         }
+
+    /**
+     * 通过编译好的sql, 来延迟查询关联对象
+     * @param 当前对象
+     * @return 关联对象, 可能多个
+     */
+    override fun lazySelectRelatedByCompiledSql(thisItem: IOrm): Any? {
+        val key = thisItem.gets(thisProp).toList()
+        return if (isHasMany) // 查多个
+                    lazySelectRelatedSql.findRows(key, ormMeta.db, modelRowTransformer)
+                else  // 查一个
+                    lazySelectRelatedSql.findRow(key, ormMeta.db, modelRowTransformer)
+    }
 
     /**
      * 检查主键外键是否存在

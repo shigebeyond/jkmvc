@@ -1,9 +1,7 @@
 package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.db.DbResultRow
-import net.jkcode.jkmvc.orm.relation.HasNThroughRelation
 import net.jkcode.jkmvc.orm.serialize.toMaps
-import net.jkcode.jkmvc.query.DbExpr
 import java.util.*
 import kotlin.collections.HashSet
 
@@ -246,12 +244,7 @@ abstract class OrmRelated : OrmPersistent() {
                             query.findRow(transform = relation.modelRowTransformer)
             */
             // 优化性能: 使用编译好的sql
-            val sql = relation.lazySelectRelatedSql
-            val key = this.gets(relation.thisProp).toList()
-            _data[name] = if (relation.isHasMany) // 查多个
-                                sql.findRows(key, ormMeta.db, relation.modelRowTransformer)
-                            else  // 查一个
-                                sql.findRow(key, ormMeta.db, relation.modelRowTransformer)
+            _data[name] = relation.lazySelectRelatedByCompiledSql(this)
         }
 
         return _data[name];

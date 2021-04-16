@@ -170,6 +170,13 @@ interface IRelation {
     val lazySelectRelatedSql: CompiledSql
 
     /**
+     * 通过编译好的sql, 来延迟查询关联对象
+     * @param 当前对象
+     * @return 关联对象, 可能多个
+     */
+    fun lazySelectRelatedByCompiledSql(thisItem: IOrm): Any?
+
+    /**
      * 检查主键外键是否存在
      *   在 OrmMeta.addRelation() 中调用, 不在关系类的构造函数中调用, 因为子类会改写了checkKeyExist(), 在父类中调用会导致他引用子类的没有初始化的属性而报错
      */
