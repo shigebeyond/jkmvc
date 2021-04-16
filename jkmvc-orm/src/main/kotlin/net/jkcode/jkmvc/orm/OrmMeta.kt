@@ -479,19 +479,29 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     }
 
     /**
-     * 删除关联对象的缓存
-     * @param item
+     * 连带缓存当前模型的关联关系
      */
-    fun removeRelatedCache(item: IOrm){
+    protected val relationsCacheThis: List<IRelation> by lazy{
         // 遍历每个关联关系, 看看他有没有缓存, 并且连带缓存当前模型
-        for((name, relation) in relations){
+        relations.values.filter { relation ->
             val relatedMeta = relation.ormMeta as OrmMeta
             // 关联对象 连带缓存了当前模型
             val hasCacheThis = relatedMeta.cacheMeta?.hasWithRelation(this)
                     ?: false
+            hasCacheThis
+        }
+    }
+
+    /**
+     * 删除关联对象的缓存
+     * @param item
+     */
+    fun removeRelatedCache(item: IOrm){
+        // 遍历每个(缓存当前模型的)关联关系
+        for(relation in relationsCacheThis){
+            val relatedMeta = relation.ormMeta as OrmMeta
             // 删除关联对象的缓存
-            if(hasCacheThis)
-                relatedMeta.removeCache(item.get(name), false) // 递归调用, 但第二个参数表示只递归一层
+            relatedMeta.removeCache(item.get(name), false) // 递归调用, 但第二个参数表示只递归一层
         }
     }
 
@@ -966,7 +976,8 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun hasRelation(name: String): Boolean {
         //return name in relations; // 坑爹啊，ConcurrentHashMap下的 in 语义是调用 contains()，但是我想调用 containsKey()
-        return relations.containsKey(name)
+        return relations.isNotEmpty() // 优化性能
+                && relations.containsKey(name)
     }
 
     /**
@@ -1085,7 +1096,8 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun hasCbRelation(name: String): Boolean {
         //return name in relations; // 坑爹啊，ConcurrentHashMap下的 in 语义是调用 contains()，但是我想调用 containsKey()
-        return relations.containsKey(name)
+        return cbRelations.isNotEmpty() // 优化性能
+                && cbRelations.containsKey(name)
     }
 
     /**
