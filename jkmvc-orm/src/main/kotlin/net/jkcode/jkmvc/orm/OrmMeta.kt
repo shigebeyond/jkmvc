@@ -794,7 +794,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
             // 构建insert语句
             // insert字段 -- 取全部字段, 不能取第一个元素的字段, 因为每个元素可能修改的字段都不一样, 这样会导致其他元素漏掉更新某些字段
-            /*val props = (items.first() as OrmEntity).getData().keys
+            /*val props = (items.first() as OrmEntity).getDoc().keys
             val columns = props.mapToArray { prop ->
                 prop2Column(prop)
             }*/
@@ -851,7 +851,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             // 构建update语句
             val query = queryBuilder(reused = true)
             // set字段: 取全部字段, 不能取第一个元素的字段, 因为每个元素可能修改的字段都不一样, 这样会导致其他元素漏掉更新某些字段
-            //val props = (items.first() as OrmEntity).getData().keys
+            //val props = (items.first() as OrmEntity).getDoc().keys
             val props = ArrayList(this.props)
             props.removeAll(primaryProp.columns)
             for (prop in props)

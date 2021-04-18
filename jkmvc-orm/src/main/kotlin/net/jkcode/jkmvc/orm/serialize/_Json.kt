@@ -67,11 +67,7 @@ public fun normalizeData(data: Any?, include: List<String> = emptyList()): Any? 
  * @return
  */
 public fun Any.toMap(include: List<String> = emptyList()): MutableMap<String, Any?> {
-    // 1 orm对象
-    if (this is IOrm && include.isEmpty())
-        return this.toMap()
-
-    // 2 Map对象
+    // 1 Map对象
     if (this is Map<*, *>) {
         if(include.isEmpty())
             return this as MutableMap<String, Any?>
@@ -80,6 +76,10 @@ public fun Any.toMap(include: List<String> = emptyList()): MutableMap<String, An
             prop to this[prop]
         } as MutableMap
     }
+
+    // 2 orm对象
+    if (this is IOrm && include.isEmpty())
+        return this.toMap()
 
     // 3 普通对象
     if(include.isEmpty())

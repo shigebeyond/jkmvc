@@ -262,7 +262,7 @@ abstract class Db protected constructor(
                 dbLogger.debug("Execute sql: {}", previewSql(sql, params))
             return result
         }catch (e:SQLException){
-            dbLogger.error("Error [{}] sql: {}", e.message, previewSql(sql, params))
+            dbLogger.error("Error [{}] on sql: {}", e.message, previewSql(sql, params))
             throw  e
         }
     }

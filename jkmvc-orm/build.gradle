@@ -25,4 +25,8 @@ dependencies{
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     //testCompile 'com.microsoft.sqlserver:mssql-jdbc:6.5.4.jre8-preview'
 
+    // es
+    compile 'org.elasticsearch:elasticsearch:5.5.3'
+    compile 'io.searchbox:jest:5.3.3'
+
 }
