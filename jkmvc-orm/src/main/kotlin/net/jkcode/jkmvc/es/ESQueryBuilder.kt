@@ -23,7 +23,7 @@ class ESQueryBuilder private constructor(
 ) {
 
 
-    public constructor():this(null, null)
+    public constructor() : this(null, null)
 
     /**
      * Filter operators
@@ -381,7 +381,7 @@ class ESQueryBuilder private constructor(
      * @param alias 别名
      * @param asc 是否升序
      */
-    public fun aggBy(expr: String, alias:String? = null, asc: Boolean? = null): ESQueryBuilder {
+    public fun aggBy(expr: String, alias: String? = null, asc: Boolean? = null): ESQueryBuilder {
         this.aggExprs.add(AggExpr(expr, alias, asc))
         return this
     }
@@ -472,23 +472,26 @@ class ESQueryBuilder private constructor(
         var termAgg: TermsAggregationBuilder? = null
         for (expr in this.aggExprs) {
             val agg = expr.toAggregation()
-            if(expr.func == "terms") { // terms聚合, 挂在sourceBuilder下
+            if (expr.func == "terms") { // 第一个terms聚合, 挂在sourceBuilder下
+                if (termAgg == null)
+                    sourceBuilder.aggregation(agg)
+                else
+                    termAgg!!.subAggregation(agg)
                 termAgg = agg as TermsAggregationBuilder
-                sourceBuilder.aggregation(agg)
-            }else{ // 非terms聚合, 要挂在terms聚合下
+            } else { // 其他聚合, 要挂在上一个terms聚合下
                 termAgg!!.subAggregation(agg)
             }
         }
 
         // 聚合的排序
         for (expr in this.aggExprs) {
-            if(expr.asc != null)
+            if (expr.asc != null)
                 termAgg!!.order(Terms.Order.aggregation(expr.alias, expr.asc))
         }
 
         // 高亮字段
         val highlighter = SearchSourceBuilder.highlight()
-        for(f in this.highlightFields){
+        for (f in this.highlightFields) {
             highlighter.field(f)
         }
         sourceBuilder.highlighter(highlighter)

@@ -4,10 +4,7 @@ import com.alibaba.fastjson.JSON
 import net.jkcode.jkmvc.es.ESQueryBuilder
 import net.jkcode.jkmvc.es.EsManager
 import net.jkcode.jkutil.common.randomString
-import org.elasticsearch.search.aggregations.AggregationBuilders
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval
 import org.joda.time.DateTime
-import org.joda.time.DateTimeZone
 import org.junit.Test
 import java.util.*
 
@@ -130,21 +127,20 @@ class EsTests {
     @Test
     fun testStat3() {
         //多级别统计,这种情况，只能返回 result 自己处理了
-        val constructor = ESQueryBuilderConstructor()
-        constructor.setFrom(0)
-        constructor.setSize(0)
+        val query = ESQueryBuilder()
         //加上时间过滤
         val start = DateTime().plusDays(-10)
-        constructor.must(ESQueryBuilders().range("createDate", start.toDate().time, DateTime().toDate().time))
+        query.whereBetween("createDate", start.toDate().time, DateTime().toDate().time)
 
-        val builder = AggregationBuilders.terms("agg").field("sheetTypeOne")
-                .subAggregation(AggregationBuilders.terms("agg").field("sheetTypeTwo"))
-        val data = EsManager.statSearch(index, type, constructor, builder)
-        println("返回结果:" + JSON.toJSONString(data))
-
-        data.entries
-                .forEach { entry -> println("两级分组统计返回：" + entry.key + "---" + JSON.toJSONString(entry.value)) }
-
+        query.aggBy("sheetTypeOne").aggBy("sheetTypeTwo", "agg")
+        val result = EsManager.searchDocs(index, type, query)
+        println("返回结果:" + JSON.toJSONString(result))
+        if (result.isSucceeded) {
+            // 多值
+            val map = result.aggregations.getTermsAggregation("nid").buckets.forEach{ item ->
+                println("两级分组统计返回：" + item.key + "---" + JSON.toJSONString(item)) }
+            }
+        }
     }
 
 
