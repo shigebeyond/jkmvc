@@ -11,9 +11,19 @@ import net.jkcode.jkutil.common.JkException
  */
 class EsException : JkException {
 
-    public constructor(cause: Throwable) : super(cause) {
+    public var failedDocs: Map<String, String>
+        protected set
+
+
+    public constructor(message: String, failedDocuments: Map<String, String> = emptyMap()) : super(message) {
+        this.failedDocs = failedDocuments
     }
 
-    public constructor(message: String, cause: Throwable? = null) : super(message, cause) {
+    public constructor(cause: Throwable, failedDocuments: Map<String, String> = emptyMap()) : super(cause) {
+        this.failedDocs = failedDocuments
+    }
+
+    public constructor(message: String, cause: Throwable? = null, failedDocuments: Map<String, String> = emptyMap()) : super(message, cause) {
+        this.failedDocs = failedDocuments
     }
 }

@@ -1,9 +1,13 @@
 package net.jkcode.jkmvc.es
 
 import io.searchbox.action.Action
-import io.searchbox.client.*
+import io.searchbox.client.JestClient
+import io.searchbox.client.JestClientFactory
+import io.searchbox.client.JestResult
+import io.searchbox.client.JestResultHandler
 import io.searchbox.client.config.HttpClientConfig
 import io.searchbox.core.*
+import io.searchbox.core.search.aggregation.MetricAggregation
 import io.searchbox.indices.*
 import io.searchbox.indices.aliases.AddAliasMapping
 import io.searchbox.indices.aliases.GetAliases
@@ -13,6 +17,7 @@ import io.searchbox.indices.mapping.GetMapping
 import io.searchbox.indices.mapping.PutMapping
 import io.searchbox.indices.settings.GetSettings
 import io.searchbox.indices.settings.UpdateSettings
+import io.searchbox.params.Parameters
 import io.searchbox.params.SearchType
 import net.jkcode.jkmvc.orm.serialize.toJson
 import net.jkcode.jkutil.common.Config
@@ -21,17 +26,30 @@ import net.jkcode.jkutil.common.esLogger
 import org.apache.commons.collections4.map.HashedMap
 import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.common.xcontent.XContentFactory
+import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.aggregations.AggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.elasticsearch.search.sort.SortBuilders
-
-import java.io.IOException
 import java.sql.SQLException
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
+
+class EsList<T>(
+        val list: List<T> = ArrayList(),
+        val scrollId: String? = null,
+        val aggregations: MetricAggregation? = null
+): List<T> by list
+
+class EsCollection<T>(override val size: Int) : AbstractCollection<T>() {
+    override fun iterator(): MutableIterator<T> {
+        TODO("Not yet implemented")
+    }
+
+}
 
 object ElasticSearchService {
 
@@ -90,8 +108,8 @@ object ElasticSearchService {
      * 对执行es操作包一层try/catch以便打印日志
      */
     private inline fun <T : JestResult> tryExecuteReturnSucceeded(actionBuilder: () -> Action<T>): Boolean {
-        val r = tryExecute(actionBuilder)
-        return r.isSucceeded
+        val result = tryExecute(actionBuilder)
+        return result.isSucceeded
     }
 
     /**
@@ -132,6 +150,16 @@ object ElasticSearchService {
     }
 
     /**
+     * 刷新ｉｎｄｅｘ
+     */
+    fun refresh(index: String): Boolean {
+        return tryExecuteReturnSucceeded {
+            Refresh.Builder().addIndex(index).build()
+        }
+    }
+
+
+    /**
      * 设置指定type 的 mapping
      *
      * @param index
@@ -164,7 +192,7 @@ object ElasticSearchService {
         val index = result.jsonObject.get(index).asJsonObject
         val mappings = index?.get("mappings")?.asJsonObject
         val type = mappings?.get(type)?.asJsonObject
-        if(type == null)
+        if (type == null)
             return null
 
         return JsonToMap.toMap(type)
@@ -196,12 +224,12 @@ object ElasticSearchService {
      * 获取对象
      */
     fun <T> getDoc(index: String, type: String, _id: String, clazz: Class<T>): T? {
-        val r = tryExecute {
+        val result = tryExecute {
             Get.Builder(index, _id).type(type).build()
         }
 
-        if (r.isSucceeded)
-            return r.getSourceAsObject(clazz)
+        if (result.isSucceeded)
+            return result.getSourceAsObject(clazz)
 
         return null
     }
@@ -210,11 +238,11 @@ object ElasticSearchService {
      * 获取json数据格式
      */
     fun getDoc(index: String, type: String, _id: String): String? {
-        val r = tryExecute {
+        val result = tryExecute {
             Get.Builder(index, _id).type(type).build()
         }
 
-        return r.jsonString
+        return result.jsonString
     }
 
 
@@ -327,8 +355,8 @@ object ElasticSearchService {
      * @param type  类型
      * @param items  (_id主键, 数据), 数据可能是json/bean/map
      */
-    fun bulkInsertDoc(index: String, type: String, items: Map<String, String>): Boolean {
-        return tryExecuteReturnSucceeded {
+    fun bulkInsertDocs(index: String, type: String, items: Map<String, Any>) {
+        val result = tryExecute {
             val actions = items.map { (_id, item) ->
                 Index.Builder(item).id(_id).build()
             }
@@ -339,6 +367,8 @@ object ElasticSearchService {
                     .addAction(actions)
                     .build()
         }
+
+        handleBulkResult(result)
     }
 
     /**
@@ -348,8 +378,8 @@ object ElasticSearchService {
      * @param type     类型
      * @param items 批量数据
      */
-    fun <T> bulkInsertDoc(index: String, type: String, items: List<T>): Boolean {
-        return tryExecuteReturnSucceeded {
+    fun <T> bulkInsertDocs(index: String, type: String, items: List<T>) {
+        val result = tryExecute {
             val actions = items.map { item ->
                 Index.Builder(item).build()
             }
@@ -360,6 +390,43 @@ object ElasticSearchService {
                     .addAction(actions)
                     .build()
         }
+        handleBulkResult(result)
+    }
+
+    /**
+     * 处理批量结果
+     */
+    private fun handleBulkResult(result: BulkResult?) {
+        val bulkResult = BulkResult(result)
+        if (!bulkResult.isSucceeded) {
+            val failedDocs: MutableMap<String, String> = HashMap()
+            for (item in bulkResult.failedItems) {
+                failedDocs[item.id] = item.error
+            }
+            throw EsException("Bulk indexing has failures. Use EsException.getFailedDocs() for detailed messages [$failedDocs]", failedDocs)
+        }
+    }
+
+    /**
+     * 批量更新数据
+     * @param index 索引名
+     * @param type  类型
+     * @param items  (_id主键, 数据), 数据可能是json/bean/map
+     */
+    fun bulkUpdateDocs(index: String, type: String, items: Map<String, Any>) {
+        val result = tryExecute {
+            val actions = items.map { (_id, item) ->
+                Update.Builder(item).id(_id).build()
+            }
+
+            Bulk.Builder()
+                    .defaultIndex(index)
+                    .defaultType(type)
+                    .addAction(actions)
+                    .build()
+        }
+
+        handleBulkResult(result)
     }
 
     /**
@@ -408,8 +475,7 @@ object ElasticSearchService {
     fun getIndexSetting(index: String): Map<String, Any> {
         val result = tryExecute {
             GetSettings.Builder()
-                    .addIndex(index).
-                            build()
+                    .addIndex(index).build()
         }
 
         val setting = result.jsonObject
@@ -456,6 +522,24 @@ object ElasticSearchService {
         }
     }
 
+    /**
+     * 统计行数
+     */
+    public fun count(index: String, type: String, query: QueryBuilder?): Long {
+        val result: CountResult = tryExecute {
+            val count = Count.Builder()
+                    .addIndex(index)
+                    .addType(type)
+
+            if (query != null) {
+                count.query(SearchSourceBuilder().query(query).toString())
+            }
+            count.build()
+        }
+
+        return result.count.toLong()
+    }
+
 
     /**
      * 查询
@@ -465,58 +549,81 @@ object ElasticSearchService {
      * @param constructor 查询构造
      */
     fun <T> search(index: String, type: String, clazz: Class<T>, constructor: ESQueryBuilderConstructor): Page<T>? {
-        var page: Page<T>? = null
+        val result: SearchResult = doSearch(index, type, constructor)
+
+        if (result.isSucceeded) {
+            result.getHits(clazz).map { item ->
+                item.source
+            }
+            page = Page()
+            page.setList(list).setCount(result.total)
+        } else {
+            esLogger.error("index search result: {}", result.jsonString)
+        }
+
+        return page
+    }
+
+    private fun doSearch(index: String, type: String, constructor: ESQueryBuilderConstructor): SearchResult {
+        val query = buildSearchQuery(constructor)
+
+        // 执行查询
+        return tryExecute {
+            Search.Builder(query)
+                    .addIndex(index)
+                    .addType(type)
+                    .setSearchType(constructor.searchType)
+                    .build()
+        }
+    }
+
+    private fun buildSearchQuery(constructor: ESQueryBuilderConstructor): String {
         val sourceBuilder = SearchSourceBuilder()
-        //sourceBuilder.query(QueryBuilders.matchAllQuery());
-        sourceBuilder.query(constructor.listBuilders())
-        sourceBuilder.from(constructor.from)
-        sourceBuilder.size(constructor.size)
+
+        // 前置过滤
+        sourceBuilder.query(constructor.build())
+
+        // 分页
+        sourceBuilder.from(constructor.offset)
+        sourceBuilder.size(constructor.limit)
+
+        // 后置过滤
+        if (constructor.postFilter != null)
+            sourceBuilder.postFilter(constructor.postFilter)
 
         sourceBuilder.timeout(TimeValue(60, TimeUnit.SECONDS))
 
         //增加多个值排序
-        if (constructor.sorts != null) {
-            constructor.sorts!!.forEach { (key, value) ->
-                sourceBuilder.sort(SortBuilders.fieldSort(key).order(value))
-            }
+        for ((field, order) in constructor.sorts) {
+            val sort = SortBuilders.fieldSort(field).order(order)
+            sourceBuilder.sort(sort)
         }
 
         //属性
-        if (constructor.includeFields != null || constructor.excludeFields != null) {
-            sourceBuilder.fetchSource(constructor.includeFields, constructor.excludeFields)
+        if (constructor.includeFields.isNotEmpty() || constructor.excludeFields.isNotEmpty()) {
+            sourceBuilder.fetchSource(constructor.includeFields.toTypedArray(), constructor.excludeFields.toTypedArray())
         }
 
-        esLogger.debug("查询条件:{}", sourceBuilder.toString())
-        //System.out.println("查询条件：" + sourceBuilder.toString());
+        // 分数
+        if (constructor.minScore > 0)
+            sourceBuilder.minScore(constructor.minScore)
 
-        val search = Search.Builder(sourceBuilder.toString())
-                .addIndex(index)
-                .addType(type)
-                .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                .build()
-
-        var result: SearchResult? = null
-        try {
-            result = client.execute(search)
-            esLogger.debug("查询结果:{}", result!!.jsonString)
-            if (result.isSucceeded) {
-                val list = ArrayList<T>()
-
-                result.getHits(clazz).forEach { item ->
-                    list.add(item.source)
-                }
-                page = Page()
-                page.setList(list).setCount(result.total!!)
-            } else {
-                esLogger.error("index search result: {}", result.jsonString)
-            }
-
-        } catch (e: IOException) {
-            e.printStackTrace()
-            esLogger.error("error: {}", e)
+        // 聚合
+        for (aggregationBuilder in constructor.aggregations) {
+            sourceBuilder.aggregation(aggregationBuilder)
         }
 
-        return page
+        // 高亮字段
+        val highlighter = SearchSourceBuilder.highlight()
+        for(f in constructor.highlightFields){
+            highlighter.field(f)
+        }
+        sourceBuilder.highlighter(highlighter)
+
+        // 转查询字符串
+        val query = sourceBuilder.toString()
+        esLogger.debug("查询条件:{}", query)
+        return query
     }
 
 
@@ -543,48 +650,98 @@ object ElasticSearchService {
         return map
     }
 
-    /**
-     * 统计查询
-     * @param index       索引名
-     * @param type        类型
-     * @param constructor 查询构造
-     * @param agg         自定义计算
-     */
-    fun stat(index: String, type: String, constructor: ESQueryBuilderConstructor?, agg: AggregationBuilder): SearchResult {
 
-        val sourceBuilder = SearchSourceBuilder()
-        if (constructor != null) {
-            sourceBuilder.query(constructor.listBuilders())
-        } else {
-            sourceBuilder.query(QueryBuilders.matchAllQuery())
+    open fun <T> doStream(scrollTimeInMillis: Long, page: ScrolledPage<T>, clazz: Class<T>, mapper: JestResultsMapper): CloseableIterator<T>? {
+        return object : CloseableIterator<T>() {
+            /** As we couldn't retrieve single result with scroll, store current hits.  */
+            @Volatile
+            private var currentHits: Iterator<T>? = page.iterator()
+
+            /** The scroll id.  */
+            @Volatile
+            private var scrollId: String? = page.getScrollId()
+
+            /** If stream is finished (ie: cluster returns no results.  */
+            @Volatile
+            private var finished = !currentHits!!.hasNext()
+
+            fun close() {
+                try {
+                    // Clear scroll on cluster only in case of error (cause elasticsearch auto clear scroll when it's done)
+                    if (!finished && scrollId != null && currentHits != null && currentHits!!.hasNext()) {
+                        clearScroll(scrollId)
+                    }
+                } finally {
+                    currentHits = null
+                    scrollId = null
+                }
+            }
+
+            operator fun hasNext(): Boolean {
+                // Test if stream is finished
+                if (finished) {
+                    return false
+                }
+                // Test if it remains hits
+                if (currentHits == null || !currentHits!!.hasNext()) {
+                    // Do a new request
+                    val scroll: ScrolledPage<T> = continueScroll(scrollId, scrollTimeInMillis, clazz, mapper) as ScrolledPage<T>
+                    // Save hits and scroll id
+                    currentHits = scroll.iterator()
+                    finished = !currentHits!!.hasNext()
+                    scrollId = scroll.getScrollId()
+                }
+                return currentHits!!.hasNext()
+            }
+
+            operator fun next(): T {
+                if (hasNext())
+                    return currentHits!!.next()
+
+                throw NoSuchElementException()
+            }
+
+            fun remove() {
+                throw UnsupportedOperationException("remove")
+            }
+        }
+    }
+
+    private fun doScroll(index: String, type: String, constructor: ESQueryBuilderConstructor, pageSize: Int, scrollTimeInMillis: Long): SearchScrollResult {
+        val query = buildSearchQuery(constructor)
+
+        // 执行查询
+        val result = tryExecute {
+            Search.Builder(query)
+                    .addIndex(index)
+                    .addType(type)
+                    .setParameter(Parameters.SIZE, pageSize)
+                    .setParameter(Parameters.SCROLL, scrollTimeInMillis.toString() + "ms")
+                    .build()
+        }
+        return SearchScrollResult(result)
+    }
+
+    fun <T> startScroll(index: String, type: String, constructor: ESQueryBuilderConstructor, pageSize: Int, scrollTimeInMillis: Long, clazz: Class<T>): Page<T>? {
+        val response = doScroll(index, type, constructor, pageSize, scrollTimeInMillis)
+        return resultsMapper.mapResults(response, clazz, null)
+    }
+
+
+    fun <T> continueScroll(scrollId: String, scrollTimeInMillis: Long, clazz: Class<T>?): Page<T>? {
+        val result = tryExecute {
+            SearchScroll.Builder(scrollId, scrollTimeInMillis.toString() + "ms").build()
         }
 
-        sourceBuilder.from(constructor!!.from)
-        sourceBuilder.size(if (constructor.size > 0) constructor.size else 0)
+        val result2 = SearchScrollResult(result)
 
-        sourceBuilder.timeout(TimeValue(60, TimeUnit.SECONDS))
+        return resultsMapper.mapResults(response, clazz)
+    }
 
-        //增加多个值排序
-        if (constructor.sorts != null) {
-            constructor.sorts!!.forEach { (key, value) -> sourceBuilder.sort(SortBuilders.fieldSort(key).order(value)) }
+    fun clearScroll(scrollId: String) {
+        tryExecute {
+            ClearScroll.Builder().addScrollId(scrollId).build()
         }
-
-        sourceBuilder.aggregation(agg)
-        sourceBuilder.fetchSource(false)
-
-        esLogger.debug("查询条件:{}", sourceBuilder.toString())
-
-        val search = Search.Builder(sourceBuilder.toString())
-                .addIndex(index)
-                .addType(type)
-                .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                .build()
-
-        val result = client.execute(search)
-
-        esLogger.debug("result:{}", result.jsonString)
-
-        return result
     }
 
 }
