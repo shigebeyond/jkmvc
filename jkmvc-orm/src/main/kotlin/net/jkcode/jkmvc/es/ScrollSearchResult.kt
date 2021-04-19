@@ -11,10 +11,11 @@ import java.util.*
 
 
 /**
- * Search scroll result of elasticsearch action.
- * @author Julien Roy
+ * Scroll search result
+ *   由于不能复用 SearchResult, 因此重新实现一个
+ *
  */
-class SearchScrollResult(source: JestResult) : JestResult(source) {
+class ScrollSearchResult(source: JestResult) : JestResult(source) {
 
     companion object {
 
@@ -31,15 +32,23 @@ class SearchScrollResult(source: JestResult) : JestResult(source) {
         val PATH_TO_MAX_SCORE: List<String> = "hits/max_score".split("/")
     }
 
-    fun <T, K> getFirstHit(sourceType: Class<T>?, explanationType: Class<K>? = null, addEsMetadataFields: Boolean = true): Hit<T, K>? {
-        return getHits(sourceType, explanationType, true,addEsMetadataFields).firstOrNull()
+    fun <T> getFirstHit(sourceType: Class<T>): Hit<T, Void>? {
+        return getFirstHit(sourceType, Void::class.java)
     }
 
-    fun <T, K> getHits(sourceType: Class<T>?, explanationType: Class<K>? = null, addEsMetadataFields: Boolean = true): List<Hit<T, K>?> {
+    fun <T, K> getFirstHit(sourceType: Class<T>?, explanationType: Class<K>? = null, addEsMetadataFields: Boolean = true): Hit<T, K>? {
+        return getHits(sourceType, explanationType, true, addEsMetadataFields).firstOrNull()
+    }
+
+    fun <T> getHits(sourceType: Class<T>): List<Hit<T, Void>> {
+        return getHits(sourceType, Void::class.java, true)
+    }
+
+    fun <T, K> getHits(sourceType: Class<T>?, explanationType: Class<K>? = null, addEsMetadataFields: Boolean = true): List<Hit<T, K>> {
         return getHits(sourceType, explanationType, false, addEsMetadataFields)
     }
 
-    protected fun <T, K> getHits(sourceType: Class<T>?, explanationType: Class<K>?, returnSingle: Boolean, addEsMetadataFields: Boolean): List<Hit<T, K>?> {
+    protected fun <T, K> getHits(sourceType: Class<T>?, explanationType: Class<K>?, returnSingle: Boolean, addEsMetadataFields: Boolean): List<Hit<T, K>> {
         if (jsonObject == null)
             return emptyList()
 
@@ -48,7 +57,7 @@ class SearchScrollResult(source: JestResult) : JestResult(source) {
         if (keys == null)
             return emptyList()
 
-        val sourceList: MutableList<Hit<T, K>?> = ArrayList()
+        val sourceList: MutableList<Hit<T, K>> = ArrayList()
         // 最后一级属性
         val sourceKey = keys[keys.size - 1]
         // 获得最后一级对象
@@ -59,13 +68,18 @@ class SearchScrollResult(source: JestResult) : JestResult(source) {
 
         // 收集hit对象
         if (obj.isJsonObject) {
-            sourceList.add(extractHit(sourceType, explanationType, obj, sourceKey, addEsMetadataFields))
+            val hit = extractHit(sourceType, explanationType, obj, sourceKey, addEsMetadataFields)
+            if (hit != null)
+                sourceList.add(hit)
         } else if (obj.isJsonArray) {
             for (hitElement in obj.asJsonArray) {
-                sourceList.add(extractHit(sourceType, explanationType, hitElement, sourceKey, addEsMetadataFields))
-                // 只要一个
-                if (returnSingle)
-                    break
+                val hit = extractHit(sourceType, explanationType, hitElement, sourceKey, addEsMetadataFields)
+                if (hit != null) {
+                    sourceList.add(hit)
+                    // 只要一个
+                    if (returnSingle)
+                        break
+                }
             }
         }
 
@@ -170,12 +184,6 @@ class SearchScrollResult(source: JestResult) : JestResult(source) {
         return obj
     }
 
-    /**
-     * 游标id
-     */
-    val scrollId: String
-        get() = jsonObject["_scroll_id"].asString
-
     val aggregations: MetricAggregation
         get() {
             val rootAggrgationName = "aggs"
@@ -214,6 +222,35 @@ class SearchScrollResult(source: JestResult) : JestResult(source) {
                     index: String? = null, type: String? = null, score: Double? = null)
                 : this(createSourceObject(source, sourceType), if (explanation == null) null else createSourceObject(explanation, explanationType),
                 highlight, fields, sort, index, type, score)
+
+        override fun hashCode(): Int {
+            return Objects.hash(
+                    source,
+                    explanation,
+                    highlight,
+                    sort,
+                    index,
+                    type)
+        }
+
+        override fun equals(obj: Any?): Boolean {
+            if (obj == null)
+                return false
+
+            if (obj === this)
+                return true
+
+            if (obj.javaClass != javaClass)
+                return false
+
+            val rhs = obj as Hit<*, *>?
+            return (source == rhs!!.source
+                    && explanation == rhs.explanation
+                    && highlight == rhs.highlight
+                    && sort == rhs.sort
+                    && index == rhs.index
+                    && type == rhs.type)
+        }
     }
 
 }

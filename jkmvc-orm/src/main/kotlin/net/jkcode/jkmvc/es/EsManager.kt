@@ -7,7 +7,6 @@ import io.searchbox.client.JestResult
 import io.searchbox.client.JestResultHandler
 import io.searchbox.client.config.HttpClientConfig
 import io.searchbox.core.*
-import io.searchbox.core.search.aggregation.MetricAggregation
 import io.searchbox.indices.*
 import io.searchbox.indices.aliases.AddAliasMapping
 import io.searchbox.indices.aliases.GetAliases
@@ -18,40 +17,21 @@ import io.searchbox.indices.mapping.PutMapping
 import io.searchbox.indices.settings.GetSettings
 import io.searchbox.indices.settings.UpdateSettings
 import io.searchbox.params.Parameters
-import io.searchbox.params.SearchType
 import net.jkcode.jkmvc.orm.serialize.toJson
 import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.IConfig
 import net.jkcode.jkutil.common.esLogger
-import org.apache.commons.collections4.map.HashedMap
-import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.common.xcontent.XContentFactory
-import org.elasticsearch.index.query.QueryBuilder
-import org.elasticsearch.index.query.QueryBuilders
-import org.elasticsearch.search.aggregations.AggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilders
-import org.elasticsearch.search.builder.SearchSourceBuilder
-import org.elasticsearch.search.sort.SortBuilders
+import java.io.Closeable
 import java.sql.SQLException
 import java.util.*
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayList
 
-class EsList<T>(
-        val list: List<T> = ArrayList(),
-        val scrollId: String? = null,
-        val aggregations: MetricAggregation? = null
-): List<T> by list
-
-class EsCollection<T>(override val size: Int) : AbstractCollection<T>() {
-    override fun iterator(): MutableIterator<T> {
-        TODO("Not yet implemented")
-    }
-
-}
-
-object ElasticSearchService {
+/**
+ * es管理者
+ */
+object EsManager {
 
     /**
      * es配置
@@ -525,190 +505,71 @@ object ElasticSearchService {
     /**
      * 统计行数
      */
-    public fun count(index: String, type: String, query: QueryBuilder?): Long {
+    public fun count(index: String, type: String, queryBuilder: ESQueryBuilder): Long {
+        val query = queryBuilder.toSearchSource()
+
         val result: CountResult = tryExecute {
-            val count = Count.Builder()
+            Count.Builder()
                     .addIndex(index)
                     .addType(type)
-
-            if (query != null) {
-                count.query(SearchSourceBuilder().query(query).toString())
-            }
-            count.build()
+                    .query(query)
+                    .build()
         }
 
         return result.count.toLong()
     }
 
-
     /**
-     * 查询
-     *
-     * @param index       索引名
-     * @param type        类型
-     * @param constructor 查询构造
+     * 搜索文档
+     * @param index 索引名
+     * @param type 类型
+     * @param queryBuilder 查询构造
+     * @param clazz
+     * @return
      */
-    fun <T> search(index: String, type: String, clazz: Class<T>, constructor: ESQueryBuilderConstructor): Page<T>? {
-        val result: SearchResult = doSearch(index, type, constructor)
-
-        if (result.isSucceeded) {
-            result.getHits(clazz).map { item ->
-                item.source
-            }
-            page = Page()
-            page.setList(list).setCount(result.total)
-        } else {
-            esLogger.error("index search result: {}", result.jsonString)
+    fun <T> searchDocs(index: String, type: String, queryBuilder: ESQueryBuilder, clazz: Class<T>): Pair<List<T>, Long> {
+        val result: SearchResult = searchDocs(index, type, queryBuilder)
+        val list = result.getHits(clazz).map { hit ->
+            hit.source
         }
-
-        return page
+        return list to result.total
     }
 
-    private fun doSearch(index: String, type: String, constructor: ESQueryBuilderConstructor): SearchResult {
-        val query = buildSearchQuery(constructor)
+    /**
+     * 搜索文档
+     * @param index 索引名
+     * @param type 类型
+     * @param queryBuilder 查询构造
+     * @return
+     */
+    public fun searchDocs(index: String, type: String, queryBuilder: ESQueryBuilder): SearchResult {
+        val query = queryBuilder.toSearchSource()
 
         // 执行查询
-        return tryExecute {
+        val result: SearchResult = tryExecute {
             Search.Builder(query)
                     .addIndex(index)
                     .addType(type)
-                    .setSearchType(constructor.searchType)
+                    .setSearchType(queryBuilder.searchType)
                     .build()
         }
+        if (!result.isSucceeded)
+            throw IllegalStateException("Fail to search: " + result.jsonString)
+
+        return result
     }
-
-    private fun buildSearchQuery(constructor: ESQueryBuilderConstructor): String {
-        val sourceBuilder = SearchSourceBuilder()
-
-        // 前置过滤
-        sourceBuilder.query(constructor.build())
-
-        // 分页
-        sourceBuilder.from(constructor.offset)
-        sourceBuilder.size(constructor.limit)
-
-        // 后置过滤
-        if (constructor.postFilter != null)
-            sourceBuilder.postFilter(constructor.postFilter)
-
-        sourceBuilder.timeout(TimeValue(60, TimeUnit.SECONDS))
-
-        //增加多个值排序
-        for ((field, order) in constructor.sorts) {
-            val sort = SortBuilders.fieldSort(field).order(order)
-            sourceBuilder.sort(sort)
-        }
-
-        //属性
-        if (constructor.includeFields.isNotEmpty() || constructor.excludeFields.isNotEmpty()) {
-            sourceBuilder.fetchSource(constructor.includeFields.toTypedArray(), constructor.excludeFields.toTypedArray())
-        }
-
-        // 分数
-        if (constructor.minScore > 0)
-            sourceBuilder.minScore(constructor.minScore)
-
-        // 聚合
-        for (aggregationBuilder in constructor.aggregations) {
-            sourceBuilder.aggregation(aggregationBuilder)
-        }
-
-        // 高亮字段
-        val highlighter = SearchSourceBuilder.highlight()
-        for(f in constructor.highlightFields){
-            highlighter.field(f)
-        }
-        sourceBuilder.highlighter(highlighter)
-
-        // 转查询字符串
-        val query = sourceBuilder.toString()
-        esLogger.debug("查询条件:{}", query)
-        return query
-    }
-
 
     /**
-     * 单个域值的聚合
-     * @param index       索引名
-     * @param type        类型
-     * @param constructor 查询构造
-     * @param groupBy     统计分组字段
+     * 开始搜索, 并返回有游标的结果集合
+     * @param index
+     * @param type
+     * @param queryBuilder
+     * @param pageSize
+     * @param scrollTimeInMillis
+     * @param clazz
      */
-    fun statSearch(index: String, type: String, constructor: ESQueryBuilderConstructor, groupBy: String): Map<String, Any> {
-        val map = HashedMap()
-
-        val result = stat(index, type, constructor, AggregationBuilders.terms("agg").field(groupBy))
-        esLogger.debug("result:{}", result.jsonString)
-
-        if (result.isSucceeded) {
-            result.aggregations.getTermsAggregation("agg").buckets.forEach { item ->
-                map.put(item.key, item.count)
-            }
-        } else {
-            esLogger.error("error, result: {}", result.jsonString)
-        }
-        return map
-    }
-
-
-    open fun <T> doStream(scrollTimeInMillis: Long, page: ScrolledPage<T>, clazz: Class<T>, mapper: JestResultsMapper): CloseableIterator<T>? {
-        return object : CloseableIterator<T>() {
-            /** As we couldn't retrieve single result with scroll, store current hits.  */
-            @Volatile
-            private var currentHits: Iterator<T>? = page.iterator()
-
-            /** The scroll id.  */
-            @Volatile
-            private var scrollId: String? = page.getScrollId()
-
-            /** If stream is finished (ie: cluster returns no results.  */
-            @Volatile
-            private var finished = !currentHits!!.hasNext()
-
-            fun close() {
-                try {
-                    // Clear scroll on cluster only in case of error (cause elasticsearch auto clear scroll when it's done)
-                    if (!finished && scrollId != null && currentHits != null && currentHits!!.hasNext()) {
-                        clearScroll(scrollId)
-                    }
-                } finally {
-                    currentHits = null
-                    scrollId = null
-                }
-            }
-
-            operator fun hasNext(): Boolean {
-                // Test if stream is finished
-                if (finished) {
-                    return false
-                }
-                // Test if it remains hits
-                if (currentHits == null || !currentHits!!.hasNext()) {
-                    // Do a new request
-                    val scroll: ScrolledPage<T> = continueScroll(scrollId, scrollTimeInMillis, clazz, mapper) as ScrolledPage<T>
-                    // Save hits and scroll id
-                    currentHits = scroll.iterator()
-                    finished = !currentHits!!.hasNext()
-                    scrollId = scroll.getScrollId()
-                }
-                return currentHits!!.hasNext()
-            }
-
-            operator fun next(): T {
-                if (hasNext())
-                    return currentHits!!.next()
-
-                throw NoSuchElementException()
-            }
-
-            fun remove() {
-                throw UnsupportedOperationException("remove")
-            }
-        }
-    }
-
-    private fun doScroll(index: String, type: String, constructor: ESQueryBuilderConstructor, pageSize: Int, scrollTimeInMillis: Long): SearchScrollResult {
-        val query = buildSearchQuery(constructor)
+    fun <T> startScroll(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int, scrollTimeInMillis: Long, clazz: Class<T>): EsScrollCollection<T> {
+        val query = queryBuilder.toSearchSource()
 
         // 执行查询
         val result = tryExecute {
@@ -719,29 +580,99 @@ object ElasticSearchService {
                     .setParameter(Parameters.SCROLL, scrollTimeInMillis.toString() + "ms")
                     .build()
         }
-        return SearchScrollResult(result)
+
+        // 封装为有游标的结果集合
+        return EsScrollCollection(clazz, result, scrollTimeInMillis)
     }
 
-    fun <T> startScroll(index: String, type: String, constructor: ESQueryBuilderConstructor, pageSize: Int, scrollTimeInMillis: Long, clazz: Class<T>): Page<T>? {
-        val response = doScroll(index, type, constructor, pageSize, scrollTimeInMillis)
-        return resultsMapper.mapResults(response, clazz, null)
-    }
-
-
-    fun <T> continueScroll(scrollId: String, scrollTimeInMillis: Long, clazz: Class<T>?): Page<T>? {
+    /**
+     * 根据游标获得下一页结果
+     */
+    private fun continueScroll(scrollId: String, scrollTimeInMillis: Long): ScrollSearchResult {
         val result = tryExecute {
             SearchScroll.Builder(scrollId, scrollTimeInMillis.toString() + "ms").build()
         }
 
-        val result2 = SearchScrollResult(result)
-
-        return resultsMapper.mapResults(response, clazz)
+        return ScrollSearchResult(result)
     }
 
+    /**
+     * 清理游标
+     */
     fun clearScroll(scrollId: String) {
         tryExecute {
             ClearScroll.Builder().addScrollId(scrollId).build()
         }
     }
 
+    /**
+     * 有游标的结果集合
+     */
+    class EsScrollCollection<T>(
+            protected var sourceType: Class<T>,
+            protected val result: SearchResult,
+            protected val scrollTimeInMillis: Long
+    ) : AbstractCollection<T>() {
+
+        override val size: Int = result.total.toInt()
+
+        override fun iterator(): MutableIterator<T> {
+            return ScrollIterator(result)
+        }
+
+        /**
+         * 有游标的迭代器
+         */
+        inner class ScrollIterator(protected var currResult: JestResult) : MutableIterator<T>, Closeable {
+
+            protected var currentHits: Iterator<T>? = currResult.getSourceAsObjectList(sourceType).iterator()
+
+            protected var scrollId: String? = currResult.scrollId
+
+            /** If stream is finished (ie: cluster returns no results.  */
+            private var finished = !currentHits!!.hasNext()
+
+            override fun close() {
+                try {
+                    // Clear scroll on cluster only in case of error (cause elasticsearch auto clear scroll when it's done)
+                    if (!finished && scrollId != null && currentHits != null && currentHits!!.hasNext()) {
+                        clearScroll(scrollId!!)
+                    }
+                } finally {
+                    currentHits = null
+                    scrollId = null
+                }
+            }
+
+            override operator fun hasNext(): Boolean {
+                // Test if stream is finished
+                if (finished)
+                    return false
+
+                // Test if it remains hits
+                if (currentHits == null || !currentHits!!.hasNext()) {
+                    // Do a new request
+                    currResult = continueScroll(scrollId!!, scrollTimeInMillis, sourceType)
+                    // Save hits and scroll id
+                    currentHits = currResult.getSourceAsObjectList(sourceType).iterator()
+                    finished = !currentHits!!.hasNext()
+                    scrollId = currResult.scrollId
+                }
+
+                return currentHits!!.hasNext()
+            }
+
+            override operator fun next(): T {
+                if (hasNext())
+                    return currentHits!!.next()
+
+                throw NoSuchElementException()
+            }
+
+            override fun remove() {
+                throw UnsupportedOperationException("remove")
+            }
+        }
+
+    }
 }
