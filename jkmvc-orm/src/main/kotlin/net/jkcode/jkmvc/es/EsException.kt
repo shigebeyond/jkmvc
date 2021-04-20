@@ -6,11 +6,14 @@ import net.jkcode.jkutil.common.JkException
  * es操作异常
  *
  * @author shijianhang
- * @date 2016-10-21 下午5:16:59  
+ * @date 2021-4-21 下午5:16:59
  *
  */
 class EsException : JkException {
 
+    /**
+     * 错误的文档
+     */
     public var failedDocs: Map<String, String>
         protected set
 

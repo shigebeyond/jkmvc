@@ -14,6 +14,8 @@ import java.util.*
  * Scroll search result
  *   由于不能复用 SearchResult, 因此重新实现一个
  *
+ * @author shijianhang
+ * @date 2021-4-21 下午5:16:59
  */
 class ScrollSearchResult(source: JestResult) : JestResult(source) {
 

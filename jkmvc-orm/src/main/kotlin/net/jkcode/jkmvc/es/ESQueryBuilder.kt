@@ -1,7 +1,10 @@
 package net.jkcode.jkmvc.es
 
 import io.searchbox.params.SearchType
+import net.jkcode.jkmvc.db.DbException
 import net.jkcode.jkutil.common.esLogger
+import net.jkcode.jkutil.common.isArrayOrCollection
+import net.jkcode.jkutil.common.isArrayOrCollectionEmpty
 import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.index.query.QueryBuilder
@@ -16,30 +19,36 @@ import java.util.concurrent.TimeUnit
 
 /**
  * 查询构建器
+ *
+ * @author shijianhang
+ * @date 2021-4-21 下午5:16:59
  */
 class ESQueryBuilder private constructor(
         protected val parent: ESQueryBuilder? = null,
         protected val path: String? = null
 ) {
 
+    companion object{
+
+        /**
+         * Filter operators
+         * @var List
+         */
+        protected val operators = arrayOf(
+                "=", // term
+                "IN", // terms
+                "!=",
+                ">",
+                ">=",
+                "<",
+                "<=",
+                "like",
+                "exists"
+        )
+    }
+
 
     public constructor() : this(null, null)
-
-    /**
-     * Filter operators
-     * @var List
-     */
-    protected val operators = arrayOf(
-            "=",
-            "IN", // api等同于=, 就是 term 兼容多值
-            "!=",
-            ">",
-            ">=",
-            "<",
-            "<=",
-            "like",
-            "exists"
-    )
 
     /**
      * Query index name
@@ -76,7 +85,6 @@ class ESQueryBuilder private constructor(
      * Query bool should
      */
     protected val should = ArrayList<QueryBuilder>()
-
     /**
      * 返回字段
      */
@@ -112,7 +120,7 @@ class ESQueryBuilder private constructor(
     /**
      * post filter
      */
-    protected val postFilter: QueryBuilder? = null
+    protected var postFilter: QueryBuilder? = null
 
     /**
      * Query search type
@@ -122,13 +130,36 @@ class ESQueryBuilder private constructor(
     /**
      * Query limit
      */
-    protected var limit = 10;
+    protected var limit = 0;
 
     /**
      * Query offset
      * @var int
      */
     protected var offset = 0;
+
+    /**
+     * 清空查询元素
+     */
+    fun clear(){
+        index = ""
+        type = ""
+        id = ""
+        filter.clear()
+        must.clear()
+        mustNot.clear()
+        should.clear()
+        includeFields.clear()
+        excludeFields.clear()
+        highlightFields.clear()
+        sorts.clear()
+        minScore = 0f
+        aggExprs.clear()
+        postFilter = null
+        searchType = SearchType.DFS_QUERY_THEN_FETCH
+        limit = 0
+        offset = 0
+    }
 
     /**
      * Set the index name
@@ -245,9 +276,21 @@ class ESQueryBuilder private constructor(
         return this;
     }
 
-    protected fun build1Condition(name: String, operator: String = "=", value: Any? = null): QueryBuilder {
-        if (operator == "=" || operator == "IN")
+    protected fun build1Condition(name: String, operator: String, value: Any?): QueryBuilder {
+        if (operator == "=") // term
             return QueryBuilders.termQuery(name, value)
+
+        if (operator.equals("IN", true)) { // terms
+            return when(value){
+                is Array<*> -> QueryBuilders.termsQuery(name, *value)
+                is IntArray -> QueryBuilders.termsQuery(name, *value)
+                is LongArray -> QueryBuilders.termsQuery(name, *value)
+                is FloatArray -> QueryBuilders.termsQuery(name, *value)
+                is DoubleArray -> QueryBuilders.termsQuery(name, *value)
+                is Collection<*> -> QueryBuilders.termsQuery(name, value)
+                else -> throw IllegalArgumentException("Value [$value] is not array or collection for terms query")
+            }
+        }
 
         if (operator == ">")
             return QueryBuilders.rangeQuery(name).gt(value);
@@ -261,12 +304,24 @@ class ESQueryBuilder private constructor(
         if (operator == "<=")
             return QueryBuilders.rangeQuery(name).lte(value);
 
-        if (operator == "like")
+        if (operator.equals("like", true))
             return QueryBuilders.matchQuery(name, value)
 
         throw IllegalArgumentException("Unkown operator")
     }
 
+    /**
+     * Prepare operator
+     *
+     * @param   value   column value
+     * @return
+     */
+    protected fun prepareOperator(value: Any?): String {
+        if(value != null && value.isArrayOrCollection()) // 数组/集合
+            return "IN"
+
+        return "=";
+    }
 
     /**
      * Set the query where clause
@@ -275,7 +330,7 @@ class ESQueryBuilder private constructor(
      * @return this
      */
     public fun where(name: String, value: Any?): ESQueryBuilder {
-        return where(name, "=", value)
+        return where(name, prepareOperator(value), value)
     }
 
     /**
@@ -286,8 +341,11 @@ class ESQueryBuilder private constructor(
      * @return this
      */
     public fun where(name: String, operator: String, value: Any?): ESQueryBuilder {
+        if(!isOperator(operator))
+            throw IllegalArgumentException("Unkown operator: $operator")
+
         if (operator == "=" && name == "_id")
-            return this.id(value as String)
+            return this.id(value.toString())
 
         val condition = build1Condition(name, operator, value)
         if (operator == "like")
@@ -301,6 +359,7 @@ class ESQueryBuilder private constructor(
         return this;
     }
 
+
     /**
      * Set the query inverse where clause
      * @param        name
@@ -308,7 +367,18 @@ class ESQueryBuilder private constructor(
      * @param null value
      * @return this
      */
-    public fun whereNot(name: String, operator: String = "=", value: Any? = null): ESQueryBuilder {
+    public fun whereNot(name: String, value: Any?): ESQueryBuilder {
+        return whereNot(name, prepareOperator(value), value)
+    }
+
+    /**
+     * Set the query inverse where clause
+     * @param        name
+     * @param string operator
+     * @param null value
+     * @return this
+     */
+    public fun whereNot(name: String, operator: String, value: Any?): ESQueryBuilder {
         val condition = build1Condition(name, operator, value)
         this.mustNot.add(condition)
         if (operator == "exists")
@@ -419,6 +489,10 @@ class ESQueryBuilder private constructor(
     protected fun toQuery(): QueryBuilder? {
         val query = QueryBuilders.boolQuery()
 
+        //filter容器
+        for (condition in filter) {
+            query.filter(condition)
+        }
         //must容器
         for (condition in must) {
             query.must(condition)
@@ -444,8 +518,10 @@ class ESQueryBuilder private constructor(
         sourceBuilder.query(this.toQuery())
 
         // 分页
-        sourceBuilder.from(this.offset)
-        sourceBuilder.size(this.limit)
+        if(this.limit > 0) {
+            sourceBuilder.from(this.offset)
+            sourceBuilder.size(this.limit)
+        }
 
         // 后置过滤
         if (this.postFilter != null)

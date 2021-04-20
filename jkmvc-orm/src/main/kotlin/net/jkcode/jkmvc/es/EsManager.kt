@@ -17,45 +17,72 @@ import io.searchbox.indices.mapping.PutMapping
 import io.searchbox.indices.settings.GetSettings
 import io.searchbox.indices.settings.UpdateSettings
 import io.searchbox.params.Parameters
+import net.jkcode.jkmvc.orm.prop.OrmMapPropDelegater
 import net.jkcode.jkmvc.orm.serialize.toJson
 import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.IConfig
 import net.jkcode.jkutil.common.esLogger
+import net.jkcode.jkutil.common.getOrPutOnce
 import org.elasticsearch.common.xcontent.XContentFactory
-import org.elasticsearch.search.aggregations.AggregationBuilders
 import java.io.Closeable
 import java.sql.SQLException
 import java.util.*
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * es管理者
+ *    JestClient实现JestHttpClient, 使用的是apache-httpComponents中的HttpClient, 配置`HttpClientConfig.multiThreaded(true)`支持多线程, 那么连接管理使用的是PoolingHttpClientConnectionManager, 是线程安全的连接池, 发送前requestConnection()调用leaseConnection()获得/复用连接池中的连接, 发送后releaseConnection()归还连接到池里, 获得与归还连接会加锁, 但他是线程安全的
+ *    JestHttpClient单例+线程安全, spring jest template也是这么实现
+ *
+ * @author shijianhang
+ * @date 2021-4-21 下午5:16:59
  */
-object EsManager {
+class EsManager protected constructor(protected val client: JestClient) {
 
-    /**
-     * es配置
-     */
-    public val config: IConfig = Config.instance("es")
+    companion object {
 
-    /**
-     * es 客户端
-     */
-    private val client: JestClient by lazy {
-        val esUrl: String = config["esUrl"]!!
-        val maxTotal: Int? = config["maxTotal"]
-        val perTotal: Int? = config["perTotal"]
+        /**
+         * EsManager池
+         */
+        private val insts: ConcurrentHashMap<String, EsManager> = ConcurrentHashMap();
 
-        val urls = esUrl.split(",")
-        val factory = JestClientFactory()
-        factory.setHttpClientConfig(HttpClientConfig.Builder(urls)
-                .multiThreaded(true)
-                .defaultMaxTotalConnectionPerRoute(Integer.valueOf(maxTotal!!)!!)
-                .maxTotalConnection(Integer.valueOf(perTotal!!)!!)
-                .build())
-        factory.getObject()
+        /**
+         * 获得EsManager实例
+         */
+        @JvmOverloads
+        @JvmStatic
+        public fun instance(name: String = "default"): EsManager {
+            return insts.getOrPutOnce(name) {
+                EsManager(buildClient(name))
+            }
+        }
+
+        /**
+         * 创建es client
+         */
+        private fun buildClient(name: String): JestClient {
+            // es配置
+            val config: IConfig = Config.instance("es.$name", "yaml")
+            val esUrl: String = config["esUrl"]!!
+            val maxTotal: Int? = config["maxTotal"]
+            val perTotal: Int? = config["perTotal"]
+
+            val urls = esUrl.split(",")
+
+            // es client工厂
+            val factory = JestClientFactory()
+            val hcConfig = HttpClientConfig.Builder(urls)
+                    .multiThreaded(true)
+                    .defaultMaxTotalConnectionPerRoute(Integer.valueOf(maxTotal!!)!!)
+                    .maxTotalConnection(Integer.valueOf(perTotal!!)!!)
+                    .build()
+            factory.setHttpClientConfig(hcConfig)
+
+            // 创建es client
+            return factory.getObject()
+        }
     }
-
 
     /**
      * 对执行es操作包一层try/catch以便打印日志
@@ -117,6 +144,8 @@ object EsManager {
      * 新建索引
      *
      * @param index 索引名
+     * @param nShards 分区数
+     * @param nReplicas 复制数
      */
     fun createIndex(index: String, nShards: Int = 1, nReplicas: Int = 1): Boolean {
         val settings = mapOf(
@@ -124,15 +153,28 @@ object EsManager {
                 "number_of_replicas" to nReplicas
         )
 
+        return createIndex(index, settings)
+    }
+
+    /**
+     * 新建索引
+     *
+     * @param index 索引名
+     * @param settings 配置
+     */
+    fun createIndex(index: String, settings: Map<String, *>): Boolean {
         return tryExecuteReturnSucceeded {
             CreateIndex.Builder(index).settings(settings).build()
         }
     }
 
+
     /**
-     * 刷新ｉｎｄｅｘ
+     * 刷新index
+     * @param index
+     * @return
      */
-    fun refresh(index: String): Boolean {
+    fun refreshIndex(index: String): Boolean {
         return tryExecuteReturnSucceeded {
             Refresh.Builder().addIndex(index).build()
         }
@@ -145,6 +187,7 @@ object EsManager {
      * @param index
      * @param type
      * @param mapping
+     * @return
      */
     fun putMapping(index: String, type: String, mapping: String): Boolean {
         return tryExecuteReturnSucceeded {
@@ -158,7 +201,7 @@ object EsManager {
      * @param type
      * @return
      */
-    fun getMapping(index: String, type: String): Map<String, Any>? {
+    fun getMapping(index: String, type: String): Map<String, Any?>? {
         val result = tryExecute {
             GetMapping.Builder().addIndex(index).addType(type).build()
         }
@@ -182,6 +225,7 @@ object EsManager {
      * 删除索引
      *
      * @param index 索引名
+     * @return
      */
     fun deleteIndex(index: String): Boolean {
         return tryExecuteReturnSucceeded {
@@ -193,6 +237,7 @@ object EsManager {
      * 验证索引是否存在
      *
      * @param index 索引名
+     * @return
      */
     fun indexExist(index: String): Boolean {
         return tryExecuteReturnSucceeded {
@@ -202,6 +247,11 @@ object EsManager {
 
     /**
      * 获取对象
+     * @param index
+     * @param type
+     * @param _id
+     * @param clazz
+     * @return
      */
     fun <T> getDoc(index: String, type: String, _id: String, clazz: Class<T>): T? {
         val result = tryExecute {
@@ -215,7 +265,30 @@ object EsManager {
     }
 
     /**
-     * 获取json数据格式
+     * 获取对象
+     * @param index
+     * @param type
+     * @param ids
+     * @param clazz
+     * @return
+     */
+    fun <T> multGetDocs(index: String, type: String, ids: List<String>, clazz: Class<T>): List<T> {
+        val result = tryExecute {
+            MultiGet.Builder.ById(index, type).addId(ids).build()
+        }
+
+        if (result.isSucceeded)
+            return result.getSourceAsObjectList(clazz)
+
+        return emptyList()
+    }
+
+    /**
+     * 获取json格式的文档
+     * @param index
+     * @param type
+     * @param _id
+     * @return
      */
     fun getDoc(index: String, type: String, _id: String): String? {
         val result = tryExecute {
@@ -227,12 +300,12 @@ object EsManager {
 
 
     /**
-     * 插入数据
+     * 插入文档
      *
      * @param index 索引名
      * @param type  类型
-     * @param source  数据, 可以是 json string/bean/map/list, 如果是bean/map/list, 最好有id属性，要不然会自动生成一个
-     * @param _id   数据id
+     * @param source  文档, 可以是 json string/bean/map/list, 如果是bean/map/list, 最好有id属性，要不然会自动生成一个
+     * @param _id   文档id
      */
     fun insertDoc(index: String, type: String, source: Any, _id: String? = null): Boolean {
         return tryExecuteReturnSucceeded {
@@ -240,14 +313,13 @@ object EsManager {
         }
     }
 
-
     /**
-     * 插入数据
+     * 插入文档
      *
      * @param index 索引名
      * @param type  类型
-     * @param source  数据, 可以是 json string/bean/map/list, 如果是bean/map/list, 最好有id属性，要不然会自动生成一个
-     * @param _id   数据id
+     * @param source  文档, 可以是 json string/bean/map/list, 如果是bean/map/list, 最好有id属性，要不然会自动生成一个
+     * @param _id   文档id
      * @return
      */
     fun <T> insertDocAsync(index: String, type: String, source: Any, _id: String? = null): CompletableFuture<DocumentResult> {
@@ -257,12 +329,18 @@ object EsManager {
     }
 
     /**
-     * 更新数据
+     * 更新文档
      * String script = "{" +
      * "    \"doc\" : {" +
      * "        \"title\" : \""+ entity.getTitle()+"\"," +
      * "    }" +
      * "}";
+     *
+     * @param index 索引名
+     * @param type  类型
+     * @param _id   文档id
+     * @param script 更新脚本
+     * @return
      */
     fun <T> updateDoc(index: String, type: String, _id: String, script: String): Boolean {
         return tryExecuteReturnSucceeded {
@@ -275,11 +353,13 @@ object EsManager {
     }
 
     /**
-     * 更新数据
+     * 更新文档
      *
      * @param index 索引名
      * @param type  类型
-     * @param _id   数据id
+     * @param _id   文档id
+     * @param entity 文档
+     * @return
      */
     fun <T> updateDoc(index: String, type: String, _id: String, entity: T): Boolean {
         return tryExecuteReturnSucceeded {
@@ -294,11 +374,13 @@ object EsManager {
     }
 
     /**
-     * 更新数据
+     * 异步更新文档
      *
      * @param index 索引名
      * @param type  类型
-     * @param _id   数据id
+     * @param _id   文档id
+     * @param entity 文档
+     * @return
      */
     fun <T> updateDocAsync(index: String, type: String, _id: String, entity: T): CompletableFuture<DocumentResult> {
         return tryExecuteAsync {
@@ -314,11 +396,11 @@ object EsManager {
     }
 
     /**
-     * 删除数据
+     * 删除文档
      *
      * @param index 索引名
      * @param type  类型
-     * @param _id   数据id
+     * @param _id   文档id
      */
     fun deleteDoc(index: String, type: String, _id: String): Boolean {
         return tryExecuteReturnSucceeded {
@@ -330,10 +412,10 @@ object EsManager {
     }
 
     /**
-     * 批量插入数据
+     * 批量插入文档
      * @param index 索引名
      * @param type  类型
-     * @param items  (_id主键, 数据), 数据可能是json/bean/map
+     * @param items  (_id主键, 文档), 文档可能是json/bean/map
      */
     fun bulkInsertDocs(index: String, type: String, items: Map<String, Any>) {
         val result = tryExecute {
@@ -352,11 +434,11 @@ object EsManager {
     }
 
     /**
-     * 批量插入数据
+     * 批量插入文档
      *
      * @param index    索引名
      * @param type     类型
-     * @param items 批量数据
+     * @param items 批量文档
      */
     fun <T> bulkInsertDocs(index: String, type: String, items: List<T>) {
         val result = tryExecute {
@@ -388,10 +470,10 @@ object EsManager {
     }
 
     /**
-     * 批量更新数据
+     * 批量更新文档
      * @param index 索引名
      * @param type  类型
-     * @param items  (_id主键, 数据), 数据可能是json/bean/map
+     * @param items  (_id主键, 文档), 文档可能是json/bean/map
      */
     fun bulkUpdateDocs(index: String, type: String, items: Map<String, Any>) {
         val result = tryExecute {
@@ -452,10 +534,11 @@ object EsManager {
      * @param index
      * @return
      */
-    fun getIndexSetting(index: String): Map<String, Any> {
+    fun getSetting(index: String): Map<String, Any?> {
         val result = tryExecute {
             GetSettings.Builder()
-                    .addIndex(index).build()
+                    .addIndex(index)
+                    .build()
         }
 
         val setting = result.jsonObject
@@ -472,7 +555,7 @@ object EsManager {
      * @param index
      * @return
      */
-    fun updateIndexSettings(index: String): Boolean {
+    fun updateSettings(index: String): Boolean {
         return tryExecuteReturnSucceeded {
             val mapBuilder = XContentFactory.jsonBuilder()
             mapBuilder!!.startObject().startObject("index")
@@ -608,7 +691,7 @@ object EsManager {
     /**
      * 有游标的结果集合
      */
-    class EsScrollCollection<T>(
+    inner class EsScrollCollection<T>(
             protected var sourceType: Class<T>,
             protected val result: SearchResult,
             protected val scrollTimeInMillis: Long
@@ -625,12 +708,29 @@ object EsManager {
          */
         inner class ScrollIterator(protected var currResult: JestResult) : MutableIterator<T>, Closeable {
 
-            protected var currentHits: Iterator<T>? = currResult.getSourceAsObjectList(sourceType).iterator()
+            // 当前结果hit, 每天切换结果会改变
+            protected var currentHits: Iterator<T>? = null
 
-            protected var scrollId: String? = currResult.scrollId
+            // 游标id, 每天切换结果会改变
+            protected var scrollId: String? = null
 
-            /** If stream is finished (ie: cluster returns no results.  */
-            private var finished = !currentHits!!.hasNext()
+            // 迭代完成, 每天切换结果会改变
+            private var finished = true
+
+            init {
+                onToggleResult()
+            }
+
+            /**
+             * 切换下一页的结果的处理
+             */
+            protected fun onToggleResult() {
+                currentHits = currResult.getSourceAsObjectList(sourceType).iterator()
+                scrollId = currResult.scrollId
+                finished = !currentHits!!.hasNext()
+                if (finished)
+                    close()
+            }
 
             override fun close() {
                 try {
@@ -645,20 +745,19 @@ object EsManager {
             }
 
             override operator fun hasNext(): Boolean {
-                // Test if stream is finished
+                // 检查是否结束
                 if (finished)
                     return false
 
-                // Test if it remains hits
+                // 当前页迭代完, 就查询下一页
                 if (currentHits == null || !currentHits!!.hasNext()) {
-                    // Do a new request
-                    currResult = continueScroll(scrollId!!, scrollTimeInMillis, sourceType)
+                    // 查询下一页
+                    currResult = continueScroll(scrollId!!, scrollTimeInMillis)
                     // Save hits and scroll id
-                    currentHits = currResult.getSourceAsObjectList(sourceType).iterator()
-                    finished = !currentHits!!.hasNext()
-                    scrollId = currResult.scrollId
+                    onToggleResult()
                 }
 
+                // 迭代
                 return currentHits!!.hasNext()
             }
 

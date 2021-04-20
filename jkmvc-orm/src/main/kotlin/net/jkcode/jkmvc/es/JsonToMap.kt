@@ -30,7 +30,7 @@ object JsonToMap {
      * @param json
      * @return
      */
-    fun toMap(json: String): Map<String, Any> {
+    fun toMap(json: String): Map<String, Any?> {
         return toMap(parseJson(json))
     }
 
@@ -39,7 +39,7 @@ object JsonToMap {
      * @param json
      * @return
      */
-    fun toMap(json: JsonObject): Map<String, Any> {
+    fun toMap(json: JsonObject): Map<String, Any?> {
         val map = HashMap<String, Any>()
         val entrySet = json.entrySet()
         val iter = entrySet.iterator()
