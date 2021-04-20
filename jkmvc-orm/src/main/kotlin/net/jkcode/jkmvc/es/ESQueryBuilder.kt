@@ -8,12 +8,16 @@ import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.script.Script
 import org.elasticsearch.search.aggregations.bucket.terms.Terms
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.elasticsearch.search.sort.SortBuilders
 import org.elasticsearch.search.sort.SortOrder
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 
 
 /**
@@ -102,11 +106,16 @@ class ESQueryBuilder(
      */
     protected val excludeFields = HashSet<String>()
 
-
     /**
      * 高亮字段
      */
     protected val highlightFields = ArrayList<String>();
+
+    /**
+     * 修改的字段脚本
+     *  <字段 to 脚本>
+     */
+    protected val fieldScripts = HashMap<String, Script>()
 
     /**
      * Query sort fields
@@ -159,6 +168,7 @@ class ESQueryBuilder(
         includeFields.clear()
         excludeFields.clear()
         highlightFields.clear()
+        fieldScripts.clear()
         sorts.clear()
         minScore = 0f
         aggExprs.clear()
@@ -481,6 +491,18 @@ class ESQueryBuilder(
         return this;
     }
 
+    /**
+     * add field script
+     * @param field
+     * @param script
+     * @param params
+     * @return
+     */
+    fun addFieldScript(field: String, script: String, params: Map<String, Any?> = emptyMap()): ESQueryBuilder {
+        fieldScripts[field] = Script(Script.DEFAULT_SCRIPT_TYPE, "painless", script, params)
+        return this
+    }
+
     /**************************** 转换查询条件 ****************************/
     /**
      * 转查询对象
@@ -571,6 +593,11 @@ class ESQueryBuilder(
         }
         sourceBuilder.highlighter(highlighter)
 
+        // 字段脚本
+        for ((field, script) in fieldScripts){
+            sourceBuilder.scriptField(field, script)
+        }
+
         // 转查询字符串
         val query = sourceBuilder.toString()
         esLogger.debug("查询条件:{}", query)
@@ -625,12 +652,11 @@ class ESQueryBuilder(
     /**
      * 删除文档
      *
-     * @param idField id字段
      * @param pageSize
      * @param scrollTimeInMillis
      * @return 被删除的id
      */
-    fun deleteDocs(idField: String = "id", pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): List<String> {
-        return esmgr.deleteDocs(index, type, this, idField, pageSize, scrollTimeInMillis)
+    fun deleteDocs(pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): Collection<String> {
+        return esmgr.deleteDocs(index, type, this, pageSize, scrollTimeInMillis)
     }
 }

@@ -53,26 +53,26 @@ class EsTests {
     }
 
     @Test
-    fun refreshIndex() {
+    fun testRefreshIndex() {
         esmgr.refreshIndex(index)
     }
 
     @Test
-    fun deleteIndex() {
+    fun testDeleteIndex() {
         //删除
         val r = esmgr.deleteIndex(index)
         System.out.println("删除索引[$index]：" + r)
     }
 
     @Test
-    fun testInsertData() {
-        val e = buildEntity(0)
+    fun testInsertDoc() {
+        val e = buildEntity(1)
         val r = esmgr.insertDoc(index, type, e)
         println("插入单个文档: " + r)
     }
 
     @Test
-    fun testBulkInsertData() {
+    fun testBulkInsertDocs() {
         val dataList = ArrayList<WorkSheet>()
 
         for (i in 1..10) {
@@ -95,24 +95,24 @@ class EsTests {
     }
 
     @Test
-    fun testUpdate() {
-        val workSheet = esmgr.getDoc(index, type, "101328", WorkSheet::class.java)!!
-        workSheet.updateDate = Date(System.currentTimeMillis())
+    fun testUpdateDoc() {
+        val workSheet = esmgr.getDoc(index, type, "1", WorkSheet::class.java)!!
+        //workSheet.updateDate = Date(System.currentTimeMillis())
         workSheet.urgeTimes = 2
         workSheet.reopenTimes = 3
-        esmgr.updateDoc(index, type, "101328", workSheet)
+        esmgr.updateDoc(index, type, "1", workSheet)
     }
 
     // curl 'localhost:9200/index-workorder/worksheet/1?pretty=true'
     @Test
-    fun testGetObject() {
+    fun testGetDoc() {
         val id = "1"
         val entity = esmgr.getDoc(index, type, id, WorkSheet::class.java)
         System.out.println("testGetObject 返回值：" + entity.toString())
     }
 
     @Test
-    fun testMultiGetObject() {
+    fun testMultiGetDoc() {
         val ids = listOf("1", "2")
         val entities = esmgr.multGetDocs(index, type, ids, WorkSheet::class.java)
         System.out.println("testGetObject 返回值：" + entities)
@@ -246,9 +246,9 @@ curl 'localhost:9200/index-workorder/worksheet/_search?pretty=true'  -H "Content
     }
 
     @Test
-    fun testDelete() {
+    fun testDeleteDoc() {
         val pageSize = 5
-        val ids = ESQueryBuilder().index(index).type(type).deleteDocs("id", pageSize, 100000)
+        val ids = ESQueryBuilder().index(index).type(type).deleteDocs(pageSize, 100000)
         println("删除" + ids.size + "个文档: id in " + ids)
     }
 

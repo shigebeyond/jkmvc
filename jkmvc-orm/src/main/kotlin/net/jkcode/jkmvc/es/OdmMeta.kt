@@ -1,5 +1,7 @@
 package net.jkcode.jkmvc.es
 
+import java.lang.reflect.Field
+
 /**
  * odm的元数据
  */
@@ -7,9 +9,12 @@ class OdmMeta(
         public val model: Class<*>, // 模型类
         public val index: String, // 索引, 相当于db
         public var type: String, // 类别, 相当于表
-        public var idField: String, // id字段
         public val esName: String = "default" // es配置名
 ){
+    /**
+     * id字段
+     */
+    public var idField: Field = model.getJestIdField()
 
     /**
      * 获得es管理器
@@ -35,7 +40,7 @@ class OdmMeta(
      * 更新
      */
     fun update(item: Odm): Boolean {
-        return esmgr.updateDoc(index, type, item[idField], item)
+        return esmgr.updateDoc(index, type, item[idField.name], item)
     }
 
     /**

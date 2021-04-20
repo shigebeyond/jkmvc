@@ -9,7 +9,7 @@ import net.jkcode.jkutil.common.dateFormat
 class Odm: OrmEntity() {
 
     public val id: String
-        get() = this[odmMeta.idField]
+        get() = this[odmMeta.idField.name]
 
     /**
      * 元数据

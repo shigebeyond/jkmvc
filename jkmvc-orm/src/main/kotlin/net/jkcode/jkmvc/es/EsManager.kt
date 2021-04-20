@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.es
 
+import com.google.gson.JsonObject
 import io.searchbox.action.Action
 import io.searchbox.client.JestClient
 import io.searchbox.client.JestClientFactory
@@ -145,11 +146,13 @@ class EsManager protected constructor(protected val client: JestClient) {
      * @param index 索引名
      * @param nShards 分区数
      * @param nReplicas 复制数
+     * @param readonly 是否只读
      */
-    fun createIndex(index: String, nShards: Int = 1, nReplicas: Int = 1): Boolean {
+    fun createIndex(index: String, nShards: Int = 1, nReplicas: Int = 1, readonly: Boolean = false): Boolean {
         val settings = mapOf(
                 "number_of_shards" to nShards,
-                "number_of_replicas" to nReplicas
+                "number_of_replicas" to nReplicas,
+                "blocks.read_only_allow_delete" to readonly
         )
 
         return createIndex(index, settings)
@@ -501,14 +504,13 @@ class EsManager protected constructor(protected val client: JestClient) {
      * @param scrollTimeInMillis
      * @return 被删除的id
      */
-    fun deleteDocs(index: String, type: String, queryBuilder: ESQueryBuilder, idField: String = "id", pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): List<String> {
-        // 查id
-        queryBuilder.select(idField)
-        val list = scrollDocs(index, type, queryBuilder, HashMap::class.java, pageSize, scrollTimeInMillis)
-
-        // 收集id
-        val ids = list.mapNotNull {
-            it[idField]?.toString()
+    fun deleteDocs(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): Collection<String> {
+        val ids = scrollDocs(index, type, queryBuilder, pageSize, scrollTimeInMillis){ result ->
+            when(result) {
+                is SearchResult -> result.getHits(JsonObject::class.java).map { it.id }
+                is ScrollSearchResult -> result.getHits(JsonObject::class.java).map { it.id }
+                else -> throw IllegalStateException()
+            }
         }
 
         bulkDeleteDocs(index, type, ids)
@@ -610,7 +612,7 @@ class EsManager protected constructor(protected val client: JestClient) {
      * @param type  类型
      * @param ids
      */
-    fun bulkDeleteDocs(index: String, type: String, ids: List<String>) {
+    fun bulkDeleteDocs(index: String, type: String, ids: Collection<String>) {
         if(ids.isEmpty())
             return
 
@@ -707,20 +709,52 @@ class EsManager protected constructor(protected val client: JestClient) {
     }
 
     /**
-     * 开始搜索文档, 并返回有游标的结果集合
+     * 搜索文档, 并返回有游标的结果集合
      * @param index
      * @param type
      * @param queryBuilder
-     * @param clazz bean类, 可以是HashMap
+     * @param pageSize
+     * @param scrollTimeInMillis
+     * @param resultMapper 结果转换器
+     * @return
+     */
+    fun <T> scrollDocs(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000, resultMapper:(JestResult)->List<T>): EsScrollCollection<T> {
+        val result = startScroll(index, type, queryBuilder, pageSize, scrollTimeInMillis)
+
+        // 封装为有游标的结果集合, 在迭代中查询下一页
+        return EsScrollCollection(result, scrollTimeInMillis, resultMapper)
+    }
+
+    /**
+     * 搜索文档, 并返回有游标的结果集合
+     * @param index
+     * @param type
+     * @param queryBuilder
+     * @param clazz bean类, 可以是HashMap, 但字段类型不可控, 如long主键值居然被查出为double
      * @param pageSize
      * @param scrollTimeInMillis
      * @return
      */
     fun <T> scrollDocs(index: String, type: String, queryBuilder: ESQueryBuilder, clazz: Class<T>, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): EsScrollCollection<T> {
+        return scrollDocs(index, type, queryBuilder, pageSize, scrollTimeInMillis) { result ->
+            result.getSourceAsObjectList(clazz)
+        }
+    }
+
+    /**
+     * 开始搜索文档, 并返回有游标的结果集合
+     * @param index
+     * @param type
+     * @param queryBuilder
+     * @param pageSize
+     * @param scrollTimeInMillis
+     * @return
+     */
+    private fun startScroll(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int, scrollTimeInMillis: Long): SearchResult {
         val query = queryBuilder.toSearchSource()
 
         // 执行查询
-        val result = tryExecute {
+        return tryExecute {
             Search.Builder(query)
                     .addIndex(index)
                     .addType(type)
@@ -728,9 +762,6 @@ class EsManager protected constructor(protected val client: JestClient) {
                     .setParameter(Parameters.SCROLL, scrollTimeInMillis.toString() + "ms")
                     .build()
         }
-
-        // 封装为有游标的结果集合, 在迭代中查询下一页
-        return EsScrollCollection(clazz, result, scrollTimeInMillis)
     }
 
     /**
@@ -757,9 +788,9 @@ class EsManager protected constructor(protected val client: JestClient) {
      * 有游标的结果集合, 在迭代中查询下一页
      */
     inner class EsScrollCollection<T>(
-            protected var sourceType: Class<T>,
             protected val result: SearchResult,
-            protected val scrollTimeInMillis: Long
+            protected val scrollTimeInMillis: Long,
+            protected val resultMapper:(JestResult)->List<T> // 结果转换器
     ) : AbstractCollection<T>() {
 
         override val size: Int = result.total.toInt()
@@ -790,7 +821,7 @@ class EsManager protected constructor(protected val client: JestClient) {
              * 切换下一页的结果的处理
              */
             protected fun onToggleResult() {
-                currHits = currResult.getSourceAsObjectList(sourceType).iterator()
+                currHits = resultMapper(currResult!!).iterator()
                 finished = !currHits!!.hasNext()
                 scrollId = currResult.scrollId
                 if (finished)

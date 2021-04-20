@@ -94,7 +94,7 @@ class ScrollSearchResult(source: JestResult) : JestResult(source) {
             return null
 
         val hitObject = hitElement.asJsonObject
-        val id = hitObject["_id"]
+        val id = hitObject["_id"].asString
         val index = hitObject["_index"].asString
         val type = hitObject["_type"].asString
         var score: Double? = null
@@ -134,7 +134,8 @@ class ScrollSearchResult(source: JestResult) : JestResult(source) {
                 sort,
                 index,
                 type,
-                score
+                score,
+                id
         )
     }
 
@@ -216,14 +217,15 @@ class ScrollSearchResult(source: JestResult) : JestResult(source) {
             val sort: List<String>? = null,
             val index: String? = null,
             val type: String? = null,
-            val score: Double? = null
+            val score: Double? = null,
+            val id: String? = null
     ) {
 
         constructor(sourceType: Class<T>?, source: JsonElement?, explanationType: Class<K>? = null, explanation: JsonElement? = null,
                     highlight: Map<String, List<String>>? = null, fields: Map<String, List<String>>? = null, sort: List<String>? = null,
-                    index: String? = null, type: String? = null, score: Double? = null)
+                    index: String? = null, type: String? = null, score: Double? = null, id: String? = null)
                 : this(createSourceObject(source, sourceType), if (explanation == null) null else createSourceObject(explanation, explanationType),
-                highlight, fields, sort, index, type, score)
+                highlight, fields, sort, index, type, score, id)
 
         override fun hashCode(): Int {
             return Objects.hash(
