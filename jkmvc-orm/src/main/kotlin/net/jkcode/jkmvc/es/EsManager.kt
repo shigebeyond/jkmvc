@@ -19,10 +19,7 @@ import io.searchbox.indices.settings.GetSettings
 import io.searchbox.indices.settings.UpdateSettings
 import io.searchbox.params.Parameters
 import net.jkcode.jkmvc.orm.serialize.toJson
-import net.jkcode.jkutil.common.Config
-import net.jkcode.jkutil.common.IConfig
-import net.jkcode.jkutil.common.esLogger
-import net.jkcode.jkutil.common.getOrPutOnce
+import net.jkcode.jkutil.common.*
 import org.elasticsearch.common.xcontent.XContentFactory
 import java.io.Closeable
 import java.sql.SQLException
@@ -507,9 +504,13 @@ class EsManager protected constructor(protected val client: JestClient) {
     fun deleteDocs(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): Collection<String> {
         val ids = scrollDocs(index, type, queryBuilder, pageSize, scrollTimeInMillis){ result ->
             when(result) {
-                is SearchResult -> result.getHits(JsonObject::class.java).map { it.id }
-                is ScrollSearchResult -> result.getHits(JsonObject::class.java).map { it.id }
-                else -> throw IllegalStateException()
+                is SearchResult ->
+                    // result.getHits(JsonObject::class.java).map { it.id }
+                    decorateCollection(result.getHits(JsonObject::class.java)) { it.id }
+                is ScrollSearchResult ->
+                    decorateCollection(result.getHits(JsonObject::class.java)) { it.id }
+                else ->
+                    throw IllegalStateException()
             }
         }
 
@@ -718,7 +719,7 @@ class EsManager protected constructor(protected val client: JestClient) {
      * @param resultMapper 结果转换器
      * @return
      */
-    fun <T> scrollDocs(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000, resultMapper:(JestResult)->List<T>): EsScrollCollection<T> {
+    fun <T> scrollDocs(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000, resultMapper:(JestResult)->Collection<T>): EsScrollCollection<T> {
         val result = startScroll(index, type, queryBuilder, pageSize, scrollTimeInMillis)
 
         // 封装为有游标的结果集合, 在迭代中查询下一页
@@ -790,7 +791,7 @@ class EsManager protected constructor(protected val client: JestClient) {
     inner class EsScrollCollection<T>(
             protected val result: SearchResult,
             protected val scrollTimeInMillis: Long,
-            protected val resultMapper:(JestResult)->List<T> // 结果转换器
+            protected val resultMapper:(JestResult)->Collection<T> // 结果转换器
     ) : AbstractCollection<T>() {
 
         override val size: Int = result.total.toInt()
