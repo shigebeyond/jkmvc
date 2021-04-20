@@ -17,7 +17,6 @@ import io.searchbox.indices.mapping.PutMapping
 import io.searchbox.indices.settings.GetSettings
 import io.searchbox.indices.settings.UpdateSettings
 import io.searchbox.params.Parameters
-import net.jkcode.jkmvc.orm.prop.OrmMapPropDelegater
 import net.jkcode.jkmvc.orm.serialize.toJson
 import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.IConfig
@@ -168,6 +167,29 @@ class EsManager protected constructor(protected val client: JestClient) {
         }
     }
 
+    /**
+     * 删除索引
+     *
+     * @param index 索引名
+     * @return
+     */
+    fun deleteIndex(index: String): Boolean {
+        return tryExecuteReturnSucceeded {
+            DeleteIndex.Builder(index).build()
+        }
+    }
+
+    /**
+     * 验证索引是否存在
+     *
+     * @param index 索引名
+     * @return
+     */
+    fun indexExist(index: String): Boolean {
+        return tryExecuteReturnSucceeded {
+            IndicesExists.Builder(listOf(index)).build()
+        }
+    }
 
     /**
      * 刷新index
@@ -180,6 +202,43 @@ class EsManager protected constructor(protected val client: JestClient) {
         }
     }
 
+    /**
+     * 获得index配置
+     * @param index
+     * @return
+     */
+    fun getSetting(index: String): Map<String, Any?> {
+        val result = tryExecute {
+            GetSettings.Builder()
+                    .addIndex(index)
+                    .build()
+        }
+
+        val setting = result.jsonObject
+                .get(index).asJsonObject
+                .get("settings").asJsonObject
+                .get("index").asJsonObject
+
+        return JsonToMap.toMap(setting)
+    }
+
+    /**
+     * 更改索引index设置setting
+     *
+     * @param index
+     * @return
+     */
+    fun updateSettings(index: String): Boolean {
+        return tryExecuteReturnSucceeded {
+            val mapBuilder = XContentFactory.jsonBuilder()
+            mapBuilder!!.startObject().startObject("index")
+                    .field("max_result_window", "1000000")
+                    .endObject()
+                    .endObject()
+            val source = mapBuilder.string()
+            UpdateSettings.Builder(source).build()
+        }
+    }
 
     /**
      * 设置指定type 的 mapping
@@ -222,26 +281,46 @@ class EsManager protected constructor(protected val client: JestClient) {
     }
 
     /**
-     * 删除索引
+     * 添加索引别名
      *
-     * @param index 索引名
-     * @return
+     * @param index
+     * @param alias
      */
-    fun deleteIndex(index: String): Boolean {
+    fun addIndexAlias(index: List<String>, alias: String): Boolean {
         return tryExecuteReturnSucceeded {
-            DeleteIndex.Builder(index).build()
+            val action = AddAliasMapping.Builder(index, alias).build()
+            ModifyAliases.Builder(action).build()
         }
     }
 
     /**
-     * 验证索引是否存在
+     * 删除索引别名
      *
-     * @param index 索引名
-     * @return
+     * @param index
+     * @param alias
      */
-    fun indexExist(index: String): Boolean {
+    fun removeIndexAlias(index: List<String>, alias: String): Boolean {
         return tryExecuteReturnSucceeded {
-            IndicesExists.Builder(listOf(index)).build()
+            val action = RemoveAliasMapping.Builder(index, alias).build()
+            ModifyAliases.Builder(action).build()
+        }
+    }
+
+    /**
+     * 索引优化
+     */
+    fun optimizeIndex(): CompletableFuture<JestResult> {
+        return tryExecuteAsync {
+            Optimize.Builder().build()
+        }
+    }
+
+    /**
+     * 清理缓存
+     */
+    fun clearCache(): Boolean {
+        return tryExecuteReturnSucceeded {
+            ClearCache.Builder().build()
         }
     }
 
@@ -412,12 +491,40 @@ class EsManager protected constructor(protected val client: JestClient) {
     }
 
     /**
+     * 删除文档
+     *
+     * @param index 索引名
+     * @param type  类型
+     * @param queryBuilder
+     * @param idField id字段
+     * @param pageSize
+     * @param scrollTimeInMillis
+     * @return 被删除的id
+     */
+    fun deleteDocs(index: String, type: String, queryBuilder: ESQueryBuilder, idField: String = "id", pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): List<String> {
+        // 查id
+        queryBuilder.select(idField)
+        val list = scrollDocs(index, type, queryBuilder, HashMap::class.java, pageSize, scrollTimeInMillis)
+
+        // 收集id
+        val ids = list.mapNotNull {
+            it[idField]?.toString()
+        }
+
+        bulkDeleteDocs(index, type, ids)
+        return ids
+    }
+
+    /**
      * 批量插入文档
      * @param index 索引名
      * @param type  类型
      * @param items  (_id主键, 文档), 文档可能是json/bean/map
      */
     fun bulkInsertDocs(index: String, type: String, items: Map<String, Any>) {
+        if(items.isEmpty())
+            return
+
         val result = tryExecute {
             val actions = items.map { (_id, item) ->
                 Index.Builder(item).id(_id).build()
@@ -441,6 +548,9 @@ class EsManager protected constructor(protected val client: JestClient) {
      * @param items 批量文档
      */
     fun <T> bulkInsertDocs(index: String, type: String, items: List<T>) {
+        if(items.isEmpty())
+            return
+
         val result = tryExecute {
             val actions = items.map { item ->
                 Index.Builder(item).build()
@@ -476,9 +586,37 @@ class EsManager protected constructor(protected val client: JestClient) {
      * @param items  (_id主键, 文档), 文档可能是json/bean/map
      */
     fun bulkUpdateDocs(index: String, type: String, items: Map<String, Any>) {
+        if(items.isEmpty())
+            return
+
         val result = tryExecute {
             val actions = items.map { (_id, item) ->
                 Update.Builder(item).id(_id).build()
+            }
+
+            Bulk.Builder()
+                    .defaultIndex(index)
+                    .defaultType(type)
+                    .addAction(actions)
+                    .build()
+        }
+
+        handleBulkResult(result)
+    }
+
+    /**
+     * 批量删除文档
+     * @param index 索引名
+     * @param type  类型
+     * @param ids
+     */
+    fun bulkDeleteDocs(index: String, type: String, ids: List<String>) {
+        if(ids.isEmpty())
+            return
+
+        val result = tryExecute {
+            val actions = ids.map { id ->
+                Delete.Builder(id).build()
             }
 
             Bulk.Builder()
@@ -504,85 +642,11 @@ class EsManager protected constructor(protected val client: JestClient) {
     }
 
     /**
-     * 添加索引别名
-     *
-     * @param index
-     * @param alias
-     */
-    fun addIndexAlias(index: List<String>, alias: String): Boolean {
-        return tryExecuteReturnSucceeded {
-            val action = AddAliasMapping.Builder(index, alias).build()
-            ModifyAliases.Builder(action).build()
-        }
-    }
-
-    /**
-     * 删除索引别名
-     *
-     * @param index
-     * @param alias
-     */
-    fun removeIndexAlias(index: List<String>, alias: String): Boolean {
-        return tryExecuteReturnSucceeded {
-            val action = RemoveAliasMapping.Builder(index, alias).build()
-            ModifyAliases.Builder(action).build()
-        }
-    }
-
-    /**
-     * 获得index配置
-     * @param index
+     * 创建查询构建器
      * @return
      */
-    fun getSetting(index: String): Map<String, Any?> {
-        val result = tryExecute {
-            GetSettings.Builder()
-                    .addIndex(index)
-                    .build()
-        }
-
-        val setting = result.jsonObject
-                .get(index).asJsonObject
-                .get("settings").asJsonObject
-                .get("index").asJsonObject
-
-        return JsonToMap.toMap(setting)
-    }
-
-    /**
-     * 更改索引index设置setting
-     *
-     * @param index
-     * @return
-     */
-    fun updateSettings(index: String): Boolean {
-        return tryExecuteReturnSucceeded {
-            val mapBuilder = XContentFactory.jsonBuilder()
-            mapBuilder!!.startObject().startObject("index")
-                    .field("max_result_window", "1000000")
-                    .endObject()
-                    .endObject()
-            val source = mapBuilder.string()
-            UpdateSettings.Builder(source).build()
-        }
-    }
-
-    /**
-     * 索引优化
-     */
-    fun optimizeIndex(): CompletableFuture<JestResult> {
-        return tryExecuteAsync {
-            Optimize.Builder().build()
-        }
-    }
-
-    /**
-     * 清理缓存
-     */
-    fun clearCache(): Boolean {
-        return tryExecuteReturnSucceeded {
-            ClearCache.Builder().build()
-        }
+    public fun queryBuilder(): ESQueryBuilder{
+        return ESQueryBuilder(this)
     }
 
     /**
@@ -643,15 +707,16 @@ class EsManager protected constructor(protected val client: JestClient) {
     }
 
     /**
-     * 开始搜索, 并返回有游标的结果集合
+     * 开始搜索文档, 并返回有游标的结果集合
      * @param index
      * @param type
      * @param queryBuilder
+     * @param clazz bean类, 可以是HashMap
      * @param pageSize
      * @param scrollTimeInMillis
-     * @param clazz
+     * @return
      */
-    fun <T> startScroll(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int, scrollTimeInMillis: Long, clazz: Class<T>): EsScrollCollection<T> {
+    fun <T> scrollDocs(index: String, type: String, queryBuilder: ESQueryBuilder, clazz: Class<T>, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): EsScrollCollection<T> {
         val query = queryBuilder.toSearchSource()
 
         // 执行查询
@@ -664,14 +729,14 @@ class EsManager protected constructor(protected val client: JestClient) {
                     .build()
         }
 
-        // 封装为有游标的结果集合
+        // 封装为有游标的结果集合, 在迭代中查询下一页
         return EsScrollCollection(clazz, result, scrollTimeInMillis)
     }
 
     /**
      * 根据游标获得下一页结果
      */
-    private fun continueScroll(scrollId: String, scrollTimeInMillis: Long): ScrollSearchResult {
+    private fun continueScroll(scrollId: String, scrollTimeInMillis: Long = 3000): ScrollSearchResult {
         val result = tryExecute {
             SearchScroll.Builder(scrollId, scrollTimeInMillis.toString() + "ms").build()
         }
@@ -689,7 +754,7 @@ class EsManager protected constructor(protected val client: JestClient) {
     }
 
     /**
-     * 有游标的结果集合
+     * 有游标的结果集合, 在迭代中查询下一页
      */
     inner class EsScrollCollection<T>(
             protected var sourceType: Class<T>,
@@ -709,7 +774,7 @@ class EsManager protected constructor(protected val client: JestClient) {
         inner class ScrollIterator(protected var currResult: JestResult) : MutableIterator<T>, Closeable {
 
             // 当前结果hit, 每天切换结果会改变
-            protected var currentHits: Iterator<T>? = null
+            protected var currHits: Iterator<T>? = null
 
             // 游标id, 每天切换结果会改变
             protected var scrollId: String? = null
@@ -725,21 +790,20 @@ class EsManager protected constructor(protected val client: JestClient) {
              * 切换下一页的结果的处理
              */
             protected fun onToggleResult() {
-                currentHits = currResult.getSourceAsObjectList(sourceType).iterator()
+                currHits = currResult.getSourceAsObjectList(sourceType).iterator()
+                finished = !currHits!!.hasNext()
                 scrollId = currResult.scrollId
-                finished = !currentHits!!.hasNext()
                 if (finished)
                     close()
             }
 
             override fun close() {
                 try {
-                    // Clear scroll on cluster only in case of error (cause elasticsearch auto clear scroll when it's done)
-                    if (!finished && scrollId != null && currentHits != null && currentHits!!.hasNext()) {
+                    // 虽然es 会有自动清理机制，但是 scroll_id 的存在会耗费大量的资源来保存一份当前查询结果集映像，并且会占用文件描述符。所以用完之后要及时清理
+                    if (scrollId != null)
                         clearScroll(scrollId!!)
-                    }
                 } finally {
-                    currentHits = null
+                    currHits = null
                     scrollId = null
                 }
             }
@@ -750,7 +814,7 @@ class EsManager protected constructor(protected val client: JestClient) {
                     return false
 
                 // 当前页迭代完, 就查询下一页
-                if (currentHits == null || !currentHits!!.hasNext()) {
+                if (currHits != null && !currHits!!.hasNext()) {
                     // 查询下一页
                     currResult = continueScroll(scrollId!!, scrollTimeInMillis)
                     // Save hits and scroll id
@@ -758,12 +822,12 @@ class EsManager protected constructor(protected val client: JestClient) {
                 }
 
                 // 迭代
-                return currentHits!!.hasNext()
+                return currHits?.hasNext() ?: false
             }
 
             override operator fun next(): T {
                 if (hasNext())
-                    return currentHits!!.next()
+                    return currHits!!.next()
 
                 throw NoSuchElementException()
             }

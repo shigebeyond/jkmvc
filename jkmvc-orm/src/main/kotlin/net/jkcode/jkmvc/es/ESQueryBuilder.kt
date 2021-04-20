@@ -1,10 +1,9 @@
 package net.jkcode.jkmvc.es
 
+import io.searchbox.core.SearchResult
 import io.searchbox.params.SearchType
-import net.jkcode.jkmvc.db.DbException
 import net.jkcode.jkutil.common.esLogger
 import net.jkcode.jkutil.common.isArrayOrCollection
-import net.jkcode.jkutil.common.isArrayOrCollectionEmpty
 import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.index.query.QueryBuilder
@@ -23,7 +22,8 @@ import java.util.concurrent.TimeUnit
  * @author shijianhang
  * @date 2021-4-21 下午5:16:59
  */
-class ESQueryBuilder private constructor(
+class ESQueryBuilder(
+        protected val esmgr: EsManager = EsManager.instance(),
         protected val parent: ESQueryBuilder? = null,
         protected val path: String? = null
 ) {
@@ -45,11 +45,18 @@ class ESQueryBuilder private constructor(
                 "like",
                 "exists"
         )
+
+        /**
+         * check if it"s a valid operator
+         * @param op
+         * @return bool
+         */
+        protected fun isOperator(op: String): Boolean {
+            return operators.contains(op)
+        }
     }
 
-
-    public constructor() : this(null, null)
-
+    /**************************** 拼接查询条件 ****************************/
     /**
      * Query index name
      */
@@ -231,15 +238,6 @@ class ESQueryBuilder private constructor(
     public fun orderBy(field: String, desc: Boolean = false): ESQueryBuilder {
         this.sorts.add(field to if (desc) SortOrder.DESC else SortOrder.ASC)
         return this;
-    }
-
-    /**
-     * check if it"s a valid operator
-     * @param op
-     * @return bool
-     */
-    protected fun isOperator(op: String): Boolean {
-        return operators.contains(op)
     }
 
     /**
@@ -461,7 +459,7 @@ class ESQueryBuilder private constructor(
      * @return 返回下一层query builder
      */
     public fun nestedDown(path: String): ESQueryBuilder {
-        return ESQueryBuilder(this, path)
+        return ESQueryBuilder(esmgr, this, path)
     }
 
     /**
@@ -483,6 +481,7 @@ class ESQueryBuilder private constructor(
         return this;
     }
 
+    /**************************** 转换查询条件 ****************************/
     /**
      * 转查询对象
      */
@@ -576,5 +575,62 @@ class ESQueryBuilder private constructor(
         val query = sourceBuilder.toString()
         esLogger.debug("查询条件:{}", query)
         return query
+    }
+
+    /**************************** 查询 ****************************/
+    /**
+     * 统计行数
+     */
+    public fun count(): Long {
+        return esmgr.count(index, type, this)
+    }
+
+    /**
+     * 搜索文档
+     * @param index 索引名
+     * @param type 类型
+     * @param queryBuilder 查询构造
+     * @param clazz
+     * @return
+     */
+    fun <T> searchDocs(clazz: Class<T>): Pair<List<T>, Long> {
+        return esmgr.searchDocs(index, type, this, clazz)
+    }
+
+    /**
+     * 搜索文档
+     * @param index 索引名
+     * @param type 类型
+     * @param queryBuilder 查询构造
+     * @return
+     */
+    public fun searchDocs(): SearchResult {
+        return esmgr.searchDocs(index, type, this)
+    }
+
+    /**
+     * 开始搜索文档, 并返回有游标的结果集合
+     * @param index
+     * @param type
+     * @param queryBuilder
+     * @param clazz bean类, 可以是HashMap
+     * @param pageSize
+     * @param scrollTimeInMillis
+     * @return
+     */
+    fun <T> scrollDocs(clazz: Class<T>, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): EsManager.EsScrollCollection<T> {
+        return esmgr.scrollDocs(index, type, this, clazz, pageSize, scrollTimeInMillis)
+    }
+
+    /**
+     * 删除文档
+     *
+     * @param idField id字段
+     * @param pageSize
+     * @param scrollTimeInMillis
+     * @return 被删除的id
+     */
+    fun deleteDocs(idField: String = "id", pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): List<String> {
+        return esmgr.deleteDocs(index, type, this, idField, pageSize, scrollTimeInMillis)
     }
 }

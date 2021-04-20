@@ -7,6 +7,7 @@ import net.jkcode.jkutil.common.randomString
 import org.joda.time.DateTime
 import org.junit.Test
 import java.util.*
+import kotlin.collections.HashMap
 
 class EsTests {
 
@@ -49,6 +50,11 @@ class EsTests {
     @Test
     fun testGetIndexAliases() {
         esmgr.getIndexAliases(index)
+    }
+
+    @Test
+    fun refreshIndex() {
+        esmgr.refreshIndex(index)
     }
 
     @Test
@@ -205,11 +211,11 @@ curl 'localhost:9200/index-workorder/worksheet/_search?pretty=true'  -H "Content
     @Test
     fun testSearch() {
         val query = ESQueryBuilder()
-        query.select("deptId", "sheetSource", "licensePlates", "sheet_source", "createDate")
-                .where("deptId", "IN", listOf(94, 93))
-                .where("sheetSource", "3")
-                .where("licensePlates", "like", "京BJM00测")
-                .whereBetween("sheet_source", 0, 6)
+        query.select("_id", "deptId", "sheetSource", "licensePlates", "sheet_source", "createDate")
+//                .where("deptId", "IN", listOf(94, 93))
+//                .where("sheetSource", "3")
+//                .where("licensePlates", "like", "京BJM00测")
+//                .whereBetween("sheet_source", 0, 6)
         //date
         val start = DateTime().plusDays(-35)
         query.whereBetween("createDate", start.toDate().time, DateTime().toDate().time)
@@ -221,6 +227,30 @@ curl 'localhost:9200/index-workorder/worksheet/_search?pretty=true'  -H "Content
             println(item)
     }
 
+    @Test
+    fun testSearch2() {
+        val (list, size) = ESQueryBuilder().index(index).type(type).searchDocs(HashMap::class.java)
+        println("查到 $size 个文档")
+        for (item in list)
+            println(item)
+    }
+
+    @Test
+    fun testScroll() {
+        val pageSize = 5
+        val c = ESQueryBuilder().index(index).type(type).scrollDocs(WorkSheet::class.java, pageSize, 100000)
+        val times = c.size / pageSize + 1
+        println("记录数=${c.size}, 每次取=$pageSize, 取次数=$times")
+        for (item in c)
+            println(item)
+    }
+
+    @Test
+    fun testDelete() {
+        val pageSize = 5
+        val ids = ESQueryBuilder().index(index).type(type).deleteDocs("id", pageSize, 100000)
+        println("删除" + ids.size + "个文档: id in " + ids)
+    }
 
     @Test
     fun testStat() {
