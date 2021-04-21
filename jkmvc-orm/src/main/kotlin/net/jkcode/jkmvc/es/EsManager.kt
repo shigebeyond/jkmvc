@@ -5,7 +5,6 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import io.searchbox.action.Action
-import io.searchbox.client.JestClient
 import io.searchbox.client.JestClientFactory
 import io.searchbox.client.JestResult
 import io.searchbox.client.JestResultHandler
@@ -22,7 +21,6 @@ import io.searchbox.indices.mapping.PutMapping
 import io.searchbox.indices.settings.GetSettings
 import io.searchbox.indices.settings.UpdateSettings
 import io.searchbox.params.Parameters
-import net.jkcode.jkmvc.orm.serialize.toJson
 import net.jkcode.jkutil.common.*
 import org.elasticsearch.common.xcontent.XContentFactory
 import java.io.Closeable
@@ -30,6 +28,7 @@ import java.sql.SQLException
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * es管理者
@@ -74,7 +73,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
 
             // gson
             val gsonBuilder = GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss")
-            if(fieldLowercaseUnderline)
+            if(fieldLowercaseUnderline) // es字段名小写+下划线, 会与java驼峰字段名相互转换
                 gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
 
             // es client工厂
@@ -529,17 +528,19 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @return 被删除的id
      */
     fun deleteDocs(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): Collection<String> {
+        // 查id
+        // 原来想先 queryBuilder.select("id"), 可惜不知道id字段是啥
         val ids = scrollDocs(index, type, queryBuilder, pageSize, scrollTimeInMillis){ result ->
+            // 处理每一页的JestResult(兼容SearchResult/ScrollSearchResult)
             when(result) {
-                is SearchResult ->
-                    // result.getHits(JsonObject::class.java).map { it.id }
-                    decorateCollection(result.getHits(JsonObject::class.java)) { it.id }
-                is ScrollSearchResult ->
-                    decorateCollection(result.getHits(JsonObject::class.java)) { it.id }
+                is SearchResult -> // 第一页
+                    result.getHits(JsonObject::class.java).map { it.id }
+                is ScrollSearchResult -> // 其他下一页
+                    result.getHits(JsonObject::class.java).map { it.id }
                 else ->
-                    throw IllegalStateException()
+                    throw IllegalStateException("Unkown scroll result type: " + result.javaClass.name)
             }
-        }
+        }.toList() // 复制为list, 因为 scrollDocs() 的结果 EsScrollCollection 只能迭代一次
 
         bulkDeleteDocs(index, type, ids)
         return ids
@@ -742,14 +743,14 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param type
      * @param queryBuilder
      * @param pageSize
-     * @param scrollTimeInMillis
-     * @param resultMapper 结果转换器
+     * @param scrollTimeInMillis 游标的有效时间, 如果报错`Elasticsearch No search context found for id`, 则加大
+     * @param resultMapper 结果转换器, 会将每一页的JestResult(兼容SearchResult/ScrollSearchResult), 转为T对象集合
      * @return
      */
     fun <T> scrollDocs(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000, resultMapper:(JestResult)->Collection<T>): EsScrollCollection<T> {
         val result = startScroll(index, type, queryBuilder, pageSize, scrollTimeInMillis)
 
-        // 封装为有游标的结果集合, 在迭代中查询下一页
+        // 封装为有游标的结果集合, 在迭代中查询下一页, 即调用continueScroll()
         return EsScrollCollection(result, scrollTimeInMillis, resultMapper)
     }
 
@@ -760,7 +761,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param queryBuilder
      * @param clazz bean类, 可以是HashMap, 但字段类型不可控, 如long主键值居然被查出为double
      * @param pageSize
-     * @param scrollTimeInMillis
+     * @param scrollTimeInMillis 游标的有效时间, 如果报错`Elasticsearch No search context found for id`, 则加大
      * @return
      */
     fun <T> scrollDocs(index: String, type: String, queryBuilder: ESQueryBuilder, clazz: Class<T>, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): EsScrollCollection<T> {
@@ -775,7 +776,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param type
      * @param queryBuilder
      * @param pageSize
-     * @param scrollTimeInMillis
+     * @param scrollTimeInMillis 游标的有效时间, 如果报错`Elasticsearch No search context found for id`, 则加大
      * @return
      */
     private fun startScroll(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int, scrollTimeInMillis: Long): SearchResult {
@@ -794,6 +795,9 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
 
     /**
      * 根据游标获得下一页结果
+     * @param scrollId
+     * @param scrollTimeInMillis 游标的有效时间, 如果报错`Elasticsearch No search context found for id`, 则加大
+     * @return
      */
     private fun continueScroll(scrollId: String, scrollTimeInMillis: Long = 3000): ScrollSearchResult {
         val result = tryExecute {
@@ -814,21 +818,31 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
 
     /**
      * 有游标的结果集合, 在迭代中查询下一页
+     *   只能迭代一次, 迭代一次后会close()
      */
     inner class EsScrollCollection<T>(
             protected val result: SearchResult,
             protected val scrollTimeInMillis: Long,
-            protected val resultMapper:(JestResult)->Collection<T> // 结果转换器
+            protected val resultMapper:(JestResult)->Collection<T> // 结果转换器, 会将每一页的JestResult(兼容SearchResult/ScrollSearchResult), 转为T对象集合
     ) : AbstractCollection<T>() {
 
+        // 迭代次数
+        protected var iterateCount = AtomicInteger(0);
+
+        // 总数
         override val size: Int = result.total.toInt()
 
+        // 获得迭代器
         override fun iterator(): MutableIterator<T> {
+            if(iterateCount.getAndIncrement() > 0)
+                throw EsException("EsScrollCollection 只能迭代一次")
+
             return ScrollIterator(result)
         }
 
         /**
          * 有游标的迭代器
+         *   只能迭代一次, 迭代一次后会close()
          */
         inner class ScrollIterator(protected var currResult: JestResult) : MutableIterator<T>, Closeable {
 

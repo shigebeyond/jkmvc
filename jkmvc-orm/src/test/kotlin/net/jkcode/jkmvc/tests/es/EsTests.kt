@@ -30,6 +30,18 @@ class EsTests {
     }
 
     @Test
+    fun testInsertAndDel() {
+        println("------------------ 插入 ------------------")
+        testBulkInsertDocs()
+        println("------------------ 搜索 ------------------")
+        testSearch2()
+        println("------------------ 搜索+删除 ------------------")
+        testSearchDeleteDoc()
+        println("------------------ 搜索 ------------------")
+        testSearch2()
+    }
+
+    @Test
     fun testGson() {
         val gsonBuilder = GsonBuilder()
         // es字段命名为: 下划线
@@ -412,6 +424,12 @@ curl 'localhost:9200/index-workorder/worksheet/_search?pretty=true'  -H "Content
 
     @Test
     fun testDeleteDoc() {
+        esmgr.deleteDoc(index, type, "1")
+        println("删除id=1文档")
+    }
+
+    @Test
+    fun testSearchDeleteDoc() {
         val pageSize = 5
         val ids = ESQueryBuilder().index(index).type(type).deleteDocs(pageSize, 100000)
         println("删除" + ids.size + "个文档: id in " + ids)
