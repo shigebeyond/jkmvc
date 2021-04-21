@@ -261,6 +261,7 @@ class WorkSheet : Serializable {
      * 关注人ids，用于创建工单时传参
      */
     var attentionUserIds: String? = null
+
     override fun toString(): String {
         return "WorkSheet(id=$id, workSheetNo=$workSheetNo, sheetTypeOne=$sheetTypeOne, sheetTypeTwo=$sheetTypeTwo, sheetTypeThree=$sheetTypeThree, sheetTypeFour=$sheetTypeFour, sheetSource=$sheetSource, contact=$contact, sheetClassify=$sheetClassify, orderType=$orderType, serviceTypeId=$serviceTypeId, driverId=$driverId, driverName=$driverName, driverPhone=$driverPhone, cityId=$cityId, licensePlates=$licensePlates, orderNo=$orderNo, riderName=$riderName, riderPhone=$riderPhone, dutyDept=$dutyDept, sheetPriority=$sheetPriority, sheetTag=$sheetTag, handleTime=$handleTime, memo=$memo, currentStatus=$currentStatus, commitUserId=$commitUserId, commitUserName=$commitUserName, currentDealUserId=$currentDealUserId, currentDealUserName=$currentDealUserName, callRecordId=$callRecordId, confirmSheetTypeOne=$confirmSheetTypeOne, confirmSheetTypeTwo=$confirmSheetTypeTwo, confirmSheetTypeThree=$confirmSheetTypeThree, confirmSheetTypeFour=$confirmSheetTypeFour, createDate=$createDate, updateDate=$updateDate, deptId=$deptId, urgeTimes=$urgeTimes, reopenTimes=$reopenTimes, sheetTagSort=$sheetTagSort, weight=$weight, attentionUserIds=$attentionUserIds)"
     }

@@ -20,4 +20,10 @@ open class MessageEntity: OrmEntity() {
     public var toUid:Int by property() // 接收人id
 
     public var content:String by property() // 消息内容
+
+    override fun toString(): String {
+        return "MessageEntity(" + toMap() + ")"
+    }
+
+
 }
