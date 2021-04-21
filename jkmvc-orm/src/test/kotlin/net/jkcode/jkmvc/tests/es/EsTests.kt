@@ -1,6 +1,8 @@
 package net.jkcode.jkmvc.tests.es
 
 import com.alibaba.fastjson.JSON
+import com.google.gson.FieldNamingPolicy
+import com.google.gson.GsonBuilder
 import net.jkcode.jkmvc.es.ESQueryBuilder
 import net.jkcode.jkmvc.es.EsManager
 import net.jkcode.jkutil.common.randomString
@@ -8,6 +10,7 @@ import org.joda.time.DateTime
 import org.junit.Test
 import java.util.*
 import kotlin.collections.HashMap
+
 
 class EsTests {
 
@@ -18,14 +21,173 @@ class EsTests {
     private val esmgr = EsManager.instance()
 
     @Test
-    fun createIndex() {
-        val mapping = "{\"worksheet\": {\"properties\": {\"call_record_id\": {\"type\": \"long\"}, \"city_id\": {\"type\": \"long\"}, \"commit_user_id\": {\"type\": \"keyword\"}, \"commit_user_name\": {\"type\": \"keyword\"}, \"confirm_sheet_type_four\": {\"type\": \"long\"}, \"confirm_sheet_type_one\": {\"type\": \"long\"}, \"confirm_sheet_type_three\": {\"type\": \"long\"}, \"confirm_sheet_type_two\": {\"type\": \"long\"}, \"contact\": {\"type\": \"keyword\"}, \"create_date\": {\"type\": \"date\"}, \"current_deal_user_id\": {\"type\": \"keyword\"}, \"current_deal_user_name\": {\"type\": \"keyword\"}, \"current_status\": {\"type\": \"long\"}, \"dept_id\": {\"type\": \"long\"}, \"driver_id\": {\"type\": \"long\"}, \"driver_name\": {\"type\": \"keyword\"}, \"driver_phone\": {\"type\": \"keyword\"}, \"duty_dept\": {\"type\": \"long\"}, \"handle_time\": {\"type\": \"long\"}, \"id\": {\"type\": \"long\"}, \"license_plates\": {\"type\": \"keyword\"}, \"memo\": {\"type\": \"keyword\"}, \"order_no\": {\"type\": \"keyword\"}, \"order_type\": {\"type\": \"long\"}, \"reopen_times\": {\"type\": \"long\"}, \"rider_name\": {\"type\": \"keyword\"}, \"rider_phone\": {\"type\": \"keyword\"}, \"service_type_id\": {\"type\": \"long\"}, \"sheet_classify\": {\"type\": \"long\"}, \"sheet_priority\": {\"type\": \"long\"}, \"sheet_source\": {\"type\": \"long\"}, \"sheet_tag\": {\"type\": \"long\"}, \"sheet_tag_sort\": {\"type\": \"long\"}, \"sheet_type_four\": {\"type\": \"long\"}, \"sheet_type_one\": {\"type\": \"long\"}, \"sheet_type_three\": {\"type\": \"long\"}, \"sheet_type_two\": {\"type\": \"long\"}, \"update_date\": {\"type\": \"date\"}, \"urge_times\": {\"type\": \"long\"}, \"weight\": {\"type\": \"long\"}, \"work_sheet_no\": {\"type\": \"keyword\"} } } } "
-        esmgr.createIndex(index)
-        esmgr.putMapping(index, type, mapping)
+    fun testAll() {
+        testDeleteIndex()
+        testCreateIndex()
+        testGetIndex()
+        testBulkInsertDocs()
+        testUpdateDoc()
     }
 
     @Test
-    fun getIndex() {
+    fun testGson() {
+        val gsonBuilder = GsonBuilder()
+        // es字段命名为: 下划线
+        // 生成的json中的字段名, 都是下划线的
+        gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+        val gson = gsonBuilder.create()
+        val e = buildEntity(1)
+        val json = gson.toJson(e)
+        println(json)
+
+        val e2 = gson.fromJson<WorkSheet>(json, WorkSheet::class.java)
+        println(e2)
+    }
+
+    @Test
+    fun testCreateIndex() {
+        // gson还是必须用双引号
+        var mapping = """{
+    'worksheet':{
+        'properties':{
+            'call_record_id':{
+                'type':'long'
+            },
+            'city_id':{
+                'type':'long'
+            },
+            'commit_user_id':{
+                'type':'keyword'
+            },
+            'commit_user_name':{
+                'type':'keyword'
+            },
+            'confirm_sheet_type_four':{
+                'type':'long'
+            },
+            'confirm_sheet_type_one':{
+                'type':'long'
+            },
+            'confirm_sheet_type_three':{
+                'type':'long'
+            },
+            'confirm_sheet_type_two':{
+                'type':'long'
+            },
+            'contact':{
+                'type':'keyword'
+            },
+            'create_date':{
+                'type':'date',
+                'format':'yyyy-MM-dd HH:mm:ss'
+            },
+            'current_deal_user_id':{
+                'type':'keyword'
+            },
+            'current_deal_user_name':{
+                'type':'keyword'
+            },
+            'current_status':{
+                'type':'long'
+            },
+            'dept_id':{
+                'type':'long'
+            },
+            'driver_id':{
+                'type':'long'
+            },
+            'driver_name':{
+                'type':'keyword'
+            },
+            'driver_phone':{
+                'type':'keyword'
+            },
+            'duty_dept':{
+                'type':'long'
+            },
+            'handle_time':{
+                'type':'long'
+            },
+            'id':{
+                'type':'long'
+            },
+            'license_plates':{
+                'type':'keyword'
+            },
+            'memo':{
+                'type':'keyword'
+            },
+            'order_no':{
+                'type':'keyword'
+            },
+            'order_type':{
+                'type':'long'
+            },
+            'reopen_times':{
+                'type':'long'
+            },
+            'rider_name':{
+                'type':'keyword'
+            },
+            'rider_phone':{
+                'type':'keyword'
+            },
+            'service_type_id':{
+                'type':'long'
+            },
+            'sheet_classify':{
+                'type':'long'
+            },
+            'sheet_priority':{
+                'type':'long'
+            },
+            'sheet_source':{
+                'type':'long'
+            },
+            'sheet_tag':{
+                'type':'long'
+            },
+            'sheet_tag_sort':{
+                'type':'long'
+            },
+            'sheet_type_four':{
+                'type':'long'
+            },
+            'sheet_type_one':{
+                'type':'long'
+            },
+            'sheet_type_three':{
+                'type':'long'
+            },
+            'sheet_type_two':{
+                'type':'long'
+            },
+            'update_date':{
+                'type':'date',
+                'format':'yyyy-MM-dd HH:mm:ss'
+            },
+            'urge_times':{
+                'type':'long'
+            },
+            'weight':{
+                'type':'long'
+            },
+            'work_sheet_no':{
+                'type':'keyword'
+            }
+        }
+    }
+}"""
+        // gson还是必须用双引号
+        mapping = mapping.replace('\'', '"')
+        var r = esmgr.createIndex(index)
+        println("创建索引[$index]: " + r)
+        r = esmgr.putMapping(index, type, mapping)
+        println("设置索引[$index]映射[$type]: " + r)
+    }
+
+    @Test
+    fun testGetIndex() {
         val setting = esmgr.getSetting(index)
         println("----------- setting ----------")
         println(setting)
@@ -96,11 +258,13 @@ class EsTests {
 
     @Test
     fun testUpdateDoc() {
-        val workSheet = esmgr.getDoc(index, type, "1", WorkSheet::class.java)!!
-        //workSheet.updateDate = Date(System.currentTimeMillis())
-        workSheet.urgeTimes = 2
-        workSheet.reopenTimes = 3
-        esmgr.updateDoc(index, type, "1", workSheet)
+        val e = esmgr.getDoc(index, type, "1", WorkSheet::class.java)!!
+        e.workSheetNo = randomString(5)
+        e.updateDate = Date(System.currentTimeMillis())
+        e.urgeTimes = 2
+        e.reopenTimes = 3
+        val r = esmgr.updateDoc(index, type, "1", e)
+        println("更新文档: " + r)
     }
 
     // curl 'localhost:9200/index-workorder/worksheet/1?pretty=true'
@@ -223,6 +387,7 @@ curl 'localhost:9200/index-workorder/worksheet/_search?pretty=true'  -H "Content
         query.limit(10).offset(0).orderBy("id")
 
         val (list, size) = esmgr.searchDocs(index, type, query, WorkSheet::class.java)
+        println("查到 $size 个文档")
         for (item in list)
             println(item)
     }

@@ -1,5 +1,8 @@
 package net.jkcode.jkmvc.es
 
+import com.google.gson.FieldNamingPolicy
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import io.searchbox.action.Action
 import io.searchbox.client.JestClient
@@ -7,6 +10,7 @@ import io.searchbox.client.JestClientFactory
 import io.searchbox.client.JestResult
 import io.searchbox.client.JestResultHandler
 import io.searchbox.client.config.HttpClientConfig
+import io.searchbox.client.http.JestHttpClient
 import io.searchbox.core.*
 import io.searchbox.indices.*
 import io.searchbox.indices.aliases.AddAliasMapping
@@ -35,7 +39,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @author shijianhang
  * @date 2021-4-21 下午5:16:59
  */
-class EsManager protected constructor(protected val client: JestClient) {
+class EsManager protected constructor(protected val client: JestHttpClient) {
 
     companion object {
 
@@ -58,14 +62,20 @@ class EsManager protected constructor(protected val client: JestClient) {
         /**
          * 创建es client
          */
-        private fun buildClient(name: String): JestClient {
+        private fun buildClient(name: String): JestHttpClient {
             // es配置
             val config: IConfig = Config.instance("es.$name", "yaml")
             val esUrl: String = config["esUrl"]!!
             val maxTotal: Int? = config["maxTotal"]
             val perTotal: Int? = config["perTotal"]
+            val fieldLowercaseUnderline: Boolean = config["fieldLowercaseUnderline"] ?: true
 
             val urls = esUrl.split(",")
+
+            // gson
+            val gsonBuilder = GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss")
+            if(fieldLowercaseUnderline)
+                gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
 
             // es client工厂
             val factory = JestClientFactory()
@@ -73,13 +83,20 @@ class EsManager protected constructor(protected val client: JestClient) {
                     .multiThreaded(true)
                     .defaultMaxTotalConnectionPerRoute(Integer.valueOf(maxTotal!!)!!)
                     .maxTotalConnection(Integer.valueOf(perTotal!!)!!)
+                    .gson(gsonBuilder.create())
                     .build()
             factory.setHttpClientConfig(hcConfig)
 
             // 创建es client
-            return factory.getObject()
+            return factory.getObject() as JestHttpClient
         }
     }
+
+    /**
+     * gson
+     */
+    public val gson: Gson
+        get() = client.gson
 
     /**
      * 对执行es操作包一层try/catch以便打印日志
@@ -207,19 +224,24 @@ class EsManager protected constructor(protected val client: JestClient) {
      * @param index
      * @return
      */
-    fun getSetting(index: String): Map<String, Any?> {
+    fun getSetting(index: String): JsonObject? {
         val result = tryExecute {
             GetSettings.Builder()
                     .addIndex(index)
                     .build()
         }
 
-        val setting = result.jsonObject
-                .get(index).asJsonObject
+        val indexObj = result.jsonObject
+                .get(index)
+        if(indexObj == null)
+            throw EsException("No setting for index[$index]")
+
+        val setting = indexObj.asJsonObject
                 .get("settings").asJsonObject
                 .get("index").asJsonObject
 
-        return JsonToMap.toMap(setting)
+        return setting
+        //return JsonToMap.toMap(setting)
     }
 
     /**
@@ -260,7 +282,7 @@ class EsManager protected constructor(protected val client: JestClient) {
      * @param type
      * @return
      */
-    fun getMapping(index: String, type: String): Map<String, Any?>? {
+    fun getMapping(index: String, type: String): JsonObject? {
         val result = tryExecute {
             GetMapping.Builder().addIndex(index).addType(type).build()
         }
@@ -274,10 +296,11 @@ class EsManager protected constructor(protected val client: JestClient) {
         val index = result.jsonObject.get(index).asJsonObject
         val mappings = index?.get("mappings")?.asJsonObject
         val type = mappings?.get(type)?.asJsonObject
-        if (type == null)
-            return null
+        return type
 
-        return JsonToMap.toMap(type)
+//        if (type == null)
+//            return null
+//        return JsonToMap.toMap(type)
     }
 
     /**
@@ -388,7 +411,11 @@ class EsManager protected constructor(protected val client: JestClient) {
      */
     fun insertDoc(index: String, type: String, source: Any, _id: String? = null): Boolean {
         return tryExecuteReturnSucceeded {
-            Index.Builder(source).index(index).type(type).id(_id).build()
+            Index.Builder(source)
+                    .index(index)
+                    .type(type)
+                    .id(_id)
+                    .build()
         }
     }
 
@@ -445,7 +472,7 @@ class EsManager protected constructor(protected val client: JestClient) {
             val script = HashMap<String, Any?>()
             script["doc"] = entity
 
-            Update.Builder(script.toJson()).id(_id)
+            Update.Builder(gson.toJson(script)).id(_id)
                     .index(index)
                     .type(type)
                     .build()
@@ -466,7 +493,7 @@ class EsManager protected constructor(protected val client: JestClient) {
             val script = HashMap<String, T>()
             script["doc"] = entity
 
-            Update.Builder(script.toJson())
+            Update.Builder(gson.toJson(script))
                     .id(_id)
                     .index(index)
                     .type(type)
