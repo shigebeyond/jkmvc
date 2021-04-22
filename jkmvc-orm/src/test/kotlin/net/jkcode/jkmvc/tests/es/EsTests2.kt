@@ -166,16 +166,11 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
     @Test
     fun testSearch() {
         val query = ESQueryBuilder()
-        query.select("_id", "deptId", "sheetSource", "licensePlates", "sheet_source", "createDate")
-//                .where("deptId", "IN", listOf(94, 93))
-//                .where("sheetSource", "3")
-//                .where("licensePlates", "like", "京BJM00测")
-//                .whereBetween("sheet_source", 0, 6)
-        //date
-        val start = DateTime().plusDays(-35)
-        query.whereBetween("createDate", start.toDate().time, DateTime().toDate().time)
-
-        query.limit(10).offset(0).orderBy("id")
+                .where("fromUid", ">=", 1)
+                .where("content", "like", "f")
+                .limit(10)
+                .offset(0)
+                .orderBy("id")
 
         val (list, size) = esmgr.searchDocs(index, type, query, MessageEntity::class.java)
         println("查到 $size 个文档")
