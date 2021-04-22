@@ -210,6 +210,15 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
     }
 
     @Test
+    fun testScript() {
+        val query = ESQueryBuilder().index(index).type(type)
+                .addFieldScript("fromUid", "doc['fromUid']+1")
+                .where("fromUid", ">=", 1)
+                .limit(10)
+        println(query.toSearchSource())
+    }
+
+    @Test
     fun testStat() {
         val query = ESQueryBuilder()
         query.where("currentStatus", 1)

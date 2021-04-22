@@ -2,4 +2,3 @@ default:
   esUrl: http://localhost:9200
   maxTotal: 100
   perTotal: 100
-  fieldLowercaseUnderline: true # es字段名小写+下划线, 会与java驼峰字段名相互转换

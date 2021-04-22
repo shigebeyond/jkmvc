@@ -1,7 +1,6 @@
 package net.jkcode.jkmvc.es
 
 import com.google.gson.FieldNamingPolicy
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import io.searchbox.action.Action
@@ -43,6 +42,14 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
     companion object {
 
         /**
+         * gson
+         */
+        public val gson = GsonBuilder()
+                .setDateFormat("yyyy-MM-dd HH:mm:ss")
+                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .create()
+
+        /**
          * EsManager池
          */
         private val insts: ConcurrentHashMap<String, EsManager> = ConcurrentHashMap();
@@ -67,14 +74,8 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
             val esUrl: String = config["esUrl"]!!
             val maxTotal: Int? = config["maxTotal"]
             val perTotal: Int? = config["perTotal"]
-            val fieldLowercaseUnderline: Boolean = config["fieldLowercaseUnderline"] ?: true
 
             val urls = esUrl.split(",")
-
-            // gson
-            val gsonBuilder = GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss")
-            if(fieldLowercaseUnderline) // es字段名小写+下划线, 会与java驼峰字段名相互转换
-                gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
 
             // es client工厂
             val factory = JestClientFactory()
@@ -82,7 +83,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
                     .multiThreaded(true)
                     .defaultMaxTotalConnectionPerRoute(Integer.valueOf(maxTotal!!)!!)
                     .maxTotalConnection(Integer.valueOf(perTotal!!)!!)
-                    .gson(gsonBuilder.create())
+                    .gson(gson)
                     .build()
             factory.setHttpClientConfig(hcConfig)
 
@@ -90,12 +91,6 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
             return factory.getObject() as JestHttpClient
         }
     }
-
-    /**
-     * gson
-     */
-    public val gson: Gson
-        get() = client.gson
 
     /**
      * 对执行es操作包一层try/catch以便打印日志
@@ -498,6 +493,22 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
                     .type(type)
                     .build()
         }
+    }
+
+    fun updateDocs(index: String, type: String){
+
+        val BuilderStr = "{"+
+        " \"script\": { " +
+                "\"source\": \"ctx._source['"+ "mailNo" +"']='" +1 +"'\" "+
+                "}," +
+                "\"query\": {"+
+                "\"match\": {"+
+                "\"orderNo\": \"" + 1 +"\""+
+                "}"+
+                "}"+
+                "}";
+        val updateByQuery = UpdateByQuery.Builder(BuilderStr).addIndex(index).build();
+
     }
 
     /**

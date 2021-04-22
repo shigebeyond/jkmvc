@@ -9,6 +9,7 @@ import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.script.Script
+import org.elasticsearch.script.ScriptType
 import org.elasticsearch.search.aggregations.bucket.terms.Terms
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder
 import org.elasticsearch.search.builder.SearchSourceBuilder
@@ -499,7 +500,7 @@ class ESQueryBuilder(
      * @return
      */
     fun addFieldScript(field: String, script: String, params: Map<String, Any?> = emptyMap()): ESQueryBuilder {
-        fieldScripts[field] = Script(Script.DEFAULT_SCRIPT_TYPE, "painless", script, params)
+        fieldScripts[field] = Script(ScriptType.INLINE, "painless", script, params)
         return this
     }
 
