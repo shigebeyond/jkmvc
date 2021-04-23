@@ -120,7 +120,7 @@ interface IOrmEntity {
      * @param exclude 要排除的字段名的列表
      * @return
      */
-    fun toMap(include: List<String>, exclude: List<String> = emptyList()): MutableMap<String, Any?>{
+    fun toMap(include: List<String> = emptyList(), exclude: List<String> = emptyList()): MutableMap<String, Any?>{
         return toMap(HashMap(), include, exclude)
     }
 

@@ -48,11 +48,26 @@ class EsTests {
         // 生成的json中的字段名, 都是下划线的
         gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
         val gson = gsonBuilder.create()
+        val e = mapOf("name" to "shi", "age" to 1)
+        val json = gson.toJson(e)
+        println(json)
+
+        val e2 = gson.fromJson(json, HashMap::class.java)
+        println(e2)
+    }
+
+    @Test
+    fun testGson2() {
+        val gsonBuilder = GsonBuilder()
+        // es字段命名为: 下划线
+        // 生成的json中的字段名, 都是下划线的
+        gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+        val gson = gsonBuilder.create()
         val e = buildEntity(1)
         val json = gson.toJson(e)
         println(json)
 
-        val e2 = gson.fromJson<WorkSheet>(json, WorkSheet::class.java)
+        val e2 = gson.fromJson(json, WorkSheet::class.java)
         println(e2)
     }
 

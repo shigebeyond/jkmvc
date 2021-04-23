@@ -166,8 +166,8 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
     @Test
     fun testSearch() {
         val query = ESQueryBuilder()
-                .where("fromUid", ">=", 1)
-                .where("content", "like", "f")
+//                .where("fromUid", ">=", 1)
+//                .where("content", "like", "f")
                 .limit(10)
                 .offset(0)
                 .orderBy("id")

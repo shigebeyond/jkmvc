@@ -1,8 +1,8 @@
 package net.jkcode.jkmvc.es
 
-import com.google.gson.FieldNamingPolicy
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
+import com.google.gson.*
+import com.google.gson.internal.bind.MapTypeAdapterFactory
+import com.google.gson.reflect.TypeToken
 import io.searchbox.action.Action
 import io.searchbox.client.JestClientFactory
 import io.searchbox.client.JestResult
@@ -28,6 +28,20 @@ import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.collections.Collection
+import kotlin.collections.Iterator
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.MutableIterator
+import kotlin.collections.MutableMap
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.emptyList
+import kotlin.collections.listOf
+import kotlin.collections.map
+import kotlin.collections.mapOf
+import kotlin.collections.set
+import kotlin.collections.toList
 
 /**
  * es管理者
@@ -44,10 +58,32 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
         /**
          * gson
          */
-        public val gson = GsonBuilder()
-                .setDateFormat("yyyy-MM-dd HH:mm:ss")
-                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                .create()
+        public val gson: Gson by lazy {
+            val builder = GsonBuilder()
+                    .setDateFormat("yyyy-MM-dd HH:mm:ss")
+                    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+
+            val gson = builder.create()
+
+            val field = Gson::class.java.getAccessibleField("factories")!!
+
+            val factories: List<TypeAdapterFactory> = field.get(gson) as List<TypeAdapterFactory>
+            // 获得map类型的适配器
+            val mapTypeAdapterFactory = factories.first {
+                it is MapTypeAdapterFactory
+            }
+            val mapTypeAdapter = mapTypeAdapterFactory.create(gson, TypeToken.get(HashMap::class.java))
+            // 创建entity类型的适配器工厂
+            val entityFactory = EntityTypeAdapterFactory(mapTypeAdapter)
+
+            // 改写 gson.factories: 注意entityFactory优先
+            val factories2 = ArrayList<TypeAdapterFactory>()
+            factories2.add(entityFactory) // entityFactory 放前面, 防止被ReflectiveTypeAdapterFactory拦截
+            factories2.addAll(factories)
+            field.set(gson, factories2)
+
+            gson
+        }
 
         /**
          * EsManager池
