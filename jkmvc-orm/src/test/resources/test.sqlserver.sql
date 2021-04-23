@@ -4,7 +4,8 @@ create table "user"
 	id int identity(1,1),
 	name varchar(50),
 	avatar varchar(50) default '',
-	age int default 0
+	age int default 0,
+	created int default 0
 );
 
 -- 地址表

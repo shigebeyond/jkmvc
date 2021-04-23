@@ -66,7 +66,6 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
             val gson = builder.create()
 
             val field = Gson::class.java.getAccessibleField("factories")!!
-
             val factories: List<TypeAdapterFactory> = field.get(gson) as List<TypeAdapterFactory>
             // 获得map类型的适配器
             val mapTypeAdapterFactory = factories.first {

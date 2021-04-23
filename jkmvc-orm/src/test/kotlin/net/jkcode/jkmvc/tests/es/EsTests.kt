@@ -403,13 +403,13 @@ curl 'localhost:9200/index-workorder/worksheet/_search?pretty=true'  -H "Content
     fun testSearch() {
         val query = ESQueryBuilder()
         query.select("_id", "deptId", "sheetSource", "licensePlates", "sheet_source", "createDate")
-//                .where("deptId", "IN", listOf(94, 93))
-//                .where("sheetSource", "3")
-//                .where("licensePlates", "like", "京BJM00测")
-//                .whereBetween("sheet_source", 0, 6)
+//                .filter("deptId", "IN", listOf(94, 93))
+//                .filter("sheetSource", "3")
+//                .filter("licensePlates", "like", "京BJM00测")
+//                .filterBetween("sheet_source", 0, 6)
         //date
         val start = DateTime().plusDays(-35)
-        query.whereBetween("createDate", start.toDate().time, DateTime().toDate().time)
+        query.filterBetween("createDate", start.toDate().time, DateTime().toDate().time)
 
         query.limit(10).offset(0).orderBy("id")
 
@@ -453,8 +453,8 @@ curl 'localhost:9200/index-workorder/worksheet/_search?pretty=true'  -H "Content
     @Test
     fun testStat() {
         val query = ESQueryBuilder()
-        query.where("currentStatus", 1)
-                .where("currentDealUserId", "1500")
+        query.filter("currentStatus", 1)
+                .filter("currentDealUserId", "1500")
                 .aggBy("deptId")
                 .aggBy("count(id)", "nid")
 
@@ -478,7 +478,7 @@ curl 'localhost:9200/index-workorder/worksheet/_search?pretty=true'  -H "Content
         val query = ESQueryBuilder()
         //加上时间过滤
         val start = DateTime().plusDays(-10)
-        query.whereBetween("createDate", start.toDate().time, DateTime().toDate().time)
+        query.filterBetween("createDate", start.toDate().time, DateTime().toDate().time)
 
         query.aggBy("sheetTypeOne").aggBy("sheetTypeTwo", "agg")
         val result = esmgr.searchDocs(index, type, query)

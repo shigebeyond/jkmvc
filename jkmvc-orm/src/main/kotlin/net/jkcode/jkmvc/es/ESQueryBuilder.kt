@@ -6,6 +6,7 @@ import net.jkcode.jkutil.common.esLogger
 import net.jkcode.jkutil.common.isArrayOrCollection
 import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.common.unit.TimeValue
+import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.script.Script
@@ -15,11 +16,11 @@ import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilde
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.elasticsearch.search.sort.SortBuilders
 import org.elasticsearch.search.sort.SortOrder
+import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
-
 
 /**
  * 查询构建器
@@ -27,13 +28,9 @@ import kotlin.collections.HashSet
  * @author shijianhang
  * @date 2021-4-21 下午5:16:59
  */
-class ESQueryBuilder(
-        protected val esmgr: EsManager = EsManager.instance(),
-        protected val parent: ESQueryBuilder? = null,
-        protected val path: String? = null
-) {
+class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
-    companion object{
+    companion object {
 
         /**
          * Filter operators
@@ -73,30 +70,56 @@ class ESQueryBuilder(
     protected lateinit var type: String
 
     /**
-     * Query type key
+     * 查询对象栈
+     *   元素是 BoolQueryBuilder + 上一层的filter/must/mustNot/should对象(仅用于闭合校验)
      */
-    protected lateinit var id: String
+    protected val queryStack: Stack<Pair<BoolQueryBuilder, List<*>?>> by lazy{
+        val s = Stack<Pair<BoolQueryBuilder, List<*>?>>()
+        s.push(QueryBuilders.boolQuery() to null)
+        s
+    }
 
     /**
-     * Query bool filter
+     * 当前查询对象
      */
-    protected val filter = ArrayList<QueryBuilder>();
+    protected val currQuery: BoolQueryBuilder
+        get() {
+            return queryStack.peek().first
+        }
 
     /**
-     * Query bool must
+     * Current query bool filter
      */
-    protected val must = ArrayList<QueryBuilder>()
+    protected val filter: MutableList<QueryBuilder>
+        get() {
+            return currQuery.filter()
+        }
 
     /**
-     * Query bool must not
+     * Current query bool must
+     */
+    protected val must: MutableList<QueryBuilder>
+        get() {
+            return currQuery.must()
+        }
+
+    /**
+     * Current query bool must not
      * @var List
      */
-    protected val mustNot = ArrayList<QueryBuilder>()
+    protected val mustNot: MutableList<QueryBuilder>
+        get() {
+            return currQuery.mustNot()
+        }
 
     /**
-     * Query bool should
+     * Current query bool should
      */
-    protected val should = ArrayList<QueryBuilder>()
+    protected val should: MutableList<QueryBuilder>
+        get() {
+            return currQuery.should()
+        }
+
     /**
      * 返回字段
      */
@@ -158,14 +181,11 @@ class ESQueryBuilder(
     /**
      * 清空查询元素
      */
-    fun clear(){
+    fun clear() {
         index = ""
         type = ""
-        id = ""
-        filter.clear()
-        must.clear()
-        mustNot.clear()
-        should.clear()
+        queryStack.clear()
+        queryStack.push(QueryBuilders.boolQuery() to null)
         includeFields.clear()
         excludeFields.clear()
         highlightFields.clear()
@@ -272,25 +292,18 @@ class ESQueryBuilder(
         return this;
     }
 
+    // --------- where start ---------
     /**
-     * Filter by _id
-     * @param id
-     * @return this
+     * 构建单个条件
      */
-    public fun id(id: String): ESQueryBuilder {
-        this.id = id;
-
-        val query = QueryBuilders.termQuery("_id", id)
-        this.filter.add(query)
-        return this;
-    }
-
     protected fun build1Condition(name: String, operator: String, value: Any?): QueryBuilder {
-        if (operator == "=") // term
-            return QueryBuilders.termQuery(name, value)
+        if (operator == "=") { // term
+            val v = if(name == "_id") value.toString() else value
+            return QueryBuilders.termQuery(name, v)
+        }
 
         if (operator.equals("IN", true)) { // terms
-            return when(value){
+            return when (value) {
                 is Array<*> -> QueryBuilders.termsQuery(name, *value)
                 is IntArray -> QueryBuilders.termsQuery(name, *value)
                 is LongArray -> QueryBuilders.termsQuery(name, *value)
@@ -316,6 +329,9 @@ class ESQueryBuilder(
         if (operator.equals("like", true))
             return QueryBuilders.matchQuery(name, value)
 
+        if (operator.equals("exist", true))
+            return QueryBuilders.existsQuery(name)
+
         throw IllegalArgumentException("Unkown operator")
     }
 
@@ -326,114 +342,38 @@ class ESQueryBuilder(
      * @return
      */
     protected fun prepareOperator(value: Any?): String {
-        if(value != null && value.isArrayOrCollection()) // 数组/集合
+        if (value != null && value.isArrayOrCollection()) // 数组/集合
             return "IN"
 
         return "=";
     }
 
     /**
-     * Set the query where clause
-     * @param name
-     * @param value
-     * @return this
-     */
-    public fun where(name: String, value: Any?): ESQueryBuilder {
-        return where(name, prepareOperator(value), value)
-    }
-
-    /**
-     * Set the query where clause
+     * Set the query filter/must/mustNot/should clause
      * @param name
      * @param operator
      * @param value
      * @return this
      */
-    public fun where(name: String, operator: String, value: Any?): ESQueryBuilder {
-        if(!isOperator(operator))
+    protected inline fun where(wheres: MutableList<QueryBuilder>, name: String, operator: String, value: Any?): ESQueryBuilder {
+        if (!isOperator(operator))
             throw IllegalArgumentException("Unkown operator: $operator")
 
-        if (operator == "=" && name == "_id")
-            return this.id(value.toString())
-
         val condition = build1Condition(name, operator, value)
-        if (operator == "like")
-            this.must.add(condition)
-        else
-            this.filter.add(condition)
-
-        if (operator == "exists")
-            this.whereExists(name, value as Boolean);
-
-        return this;
-    }
-
-
-    /**
-     * Set the query inverse where clause
-     * @param        name
-     * @param string operator
-     * @param null value
-     * @return this
-     */
-    public fun whereNot(name: String, value: Any?): ESQueryBuilder {
-        return whereNot(name, prepareOperator(value), value)
+        wheres.add(condition)
+        return this
     }
 
     /**
-     * Set the query inverse where clause
-     * @param        name
-     * @param string operator
-     * @param null value
-     * @return this
-     */
-    public fun whereNot(name: String, operator: String, value: Any?): ESQueryBuilder {
-        val condition = build1Condition(name, operator, value)
-        this.mustNot.add(condition)
-        if (operator == "exists")
-            this.whereExists(name, !(value as Boolean));
-
-        return this;
-    }
-
-    /**
-     * Set the query where between clause
+     * Set the query filter/must/mustNot/should between clause
      * @param name
      * @param from
      * @param to
      * @return this
      */
-    public fun whereBetween(name: String, from: Any, to: Any): ESQueryBuilder {
+    protected inline fun whereBetween(wheres: MutableList<QueryBuilder>, name: String, from: Any, to: Any): ESQueryBuilder {
         val query = QueryBuilders.rangeQuery(name).gte(from).lte(to)
-        this.filter.add(query)
-        return this;
-    }
-
-    /**
-     * Set the query where not between clause
-     * @param name
-     * @param from
-     * @param to
-     * @return this
-     */
-    public fun whereNotBetween(name: String, from: Any, to: Any): ESQueryBuilder {
-        val query = QueryBuilders.rangeQuery(name).gte(from).lte(to)
-        this.mustNot.add(query)
-        return this;
-    }
-
-    /**
-     * Set the query where exists clause
-     * @param      name
-     * @param bool exists
-     * @return this
-     */
-    public fun whereExists(name: String, exists: Boolean = true): ESQueryBuilder {
-        val query = QueryBuilders.existsQuery(name)
-        if (exists)
-            this.must.add(query)
-        else
-            this.mustNot.add(query)
+        wheres.add(query)
         return this;
     }
 
@@ -448,11 +388,521 @@ class ESQueryBuilder(
      * @param distance A distance from the starting geo point. It can be for example "20km".
      * @return this
      */
-    public fun distance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
+    protected inline fun whereDistance(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
         val query = QueryBuilders.geoDistanceQuery(name).point(lat, lon).distance(distance);
-        this.filter.add(query)
+        wheres.add(query)
         return this;
     }
+
+    /**
+     * Open a filter/must/mustNot/should sub clauses
+     * @return
+     */
+    protected inline fun whereOpen(wheres: MutableList<QueryBuilder>): ESQueryBuilder {
+        val query = QueryBuilders.boolQuery()
+        wheres.add(query)
+        queryStack.push(query to wheres)
+        return this
+    }
+
+    /**
+     * Opens a filter/must/mustNot/should nested sub clauses
+     * @param path
+     * @return
+     */
+    protected inline fun whereNestedOpen(wheres: MutableList<QueryBuilder>, path: String): ESQueryBuilder {
+        val subquery = QueryBuilders.boolQuery()
+        val nestedContainer = QueryBuilders.nestedQuery(path, subquery, ScoreMode.Total)
+        wheres.add(nestedContainer)
+        queryStack.push(subquery to wheres)
+        return this
+    }
+
+    /**
+     * Close a filter/must/mustNot/should sub clauses
+     * @return
+     */
+    protected inline fun whereClose(wheresGetter: ESQueryBuilder.()->MutableList<QueryBuilder>): ESQueryBuilder {
+        // 出栈, 获得上一层的where对象
+        val (_, preWheres) = queryStack.pop()
+        // 出栈后的当前层的where对象
+        val currWheres = this.wheresGetter()
+        // 两者应该相等
+        if(currWheres != preWheres)
+            throw EsException("Close not match last open")
+
+        return this
+    }
+    // --------- where end ---------
+
+    // --------- filter start ---------
+    /**
+     * Set the query filter clause
+     * @param name
+     * @param value
+     * @return this
+     */
+    public fun filter(name: String, value: Any?): ESQueryBuilder {
+        return filter(name, prepareOperator(value), value)
+    }
+
+    /**
+     * Set the query filter clause
+     * @param name
+     * @param operator
+     * @param value
+     * @return this
+     */
+    public fun filter(name: String, operator: String, value: Any?): ESQueryBuilder {
+        return where(this.filter, name, operator, value)
+    }
+
+    /**
+     * Set the query filter exists clause
+     * @param name
+     * @return this
+     */
+    public fun filterExists(name: String): ESQueryBuilder {
+        return filter(name, "exists", null)
+    }
+
+    /**
+     * Set the query filter between clause
+     * @param name
+     * @param from
+     * @param to
+     * @return this
+     */
+    public fun filterBetween(name: String, from: Any, to: Any): ESQueryBuilder {
+        return whereBetween(this.filter, name, from, to)
+    }
+
+    /**
+     * Add a condition to find documents which are some distance away from the given geo point.
+     *
+     * @see https://www.elastic.co/guide/en/elasticsearch/reference/2.4/query-dsl-geo-distance-query.html
+     *
+     * @param name A name of the field.
+     * @param lat geo point
+     * @param lon geo point
+     * @param distance A distance from the starting geo point. It can be for example "20km".
+     * @return this
+     */
+    public fun filterDistance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
+        return whereDistance(this.filter, name, lat, lon, distance)
+    }
+
+    /**
+     * Opens a filter sub clauses
+     * @return
+     */
+    public fun filterOpen(): ESQueryBuilder {
+        return whereOpen(this.filter)
+    }
+
+    /**
+     * Opens a filter sub clauses
+     * @return
+     */
+    public fun filterClose(): ESQueryBuilder {
+        return whereClose(ESQueryBuilder::filter)
+    }
+
+    /**
+     * Wrap a filter sub clauses
+     * @param action
+     * @return
+     */
+    public fun filterWrap(action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+        filterOpen()
+        this.action()
+        filterClose()
+        return this
+    }
+
+    /**
+     * Opens a filter nested sub clauses
+     * @param path
+     * @return
+     */
+    public fun filterNestedOpen(path: String): ESQueryBuilder {
+        return whereNestedOpen(this.filter, path)
+    }
+
+    /**
+     * Opens a filter nested sub clauses
+     * @return
+     */
+    public fun filterNestedClose(): ESQueryBuilder {
+        return whereClose(ESQueryBuilder::filter)
+    }
+
+    /**
+     * Wrap a filter nested sub clauses
+     * @param path
+     * @param action
+     * @return
+     */
+    public fun filterNestedWrap(path: String, action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+        filterNestedOpen(path)
+        this.action()
+        filterNestedClose()
+        return this
+    }
+    // --------- filter end ---------
+
+
+    // --------- must start ---------
+    /**
+     * Set the query must clause
+     * @param name
+     * @param value
+     * @return this
+     */
+    public fun must(name: String, value: Any?): ESQueryBuilder {
+        return must(name, prepareOperator(value), value)
+    }
+
+    /**
+     * Set the query must clause
+     * @param name
+     * @param operator
+     * @param value
+     * @return this
+     */
+    public fun must(name: String, operator: String, value: Any?): ESQueryBuilder {
+        return where(this.must, name, operator, value)
+    }
+
+    /**
+     * Set the query must exists clause
+     * @param name
+     * @return this
+     */
+    public fun mustExists(name: String): ESQueryBuilder {
+        return must(name, "exists", null)
+    }
+
+    /**
+     * Set the query must between clause
+     * @param name
+     * @param from
+     * @param to
+     * @return this
+     */
+    public fun mustBetween(name: String, from: Any, to: Any): ESQueryBuilder {
+        return whereBetween(this.must, name, from, to)
+    }
+
+    /**
+     * Add a condition to find documents which are some distance away from the given geo point.
+     *
+     * @see https://www.elastic.co/guide/en/elasticsearch/reference/2.4/query-dsl-geo-distance-query.html
+     *
+     * @param name A name of the field.
+     * @param lat geo point
+     * @param lon geo point
+     * @param distance A distance from the starting geo point. It can be for example "20km".
+     * @return this
+     */
+    public fun mustDistance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
+        return whereDistance(this.must, name, lat, lon, distance)
+    }
+
+    /**
+     * Opens a must sub clauses
+     * @return
+     */
+    public fun mustOpen(): ESQueryBuilder {
+        return whereOpen(this.must)
+    }
+
+    /**
+     * Opens a must sub clauses
+     * @return
+     */
+    public fun mustClose(): ESQueryBuilder {
+        return whereClose(ESQueryBuilder::must)
+    }
+
+    /**
+     * Wrap a must sub clauses
+     * @param action
+     * @return
+     */
+    public fun mustWrap(action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+        mustOpen()
+        this.action()
+        mustClose()
+        return this
+    }
+
+    /**
+     * Opens a must nested sub clauses
+     * @param path
+     * @return
+     */
+    public fun mustNestedOpen(path: String): ESQueryBuilder {
+        return whereNestedOpen(this.must, path)
+    }
+
+    /**
+     * Opens a must nested sub clauses
+     * @return
+     */
+    public fun mustNestedClose(): ESQueryBuilder {
+        return whereClose(ESQueryBuilder::must)
+    }
+
+    /**
+     * Wrap a must nested sub clauses
+     * @param path
+     * @param action
+     * @return
+     */
+    public fun mustNestedWrap(path: String, action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+        mustNestedOpen(path)
+        this.action()
+        mustNestedClose()
+        return this
+    }
+    // --------- must end ---------
+
+
+
+    // --------- mustNot start ---------
+    /**
+     * Set the query mustNot clause
+     * @param name
+     * @param value
+     * @return this
+     */
+    public fun mustNot(name: String, value: Any?): ESQueryBuilder {
+        return mustNot(name, prepareOperator(value), value)
+    }
+
+    /**
+     * Set the query mustNot clause
+     * @param name
+     * @param operator
+     * @param value
+     * @return this
+     */
+    public fun mustNot(name: String, operator: String, value: Any?): ESQueryBuilder {
+        return where(this.mustNot, name, operator, value)
+    }
+
+    /**
+     * Set the query mustNot exists clause
+     * @param name
+     * @return this
+     */
+    public fun mustNotExists(name: String): ESQueryBuilder {
+        return mustNot(name, "exists", null)
+    }
+
+    /**
+     * Set the query mustNot between clause
+     * @param name
+     * @param from
+     * @param to
+     * @return this
+     */
+    public fun mustNotBetween(name: String, from: Any, to: Any): ESQueryBuilder {
+        return whereBetween(this.mustNot, name, from, to)
+    }
+
+    /**
+     * Add a condition to find documents which are some distance away from the given geo point.
+     *
+     * @see https://www.elastic.co/guide/en/elasticsearch/reference/2.4/query-dsl-geo-distance-query.html
+     *
+     * @param name A name of the field.
+     * @param lat geo point
+     * @param lon geo point
+     * @param distance A distance from the starting geo point. It can be for example "20km".
+     * @return this
+     */
+    public fun mustNotDistance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
+        return whereDistance(this.mustNot, name, lat, lon, distance)
+    }
+
+    /**
+     * Opens a mustNot sub clauses
+     * @return
+     */
+    public fun mustNotOpen(): ESQueryBuilder {
+        return whereOpen(this.mustNot)
+    }
+
+    /**
+     * Opens a mustNot sub clauses
+     * @return
+     */
+    public fun mustNotClose(): ESQueryBuilder {
+        return whereClose(ESQueryBuilder::mustNot)
+    }
+
+    /**
+     * Wrap a mustNot sub clauses
+     * @param action
+     * @return
+     */
+    public fun mustNotWrap(action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+        mustNotOpen()
+        this.action()
+        mustNotClose()
+        return this
+    }
+
+    /**
+     * Opens a mustNot nested sub clauses
+     * @param path
+     * @return
+     */
+    public fun mustNotNestedOpen(path: String): ESQueryBuilder {
+        return whereNestedOpen(this.mustNot, path)
+    }
+
+    /**
+     * Opens a mustNot nested sub clauses
+     * @return
+     */
+    public fun mustNotNestedClose(): ESQueryBuilder {
+        return whereClose(ESQueryBuilder::mustNot)
+    }
+
+    /**
+     * Wrap a mustNot nested sub clauses
+     * @param path
+     * @param action
+     * @return
+     */
+    public fun mustNotNestedWrap(path: String, action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+        mustNotNestedOpen(path)
+        this.action()
+        mustNotNestedClose()
+        return this
+    }
+    // --------- mustNot end ---------
+
+
+
+    // --------- should start ---------
+    /**
+     * Set the query should clause
+     * @param name
+     * @param value
+     * @return this
+     */
+    public fun should(name: String, value: Any?): ESQueryBuilder {
+        return should(name, prepareOperator(value), value)
+    }
+
+    /**
+     * Set the query should clause
+     * @param name
+     * @param operator
+     * @param value
+     * @return this
+     */
+    public fun should(name: String, operator: String, value: Any?): ESQueryBuilder {
+        return where(this.should, name, operator, value)
+    }
+
+    /**
+     * Set the query should exists clause
+     * @param name
+     * @return this
+     */
+    public fun shouldExists(name: String): ESQueryBuilder {
+        return should(name, "exists", null)
+    }
+
+    /**
+     * Set the query should between clause
+     * @param name
+     * @param from
+     * @param to
+     * @return this
+     */
+    public fun shouldBetween(name: String, from: Any, to: Any): ESQueryBuilder {
+        return whereBetween(this.should, name, from, to)
+    }
+
+    /**
+     * Add a condition to find documents which are some distance away from the given geo point.
+     *
+     * @see https://www.elastic.co/guide/en/elasticsearch/reference/2.4/query-dsl-geo-distance-query.html
+     *
+     * @param name A name of the field.
+     * @param lat geo point
+     * @param lon geo point
+     * @param distance A distance from the starting geo point. It can be for example "20km".
+     * @return this
+     */
+    public fun shouldDistance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
+        return whereDistance(this.should, name, lat, lon, distance)
+    }
+
+    /**
+     * Opens a should sub clauses
+     * @return
+     */
+    public fun shouldOpen(): ESQueryBuilder {
+        return whereOpen(this.should)
+    }
+
+    /**
+     * Opens a should sub clauses
+     * @return
+     */
+    public fun shouldClose(): ESQueryBuilder {
+        return whereClose(ESQueryBuilder::should)
+    }
+
+    /**
+     * Wrap a should sub clauses
+     * @param action
+     * @return
+     */
+    public fun shouldWrap(action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+        shouldOpen()
+        this.action()
+        shouldClose()
+        return this
+    }
+
+    /**
+     * Opens a should nested sub clauses
+     * @param path
+     * @return
+     */
+    public fun shouldNestedOpen(path: String): ESQueryBuilder {
+        return whereNestedOpen(this.should, path)
+    }
+
+    /**
+     * Opens a should nested sub clauses
+     * @return
+     */
+    public fun shouldNestedClose(): ESQueryBuilder {
+        return whereClose(ESQueryBuilder::should)
+    }
+
+    /**
+     * Wrap a should nested sub clauses
+     * @param path
+     * @param action
+     * @return
+     */
+    public fun shouldNestedWrap(path: String, action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+        shouldNestedOpen(path)
+        this.action()
+        shouldNestedClose()
+        return this
+    }
+    // --------- should end ---------
 
     /**
      * 聚合
@@ -463,24 +913,6 @@ class ESQueryBuilder(
     public fun aggBy(expr: String, alias: String? = null, asc: Boolean? = null): ESQueryBuilder {
         this.aggExprs.add(AggExpr(expr, alias, asc))
         return this
-    }
-
-    /**
-     * 嵌套进-
-     * @return 返回下一层query builder
-     */
-    public fun nestedDown(path: String): ESQueryBuilder {
-        return ESQueryBuilder(esmgr, this, path)
-    }
-
-    /**
-     * 嵌套退-
-     * @return 返回上一层query builder
-     */
-    public fun nestedUp(): ESQueryBuilder {
-        val nestedQuery = QueryBuilders.nestedQuery(path, toQuery(), ScoreMode.Total)
-        parent!!.must.add(nestedQuery)
-        return parent!!
     }
 
     /**
@@ -509,25 +941,10 @@ class ESQueryBuilder(
      * 转查询对象
      */
     protected fun toQuery(): QueryBuilder? {
-        val query = QueryBuilders.boolQuery()
+        if(queryStack.size > 1)
+            throw EsException("No close for " + currQuery)
 
-        //filter容器
-        for (condition in filter) {
-            query.filter(condition)
-        }
-        //must容器
-        for (condition in must) {
-            query.must(condition)
-        }
-        //should容器
-        for (condition in should) {
-            query.should(condition)
-        }
-        //must not 容器
-        for (condition in mustNot) {
-            query.mustNot(condition)
-        }
-        return query
+        return currQuery
     }
 
     /**
@@ -540,7 +957,7 @@ class ESQueryBuilder(
         sourceBuilder.query(this.toQuery())
 
         // 分页
-        if(this.limit > 0) {
+        if (this.limit > 0) {
             sourceBuilder.from(this.offset)
             sourceBuilder.size(this.limit)
         }
@@ -595,7 +1012,7 @@ class ESQueryBuilder(
         sourceBuilder.highlighter(highlighter)
 
         // 字段脚本
-        for ((field, script) in fieldScripts){
+        for ((field, script) in fieldScripts) {
             sourceBuilder.scriptField(field, script)
         }
 

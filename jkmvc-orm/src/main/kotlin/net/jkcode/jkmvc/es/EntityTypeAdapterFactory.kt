@@ -18,7 +18,6 @@ import net.jkcode.jkmvc.orm.IOrmEntity
 class EntityTypeAdapterFactory(protected val mapTypeAdapter: TypeAdapter<HashMap<*, *>>) : TypeAdapterFactory {
 
     override fun <T> create(gson: Gson, typeToken: TypeToken<T>): TypeAdapter<T>? {
-        val type = typeToken.type
         val rawType = typeToken.rawType as Class<T>
         if (!IOrmEntity::class.java.isAssignableFrom(rawType))
             return null

@@ -6,8 +6,9 @@ import com.google.gson.GsonBuilder
 import net.jkcode.jkmvc.es.ESQueryBuilder
 import net.jkcode.jkmvc.es.EsManager
 import net.jkcode.jkmvc.tests.entity.MessageEntity
+import net.jkcode.jkutil.common.randomBoolean
 import net.jkcode.jkutil.common.randomInt
-import net.jkcode.jkutil.common.randomString
+import net.jkcode.jkutil.common.toDate
 import org.joda.time.DateTime
 import org.junit.Test
 import java.util.*
@@ -21,6 +22,8 @@ class EsTests2 {
     private val type = "message"
 
     private val esmgr = EsManager.instance()
+
+    private val time = "2021-04-15".toDate().time / 1000
 
     @Test
     fun testGson() {
@@ -38,6 +41,15 @@ class EsTests2 {
     }
 
     @Test
+    fun testAll() {
+        testDeleteIndex()
+        testCreateIndex()
+        testGetIndex()
+        testBulkInsertDocs()
+        testSearch()
+    }
+
+    @Test
     fun testCreateIndex() {
         // gson还是必须用双引号
         var mapping = """{
@@ -46,15 +58,18 @@ class EsTests2 {
             'id':{
                 'type':'long'
             },
-            'from_uid':{
+            'fromUid':{
                 'type':'long'
             },
-            'to_uid':{
+            'toUid':{
                 'type':'long'
             },
             'content':{
-                'type':'keyword'
-            }
+                'type':'text'
+            },
+            'created':{
+                'type':'long'
+            },
         }
     }
 }"""
@@ -131,7 +146,8 @@ class EsTests2 {
         e.id = i
         e.fromUid = randomInt(10)
         e.toUid = randomInt(10)
-        e.content = "hello entity $i"
+        e.content = if(i % 2 == 0) "welcome $i" else "Goodbye $i"
+        e.created = time + i * 60
         return e
     }
 
@@ -165,9 +181,20 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
      */
     @Test
     fun testSearch() {
+        val ts = time + 120 // 2分钟前
         val query = ESQueryBuilder()
-//                .where("fromUid", ">=", 1)
-//                .where("content", "like", "f")
+                .filter("fromUid", ">=", 1)
+                .must("toUid", ">=", 1)
+                .shouldWrap {
+                    filterWrap {
+                        must("content", "like", "Welcome")
+                        must("created", "<=", ts) // 两分钟前发的
+                    }
+                    filterWrap {
+                        must("content", "like", "Goodbye")
+                        must("created", ">", ts) // 两分钟内发的
+                    }
+                }
                 .limit(10)
                 .offset(0)
                 .orderBy("id")
@@ -213,7 +240,7 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
     fun testScript() {
         val query = ESQueryBuilder().index(index).type(type)
                 .addFieldScript("fromUid", "doc['fromUid']+1")
-                .where("fromUid", ">=", 1)
+                .filter("fromUid", ">=", 1)
                 .limit(10)
         println(query.toSearchSource())
     }
@@ -221,8 +248,8 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
     @Test
     fun testStat() {
         val query = ESQueryBuilder()
-        query.where("currentStatus", 1)
-                .where("currentDealUserId", "1500")
+        query.filter("currentStatus", 1)
+                .filter("currentDealUserId", "1500")
                 .aggBy("deptId")
                 .aggBy("count(id)", "nid")
 
@@ -246,7 +273,7 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
         val query = ESQueryBuilder()
         //加上时间过滤
         val start = DateTime().plusDays(-10)
-        query.whereBetween("createDate", start.toDate().time, DateTime().toDate().time)
+        query.filterBetween("createDate", start.toDate().time, DateTime().toDate().time)
 
         query.aggBy("sheetTypeOne").aggBy("sheetTypeTwo", "agg")
         val result = esmgr.searchDocs(index, type, query)

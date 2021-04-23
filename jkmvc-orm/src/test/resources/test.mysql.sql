@@ -32,5 +32,6 @@ CREATE TABLE `message` (
   `from_uid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '发送人id',
   `to_uid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '接收人id',
   `content` varchar(50) NOT NULL DEFAULT '' COMMENT '消息内容',
+  `created` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '接收人id',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='消息';

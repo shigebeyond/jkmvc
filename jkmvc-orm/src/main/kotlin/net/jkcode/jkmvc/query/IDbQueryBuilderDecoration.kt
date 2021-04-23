@@ -212,11 +212,35 @@ interface IDbQueryBuilderDecoration{
     fun andWhereOpen(): IDbQueryBuilder;
 
     /**
+     * Wrap a new "AND WHERE (...)" grouping.
+     *
+     * @return
+     */
+    fun andWhereWrap(action: IDbQueryBuilder.() -> Unit): IDbQueryBuilder{
+        andWhereOpen()
+        (this as IDbQueryBuilder).action()
+        andWhereClose()
+        return this
+    }
+
+    /**
      * Opens a new "OR WHERE (...)" grouping.
      *
      * @return
      */
     fun orWhereOpen(): IDbQueryBuilder;
+
+    /**
+     * Wrap a new "Or WHERE (...)" grouping.
+     *
+     * @return
+     */
+    fun orWhereWrap(action: IDbQueryBuilder.() -> Unit): IDbQueryBuilder{
+        orWhereOpen()
+        (this as IDbQueryBuilder).action()
+        orWhereClose()
+        return this
+    }
 
     /**
      * Closes an open "WHERE (...)" grouping.
