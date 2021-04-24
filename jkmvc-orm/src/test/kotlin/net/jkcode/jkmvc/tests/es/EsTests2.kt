@@ -56,6 +56,7 @@ class EsTests2 {
         // gson还是必须用双引号
         var mapping = """{
     'message':{
+        '_id':{'path':'id'},
         'properties':{
             'id':{
                 'type':'long'
@@ -71,12 +72,13 @@ class EsTests2 {
             },
             'created':{
                 'type':'long'
-            },
+            }
         }
     }
 }"""
         // gson还是必须用双引号
         mapping = mapping.replace('\'', '"')
+        println(mapping)
         var r = esmgr.createIndex(index)
         println("创建索引[$index]: " + r)
         r = esmgr.putMapping(index, type, mapping)
