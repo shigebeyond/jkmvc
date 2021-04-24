@@ -311,7 +311,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param type
      * @return
      */
-    fun getMapping(index: String, type: String): JsonObject? {
+    fun getMapping(index: String, type: String): Map<String, Any?>? {
         val result = tryExecute {
             GetMapping.Builder().addIndex(index).addType(type).build()
         }
@@ -325,11 +325,10 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
         val index = result.jsonObject.get(index).asJsonObject
         val mappings = index?.get("mappings")?.asJsonObject
         val type = mappings?.get(type)?.asJsonObject
-        return type
 
-//        if (type == null)
-//            return null
-//        return JsonToMap.toMap(type)
+        if (type == null)
+            return null
+        return JsonToMap.toMap(type)
     }
 
     /**

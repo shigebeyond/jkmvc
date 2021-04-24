@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.tests.entity
 
+import net.jkcode.jkmvc.es.EsId
 import net.jkcode.jkmvc.orm.OrmEntity
 
 /**
@@ -13,6 +14,7 @@ import net.jkcode.jkmvc.orm.OrmEntity
 open class MessageEntity: OrmEntity() {
 
     // 代理属性读写
+    @EsId
     public var id:Int by property() // 消息id
 
     public var fromUid:Int by property() // 发送人id

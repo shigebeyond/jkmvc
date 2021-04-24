@@ -23,7 +23,8 @@ class EsTests2 {
 
     private val esmgr = EsManager.instance()
 
-    private val time = "2021-04-15".toDate().time / 1000
+    //private val time = "2021-04-15".toDate().time / 1000
+    private val time = 0L
 
     @Test
     fun testGson() {
@@ -46,6 +47,7 @@ class EsTests2 {
         testCreateIndex()
         testGetIndex()
         testBulkInsertDocs()
+        testRefreshIndex()
         testSearch()
     }
 
@@ -182,19 +184,25 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
     @Test
     fun testSearch() {
         val ts = time + 120 // 2分钟前
+        println("timestamp: $ts")
         val query = ESQueryBuilder()
-                .filter("fromUid", ">=", 1)
-                .must("toUid", ">=", 1)
-                .shouldWrap {
-                    filterWrap {
-                        must("content", "like", "Welcome")
-                        must("created", "<=", ts) // 两分钟前发的
-                    }
-                    filterWrap {
-                        must("content", "like", "Goodbye")
-                        must("created", ">", ts) // 两分钟内发的
-                    }
+//                .filter("fromUid", ">=", 7)
+//                .must("toUid", ">=", 8)
+//                .should("created", "<=", 120)
+                /*.shouldWrap {
+                    must("content", "like", "Welcome")
+                    must("created", "<=", ts) // 两分钟前发的
                 }
+                .shouldWrap {
+                    must("content", "like", "Goodbye")
+                    must("created", ">", ts) // 两分钟内发的
+                }*/
+                /*.mustWrap {
+                    should("created", "=", 120)
+                    should("fromUid", "=", 8)
+                }
+                .must("toUid", ">=", 8)
+                */
                 .limit(10)
                 .offset(0)
                 .orderBy("id")
