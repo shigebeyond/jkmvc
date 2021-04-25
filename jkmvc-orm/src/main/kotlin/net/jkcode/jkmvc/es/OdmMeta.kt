@@ -1,7 +1,5 @@
 package net.jkcode.jkmvc.es
 
-import java.lang.reflect.Field
-
 /**
  * odm的元数据
  */
@@ -12,9 +10,9 @@ class OdmMeta(
         public val esName: String = "default" // es配置名
 ){
     /**
-     * id字段
+     * id属性名
      */
-    public var idField: Field = model.getJestIdField()
+    public var idProp: String = model.kotlin.getEsIdProp()?.name ?: throw EsException("$model 没有用 @EsId 注解来指定 _id 属性")
 
     /**
      * 获得es管理器
@@ -40,7 +38,7 @@ class OdmMeta(
      * 更新
      */
     fun update(item: Odm): Boolean {
-        return esmgr.updateDoc(index, type, item[idField.name], item)
+        return esmgr.updateDoc(index, type, item, item._id)
     }
 
     /**

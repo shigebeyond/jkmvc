@@ -5,7 +5,9 @@ import com.google.gson.FieldNamingPolicy
 import com.google.gson.GsonBuilder
 import net.jkcode.jkmvc.es.ESQueryBuilder
 import net.jkcode.jkmvc.es.EsManager
+import net.jkcode.jkmvc.es.getEsIdProp
 import net.jkcode.jkmvc.tests.entity.MessageEntity
+import net.jkcode.jkmvc.tests.model.MessageModel
 import net.jkcode.jkutil.common.randomBoolean
 import net.jkcode.jkutil.common.randomInt
 import net.jkcode.jkutil.common.toDate
@@ -17,14 +19,20 @@ import kotlin.collections.HashMap
 
 class EsTests2 {
 
-    private val index = "esindex"
+    private val index = "message_index"
 
-    private val type = "message"
+    private val type = "doc"
 
     private val esmgr = EsManager.instance()
 
     //private val time = "2021-04-15".toDate().time / 1000
     private val time = 0L
+
+    @Test
+    fun testEsId() {
+        val prop = MessageModel::class.getEsIdProp()
+        println("esid prop: " + prop?.name)
+    }
 
     @Test
     fun testGson() {
@@ -160,7 +168,7 @@ class EsTests2 {
         val e = esmgr.getDoc(index, type, "1", MessageEntity::class.java)!!
         e.fromUid = randomInt(10)
         e.toUid = randomInt(10)
-        val r = esmgr.updateDoc(index, type, "1", e)
+        val r = esmgr.updateDoc(index, type, e, "1")
         println("更新文档: " + r)
     }
 
@@ -189,8 +197,9 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
         println("timestamp: $ts")
         val query = ESQueryBuilder()
 //                .filter("fromUid", ">=", 7)
-//                .must("toUid", ">=", 8)
-//                .should("created", "<=", 120)
+                .must("toUid", ">=", 8)
+                .must("created", "<=", 120)
+                .must("content", "like", "Welcome")
                 /*.shouldWrap {
                     must("content", "like", "Welcome")
                     must("created", "<=", ts) // 两分钟前发的

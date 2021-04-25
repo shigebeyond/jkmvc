@@ -20,6 +20,8 @@ import io.searchbox.indices.mapping.PutMapping
 import io.searchbox.indices.settings.GetSettings
 import io.searchbox.indices.settings.UpdateSettings
 import io.searchbox.params.Parameters
+import net.jkcode.jkmvc.orm.IOrmEntity
+import net.jkcode.jkmvc.orm.OrmEntity
 import net.jkcode.jkutil.common.*
 import org.elasticsearch.common.xcontent.XContentFactory
 import java.io.Closeable
@@ -191,7 +193,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param nReplicas 复制数
      * @param readonly 是否只读
      */
-    fun createIndex(index: String, nShards: Int = 1, nReplicas: Int = 1, readonly: Boolean = false): Boolean {
+    fun createIndex(index: String, nShards: Int, nReplicas: Int, readonly: Boolean = false): Boolean {
         val settings = mapOf(
                 "number_of_shards" to nShards,
                 "number_of_replicas" to nReplicas,
@@ -207,7 +209,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param index 索引名
      * @param settings 配置
      */
-    fun createIndex(index: String, settings: Map<String, *>): Boolean {
+    fun createIndex(index: String, settings: Map<String, *>? = null): Boolean {
         return tryExecuteReturnSucceeded {
             CreateIndex.Builder(index).settings(settings).build()
         }
@@ -301,7 +303,9 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      */
     fun putMapping(index: String, type: String, mapping: String): Boolean {
         return tryExecuteReturnSucceeded {
-            PutMapping.Builder(index, type, mapping).build()
+            PutMapping.Builder(index, type, mapping)
+                    .setParameter("include_type_name", true)
+                    .build()
         }
     }
 
@@ -439,11 +443,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      */
     fun insertDoc(index: String, type: String, source: Any, _id: String? = null): Boolean {
         return tryExecuteReturnSucceeded {
-            Index.Builder(source)
-                    .index(index)
-                    .type(type)
-                    .id(_id)
-                    .build()
+            buildInsertAction(index, type, source, _id)
         }
     }
 
@@ -458,8 +458,28 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      */
     fun <T> insertDocAsync(index: String, type: String, source: Any, _id: String? = null): CompletableFuture<DocumentResult> {
         return tryExecuteAsync {
-            Index.Builder(source).index(index).type(type).id(_id).build()
+            buildInsertAction(index, type, source, _id)
         }
+    }
+
+    /**
+     * 构建插入的动作
+     * @param index 索引名
+     * @param type  类型
+     * @param source  文档, 可以是 json string/bean/map/list, 如果是bean/map/list, 最好有id属性，要不然会自动生成一个
+     * @param _id   文档id
+     * @return
+     */
+    protected fun buildInsertAction(index: String, type: String, source: Any, _id: String?): Index {
+        val action = Index.Builder(source)
+                .index(index)
+                .type(type)
+        if(_id == null && source is OrmEntity){
+
+        }
+        return action
+                .id(_id)
+                .build()
     }
 
     /**
@@ -472,11 +492,11 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      *
      * @param index 索引名
      * @param type  类型
-     * @param _id   文档id
      * @param script 更新脚本
+     * @param _id   文档id
      * @return
      */
-    fun <T> updateDoc(index: String, type: String, _id: String, script: String): Boolean {
+    fun <T> updateDoc(index: String, type: String, script: String, _id: String): Boolean {
         return tryExecuteReturnSucceeded {
             Update.Builder(script)
                     .id(_id)
@@ -491,16 +511,17 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      *
      * @param index 索引名
      * @param type  类型
-     * @param _id   文档id
      * @param entity 文档
+     * @param _id   文档id
      * @return
      */
-    fun <T> updateDoc(index: String, type: String, _id: String, entity: T): Boolean {
+    fun <T> updateDoc(index: String, type: String, entity: T, _id: String): Boolean {
         return tryExecuteReturnSucceeded {
             val script = HashMap<String, Any?>()
             script["doc"] = entity
 
-            Update.Builder(gson.toJson(script)).id(_id)
+            Update.Builder(gson.toJson(script))
+                    .id(_id)
                     .index(index)
                     .type(type)
                     .build()

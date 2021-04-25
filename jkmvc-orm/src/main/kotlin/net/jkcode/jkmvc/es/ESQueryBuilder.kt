@@ -44,7 +44,12 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
                 ">=",
                 "<",
                 "<=",
-                "like",
+                "like", // like = match
+                "match",
+                "fuzzy",
+                "wildcard",
+                "prefix",
+                "queryString",
                 "exists"
         )
 
@@ -326,8 +331,20 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
         if (operator == "<=")
             return QueryBuilders.rangeQuery(name).lte(value);
 
-        if (operator.equals("like", true))
+        if (operator.equals("like", true) || operator.equals("match", true))
             return QueryBuilders.matchQuery(name, value)
+
+        if(operator.equals("fuzzy", true))
+            return QueryBuilders.fuzzyQuery(name, value)
+
+        if(operator.equals("wildcard", true))
+            return QueryBuilders.wildcardQuery(name, value.toString())
+
+        if(operator.equals("prefix", true))
+            return QueryBuilders.prefixQuery(name, value.toString())
+
+        if(operator.equals("queryString", true))
+            return QueryBuilders.queryStringQuery(value.toString())
 
         if (operator.equals("exist", true))
             return QueryBuilders.existsQuery(name)

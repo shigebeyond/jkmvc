@@ -16,7 +16,7 @@ val JestResult.scrollId: String?
 
 
 /**
- * 获得@JestId注解的属性
+ * 获得@JestId注解的java属性
  */
 public fun Class<*>.getJestIdField(): Field {
     return this.fields.first {

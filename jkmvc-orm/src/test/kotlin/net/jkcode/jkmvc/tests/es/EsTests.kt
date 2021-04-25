@@ -14,9 +14,9 @@ import kotlin.collections.HashMap
 
 class EsTests {
 
-    private val index = "index-workorder"
+    private val index = "worksheet_index"
 
-    private val type = "worksheet"
+    private val type = "_doc"
 
     private val esmgr = EsManager.instance()
 
@@ -290,7 +290,7 @@ class EsTests {
         e.updateDate = Date(System.currentTimeMillis())
         e.urgeTimes = 2
         e.reopenTimes = 3
-        val r = esmgr.updateDoc(index, type, "1", e)
+        val r = esmgr.updateDoc(index, type, e, "1")
         println("更新文档: " + r)
     }
 

@@ -1,15 +1,17 @@
 package net.jkcode.jkmvc.es
 
 import net.jkcode.jkmvc.orm.OrmEntity
-import net.jkcode.jkutil.common.dateFormat
 
 /**
  * 对象关系映射
  */
 class Odm: OrmEntity() {
 
-    public val id: String
-        get() = this[odmMeta.idField.name]
+    /**
+     * es主键
+     */
+    public val _id: String
+        get() = this[odmMeta.idProp]
 
     /**
      * 元数据
@@ -36,7 +38,7 @@ class Odm: OrmEntity() {
      * 删除
      */
     fun delete(): Boolean {
-        return odmMeta.deleteById(id)
+        return odmMeta.deleteById(_id)
     }
 
 }
