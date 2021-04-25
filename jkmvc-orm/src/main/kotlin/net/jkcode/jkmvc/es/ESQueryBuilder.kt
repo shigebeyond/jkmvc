@@ -11,6 +11,9 @@ import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.script.Script
 import org.elasticsearch.script.ScriptType
+import org.elasticsearch.search.aggregations.AggregationBuilder
+import org.elasticsearch.search.aggregations.AggregationBuilders
+import org.elasticsearch.search.aggregations.AggregatorFactories
 import org.elasticsearch.search.aggregations.bucket.terms.Terms
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder
 import org.elasticsearch.search.builder.SearchSourceBuilder
@@ -1000,12 +1003,14 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
         if (this.minScore > 0)
             sourceBuilder.minScore(this.minScore)
 
+        AggregatorFactories.builder();
+
         // 聚合
-        var termAgg: TermsAggregationBuilder? = null
+        var termAgg: AggregationBuilder? = null
         for (expr in this.aggExprs) {
             val agg = expr.toAggregation()
-            if (expr.func == "terms") { // 第一个terms聚合, 挂在sourceBuilder下
-                if (termAgg == null)
+            if (expr.func == "terms") {
+                if (termAgg == null)// 第一个terms聚合, 挂在sourceBuilder下
                     sourceBuilder.aggregation(agg)
                 else
                     termAgg!!.subAggregation(agg)
@@ -1016,9 +1021,11 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
         }
 
         // 聚合的排序
-        for (expr in this.aggExprs) {
-            if (expr.asc != null)
-                termAgg!!.order(Terms.Order.aggregation(expr.alias, expr.asc))
+        if(termAgg is TermsAggregationBuilder) {
+            for (expr in this.aggExprs) {
+                if (expr.asc != null)
+                    (termAgg!! as TermsAggregationBuilder).order(Terms.Order.aggregation(expr.alias, expr.asc))
+            }
         }
 
         // 高亮字段

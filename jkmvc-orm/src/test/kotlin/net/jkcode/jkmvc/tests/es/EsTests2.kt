@@ -267,21 +267,21 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
     @Test
     fun testStat() {
         val query = ESQueryBuilder()
-        query.filter("currentStatus", 1)
-                .filter("currentDealUserId", "1500")
-                .aggBy("deptId")
+        query.aggBy("fromUid")
                 .aggBy("count(id)", "nid")
 
         val result = esmgr.searchDocs(index, type, query)
         println("返回结果:" + result.getJsonString())
         if (result.isSucceeded) {
             // 单值
-            val n = result.aggregations.getValueCountAggregation("nid").getValueCount()
+//            val n = result.aggregations.getValueCountAggregation("nid").getValueCount()
+//            println(n)
 
             // 多值
             val map = result.aggregations.getTermsAggregation("nid").buckets.associate { item ->
                 item.key to item.count
             }
+            println(map)
         }
     }
 

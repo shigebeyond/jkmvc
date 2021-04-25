@@ -4,6 +4,7 @@ import net.jkcode.jkutil.common.mapToArray
 import net.jkcode.jkutil.validator.ArgsParser
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilders
+import org.elasticsearch.search.sort.SortOrder
 
 /**
  * 聚合表达式
@@ -53,7 +54,7 @@ class AggExpr(
         }
 
         if (alias == null)
-            alias = func + '_' + args.firstOrNull()
+            alias = func + '_' + field
     }
 
     /**
@@ -65,7 +66,10 @@ class AggExpr(
         if (func == "terms")
             return AggregationBuilders.terms(alias).field(field)
 
-        // 总数聚合
+        if (func == "nested")
+            return AggregationBuilders.nested(alias, field) // field 是path
+
+        // 总数聚合: value_count
         if (func == "count")
             return AggregationBuilders.count(alias).field(field)
 
@@ -113,6 +117,30 @@ class AggExpr(
         if (func == "geo_centroid")
             return AggregationBuilders.geoCentroid(alias).field(field)
 
+        // 多桶聚合后的请求如果使用了top_hits，返回结果会带上每个bucket关联的文档数据
+        if (func == "top_hits") {
+            val topHits = AggregationBuilders.topHits(alias)
+            // from
+            val from = args.firstOrNull()?.toInt()
+            if(from != null)
+                topHits.from(from)
+            // size
+            val size = args.getOrNull(1)?.toInt()
+            if(size != null)
+                topHits.size(size)
+            // order
+            for(i in 2 until args.size){
+                // 每个排序=字段 方向
+                val orderArgs = args[i].split(' ')
+                val field = orderArgs[0]
+                val direction = orderArgs.getOrNull(1)
+                var order: SortOrder? = null
+                if(direction != null)
+                    order = SortOrder.valueOf(direction.toUpperCase())
+                topHits.sort(field, order)
+            }
+            return topHits
+        }
 
         // todo
         /**
