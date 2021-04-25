@@ -18,8 +18,7 @@ import org.elasticsearch.search.sort.SortOrder
  */
 class AggExpr(
         public val exp: String, // 表达式
-        public var alias: String? = null, // 别名
-        public val asc: Boolean? = null // 升序
+        public var alias: String? = null // 别名
 ) {
 
     /**

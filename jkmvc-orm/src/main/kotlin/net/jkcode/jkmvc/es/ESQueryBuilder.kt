@@ -3,7 +3,9 @@ package net.jkcode.jkmvc.es
 import io.searchbox.core.SearchResult
 import io.searchbox.params.SearchType
 import net.jkcode.jkutil.common.esLogger
+import net.jkcode.jkutil.common.getPropertyValue
 import net.jkcode.jkutil.common.isArrayOrCollection
+import net.jkcode.jkutil.common.setPropertyValue
 import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.index.query.BoolQueryBuilder
@@ -129,6 +131,54 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
         }
 
     /**
+     * 聚合组栈
+     *   元素是 AggregatorFactories.Builder + 上一层的聚合组对象(仅用于闭合校验)
+     */
+    protected val aggsStack: Stack<Pair<AggregatorFactories.Builder, AggregatorFactories.Builder?>> by lazy{
+        val s = Stack<Pair<AggregatorFactories.Builder, AggregatorFactories.Builder?>>()
+        s.push(AggregatorFactories.builder() to null)
+        s
+    }
+
+    /**
+     * 当前聚合组
+     *   SearchSourceBuilder.aggregation(AggregationBuilder) 与 AggregationBuilder.subAggregation(AggregationBuilder) 子聚合
+     *   SearchSourceBuilder.aggregations 属性 与 AggregationBuilder.factoriesBuilder 属性都是 AggregatorFactories.Builder
+     *   内部都使用 AggregatorFactories.Builder.addAggregator(AggregationBuilder)
+     *   其中 AggregatorFactories.Builder.aggregationBuilders 属性是 AggregationBuilder列表
+     */
+    protected val currAggs: AggregatorFactories.Builder
+        get() {
+            return aggsStack.peek().first
+        }
+
+    /**
+     * 父聚合
+     */
+    protected val parentAgg: AggregationBuilder
+        get(){
+            if(aggsStack.size < 2)
+                throw IllegalStateException("Cannot find parent aggregation, because `aggsStack` only has 1 aggregation group")
+
+            val parentAggs = aggsStack[aggsStack.size - 2].first
+            return parentAggs.aggregatorFactories.last()
+        }
+
+    /**
+     * 下一层聚合组
+     *    当前聚合组最后一个聚合的子聚合组
+     */
+    protected val nextLevelAggs: AggregatorFactories.Builder
+        get() {
+            // 当前聚合组最后一个聚合
+            // AggregatorFactories.Builder.aggregationBuilders 属性是 AggregationBuilder列表
+            val nextAgg = currAggs.aggregatorFactories.last()
+            // 子聚合组
+            //AggregationBuilder.factoriesBuilder 属性是 AggregatorFactories.Builder
+            return nextAgg.getFactoriesBuilder()
+        }
+
+    /**
      * 返回字段
      */
     protected var includeFields = HashSet<String>()
@@ -161,11 +211,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
     protected var minScore = 0f
 
     /**
-     * 聚合
-     */
-    protected val aggExprs = ArrayList<AggExpr>()
-
-    /**
      * post filter
      */
     protected var postFilter: QueryBuilder? = null
@@ -194,13 +239,14 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
         type = ""
         queryStack.clear()
         queryStack.push(QueryBuilders.boolQuery() to null)
+        aggsStack.clear()
+        aggsStack.push(AggregatorFactories.builder() to null)
         includeFields.clear()
         excludeFields.clear()
         highlightFields.clear()
         fieldScripts.clear()
         sorts.clear()
         minScore = 0f
-        aggExprs.clear()
         postFilter = null
         searchType = SearchType.DFS_QUERY_THEN_FETCH
         limit = 0
@@ -924,6 +970,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
     }
     // --------- should end ---------
 
+    // --------- agg start ---------
     /**
      * 聚合
      * @param expr 聚合表达式, 如 count(name), sum(age)
@@ -931,9 +978,54 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param asc 是否升序
      */
     public fun aggBy(expr: String, alias: String? = null, asc: Boolean? = null): ESQueryBuilder {
-        this.aggExprs.add(AggExpr(expr, alias, asc))
+        val exp = AggExpr(expr, alias)
+        val agg = exp.toAggregation()
+        this.currAggs.addAggregator(agg)
+
+        // 排序
+        if(asc != null) {
+            (parentAgg as TermsAggregationBuilder).order(Terms.Order.aggregation(exp.alias, asc))
+        }
         return this
     }
+
+    /**
+     * Open a agg sub clauses
+     * @return
+     */
+    public fun aggOpen(): ESQueryBuilder {
+        aggsStack.push(nextLevelAggs to currAggs)
+        return this
+    }
+
+    /**
+     * Close a agg sub clauses
+     * @return
+     */
+    public fun aggClose(): ESQueryBuilder {
+        // 出栈, 获得上一层的agg对象
+        val (_, preAggs) = aggsStack.pop()
+        // 出栈后的当前层的agg对象
+        //this.currAggs
+        // 两者应该相等
+        if(currAggs != preAggs)
+            throw EsException("Close not match last open")
+
+        return this
+    }
+
+    /**
+     * Wrap a agg sub clauses
+     * @param action
+     * @return
+     */
+    public fun aggWrap(action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+        aggOpen()
+        this.action()
+        aggClose()
+        return this
+    }
+    // --------- agg end ---------
 
     /**
      * Get highlight result
@@ -1005,28 +1097,11 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
         AggregatorFactories.builder();
 
-        // 聚合
-        var termAgg: AggregationBuilder? = null
-        for (expr in this.aggExprs) {
-            val agg = expr.toAggregation()
-            if (expr.func == "terms") {
-                if (termAgg == null)// 第一个terms聚合, 挂在sourceBuilder下
-                    sourceBuilder.aggregation(agg)
-                else
-                    termAgg!!.subAggregation(agg)
-                termAgg = agg as TermsAggregationBuilder
-            } else { // 其他聚合, 要挂在上一个terms聚合下
-                termAgg!!.subAggregation(agg)
-            }
-        }
-
-        // 聚合的排序
-        if(termAgg is TermsAggregationBuilder) {
-            for (expr in this.aggExprs) {
-                if (expr.asc != null)
-                    (termAgg!! as TermsAggregationBuilder).order(Terms.Order.aggregation(expr.alias, expr.asc))
-            }
-        }
+        // 聚合: 反射设置属性
+        // SearchSourceBuilder.aggregations 属性 是 AggregatorFactories.Builder
+        if(aggsStack.size > 1)
+            throw EsException("No close for " + currAggs)
+        sourceBuilder.setAggregations(currAggs)
 
         // 高亮字段
         val highlighter = SearchSourceBuilder.highlight()

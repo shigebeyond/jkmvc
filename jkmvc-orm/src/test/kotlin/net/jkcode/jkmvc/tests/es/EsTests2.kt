@@ -268,8 +268,12 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
     fun testStat() {
         val query = ESQueryBuilder()
         query.aggBy("fromUid")
-                .aggBy("count(id)", "nid")
-
+            .aggWrap {
+                aggBy("toUid", null, false)
+                aggWrap {
+                    aggBy("count(id)", "nid")
+                }
+            }
         val result = esmgr.searchDocs(index, type, query)
         println("返回结果:" + result.getJsonString())
         if (result.isSucceeded) {
@@ -278,10 +282,19 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
 //            println(n)
 
             // 多值
-            val map = result.aggregations.getTermsAggregation("nid").buckets.associate { item ->
+            val map = result.aggregations.getTermsAggregation("terms_fromUid").buckets.associateTo(LinkedHashMap()) { item ->
                 item.key to item.count
             }
             println(map)
+
+            // 二维
+            val map2 = LinkedHashMap<String, Any?>()
+            for(item1 in result.aggregations.getTermsAggregation("terms_fromUid").buckets){
+                for(item2 in item1.getTermsAggregation("terms_toUid").buckets){
+                    map2[item1.key + "-" + item2.key] = item2.count
+                }
+            }
+            println(map2)
         }
     }
 
