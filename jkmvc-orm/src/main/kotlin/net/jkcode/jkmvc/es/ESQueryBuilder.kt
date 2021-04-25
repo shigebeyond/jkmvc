@@ -3,9 +3,7 @@ package net.jkcode.jkmvc.es
 import io.searchbox.core.SearchResult
 import io.searchbox.params.SearchType
 import net.jkcode.jkutil.common.esLogger
-import net.jkcode.jkutil.common.getPropertyValue
 import net.jkcode.jkutil.common.isArrayOrCollection
-import net.jkcode.jkutil.common.setPropertyValue
 import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.index.query.BoolQueryBuilder
@@ -14,7 +12,6 @@ import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.script.Script
 import org.elasticsearch.script.ScriptType
 import org.elasticsearch.search.aggregations.AggregationBuilder
-import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.AggregatorFactories
 import org.elasticsearch.search.aggregations.bucket.terms.Terms
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder
@@ -976,6 +973,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param expr 聚合表达式, 如 count(name), sum(age)
      * @param alias 别名
      * @param asc 是否升序
+     * @return
      */
     public fun aggBy(expr: String, alias: String? = null, asc: Boolean? = null): ESQueryBuilder {
         val exp = AggExpr(expr, alias)
@@ -990,10 +988,24 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
     }
 
     /**
+     * 聚合+子聚合回调
+     * @param expr 聚合表达式, 如 count(name), sum(age)
+     * @param alias 别名
+     * @param asc 是否升序
+     * @param subAggAction
+     * @return
+     */
+    public fun aggByWithSubAgg(expr: String, alias: String? = null, asc: Boolean? = null, subAggAction: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+        aggBy(expr, alias, asc)
+        subAggWrap(subAggAction)
+        return this
+    }
+
+    /**
      * Open a agg sub clauses
      * @return
      */
-    public fun aggOpen(): ESQueryBuilder {
+    public fun subAggOpen(): ESQueryBuilder {
         aggsStack.push(nextLevelAggs to currAggs)
         return this
     }
@@ -1002,7 +1014,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * Close a agg sub clauses
      * @return
      */
-    public fun aggClose(): ESQueryBuilder {
+    public fun subAggClose(): ESQueryBuilder {
         // 出栈, 获得上一层的agg对象
         val (_, preAggs) = aggsStack.pop()
         // 出栈后的当前层的agg对象
@@ -1019,10 +1031,10 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param action
      * @return
      */
-    public fun aggWrap(action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
-        aggOpen()
+    public fun subAggWrap(action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+        subAggOpen()
         this.action()
-        aggClose()
+        subAggClose()
         return this
     }
     // --------- agg end ---------

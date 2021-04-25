@@ -8,9 +8,7 @@ import net.jkcode.jkmvc.es.EsManager
 import net.jkcode.jkmvc.es.getEsIdProp
 import net.jkcode.jkmvc.tests.entity.MessageEntity
 import net.jkcode.jkmvc.tests.model.MessageModel
-import net.jkcode.jkutil.common.randomBoolean
 import net.jkcode.jkutil.common.randomInt
-import net.jkcode.jkutil.common.toDate
 import org.joda.time.DateTime
 import org.junit.Test
 import java.util.*
@@ -267,13 +265,11 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
     @Test
     fun testStat() {
         val query = ESQueryBuilder()
-        query.aggBy("fromUid")
-            .aggWrap {
-                aggBy("toUid", null, false)
-                aggWrap {
-                    aggBy("count(id)", "nid")
-                }
+        query.aggByWithSubAgg("fromUid") {
+            aggByWithSubAgg("toUid", null, false) {
+                aggBy("count(id)", "nid")
             }
+        }
         val result = esmgr.searchDocs(index, type, query)
         println("返回结果:" + result.getJsonString())
         if (result.isSucceeded) {
