@@ -20,30 +20,21 @@ import io.searchbox.indices.mapping.PutMapping
 import io.searchbox.indices.settings.GetSettings
 import io.searchbox.indices.settings.UpdateSettings
 import io.searchbox.params.Parameters
-import net.jkcode.jkmvc.orm.IOrmEntity
-import net.jkcode.jkmvc.orm.OrmEntity
 import net.jkcode.jkutil.common.*
+import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.common.xcontent.XContentFactory
+import org.elasticsearch.script.Script
+import org.elasticsearch.script.ScriptType
+import java.io.ByteArrayOutputStream
 import java.io.Closeable
 import java.sql.SQLException
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.collections.Collection
-import kotlin.collections.Iterator
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.MutableIterator
-import kotlin.collections.MutableMap
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.emptyList
-import kotlin.collections.listOf
-import kotlin.collections.map
-import kotlin.collections.mapOf
 import kotlin.collections.set
-import kotlin.collections.toList
 
 /**
  * es管理者
@@ -257,13 +248,10 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      */
     fun getSetting(index: String): JsonObject? {
         val result = tryExecute {
-            GetSettings.Builder()
-                    .addIndex(index)
-                    .build()
+            GetSettings.Builder().addIndex(index).build()
         }
 
-        val indexObj = result.jsonObject
-                .get(index)
+        val indexObj = result.jsonObject.get(index)
         if(indexObj == null)
             throw EsException("No setting for index[$index]")
 
@@ -279,17 +267,12 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * 更改索引index设置setting
      *
      * @param index
+     * @param setting
      * @return
      */
-    fun updateSettings(index: String): Boolean {
+    fun updateSettings(index: String, setting: Map<String, Any?>): Boolean {
         return tryExecuteReturnSucceeded {
-            val mapBuilder = XContentFactory.jsonBuilder()
-            mapBuilder!!.startObject().startObject("index")
-                    .field("max_result_window", "1000000")
-                    .endObject()
-                    .endObject()
-            val source = mapBuilder.string()
-            UpdateSettings.Builder(source).build()
+            UpdateSettings.Builder(setting).addIndex(index).build()
         }
     }
 
@@ -325,13 +308,13 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
             return null
         }
 
-
         val index = result.jsonObject.get(index).asJsonObject
         val mappings = index?.get("mappings")?.asJsonObject
         val type = mappings?.get(type)?.asJsonObject
 
         if (type == null)
             return null
+
         return JsonToMap.toMap(type)
     }
 
@@ -470,44 +453,43 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param _id   文档id
      * @return
      */
-    protected fun buildInsertAction(index: String, type: String, source: Any, _id: String?): Index {
-        val action = Index.Builder(source)
-                .index(index)
-                .type(type)
-        if(_id == null && source is OrmEntity){
-
-        }
-        return action
-                .id(_id)
-                .build()
+    protected fun buildInsertAction(index: String, type: String, source: Any, _id: String? = null): Index {
+        val action = Index.Builder(source).index(index).type(type)
+        if(_id != null)
+            action.id(_id)
+        return action.build()
     }
 
     /**
      * 更新文档
-     * String script = "{" +
-     * "    \"doc\" : {" +
-     * "        \"title\" : \""+ entity.getTitle()+"\"," +
-     * "    }" +
-     * "}";
+     *   支持增量更新, 如添加新字段, 如动态计算的字段值
      *
      * @param index 索引名
      * @param type  类型
      * @param script 更新脚本
+     * 属性不用计算
+     * {
+     *     "doc" : {"title" : "hello"}
+     * }
+     * 属性要计算
+     * {
+     *     "script" : "ctx._source.tags += tag",
+     *     "params" : { "tag" : "blue"}
+     * }
      * @param _id   文档id
+     * @param params 脚本参数
      * @return
      */
-    fun <T> updateDoc(index: String, type: String, script: String, _id: String): Boolean {
+    fun <T> updateDoc(index: String, type: String, script: String, _id: String, params: Map<String, Any?> = emptyMap()): Boolean {
+        val script2 = Script(ScriptType.INLINE, "painless", script, params)
         return tryExecuteReturnSucceeded {
-            Update.Builder(script)
-                    .id(_id)
-                    .index(index)
-                    .type(type)
-                    .build()
+            buildUpdateAction(index, type, script2, _id)
         }
     }
 
     /**
      * 更新文档
+     *    支持增量更新, 如添加新字段, 如动态计算的字段值
      *
      * @param index 索引名
      * @param type  类型
@@ -515,17 +497,45 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param _id   文档id
      * @return
      */
-    fun <T> updateDoc(index: String, type: String, entity: T, _id: String): Boolean {
+    fun <T: Any> updateDoc(index: String, type: String, entity: T, _id: String): Boolean {
         return tryExecuteReturnSucceeded {
-            val script = HashMap<String, Any?>()
-            script["doc"] = entity
-
-            Update.Builder(gson.toJson(script))
-                    .id(_id)
-                    .index(index)
-                    .type(type)
-                    .build()
+            buildUpdateAction(index, type, entity, _id)
         }
+    }
+
+    /**
+     * 构建更新动作
+     *
+     * @param index 索引名
+     * @param type  类型
+     * @param script 更新脚本
+     * 属性不用计算
+     * {
+     *     "doc" : {"title" : "hello"}
+     * }
+     * 属性要计算
+     * {
+     *     "script" : "ctx._source.tags += tag",
+     *     "params" : { "tag" : "blue"}
+     * }
+     * @param _id   文档id
+     * @param params 脚本参数
+     * @return
+     */
+    protected fun buildUpdateAction(index: String, type: String, script: Any, _id: String): Update {
+        var script2: Any
+        if(script is String || script is Script){ // 纯脚本
+            script2 = script
+        }else{ // 纯文档
+            val map = mapOf("doc" to script)
+            script2 = gson.toJson(map)
+        }
+
+        return Update.Builder(script2)
+                .id(_id)
+                .index(index)
+                .type(type)
+                .build()
     }
 
     /**
@@ -537,32 +547,33 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param entity 文档
      * @return
      */
-    fun <T> updateDocAsync(index: String, type: String, _id: String, entity: T): CompletableFuture<DocumentResult> {
+    fun <T: Any> updateDocAsync(index: String, type: String, _id: String, entity: T): CompletableFuture<DocumentResult> {
         return tryExecuteAsync {
-            val script = HashMap<String, T>()
-            script["doc"] = entity
-
-            Update.Builder(gson.toJson(script))
-                    .id(_id)
-                    .index(index)
-                    .type(type)
-                    .build()
+            buildUpdateAction(index, type, entity, _id)
         }
     }
 
-    fun updateDocs(index: String, type: String){
+    /**
+     * 通过查询来批量更新
+     */
+    fun updateDocsByQuery(index: String, type: String, script: String, queryBuilder: ESQueryBuilder){
+        val xContentBuilder: XContentBuilder = XContentFactory.jsonBuilder()
+                .startObject()
+                .field("query", queryBuilder.toQuery())
+                .startObject("script")
+                .field("inline", script)
+                .endObject()
+                .endObject()
 
-        val BuilderStr = "{"+
-        " \"script\": { " +
-                "\"source\": \"ctx._source['"+ "mailNo" +"']='" +1 +"'\" "+
-                "}," +
-                "\"query\": {"+
-                "\"match\": {"+
-                "\"orderNo\": \"" + 1 +"\""+
-                "}"+
-                "}"+
-                "}";
-        val updateByQuery = UpdateByQuery.Builder(BuilderStr).addIndex(index).build();
+        xContentBuilder.flush()
+
+        val payload = (xContentBuilder.getOutputStream() as ByteArrayOutputStream).toString("UTF-8")
+
+        val updateByQuery = UpdateByQuery.Builder(payload)
+                .addIndex(index)
+                .addType(type)
+                .build()
+
 
     }
 
@@ -583,7 +594,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
     }
 
     /**
-     * 删除文档
+     * 通过查询来批量删除文档
      *
      * @param index 索引名
      * @param type  类型
@@ -593,7 +604,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param scrollTimeInMillis
      * @return 被删除的id
      */
-    fun deleteDocs(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): Collection<String> {
+    fun deleteDocsByQuery2(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): Collection<String> {
         // 查id
         // 原来想先 queryBuilder.select("id"), 可惜不知道id字段是啥
         val ids = scrollDocs(index, type, queryBuilder, pageSize, scrollTimeInMillis){ result ->

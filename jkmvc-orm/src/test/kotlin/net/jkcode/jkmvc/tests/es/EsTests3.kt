@@ -169,9 +169,9 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
         println("timestamp: $ts")
         val query = ESQueryBuilder()
 //                .filter("cargoId", ">=", 7)
-                .must("driverUserName", ">=", 8)
-                .must("companyId", "<=", 120)
-                .must("loadAddress", "like", "Welcome")
+//                .must("driverUserName", ">=", 8)
+//                .must("companyId", "<=", 120)
+//                .must("loadAddress", "like", "Welcome")
                 /*.shouldWrap {
                     must("loadAddress", "like", "Welcome")
                     must("companyId", "<=", ts) // 两分钟前发的

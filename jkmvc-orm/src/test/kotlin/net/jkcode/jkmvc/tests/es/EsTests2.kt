@@ -167,6 +167,12 @@ class EsTests2 {
         println("更新文档: " + r)
     }
 
+    @Test
+    fun testPartUpdateDoc() {
+        val r = esmgr.updateDoc(index, type, mapOf("name" to "shi"), "1")
+        println("部分更新文档: " + r)
+    }
+
     // curl 'localhost:9200/esindex/message/1?pretty=true'
     @Test
     fun testGetDoc() {

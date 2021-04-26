@@ -1161,7 +1161,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
     /**
      * 转查询对象
      */
-    protected fun toQuery(): QueryBuilder? {
+    internal fun toQuery(): QueryBuilder {
         if(queryStack.size > 1)
             throw EsException("No close for " + currQuery)
 
@@ -1280,6 +1280,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @return 被删除的id
      */
     fun deleteDocs(pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): Collection<String> {
-        return esmgr.deleteDocs(index, type, this, pageSize, scrollTimeInMillis)
+        return esmgr.deleteDocsByQuery2(index, type, this, pageSize, scrollTimeInMillis)
     }
 }
