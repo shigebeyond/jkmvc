@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.tests.es
 
-import net.jkcode.jkmvc.es.EsId
+import net.jkcode.jkmvc.es.annotation.EsId
 import net.jkcode.jkmvc.orm.OrmEntity
 
 public class RecentOrder: OrmEntity() {

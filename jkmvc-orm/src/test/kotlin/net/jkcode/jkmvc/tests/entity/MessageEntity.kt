@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.tests.entity
 
-import net.jkcode.jkmvc.es.EsId
+import net.jkcode.jkmvc.es.annotation.EsId
 import net.jkcode.jkmvc.orm.OrmEntity
 
 /**

@@ -4,7 +4,7 @@ import com.google.gson.FieldNamingPolicy
 import com.google.gson.GsonBuilder
 import net.jkcode.jkmvc.es.ESQueryBuilder
 import net.jkcode.jkmvc.es.EsManager
-import net.jkcode.jkmvc.es.getEsIdProp
+import net.jkcode.jkmvc.es.annotation.getEsIdProp
 import net.jkcode.jkmvc.tests.entity.MessageEntity
 import net.jkcode.jkmvc.tests.model.MessageModel
 import net.jkcode.jkutil.common.randomInt

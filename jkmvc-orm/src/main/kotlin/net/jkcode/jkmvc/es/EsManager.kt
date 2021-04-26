@@ -315,7 +315,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
         if (type == null)
             return null
 
-        return JsonToMap.toMap(type)
+        return gson.fromJson(type, Map::class.java) as Map<String, Any?>?
     }
 
     /**
@@ -567,7 +567,8 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
 
         xContentBuilder.flush()
 
-        val payload = (xContentBuilder.getOutputStream() as ByteArrayOutputStream).toString("UTF-8")
+        //val payload = (xContentBuilder.getOutputStream() as ByteArrayOutputStream).toString("UTF-8")
+        val payload = xContentBuilder.toString()
 
         val updateByQuery = UpdateByQuery.Builder(payload)
                 .addIndex(index)
