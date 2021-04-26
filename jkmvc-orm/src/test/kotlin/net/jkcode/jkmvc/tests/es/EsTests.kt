@@ -411,7 +411,7 @@ curl 'localhost:9200/index-workorder/worksheet/_search?pretty=true'  -H "Content
         val start = DateTime().plusDays(-35)
         query.filterBetween("createDate", start.toDate().time, DateTime().toDate().time)
 
-        query.limit(10).offset(0).orderBy("id")
+        query.limit(10).offset(0).orderByField("id")
 
         val (list, size) = esmgr.searchDocs(index, type, query, WorkSheet::class.java)
         println("查到 $size 个文档")

@@ -6,7 +6,6 @@ import net.jkcode.jkutil.common.randomBoolean
 import net.jkcode.jkutil.common.randomLong
 import org.junit.Test
 import java.util.*
-import kotlin.collections.HashMap
 
 
 class EsTests3 {
@@ -189,7 +188,7 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
                 */
                 .limit(10)
                 .offset(0)
-                .orderBy("id")
+                .orderByField("id")
 
         val (list, size) = esmgr.searchDocs(index, type, query, RecentOrder::class.java)
         println("查到 $size 个文档")
@@ -232,7 +231,8 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
         query.select("cargoId", "startDistrictId", "startCityId", "endDistrictId", "endCityId", "updateTime", "cargoLabels",
                 "cargoCategory", "featureSort", "cargoChannel", "searchableSources", "securityTran")
 
-        query.orderBy("duplicate", "ASC")
+        query.orderByField("duplicate", "ASC")
+                .orderByScript("searchCargo-script", mapOf("searchColdCargoTop" to 0))
 
         query.toSearchSource()
     }

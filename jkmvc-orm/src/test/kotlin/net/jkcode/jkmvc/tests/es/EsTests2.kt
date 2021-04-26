@@ -1,6 +1,5 @@
 package net.jkcode.jkmvc.tests.es
 
-import com.alibaba.fastjson.JSON
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.GsonBuilder
 import net.jkcode.jkmvc.es.ESQueryBuilder
@@ -9,7 +8,6 @@ import net.jkcode.jkmvc.es.getEsIdProp
 import net.jkcode.jkmvc.tests.entity.MessageEntity
 import net.jkcode.jkmvc.tests.model.MessageModel
 import net.jkcode.jkutil.common.randomInt
-import org.joda.time.DateTime
 import org.junit.Test
 import java.util.*
 import kotlin.collections.HashMap
@@ -213,7 +211,7 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
                 */
                 .limit(10)
                 .offset(0)
-                .orderBy("id")
+                .orderByField("id")
 
         val (list, size) = esmgr.searchDocs(index, type, query, MessageEntity::class.java)
         println("查到 $size 个文档")
