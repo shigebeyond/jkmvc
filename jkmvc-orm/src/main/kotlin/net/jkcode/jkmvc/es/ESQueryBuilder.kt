@@ -19,6 +19,8 @@ import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregati
 import org.elasticsearch.search.aggregations.bucket.terms.Terms
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder
 import org.elasticsearch.search.builder.SearchSourceBuilder
+import org.elasticsearch.search.sort.ScriptSortBuilder
+import org.elasticsearch.search.sort.SortBuilder
 import org.elasticsearch.search.sort.SortBuilders
 import org.elasticsearch.search.sort.SortOrder
 import java.util.*
@@ -207,7 +209,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * Query sort fields
      * @var List
      */
-    protected val sorts = ArrayList<Pair<String, SortOrder>>();
+    protected val sorts = ArrayList<SortBuilder<*>>();
 
     /**
      * 最低分
@@ -308,27 +310,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
     }
 
     /**
-     * Set the sorting field
-     * @param field
-     * @param direction 方向: ASC/DESC
-     * @return this
-     */
-    public fun orderBy(field: String, direction: String): ESQueryBuilder {
-        return orderBy(field, direction.equals("DESC", false))
-    }
-
-    /**
-     * Set the sorting field
-     * @param field
-     * @param string direction
-     * @return this
-     */
-    public fun orderBy(field: String, desc: Boolean = false): ESQueryBuilder {
-        this.sorts.add(field to if (desc) SortOrder.DESC else SortOrder.ASC)
-        return this;
-    }
-
-    /**
      * Set the query fields to return
      * @param fields
      * @return this
@@ -348,6 +329,106 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
         this.includeFields.removeAll(fields)
         return this;
     }
+
+    // --------- orderby start ---------
+    /**
+     * Set the sorting field
+     * @param field
+     * @param direction 方向: ASC/DESC
+     * @return this
+     */
+    public fun orderByField(field: String, direction: String): ESQueryBuilder {
+        return orderByField(field, direction.equals("DESC", false))
+    }
+
+    /**
+     * Set the sorting field
+     * @param field
+     * @param direction
+     * @return this
+     */
+    public fun orderByField(field: String, desc: Boolean = false): ESQueryBuilder {
+        val order = if (desc) SortOrder.DESC else SortOrder.ASC
+        val sort = SortBuilders.fieldSort(field).order(order)
+        this.sorts.add(sort)
+        return this;
+    }
+
+    /**
+     * Set the sorting field to `_score`
+     *   _score为相关性得分
+     * @param direction 方向: ASC/DESC
+     * @return this
+     */
+    public fun orderByScore(direction: String): ESQueryBuilder {
+        return orderByScore(direction.equals("DESC", false))
+    }
+
+    /**
+     * Set the sorting field to `_score`
+     *   _score为相关性得分
+     * @param field
+     * @param direction
+     * @return this
+     */
+    public fun orderByScore(desc: Boolean = false): ESQueryBuilder {
+        val order = if (desc) SortOrder.DESC else SortOrder.ASC
+        val sort = SortBuilders.scoreSort().order(order)
+        this.sorts.add(sort)
+        return this;
+    }
+
+    /**
+     * Set the sorting script
+     * @param script
+     * @param params
+     * @param direction 方向: ASC/DESC
+     * @return this
+     */
+    public fun orderByScript(script: String, params: Map<String, Any?> = emptyMap(), direction: String): ESQueryBuilder {
+        return orderByScript(script, params, direction.equals("DESC", false))
+    }
+
+    /**
+     * Set the sorting script
+     * @param script
+     * @param params
+     * @param direction
+     * @return this
+     */
+    public fun orderByScript(script: String, params: Map<String, Any?> = emptyMap(), desc: Boolean = false): ESQueryBuilder {
+        val order = if (desc) SortOrder.DESC else SortOrder.ASC
+        val script2 = Script(ScriptType.INLINE, "painless", script, params)
+        val sort = SortBuilders.scriptSort(script2, ScriptSortBuilder.ScriptSortType.STRING).order(order)
+        this.sorts.add(sort)
+        return this;
+    }
+
+    /**
+     * Set the sorting geoDistance
+     * @param field
+     * @param params
+     * @param direction 方向: ASC/DESC
+     * @return this
+     */
+    public fun orderByGeoDistance(field: String, lat: Double, lon: Double, direction: String): ESQueryBuilder {
+        return orderByGeoDistance(field, lat, lon, direction.equals("DESC", false))
+    }
+
+    /**
+     * Set the sorting geoDistance
+     * @param field
+     * @param params
+     * @param direction
+     * @return this
+     */
+    public fun orderByGeoDistance(field: String, lat: Double, lon: Double, desc: Boolean = false): ESQueryBuilder {
+        val order = if (desc) SortOrder.DESC else SortOrder.ASC
+        val sort = SortBuilders.geoDistanceSort(field, lat, lon).order(order)
+        this.sorts.add(sort)
+        return this;
+    }
+    // --------- orderby end ---------
 
     // --------- where start ---------
     /**
@@ -1105,13 +1186,12 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
         sourceBuilder.timeout(TimeValue(60, TimeUnit.SECONDS))
 
-        //增加多个值排序
-        for ((field, order) in this.sorts) {
-            val sort = SortBuilders.fieldSort(field).order(order)
+        // 排序
+        for (sort in this.sorts) {
             sourceBuilder.sort(sort)
         }
 
-        //属性
+        // 属性
         if (this.includeFields.isNotEmpty() || this.excludeFields.isNotEmpty()) {
             sourceBuilder.fetchSource(this.includeFields.toTypedArray(), this.excludeFields.toTypedArray())
         }
