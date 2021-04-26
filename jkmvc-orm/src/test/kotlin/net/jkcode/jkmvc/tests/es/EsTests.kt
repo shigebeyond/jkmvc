@@ -75,7 +75,7 @@ class EsTests {
     fun testCreateIndex() {
         // gson还是必须用双引号
         var mapping = """{
-    'worksheet':{
+    '_doc':{
         'properties':{
             'call_record_id':{
                 'type':'long'

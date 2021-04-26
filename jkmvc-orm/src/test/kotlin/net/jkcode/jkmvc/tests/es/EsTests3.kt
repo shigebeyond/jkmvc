@@ -1,51 +1,23 @@
 package net.jkcode.jkmvc.tests.es
 
-import com.alibaba.fastjson.JSON
-import com.google.gson.FieldNamingPolicy
-import com.google.gson.GsonBuilder
 import net.jkcode.jkmvc.es.ESQueryBuilder
 import net.jkcode.jkmvc.es.EsManager
-import net.jkcode.jkmvc.es.getEsIdProp
-import net.jkcode.jkmvc.tests.entity.MessageEntity
-import net.jkcode.jkmvc.tests.model.MessageModel
-import net.jkcode.jkutil.common.randomInt
-import org.joda.time.DateTime
+import net.jkcode.jkutil.common.randomBoolean
+import net.jkcode.jkutil.common.randomLong
 import org.junit.Test
 import java.util.*
 import kotlin.collections.HashMap
 
 
-class EsTests2 {
+class EsTests3 {
 
-    private val index = "message_index"
+    private val index = "recent_order_index"
 
     private val type = "_doc"
 
     private val esmgr = EsManager.instance()
 
-    //private val time = "2021-04-15".toDate().time / 1000
-    private val time = 0L
-
-    @Test
-    fun testEsId() {
-        val prop = MessageModel::class.getEsIdProp()
-        println("esid prop: " + prop?.name)
-    }
-
-    @Test
-    fun testGson() {
-        val gsonBuilder = GsonBuilder()
-        // es字段命名为: 下划线
-        // 生成的json中的字段名, 都是下划线的
-        gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-        val gson = gsonBuilder.create()
-        val e = buildEntity(1)
-        val json = gson.toJson(e.toMap())
-        println(json)
-
-        val e2 = gson.fromJson<MessageEntity>(json, MessageEntity::class.java)
-        println(e2)
-    }
+    private val cid = 100
 
     @Test
     fun testAll() {
@@ -63,21 +35,24 @@ class EsTests2 {
         var mapping = """{
     '_doc':{
         'properties':{
-            'id':{
-                'type':'long'
-            },
-            'fromUid':{
-                'type':'long'
-            },
-            'toUid':{
-                'type':'long'
-            },
-            'content':{
-                'type':'text'
-            },
-            'created':{
-                'type':'long'
-            }
+            'id': {
+                'type': 'long'
+              },
+            'cargoId': {
+                'type': 'long'
+              },
+              'driverUserName': {
+                'type': 'keyword'
+              },
+              'loadAddress': {
+                'type': 'text'
+              },
+              'searchable': {
+                'type': 'boolean'
+              },
+              'companyId': {
+                'type': 'long'
+              }
         }
     }
 }"""
@@ -139,9 +114,9 @@ class EsTests2 {
 
     @Test
     fun testBulkInsertDocs() {
-        val dataList = ArrayList<MessageEntity>()
+        val dataList = ArrayList<RecentOrder>()
 
-        for (i in 1..10) {
+        for (i in 0 until 5) {
             val e = buildEntity(i)
             dataList.add(e)
         }
@@ -150,21 +125,22 @@ class EsTests2 {
         println("批量插入")
     }
 
-    private fun buildEntity(i: Int): MessageEntity {
-        val e = MessageEntity()
-        e.id = i
-        e.fromUid = randomInt(10)
-        e.toUid = randomInt(10)
-        e.content = if(i % 2 == 0) "welcome $i" else "Goodbye $i"
-        e.created = time + i * 60
+    private fun buildEntity(i: Int): RecentOrder {
+        val e = RecentOrder()
+        e.id = i.toLong()
+        e.cargoId = i.toLong()
+        e.driverUserName = arrayOf("张三", "李四", "王五", "赵六", "钱七")[i]
+        e.loadAddress = arrayOf("南京市玄武区", "南京市秦淮区", "南京市六合区", "南京市建邺区", "南京市鼓楼区")[i]
+        e.searchable = randomBoolean()
+        e.companyId = cid + i * 10
         return e
     }
 
     @Test
     fun testUpdateDoc() {
-        val e = esmgr.getDoc(index, type, "1", MessageEntity::class.java)!!
-        e.fromUid = randomInt(10)
-        e.toUid = randomInt(10)
+        val e = esmgr.getDoc(index, type, "1", RecentOrder::class.java)!!
+        e.cargoId = randomLong(5)
+        e.driverUserName = arrayOf("南京市玄武区", "南京市秦淮区", "南京市六合区", "南京市建邺区", "南京市鼓楼区").random()
         val r = esmgr.updateDoc(index, type, e, "1")
         println("更新文档: " + r)
     }
@@ -173,14 +149,14 @@ class EsTests2 {
     @Test
     fun testGetDoc() {
         val id = "1"
-        val entity = esmgr.getDoc(index, type, id, MessageEntity::class.java)
+        val entity = esmgr.getDoc(index, type, id, RecentOrder::class.java)
         System.out.println("testGetObject 返回值：" + entity.toString())
     }
 
     @Test
     fun testMultiGetDoc() {
         val ids = listOf("1", "2")
-        val entities = esmgr.multGetDocs(index, type, ids, MessageEntity::class.java)
+        val entities = esmgr.multGetDocs(index, type, ids, RecentOrder::class.java)
         System.out.println("testGetObject 返回值：" + entities)
     }
 
@@ -190,32 +166,32 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
      */
     @Test
     fun testSearch() {
-        val ts = time + 120 // 2分钟前
+        val ts = cid + 120 // 2分钟前
         println("timestamp: $ts")
         val query = ESQueryBuilder()
-//                .filter("fromUid", ">=", 7)
-                .must("toUid", ">=", 8)
-                .must("created", "<=", 120)
-                .must("content", "like", "Welcome")
+//                .filter("cargoId", ">=", 7)
+                .must("driverUserName", ">=", 8)
+                .must("companyId", "<=", 120)
+                .must("loadAddress", "like", "Welcome")
                 /*.shouldWrap {
-                    must("content", "like", "Welcome")
-                    must("created", "<=", ts) // 两分钟前发的
+                    must("loadAddress", "like", "Welcome")
+                    must("companyId", "<=", ts) // 两分钟前发的
                 }
                 .shouldWrap {
-                    must("content", "like", "Goodbye")
-                    must("created", ">", ts) // 两分钟内发的
+                    must("loadAddress", "like", "Goodbye")
+                    must("companyId", ">", ts) // 两分钟内发的
                 }*/
                 /*.mustWrap {
-                    should("created", "=", 120)
-                    should("fromUid", "=", 8)
+                    should("companyId", "=", 120)
+                    should("cargoId", "=", 8)
                 }
-                .must("toUid", ">=", 8)
+                .must("driverUserName", ">=", 8)
                 */
                 .limit(10)
                 .offset(0)
                 .orderBy("id")
 
-        val (list, size) = esmgr.searchDocs(index, type, query, MessageEntity::class.java)
+        val (list, size) = esmgr.searchDocs(index, type, query, RecentOrder::class.java)
         println("查到 $size 个文档")
         for (item in list)
             println(item)
@@ -223,16 +199,48 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
 
     @Test
     fun testSearch2() {
-        val (list, size) = ESQueryBuilder().index(index).type(type).searchDocs(HashMap::class.java)
-        println("查到 $size 个文档")
-        for (item in list)
-            println(item)
+        val query = ESQueryBuilder()
+                .index(index)
+                .type(type)
+                .mustWrap { // city
+                    mustWrap { // start city
+                        should("startDistrictId", "IN", arrayOf(684214, 981362))
+                        should("startCityId", "IN", arrayOf(320705, 931125))
+                    }
+                    mustWrap { // end city
+                        should("endDistrictId", "IN", arrayOf(95312, 931125))
+                        should("endCityId", "IN", arrayOf(589421, 953652))
+                    }
+                }
+                .must("updateTime", ">=", 1608285822239L) // range
+                .must("cargoLabels", "IN", arrayOf("水果", "生鲜")) // cargoLabels
+
+                .mustNot("cargoCategory", "IN", arrayOf("A", "B")) // cargoCategory
+                .mustNot("featureSort", "=", "好货") // cargoCategory
+
+                .shouldWrap {
+                    mustNot("cargoChannel", "IN", arrayOf("长途货源", "一口价货源")) // cargoChannel
+                    shouldWrap {
+                        must("searchableSources", "=", "ALL") // searchableSources
+                        mustWrap { // security
+                            must("cargoChannel", "IN", arrayOf("No.1", "No.2", "No.3")) // cargoChannel
+                            must("securityTran", "=", "平台保证") // securityTran
+                        }
+                    }
+                }
+
+        query.select("cargoId", "startDistrictId", "startCityId", "endDistrictId", "endCityId", "updateTime", "cargoLabels",
+                "cargoCategory", "featureSort", "cargoChannel", "searchableSources", "securityTran")
+
+        query.orderBy("duplicate", "ASC")
+
+        query.toSearchSource()
     }
 
     @Test
     fun testScroll() {
         val pageSize = 5
-        val c = ESQueryBuilder().index(index).type(type).scrollDocs(MessageEntity::class.java, pageSize, 100000)
+        val c = ESQueryBuilder().index(index).type(type).scrollDocs(RecentOrder::class.java, pageSize, 100000)
         val times = c.size / pageSize + 1
         println("记录数=${c.size}, 每次取=$pageSize, 取次数=$times")
         for (item in c)
@@ -255,8 +263,8 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
     @Test
     fun testScript() {
         val query = ESQueryBuilder().index(index).type(type)
-                .addFieldScript("fromUid", "doc['fromUid']+1")
-                .filter("fromUid", ">=", 1)
+                .addFieldScript("cargoId", "doc['cargoId']+1")
+                .filter("cargoId", ">=", 1)
                 .limit(10)
         println(query.toSearchSource())
     }
@@ -264,8 +272,8 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
     @Test
     fun testStat() {
         val query = ESQueryBuilder()
-        query.aggByAndWrapSubAgg("fromUid") {
-            aggByAndWrapSubAgg("toUid", null, false) {
+        query.aggByAndWrapSubAgg("cargoId") {
+            aggByAndWrapSubAgg("driverUserName", null, false) {
                 aggBy("count(id)", "nid")
             }
         }
@@ -277,15 +285,15 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
 //            println(n)
 
             // 多值
-            val map = result.aggregations.getTermsAggregation("terms_fromUid").buckets.associateTo(LinkedHashMap()) { item ->
+            val map = result.aggregations.getTermsAggregation("terms_cargoId").buckets.associateTo(LinkedHashMap()) { item ->
                 item.key to item.count
             }
             println(map)
 
             // 二维
             val map2 = LinkedHashMap<String, Any?>()
-            for(item1 in result.aggregations.getTermsAggregation("terms_fromUid").buckets){
-                for(item2 in item1.getTermsAggregation("terms_toUid").buckets){
+            for (item1 in result.aggregations.getTermsAggregation("terms_cargoId").buckets) {
+                for (item2 in item1.getTermsAggregation("terms_driverUserName").buckets) {
                     map2[item1.key + "-" + item2.key] = item2.count
                 }
             }

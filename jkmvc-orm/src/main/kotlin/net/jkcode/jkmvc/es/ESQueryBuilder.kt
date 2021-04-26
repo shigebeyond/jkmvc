@@ -13,6 +13,9 @@ import org.elasticsearch.script.Script
 import org.elasticsearch.script.ScriptType
 import org.elasticsearch.search.aggregations.AggregationBuilder
 import org.elasticsearch.search.aggregations.AggregatorFactories
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram
+import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder
 import org.elasticsearch.search.aggregations.bucket.terms.Terms
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder
 import org.elasticsearch.search.builder.SearchSourceBuilder
@@ -130,6 +133,10 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
     /**
      * 聚合组栈
      *   元素是 AggregatorFactories.Builder + 上一层的聚合组对象(仅用于闭合校验)
+     *   TODO: 去掉元素的second
+     *   因为不像queryStack有多种类型对象(filter/must/mustNot/should), 因此queryStack的close时可检查对象类型即可
+     *   而aggsStack是只有一种类型对象, 前一个元素的first, 肯定是下一个元素的second, 没必要校验
+     *
      */
     protected val aggsStack: Stack<Pair<AggregatorFactories.Builder, AggregatorFactories.Builder?>> by lazy{
         val s = Stack<Pair<AggregatorFactories.Builder, AggregatorFactories.Builder?>>()
@@ -307,8 +314,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @return this
      */
     public fun orderBy(field: String, direction: String): ESQueryBuilder {
-        this.sorts.add(field to SortOrder.valueOf(direction.toUpperCase()))
-        return this;
+        return orderBy(field, direction.equals("DESC", false))
     }
 
     /**
@@ -982,20 +988,27 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
         // 排序
         if(asc != null) {
-            (parentAgg as TermsAggregationBuilder).order(Terms.Order.aggregation(exp.alias, asc))
+            if(parentAgg is TermsAggregationBuilder)
+                (parentAgg as TermsAggregationBuilder).order(Terms.Order.aggregation(exp.alias, asc))
+
+            if(parentAgg is DateHistogramAggregationBuilder)
+                (parentAgg as DateHistogramAggregationBuilder).order(Histogram.Order.aggregation(exp.alias, asc))
+
+            if(parentAgg is HistogramAggregationBuilder)
+                (parentAgg as HistogramAggregationBuilder).order(Histogram.Order.aggregation(exp.alias, asc))
         }
         return this
     }
 
     /**
-     * 聚合+子聚合回调
+     * 聚合+包含子聚合回调
      * @param expr 聚合表达式, 如 count(name), sum(age)
      * @param alias 别名
      * @param asc 是否升序
      * @param subAggAction
      * @return
      */
-    public fun aggByWithSubAgg(expr: String, alias: String? = null, asc: Boolean? = null, subAggAction: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+    public fun aggByAndWrapSubAgg(expr: String, alias: String? = null, asc: Boolean? = null, subAggAction: ESQueryBuilder.() -> Unit): ESQueryBuilder {
         aggBy(expr, alias, asc)
         subAggWrap(subAggAction)
         return this
@@ -1106,8 +1119,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
         // 分数
         if (this.minScore > 0)
             sourceBuilder.minScore(this.minScore)
-
-        AggregatorFactories.builder();
 
         // 聚合: 反射设置属性
         // SearchSourceBuilder.aggregations 属性 是 AggregatorFactories.Builder

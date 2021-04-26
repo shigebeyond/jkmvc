@@ -304,7 +304,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
     fun putMapping(index: String, type: String, mapping: String): Boolean {
         return tryExecuteReturnSucceeded {
             PutMapping.Builder(index, type, mapping)
-                    .setParameter("include_type_name", true)
+                    //.setParameter("include_type_name", true) // es6不用, es7要
                     .build()
         }
     }
