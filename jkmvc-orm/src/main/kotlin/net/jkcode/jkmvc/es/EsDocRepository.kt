@@ -56,7 +56,7 @@ class EsDocRepository<T: Any>(
      * 新增
      */
     fun create(item: T): Boolean {
-        val id = item.getPropertyValue(idProp).toString()
+        val id = getId(item)
         return esmgr.insertDoc(index, type, item, id)
     }
 
@@ -64,8 +64,15 @@ class EsDocRepository<T: Any>(
      * 更新
      */
     fun update(item: T): Boolean {
-        val id = item.getPropertyValue(idProp).toString()
+        val id = getId(item)
         return esmgr.updateDoc(index, type, item, id)
+    }
+
+    /**
+     * 获得对象id
+     */
+    fun getId(item: T): String {
+        return item.getPropertyValue(idProp).toString()
     }
 
     /**

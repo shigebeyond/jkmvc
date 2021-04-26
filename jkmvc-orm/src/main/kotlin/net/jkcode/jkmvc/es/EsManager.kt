@@ -20,6 +20,7 @@ import io.searchbox.indices.mapping.PutMapping
 import io.searchbox.indices.settings.GetSettings
 import io.searchbox.indices.settings.UpdateSettings
 import io.searchbox.params.Parameters
+import net.jkcode.jkmvc.orm.OrmEntity
 import net.jkcode.jkutil.common.*
 import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.common.xcontent.XContentFactory
@@ -449,14 +450,19 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * 构建插入的动作
      * @param index 索引名
      * @param type  类型
-     * @param source  文档, 可以是 json string/bean/map/list, 如果是bean/map/list, 最好有id属性，要不然会自动生成一个
+     * @param source 文档, 可以是 json string/bean/map/list, 如果是bean/map/list, 最好有id属性，要不然会自动生成一个
      * @param _id   文档id
      * @return
      */
     protected fun buildInsertAction(index: String, type: String, source: Any, _id: String? = null): Index {
         val action = Index.Builder(source).index(index).type(type)
-        if(_id != null)
-            action.id(_id)
+        var id = _id
+        if(id == null && source is OrmEntity){
+            val rep = EsDocRepository.instance(source.javaClass)
+            id = rep.getId(source)
+        }
+        if(id != null)
+            action.id(id)
         return action.build()
     }
 
