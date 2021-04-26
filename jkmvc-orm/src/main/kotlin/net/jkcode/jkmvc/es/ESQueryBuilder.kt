@@ -5,6 +5,7 @@ import io.searchbox.params.SearchType
 import net.jkcode.jkutil.common.esLogger
 import net.jkcode.jkutil.common.isArrayOrCollection
 import org.apache.lucene.search.join.ScoreMode
+import org.elasticsearch.common.unit.DistanceUnit
 import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.QueryBuilder
@@ -409,10 +410,11 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param field
      * @param params
      * @param direction 方向: ASC/DESC
+     * @param unit 距离单位
      * @return this
      */
-    public fun orderByGeoDistance(field: String, lat: Double, lon: Double, direction: String): ESQueryBuilder {
-        return orderByGeoDistance(field, lat, lon, direction.equals("DESC", false))
+    public fun orderByGeoDistance(field: String, lat: Double, lon: Double, direction: String, unit: DistanceUnit = DistanceUnit.DEFAULT): ESQueryBuilder {
+        return orderByGeoDistance(field, lat, lon, direction.equals("DESC", false), unit)
     }
 
     /**
@@ -420,11 +422,12 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param field
      * @param params
      * @param direction
+     * @param unit 距离单位
      * @return this
      */
-    public fun orderByGeoDistance(field: String, lat: Double, lon: Double, desc: Boolean = false): ESQueryBuilder {
+    public fun orderByGeoDistance(field: String, lat: Double, lon: Double, desc: Boolean = false, unit: DistanceUnit = DistanceUnit.DEFAULT): ESQueryBuilder {
         val order = if (desc) SortOrder.DESC else SortOrder.ASC
-        val sort = SortBuilders.geoDistanceSort(field, lat, lon).order(order)
+        val sort = SortBuilders.geoDistanceSort(field, lat, lon).order(order).unit(unit)
         this.sorts.add(sort)
         return this;
     }
@@ -538,7 +541,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param distance A distance from the starting geo point. It can be for example "20km".
      * @return this
      */
-    protected inline fun whereDistance(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
+    protected inline fun whereGeoDistance(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
         val query = QueryBuilders.geoDistanceQuery(name).point(lat, lon).distance(distance);
         wheres.add(query)
         return this;
@@ -638,8 +641,8 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param distance A distance from the starting geo point. It can be for example "20km".
      * @return this
      */
-    public fun filterDistance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
-        return whereDistance(this.filter, name, lat, lon, distance)
+    public fun filterGeoDistance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
+        return whereGeoDistance(this.filter, name, lat, lon, distance)
     }
 
     /**
@@ -755,8 +758,8 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param distance A distance from the starting geo point. It can be for example "20km".
      * @return this
      */
-    public fun mustDistance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
-        return whereDistance(this.must, name, lat, lon, distance)
+    public fun mustGeoDistance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
+        return whereGeoDistance(this.must, name, lat, lon, distance)
     }
 
     /**
@@ -873,8 +876,8 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param distance A distance from the starting geo point. It can be for example "20km".
      * @return this
      */
-    public fun mustNotDistance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
-        return whereDistance(this.mustNot, name, lat, lon, distance)
+    public fun mustNotGeoDistance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
+        return whereGeoDistance(this.mustNot, name, lat, lon, distance)
     }
 
     /**
@@ -991,8 +994,8 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param distance A distance from the starting geo point. It can be for example "20km".
      * @return this
      */
-    public fun shouldDistance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
-        return whereDistance(this.should, name, lat, lon, distance)
+    public fun shouldGeoDistance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
+        return whereGeoDistance(this.should, name, lat, lon, distance)
     }
 
     /**
