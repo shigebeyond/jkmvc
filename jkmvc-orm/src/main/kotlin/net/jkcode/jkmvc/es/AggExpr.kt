@@ -1,9 +1,15 @@
 package net.jkcode.jkmvc.es
 
-import net.jkcode.jkutil.common.mapToArray
 import net.jkcode.jkutil.validator.ArgsParser
+import org.elasticsearch.common.geo.GeoDistance
+import org.elasticsearch.common.geo.GeoPoint
+import org.elasticsearch.common.unit.DistanceUnit
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilders
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval
+import org.elasticsearch.search.aggregations.bucket.range.date.DateRangeAggregationBuilder
+import org.elasticsearch.search.aggregations.bucket.range.geodistance.GeoDistanceAggregationBuilder
+import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsAggregationBuilder
 import org.elasticsearch.search.sort.SortOrder
 
 /**
@@ -69,6 +75,7 @@ class AggExpr(
             return AggregationBuilders.nested(alias, field) // field 是path
 
         // 总数聚合: value_count
+        // count(field)
         if (func == "count")
             return AggregationBuilders.count(alias).field(field)
 
@@ -97,49 +104,63 @@ class AggExpr(
             return AggregationBuilders.stats(alias).field(field)
 
         // 百分百聚合——基于聚合文档中某个数值类型的值，求指定比例中的值分布
+        // percentiles(field,percentiles1,percentiles2...)
         if (func == "percentiles") {
             val percentiles = DoubleArray(args.size)
             args.forEachIndexed { i, item ->
                 percentiles[i] = item.toDouble()
             }
-            return AggregationBuilders.percentiles(alias).percentiles(*percentiles).field(field)
+            return AggregationBuilders.percentiles(alias).field(field)
+                    .percentiles(*percentiles)
         }
 
         // 地理边界聚合——基于文档的某个字段（geo-point类型字段），计算出该字段所有地理坐标点的边界（左上角/右下角坐标点）
+        // geo_bounds(field,wrapLongitude)
         if (func == "geo_bounds") {
             val wrapLongitude = args.firstOrNull()?.toBoolean()
                     ?: true
-            return AggregationBuilders.geoBounds(alias).wrapLongitude(wrapLongitude).field(field)
+            return AggregationBuilders.geoBounds(alias).field(field)
+                    .wrapLongitude(wrapLongitude)
         }
+
+        // 地理距离聚合——基于文档的某个字段（geo-point类型字段），计算出该字段的指定距离范围内的个数
+        // geo_distance(field,lat,lon,unit,from1-to1,from2-to2,from3-...)
+        if (func == "geo_distance")
+            return toGeoDistance()
 
         // 地理重心聚合——基于文档的某个字段（geo-point类型字段），计算所有坐标的加权重心
         if (func == "geo_centroid")
             return AggregationBuilders.geoCentroid(alias).field(field)
 
         // 多桶聚合后的请求如果使用了top_hits，返回结果会带上每个bucket关联的文档数据
-        if (func == "top_hits") {
-            val topHits = AggregationBuilders.topHits(alias)
-            // from
-            val from = args.firstOrNull()?.toInt()
-            if(from != null)
-                topHits.from(from)
-            // size
-            val size = args.getOrNull(1)?.toInt()
-            if(size != null)
-                topHits.size(size)
-            // order
-            for(i in 2 until args.size){
-                // 每个排序=字段 方向
-                val orderArgs = args[i].split(' ')
-                val field = orderArgs[0]
-                val direction = orderArgs.getOrNull(1)
-                var order: SortOrder? = null
-                if(direction != null)
-                    order = SortOrder.valueOf(direction.toUpperCase())
-                topHits.sort(field, order)
-            }
-            return topHits
+        // top_hits(from,size,orderField1 orderDirection1,orderField2 orderDirection2...)
+        if (func == "top_hits")
+            return toTopHits()
+
+        // 计算指定范围集的文档的个数, 针对数值/日期/ip等, 如统计2011以前/2011-2019/2019及以后的文档数
+        // date_range(field,format,from1-to1,from2-to2...)
+        if (func == "date_range")
+            return toDateRange()
+
+        // 对字段值按间隔统计建立直方图, 针对数值型和日期型字段。
+        // 比如我们以5为间隔，统计不同区间的，现在想每隔5就创建一个桶，统计每隔区间都有多少个文档
+        // histogram(field,interval)
+        if (func == "histogram") {
+            val interval = args[0].toDouble()
+            return AggregationBuilders.histogram(alias).field(field)
+                    .interval(interval)
         }
+
+        // 对日期字段值按间隔统计建立直方图, 针对日期型字段。
+        // date_histogram(field,interval,format)
+        if (func == "date_histogram") {
+            val interval = args[0]
+            val format = args[1]
+            return AggregationBuilders.dateHistogram(alias).field(field)
+                    .dateHistogramInterval(DateHistogramInterval(interval))
+                    .format(format)
+        }
+
 
         // todo
         /**
@@ -150,6 +171,94 @@ class AggExpr(
          */
 
         throw IllegalArgumentException("Unknown aggregation function: " + func)
+    }
+
+    /**
+     * 计算指定范围集的文档的个数, 针对数值/日期/ip等, 如统计2011以前/2011-2019/2019及以后的文档数
+     * date_range(field,format,from1-to1,from2-to2...)
+     */
+    protected fun toDateRange(): DateRangeAggregationBuilder {
+        val format = args[0]
+        val dateRange = AggregationBuilders.dateRange(alias).field(field).format(format)
+
+        for (i in 3 until args.size) {
+            // 每个range=from-to
+            val key = args[i]
+            val (from, to) = key.split('-')
+            if (from != "") {
+                if (to != "")
+                    dateRange.addRange(key, from, to)
+                else
+                    dateRange.addUnboundedFrom(key, from)
+            } else {
+                if (to != "")
+                    dateRange.addUnboundedTo(key, to)
+                else
+                    throw IllegalArgumentException("Aggregation function date_range(field,format,from-to) fail, when from and to is empty")
+            }
+        }
+        return dateRange
+    }
+
+    /**
+     * 地理距离聚合——基于文档的某个字段（geo-point类型字段），计算出该字段的指定距离范围内的个数
+     * geo_distance(field,lat,lon,unit,from1-to1,from2-to2,from3-...)
+     */
+    protected fun toGeoDistance(): GeoDistanceAggregationBuilder {
+        val lat = args[0].toDouble()
+        val lon = args[1].toDouble()
+        val unit = args[2]
+        val dist = AggregationBuilders.geoDistance(alias, GeoPoint(lat, lon))
+                .field(field)
+                .unit(DistanceUnit.fromString(unit))
+                .distanceType(GeoDistance.ARC)
+        for (i in 3 until args.size) {
+            // 每个range=from-to
+            val key = args[i]
+            val range = key.split('-')
+            val from = range[0].toDoubleOrNull()
+            val to = range[1].toDoubleOrNull()
+            if (from != null) {
+                if (to != null)
+                    dist.addRange(key, from, to)
+                else
+                    dist.addUnboundedFrom(key, from)
+            } else {
+                if (to != null)
+                    dist.addUnboundedTo(key, to)
+                else
+                    throw IllegalArgumentException("Aggregation function geo_distance(field,lat,lon,unit,from-to) fail, when from and to is empty")
+            }
+        }
+        return dist
+    }
+
+    /**
+     * 多桶聚合后的请求如果使用了top_hits，返回结果会带上每个bucket关联的文档数据
+     *   top_hits(from,size,orderField1 orderDirection1,orderField2 orderDirection2...)
+     */
+    protected fun toTopHits(): TopHitsAggregationBuilder {
+        val topHits = AggregationBuilders.topHits(alias)
+        // from
+        val from = args.firstOrNull()?.toInt()
+        if (from != null)
+            topHits.from(from)
+        // size
+        val size = args.getOrNull(1)?.toInt()
+        if (size != null)
+            topHits.size(size)
+        // order
+        for (i in 2 until args.size) {
+            // 每个排序=字段 方向
+            val orderArgs = args[i].split(' ')
+            val field = orderArgs[0]
+            val direction = orderArgs.getOrNull(1)
+            var order: SortOrder? = null
+            if (direction != null)
+                order = SortOrder.valueOf(direction.toUpperCase())
+            topHits.sort(field, order)
+        }
+        return topHits
     }
 
 }
