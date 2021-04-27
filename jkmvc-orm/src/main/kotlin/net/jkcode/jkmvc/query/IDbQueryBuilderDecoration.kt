@@ -64,22 +64,24 @@ interface IDbQueryBuilderDecoration{
      * Creates a new "WHERE BETWEEN" condition for the query.
      *
      * @param   column  column name or DbExpr
-     * @param   value   column value
+     * @param   from   column value
+     * @param   to   column value
      * @return
      */
-    fun whereBetween(column: String, value: Pair<Any, Any>): IDbQueryBuilder {
-        return where(column, "BETWEEN", value)
+    fun whereBetween(column: String, from: Any, to: Any): IDbQueryBuilder {
+        return where(column, "BETWEEN", Pair(from, to))
     }
 
     /**
      * Creates a new "OR WHERE BETWEEN" condition for the query.
      *
      * @param   column  column name or DbExpr
-     * @param   value   column value
+     * @param   from   column value
+     * @param   to   column value
      * @return
      */
-    fun orWhereBetween(column: String, value: Pair<Any, Any>): IDbQueryBuilder {
-        return orWhere(column, "BETWEEN", value)
+    fun orWhereBetween(column: String, from: Any, to: Any): IDbQueryBuilder {
+        return orWhere(column, "BETWEEN", Pair(from, to))
     }
 
     /**
