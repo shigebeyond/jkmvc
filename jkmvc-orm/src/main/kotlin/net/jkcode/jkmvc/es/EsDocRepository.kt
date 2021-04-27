@@ -115,8 +115,7 @@ class EsDocRepository<T: Any>(
      */
     @JvmOverloads
     fun deleteAll(query: ESQueryBuilder? = null, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): Collection<String> {
-        val query2 = query ?: queryBuilder()
-        return query2.deleteDocs(pageSize, scrollTimeInMillis)
+        return prepareQueryBuilder(query).deleteDocs(pageSize, scrollTimeInMillis)
     }
 
     /**
@@ -139,8 +138,7 @@ class EsDocRepository<T: Any>(
      */
     @JvmOverloads
     fun findAll(query: ESQueryBuilder? = null): Pair<List<T>, Long> {
-        val query2 = query ?: queryBuilder()
-        return query2.searchDocs(model)
+        return prepareQueryBuilder(query).searchDocs(model)
     }
 
     /**
@@ -151,8 +149,7 @@ class EsDocRepository<T: Any>(
      */
     @JvmOverloads
     fun scrollAll(query: ESQueryBuilder? = null, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): EsManager.EsScrollCollection<T>{
-        val query2 = query ?: queryBuilder()
-        return query2.scrollDocs(model, pageSize, scrollTimeInMillis)
+        return prepareQueryBuilder(query).scrollDocs(model, pageSize, scrollTimeInMillis)
     }
 
     /**
@@ -160,8 +157,18 @@ class EsDocRepository<T: Any>(
      */
     @JvmOverloads
     fun count(query: ESQueryBuilder? = null): Long {
-        val query2 = query ?: queryBuilder()
-        return query2.count()
+        return prepareQueryBuilder(query).count()
+    }
+
+    /**
+     * 准备好query buider
+     */
+    protected fun prepareQueryBuilder(query: ESQueryBuilder?): ESQueryBuilder {
+        if(query == null)
+            return queryBuilder()
+
+        query.index(index).type(type)
+        return query
     }
 
     /**

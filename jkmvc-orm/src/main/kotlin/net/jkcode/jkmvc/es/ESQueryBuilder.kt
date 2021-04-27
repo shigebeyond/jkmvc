@@ -43,7 +43,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
         /**
          * Filter operators
-         * @var List
          */
         protected val operators = arrayOf(
                 "=", // term
@@ -119,7 +118,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
     /**
      * Current query bool must not
-     * @var List
      */
     protected val mustNot: MutableList<QueryBuilder>
         get() {
@@ -209,7 +207,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
     /**
      * Query sort fields
-     * @var List
      */
     protected val sorts = ArrayList<SortBuilder<*>>();
 
@@ -235,7 +232,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
     /**
      * Query offset
-     * @var int
      */
     protected var offset = 0;
 
@@ -349,6 +345,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param direction
      * @return this
      */
+    @JvmOverloads
     public fun orderByField(field: String, desc: Boolean = false): ESQueryBuilder {
         val order = if (desc) SortOrder.DESC else SortOrder.ASC
         val sort = SortBuilders.fieldSort(field).order(order)
@@ -373,6 +370,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param direction
      * @return this
      */
+    @JvmOverloads
     public fun orderByScore(desc: Boolean = false): ESQueryBuilder {
         val order = if (desc) SortOrder.DESC else SortOrder.ASC
         val sort = SortBuilders.scoreSort().order(order)
@@ -398,6 +396,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param direction
      * @return this
      */
+    @JvmOverloads
     public fun orderByScript(script: String, params: Map<String, Any?> = emptyMap(), desc: Boolean = false): ESQueryBuilder {
         val order = if (desc) SortOrder.DESC else SortOrder.ASC
         val script2 = Script(ScriptType.INLINE, "painless", script, params)
@@ -414,6 +413,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param unit 距离单位
      * @return this
      */
+    @JvmOverloads
     public fun orderByGeoDistance(field: String, lat: Double, lon: Double, direction: String, unit: DistanceUnit = DistanceUnit.DEFAULT): ESQueryBuilder {
         return orderByGeoDistance(field, lat, lon, direction.equals("DESC", false), unit)
     }
@@ -426,6 +426,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param unit 距离单位
      * @return this
      */
+    @JvmOverloads
     public fun orderByGeoDistance(field: String, lat: Double, lon: Double, desc: Boolean = false, unit: DistanceUnit = DistanceUnit.DEFAULT): ESQueryBuilder {
         val order = if (desc) SortOrder.DESC else SortOrder.ASC
         val sort = SortBuilders.geoDistanceSort(field, lat, lon).order(order).unit(unit)
@@ -1066,6 +1067,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param asc 是否升序
      * @return
      */
+    @JvmOverloads
     public fun aggBy(expr: String, alias: String? = null, asc: Boolean? = null): ESQueryBuilder {
         val exp = AggExpr(expr, alias)
         val agg = exp.toAggregation()
@@ -1093,6 +1095,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param subAggAction
      * @return
      */
+    @JvmOverloads
     public fun aggByAndWrapSubAgg(expr: String, alias: String? = null, asc: Boolean? = null, subAggAction: ESQueryBuilder.() -> Unit): ESQueryBuilder {
         aggBy(expr, alias, asc)
         subAggWrap(subAggAction)
@@ -1153,6 +1156,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param params
      * @return
      */
+    @JvmOverloads
     fun addFieldScript(field: String, script: String, params: Map<String, Any?> = emptyMap()): ESQueryBuilder {
         fieldScripts[field] = Script(ScriptType.INLINE, "painless", script, params)
         return this
@@ -1260,6 +1264,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param scrollTimeInMillis
      * @return
      */
+    @JvmOverloads
     fun <T> scrollDocs(clazz: Class<T>, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): EsManager.EsScrollCollection<T> {
         return esmgr.scrollDocs(index, type, this, clazz, pageSize, scrollTimeInMillis)
     }
@@ -1271,6 +1276,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param scrollTimeInMillis
      * @return 被删除的id
      */
+    @JvmOverloads
     fun deleteDocs(pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): Collection<String> {
         return esmgr.deleteDocsByQuery2(index, type, this, pageSize, scrollTimeInMillis)
     }
@@ -1283,6 +1289,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param pageSize
      * @param scrollTimeInMillis
      */
+    @JvmOverloads
     fun updateDocsByQuery(script: String, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): UpdateByQueryResult {
         return esmgr.updateDocsByQuery(index, type, script, this, pageSize, scrollTimeInMillis)
     }

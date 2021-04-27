@@ -184,6 +184,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param nReplicas 复制数
      * @param readonly 是否只读
      */
+    @JvmOverloads
     fun createIndex(index: String, nShards: Int, nReplicas: Int, readonly: Boolean = false): Boolean {
         val settings = mapOf(
                 "number_of_shards" to nShards,
@@ -200,6 +201,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param index 索引名
      * @param settings 配置
      */
+    @JvmOverloads
     fun createIndex(index: String, settings: Map<String, *>? = null): Boolean {
         return tryExecuteReturnSucceeded {
             CreateIndex.Builder(index).settings(settings).build()
@@ -424,6 +426,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param source  文档, 可以是 json string/bean/map/list, 如果是bean/map/list, 最好有id属性，要不然会自动生成一个
      * @param _id   文档id
      */
+    @JvmOverloads
     fun indexDoc(index: String, type: String, source: Any, _id: String? = null): Boolean {
         return tryExecuteReturnSucceeded {
             buildInsertAction(index, type, source, _id)
@@ -439,6 +442,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param _id   文档id
      * @return
      */
+    @JvmOverloads
     fun <T> indexDocAsync(index: String, type: String, source: Any, _id: String? = null): CompletableFuture<DocumentResult> {
         return tryExecuteAsync {
             buildInsertAction(index, type, source, _id)
@@ -486,6 +490,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param params 脚本参数
      * @return
      */
+    @JvmOverloads
     fun <T> updateDoc(index: String, type: String, script: String, _id: String, params: Map<String, Any?> = emptyMap()): Boolean {
         val script2 = Script(ScriptType.INLINE, "painless", script, params)
         return tryExecuteReturnSucceeded {
@@ -570,6 +575,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param pageSize
      * @param scrollTimeInMillis
      */
+    @JvmOverloads
     fun updateDocsByQuery(index: String, type: String, script: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): UpdateByQueryResult {
         val xContentBuilder: XContentBuilder = XContentFactory.jsonBuilder()
                 .startObject()
@@ -622,6 +628,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param scrollTimeInMillis
      * @return 被删除的id
      */
+    @JvmOverloads
     fun deleteDocsByQuery(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): JestResult? {
         val query = queryBuilder.toQuery().toString()
         return tryExecute {
@@ -645,6 +652,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param scrollTimeInMillis
      * @return 被删除的id
      */
+    @JvmOverloads
     fun deleteDocsByQuery2(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): Collection<String> {
         // 查id
         // 原来想先 queryBuilder.select("id"), 可惜不知道id字段是啥
@@ -865,6 +873,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param resultMapper 结果转换器, 会将每一页的JestResult(兼容SearchResult/ScrollSearchResult), 转为T对象集合
      * @return
      */
+    @JvmOverloads
     fun <T> scrollDocs(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000, resultMapper:(JestResult)->Collection<T>): EsScrollCollection<T> {
         val result = startScroll(index, type, queryBuilder, pageSize, scrollTimeInMillis)
 
@@ -882,6 +891,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param scrollTimeInMillis 游标的有效时间, 如果报错`Elasticsearch No search context found for id`, 则加大
      * @return
      */
+    @JvmOverloads
     fun <T> scrollDocs(index: String, type: String, queryBuilder: ESQueryBuilder, clazz: Class<T>, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): EsScrollCollection<T> {
         return scrollDocs(index, type, queryBuilder, pageSize, scrollTimeInMillis) { result ->
             result.getSourceAsObjectList(clazz)
