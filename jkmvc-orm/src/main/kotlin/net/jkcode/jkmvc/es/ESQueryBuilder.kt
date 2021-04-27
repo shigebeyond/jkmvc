@@ -8,6 +8,7 @@ import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.common.unit.DistanceUnit
 import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.index.query.BoolQueryBuilder
+import org.elasticsearch.index.query.GeoBoundingBoxQueryBuilder
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.script.Script
@@ -548,6 +549,37 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
     }
 
     /**
+     * 搜索矩形(top,left,bottom,right)范围内的坐标点
+     * @param wheres
+     * @param name
+     * @param top
+     * @param left
+     * @param bottom
+     * @param right
+     * @return
+     */
+    protected inline fun whereGeoBoundingBox(wheres: MutableList<QueryBuilder>, name: String, top: Double, left: Double, bottom: Double, right: Double): ESQueryBuilder {
+        val query = QueryBuilders.geoBoundingBoxQuery(name).setCorners(top, left, bottom, right);
+        wheres.add(query)
+        return this
+    }
+
+    /**
+     * 搜索与指定点距离在给定最小距离和最大距离之间的点
+     * @param name A name of the field.
+     * @param lat geo point
+     * @param lon geo point
+     * @param distanceFrom A distance from the starting geo point. It can be for example "20km".
+     * @param distanceTo A distance to the starting geo point. It can be for example "20km".
+     * @return
+     */
+    protected inline fun whereGeoDistanceRange(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distanceFrom: String, distanceTo: String): ESQueryBuilder {
+        val query = QueryBuilders.geoDistanceRangeQuery(name, lat, lon).from(distanceFrom).to(distanceTo)
+        wheres.add(query)
+        return this
+    }
+
+    /**
      * Open a filter/must/mustNot/should sub clauses
      * @return
      */
@@ -643,6 +675,32 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      */
     public fun filterGeoDistance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
         return whereGeoDistance(this.filter, name, lat, lon, distance)
+    }
+
+    /**
+     * 搜索矩形(top,left,bottom,right)范围内的坐标点
+     * @param name
+     * @param top
+     * @param left
+     * @param bottom
+     * @param right
+     * @return
+     */
+    public fun filterGeoBoundingBox(wheres: MutableList<QueryBuilder>, name: String, top: Double, left: Double, bottom: Double, right: Double): ESQueryBuilder {
+        return whereGeoBoundingBox(this.filter, name, top, left, bottom, right)
+    }
+
+    /**
+     * 搜索与指定点距离在给定最小距离和最大距离之间的点
+     * @param name A name of the field.
+     * @param lat geo point
+     * @param lon geo point
+     * @param distanceFrom A distance from the starting geo point. It can be for example "20km".
+     * @param distanceTo A distance to the starting geo point. It can be for example "20km".
+     * @return
+     */
+    public fun filterGeoDistanceRange(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distanceFrom: String, distanceTo: String): ESQueryBuilder {
+        return whereGeoDistanceRange(this.filter, name, lat, lon, distanceFrom, distanceTo)
     }
 
     /**
@@ -760,6 +818,32 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      */
     public fun mustGeoDistance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
         return whereGeoDistance(this.must, name, lat, lon, distance)
+    }
+
+    /**
+     * 搜索矩形(top,left,bottom,right)范围内的坐标点
+     * @param name
+     * @param top
+     * @param left
+     * @param bottom
+     * @param right
+     * @return
+     */
+    public fun mustGeoBoundingBox(wheres: MutableList<QueryBuilder>, name: String, top: Double, left: Double, bottom: Double, right: Double): ESQueryBuilder {
+        return whereGeoBoundingBox(this.must, name, top, left, bottom, right)
+    }
+
+    /**
+     * 搜索与指定点距离在给定最小距离和最大距离之间的点
+     * @param name A name of the field.
+     * @param lat geo point
+     * @param lon geo point
+     * @param distanceFrom A distance from the starting geo point. It can be for example "20km".
+     * @param distanceTo A distance to the starting geo point. It can be for example "20km".
+     * @return
+     */
+    public fun mustGeoDistanceRange(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distanceFrom: String, distanceTo: String): ESQueryBuilder {
+        return whereGeoDistanceRange(this.must, name, lat, lon, distanceFrom, distanceTo)
     }
 
     /**
@@ -881,6 +965,32 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
     }
 
     /**
+     * 搜索矩形(top,left,bottom,right)范围内的坐标点
+     * @param name
+     * @param top
+     * @param left
+     * @param bottom
+     * @param right
+     * @return
+     */
+    public fun mustNotGeoBoundingBox(wheres: MutableList<QueryBuilder>, name: String, top: Double, left: Double, bottom: Double, right: Double): ESQueryBuilder {
+        return whereGeoBoundingBox(this.mustNot, name, top, left, bottom, right)
+    }
+
+    /**
+     * 搜索与指定点距离在给定最小距离和最大距离之间的点
+     * @param name A name of the field.
+     * @param lat geo point
+     * @param lon geo point
+     * @param distanceFrom A distance from the starting geo point. It can be for example "20km".
+     * @param distanceTo A distance to the starting geo point. It can be for example "20km".
+     * @return
+     */
+    public fun mustNotGeoDistanceRange(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distanceFrom: String, distanceTo: String): ESQueryBuilder {
+        return whereGeoDistanceRange(this.mustNot, name, lat, lon, distanceFrom, distanceTo)
+    }
+
+    /**
      * Opens a mustNot sub clauses
      * @return
      */
@@ -996,6 +1106,32 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      */
     public fun shouldGeoDistance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
         return whereGeoDistance(this.should, name, lat, lon, distance)
+    }
+
+    /**
+     * 搜索矩形(top,left,bottom,right)范围内的坐标点
+     * @param name
+     * @param top
+     * @param left
+     * @param bottom
+     * @param right
+     * @return
+     */
+    public fun shouldGeoBoundingBox(wheres: MutableList<QueryBuilder>, name: String, top: Double, left: Double, bottom: Double, right: Double): ESQueryBuilder {
+        return whereGeoBoundingBox(this.should, name, top, left, bottom, right)
+    }
+
+    /**
+     * 搜索与指定点距离在给定最小距离和最大距离之间的点
+     * @param name A name of the field.
+     * @param lat geo point
+     * @param lon geo point
+     * @param distanceFrom A distance from the starting geo point. It can be for example "20km".
+     * @param distanceTo A distance to the starting geo point. It can be for example "20km".
+     * @return
+     */
+    public fun shouldGeoDistanceRange(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distanceFrom: String, distanceTo: String): ESQueryBuilder {
+        return whereGeoDistanceRange(this.should, name, lat, lon, distanceFrom, distanceTo)
     }
 
     /**
