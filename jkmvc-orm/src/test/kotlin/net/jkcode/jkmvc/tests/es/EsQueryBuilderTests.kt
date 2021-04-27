@@ -8,7 +8,7 @@ import org.junit.Test
 import java.util.*
 
 
-class EsTests3 {
+class EsQueryBuilderTests {
 
     private val index = "recent_order_index"
 
@@ -75,24 +75,6 @@ class EsTests3 {
     }
 
     @Test
-    fun testIndexExist() {
-        val r = esmgr.indexExist(index)
-        System.out.println("索引[$index]是否存在：" + r)
-    }
-
-    @Test
-    fun testAddAliases() {
-        val list = Arrays.asList(index)
-        esmgr.addIndexAlias(list, "esindex_alias")
-        this.testGetIndexAliases()
-    }
-
-    @Test
-    fun testGetIndexAliases() {
-        esmgr.getIndexAliases(index)
-    }
-
-    @Test
     fun testRefreshIndex() {
         esmgr.refreshIndex(index)
     }
@@ -104,12 +86,6 @@ class EsTests3 {
         System.out.println("删除索引[$index]：" + r)
     }
 
-    @Test
-    fun testInsertDoc() {
-        val e = buildEntity(1)
-        val r = esmgr.insertDoc(index, type, e)
-        println("插入单个文档: " + r)
-    }
 
     @Test
     fun testBulkInsertDocs() {
@@ -135,69 +111,34 @@ class EsTests3 {
         return e
     }
 
-    @Test
-    fun testUpdateDoc() {
-        val e = esmgr.getDoc(index, type, "1", RecentOrder::class.java)!!
-        e.cargoId = randomLong(5)
-        e.driverUserName = arrayOf("南京市玄武区", "南京市秦淮区", "南京市六合区", "南京市建邺区", "南京市鼓楼区").random()
-        val r = esmgr.updateDoc(index, type, e, "1")
-        println("更新文档: " + r)
-    }
-
-    // curl 'localhost:9200/esindex/message/1?pretty=true'
-    @Test
-    fun testGetDoc() {
-        val id = "1"
-        val entity = esmgr.getDoc(index, type, id, RecentOrder::class.java)
-        System.out.println("testGetObject 返回值：" + entity.toString())
-    }
-
-    @Test
-    fun testMultiGetDoc() {
-        val ids = listOf("1", "2")
-        val entities = esmgr.multGetDocs(index, type, ids, RecentOrder::class.java)
-        System.out.println("testGetObject 返回值：" + entities)
-    }
-
     /*
-curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: application/json" -d '
+curl 'localhost:9200/recent_order_index/_doc/_search?pretty=true'  -H "Content-Type: application/json" -d '
 '
      */
     @Test
     fun testSearch() {
-        val ts = cid + 120 // 2分钟前
-        println("timestamp: $ts")
         val query = ESQueryBuilder()
-//                .filter("cargoId", ">=", 7)
-//                .must("driverUserName", ">=", 8)
-//                .must("companyId", "<=", 120)
-//                .must("loadAddress", "like", "Welcome")
-                /*.shouldWrap {
-                    must("loadAddress", "like", "Welcome")
-                    must("companyId", "<=", ts) // 两分钟前发的
-                }
-                .shouldWrap {
-                    must("loadAddress", "like", "Goodbye")
-                    must("companyId", ">", ts) // 两分钟内发的
-                }*/
-                /*.mustWrap {
-                    should("companyId", "=", 120)
-                    should("cargoId", "=", 8)
-                }
-                .must("driverUserName", ">=", 8)
-                */
+                .index(index)
+                .type(type)
+                .must("searchable", "=", true)
+                .must("driverUserName", "=", "张三")
                 .limit(10)
                 .offset(0)
                 .orderByField("id")
 
-        val (list, size) = esmgr.searchDocs(index, type, query, RecentOrder::class.java)
+        val (list, size) = query.searchDocs(RecentOrder::class.java)
         println("查到 $size 个文档")
         for (item in list)
             println(item)
     }
 
+    /**
+     * 复杂查询
+     *  对比 https://mp.weixin.qq.com/s/GFRiiQEk-JLpPnCi_WrRqw
+     *      https://www.infoq.cn/article/u4Xhw5Q3jfLE1brGhtbR
+     */
     @Test
-    fun testSearch2() {
+    fun testComplexQuery() {
         val query = ESQueryBuilder()
                 .index(index)
                 .type(type)
@@ -235,70 +176,6 @@ curl 'localhost:9200/esindex/message/_search?pretty=true'  -H "Content-Type: app
                 .orderByScript("searchCargo-script", mapOf("searchColdCargoTop" to 0))
 
         query.toSearchSource()
-    }
-
-    @Test
-    fun testScroll() {
-        val pageSize = 5
-        val c = ESQueryBuilder().index(index).type(type).scrollDocs(RecentOrder::class.java, pageSize, 100000)
-        val times = c.size / pageSize + 1
-        println("记录数=${c.size}, 每次取=$pageSize, 取次数=$times")
-        for (item in c)
-            println(item)
-    }
-
-    @Test
-    fun testDeleteDoc() {
-        esmgr.deleteDoc(index, type, "1")
-        println("删除id=1文档")
-    }
-
-    @Test
-    fun testSearchDeleteDoc() {
-        val pageSize = 5
-        val ids = ESQueryBuilder().index(index).type(type).deleteDocs(pageSize, 100000)
-        println("删除" + ids.size + "个文档: id in " + ids)
-    }
-
-    @Test
-    fun testScript() {
-        val query = ESQueryBuilder().index(index).type(type)
-                .addFieldScript("cargoId", "doc['cargoId']+1")
-                .filter("cargoId", ">=", 1)
-                .limit(10)
-        println(query.toSearchSource())
-    }
-
-    @Test
-    fun testStat() {
-        val query = ESQueryBuilder()
-        query.aggByAndWrapSubAgg("cargoId") {
-            aggByAndWrapSubAgg("driverUserName", null, false) {
-                aggBy("count(id)", "nid")
-            }
-        }
-        val result = esmgr.searchDocs(index, type, query)
-        println("返回结果:" + result.getJsonString())
-        if (result.isSucceeded) {
-            // 单值
-//            val n = result.aggregations.getValueCountAggregation("nid").getValueCount()
-//            println(n)
-
-            // 多值
-            val map = result.aggregations.getTermsAggregation("terms_cargoId").buckets.associateTo(LinkedHashMap()) { item ->
-                item.key to item.count
-            }
-            println(map)
-
-            // 二维
-            val map2 = LinkedHashMap<String, Any?>()
-            for (item1 in result.aggregations.getTermsAggregation("terms_cargoId").buckets) {
-                for (item2 in item1.getTermsAggregation("terms_driverUserName").buckets) {
-                    map2[item1.key + "-" + item2.key] = item2.count
-                }
-            }
-            println(map2)
-        }
     }
 
 }

@@ -26,7 +26,6 @@ import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.common.xcontent.XContentFactory
 import org.elasticsearch.script.Script
 import org.elasticsearch.script.ScriptType
-import java.io.ByteArrayOutputStream
 import java.io.Closeable
 import java.sql.SQLException
 import java.util.*
@@ -561,8 +560,16 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
 
     /**
      * 通过查询来批量更新
+     *    参考 https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html
+     *
+     * @param index 索引名
+     * @param type  类型
+     * @param script
+     * @param queryBuilder
+     * @param pageSize
+     * @param scrollTimeInMillis
      */
-    fun updateDocsByQuery(index: String, type: String, script: String, queryBuilder: ESQueryBuilder){
+    fun updateDocsByQuery(index: String, type: String, script: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): UpdateByQueryResult {
         val xContentBuilder: XContentBuilder = XContentFactory.jsonBuilder()
                 .startObject()
                 .field("query", queryBuilder.toQuery())
@@ -576,12 +583,14 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
         //val payload = (xContentBuilder.getOutputStream() as ByteArrayOutputStream).toString("UTF-8")
         val payload = xContentBuilder.toString()
 
-        val updateByQuery = UpdateByQuery.Builder(payload)
-                .addIndex(index)
-                .addType(type)
-                .build()
-
-
+        return tryExecute {
+            UpdateByQuery.Builder(payload)
+                    .addIndex(index)
+                    .addType(type)
+                    .setParameter("scroll_size", pageSize)
+                    .setParameter("scroll", scrollTimeInMillis.toString() + "ms")
+                    .build()
+        }
     }
 
     /**
@@ -596,6 +605,30 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
             Delete.Builder(_id)
                     .index(index)
                     .type(type)
+                    .build()
+        }
+    }
+
+    /**
+     * 通过查询来批量删除文档
+     *   参考 https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-delete-by-query.html
+     *
+     * @param index 索引名
+     * @param type  类型
+     * @param queryBuilder
+     * @param idField id字段
+     * @param pageSize
+     * @param scrollTimeInMillis
+     * @return 被删除的id
+     */
+    fun deleteDocsByQuery(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): JestResult? {
+        val query = queryBuilder.toQuery().toString()
+        return tryExecute {
+            DeleteByQuery.Builder(query)
+                    .addIndex(index)
+                    .addType(type)
+                    .setParameter("scroll_size", pageSize)
+                    .setParameter("scroll", scrollTimeInMillis.toString() + "ms")
                     .build()
         }
     }
