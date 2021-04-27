@@ -26,7 +26,6 @@ import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.common.xcontent.XContentFactory
 import org.elasticsearch.script.Script
 import org.elasticsearch.script.ScriptType
-import java.io.ByteArrayOutputStream
 import java.io.Closeable
 import java.sql.SQLException
 import java.util.*
@@ -185,6 +184,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param nReplicas 复制数
      * @param readonly 是否只读
      */
+    @JvmOverloads
     fun createIndex(index: String, nShards: Int, nReplicas: Int, readonly: Boolean = false): Boolean {
         val settings = mapOf(
                 "number_of_shards" to nShards,
@@ -201,6 +201,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param index 索引名
      * @param settings 配置
      */
+    @JvmOverloads
     fun createIndex(index: String, settings: Map<String, *>? = null): Boolean {
         return tryExecuteReturnSucceeded {
             CreateIndex.Builder(index).settings(settings).build()
@@ -390,7 +391,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param clazz
      * @return
      */
-    fun <T> multGetDocs(index: String, type: String, ids: List<String>, clazz: Class<T>): List<T> {
+    fun <T> multGetDocs(index: String, type: String, ids: Collection<String>, clazz: Class<T>): List<T> {
         val result = tryExecute {
             MultiGet.Builder.ById(index, type).addId(ids).build()
         }
@@ -418,21 +419,22 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
 
 
     /**
-     * 插入文档
+     * 索引文档(插入或更新)
      *
      * @param index 索引名
      * @param type  类型
      * @param source  文档, 可以是 json string/bean/map/list, 如果是bean/map/list, 最好有id属性，要不然会自动生成一个
      * @param _id   文档id
      */
-    fun insertDoc(index: String, type: String, source: Any, _id: String? = null): Boolean {
+    @JvmOverloads
+    fun indexDoc(index: String, type: String, source: Any, _id: String? = null): Boolean {
         return tryExecuteReturnSucceeded {
             buildInsertAction(index, type, source, _id)
         }
     }
 
     /**
-     * 插入文档
+     * 索引文档(插入或更新)
      *
      * @param index 索引名
      * @param type  类型
@@ -440,7 +442,8 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param _id   文档id
      * @return
      */
-    fun <T> insertDocAsync(index: String, type: String, source: Any, _id: String? = null): CompletableFuture<DocumentResult> {
+    @JvmOverloads
+    fun <T> indexDocAsync(index: String, type: String, source: Any, _id: String? = null): CompletableFuture<DocumentResult> {
         return tryExecuteAsync {
             buildInsertAction(index, type, source, _id)
         }
@@ -457,6 +460,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
     protected fun buildInsertAction(index: String, type: String, source: Any, _id: String? = null): Index {
         val action = Index.Builder(source).index(index).type(type)
         var id = _id
+        // 获得_id: 用 @EsId 注解的属性值
         if(id == null && source is OrmEntity){
             val rep = EsDocRepository.instance(source.javaClass)
             id = rep.getId(source)
@@ -486,6 +490,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param params 脚本参数
      * @return
      */
+    @JvmOverloads
     fun <T> updateDoc(index: String, type: String, script: String, _id: String, params: Map<String, Any?> = emptyMap()): Boolean {
         val script2 = Script(ScriptType.INLINE, "painless", script, params)
         return tryExecuteReturnSucceeded {
@@ -561,8 +566,17 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
 
     /**
      * 通过查询来批量更新
+     *    参考 https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html
+     *
+     * @param index 索引名
+     * @param type  类型
+     * @param script
+     * @param queryBuilder
+     * @param pageSize
+     * @param scrollTimeInMillis
      */
-    fun updateDocsByQuery(index: String, type: String, script: String, queryBuilder: ESQueryBuilder){
+    @JvmOverloads
+    fun updateDocsByQuery(index: String, type: String, script: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): UpdateByQueryResult {
         val xContentBuilder: XContentBuilder = XContentFactory.jsonBuilder()
                 .startObject()
                 .field("query", queryBuilder.toQuery())
@@ -576,12 +590,14 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
         //val payload = (xContentBuilder.getOutputStream() as ByteArrayOutputStream).toString("UTF-8")
         val payload = xContentBuilder.toString()
 
-        val updateByQuery = UpdateByQuery.Builder(payload)
-                .addIndex(index)
-                .addType(type)
-                .build()
-
-
+        return tryExecute {
+            UpdateByQuery.Builder(payload)
+                    .addIndex(index)
+                    .addType(type)
+                    .setParameter("scroll_size", pageSize)
+                    .setParameter("scroll", scrollTimeInMillis.toString() + "ms")
+                    .build()
+        }
     }
 
     /**
@@ -602,6 +618,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
 
     /**
      * 通过查询来批量删除文档
+     *   参考 https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-delete-by-query.html
      *
      * @param index 索引名
      * @param type  类型
@@ -611,6 +628,31 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param scrollTimeInMillis
      * @return 被删除的id
      */
+    @JvmOverloads
+    fun deleteDocsByQuery(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): JestResult? {
+        val query = queryBuilder.toQuery().toString()
+        return tryExecute {
+            DeleteByQuery.Builder(query)
+                    .addIndex(index)
+                    .addType(type)
+                    .setParameter("scroll_size", pageSize)
+                    .setParameter("scroll", scrollTimeInMillis.toString() + "ms")
+                    .build()
+        }
+    }
+
+    /**
+     * 通过查询来批量删除文档
+     *
+     * @param index 索引名
+     * @param type  类型
+     * @param queryBuilder
+     * @param idField id字段
+     * @param pageSize
+     * @param scrollTimeInMillis
+     * @return 被删除的id
+     */
+    @JvmOverloads
     fun deleteDocsByQuery2(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): Collection<String> {
         // 查id
         // 原来想先 queryBuilder.select("id"), 可惜不知道id字段是啥
@@ -631,18 +673,18 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
     }
 
     /**
-     * 批量插入文档
+     * 批量索引文档(插入或更新)
      * @param index 索引名
      * @param type  类型
      * @param items  (_id主键, 文档), 文档可能是json/bean/map
      */
-    fun bulkInsertDocs(index: String, type: String, items: Map<String, Any>) {
+    fun bulkIndexDocs(index: String, type: String, items: Map<String, Any>) {
         if(items.isEmpty())
             return
 
         val result = tryExecute {
             val actions = items.map { (_id, item) ->
-                Index.Builder(item).id(_id).build()
+                buildInsertAction(index, type, item, _id)
             }
 
             Bulk.Builder()
@@ -656,19 +698,19 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
     }
 
     /**
-     * 批量插入文档
+     * 批量索引文档(插入或更新)
      *
      * @param index    索引名
      * @param type     类型
      * @param items 批量文档
      */
-    fun <T> bulkInsertDocs(index: String, type: String, items: List<T>) {
+    fun <T: Any> bulkIndexDocs(index: String, type: String, items: List<T>) {
         if(items.isEmpty())
             return
 
         val result = tryExecute {
             val actions = items.map { item ->
-                Index.Builder(item).build()
+                buildInsertAction(index, type, item)
             }
 
             Bulk.Builder()
@@ -831,6 +873,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param resultMapper 结果转换器, 会将每一页的JestResult(兼容SearchResult/ScrollSearchResult), 转为T对象集合
      * @return
      */
+    @JvmOverloads
     fun <T> scrollDocs(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000, resultMapper:(JestResult)->Collection<T>): EsScrollCollection<T> {
         val result = startScroll(index, type, queryBuilder, pageSize, scrollTimeInMillis)
 
@@ -848,6 +891,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param scrollTimeInMillis 游标的有效时间, 如果报错`Elasticsearch No search context found for id`, 则加大
      * @return
      */
+    @JvmOverloads
     fun <T> scrollDocs(index: String, type: String, queryBuilder: ESQueryBuilder, clazz: Class<T>, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): EsScrollCollection<T> {
         return scrollDocs(index, type, queryBuilder, pageSize, scrollTimeInMillis) { result ->
             result.getSourceAsObjectList(clazz)

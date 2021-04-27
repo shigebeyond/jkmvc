@@ -1,12 +1,11 @@
 package net.jkcode.jkmvc.tests.es
 
-import com.alibaba.fastjson.JSON
-import com.google.gson.FieldNamingPolicy
-import com.google.gson.GsonBuilder
 import net.jkcode.jkmvc.es.ESQueryBuilder
 import net.jkcode.jkmvc.es.EsManager
-import net.jkcode.jkutil.common.randomString
-import org.joda.time.DateTime
+import net.jkcode.jkmvc.es.annotation.esIdProp
+import net.jkcode.jkmvc.tests.entity.MessageEntity
+import net.jkcode.jkmvc.tests.model.MessageModel
+import net.jkcode.jkutil.common.randomInt
 import org.junit.Test
 import java.util.*
 import kotlin.collections.HashMap
@@ -14,61 +13,29 @@ import kotlin.collections.HashMap
 
 class EsTests {
 
-    private val index = "worksheet_index"
+    private val index = "message_index"
 
     private val type = "_doc"
 
     private val esmgr = EsManager.instance()
+
+    //private val time = "2021-04-15".toDate().time / 1000
+    private val time = 0L
+
+    @Test
+    fun testEsId() {
+        val prop = MessageModel::class.esIdProp
+        println("esid prop: " + prop?.name)
+    }
 
     @Test
     fun testAll() {
         testDeleteIndex()
         testCreateIndex()
         testGetIndex()
-        testBulkInsertDocs()
-        testUpdateDoc()
-    }
-
-    @Test
-    fun testInsertAndDel() {
-        println("------------------ 插入 ------------------")
-        testBulkInsertDocs()
-        println("------------------ 搜索 ------------------")
-        testSearch2()
-        println("------------------ 搜索+删除 ------------------")
-        testSearchDeleteDoc()
-        println("------------------ 搜索 ------------------")
-        testSearch2()
-    }
-
-    @Test
-    fun testGson() {
-        val gsonBuilder = GsonBuilder()
-        // es字段命名为: 下划线
-        // 生成的json中的字段名, 都是下划线的
-        gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-        val gson = gsonBuilder.create()
-        val e = mapOf("name" to "shi", "age" to 1)
-        val json = gson.toJson(e)
-        println(json)
-
-        val e2 = gson.fromJson(json, HashMap::class.java)
-        println(e2)
-    }
-
-    @Test
-    fun testGson2() {
-        val gsonBuilder = GsonBuilder()
-        // es字段命名为: 下划线
-        // 生成的json中的字段名, 都是下划线的
-        gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-        val gson = gsonBuilder.create()
-        val e = buildEntity(1)
-        val json = gson.toJson(e)
-        println(json)
-
-        val e2 = gson.fromJson(json, WorkSheet::class.java)
-        println(e2)
+        testBulkIndexDocs()
+        testRefreshIndex()
+        testSearch()
     }
 
     @Test
@@ -77,136 +44,27 @@ class EsTests {
         var mapping = """{
     '_doc':{
         'properties':{
-            'call_record_id':{
-                'type':'long'
-            },
-            'city_id':{
-                'type':'long'
-            },
-            'commit_user_id':{
-                'type':'keyword'
-            },
-            'commit_user_name':{
-                'type':'keyword'
-            },
-            'confirm_sheet_type_four':{
-                'type':'long'
-            },
-            'confirm_sheet_type_one':{
-                'type':'long'
-            },
-            'confirm_sheet_type_three':{
-                'type':'long'
-            },
-            'confirm_sheet_type_two':{
-                'type':'long'
-            },
-            'contact':{
-                'type':'keyword'
-            },
-            'create_date':{
-                'type':'date',
-                'format':'yyyy-MM-dd HH:mm:ss'
-            },
-            'current_deal_user_id':{
-                'type':'keyword'
-            },
-            'current_deal_user_name':{
-                'type':'keyword'
-            },
-            'current_status':{
-                'type':'long'
-            },
-            'dept_id':{
-                'type':'long'
-            },
-            'driver_id':{
-                'type':'long'
-            },
-            'driver_name':{
-                'type':'keyword'
-            },
-            'driver_phone':{
-                'type':'keyword'
-            },
-            'duty_dept':{
-                'type':'long'
-            },
-            'handle_time':{
-                'type':'long'
-            },
             'id':{
                 'type':'long'
             },
-            'license_plates':{
-                'type':'keyword'
-            },
-            'memo':{
-                'type':'keyword'
-            },
-            'order_no':{
-                'type':'keyword'
-            },
-            'order_type':{
+            'fromUid':{
                 'type':'long'
             },
-            'reopen_times':{
+            'toUid':{
                 'type':'long'
             },
-            'rider_name':{
-                'type':'keyword'
+            'content':{
+                'type':'text'
             },
-            'rider_phone':{
-                'type':'keyword'
-            },
-            'service_type_id':{
+            'created':{
                 'type':'long'
-            },
-            'sheet_classify':{
-                'type':'long'
-            },
-            'sheet_priority':{
-                'type':'long'
-            },
-            'sheet_source':{
-                'type':'long'
-            },
-            'sheet_tag':{
-                'type':'long'
-            },
-            'sheet_tag_sort':{
-                'type':'long'
-            },
-            'sheet_type_four':{
-                'type':'long'
-            },
-            'sheet_type_one':{
-                'type':'long'
-            },
-            'sheet_type_three':{
-                'type':'long'
-            },
-            'sheet_type_two':{
-                'type':'long'
-            },
-            'update_date':{
-                'type':'date',
-                'format':'yyyy-MM-dd HH:mm:ss'
-            },
-            'urge_times':{
-                'type':'long'
-            },
-            'weight':{
-                'type':'long'
-            },
-            'work_sheet_no':{
-                'type':'keyword'
             }
         }
     }
 }"""
         // gson还是必须用双引号
         mapping = mapping.replace('\'', '"')
+        println(mapping)
         var r = esmgr.createIndex(index)
         println("创建索引[$index]: " + r)
         r = esmgr.putMapping(index, type, mapping)
@@ -232,7 +90,7 @@ class EsTests {
     @Test
     fun testAddAliases() {
         val list = Arrays.asList(index)
-        esmgr.addIndexAlias(list, "index-workorder_alias")
+        esmgr.addIndexAlias(list, "esindex_alias")
         this.testGetIndexAliases()
     }
 
@@ -254,166 +112,97 @@ class EsTests {
     }
 
     @Test
-    fun testInsertDoc() {
+    fun testIndexDoc() {
         val e = buildEntity(1)
-        val r = esmgr.insertDoc(index, type, e)
+        val r = esmgr.indexDoc(index, type, e)
         println("插入单个文档: " + r)
     }
 
     @Test
-    fun testBulkInsertDocs() {
-        val dataList = ArrayList<WorkSheet>()
+    fun testBulkIndexDocs() {
+        val items = ArrayList<MessageEntity>()
 
         for (i in 1..10) {
             val e = buildEntity(i)
-            dataList.add(e)
+            items.add(e)
         }
 
-        esmgr.bulkInsertDocs(index, type, dataList)
+        esmgr.bulkIndexDocs(index, type, items)
         println("批量插入")
     }
 
-    private fun buildEntity(i: Int): WorkSheet {
-        val e = WorkSheet()
+    private fun buildEntity(i: Int): MessageEntity {
+        val e = MessageEntity()
         e.id = i
-        e.workSheetNo = randomString(5)
-        e.sheetTypeTwo = 2
-        e.attentionUserIds = randomString(5)
-        e.createDate = Date(System.currentTimeMillis())
+        e.fromUid = randomInt(10)
+        e.toUid = randomInt(10)
+        e.content = if(i % 2 == 0) "welcome $i" else "Goodbye $i"
+        e.created = time + i * 60
         return e
     }
 
     @Test
     fun testUpdateDoc() {
-        val e = esmgr.getDoc(index, type, "1", WorkSheet::class.java)!!
-        e.workSheetNo = randomString(5)
-        e.updateDate = Date(System.currentTimeMillis())
-        e.urgeTimes = 2
-        e.reopenTimes = 3
+        val e = esmgr.getDoc(index, type, "1", MessageEntity::class.java)!!
+        e.fromUid = randomInt(10)
+        e.toUid = randomInt(10)
         val r = esmgr.updateDoc(index, type, e, "1")
         println("更新文档: " + r)
     }
 
-    // curl 'localhost:9200/index-workorder/worksheet/1?pretty=true'
+    @Test
+    fun testPartUpdateDoc() {
+        val r = esmgr.updateDoc(index, type, mapOf("name" to "shi"), "1")
+        println("部分更新文档: " + r)
+    }
+
+    // curl 'localhost:9200/esindex/message/1?pretty=true'
     @Test
     fun testGetDoc() {
         val id = "1"
-        val entity = esmgr.getDoc(index, type, id, WorkSheet::class.java)
-        System.out.println("testGetObject 返回值：" + entity.toString())
+        val entity = esmgr.getDoc(index, type, id, MessageEntity::class.java)
+        System.out.println("查单个：" + entity.toString())
     }
 
     @Test
     fun testMultiGetDoc() {
         val ids = listOf("1", "2")
-        val entities = esmgr.multGetDocs(index, type, ids, WorkSheet::class.java)
-        System.out.println("testGetObject 返回值：" + entities)
+        val entities = esmgr.multGetDocs(index, type, ids, MessageEntity::class.java)
+        System.out.println("查多个：" + entities)
     }
 
     /*
-curl 'localhost:9200/index-workorder/worksheet/_search?pretty=true'  -H "Content-Type: application/json" -d '
-{
-  "from" : 0,
-  "size" : 10,
-  "timeout" : "60s",
-  "query" : {
-    "bool" : {
-      "must" : [
-        {
-          "match" : {
-            "licensePlates" : {
-              "query" : "京BJM00测",
-              "operator" : "OR",
-              "prefix_length" : 0,
-              "max_expansions" : 50,
-              "fuzzy_transpositions" : true,
-              "lenient" : false,
-              "zero_terms_query" : "NONE",
-              "boost" : 1.0
-            }
-          }
-        }
-      ],
-      "filter" : [
-        {
-          "terms" : {
-            "deptId" : [
-              94,
-              93
-            ],
-            "boost" : 1.0
-          }
-        },
-        {
-          "term" : {
-            "sheetSource" : {
-              "value" : "3",
-              "boost" : 1.0
-            }
-          }
-        },
-        {
-          "range" : {
-            "sheet_source" : {
-              "from" : 0,
-              "to" : 6,
-              "include_lower" : true,
-              "include_upper" : true,
-              "boost" : 1.0
-            }
-          }
-        },
-        {
-          "range" : {
-            "createDate" : {
-              "from" : 1615868974174,
-              "to" : 1618892974205,
-              "include_lower" : true,
-              "include_upper" : true,
-              "boost" : 1.0
-            }
-          }
-        }
-      ],
-      "disable_coord" : false,
-      "adjust_pure_negative" : true,
-      "boost" : 1.0
-    }
-  },
-  "_source" : {
-    "includes" : [
-      "sheet_source",
-      "deptId",
-      "licensePlates",
-      "sheetSource",
-      "createDate"
-    ],
-    "excludes" : [ ]
-  },
-  "sort" : [
-    {
-      "id" : {
-        "order" : "asc"
-      }
-    }
-  ],
-  "highlight" : { }
-}'
+curl 'localhost:9200/message_index/_doc/_search?pretty=true'  -H "Content-Type: application/json" -d '
+'
      */
     @Test
     fun testSearch() {
+        val ts = time + 120 // 2分钟前
+        println("timestamp: $ts")
         val query = ESQueryBuilder()
-        query.select("_id", "deptId", "sheetSource", "licensePlates", "sheet_source", "createDate")
-//                .filter("deptId", "IN", listOf(94, 93))
-//                .filter("sheetSource", "3")
-//                .filter("licensePlates", "like", "京BJM00测")
-//                .filterBetween("sheet_source", 0, 6)
-        //date
-        val start = DateTime().plusDays(-35)
-        query.filterBetween("createDate", start.toDate().time, DateTime().toDate().time)
+//                .filter("fromUid", ">=", 7)
+                .must("toUid", ">=", 8)
+                .must("created", "<=", 120)
+                .must("content", "like", "Welcome")
+                /*.shouldWrap {
+                    must("content", "like", "Welcome")
+                    must("created", "<=", ts) // 两分钟前发的
+                }
+                .shouldWrap {
+                    must("content", "like", "Goodbye")
+                    must("created", ">", ts) // 两分钟内发的
+                }*/
+                /*.mustWrap {
+                    should("created", "=", 120)
+                    should("fromUid", "=", 8)
+                }
+                .must("toUid", ">=", 8)
+                */
+                .limit(10)
+                .offset(0)
+                .orderByField("id")
 
-        query.limit(10).offset(0).orderByField("id")
-
-        val (list, size) = esmgr.searchDocs(index, type, query, WorkSheet::class.java)
+        val (list, size) = esmgr.searchDocs(index, type, query, MessageEntity::class.java)
         println("查到 $size 个文档")
         for (item in list)
             println(item)
@@ -430,7 +219,7 @@ curl 'localhost:9200/index-workorder/worksheet/_search?pretty=true'  -H "Content
     @Test
     fun testScroll() {
         val pageSize = 5
-        val c = ESQueryBuilder().index(index).type(type).scrollDocs(WorkSheet::class.java, pageSize, 100000)
+        val c = ESQueryBuilder().index(index).type(type).scrollDocs(MessageEntity::class.java, pageSize, 100000)
         val times = c.size / pageSize + 1
         println("记录数=${c.size}, 每次取=$pageSize, 取次数=$times")
         for (item in c)
@@ -451,43 +240,44 @@ curl 'localhost:9200/index-workorder/worksheet/_search?pretty=true'  -H "Content
     }
 
     @Test
+    fun testScript() {
+        val query = ESQueryBuilder().index(index).type(type)
+                .addFieldScript("fromUid", "doc['fromUid']+1")
+                .filter("fromUid", ">=", 1)
+                .limit(10)
+        println(query.toSearchSource())
+    }
+
+    @Test
     fun testStat() {
         val query = ESQueryBuilder()
-        query.filter("currentStatus", 1)
-                .filter("currentDealUserId", "1500")
-                .aggBy("deptId")
-                .aggBy("count(id)", "nid")
-
+        query.aggByAndWrapSubAgg("fromUid") {
+            aggByAndWrapSubAgg("toUid", null, false) {
+                aggBy("count(id)", "nid")
+            }
+        }
         val result = esmgr.searchDocs(index, type, query)
         println("返回结果:" + result.getJsonString())
         if (result.isSucceeded) {
             // 单值
-            val n = result.aggregations.getValueCountAggregation("nid").getValueCount()
+//            val n = result.aggregations.getValueCountAggregation("nid").getValueCount()
+//            println(n)
 
             // 多值
-            val map = result.aggregations.getTermsAggregation("nid").buckets.associate { item ->
+            val map = result.aggregations.getTermsAggregation("terms_fromUid").buckets.associateTo(LinkedHashMap()) { item ->
                 item.key to item.count
             }
-        }
-    }
+            println(map)
 
-
-    @Test
-    fun testStat2() {
-        //多级别统计,这种情况，只能返回 result 自己处理了
-        val query = ESQueryBuilder()
-        //加上时间过滤
-        val start = DateTime().plusDays(-10)
-        query.filterBetween("createDate", start.toDate().time, DateTime().toDate().time)
-
-        query.aggBy("sheetTypeOne").aggBy("sheetTypeTwo", "agg")
-        val result = esmgr.searchDocs(index, type, query)
-        println("返回结果:" + JSON.toJSONString(result))
-        if (result.isSucceeded) {
-            // 多值
-            val map = result.aggregations.getTermsAggregation("nid").buckets.forEach { item ->
-                println("两级分组统计返回：" + item.key + "---" + JSON.toJSONString(item))
+            // 二维
+            val map2 = LinkedHashMap<String, Any?>()
+            for(item1 in result.aggregations.getTermsAggregation("terms_fromUid").buckets){
+                for(item2 in item1.getTermsAggregation("terms_toUid").buckets){
+                    map2[item1.key + "-" + item2.key] = item2.count
+                }
             }
+            println(map2)
         }
     }
+
 }

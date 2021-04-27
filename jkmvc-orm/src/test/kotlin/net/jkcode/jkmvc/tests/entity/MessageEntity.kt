@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.tests.entity
 
+import net.jkcode.jkmvc.es.annotation.EsDoc
 import net.jkcode.jkmvc.es.annotation.EsId
 import net.jkcode.jkmvc.orm.OrmEntity
 
@@ -11,6 +12,7 @@ import net.jkcode.jkmvc.orm.OrmEntity
  * @author shijianhang<772910474@qq.com>
  * @date 2019-06-27 2:53 PM
  */
+@EsDoc("message_index", "_doc")
 open class MessageEntity: OrmEntity() {
 
     // 代理属性读写

@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.es
 
 import io.searchbox.core.SearchResult
+import io.searchbox.core.UpdateByQueryResult
 import io.searchbox.params.SearchType
 import net.jkcode.jkutil.common.esLogger
 import net.jkcode.jkutil.common.isArrayOrCollection
@@ -43,7 +44,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
         /**
          * Filter operators
-         * @var List
          */
         protected val operators = arrayOf(
                 "=", // term
@@ -119,7 +119,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
     /**
      * Current query bool must not
-     * @var List
      */
     protected val mustNot: MutableList<QueryBuilder>
         get() {
@@ -209,7 +208,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
     /**
      * Query sort fields
-     * @var List
      */
     protected val sorts = ArrayList<SortBuilder<*>>();
 
@@ -235,7 +233,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
     /**
      * Query offset
-     * @var int
      */
     protected var offset = 0;
 
@@ -349,6 +346,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param direction
      * @return this
      */
+    @JvmOverloads
     public fun orderByField(field: String, desc: Boolean = false): ESQueryBuilder {
         val order = if (desc) SortOrder.DESC else SortOrder.ASC
         val sort = SortBuilders.fieldSort(field).order(order)
@@ -373,6 +371,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param direction
      * @return this
      */
+    @JvmOverloads
     public fun orderByScore(desc: Boolean = false): ESQueryBuilder {
         val order = if (desc) SortOrder.DESC else SortOrder.ASC
         val sort = SortBuilders.scoreSort().order(order)
@@ -398,6 +397,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param direction
      * @return this
      */
+    @JvmOverloads
     public fun orderByScript(script: String, params: Map<String, Any?> = emptyMap(), desc: Boolean = false): ESQueryBuilder {
         val order = if (desc) SortOrder.DESC else SortOrder.ASC
         val script2 = Script(ScriptType.INLINE, "painless", script, params)
@@ -414,6 +414,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param unit 距离单位
      * @return this
      */
+    @JvmOverloads
     public fun orderByGeoDistance(field: String, lat: Double, lon: Double, direction: String, unit: DistanceUnit = DistanceUnit.DEFAULT): ESQueryBuilder {
         return orderByGeoDistance(field, lat, lon, direction.equals("DESC", false), unit)
     }
@@ -426,6 +427,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param unit 距离单位
      * @return this
      */
+    @JvmOverloads
     public fun orderByGeoDistance(field: String, lat: Double, lon: Double, desc: Boolean = false, unit: DistanceUnit = DistanceUnit.DEFAULT): ESQueryBuilder {
         val order = if (desc) SortOrder.DESC else SortOrder.ASC
         val sort = SortBuilders.geoDistanceSort(field, lat, lon).order(order).unit(unit)
@@ -440,7 +442,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      */
     protected fun build1Condition(name: String, operator: String, value: Any?): QueryBuilder {
         if (operator == "=") { // term
-            val v = if(name == "_id") value.toString() else value
+            val v = if(name == "_id") value?.toString() else value // id转字符串
             return QueryBuilders.termQuery(name, v)
         }
 
@@ -1201,6 +1203,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param asc 是否升序
      * @return
      */
+    @JvmOverloads
     public fun aggBy(expr: String, alias: String? = null, asc: Boolean? = null): ESQueryBuilder {
         val exp = AggExpr(expr, alias)
         val agg = exp.toAggregation()
@@ -1228,6 +1231,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param subAggAction
      * @return
      */
+    @JvmOverloads
     public fun aggByAndWrapSubAgg(expr: String, alias: String? = null, asc: Boolean? = null, subAggAction: ESQueryBuilder.() -> Unit): ESQueryBuilder {
         aggBy(expr, alias, asc)
         subAggWrap(subAggAction)
@@ -1288,6 +1292,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * @param params
      * @return
      */
+    @JvmOverloads
     fun addFieldScript(field: String, script: String, params: Map<String, Any?> = emptyMap()): ESQueryBuilder {
         fieldScripts[field] = Script(ScriptType.INLINE, "painless", script, params)
         return this
@@ -1373,9 +1378,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
     /**
      * 搜索文档
-     * @param index 索引名
-     * @param type 类型
-     * @param queryBuilder 查询构造
      * @param clazz
      * @return
      */
@@ -1385,9 +1387,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
     /**
      * 搜索文档
-     * @param index 索引名
-     * @param type 类型
-     * @param queryBuilder 查询构造
      * @return
      */
     public fun searchDocs(): SearchResult {
@@ -1396,26 +1395,38 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
     /**
      * 开始搜索文档, 并返回有游标的结果集合
-     * @param index
-     * @param type
-     * @param queryBuilder
      * @param clazz bean类, 可以是HashMap
      * @param pageSize
      * @param scrollTimeInMillis
      * @return
      */
+    @JvmOverloads
     fun <T> scrollDocs(clazz: Class<T>, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): EsManager.EsScrollCollection<T> {
         return esmgr.scrollDocs(index, type, this, clazz, pageSize, scrollTimeInMillis)
     }
 
     /**
-     * 删除文档
+     * 通过查询批量删除文档
      *
      * @param pageSize
      * @param scrollTimeInMillis
      * @return 被删除的id
      */
+    @JvmOverloads
     fun deleteDocs(pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): Collection<String> {
         return esmgr.deleteDocsByQuery2(index, type, this, pageSize, scrollTimeInMillis)
+    }
+
+    /**
+     * 通过查询来批量更新
+     *    参考 https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html
+     *
+     * @param script
+     * @param pageSize
+     * @param scrollTimeInMillis
+     */
+    @JvmOverloads
+    fun updateDocsByQuery(script: String, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): UpdateByQueryResult {
+        return esmgr.updateDocsByQuery(index, type, script, this, pageSize, scrollTimeInMillis)
     }
 }
