@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.es
 
 import io.searchbox.core.SearchResult
+import io.searchbox.core.UpdateByQueryResult
 import io.searchbox.params.SearchType
 import net.jkcode.jkutil.common.esLogger
 import net.jkcode.jkutil.common.isArrayOrCollection
@@ -439,7 +440,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      */
     protected fun build1Condition(name: String, operator: String, value: Any?): QueryBuilder {
         if (operator == "=") { // term
-            val v = if(name == "_id") value.toString() else value
+            val v = if(name == "_id") value?.toString() else value // id转字符串
             return QueryBuilders.termQuery(name, v)
         }
 
@@ -1237,9 +1238,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
     /**
      * 搜索文档
-     * @param index 索引名
-     * @param type 类型
-     * @param queryBuilder 查询构造
      * @param clazz
      * @return
      */
@@ -1249,9 +1247,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
     /**
      * 搜索文档
-     * @param index 索引名
-     * @param type 类型
-     * @param queryBuilder 查询构造
      * @return
      */
     public fun searchDocs(): SearchResult {
@@ -1260,9 +1255,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
     /**
      * 开始搜索文档, 并返回有游标的结果集合
-     * @param index
-     * @param type
-     * @param queryBuilder
      * @param clazz bean类, 可以是HashMap
      * @param pageSize
      * @param scrollTimeInMillis
@@ -1273,7 +1265,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
     }
 
     /**
-     * 删除文档
+     * 通过查询批量删除文档
      *
      * @param pageSize
      * @param scrollTimeInMillis
@@ -1281,5 +1273,17 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      */
     fun deleteDocs(pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): Collection<String> {
         return esmgr.deleteDocsByQuery2(index, type, this, pageSize, scrollTimeInMillis)
+    }
+
+    /**
+     * 通过查询来批量更新
+     *    参考 https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html
+     *
+     * @param script
+     * @param pageSize
+     * @param scrollTimeInMillis
+     */
+    fun updateDocsByQuery(script: String, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): UpdateByQueryResult {
+        return esmgr.updateDocsByQuery(index, type, script, this, pageSize, scrollTimeInMillis)
     }
 }

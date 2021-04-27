@@ -33,7 +33,7 @@ class EsTests {
         testDeleteIndex()
         testCreateIndex()
         testGetIndex()
-        testBulkInsertDocs()
+        testBulkIndexDocs()
         testRefreshIndex()
         testSearch()
     }
@@ -112,22 +112,22 @@ class EsTests {
     }
 
     @Test
-    fun testInsertDoc() {
+    fun testIndexDoc() {
         val e = buildEntity(1)
-        val r = esmgr.insertDoc(index, type, e)
+        val r = esmgr.indexDoc(index, type, e)
         println("插入单个文档: " + r)
     }
 
     @Test
-    fun testBulkInsertDocs() {
-        val dataList = ArrayList<MessageEntity>()
+    fun testBulkIndexDocs() {
+        val items = ArrayList<MessageEntity>()
 
         for (i in 1..10) {
             val e = buildEntity(i)
-            dataList.add(e)
+            items.add(e)
         }
 
-        esmgr.bulkInsertDocs(index, type, dataList)
+        esmgr.bulkIndexDocs(index, type, items)
         println("批量插入")
     }
 
@@ -161,14 +161,14 @@ class EsTests {
     fun testGetDoc() {
         val id = "1"
         val entity = esmgr.getDoc(index, type, id, MessageEntity::class.java)
-        System.out.println("testGetObject 返回值：" + entity.toString())
+        System.out.println("查单个：" + entity.toString())
     }
 
     @Test
     fun testMultiGetDoc() {
         val ids = listOf("1", "2")
         val entities = esmgr.multGetDocs(index, type, ids, MessageEntity::class.java)
-        System.out.println("testGetObject 返回值：" + entities)
+        System.out.println("查多个：" + entities)
     }
 
     /*

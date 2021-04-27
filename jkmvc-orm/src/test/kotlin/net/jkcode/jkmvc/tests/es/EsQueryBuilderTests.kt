@@ -23,7 +23,7 @@ class EsQueryBuilderTests {
         testDeleteIndex()
         testCreateIndex()
         testGetIndex()
-        testBulkInsertDocs()
+        testBulkIndexDocs()
         testRefreshIndex()
         testSearch()
     }
@@ -88,7 +88,7 @@ class EsQueryBuilderTests {
 
 
     @Test
-    fun testBulkInsertDocs() {
+    fun testBulkIndexDocs() {
         val dataList = ArrayList<RecentOrder>()
 
         for (i in 0 until 5) {
@@ -96,7 +96,7 @@ class EsQueryBuilderTests {
             dataList.add(e)
         }
 
-        esmgr.bulkInsertDocs(index, type, dataList)
+        esmgr.bulkIndexDocs(index, type, dataList)
         println("批量插入")
     }
 

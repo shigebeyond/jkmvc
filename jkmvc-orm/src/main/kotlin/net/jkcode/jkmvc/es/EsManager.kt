@@ -389,7 +389,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param clazz
      * @return
      */
-    fun <T> multGetDocs(index: String, type: String, ids: List<String>, clazz: Class<T>): List<T> {
+    fun <T> multGetDocs(index: String, type: String, ids: Collection<String>, clazz: Class<T>): List<T> {
         val result = tryExecute {
             MultiGet.Builder.ById(index, type).addId(ids).build()
         }
@@ -417,21 +417,21 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
 
 
     /**
-     * 插入文档
+     * 索引文档(插入或更新)
      *
      * @param index 索引名
      * @param type  类型
      * @param source  文档, 可以是 json string/bean/map/list, 如果是bean/map/list, 最好有id属性，要不然会自动生成一个
      * @param _id   文档id
      */
-    fun insertDoc(index: String, type: String, source: Any, _id: String? = null): Boolean {
+    fun indexDoc(index: String, type: String, source: Any, _id: String? = null): Boolean {
         return tryExecuteReturnSucceeded {
             buildInsertAction(index, type, source, _id)
         }
     }
 
     /**
-     * 插入文档
+     * 索引文档(插入或更新)
      *
      * @param index 索引名
      * @param type  类型
@@ -439,7 +439,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param _id   文档id
      * @return
      */
-    fun <T> insertDocAsync(index: String, type: String, source: Any, _id: String? = null): CompletableFuture<DocumentResult> {
+    fun <T> indexDocAsync(index: String, type: String, source: Any, _id: String? = null): CompletableFuture<DocumentResult> {
         return tryExecuteAsync {
             buildInsertAction(index, type, source, _id)
         }
@@ -456,6 +456,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
     protected fun buildInsertAction(index: String, type: String, source: Any, _id: String? = null): Index {
         val action = Index.Builder(source).index(index).type(type)
         var id = _id
+        // 获得_id: 用 @EsId 注解的属性值
         if(id == null && source is OrmEntity){
             val rep = EsDocRepository.instance(source.javaClass)
             id = rep.getId(source)
@@ -664,18 +665,18 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
     }
 
     /**
-     * 批量插入文档
+     * 批量索引文档(插入或更新)
      * @param index 索引名
      * @param type  类型
      * @param items  (_id主键, 文档), 文档可能是json/bean/map
      */
-    fun bulkInsertDocs(index: String, type: String, items: Map<String, Any>) {
+    fun bulkIndexDocs(index: String, type: String, items: Map<String, Any>) {
         if(items.isEmpty())
             return
 
         val result = tryExecute {
             val actions = items.map { (_id, item) ->
-                Index.Builder(item).id(_id).build()
+                buildInsertAction(index, type, item, _id)
             }
 
             Bulk.Builder()
@@ -689,19 +690,19 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
     }
 
     /**
-     * 批量插入文档
+     * 批量索引文档(插入或更新)
      *
      * @param index    索引名
      * @param type     类型
      * @param items 批量文档
      */
-    fun <T> bulkInsertDocs(index: String, type: String, items: List<T>) {
+    fun <T: Any> bulkIndexDocs(index: String, type: String, items: List<T>) {
         if(items.isEmpty())
             return
 
         val result = tryExecute {
             val actions = items.map { item ->
-                Index.Builder(item).build()
+                buildInsertAction(index, type, item)
             }
 
             Bulk.Builder()
