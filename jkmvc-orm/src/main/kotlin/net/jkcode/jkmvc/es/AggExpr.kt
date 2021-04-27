@@ -61,8 +61,14 @@ class AggExpr(
             args = emptyList()
         }
 
-        if (alias == null)
-            alias = func + '_' + field
+        if (alias == null) {
+            alias = field
+            if(alias!!.contains('.'))
+                alias = alias!!.replace('.', '_')
+            // terms/nested 的别名还是字段名, 但其他的需要加上函数名前缀
+            if(func != "terms" && func != "nested")
+                alias = func + '_' + alias
+        }
     }
 
     /**
