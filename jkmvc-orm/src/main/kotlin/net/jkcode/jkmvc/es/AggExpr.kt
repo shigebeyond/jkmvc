@@ -7,10 +7,13 @@ import org.elasticsearch.common.unit.DistanceUnit
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram
+import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder
 import org.elasticsearch.search.aggregations.bucket.range.date.DateRangeAggregationBuilder
 import org.elasticsearch.search.aggregations.bucket.range.geodistance.GeoDistanceAggregationBuilder
 import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsAggregationBuilder
 import org.elasticsearch.search.sort.SortOrder
+import kotlin.math.min
 
 /**
  * 聚合表达式
@@ -103,15 +106,17 @@ class AggExpr(
         if (func == "stats")
             return AggregationBuilders.stats(alias).field(field)
 
-        // 百分百聚合——基于聚合文档中某个数值类型的值，求指定比例中的值分布
-        // percentiles(field,percentiles1,percentiles2...)
-        if (func == "percentiles") {
-            val percentiles = DoubleArray(args.size)
-            args.forEachIndexed { i, item ->
-                percentiles[i] = item.toDouble()
-            }
-            return AggregationBuilders.percentiles(alias).field(field)
-                    .percentiles(*percentiles)
+        // 地理重心聚合——基于文档的某个字段（geo-point类型字段），计算所有坐标的加权重心
+        if (func == "geo_centroid")
+            return AggregationBuilders.geoCentroid(alias).field(field)
+
+        // geohash_grid 按照你定义的精度计算每一个点的 geohash 值而将附近的位置聚合在一起作为一个区域(单元格)
+        // 高精度的geohash字符串长度越长, 代表的区域越小, 低精度的字符串越短, 代表的区域越大
+        // 精度为 5 大约是 5km x 5km
+        // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-geohashgrid-aggregation.html
+        if(func == "geohash_grid"){
+            val precision = args[0].toInt()
+            return AggregationBuilders.geohashGrid(alias).field(field).precision(precision)
         }
 
         // 地理边界聚合——基于文档的某个字段（geo-point类型字段），计算出该字段所有地理坐标点的边界（左上角/右下角坐标点）
@@ -128,10 +133,6 @@ class AggExpr(
         if (func == "geo_distance")
             return toGeoDistance()
 
-        // 地理重心聚合——基于文档的某个字段（geo-point类型字段），计算所有坐标的加权重心
-        if (func == "geo_centroid")
-            return AggregationBuilders.geoCentroid(alias).field(field)
-
         // 多桶聚合后的请求如果使用了top_hits，返回结果会带上每个bucket关联的文档数据
         // top_hits(from,size,orderField1 orderDirection1,orderField2 orderDirection2...)
         if (func == "top_hits")
@@ -142,17 +143,29 @@ class AggExpr(
         if (func == "date_range")
             return toDateRange()
 
+        // 百分百聚合——基于聚合文档中某个数值类型的值，求指定比例中的值分布
+        // percentiles(field,percentiles1,percentiles2...)
+        if (func == "percentiles") {
+            val percentiles = DoubleArray(args.size)
+            args.forEachIndexed { i, item ->
+                percentiles[i] = item.toDouble()
+            }
+            return AggregationBuilders.percentiles(alias).field(field)
+                    .percentiles(*percentiles)
+        }
+
         // 对字段值按间隔统计建立直方图, 针对数值型和日期型字段。
         // 比如我们以5为间隔，统计不同区间的，现在想每隔5就创建一个桶，统计每隔区间都有多少个文档
-        // histogram(field,interval)
+        // histogram(field,interval,minBound-maxBound,orderField orderDirection)
+        // 其中orderField只有count/key
+        // https://www.cnblogs.com/xing901022/p/4954823.html
         if (func == "histogram") {
-            val interval = args[0].toDouble()
-            return AggregationBuilders.histogram(alias).field(field)
-                    .interval(interval)
+            return toHistogram()
         }
 
         // 对日期字段值按间隔统计建立直方图, 针对日期型字段。
         // date_histogram(field,interval,format)
+        // interval时间间隔: 1s/1m/1h/1d/1w/1M/1q/1y
         if (func == "date_histogram") {
             val interval = args[0]
             val format = args[1]
@@ -161,16 +174,38 @@ class AggExpr(
                     .format(format)
         }
 
-
-        // todo
-        /**
-        val aggregationBuilder = AggregationBuilders.dateHistogram("dateagg")
-        .field("createDate")
-        .dateHistogramInterval(DateHistogramInterval.DAY)
-        .timeZone(DateTimeZone.forID("Asia/Shanghai"))
-         */
-
         throw IllegalArgumentException("Unknown aggregation function: " + func)
+    }
+
+    /**
+     * 对字段值按间隔统计建立直方图, 针对数值型和日期型字段。
+     * 比如我们以5为间隔，统计不同区间的，现在想每隔5就创建一个桶，统计每隔区间都有多少个文档
+     * histogram(field,interval,minBound-maxBound,orderField orderDirection)
+     * 其中orderField只有count/key
+     * https://www.cnblogs.com/xing901022/p/4954823.html
+     */
+    protected fun toHistogram(): HistogramAggregationBuilder {
+        val interval = args[0].toDouble()
+        val histogram = AggregationBuilders.histogram(alias).field(field)
+                .interval(interval)
+        val bounds = args.getOrNull(1)?.split('-')
+        if (bounds != null) {
+            val minBound = bounds[0].toDouble()
+            val maxBound = bounds[1].toDouble()
+            histogram.extendedBounds(minBound, maxBound)
+        }
+        // order, 排序=字段 方向
+        if (args.size > 3) {
+            val order = when (args[2]) {
+                "key desc" -> Histogram.Order.KEY_DESC
+                "count asc" -> Histogram.Order.COUNT_ASC
+                "count desc" -> Histogram.Order.COUNT_DESC
+                "key asc" -> Histogram.Order.KEY_ASC
+                else -> Histogram.Order.KEY_ASC
+            }
+            histogram.order(order)
+        }
+        return histogram
     }
 
     /**
