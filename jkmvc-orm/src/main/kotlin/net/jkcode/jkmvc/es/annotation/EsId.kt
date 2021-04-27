@@ -8,6 +8,9 @@ import kotlin.reflect.full.memberProperties
 /**
  * es id的注解
  *   用于表示 _id 的字段
+ *
+ * @author shijianhang
+ * @date 2021-4-21 下午5:16:59
  */
 @Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.RUNTIME)

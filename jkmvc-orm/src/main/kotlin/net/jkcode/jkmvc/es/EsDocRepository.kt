@@ -7,6 +7,9 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 文档仓库
+ *
+ * @author shijianhang
+ * @date 2021-4-21 下午5:16:59
  */
 class EsDocRepository<T: Any>(
         public val model: Class<T> // 模型类

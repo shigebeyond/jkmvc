@@ -5,6 +5,9 @@ import kotlin.reflect.KClass
 
 /**
  * es文档注解
+ *
+ * @author shijianhang
+ * @date 2021-4-21 下午5:16:59
  */
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FILE)
