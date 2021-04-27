@@ -11,7 +11,7 @@ import net.jkcode.jkmvc.query.SqlAction
 import org.junit.Test
 
 
-class QueryBuilderTests{
+class DbQueryBuilderTests{
 
     val db: Db = Db.instance()
 
