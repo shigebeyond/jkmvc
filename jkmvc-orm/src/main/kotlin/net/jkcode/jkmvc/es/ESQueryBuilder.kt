@@ -183,7 +183,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
         if(aggsStack.size < 2)
             throw IllegalStateException("Cannot find parent aggregation, because `aggsStack` only has 1 aggregation group")
 
-        val reverseIndx = (aggsStack.size - 2).rangeTo(0).step(-1)
+        val reverseIndx = (aggsStack.size - 2).downTo(0)
         for (i in reverseIndx){
             val parentAggs = aggsStack[i].first // AggregatorFactories.Builder
             val parentAgg = parentAggs.aggregatorFactories.last() // AggregationBuilder
@@ -1235,17 +1235,17 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
         if(asc != null) {
             val parentAgg = getClosetParentAgg{
                 it is TermsAggregationBuilder
-                        && it is DateHistogramAggregationBuilder
-                        && it is HistogramAggregationBuilder
+                        || it is DateHistogramAggregationBuilder
+                        || it is HistogramAggregationBuilder
             }
-            if(parentAgg is TermsAggregationBuilder)
-                parentAgg.order(Terms.Order.aggregation(exp.alias, asc))
-
-            if(parentAgg is DateHistogramAggregationBuilder)
-                parentAgg.order(Histogram.Order.aggregation(exp.alias, asc))
-
-            if(parentAgg is HistogramAggregationBuilder)
-                parentAgg.order(Histogram.Order.aggregation(exp.alias, asc))
+            when(parentAgg) {
+                is TermsAggregationBuilder ->
+                    parentAgg.order(Terms.Order.aggregation(exp.alias, asc))
+                is DateHistogramAggregationBuilder ->
+                    parentAgg.order(Histogram.Order.aggregation(exp.alias, asc))
+                is HistogramAggregationBuilder ->
+                    parentAgg.order(Histogram.Order.aggregation(exp.alias, asc))
+            }
         }
         return this
     }
@@ -1393,7 +1393,8 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
         // 转查询字符串
         val query = sourceBuilder.toString()
-        esLogger.debug("查询条件:{}", query)
+        if(logging)
+            esLogger.debug("查询条件:{}", query)
         return query
     }
 

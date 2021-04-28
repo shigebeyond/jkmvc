@@ -248,7 +248,7 @@ class AggregationTests {
         teamAgg.subAggregation(cardinalityPositionAgg)
         teamAgg.subAggregation(sumSalaryAgg)
         // 子文档
-        val nestedGamesAgg1 = AggregationBuilders.nested("nested_games", "games")
+        val nestedGamesAgg1 = AggregationBuilders.nested("games", "games")
         val sumScoreAgg1 = AggregationBuilders.sum("sum_games_score").field("games.score");
         nestedGamesAgg1.subAggregation(sumScoreAgg1)
         teamAgg.subAggregation(nestedGamesAgg1)
@@ -264,14 +264,14 @@ class AggregationTests {
         val avgSalaryAgg = AggregationBuilders.avg("avg_salary").field("salary");
         positionAgg.subAggregation(avgSalaryAgg)
         // 子文档
-        val nestedGamesAgg2 = AggregationBuilders.nested("nested_games", "games")
+        val nestedGamesAgg2 = AggregationBuilders.nested("games", "games")
         val sumScoreAgg2 = AggregationBuilders.sum("sum_games_score").field("games.score");
         nestedGamesAgg2.subAggregation(sumScoreAgg2)
         positionAgg.subAggregation(nestedGamesAgg2)
 
         // 每场比赛 -- select sum(games.score) from  player_index group by games.id
-        val nestedGamesAgg3 = AggregationBuilders.nested("nested_games", "games")
-        val subGameIdAgg = AggregationBuilders.terms("games.id")
+        val nestedGamesAgg3 = AggregationBuilders.nested("games", "games")
+        val subGameIdAgg = AggregationBuilders.terms("games.id").order(Terms.Order.aggregation("sum_games_score", false))
         val sumScoreAgg3 = AggregationBuilders.sum("sum_games_score").field("games.score");
         subGameIdAgg.subAggregation(sumScoreAgg3)
         nestedGamesAgg3.subAggregation(subGameIdAgg)
@@ -307,7 +307,7 @@ class AggregationTests {
                     }
                 }
         println(query.toSearchSource(false))
-        return
+
         val result = query.searchDocs()
 
         // 每个队伍 -- select count(position), sum(salary), team from player_index group by team;
