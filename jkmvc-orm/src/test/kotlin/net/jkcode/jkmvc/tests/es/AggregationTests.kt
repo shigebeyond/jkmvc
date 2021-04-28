@@ -1,11 +1,18 @@
 package net.jkcode.jkmvc.tests.es
 
+import io.searchbox.core.search.aggregation.Bucket
 import net.jkcode.jkmvc.es.ESQueryBuilder
 import net.jkcode.jkmvc.es.EsManager
+import net.jkcode.jkmvc.es.NestedAggregation
+import net.jkcode.jkmvc.es.flattenAggRows
+import net.jkcode.jkmvc.tests.entity.Game
+import net.jkcode.jkmvc.tests.entity.Player
+import net.jkcode.jkutil.common.randomInt
 import org.junit.Test
 import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.terms.Terms
 import org.elasticsearch.search.builder.SearchSourceBuilder
+import java.util.ArrayList
 
 
 /**
@@ -13,25 +20,35 @@ import org.elasticsearch.search.builder.SearchSourceBuilder
  */
 class AggregationTests {
 
-    private val index = "message_index"
+    private val index = "player_index"
 
     private val type = "_doc"
 
     private val esmgr = EsManager.instance()
 
-    private val myBuilder = ESQueryBuilder()
+    private val myBuilder = ESQueryBuilder().index(index).type(type)
 
     val nativebuilder = SearchSourceBuilder()
 
     @Test
-    fun testMyCreateIndex() {
+    fun testAll() {
+        testDeleteIndex()
+        testCreateIndex()
+        testBulkIndexDocs()
+        testSearch()
+    }
+
+    @Test
+    fun testCreateIndex() {
         // gson还是必须用双引号
         var mapping = """{
     '_doc':{
         'properties':{
+            'id' : {
+                'type' : 'integer'
+            },
             'name': {
-                'index': 'not_analyzed',
-                'type': 'string'
+                'type': 'keyword'
             },
             'age': {
                 'type': 'integer'
@@ -40,12 +57,24 @@ class AggregationTests {
                 'type': 'integer'
             },
             'team': {
-                'index': 'not_analyzed',
-                'type': 'string'
+                'type': 'keyword'
             },
             'position': {
-                'index': 'not_analyzed',
-                'type': 'string'
+                'type': 'keyword'
+            },
+            'games': {
+                'type': 'nested',
+                'properties' : {
+                    'id' : {
+                      'type' : 'integer'
+                    },
+                    'title' : {
+                      'type' : 'text'
+                    },
+                    'score' : {
+                      'type' : 'integer'
+                    }
+                }
             }
         }
     }
@@ -57,6 +86,56 @@ class AggregationTests {
         println("创建索引[$index]: " + r)
         r = esmgr.putMapping(index, type, mapping)
         println("设置索引[$index]映射[$type]: " + r)
+    }
+
+    @Test
+    fun testDeleteIndex() {
+        //删除
+        val r = esmgr.deleteIndex(index)
+        System.out.println("删除索引[$index]：" + r)
+    }
+
+    @Test
+    fun testBulkIndexDocs() {
+        val items = ArrayList<Player>()
+
+        for (i in 0 until 5) {
+            val e = buildPlayer(i)
+            items.add(e)
+        }
+
+        esmgr.bulkIndexDocs(index, type, items)
+        println("批量插入")
+    }
+
+    @Test
+    fun testSearch() {
+        val (list, size) = myBuilder.searchDocs(HashMap::class.java)
+        println("查到 $size 个文档")
+        for (item in list)
+            println(item)
+    }
+
+    private fun buildPlayer(i: Int): Player {
+        val e = Player()
+        e.id = i + 1
+        e.name = arrayOf("张三", "李四", "王五", "赵六", "钱七")[i]
+        e.team = arrayOf("骑士", "湖人").random()
+        e.position = arrayOf("前锋", "后卫").random()
+        e.age = randomInt(30)
+        e.salary = (randomInt(5) + 1) * 1000
+        e.games = (0..1).map {i ->
+            buildGame(i+1)
+        }
+        return e
+    }
+
+    private fun buildGame(i: Int): Game {
+        val e = Game()
+        e.id = i
+        e.title = "第${i}比赛"
+        e.score = randomInt(100)
+        return e
     }
 
     /**
@@ -156,33 +235,43 @@ class AggregationTests {
     @Test
     fun testMy6(){
         val query = myBuilder
-                .aggByAndWrapSubAgg("team") {
-                    aggBy("count(position)")
-                    aggBy("sum(salary)")
-                    aggByAndWrapSubAgg("nested(game)") {
-                        aggBy("sum(game.score)", null, false)
+                .aggByAndWrapSubAgg("team") { // 每个队伍 -- select count(position), sum(salary), count(1), team from player_index group by team;
+                    aggBy("count(position)") // 每个队伍总职位数
+                    aggBy("sum(salary)") // 每个队伍的总薪酬
+                    aggByAndWrapSubAgg("nested(games)") { // 每个队伍的总分 -- 嵌套文档
+                        aggBy("sum(games.score)", null, false)
                     }
                 }
-        query.toSearchSource()
+                .aggByAndWrapSubAgg("position") { // 每个职位 -- select avg(salary), sum(games.score), position from player_index group by position; -- sum(games.score)不能执行
+                    aggBy("avg(salary)") // 每个职位的平均薪酬
+                    aggByAndWrapSubAgg("nested(games)") { // 每个职位的总分 -- 嵌套文档
+                        aggBy("sum(games.score)", null, false)
+                    }
+                }
+                .aggByAndWrapSubAgg("nested(games)") { // 每场比赛 -- select sum(games.score) from  player_index group by games.id
+                    aggByAndWrapSubAgg("games.id"){ // 每场的总分 -- 嵌套文档 https://blog.csdn.net/z327092292/article/details/95203647
+                        aggBy("sum(games.score)", null, false)
+                    }
+                }
+        //query.toSearchSource()
+        val result = query.searchDocs()
+
+        // 每个队伍 -- select count(position), sum(salary), count(1), team from player_index group by team;
+        val teamRows = result.aggregations.flattenAggRows("team")
+        println("统计每个队伍:" + teamRows)
+
+        // 每个职位 -- select avg(salary), sum(games.score), position from player_index group by position; -- sum(games.score)不能执行
+        val positionRows = result.aggregations.flattenAggRows("position"){ bucket, row ->
+            row["avg_salary"] = bucket.getAvgAggregation("avg_salary").avg
+            val games = bucket.getAggregation("games", NestedAggregation::class.java) // 嵌套文档的聚合
+            row["sum_score"] = games.getSumAggregation("sum_games_score").sum
+        }
+        println("统计每个职位:" + positionRows)
+
+        // 每场比赛 -- select sum(games.score) from  player_index group by games.id
+        val gameRows = result.aggregations.getAggregation("games", NestedAggregation::class.java)
+                .flattenAggRows("games_id")
+        println("统计每场比赛:" + gameRows)
     }
 
-    /**
-     * https://blog.csdn.net/z327092292/article/details/95203647
-     */
-    @Test
-    fun testMy7(){
-        /*val query = myBuilder
-                .aggByAndWrapSubAgg("nested(wordFrequency)", "wordgroup") {
-                    aggByAndWrapSubAgg("wordFrequency.keyword", "word"){
-                        aggBy("sum(wordFrequency.count)", "wordnum", false)
-                    }
-                }*/
-        val query = myBuilder
-                .aggByAndWrapSubAgg("nested(wordFrequency)") {
-                    aggByAndWrapSubAgg("wordFrequency.keyword"){
-                        aggBy("sum(wordFrequency.count)", null, false)
-                    }
-                }
-        query.toSearchSource()
-    }
 }

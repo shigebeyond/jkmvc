@@ -1,8 +1,10 @@
 package net.jkcode.jkmvc.tests.es
 
+import io.searchbox.core.search.aggregation.Bucket
 import net.jkcode.jkmvc.es.ESQueryBuilder
 import net.jkcode.jkmvc.es.EsManager
 import net.jkcode.jkmvc.es.annotation.esIdProp
+import net.jkcode.jkmvc.es.flattenAggRows
 import net.jkcode.jkmvc.tests.entity.MessageEntity
 import net.jkcode.jkmvc.tests.model.MessageModel
 import net.jkcode.jkutil.common.randomInt
@@ -252,7 +254,7 @@ curl 'localhost:9200/message_index/_doc/_search?pretty=true'  -H "Content-Type: 
     fun testStat() {
         val query = ESQueryBuilder()
         query.aggByAndWrapSubAgg("fromUid") {
-            aggByAndWrapSubAgg("toUid", null, false) {
+            aggByAndWrapSubAgg("toUid", null) {
                 aggBy("count(id)", "nid")
             }
         }
@@ -263,20 +265,32 @@ curl 'localhost:9200/message_index/_doc/_search?pretty=true'  -H "Content-Type: 
 //            val n = result.aggregations.getValueCountAggregation("nid").getValueCount()
 //            println(n)
 
-            // 多值
-            val map = result.aggregations.getTermsAggregation("terms_fromUid").buckets.associateTo(LinkedHashMap()) { item ->
+            // 一层
+            /*val map = result.aggregations.getTermsAggregation("fromUid").buckets.associateTo(LinkedHashMap()) { item ->
                 item.key to item.count
             }
-            println(map)
+            println(map)*/
+            /*val rows = result.extractAggRows("fromUid"){
+                it.count
+            }
+            println(rows)*/
 
-            // 二维
-            val map2 = LinkedHashMap<String, Any?>()
-            for(item1 in result.aggregations.getTermsAggregation("terms_fromUid").buckets){
-                for(item2 in item1.getTermsAggregation("terms_toUid").buckets){
+            println("----------------")
+
+            // 二层
+            /*val map2 = LinkedHashMap<String, Any?>()
+            for(item1 in result.aggregations.getTermsAggregation("fromUid").buckets){
+                for(item2 in item1.getTermsAggregation("toUid").buckets){
                     map2[item1.key + "-" + item2.key] = item2.count
                 }
             }
             println(map2)
+            */
+            val rows = result.aggregations.flattenAggRows("fromUid.toUid")
+            println(rows)
+            for (row in rows){
+                print(row["fromUid"].toString() + "-" + row["toUid"] + "=" + row["nid"] + ", ")
+            }
         }
     }
 

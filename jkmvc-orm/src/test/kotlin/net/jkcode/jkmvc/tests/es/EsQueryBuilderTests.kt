@@ -2,8 +2,8 @@ package net.jkcode.jkmvc.tests.es
 
 import net.jkcode.jkmvc.es.ESQueryBuilder
 import net.jkcode.jkmvc.es.EsManager
+import net.jkcode.jkmvc.tests.entity.RecentOrder
 import net.jkcode.jkutil.common.randomBoolean
-import net.jkcode.jkutil.common.randomLong
 import org.junit.Test
 import java.util.*
 
@@ -89,21 +89,21 @@ class EsQueryBuilderTests {
 
     @Test
     fun testBulkIndexDocs() {
-        val dataList = ArrayList<RecentOrder>()
+        val items = ArrayList<RecentOrder>()
 
         for (i in 0 until 5) {
             val e = buildEntity(i)
-            dataList.add(e)
+            items.add(e)
         }
 
-        esmgr.bulkIndexDocs(index, type, dataList)
+        esmgr.bulkIndexDocs(index, type, items)
         println("批量插入")
     }
 
     private fun buildEntity(i: Int): RecentOrder {
         val e = RecentOrder()
-        e.id = i.toLong()
-        e.cargoId = i.toLong()
+        e.id = i.toLong() + 1
+        e.cargoId = i.toLong() + 1
         e.driverUserName = arrayOf("张三", "李四", "王五", "赵六", "钱七")[i]
         e.loadAddress = arrayOf("南京市玄武区", "南京市秦淮区", "南京市六合区", "南京市建邺区", "南京市鼓楼区")[i]
         e.searchable = randomBoolean()

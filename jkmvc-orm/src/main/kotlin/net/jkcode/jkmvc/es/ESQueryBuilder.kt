@@ -40,6 +40,11 @@ import kotlin.collections.HashSet
  */
 class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
+    constructor(index: String, type: String, esmgr: EsManager = EsManager.instance()):this(esmgr){
+        this.index(index)
+        this.type(type)
+    }
+
     companion object {
 
         /**
