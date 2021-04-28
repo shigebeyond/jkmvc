@@ -177,6 +177,23 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
         }
 
     /**
+     * 找到最近的父聚合
+     */
+    protected fun getClosetParentAgg(predicate: (AggregationBuilder) -> Boolean): AggregationBuilder? {
+        if(aggsStack.size < 2)
+            throw IllegalStateException("Cannot find parent aggregation, because `aggsStack` only has 1 aggregation group")
+
+        val reverseIndx = (aggsStack.size - 2).rangeTo(0).step(-1)
+        for (i in reverseIndx){
+            val parentAggs = aggsStack[i].first // AggregatorFactories.Builder
+            val parentAgg = parentAggs.aggregatorFactories.last() // AggregationBuilder
+            if(predicate(parentAgg))
+                return parentAgg
+        }
+        return null
+    }
+
+    /**
      * 下一层聚合组
      *    当前聚合组最后一个聚合的子聚合组
      */
@@ -1203,8 +1220,8 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
     // --------- agg start ---------
     /**
      * 聚合
-     * @param expr 聚合表达式, 如 count(name), sum(age)
-     * @param alias 别名
+     * @param expr 聚合表达式, 如 count(name) / sum(age)
+     * @param alias 别名, 如果别名省略, 则自动生成, 会是`函数名_字段名`, 如 count_name/sum_age, 但对于 terms/nested 函数则还是使用字段名作为别名
      * @param asc 是否升序
      * @return
      */
@@ -1216,14 +1233,19 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
         // 排序
         if(asc != null) {
+            val parentAgg = getClosetParentAgg{
+                it is TermsAggregationBuilder
+                        && it is DateHistogramAggregationBuilder
+                        && it is HistogramAggregationBuilder
+            }
             if(parentAgg is TermsAggregationBuilder)
-                (parentAgg as TermsAggregationBuilder).order(Terms.Order.aggregation(exp.alias, asc))
+                parentAgg.order(Terms.Order.aggregation(exp.alias, asc))
 
             if(parentAgg is DateHistogramAggregationBuilder)
-                (parentAgg as DateHistogramAggregationBuilder).order(Histogram.Order.aggregation(exp.alias, asc))
+                parentAgg.order(Histogram.Order.aggregation(exp.alias, asc))
 
             if(parentAgg is HistogramAggregationBuilder)
-                (parentAgg as HistogramAggregationBuilder).order(Histogram.Order.aggregation(exp.alias, asc))
+                parentAgg.order(Histogram.Order.aggregation(exp.alias, asc))
         }
         return this
     }
@@ -1316,8 +1338,10 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
     /**
      * 转搜索参数
+     * @param logging 是否打印日志, 仅测试时用
+     * @return
      */
-    public fun toSearchSource(): String {
+    public fun toSearchSource(logging: Boolean = true): String {
         val sourceBuilder = SearchSourceBuilder()
 
         // 前置过滤

@@ -1,10 +1,6 @@
 package net.jkcode.jkmvc.tests.es
 
-import io.searchbox.core.search.aggregation.Bucket
-import net.jkcode.jkmvc.es.ESQueryBuilder
-import net.jkcode.jkmvc.es.EsManager
-import net.jkcode.jkmvc.es.NestedAggregation
-import net.jkcode.jkmvc.es.flattenAggRows
+import net.jkcode.jkmvc.es.*
 import net.jkcode.jkmvc.tests.entity.Game
 import net.jkcode.jkmvc.tests.entity.Player
 import net.jkcode.jkutil.common.randomInt
@@ -144,8 +140,9 @@ class AggregationTests {
     @Test
     fun testMy1(){
         val query = myBuilder
-                .aggBy("team", "player_count")
-        query.toSearchSource()
+                //.aggBy("team", "player_count")
+                .aggBy("team") // 别名是team
+        println(query.toSearchSource(false))
     }
     @Test
     fun testNative1(){
@@ -160,10 +157,13 @@ class AggregationTests {
     @Test
     fun testMy2(){
         val query = myBuilder
-                    .aggByAndWrapSubAgg("team", "player_count") {
+                    /*.aggByAndWrapSubAgg("team", "player_count") {
                         aggBy("position", "pos_count")
+                    }*/
+                    .aggByAndWrapSubAgg("team") { // 别名是team
+                        aggBy("count(position)") // 别名是count_position
                     }
-        query.toSearchSource()
+        println(query.toSearchSource(false))
     }
     @Test
     fun testNative2(){
@@ -179,10 +179,13 @@ class AggregationTests {
     @Test
     fun testMy3(){
         val query = myBuilder
-                    .aggByAndWrapSubAgg("team", "player_count") {
-                        aggBy("max(age)")
+                    /*.aggByAndWrapSubAgg("team", "player_count") {
+                        aggBy("max(age)", "max_age")
+                    }*/
+                    .aggByAndWrapSubAgg("team") { // 别名是team
+                        aggBy("max(age)") // 别名是max_age
                     }
-        query.toSearchSource()
+        println(query.toSearchSource(false))
     }
     @Test
     fun testNative3(){
@@ -198,11 +201,15 @@ class AggregationTests {
     @Test
     fun testMy4(){
         val query = myBuilder
-                    .aggByAndWrapSubAgg("team") {
+                    /*.aggByAndWrapSubAgg("team") {
                         aggBy("avg(age)", "avg_age")
                         aggBy("sum(salary)", "total_salary")
+                    }*/
+                    .aggByAndWrapSubAgg("team") { // 别名是team
+                        aggBy("avg(age)") // 别名是avg_age
+                        aggBy("sum(salary)") // 别名是sum_salary
                     }
-        query.toSearchSource()
+        println(query.toSearchSource(false))
     }
     @Test
     fun testNative4(){
@@ -220,9 +227,9 @@ class AggregationTests {
     fun testMy5(){
         val query = myBuilder
                     .aggByAndWrapSubAgg("team") {
-                        aggBy("sum(salary)", "total_salary", false)
+                        aggBy("sum(salary)", "total_salary", false) // 降序
                     }
-        query.toSearchSource()
+        println(query.toSearchSource(false))
     }
     @Test
     fun testNative5(){
@@ -233,13 +240,59 @@ class AggregationTests {
     }
 
     @Test
+    fun testNative6(){
+        // 每个队伍 -- select count(position), sum(salary), sum(games.score), team from player_index group by team;
+        val teamAgg = AggregationBuilders.terms("team").order(Terms.Order.aggregation("sum_games_score", false))
+        val cardinalityPositionAgg = AggregationBuilders.cardinality("cardinality_position ").field("position");
+        val sumSalaryAgg = AggregationBuilders.sum("sum_salary").field("salary");
+        teamAgg.subAggregation(cardinalityPositionAgg)
+        teamAgg.subAggregation(sumSalaryAgg)
+        // 子文档
+        val nestedGamesAgg1 = AggregationBuilders.nested("nested_games", "games")
+        val sumScoreAgg1 = AggregationBuilders.sum("sum_games_score").field("games.score");
+        nestedGamesAgg1.subAggregation(sumScoreAgg1)
+        teamAgg.subAggregation(nestedGamesAgg1)
+
+        // 每个队伍+职位 -- select avg(age), team, position from player_index group by team, position;
+        val subPositionAgg = AggregationBuilders.terms("position")
+        val avgAgeAgg = AggregationBuilders.avg("avg_age").field("age");
+        subPositionAgg.subAggregation(avgAgeAgg)
+        teamAgg.subAggregation(subPositionAgg)
+
+        // 每个职位 -- select avg(salary), sum(games.score), position from player_index group by position; -- sum(games.score)不能执行
+        val positionAgg = AggregationBuilders.terms("position").order(Terms.Order.aggregation("sum_games_score", false))
+        val avgSalaryAgg = AggregationBuilders.avg("avg_salary").field("salary");
+        positionAgg.subAggregation(avgSalaryAgg)
+        // 子文档
+        val nestedGamesAgg2 = AggregationBuilders.nested("nested_games", "games")
+        val sumScoreAgg2 = AggregationBuilders.sum("sum_games_score").field("games.score");
+        nestedGamesAgg2.subAggregation(sumScoreAgg2)
+        positionAgg.subAggregation(nestedGamesAgg2)
+
+        // 每场比赛 -- select sum(games.score) from  player_index group by games.id
+        val nestedGamesAgg3 = AggregationBuilders.nested("nested_games", "games")
+        val subGameIdAgg = AggregationBuilders.terms("games.id")
+        val sumScoreAgg3 = AggregationBuilders.sum("sum_games_score").field("games.score");
+        subGameIdAgg.subAggregation(sumScoreAgg3)
+        nestedGamesAgg3.subAggregation(subGameIdAgg)
+
+        nativebuilder.aggregation(teamAgg);
+        nativebuilder.aggregation(positionAgg);
+        nativebuilder.aggregation(nestedGamesAgg3);
+        println(nativebuilder.toString())
+    }
+
+    @Test
     fun testMy6(){
         val query = myBuilder
-                .aggByAndWrapSubAgg("team") { // 每个队伍 -- select count(position), sum(salary), count(1), team from player_index group by team;
-                    aggBy("count(position)") // 每个队伍总职位数
+                .aggByAndWrapSubAgg("team") { // 每个队伍 -- select count(position), sum(salary), sum(games.score), team from player_index group by team;
+                    aggBy("cardinality(position)") // 每个队伍总职位数
                     aggBy("sum(salary)") // 每个队伍的总薪酬
                     aggByAndWrapSubAgg("nested(games)") { // 每个队伍的总分 -- 嵌套文档
                         aggBy("sum(games.score)", null, false)
+                    }
+                    aggByAndWrapSubAgg("position"){ // 每个队伍+职位 -- select avg(age), team, position from player_index group by team, position;
+                        aggBy("avg(age)")
                     }
                 }
                 .aggByAndWrapSubAgg("position") { // 每个职位 -- select avg(salary), sum(games.score), position from player_index group by position; -- sum(games.score)不能执行
@@ -249,29 +302,42 @@ class AggregationTests {
                     }
                 }
                 .aggByAndWrapSubAgg("nested(games)") { // 每场比赛 -- select sum(games.score) from  player_index group by games.id
-                    aggByAndWrapSubAgg("games.id"){ // 每场的总分 -- 嵌套文档 https://blog.csdn.net/z327092292/article/details/95203647
+                    aggByAndWrapSubAgg("games.id"){ // 每场比赛的总分 -- 嵌套文档 https://blog.csdn.net/z327092292/article/details/95203647
                         aggBy("sum(games.score)", null, false)
                     }
                 }
-        //query.toSearchSource()
+        println(query.toSearchSource(false))
+        return
         val result = query.searchDocs()
 
-        // 每个队伍 -- select count(position), sum(salary), count(1), team from player_index group by team;
-        val teamRows = result.aggregations.flattenAggRows("team")
-        println("统计每个队伍:" + teamRows)
+        // 每个队伍 -- select count(position), sum(salary), team from player_index group by team;
+//        val teamRows = result.aggregations.flattenAggRows("team")
+//        println("统计每个队伍:" + teamRows)
+
+        // 每个队伍 -- select count(position), sum(salary), sum(games.score), team from player_index group by team;
+        val teamRows2 = result.aggregations.flattenAggRows("team"){ bucket, row ->
+            handleSingleValueAgg(bucket, row)
+            val games = bucket.getAggregation("games", NestedAggregation::class.java) // 嵌套文档的聚合
+            row["sum_games_score"] = games.getSumAggregation("sum_games_score").sum
+        }
+        println("统计每个队伍:" + teamRows2)
 
         // 每个职位 -- select avg(salary), sum(games.score), position from player_index group by position; -- sum(games.score)不能执行
         val positionRows = result.aggregations.flattenAggRows("position"){ bucket, row ->
             row["avg_salary"] = bucket.getAvgAggregation("avg_salary").avg
             val games = bucket.getAggregation("games", NestedAggregation::class.java) // 嵌套文档的聚合
-            row["sum_score"] = games.getSumAggregation("sum_games_score").sum
+            row["sum_games_score"] = games.getSumAggregation("sum_games_score").sum
         }
         println("统计每个职位:" + positionRows)
 
-        // 每场比赛 -- select sum(games.score) from  player_index group by games.id
+        // 每场比赛 -- select sum(games.score) from  player_index group by games.id --
         val gameRows = result.aggregations.getAggregation("games", NestedAggregation::class.java)
                 .flattenAggRows("games_id")
         println("统计每场比赛:" + gameRows)
+
+        // 每个队伍+职位 -- select avg(age), team, position from player_index group by team, position;
+        val teamPositionRows = result.aggregations.flattenAggRows("team.position")
+        println("统计每个队伍+职位:" + teamPositionRows)
     }
 
 }

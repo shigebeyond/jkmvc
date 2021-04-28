@@ -27,7 +27,7 @@ import kotlin.math.min
  */
 class AggExpr(
         public val exp: String, // 表达式
-        public var alias: String? = null // 别名
+        public var alias: String? = null // 别名, 如果别名省略, 则自动生成, 会是`函数名_字段名`, 如 count_name/sum_age, 但对于 terms/nested 函数则还是使用字段名作为别名
 ) {
 
     /**
