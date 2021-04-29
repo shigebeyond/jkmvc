@@ -210,6 +210,8 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
     /**
      * 数据库
+     *   OrmMeta 会被多个请求访问, 因此每次都读最新的db
+     *   不能直接赋值, 否则持有的db被上一个请求释放了, 下一个请求再用就报错
      */
     public override val db: IDb
         get() = Db.instance(dbName)
@@ -499,9 +501,14 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     fun removeRelatedCache(item: IOrm){
         // 遍历每个(缓存当前模型的)关联关系
         for(relation in relationsCacheThis){
-            val relatedMeta = relation.ormMeta as OrmMeta
+            // 获得关联对象
+            val related: IOrm? = item.get(relation.name)
+            if(related == null)
+                continue
+
             // 删除关联对象的缓存
-            relatedMeta.removeCache(item.get(name), false) // 递归调用, 但第二个参数表示只递归一层
+            val relatedMeta = relation.ormMeta as OrmMeta
+            relatedMeta.removeCache(related, false) // 递归调用, 但第二个参数表示只递归一层
         }
     }
 
@@ -585,7 +592,10 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             cacheMeta!!.applyQueryWiths(query)
         }
         // 查询主键
-        query.where(primaryKey, DbExpr.question)
+        val pk = primaryKey.map {
+            DbExpr.question
+        }
+        query.where(primaryKey, pk)
                 .compileSelectOne()
     }
 
@@ -593,8 +603,11 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * 根据主键删除的sql
      */
     override val deleteSqlByPk: CompiledSql by lazy{
+        val pk = primaryKey.map {
+            DbExpr.question
+        }
         queryBuilder(reused = true)
-            .where(primaryKey, DbExpr.question) // 查询主键
+            .where(primaryKey, pk) // 查询主键
             .compileDelete()
     }
 
@@ -635,8 +648,11 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     override fun getUpdateSql(updateProps: Collection<String>): CompiledSql{
         return getSqlByProps(updateProps, updateSqls){
+            val pk = primaryKey.map {
+                DbExpr.question
+            }
             val query = queryBuilder(reused = true)
-                    .where(primaryKey, DbExpr.question) // 过滤主键
+                    .where(primaryKey, pk) // 过滤主键
             for (prop in updateProps) {
                 val col = prop2Column(prop)
                 query.set(col, DbExpr.question) // 更新字段
@@ -722,7 +738,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     protected fun <T : IOrm> innerloadByPk(pk: DbKeyValues, item: T? = null): T? {
         //return queryBuilder().where(primaryKey, pk).findRow
-        return selectSqlByPk.findRow(pk.toList()) {
+        return selectSqlByPk.findRow(pk.toList(), db) {
             //val result = item ?: model.java.newInstance() as T
             val result = item ?: newInstance() as T
             result.setOriginal(it)
@@ -813,7 +829,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             }
 
             // 批量插入
-            val result = query.batchInsert(params)
+            val result = query.batchInsert(params, db)
 
             // 后置
             for (item in items) {
@@ -872,7 +888,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             }
 
             // 批量更新
-            val result = query.batchUpdate(params);
+            val result = query.batchUpdate(params, db);
 
             // 后置
             for (item in items) {
@@ -903,7 +919,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
                 params.add(pk)
         }
 
-        return query.batchDelete(params)
+        return query.batchDelete(params, db)
     }
 
     /**
