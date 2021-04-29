@@ -1,10 +1,7 @@
 package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.db.DbResultRow
-import net.jkcode.jkutil.common.decorateIterator
-import net.jkcode.jkutil.common.getStaticProperty
-import net.jkcode.jkutil.common.getStaticPropertyValue
-import net.jkcode.jkutil.common.lcFirst
+import net.jkcode.jkutil.common.*
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.reflect.KClass
@@ -103,6 +100,18 @@ fun <T: OrmEntity> Collection<out IEntitiableOrm<T>>.toEntities(): List<T> {
     return this.map {
         it.toEntity()
     }
+}
+
+/**
+ * 复制orm对象
+ *
+ * @param include 要设置的字段名的数组
+ * @param exclude 要排除的字段名的列表
+ */
+public fun <T : Orm> T.copy(include: List<String> = emptyList(), exclude: List<String> = emptyList()): T {
+    val to = this::class.modelOrmMeta.newInstance() as T
+    to.fromOrm(this, include, exclude)
+    return to
 }
 
 /**
