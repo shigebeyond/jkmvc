@@ -22,8 +22,11 @@ class CompiledSql : Cloneable, ICompiledSql() {
 
     /**
      * 默认db
+     *   CompiledSql 有可能被多个请求持有, 因此每次都读最新的db
+     *   不能直接赋值, 否则持有的db被上一个请求释放了, 下一个请求再用就报错
      */
-    public override val defaultDb: IDb = Db.instance()
+    public override val defaultDb: IDb
+        get() = Db.instance()
 
     /****************************** 构建参数/sql *******************************/
     /**
