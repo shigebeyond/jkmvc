@@ -166,6 +166,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
     /**
      * 父聚合
+     *   无用
      */
     protected val parentAgg: AggregationBuilder
         get(){
@@ -177,7 +178,9 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
         }
 
     /**
-     * 找到最近的父聚合
+     * 找到满足条件的最近父聚合
+     * @param predicate 条件
+     * @return
      */
     protected fun getClosetParentAgg(predicate: (AggregationBuilder) -> Boolean): AggregationBuilder? {
         if(aggsStack.size < 2)
@@ -355,16 +358,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
     /**
      * Set the sorting field
      * @param field
-     * @param direction 方向: ASC/DESC
-     * @return this
-     */
-    public fun orderByField(field: String, direction: String): ESQueryBuilder {
-        return orderByField(field, direction.equals("DESC", false))
-    }
-
-    /**
-     * Set the sorting field
-     * @param field
      * @param direction
      * @return this
      */
@@ -374,16 +367,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
         val sort = SortBuilders.fieldSort(field).order(order)
         this.sorts.add(sort)
         return this;
-    }
-
-    /**
-     * Set the sorting field to `_score`
-     *   _score为相关性得分
-     * @param direction 方向: ASC/DESC
-     * @return this
-     */
-    public fun orderByScore(direction: String): ESQueryBuilder {
-        return orderByScore(direction.equals("DESC", false))
     }
 
     /**
@@ -405,17 +388,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      * Set the sorting script
      * @param script
      * @param params
-     * @param direction 方向: ASC/DESC
-     * @return this
-     */
-    public fun orderByScript(script: String, params: Map<String, Any?> = emptyMap(), direction: String): ESQueryBuilder {
-        return orderByScript(script, params, direction.equals("DESC", false))
-    }
-
-    /**
-     * Set the sorting script
-     * @param script
-     * @param params
      * @param direction
      * @return this
      */
@@ -426,19 +398,6 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
         val sort = SortBuilders.scriptSort(script2, ScriptSortBuilder.ScriptSortType.STRING).order(order)
         this.sorts.add(sort)
         return this;
-    }
-
-    /**
-     * Set the sorting geoDistance
-     * @param field
-     * @param params
-     * @param direction 方向: ASC/DESC
-     * @param unit 距离单位
-     * @return this
-     */
-    @JvmOverloads
-    public fun orderByGeoDistance(field: String, lat: Double, lon: Double, direction: String, unit: DistanceUnit = DistanceUnit.DEFAULT): ESQueryBuilder {
-        return orderByGeoDistance(field, lat, lon, direction.equals("DESC", false), unit)
     }
 
     /**

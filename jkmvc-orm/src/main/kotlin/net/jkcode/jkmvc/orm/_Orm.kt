@@ -107,10 +107,24 @@ fun <T: OrmEntity> Collection<out IEntitiableOrm<T>>.toEntities(): List<T> {
  *
  * @param include 要设置的字段名的数组
  * @param exclude 要排除的字段名的列表
+ * @return
  */
 public fun <T : Orm> T.copy(include: List<String> = emptyList(), exclude: List<String> = emptyList()): T {
     val to = this::class.modelOrmMeta.newInstance() as T
     to.fromOrm(this, include, exclude)
+    return to
+}
+
+/**
+ * 复制orm对象
+ *
+ * @param ignorePks 忽略主键值, 不复制
+ */
+public fun <T : Orm> T.copy(ignorePks: Boolean): T {
+    val ormMeta = this::class.modelOrmMeta
+    val to = ormMeta.newInstance() as T
+    val exclude = if(ignorePks) emptyList<String>() else ormMeta.primaryKey.columns.toList()
+    to.fromOrm(this, emptyList(), exclude)
     return to
 }
 

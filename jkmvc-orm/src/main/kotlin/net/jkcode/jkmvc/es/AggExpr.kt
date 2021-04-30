@@ -13,7 +13,6 @@ import org.elasticsearch.search.aggregations.bucket.range.date.DateRangeAggregat
 import org.elasticsearch.search.aggregations.bucket.range.geodistance.GeoDistanceAggregationBuilder
 import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsAggregationBuilder
 import org.elasticsearch.search.sort.SortOrder
-import kotlin.math.min
 
 /**
  * 聚合表达式
@@ -75,6 +74,8 @@ class AggExpr(
      * 转为聚合对象
      *   参考es聚合详解
      *   https://www.cnblogs.com/candlia/p/11920034.html
+     *   有请求有响应, 可看到响应有哪些字段, 因为不同聚合响应是不同的
+     *   https://blog.csdn.net/donghaixiaolongwang/article/details/58597058
      */
     fun toAggregation(): AbstractAggregationBuilder<*> {
         if (func == "terms")
@@ -112,7 +113,12 @@ class AggExpr(
         if (func == "stats")
             return AggregationBuilders.stats(alias).field(field)
 
+        // 统计聚合——基于文档的某个值，计算出一些统计信息（min、max、sum、count、avg）, 比stats更多, 如方差等等。
+        if (func == "extended_stats")
+            return AggregationBuilders.extendedStats(alias).field(field)
+
         // 地理重心聚合——基于文档的某个字段（geo-point类型字段），计算所有坐标的加权重心
+        // 计算出所有文档的大概的中心点。比如说某个地区盗窃犯罪很多，那我这样就可以看到这片区域到底哪个点（街道）偷盗事件最猖狂。
         if (func == "geo_centroid")
             return AggregationBuilders.geoCentroid(alias).field(field)
 
@@ -126,6 +132,7 @@ class AggExpr(
         }
 
         // 地理边界聚合——基于文档的某个字段（geo-point类型字段），计算出该字段所有地理坐标点的边界（左上角/右下角坐标点）
+        // 计算出所有的地理坐标将会落在一个矩形区域。比如说朝阳区域有很多饭店，我就可以用一个矩形把这些饭店都圈起来，看看范围。
         // geo_bounds(field,wrapLongitude)
         if (func == "geo_bounds") {
             val wrapLongitude = args.firstOrNull()?.toBoolean()
@@ -140,6 +147,7 @@ class AggExpr(
             return toGeoDistance()
 
         // 多桶聚合后的请求如果使用了top_hits，返回结果会带上每个bucket关联的文档数据
+        // 获取到每组前n条数据。相当于sql 中 group by 后取出前n条。
         // top_hits(from,size,orderField1 orderDirection1,orderField2 orderDirection2...)
         if (func == "top_hits")
             return toTopHits()
@@ -149,7 +157,8 @@ class AggExpr(
         if (func == "date_range")
             return toDateRange()
 
-        // 百分百聚合——基于聚合文档中某个数值类型的值，求指定比例中的值分布
+        // 百分比聚合——基于聚合文档中某个数值类型的值，求指定比例中的值分布
+        // 如查看网站的所有页面加载时间的差异, 如75%页面在29毫秒左右就加载完毕了, 有5%的页面超过了60毫秒
         // percentiles(field,percentiles1,percentiles2...)
         if (func == "percentiles") {
             val percentiles = DoubleArray(args.size)
@@ -158,6 +167,18 @@ class AggExpr(
             }
             return AggregationBuilders.percentiles(alias).field(field)
                     .percentiles(*percentiles)
+        }
+
+        // 百分比排位展示那些在某一值之下的观测值的百分比。例如，假如某一直大于等于被观测值的95%，则称其为第95百分位数。
+        // 假设你的数据由网页加载时间组成。如看看15毫秒和30毫秒(value值)内大概有多少页面加载完
+        // percentile_ranks(field,value1,value2...)
+        if (func == "percentile_ranks") {
+            val values = DoubleArray(args.size)
+            args.forEachIndexed { i, item ->
+                values[i] = item.toDouble()
+            }
+            return AggregationBuilders.percentileRanks(alias).field(field)
+                    .values(*values)
         }
 
         // 对字段值按间隔统计建立直方图, 针对数值型和日期型字段。
@@ -276,6 +297,7 @@ class AggExpr(
 
     /**
      * 多桶聚合后的请求如果使用了top_hits，返回结果会带上每个bucket关联的文档数据
+     * 获取到每组前n条数据。相当于sql 中 group by 后取出前n条。
      *   top_hits(from,size,orderField1 orderDirection1,orderField2 orderDirection2...)
      */
     protected fun toTopHits(): TopHitsAggregationBuilder {
