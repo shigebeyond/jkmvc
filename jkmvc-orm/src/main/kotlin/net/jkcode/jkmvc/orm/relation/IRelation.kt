@@ -149,7 +149,7 @@ interface IRelation {
      * 获得关联模型的元数据
      *  伴随对象就是元数据
      */
-    val ormMeta: IOrmMeta
+    val ormMeta: OrmMeta
         get() = model.modelOrmMeta
 
     /**

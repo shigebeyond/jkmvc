@@ -172,7 +172,7 @@ curl 'localhost:9200/recent_order_index/_doc/_search?pretty=true'  -H "Content-T
         query.select("cargoId", "startDistrictId", "startCityId", "endDistrictId", "endCityId", "updateTime", "cargoLabels",
                 "cargoCategory", "featureSort", "cargoChannel", "searchableSources", "securityTran")
 
-        query.orderByField("duplicate", "ASC")
+        query.orderByField("duplicate")
                 .orderByScript("searchCargo-script", mapOf("searchColdCargoTop" to 0))
 
         query.toSearchSource()

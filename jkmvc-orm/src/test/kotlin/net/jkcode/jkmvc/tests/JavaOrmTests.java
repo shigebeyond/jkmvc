@@ -5,7 +5,7 @@ import net.jkcode.jkmvc.tests.model.JavaUserModel;
 public class JavaOrmTests {
 
     public static void main(String[] args){
-        JavaUserModel user = JavaUserModel.ormMeta.queryBuilder(false, false, true, false)
+        JavaUserModel user = JavaUserModel.ormMeta.queryBuilder()
                 .with("home")
                 .with("addresses")
                 .where("name", "shi")

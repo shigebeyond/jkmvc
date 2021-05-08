@@ -74,7 +74,7 @@ abstract class Relation(
      */
     override val foreignKeyDefault: DbKeyValues
         get(){
-            val slave = slaveOrmMeta as OrmMeta
+            val slave = slaveOrmMeta
             return foreignKey.map { col ->
                 slave.dbColumns[col]?.default
             }

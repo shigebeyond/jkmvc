@@ -26,12 +26,12 @@ public val KClass<out IOrm>.modelName:String
  * 根据模型类来获得模型元数据
  *   元数据 = kotlin类伴随对象 或 java类的静态属性ormMeta
  */
-public val KClass<out IOrm>.modelOrmMeta: IOrmMeta
+public val KClass<out IOrm>.modelOrmMeta: OrmMeta
     get(){
         val om = companionObjectInstance // kotlin类的伴随对象
                 ?: getStaticPropertyValue("ormMeta")
 
-        if(om is IOrmMeta)
+        if(om is OrmMeta)
             return om
 
         throw IllegalStateException("No OrmMeta definition for class: $this")

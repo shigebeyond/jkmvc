@@ -486,7 +486,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     protected val relationsCacheThis: List<IRelation> by lazy{
         // 遍历每个关联关系, 看看他有没有缓存, 并且连带缓存当前模型
         relations.values.filter { relation ->
-            val relatedMeta = relation.ormMeta as OrmMeta
+            val relatedMeta = relation.ormMeta
             // 关联对象 连带缓存了当前模型
             val hasCacheThis = relatedMeta.cacheMeta?.hasWithRelation(this)
                     ?: false
@@ -507,7 +507,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
                 continue
 
             // 删除关联对象的缓存
-            val relatedMeta = relation.ormMeta as OrmMeta
+            val relatedMeta = relation.ormMeta
             relatedMeta.removeCache(related, false) // 递归调用, 但第二个参数表示只递归一层
         }
     }
@@ -1208,7 +1208,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
         // 3 关联模型的初始化
         for ((name, relation) in relations) {
-            val related = relation.ormMeta as OrmMeta
+            val related = relation.ormMeta
             // 关联模型名作为别名
             if (modelNameAsAlias)
                 xstream.alias(related.name, related.model.java)

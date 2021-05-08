@@ -23,6 +23,45 @@ import kotlin.reflect.KClass
  */
 public abstract class IJavaOrmMeta : IOrmMeta  {
 
+    /************************************ query builder *************************************/
+    /**
+     * 获得orm查询构建器
+     *    子类要重写该方法, 只是因为@JvmOverloads不能用在抽象方法中, 才给了一个默认的实现
+     *
+     * @param convertingValue 查询时是否智能转换字段值
+     * @param convertingColumn 查询时是否智能转换字段名
+     * @param withSelect with()联查时自动select关联表的字段
+     * @param reused 是否复用的
+     * @return
+     */
+    @JvmOverloads
+    open fun queryBuilder(convertingValue: Boolean = false, convertingColumn: Boolean = false, withSelect: Boolean = true, reused: Boolean = false): OrmQueryBuilder{
+        throw UnsupportedOperationException("子类要重写该方法, 只是因为@JvmOverloads不能用在抽象方法中, 才给了一个默认的实现")
+    }
+
+    /**
+     * 获得orm查询构建器
+     *
+     *
+     * @param sort 排序字段
+     * @param desc 是否降序
+     * @param start 偏移
+     * @param rows 查询行数
+     * @return
+     */
+    @JvmOverloads
+    fun queryBuilder(sort: String?, desc: Boolean? = null, start: Int? = null, rows: Int? = null): OrmQueryBuilder {
+        val query = queryBuilder()
+
+        if (sort != null && sort != "")
+            query.orderBy(sort, desc)
+
+        if (rows != null && rows > 0)
+            query.limit(rows, start ?: 0)
+
+        return query
+    }
+
     /************************************ 添加关联关系: 复合主键版本, 主外键类型为 DbKeyNames *************************************/
     /**
      * 生成属性代理 + 设置关联关系(belongs to)

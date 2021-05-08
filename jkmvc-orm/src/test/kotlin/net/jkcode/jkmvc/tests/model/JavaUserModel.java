@@ -108,6 +108,15 @@ public final class JavaUserModel extends Orm
                         return null;
                     }
                 });
+        /*ormMeta.hasOne("home", AddressModel.class, "user_id", "id", Collections.emptyMap(), false,
+                (query, lazy) ->{
+                    if(lazy)
+                        query.where("is_home", 1);
+                    else
+                        query.on("is_home", 1, false);
+                    return null;
+                }
+        );*/
         ormMeta.hasMany("addresses", AddressModel.class);
     }
 }

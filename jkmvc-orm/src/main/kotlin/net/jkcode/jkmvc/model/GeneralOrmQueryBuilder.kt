@@ -3,6 +3,7 @@ package net.jkcode.jkmvc.model
 import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.orm.IOrmMeta
+import net.jkcode.jkmvc.orm.OrmMeta
 import net.jkcode.jkmvc.orm.OrmQueryBuilder
 
 /**
@@ -13,10 +14,10 @@ import net.jkcode.jkmvc.orm.OrmQueryBuilder
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-17 3:38 PM
  */
-class GeneralOrmQueryBuilder(ormMeta: IOrmMeta, // orm元数据
-                              convertingValue: Boolean = false, // 查询时是否智能转换字段值
-                              convertingColumn: Boolean = false, // 查询时是否智能转换字段名
-                              withSelect: Boolean = true // with()联查时自动select关联表的字段
+class GeneralOrmQueryBuilder(ormMeta: OrmMeta, // orm元数据
+                             convertingValue: Boolean = false, // 查询时是否智能转换字段值
+                             convertingColumn: Boolean = false, // 查询时是否智能转换字段名
+                             withSelect: Boolean = true // with()联查时自动select关联表的字段
 ): OrmQueryBuilder(ormMeta, convertingValue, convertingColumn, withSelect){
 
     /**

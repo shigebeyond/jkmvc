@@ -241,7 +241,7 @@ interface IOrmMeta {
      */
     fun removeCache(item: IOrm)
 
-    /************************************ 事件 *************************************/
+    /************************************ 校验 *************************************/
     /**
      * 校验orm对象数据
      * @param item
@@ -276,7 +276,7 @@ interface IOrmMeta {
      */
     fun addRule(field: String, rule: IValidator): OrmMeta;
 
-    /************************************ query builder *************************************/
+    /************************************ 查询 *************************************/
     /**
      * 根据主键查询的sql
      */
@@ -296,57 +296,6 @@ interface IOrmMeta {
      * 获得更新的sql
      */
     fun getUpdateSql(updateProps: Collection<String>): CompiledSql
-
-    /**
-     * 获得orm查询构建器
-     *
-     * @param convertingValue 查询时是否智能转换字段值
-     * @param convertingColumn 查询时是否智能转换字段名
-     * @param withSelect with()联查时自动select关联表的字段
-     * @param reused 是否复用的
-     * @return
-     */
-    fun queryBuilder(convertingValue: Boolean = false, convertingColumn: Boolean = false, withSelect: Boolean = true, reused: Boolean = false): OrmQueryBuilder;
-
-    /**
-     * 获得orm查询构建器
-     *
-     *
-     * @param sort 排序字段
-     * @param desc 是否降序
-     * @param start 偏移
-     * @param rows 查询行数
-     * @return
-     */
-    fun queryBuilder(sort: String?, desc: Boolean? = null, start: Int? = null, rows: Int? = null): OrmQueryBuilder {
-        val query = queryBuilder()
-
-        if (sort != null && sort != "")
-            query.orderBy(sort, desc)
-
-        if (rows != null && rows > 0)
-            query.limit(rows, start ?: 0)
-
-        return query
-    }
-
-    /**
-     * 获得orm查询构建器
-     *
-     *
-     * @param condition 条件
-     * @param params 条件参数
-     * @param sort 排序字段
-     * @param desc 是否降序
-     * @param start 偏移
-     * @param rows 查询行数
-     * @return
-     */
-    fun queryBuilder(condition: String, params: List<*> = emptyList<Any>(), sort: String? = null, desc: Boolean? = null, start: Int? = null, rows: Int? = null): OrmQueryBuilder {
-        val query = queryBuilder(sort, desc, start, rows)
-        query.whereCondition(condition, params)
-        return query
-    }
 
     /**
      * 根据主键值来加载数据

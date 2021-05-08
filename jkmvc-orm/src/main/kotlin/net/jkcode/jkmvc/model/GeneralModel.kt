@@ -29,7 +29,7 @@ import net.jkcode.jkmvc.orm.*
  * @author shijianhang<772910474@qq.com>
  * @date 2018-12-17 3:38 PM
  */
-open class GeneralModel(myOrmMeta: IOrmMeta /* 自定义元数据 */) : Orm() {
+open class GeneralModel(myOrmMeta: OrmMeta /* 自定义元数据 */) : Orm() {
 
     public constructor(table: String /* 表名 */, primaryKey:String = "id" /* 主键 */):this(GeneralOrmMeta("`$table`'s general model", table, primaryKey))
 
@@ -39,7 +39,7 @@ open class GeneralModel(myOrmMeta: IOrmMeta /* 自定义元数据 */) : Orm() {
     /**
      * 改写ormMeta -- 增删改查时需要的元数据
      */
-    public override var ormMeta: IOrmMeta = myOrmMeta
+    public override var ormMeta: OrmMeta = myOrmMeta
 
     /**
      * 伴随对象
@@ -68,7 +68,7 @@ open class GeneralModel(myOrmMeta: IOrmMeta /* 自定义元数据 */) : Orm() {
      * 延迟设置元数据 =>　递延设置原始字段值
      * @param ormMeta
      */
-    public fun delaySetMeta(ormMeta: IOrmMeta) {
+    public fun delaySetMeta(ormMeta: OrmMeta) {
         if(this.ormMeta is EmptyOrmMeta) {
             this.ormMeta = ormMeta
             // 设置原始字段值
