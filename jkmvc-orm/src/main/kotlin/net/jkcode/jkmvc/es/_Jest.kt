@@ -77,7 +77,7 @@ public fun handleSingleValueAgg(bucket: Bucket, row: MutableMap<String, Any>){
             // donth
         } else if (key == "doc_count") {
             row["count"] = valueField.get(value as JsonPrimitive) // 获得原始值
-        } else if (value is JsonObject && value.has(valueKey)) {
+        } else if (value is JsonObject && value.has(valueKey)) { // 对 SingleValueAggregation 聚合, 即 count/sum/avg/max/min 等单值聚合对象, 计算值都放 value 属性中
             row[key] = valueField.get(value.get(valueKey) as JsonPrimitive) // 获得原始值
         }
     }
