@@ -582,6 +582,8 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
         val subquery = QueryBuilders.boolQuery()
         val nestedContainer = QueryBuilders.nestedQuery(path, subquery, ScoreMode.Total)
         wheres.add(nestedContainer)
+        // 入栈的是 subquery, 而非 nestedContainer
+        // https://blog.csdn.net/lsq_401/article/details/100983450
         queryStack.push(subquery to wheres)
         return this
     }

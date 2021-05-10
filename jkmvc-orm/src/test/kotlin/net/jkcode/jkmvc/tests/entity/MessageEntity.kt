@@ -31,5 +31,4 @@ open class MessageEntity: OrmEntity() {
         return "MessageEntity(" + toMap() + ")"
     }
 
-
 }

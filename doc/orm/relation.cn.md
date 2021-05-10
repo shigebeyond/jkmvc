@@ -125,11 +125,30 @@ hasManyThrough("posts", PostModel::class, "category_id", "id", "categories_posts
 hasOneThrough("category", CategoryModel::class, "post_id", "id", "categories_posts", "category_id", "id") 
 ```
 
-## 6 管理关联关系
+## 6 自定义关联条件或关联查询
+
+自定义关联条件:
+```
+hasOne("home", AddressModel::class, conditions = mapOf("is_home" to 1))
+```
+
+等价于以下的自定义关联查询:
+```
+hasOne("home", AddressModel::class){ query, lazy ->
+    if(lazy) // 是否懒加载
+        query.where("is_home", 1)
+    else
+        query.on("is_home", 1, false)
+}
+```
+
+这样可以非常容易的定义各种复杂的关联关系.
+
+## 7 管理关联关系
 
 Jkmvc提供了便捷的方法来管理关联关系，如检查关系/关系计数/添加关系/删除关系。首先，我们先假定有2个对象：已加载的`Post`模型对象post，与已加载的`Category`模型对象category。
 
-### 6.1 检查关系
+### 7.1 检查关系
 你可以这样来检查post是否关联了category:
 
 ```
@@ -138,7 +157,7 @@ post.hasRelation('categories', category);
 
 有2个参数： 1 关系名 2 要检查的关联模型对象
 
-### 6.2 添加关系
+### 7.2 添加关系
 
 接下来我们添加一下关系，就是在中间表 categories_posts 中插入一条记录，就这么简单调用下就行了
 
@@ -146,7 +165,7 @@ post.hasRelation('categories', category);
 post.addRelation('categories', category);
 ```
 
-### 6.3 删除关系
+### 7.3 删除关系
 
 删除关系，就是删除中间表 categories_posts 中对应的记录，简单调用以下代码即可：
 

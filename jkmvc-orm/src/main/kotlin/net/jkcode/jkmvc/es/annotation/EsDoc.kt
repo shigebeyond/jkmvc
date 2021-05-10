@@ -12,8 +12,8 @@ import kotlin.reflect.KClass
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FILE)
 annotation class EsDoc(
-        public val index: String,
-        public val type: String = "_doc",
+        public val index: String, // 索引名
+        public val type: String = "_doc", // 类型
         public val esName: String = "default" // es配置名
 )
 

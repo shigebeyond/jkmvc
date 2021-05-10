@@ -1,4 +1,4 @@
-default:
-  esUrl: http://localhost:9200
-  maxTotal: 100
-  perTotal: 100
+default: # es配置名, 可有多个配置
+  esUrl: http://localhost:9200 # es server地址, 多个用逗号分割
+  maxTotal: 100 # 连接池中总的最大连接数
+  maxTotalPerRoute: 100 # 每个路由(host+port)的最大连接数

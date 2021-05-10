@@ -36,11 +36,14 @@ class EsDocRepository<T: Any>(
     public lateinit var idProp: String
 
     init {
-        val adoc = model.kotlin.esDoc ?: throw EsException("Class $model miss @EsDoc annotation")
+        val adoc = model.kotlin.esDoc // @EsDoc 注解
+                ?: throw EsException("Class $model miss @EsDoc annotation")
         index = adoc.index
         type = adoc.type
         esName = adoc.esName
-        idProp = model.kotlin.esIdProp?.name ?: throw EsException("$model 没有用 @EsId 注解来指定 _id 属性")
+        idProp = model.kotlin.esIdProp?.name // @EsId 注解, 用在kotlin属性中
+                ?: model.jestIdField?.name // @JestId 注解, 用在java字段中
+                ?: throw EsException("$model 没有用 @EsId 或 @JestId 注解来指定 _id 属性")
     }
 
     /**

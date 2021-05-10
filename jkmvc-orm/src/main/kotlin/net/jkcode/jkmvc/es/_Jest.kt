@@ -32,12 +32,13 @@ val JestResult.scrollId: String?
 /**
  * 获得@JestId注解的java属性
  */
-public fun Class<*>.getJestIdField(): Field {
-    return this.fields.first {
-        // 有 @JestId 注解的属性
-        it.getCachedAnnotation<JestId>() != null
+public val Class<*>.jestIdField: Field
+    get() {
+        return this.fields.first {
+            // 有 @JestId 注解的属性
+            it.getCachedAnnotation<JestId>() != null
+        }
     }
-}
 
 //AggregationBuilder.factoriesBuilder 属性是 AggregatorFactories.Builder
 private val factoriesBuilderField = AggregationBuilder::class.java.getAccessibleField("factoriesBuilder")!!

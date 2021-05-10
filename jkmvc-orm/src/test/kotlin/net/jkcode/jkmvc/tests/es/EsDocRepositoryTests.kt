@@ -1,6 +1,5 @@
 package net.jkcode.jkmvc.tests.es
 
-import net.jkcode.jkmvc.es.ESQueryBuilder
 import net.jkcode.jkmvc.es.EsDocRepository
 import net.jkcode.jkmvc.tests.entity.MessageEntity
 import net.jkcode.jkutil.common.randomInt

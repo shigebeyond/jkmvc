@@ -124,11 +124,31 @@ Use above example, we define our `hasOneThrough` relation.
 hasOneThrough("category", CategoryModel::class, "post_id", "id", "categories_posts", "category_id", "id") 
 ```
 
-## 6 Manage relation
+## 6 Custom conditions or query
+
+Custom conditions:
+```
+hasOne("home", AddressModel::class, conditions = mapOf("is_home" to 1))
+```
+
+It equals custom query:
+
+```
+hasOne("home", AddressModel::class){ query, lazy ->
+    if(lazy) // Whether is lazy load
+        query.where("is_home", 1)
+    else
+        query.on("is_home", 1, false)
+}
+```
+
+So it's easy to define complex relations.
+
+## 7 Manage relation
 
 Methods are available to check for, count, add, and remove relations for relations.  Let's assume you have a post model loaded, and a category model loaded as well. 
 
-### 6.1 check relation
+### 7.1 check relation
 
 You can check to see if the post is related to this category with the following call:
 
@@ -138,7 +158,7 @@ post.hasRelation('categories', category);
 
 The first parameter is the relation name to use (in case your post model has more than one relation to the category model) and the second is the model to check for a relation with.
 
-### 6.2 add relation
+### 7.2 add relation
 
 Assuming you want to add the relation (by creating a new row in the categories_posts table), you would simply do:
 
@@ -146,7 +166,7 @@ Assuming you want to add the relation (by creating a new row in the categories_p
 post.addRelation('categories', category);
 ```
 
-### 6.3 remove relation
+### 7.3 remove relation
 
 To remove:
 

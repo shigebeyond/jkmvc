@@ -100,8 +100,8 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
             // es配置
             val config: IConfig = Config.instance("es.$name", "yaml")
             val esUrl: String = config["esUrl"]!!
-            val maxTotal: Int? = config["maxTotal"]
-            val perTotal: Int? = config["perTotal"]
+            val maxTotal: Int = config["maxTotal"]!!
+            val maxTotalPerRoute: Int = config["maxTotalPerRoute"]!!
 
             val urls = esUrl.split(",")
 
@@ -109,8 +109,8 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
             val factory = JestClientFactory()
             val hcConfig = HttpClientConfig.Builder(urls)
                     .multiThreaded(true)
-                    .defaultMaxTotalConnectionPerRoute(Integer.valueOf(maxTotal!!)!!)
-                    .maxTotalConnection(Integer.valueOf(perTotal!!)!!)
+                    .defaultMaxTotalConnectionPerRoute(maxTotalPerRoute)
+                    .maxTotalConnection(maxTotal)
                     .gson(gson)
                     .build()
             factory.setHttpClientConfig(hcConfig)

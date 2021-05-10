@@ -1,6 +1,5 @@
 package net.jkcode.jkmvc.tests.es
 
-import io.searchbox.core.search.aggregation.Bucket
 import net.jkcode.jkmvc.es.ESQueryBuilder
 import net.jkcode.jkmvc.es.EsManager
 import net.jkcode.jkmvc.es.annotation.esIdProp
