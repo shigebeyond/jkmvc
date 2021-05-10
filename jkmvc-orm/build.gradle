@@ -5,7 +5,7 @@ dependencies{
         compile project(':jkutil')
     }else{
         // jkutil
-        compile "net.jkcode.jkutil:jkutil:$jkutil_version"
+        compile "net.jkcode.jkmvc:jkutil:$jkutil_version"
     }
 
 
