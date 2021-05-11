@@ -53,14 +53,14 @@ class EsDocRepositoryTests {
     fun testFindById() {
         val id = "1"
         val entity = rep.findById(id)
-        System.out.println("查单个：" + entity.toString())
+        println("查单个：" + entity.toString())
     }
 
     @Test
     fun testFindAllByIds() {
         val ids = listOf("1", "2")
         val entities = rep.findAllByIds(ids)
-        System.out.println("查多个：" + entities)
+        println("查多个：" + entities)
     }
 
     @Test

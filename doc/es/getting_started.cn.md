@@ -96,7 +96,7 @@ println("设置索引[$index]映射[$type]: " + r)
 ## 增删改操作
 jkorm-es库 提供了各种基本的CRUD功能。
 
-1. 实例化 EsDocRepository
+### 1. 实例化 EsDocRepository
 
 ```
 import net.jkcode.jkmvc.es.EsDocRepository
@@ -104,9 +104,7 @@ import net.jkcode.jkmvc.es.EsDocRepository
 val rep = EsDocRepository.instance(MessageEntity::class.java)
 ```
 
-
-
-2. 单个保存(id存在就是修改，否则就是插入)
+### 2. 单个保存(id存在就是修改，否则就是插入)
 ```
 @Test
 fun testSave() {
@@ -117,7 +115,7 @@ fun testSave() {
 ```
 
 
-3. 批量保存
+### 3. 批量保存
 ```
 @Test
 fun testSaveAll() {
@@ -133,7 +131,7 @@ fun testSaveAll() {
 }
 ```
 
-4. 增量更新
+### 4. 增量更新
 ```
 @Test
 fun testUpdate() {
@@ -145,8 +143,7 @@ fun testUpdate() {
 }
 ```
 
-
-5. 单个删除
+### 5. 单个删除
 ```
 @Test
 fun testDeleteById() {
@@ -155,7 +152,7 @@ fun testDeleteById() {
 }
 ```
 
-6. 批量删除
+### 6. 批量删除
 ```
 @Test
 fun testDeleteAll() {
@@ -168,18 +165,17 @@ fun testDeleteAll() {
 }
 ```
 
-7. 根据id查询单个
+### 7. 根据id查询单个
 ```
 @Test
 fun testFindById() {
     val id = "1"
     val entity = rep.findById(id)
-    System.out.println("查单个：" + entity.toString())
+    println("查单个：" + entity.toString())
 }
 ```
 
-
-8. 查询全部，并按照id排序
+### 8. 查询全部，并按照id排序
 ```
 @Test
 fun testFindAll() {
