@@ -1,6 +1,8 @@
 package net.jkcode.jkmvc.query
 
+import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkmvc.orm.*
 
 /**
  * sql构建器
@@ -15,7 +17,7 @@ import net.jkcode.jkmvc.db.IDb
  * @author shijianhang
  * @date 2016-10-13
  */
-abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, IDbQueryBuilderDecoration, Cloneable, CharSequence by "", IDbQuery() {
+abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, IDbQueryBuilderDecoration, CharSequence by "", IDbQuery() {
 
     /**
      * 克隆对象: 单纯用于改权限为public
@@ -221,4 +223,68 @@ abstract class IDbQueryBuilder: IDbQueryBuilderQuoter, IDbQueryBuilderAction, ID
     public fun batchDelete(paramses: List<Any?>, db: IDb = defaultDb): IntArray {
         return batchExecute(SqlAction.DELETE, paramses, db)
     }
+
+    /****************************** 优化分页查询 ********************************/
+    /**
+     * 通过select id子查询来加快分页查询
+     *
+     * @param limit
+     * @param offset
+     * @param idField id字段名
+     * @param whereOnlyIds 外部查询的查询条件只保留id条件, 去掉其他旧条件, 仅适用于id字段, 非id字段可能要保留旧条件
+     * @param params 参数
+     * @param db 数据库连接
+     * @param transform 行转换函数
+     * @return 列表
+     */
+    public abstract fun <T:Any> fastFindPageBySubquery(limit: Int, offset: Int, idField: String, whereOnlyIds: Boolean = true, params: List<*> = emptyList<Any>(), db: IDb = defaultDb, transform: (DbResultRow) -> T): List<T>
+
+    /**
+     * 通过select id子查询来加快分页查询
+     *
+     * @param limit
+     * @param offset
+     * @param idField id字段名
+     * @param whereOnlyIds 外部查询的查询条件只保留id条件, 去掉其他旧条件, 仅适用于id字段, 非id字段可能要保留旧条件
+     * @param params 参数
+     * @param convertingColumn 是否转换字段名
+     * @param db 数据库连接
+     * @return 列表
+     */
+    public fun fastFindPageMaps(limit: Int, offset: Int, idField: String, whereOnlyIds: Boolean = true, params: List<*> = emptyList<Any>(), convertingColumn: Boolean = false, db: IDb = defaultDb): List<Map<String, Any?>>{
+        return fastFindPageBySubquery(limit, offset, idField, whereOnlyIds, params, db){ row ->
+            row.toMap(convertingColumn)
+        }
+    }
+
+    /**
+     * 通过select id子查询来加快分页查询
+     *
+     * @param limit
+     * @param offset
+     * @param idField id字段名
+     * @param whereOnlyIds 外部查询的查询条件只保留id条件, 去掉其他旧条件, 仅适用于id字段, 非id字段可能要保留旧条件
+     * @param params 参数
+     * @param db 数据库连接
+     * @return 列表
+     */
+    public inline fun <reified T: IOrm> fastFindPageModels(limit: Int, offset: Int, idField: String, whereOnlyIds: Boolean = true, params: List<*> = emptyList<Any>(), db: IDb = defaultDb): List<T> {
+        return fastFindPageBySubquery(limit, offset, idField, whereOnlyIds, params, db, T::class.modelRowTransformer)
+    }
+
+    /**
+     * 查找一个： select ... limit 1语句
+     *
+     * @param limit
+     * @param offset
+     * @param idField id字段名
+     * @param whereOnlyIds 外部查询的查询条件只保留id条件, 去掉其他旧条件, 仅适用于id字段, 非id字段可能要保留旧条件
+     * @param params 参数
+     * @param db 数据库连接
+     * @return 一个数据
+     */
+    public inline fun <reified T: IEntitiableOrm<E>, reified E: OrmEntity> fastFindPageEntities(limit: Int, offset: Int, idField: String, whereOnlyIds: Boolean = true, params: List<*> = emptyList<Any>(), db: IDb = defaultDb): List<E> {
+        return fastFindPageBySubquery(limit, offset, idField, whereOnlyIds, params, db, T::class.entityRowTransformer())
+    }
+
 }

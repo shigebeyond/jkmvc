@@ -18,7 +18,7 @@ import kotlin.collections.ArrayList
  * @author shijianhang
  * @date 2017-6-10 下午8:02:47
  */
-class CompiledSql : Cloneable, ICompiledSql() {
+class CompiledSql : ICompiledSql() {
 
     /**
      * 默认db

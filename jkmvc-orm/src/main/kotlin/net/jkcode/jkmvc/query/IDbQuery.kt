@@ -22,7 +22,7 @@ import kotlin.reflect.KClass
  * 3 注：为什么不是接口，而是抽象类？
  *    因为我需要实现几个 inline 方法, 这几个方法都需要具体化泛型，因此需要内联实现inline，但是inline不能用于接口方法/抽象方法，因此我直接在该类中实现这两个方法，该类也只能由接口变为抽象类
  */
-abstract class IDbQuery{
+abstract class IDbQuery: Cloneable{
 
     /**
      * 默认db名

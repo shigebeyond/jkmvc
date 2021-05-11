@@ -126,6 +126,14 @@ class DbQueryBuilderTests{
     }
 
     @Test
+    fun testFastFindPage(){
+        val rows = DbQueryBuilder().table("user")
+                .orderBy("user.id")
+                .fastFindPageMaps(10, 2, "user.id") // 查分页数据
+        println("查询user表： " + rows)
+    }
+
+    @Test
     fun testCount(){
         val count = DbQueryBuilder().table("user").count();
         println("统计user表：" + count)
@@ -192,6 +200,21 @@ class DbQueryBuilderTests{
                         .orWhere("lastLogin", "IS", null)
                     .andWhereClose()
                 .whereClose()
+                .andWhere("removed","IS", null);
+        val csql = query.compileSelect()
+        println(csql.previewSql())
+    }
+
+    @Test
+    fun testNestedClauses2(){
+        val query = DbQueryBuilder().from("user")
+                .whereWrap {
+                    where("id", "IN", arrayOf(1, 2, 3, 5))
+                        .whereWrap {
+                            where("lastLogin", "<=", System.currentTimeMillis() / 1000)
+                            orWhere("lastLogin", "IS", null)
+                        }
+                }
                 .andWhere("removed","IS", null);
         val csql = query.compileSelect()
         println(csql.previewSql())

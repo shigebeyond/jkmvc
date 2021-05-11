@@ -226,6 +226,15 @@ interface IDbQueryBuilderDecoration{
     }
 
     /**
+     * Wrap a new "AND WHERE (...)" grouping.
+     *
+     * @return
+     */
+    fun whereWrap(action: IDbQueryBuilder.() -> Unit): IDbQueryBuilder{
+        return andWhereWrap(action)
+    }
+
+    /**
      * Opens a new "OR WHERE (...)" grouping.
      *
      * @return

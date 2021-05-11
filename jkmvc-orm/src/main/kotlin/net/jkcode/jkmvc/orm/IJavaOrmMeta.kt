@@ -50,7 +50,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
      * @return
      */
     @JvmOverloads
-    fun queryBuilder(sort: String?, desc: Boolean? = null, start: Int? = null, rows: Int? = null): OrmQueryBuilder {
+    open fun queryBuilder(sort: String?, desc: Boolean? = null, start: Int? = null, rows: Int? = null): OrmQueryBuilder {
         val query = queryBuilder()
 
         if (sort != null && sort != "")

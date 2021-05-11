@@ -95,7 +95,7 @@ abstract class DbQueryBuilderAction : DbQueryBuilderQuoter() {
     /**
      * 要查询的字段名
      */
-    public val selectColumns: HashSet<CharSequence>
+    protected val selectColumns: HashSet<CharSequence>
         get(){
             return manipulatedData.getOrPut(SqlAction.SELECT.ordinal){
                 HashSet<CharSequence>();

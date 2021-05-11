@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.query
 
 import net.jkcode.jkmvc.db.Db
+import net.jkcode.jkmvc.db.DbResultRow
 import net.jkcode.jkmvc.db.DbResultSet
 import net.jkcode.jkmvc.db.IDb
 
@@ -182,4 +183,42 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
         // 编译 + 执行
         return compile(action, db, false).batchExecute(paramses, db)
     }
+
+    /**
+     * 通过select id子查询来加快分页查询
+     *
+     * @param limit
+     * @param offset
+     * @param idField id字段名
+     * @param whereOnlyIds 外部查询的查询条件只保留id条件, 去掉其他旧条件, 仅适用于id字段, 非id字段可能要保留旧条件
+     * @param params 参数
+     * @param db 数据库连接
+     * @param transform 行转换函数
+     * @return 列表
+     */
+    public override fun <T:Any> fastFindPageBySubquery(limit: Int, offset: Int, idField: String, whereOnlyIds: Boolean, params: List<*>, db: IDb, transform: (DbResultRow) -> T): List<T>{
+        // 构建select id的子查询
+        val subquery = this.copy(true) // 克隆+清空select
+        subquery.select(idField) // 查询id
+
+        // 分页
+        subquery.limit(limit, offset); // 子查询的分页: limit 40,10
+        this.limit(limit);// 外查询的分页: limit 10
+
+        // 去掉其他旧条件
+        if(whereOnlyIds)
+            whereClause.clear()
+
+        // 子查询作为条件
+        // bug: where id in (select id from xxx) 报错: This version of MySQL doesn’t yet support ‘LIMIT & IN/ALL/ANY/SOME subquery’
+        //this.whereCondition("$idField IN ($subquery)")
+        val subIdField = idField.substringAfter('.') // 获得去掉表别名的id字段
+        // fix: limit外层再嵌套一层
+        //return this.where("$idField IN (SELECT $subIdField FROM ($subquery) subquery)")
+        // fix: 用 inner join…on
+        this.join(DbExpr(subquery, "subquery")).on("subquery.$subIdField", "=", idField)
+
+        return findRows(params, db, transform)
+    }
+
 }
