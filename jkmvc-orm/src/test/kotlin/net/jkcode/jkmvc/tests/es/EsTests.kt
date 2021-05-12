@@ -200,7 +200,6 @@ curl 'localhost:9200/message_index/_doc/_search?pretty=true'  -H "Content-Type: 
                 .must("toUid", ">=", 8)
                 */
                 .limit(10)
-                .offset(0)
                 .orderByField("id")
 
         val (list, size) = esmgr.searchDocs(index, type, query, MessageEntity::class.java)

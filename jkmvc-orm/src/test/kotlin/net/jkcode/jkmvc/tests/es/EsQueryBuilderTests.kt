@@ -1,9 +1,17 @@
 package net.jkcode.jkmvc.tests.es
 
+import com.google.common.collect.Lists
 import net.jkcode.jkmvc.es.ESQueryBuilder
 import net.jkcode.jkmvc.es.EsManager
 import net.jkcode.jkmvc.tests.entity.RecentOrder
 import net.jkcode.jkutil.common.randomBoolean
+import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.script.Script
+import org.elasticsearch.script.ScriptType
+import org.elasticsearch.search.builder.SearchSourceBuilder
+import org.elasticsearch.search.sort.ScriptSortBuilder
+import org.elasticsearch.search.sort.SortBuilders
+import org.elasticsearch.search.sort.SortOrder
 import org.junit.Test
 import java.util.*
 
@@ -118,18 +126,38 @@ curl 'localhost:9200/recent_order_index/_doc/_search?pretty=true'  -H "Content-T
     @Test
     fun testSearch() {
         val query = ESQueryBuilder()
-                .index(index)
-                .type(type)
+                //.index(index) // 可省略, 因为在 searchDocs(clazz) 会从目标类clazz注解中解析index/type
+                //.type(type)
                 .must("searchable", "=", true)
                 .must("driverUserName", "=", "张三")
-                .limit(10)
-                .offset(0)
+                .select("cargoId", "driverUserName", "loadAddress", "companyId")
                 .orderByField("id")
+                .limit(10, 30)
+
 
         val (list, size) = query.searchDocs(RecentOrder::class.java)
         println("查到 $size 个文档")
         for (item in list)
             println(item)
+    }
+
+
+    @Test
+    fun testSearchNative() {
+        // 构建query builder
+        val queryBuilder = QueryBuilders.boolQuery()
+        val searchable = QueryBuilders.termQuery("searchable", true)
+        val driverUserName = QueryBuilders.termQuery("driverUserName", "张三")
+        queryBuilder.must(searchable).must(driverUserName)
+
+        val searchSource = SearchSourceBuilder()
+        searchSource.query(queryBuilder)
+        searchSource.fetchSource(arrayOf("cargoId", "driverUserName", "loadAddress", "companyId"), arrayOfNulls(0))
+        searchSource.sort("id", SortOrder.ASC)
+        searchSource.from(30)
+        searchSource.size(10)
+
+        println(searchSource)
     }
 
     /**
@@ -138,18 +166,18 @@ curl 'localhost:9200/recent_order_index/_doc/_search?pretty=true'  -H "Content-T
      *      https://www.infoq.cn/article/u4Xhw5Q3jfLE1brGhtbR
      */
     @Test
-    fun testComplexQuery() {
+    fun testComplexSearch() {
         val query = ESQueryBuilder()
                 .index(index)
                 .type(type)
                 .mustWrap { // city
                     mustWrap { // start city
-                        should("startDistrictId", "IN", arrayOf(684214, 981362))
                         should("startCityId", "IN", arrayOf(320705, 931125))
+                        should("startDistrictId", "IN", arrayOf(684214, 981362))
                     }
                     mustWrap { // end city
-                        should("endDistrictId", "IN", arrayOf(95312, 931125))
                         should("endCityId", "IN", arrayOf(589421, 953652))
+                        should("endDistrictId", "IN", arrayOf(95312, 931125))
                     }
                 }
                 .must("updateTime", ">=", 1608285822239L) // range
@@ -176,6 +204,55 @@ curl 'localhost:9200/recent_order_index/_doc/_search?pretty=true'  -H "Content-T
                 .orderByScript("searchCargo-script", mapOf("searchColdCargoTop" to 0))
 
         query.toSearchSource()
+    }
+
+    @Test
+    fun testComplexSearchNative() {
+        val queryBuilder = QueryBuilders.boolQuery()
+        val startCityId = QueryBuilders.termsQuery("startCityId", Lists.newArrayList(320705L, 931125L))
+        val startDistrictId = QueryBuilders.termsQuery("startDistrictId", Lists.newArrayList(684214L, 981362L))
+        val endCityId = QueryBuilders.termsQuery("endCityId", Lists.newArrayList(589421L, 953652L))
+        val endDistrictId = QueryBuilders.termsQuery("endDistrictId", Lists.newArrayList(95312L, 931125L))
+        val startBuilder = QueryBuilders.boolQuery()
+        startBuilder.should(startCityId).should(startDistrictId)
+        val endBuilder = QueryBuilders.boolQuery()
+        endBuilder.should(endCityId).should(endDistrictId)
+        val cityBuilder = QueryBuilders.boolQuery()
+        cityBuilder.must(startBuilder)
+        cityBuilder.must(endBuilder)
+        queryBuilder.must(cityBuilder)
+        val rangeBuilder = QueryBuilders.rangeQuery("updateTime")
+        queryBuilder.must(rangeBuilder.from(1608285822239L))
+        val cargoLabelsBuilder = QueryBuilders.termsQuery("cargoLabels", Lists.newArrayList("水果", "生鲜"))
+        queryBuilder.must(cargoLabelsBuilder)
+        val cargoCategoryBuilder = QueryBuilders.termsQuery("cargoCategory", Lists.newArrayList("A", "B"))
+        val featureSortBuilder = QueryBuilders.termQuery("featureSort", "好货")
+        queryBuilder.mustNot(cargoCategoryBuilder)
+        queryBuilder.mustNot(featureSortBuilder)
+        val cargoChannelBuilder = QueryBuilders.boolQuery()
+        queryBuilder.should(cargoChannelBuilder)
+        val channelBuilder = QueryBuilders.termsQuery("cargoChannel", Lists.newArrayList("长途货源", "一口价货源"))
+        cargoChannelBuilder.mustNot(channelBuilder)
+        val searchableSourcesBuilder = QueryBuilders.boolQuery()
+        cargoChannelBuilder.should(searchableSourcesBuilder)
+        val sourceBuilder = QueryBuilders.termQuery("searchableSources", "ALL")
+        searchableSourcesBuilder.must(sourceBuilder)
+        val securityTranBuilder = QueryBuilders.boolQuery()
+        searchableSourcesBuilder.must(securityTranBuilder)
+        securityTranBuilder.must(QueryBuilders.termsQuery("cargoChannel", "No.1", "No.2", "No.3"))
+        securityTranBuilder.must(QueryBuilders.termQuery("securityTran", "平台保证"))
+
+        val searchSource = SearchSourceBuilder()
+        searchSource.query(queryBuilder)
+        searchSource.fetchSource(arrayOf("cargoId", "startDistrictId", "startCityId", "endDistrictId", "endCityId", "updateTime", "cargoLabels",
+                "cargoCategory", "featureSort", "cargoChannel", "searchableSources", "securityTran"), arrayOfNulls(0))
+        searchSource.sort("duplicate", SortOrder.ASC)
+        val sortBuilder = SortBuilders.scriptSort(Script(ScriptType.INLINE,
+                "painless", "searchCargo-script", Collections.emptyMap(), mapOf("searchColdCargoTop" to 0)),
+                ScriptSortBuilder.ScriptSortType.STRING).order(SortOrder.ASC)
+        searchSource.sort(sortBuilder)
+
+        println(searchSource)
     }
 
 }

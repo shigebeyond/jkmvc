@@ -195,21 +195,45 @@ fun testFindAll() {
 ```
 @Test
 fun testSearch() {
+    // 构建query builder
     val query = ESQueryBuilder()
-            .index(index)
-            .type(type)
             .must("searchable", "=", true)
             .must("driverUserName", "=", "张三")
-            .limit(10)
-            .offset(0)
+            .select("cargoId", "driverUserName", "loadAddress", "companyId")
             .orderByField("id")
+            .limit(10, 30)
 
+    // 执行搜索
     val (list, size) = query.searchDocs(RecentOrder::class.java)
     println("查到 $size 个文档")
     for (item in list)
         println(item)
 }
 ```
+
+而使用原生Java High Level REST Client接口方式：
+```
+// 构建query builder
+final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+final TermsQueryBuilder searchable = QueryBuilders.termQuery("searchable", true);
+final TermsQueryBuilder driverUserName = QueryBuilders.termQuery("driverUserName", "张三");
+queryBuilder.must(searchable).must(driverUserName);
+
+SearchSourceBuilder searchSource = new SearchSourceBuilder();
+searchSource.query(queryBuilder);
+searchSource.fetchSource(new String[]{"cargoId", "driverUserName", "loadAddress", "companyId"},
+        new String[0]);
+searchSource.sort("id", SortOrder.ASC);
+searchSource.from(30);
+searchSource.size(10);
+
+// 执行搜索
+......
+```
+
+对比生成的es搜索DSL如下, 左边是jkorm-es生成代码, 右边是原生API生成代码
+![](img/es/search-compare.png)
+基本上一样, 只是select字段的顺序不同, 这是因为jkorm-es使用了HashSet(排重)来接收字段, 导致字段顺序变更
 
 ### 2. 复杂查询
 非常复杂的查询, 但使用 jkorm-es 库可以做到非常简单与可读
@@ -221,18 +245,18 @@ fun testSearch() {
  *      https://www.infoq.cn/article/u4Xhw5Q3jfLE1brGhtbR
  */
 @Test
-fun testComplexQuery() {
+fun testComplexSearch() {
     val query = ESQueryBuilder()
             .index(index)
             .type(type)
             .mustWrap { // city
                 mustWrap { // start city
-                    should("startDistrictId", "IN", arrayOf(684214, 981362))
                     should("startCityId", "IN", arrayOf(320705, 931125))
+                    should("startDistrictId", "IN", arrayOf(684214, 981362))
                 }
                 mustWrap { // end city
-                    should("endDistrictId", "IN", arrayOf(95312, 931125))
                     should("endCityId", "IN", arrayOf(589421, 953652))
+                    should("endDistrictId", "IN", arrayOf(95312, 931125))
                 }
             }
             .must("updateTime", ">=", 1608285822239L) // range
@@ -258,12 +282,70 @@ fun testComplexQuery() {
     query.orderByField("duplicate")
             .orderByScript("searchCargo-script", mapOf("searchColdCargoTop" to 0))
 
+    // 执行搜索
     val (list, size) = query.searchDocs(RecentOrder::class.java)
     println("查到 $size 个文档")
     for (item in list)
         println(item)
 }
 ```
+
+而使用原生Java High Level REST Client接口方式, 非常复杂与难看：
+
+```
+// 构建query builder
+final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+final TermsQueryBuilder startCityId = QueryBuilders.termsQuery("startCityId", Lists.newArrayList(320705L, 931125L));
+final TermsQueryBuilder startDistrictId = QueryBuilders.termsQuery("startDistrictId", Lists.newArrayList(684214L, 981362L));
+final TermsQueryBuilder endCityId = QueryBuilders.termsQuery("endCityId", Lists.newArrayList(589421L, 953652L));
+final TermsQueryBuilder endDistrictId = QueryBuilders.termsQuery("endDistrictId", Lists.newArrayList(95312L, 931125L));
+final BoolQueryBuilder startBuilder = QueryBuilders.boolQuery();
+startBuilder.should(startCityId).should(startDistrictId);
+final BoolQueryBuilder endBuilder = QueryBuilders.boolQuery();
+endBuilder.should(endCityId).should(endDistrictId);
+final BoolQueryBuilder cityBuilder = QueryBuilders.boolQuery();
+cityBuilder.must(startBuilder);
+cityBuilder.must(endBuilder);
+queryBuilder.must(cityBuilder);
+final RangeQueryBuilder rangeBuilder = QueryBuilders.rangeQuery("updateTime");
+queryBuilder.must(rangeBuilder.from(1608285822239L));
+final TermsQueryBuilder cargoLabelsBuilder = QueryBuilders.termsQuery("cargoLabels", Lists.newArrayList("水果", "生鲜"));
+queryBuilder.must(cargoLabelsBuilder);
+final TermsQueryBuilder cargoCategoryBuilder = QueryBuilders.termsQuery("cargoCategory", Lists.newArrayList("A", "B"));
+final TermQueryBuilder featureSortBuilder = QueryBuilders.termQuery("featureSort", "好货");
+queryBuilder.mustNot(cargoCategoryBuilder);
+queryBuilder.mustNot(featureSortBuilder);
+final BoolQueryBuilder cargoChannelBuilder = QueryBuilders.boolQuery();
+queryBuilder.should(cargoChannelBuilder);
+final TermsQueryBuilder channelBuilder = QueryBuilders.termsQuery("cargoChannel", Lists.newArrayList("长途货源", "一口价货源"));
+cargoChannelBuilder.mustNot(channelBuilder);
+final BoolQueryBuilder searchableSourcesBuilder = QueryBuilders.boolQuery();
+cargoChannelBuilder.should(searchableSourcesBuilder);
+final TermQueryBuilder sourceBuilder = QueryBuilders.termQuery("searchableSources", "ALL");
+searchableSourcesBuilder.must(sourceBuilder);
+final BoolQueryBuilder securityTranBuilder = QueryBuilders.boolQuery();
+searchableSourcesBuilder.must(securityTranBuilder);
+securityTranBuilder.must(QueryBuilders.termsQuery("cargoChannel", "No.1", "No.2", "No.3"));
+securityTranBuilder.must(QueryBuilders.termQuery("securityTran", "平台保证"));
+
+SearchSourceBuilder searchSource = new SearchSourceBuilder();
+searchSource.query(queryBuilder);
+searchSource.fetchSource(new String[]{"cargoId", "startDistrictId", "startCityId", "endDistrictId", "endCityId", "updateTime", "cargoLabels",
+                "cargoCategory", "featureSort", "cargoChannel", "searchableSources", "securityTran"},
+        new String[0]);
+searchSource.sort("duplicate", SortOrder.ASC);
+ScriptSortBuilder sortBuilder = SortBuilders.scriptSort(new org.elasticsearch.script.Script(ScriptType.INLINE,
+        "painless", "searchCargo-script", Collections.emptyMap(), Collections.singletonMap("searchColdCargoTop", 0)),
+        ScriptSortBuilder.ScriptSortType.STRING).order(SortOrder.ASC);
+searchSource.sort(sortBuilder);
+
+// 执行搜索
+......
+```
+
+对比生成的es搜索DSL如下, 左边是jkorm-es生成代码, 右边是原生API生成代码
+![](img/es/complex-search-compare.png)
+基本上一样, 只是select字段的顺序不同, 这是因为jkorm-es使用了HashSet(排重)来接收字段, 导致字段顺序变更
 
 ## 聚合
 ### 1. 简单聚合

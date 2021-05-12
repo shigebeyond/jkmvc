@@ -135,6 +135,27 @@ class AggregationTests {
     }
 
     /**
+     * select count(1), count(position) as count_position, max(age) as max_age, team from player_index group by team;
+     */
+    @Test
+    fun testMy0(){
+        val query = myBuilder
+                .aggByAndWrapSubAgg("team") { // 别名是team
+                    aggBy("count(position)") // 别名是count_position
+                    aggBy("max(age)") // 别名是max_age
+                }
+        println(query.toSearchSource(false))
+    }
+    @Test
+    fun testNative0(){
+        val teamAgg = AggregationBuilders.terms("team ").field("team")
+        val posAgg = AggregationBuilders.terms("pos_count").field("position")
+        val ageAgg = AggregationBuilders.max("max_age").field("age")
+        nativebuilder.aggregation(teamAgg.subAggregation(posAgg).subAggregation(ageAgg))
+        println(nativebuilder.toString())
+    }
+
+    /**
      * select team, count(*) as player_count from player group by team;
      */
     @Test
@@ -152,7 +173,7 @@ class AggregationTests {
     }
 
     /**
-     * select team, position, count(*) as pos_count from player group by team, position;
+     * select team, count(*) as pos_count from player group by team, position;
      */
     @Test
     fun testMy2(){

@@ -3,17 +3,18 @@ package net.jkcode.jkmvc.es
 import io.searchbox.core.SearchResult
 import io.searchbox.core.UpdateByQueryResult
 import io.searchbox.params.SearchType
+import net.jkcode.jkmvc.es.annotation.esDoc
 import net.jkcode.jkutil.common.esLogger
 import net.jkcode.jkutil.common.isArrayOrCollection
 import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.common.unit.DistanceUnit
 import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.index.query.BoolQueryBuilder
-import org.elasticsearch.index.query.GeoBoundingBoxQueryBuilder
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.script.Script
 import org.elasticsearch.script.ScriptType
+import org.elasticsearch.search.aggregations.AbstractAggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilder
 import org.elasticsearch.search.aggregations.AggregatorFactories
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder
@@ -38,8 +39,9 @@ import kotlin.collections.HashSet
  * @author shijianhang
  * @date 2021-4-21 下午5:16:59
  */
-class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
+class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = EsManager.instance()) {
 
+    @JvmOverloads
     constructor(index: String, type: String, esmgr: EsManager = EsManager.instance()):this(esmgr){
         this.index(index)
         this.type(type)
@@ -81,12 +83,17 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
     /**
      * Query index name
      */
-    protected lateinit var index: String;
+    protected lateinit var index: String
 
     /**
      * Query type name
      */
     protected lateinit var type: String
+
+    /**
+     * Whether index is initial
+     */
+    protected var indexInited = false
 
     /**
      * 查询对象栈
@@ -262,6 +269,11 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
     protected var offset = 0;
 
     /**
+     * timeout (seconds) to control how long search is allowed to take
+     */
+    protected var timeout = 0L;
+
+    /**
      * 清空查询元素
      */
     fun clear() {
@@ -290,6 +302,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      */
     public fun index(index: String): ESQueryBuilder {
         this.index = index;
+        this.indexInited = true
         return this
     }
 
@@ -314,23 +327,23 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
     }
 
     /**
-     * Set the query limit
+     * Set the query limit and offset
      * @param int limit
      * @return this
      */
-    public fun limit(limit: Int = 10): ESQueryBuilder {
+    @JvmOverloads
+    public fun limit(limit: Int, offset: Int = 0): ESQueryBuilder {
         this.limit = limit;
+        this.offset = offset;
         return this;
     }
 
     /**
-     * Set the query offset
-     * @param int offset
-     * @return this
+     * Set timeout (seconds) to control how long search is allowed to take.
      */
-    public fun offset(offset: Int = 0): ESQueryBuilder {
-        this.offset = offset;
-        return this;
+    public fun timeout(timeout: Long): ESQueryBuilder {
+        this.timeout = timeout
+        return this
     }
 
     /**
@@ -608,6 +621,16 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
     // --------- filter start ---------
     /**
      * Set the query filter clause
+     * @param condition
+     * @return this
+     */
+    public fun filter(condition: QueryBuilder): ESQueryBuilder {
+        filter.add(condition)
+        return this
+    }
+
+    /**
+     * Set the query filter clause
      * @param name
      * @param value
      * @return this
@@ -749,6 +772,16 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
 
 
     // --------- must start ---------
+    /**
+     * Set the query must clause
+     * @param condition
+     * @return this
+     */
+    public fun must(condition: QueryBuilder): ESQueryBuilder {
+        must.add(condition)
+        return this
+    }
+
     /**
      * Set the query must clause
      * @param name
@@ -895,6 +928,16 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
     // --------- mustNot start ---------
     /**
      * Set the query mustNot clause
+     * @param condition
+     * @return this
+     */
+    public fun mustNot(condition: QueryBuilder): ESQueryBuilder {
+        mustNot.add(condition)
+        return this
+    }
+
+    /**
+     * Set the query mustNot clause
      * @param name
      * @param value
      * @return this
@@ -1035,8 +1078,17 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
     // --------- mustNot end ---------
 
 
-
     // --------- should start ---------
+    /**
+     * Set the query should clause
+     * @param condition
+     * @return this
+     */
+    public fun should(condition: QueryBuilder): ESQueryBuilder {
+        should.add(condition)
+        return this
+    }
+
     /**
      * Set the query should clause
      * @param name
@@ -1190,22 +1242,34 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
     public fun aggBy(expr: String, alias: String? = null, asc: Boolean? = null): ESQueryBuilder {
         val exp = AggExpr(expr, alias)
         val agg = exp.toAggregation()
+        return aggBy(agg, asc)
+    }
+
+    /**
+     * 聚合
+     * @param agg 聚合对象
+     * @param asc 是否升序
+     * @return
+     */
+    @JvmOverloads
+    public fun aggBy(agg: AbstractAggregationBuilder<*>, asc: Boolean? = null): ESQueryBuilder {
+        // 添加聚合
         this.currAggs.addAggregator(agg)
 
         // 排序
-        if(asc != null) {
-            val parentAgg = getClosetParentAgg{
+        if (asc != null) {
+            val parentAgg = getClosetParentAgg {
                 it is TermsAggregationBuilder
                         || it is DateHistogramAggregationBuilder
                         || it is HistogramAggregationBuilder
             }
-            when(parentAgg) {
+            when (parentAgg) {
                 is TermsAggregationBuilder ->
-                    parentAgg.order(Terms.Order.aggregation(exp.alias, asc))
+                    parentAgg.order(Terms.Order.aggregation(agg.getName(), asc))
                 is DateHistogramAggregationBuilder ->
-                    parentAgg.order(Histogram.Order.aggregation(exp.alias, asc))
+                    parentAgg.order(Histogram.Order.aggregation(agg.getName(), asc))
                 is HistogramAggregationBuilder ->
-                    parentAgg.order(Histogram.Order.aggregation(exp.alias, asc))
+                    parentAgg.order(Histogram.Order.aggregation(agg.getName(), asc))
             }
         }
         return this
@@ -1309,16 +1373,18 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
         sourceBuilder.query(this.toQuery())
 
         // 分页
-        if (this.limit > 0) {
-            sourceBuilder.from(this.offset)
+        if (this.limit > 0)
             sourceBuilder.size(this.limit)
-        }
+        if(this.offset > 0)
+            sourceBuilder.from(this.offset)
 
         // 后置过滤
         if (this.postFilter != null)
             sourceBuilder.postFilter(this.postFilter)
 
-        sourceBuilder.timeout(TimeValue(60, TimeUnit.SECONDS))
+        // 请求超时
+        if(this.timeout > 0)
+            sourceBuilder.timeout(TimeValue(this.timeout, TimeUnit.SECONDS))
 
         // 排序
         for (sort in this.sorts) {
@@ -1338,14 +1404,17 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
         // SearchSourceBuilder.aggregations 属性 是 AggregatorFactories.Builder
         if(aggsStack.size > 1)
             throw EsException("No close for " + currAggs)
-        sourceBuilder.setAggregations(currAggs)
+        if(currAggs.count() > 0) // 有才设置
+            sourceBuilder.setAggregations(currAggs)
 
         // 高亮字段
-        val highlighter = SearchSourceBuilder.highlight()
-        for (f in this.highlightFields) {
-            highlighter.field(f)
+        if(highlightFields.isNotEmpty()) {
+            val highlighter = SearchSourceBuilder.highlight()
+            for (f in this.highlightFields) {
+                highlighter.field(f)
+            }
+            sourceBuilder.highlighter(highlighter)
         }
-        sourceBuilder.highlighter(highlighter)
 
         // 字段脚本
         for ((field, script) in fieldScripts) {
@@ -1368,11 +1437,27 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
     }
 
     /**
+     * 从model类中注解获得并设置index/type
+     */
+    protected fun initIndexTypeFromClass(clazz: Class<*>){
+        if(indexInited)
+            return
+
+        val adoc = clazz.kotlin.esDoc // @EsDoc 注解
+        if(adoc == null)
+            return
+
+        index = adoc.index
+        type = adoc.type
+    }
+
+    /**
      * 搜索文档
      * @param clazz
      * @return
      */
     fun <T> searchDocs(clazz: Class<T>): Pair<List<T>, Long> {
+        initIndexTypeFromClass(clazz)
         return esmgr.searchDocs(index, type, this, clazz)
     }
 
@@ -1393,6 +1478,7 @@ class ESQueryBuilder(protected val esmgr: EsManager = EsManager.instance()) {
      */
     @JvmOverloads
     fun <T> scrollDocs(clazz: Class<T>, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): EsManager.EsScrollCollection<T> {
+        initIndexTypeFromClass(clazz)
         return esmgr.scrollDocs(index, type, this, clazz, pageSize, scrollTimeInMillis)
     }
 
