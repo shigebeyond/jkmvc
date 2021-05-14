@@ -199,7 +199,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
     protected fun getClosetParentAgg(predicate: (AggregationBuilder) -> Boolean): AggregationBuilder? {
         travelParentAggs{ parentAgg ->
             if(predicate(parentAgg))
-                return parentAgg // 找到直接return getClosetParentAgg()
+                return@getClosetParentAgg parentAgg // 找到直接return getClosetParentAgg()
 
             // 没找到继续找
             true
@@ -216,6 +216,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
         if(aggsStack.size < 2)
             throw IllegalStateException("Cannot find parent aggregation, because `aggsStack` only has 1 aggregation group")
 
+        // 逐层往上遍历父聚合
         val reverseIndx = (aggsStack.size - 2).downTo(0)
         for (i in reverseIndx){
             val parentAggs = aggsStack[i].first // AggregatorFactories.Builder
@@ -1299,35 +1300,37 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      *
      */
     protected fun aggOrderBy(agg: AbstractAggregationBuilder<*>, asc: Boolean) {
-        // 能挂排序的父聚合
-        val orderTargetAgg = getClosetParentAgg {
-            it is TermsAggregationBuilder
-                    || it is DateHistogramAggregationBuilder
-                    || it is HistogramAggregationBuilder
-        }
-
-        // 嵌套字段: 添加嵌套路径
-        // 字段
+        // 嵌套字段的全路径 = 父路径 + 本字段名
         var path = agg.getName()
-        // 收集父路径
-        travelParentAggs{ parentAgg ->
-            // 只找嵌套父聚合
-            if (parentAgg is NestedAggregationBuilder) {
+        
+        // 逐层往上找 能挂排序的父聚合, 随便收集全路径
+        val orderHoldingAgg = getClosetParentAgg { parentAgg ->
+            // 1 能挂排序的父聚合
+            // Only single-bucket or metrics aggregation(TermsAggregationBuilder/DateHistogramAggregationBuilder/HistogramAggregationBuilder) can hold order
+            val orderHolding = (parentAgg is TermsAggregationBuilder
+                    || parentAgg is DateHistogramAggregationBuilder
+                    || parentAgg is HistogramAggregationBuilder)
+
+            // 2 对中间的嵌套父聚合, 要收集其路径
+            if (parentAgg is NestedAggregationBuilder)
                 // 全路径 = 父路径 + 本字段名
                 path = parentAgg.path() + '>' + path
-                true
-            }else
-                false
+            
+            orderHolding
         }
 
+        // 预警错误: Invalid aggregation order path [xxx]. Buckets can only be sorted on a sub-aggregator path that is built out of zero or more single-bucket aggregations within the path and a final single-bucket or a metrics aggregation at the path end.
+        if(orderHoldingAgg == null)
+            throw EsException("Cannot find single-bucket or metrics aggregation(TermsAggregationBuilder/DateHistogramAggregationBuilder/HistogramAggregationBuilder) to hold order [" + agg.getName() + "," + (if(asc) "ASC" else "DESC") + "]")
+
         // 挂排序字段
-        when (orderTargetAgg) {
+        when (orderHoldingAgg) {
             is TermsAggregationBuilder ->
-                orderTargetAgg.order(Terms.Order.aggregation(path, asc))
+                orderHoldingAgg.order(Terms.Order.aggregation(path, asc))
             is DateHistogramAggregationBuilder ->
-                orderTargetAgg.order(Histogram.Order.aggregation(path, asc))
+                orderHoldingAgg.order(Histogram.Order.aggregation(path, asc))
             is HistogramAggregationBuilder ->
-                orderTargetAgg.order(Histogram.Order.aggregation(path, asc))
+                orderHoldingAgg.order(Histogram.Order.aggregation(path, asc))
         }
     }
 
