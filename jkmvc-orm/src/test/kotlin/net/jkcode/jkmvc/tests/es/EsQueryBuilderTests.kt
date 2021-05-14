@@ -114,7 +114,7 @@ class EsQueryBuilderTests {
         e.cargoId = i.toLong() + 1
         e.driverUserName = arrayOf("张三", "李四", "王五", "赵六", "钱七")[i]
         e.loadAddress = arrayOf("南京市玄武区", "南京市秦淮区", "南京市六合区", "南京市建邺区", "南京市鼓楼区")[i]
-        e.searchable = randomBoolean()
+        e.searchable = if(e.driverUserName == "张三") true else randomBoolean()
         e.companyId = cid + i * 10
         return e
     }
@@ -132,7 +132,8 @@ curl 'localhost:9200/recent_order_index/_doc/_search?pretty=true'  -H "Content-T
                 .must("driverUserName", "=", "张三")
                 .select("cargoId", "driverUserName", "loadAddress", "companyId")
                 .orderByField("id")
-                .limit(10, 30)
+                //.limit(10, 30) //
+                .limit(10)
 
 
         val (list, size) = query.searchDocs(RecentOrder::class.java)
@@ -154,7 +155,7 @@ curl 'localhost:9200/recent_order_index/_doc/_search?pretty=true'  -H "Content-T
         searchSource.query(queryBuilder)
         searchSource.fetchSource(arrayOf("cargoId", "driverUserName", "loadAddress", "companyId"), arrayOfNulls(0))
         searchSource.sort("id", SortOrder.ASC)
-        searchSource.from(30)
+        //searchSource.from(30)
         searchSource.size(10)
 
         println(searchSource)

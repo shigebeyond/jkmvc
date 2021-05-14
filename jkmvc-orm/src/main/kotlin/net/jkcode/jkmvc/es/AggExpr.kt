@@ -62,11 +62,12 @@ class AggExpr(
 
         if (alias == null) {
             alias = field
-            if(alias!!.contains('.'))
-                alias = alias!!.replace('.', '_')
             // terms/nested 的别名还是字段名, 但其他的需要加上函数名前缀
-            if(func != "terms" && func != "nested")
+            if(func != "terms" && func != "nested") {
+                if(alias!!.contains('.'))
+                    alias = alias!!.replace('.', '_')
                 alias = func + '_' + alias
+            }
         }
     }
 

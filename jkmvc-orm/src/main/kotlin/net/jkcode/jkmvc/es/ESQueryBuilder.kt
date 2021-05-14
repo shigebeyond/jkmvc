@@ -20,13 +20,11 @@ import org.elasticsearch.search.aggregations.AggregatorFactories
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder
 import org.elasticsearch.search.aggregations.bucket.histogram.Histogram
 import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder
+import org.elasticsearch.search.aggregations.bucket.nested.NestedAggregationBuilder
 import org.elasticsearch.search.aggregations.bucket.terms.Terms
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder
 import org.elasticsearch.search.builder.SearchSourceBuilder
-import org.elasticsearch.search.sort.ScriptSortBuilder
-import org.elasticsearch.search.sort.SortBuilder
-import org.elasticsearch.search.sort.SortBuilders
-import org.elasticsearch.search.sort.SortOrder
+import org.elasticsearch.search.sort.*
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -114,10 +112,16 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
         }
 
     /**
+     * 是否有设置BoolQueryBuilder
+     */
+    protected var hasQuery = false
+
+    /**
      * Current query bool filter
      */
     protected val filter: MutableList<QueryBuilder>
         get() {
+            hasQuery = true
             return currQuery.filter()
         }
 
@@ -126,6 +130,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      */
     protected val must: MutableList<QueryBuilder>
         get() {
+            hasQuery = true
             return currQuery.must()
         }
 
@@ -134,6 +139,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      */
     protected val mustNot: MutableList<QueryBuilder>
         get() {
+            hasQuery = true
             return currQuery.mustNot()
         }
 
@@ -142,6 +148,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      */
     protected val should: MutableList<QueryBuilder>
         get() {
+            hasQuery = true
             return currQuery.should()
         }
 
@@ -186,10 +193,26 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
 
     /**
      * 找到满足条件的最近父聚合
-     * @param predicate 条件
+     * @param predicate 匹配条件
      * @return
      */
     protected fun getClosetParentAgg(predicate: (AggregationBuilder) -> Boolean): AggregationBuilder? {
+        travelParentAggs{ parentAgg ->
+            if(predicate(parentAgg))
+                return parentAgg // 找到直接return getClosetParentAgg()
+
+            // 没找到继续找
+            true
+        }
+
+        return null
+    }
+
+    /**
+     * 遍历满足条件的父聚合
+     * @param predicate 迭代条件
+     */
+    protected inline fun travelParentAggs(predicate: (AggregationBuilder) -> Boolean) {
         if(aggsStack.size < 2)
             throw IllegalStateException("Cannot find parent aggregation, because `aggsStack` only has 1 aggregation group")
 
@@ -197,10 +220,10 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
         for (i in reverseIndx){
             val parentAggs = aggsStack[i].first // AggregatorFactories.Builder
             val parentAgg = parentAggs.aggregatorFactories.last() // AggregationBuilder
-            if(predicate(parentAgg))
-                return parentAgg
+            // 不满足迭代条件则跳出
+            if(!predicate(parentAgg))
+                break
         }
-        return null
     }
 
     /**
@@ -279,8 +302,10 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
     fun clear() {
         index = ""
         type = ""
-        queryStack.clear()
-        queryStack.push(QueryBuilders.boolQuery() to null)
+        if(hasQuery) {
+            queryStack.clear()
+            queryStack.push(QueryBuilders.boolQuery() to null)
+        }
         aggsStack.clear()
         aggsStack.push(AggregatorFactories.builder() to null)
         includeFields.clear()
@@ -378,6 +403,13 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
     public fun orderByField(field: String, desc: Boolean = false): ESQueryBuilder {
         val order = if (desc) SortOrder.DESC else SortOrder.ASC
         val sort = SortBuilders.fieldSort(field).order(order)
+        // 嵌套字段: 设置嵌套路径
+        if(field.contains('.')){
+            // 获得嵌套路径
+            val path = field.substringBeforeLast('.')
+            // 设置嵌套路径
+            sort.setNestedPath(path)
+        }
         this.sorts.add(sort)
         return this;
     }
@@ -1257,22 +1289,46 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
         this.currAggs.addAggregator(agg)
 
         // 排序
-        if (asc != null) {
-            val parentAgg = getClosetParentAgg {
-                it is TermsAggregationBuilder
-                        || it is DateHistogramAggregationBuilder
-                        || it is HistogramAggregationBuilder
-            }
-            when (parentAgg) {
-                is TermsAggregationBuilder ->
-                    parentAgg.order(Terms.Order.aggregation(agg.getName(), asc))
-                is DateHistogramAggregationBuilder ->
-                    parentAgg.order(Histogram.Order.aggregation(agg.getName(), asc))
-                is HistogramAggregationBuilder ->
-                    parentAgg.order(Histogram.Order.aggregation(agg.getName(), asc))
-            }
-        }
+        if (asc != null)
+            aggOrderBy(agg, asc)
+
         return this
+    }
+
+    /**
+     *
+     */
+    protected fun aggOrderBy(agg: AbstractAggregationBuilder<*>, asc: Boolean) {
+        // 能挂排序的父聚合
+        val orderTargetAgg = getClosetParentAgg {
+            it is TermsAggregationBuilder
+                    || it is DateHistogramAggregationBuilder
+                    || it is HistogramAggregationBuilder
+        }
+
+        // 嵌套字段: 添加嵌套路径
+        // 字段
+        var path = agg.getName()
+        // 收集父路径
+        travelParentAggs{ parentAgg ->
+            // 只找嵌套父聚合
+            if (parentAgg is NestedAggregationBuilder) {
+                // 全路径 = 父路径 + 本字段名
+                path = parentAgg.path() + '>' + path
+                true
+            }else
+                false
+        }
+
+        // 挂排序字段
+        when (orderTargetAgg) {
+            is TermsAggregationBuilder ->
+                orderTargetAgg.order(Terms.Order.aggregation(path, asc))
+            is DateHistogramAggregationBuilder ->
+                orderTargetAgg.order(Histogram.Order.aggregation(path, asc))
+            is HistogramAggregationBuilder ->
+                orderTargetAgg.order(Histogram.Order.aggregation(path, asc))
+        }
     }
 
     /**
@@ -1370,7 +1426,8 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
         val sourceBuilder = SearchSourceBuilder()
 
         // 前置过滤
-        sourceBuilder.query(this.toQuery())
+        if(hasQuery)
+            sourceBuilder.query(this.toQuery())
 
         // 分页
         if (this.limit > 0)

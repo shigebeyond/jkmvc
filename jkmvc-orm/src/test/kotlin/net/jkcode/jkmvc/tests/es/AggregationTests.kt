@@ -144,12 +144,18 @@ class AggregationTests {
                     aggBy("count(position)") // 别名是count_position
                     aggBy("max(age)") // 别名是max_age
                 }
-        println(query.toSearchSource(false))
+        //println(query.toSearchSource(false))
+
+        val result = query.searchDocs()
+
+        // 每个队伍 -- select count(1), count(position) as count_position, max(age) as max_age, team from player_index group by team;
+        val teamRows = result.aggregations.flattenAggRows("team")
+        println("统计每个队伍:" + teamRows)
     }
     @Test
     fun testNative0(){
         val teamAgg = AggregationBuilders.terms("team ").field("team")
-        val posAgg = AggregationBuilders.terms("pos_count").field("position")
+        val posAgg = AggregationBuilders.count("count_position").field("position")
         val ageAgg = AggregationBuilders.max("max_age").field("age")
         nativebuilder.aggregation(teamAgg.subAggregation(posAgg).subAggregation(ageAgg))
         println(nativebuilder.toString())

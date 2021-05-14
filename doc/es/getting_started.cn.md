@@ -354,6 +354,7 @@ demo: 按照队伍team进行分组(桶)
 ```
 @Test
 public void testAgg(){
+    // 构建聚合查询
     val query = ESQueryBuilder()
         .index(index)
         .type(type)
@@ -361,15 +362,78 @@ public void testAgg(){
             aggBy("count(position)") // 别名是count_position
             aggBy("max(age)") // 别名是max_age
         }
+
+    // 执行查询
     val result = query.searchDocs()
 
+    // 转换聚合结果
     // 每个队伍 -- select count(1), count(position) as count_position, max(age) as max_age, team from player_index group by team;
-    val teamRows = result.aggregations.flattenAggRows("team")
+    val teamRows = result.aggregations.flattenAggRows("team") // 将树型的聚合结果进行扁平化, 转为多行的Map, 每个Map的key是统计字段名, value是统计字段值
     println("统计每个队伍:" + teamRows)
 }
 ```
 
-显示的结果：
+而使用原生Java High Level REST Client接口方式
+```
+// 构建聚合查询
+val teamAgg = AggregationBuilders.terms("team ").field("team")
+val posAgg = AggregationBuilders.count("count_position").field("position")
+val ageAgg = AggregationBuilders.max("max_age").field("age")
+
+SearchSourceBuilder searchSource = new SearchSourceBuilder();
+searchSource.aggregation(teamAgg.subAggregation(posAgg).subAggregation(ageAgg))
+
+// 执行查询
+......
+```
+
+生成的es搜索DSL是一样的
+```
+{
+  "aggregations" : {
+    "team " : {
+      "terms" : {
+        "field" : "team",
+        "size" : 10,
+        "min_doc_count" : 1,
+        "shard_min_doc_count" : 0,
+        "show_term_doc_count_error" : false,
+        "order" : [
+          {
+            "_count" : "desc"
+          },
+          {
+            "_term" : "asc"
+          }
+        ]
+      },
+      "aggregations" : {
+        "count_position" : {
+          "value_count" : {
+            "field" : "position"
+          }
+        },
+        "max_age" : {
+          "max" : {
+            "field" : "age"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+方法 `net.jkcode.jkmvc.es._JestKt.flattenAggRows()` 将树型的聚合结果进行扁平化, 转为多行的Map, 每个Map的key是统计字段名, value是统计字段值;
+如上面代码的结果输出如下:
+
+```
+统计每个队伍:[{max_age=28.0, count_position=4, count=4, team=湖人},
+             {max_age=9.0, count_position=1, count=1, team=骑士}]
+```
+
+由此可见, 输出为多行的Map, Map的key是聚合字段名[team, count_position, max_age];
+这种将树型聚合结果进行扁平化, 转为类似于select sql查询结果, 不用逐层去解析聚合结果, 方便开发者像往常一样开发, 简单易理解. 
 
 ### 2. 复杂聚合
 
@@ -430,3 +494,4 @@ fun testComplexAgg(){
     println("统计每个队伍+职位:" + teamPositionRows)
 }
 ```
+

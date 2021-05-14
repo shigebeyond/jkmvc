@@ -85,7 +85,8 @@ public fun handleSingleValueAgg(bucket: Bucket, row: MutableMap<String, Any>){
 }
 
 /**
- * 扁平化聚合结果为多行
+ * 将树型的聚合结果进行扁平化, 转为多行的Map, 每个Map的key是统计字段名, value是统计字段值
+ *   类似于select sql查询结果
  * @param path 前面几列(除了最后一列)的路径, 用逗号分割
  * @param aggValueCollector 收集最后一列的聚合对象的值, 参数: 1 聚合对象 2 结果行对象
  * @return
