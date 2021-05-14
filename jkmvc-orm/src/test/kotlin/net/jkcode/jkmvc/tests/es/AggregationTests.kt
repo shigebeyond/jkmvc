@@ -13,6 +13,7 @@ import java.util.ArrayList
 
 /**
  * 聚合例子参考 https://www.cnblogs.com/xionggeclub/p/7975982.html
+ * 如果你想过滤后才聚合, 请先使用 filter/must/mustNot/should 等来添加过滤条件
  */
 class AggregationTests {
 
@@ -269,7 +270,7 @@ class AggregationTests {
     @Test
     fun testNative6(){
         // 每个队伍 -- select count(position), sum(salary), sum(games.score), team from player_index group by team;
-        val teamAgg = AggregationBuilders.terms("team").order(Terms.Order.aggregation("sum_games_score", false))
+        val teamAgg = AggregationBuilders.terms("team").order(Terms.Order.aggregation("games>sum_games_score", false))
         val cardinalityPositionAgg = AggregationBuilders.cardinality("cardinality_position ").field("position");
         val sumSalaryAgg = AggregationBuilders.sum("sum_salary").field("salary");
         teamAgg.subAggregation(cardinalityPositionAgg)
@@ -287,7 +288,7 @@ class AggregationTests {
         teamAgg.subAggregation(subPositionAgg)
 
         // 每个职位 -- select avg(salary), sum(games.score), position from player_index group by position; -- sum(games.score)不能执行
-        val positionAgg = AggregationBuilders.terms("position").order(Terms.Order.aggregation("sum_games_score", false))
+        val positionAgg = AggregationBuilders.terms("position").order(Terms.Order.aggregation("games>sum_games_score", false))
         val avgSalaryAgg = AggregationBuilders.avg("avg_salary").field("salary");
         positionAgg.subAggregation(avgSalaryAgg)
         // 子文档
@@ -312,6 +313,8 @@ class AggregationTests {
     @Test
     fun testMy6(){
         val query = myBuilder
+                //.filter("team", "湖人") // 过滤后才聚合
+                //.filter("team", "骑士")
                 .aggByAndWrapSubAgg("team") { // 每个队伍 -- select count(position), sum(salary), sum(games.score), team from player_index group by team;
                     aggBy("cardinality(position)") // 每个队伍总职位数
                     aggBy("sum(salary)") // 每个队伍的总薪酬
@@ -341,7 +344,7 @@ class AggregationTests {
 //        val teamRows = result.aggregations.flattenAggRows("team")
 //        println("统计每个队伍:" + teamRows)
 
-        // 每个队伍 -- select count(position), sum(salary), sum(games.score), team from player_index group by team;
+        // 每个队伍 -- select count(position), sum(salary), sum(games.score), team from player_index group by team; -- sum(games.score)值错误, 为0, 只能自己算
         val teamRows2 = result.aggregations.flattenAggRows("team"){ bucket, row ->
             handleSingleValueAgg(bucket, row)
             val games = bucket.getAggregation("games", NestedAggregation::class.java) // 嵌套文档的聚合
@@ -349,7 +352,7 @@ class AggregationTests {
         }
         println("统计每个队伍:" + teamRows2)
 
-        // 每个职位 -- select avg(salary), sum(games.score), position from player_index group by position; -- sum(games.score)不能执行
+        // 每个职位 -- select avg(salary), sum(games.score), position from player_index group by position; -- sum(games.score)值错误, 为0, 只能自己算
         val positionRows = result.aggregations.flattenAggRows("position"){ bucket, row ->
             row["avg_salary"] = bucket.getAvgAggregation("avg_salary").avg
             val games = bucket.getAggregation("games", NestedAggregation::class.java) // 嵌套文档的聚合
@@ -357,13 +360,13 @@ class AggregationTests {
         }
         println("统计每个职位:" + positionRows)
 
-        // 每场比赛 -- select sum(games.score) from  player_index group by games.id --
+        // 每场比赛 -- select sum(games.score) from  player_index group by games.id -- 错误: Grouping isn't (yet) compatible with nested fields [games.id]]
         val gameRows = result.aggregations.getAggregation("games", NestedAggregation::class.java)
-                .flattenAggRows("games_id")
+                .flattenAggRows("games.id")
         println("统计每场比赛:" + gameRows)
 
         // 每个队伍+职位 -- select avg(age), team, position from player_index group by team, position;
-        val teamPositionRows = result.aggregations.flattenAggRows("team.position")
+        val teamPositionRows = result.aggregations.flattenAggRows("team>position")
         println("统计每个队伍+职位:" + teamPositionRows)
     }
 

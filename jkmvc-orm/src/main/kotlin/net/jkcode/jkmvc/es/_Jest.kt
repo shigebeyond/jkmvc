@@ -87,12 +87,12 @@ public fun handleSingleValueAgg(bucket: Bucket, row: MutableMap<String, Any>){
 /**
  * 将树型的聚合结果进行扁平化, 转为多行的Map, 每个Map的key是统计字段名, value是统计字段值
  *   类似于select sql查询结果
- * @param path 前面几列(除了最后一列)的路径, 用逗号分割
- * @param aggValueCollector 收集最后一列的聚合对象的值, 参数: 1 聚合对象 2 结果行对象
+ * @param path 前面几列(除了最后一列)的路径, 用>分割
+ * @param aggValueCollector 收集最后一列的聚合对象的值的lambda, 参数: 1 聚合对象 2 结果行对象; 可省, 默认收集单值聚合对象的值(详见 handleSingleValueAgg()), 其他聚合对象需手动收集
  * @return
  */
 public fun MetricAggregation.flattenAggRows(path: String, aggValueCollector: (bucket: Bucket, row: MutableMap<String, Any>) -> Unit = ::handleSingleValueAgg): ArrayList<Map<String, Any>> {
-    val names: List<String> = path.split('.')
+    val names: List<String> = path.split('>')
     val result = ArrayList<Map<String, Any>>()
     travelAggTree(this, names, 0, Stack()) { keys, agg ->
         if (names.size != keys.size)

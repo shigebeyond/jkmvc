@@ -192,7 +192,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
         }
 
     /**
-     * 找到满足条件的最近父聚合
+     * 逐层往上找到满足条件的最近父聚合
      * @param predicate 匹配条件
      * @return
      */
@@ -200,19 +200,16 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
         travelParentAggs{ parentAgg ->
             if(predicate(parentAgg))
                 return@getClosetParentAgg parentAgg // 找到直接return getClosetParentAgg()
-
-            // 没找到继续找
-            true
         }
 
         return null
     }
 
     /**
-     * 遍历满足条件的父聚合
-     * @param predicate 迭代条件
+     * 逐层往上遍历父聚合
+     * @param action 迭代操作
      */
-    protected inline fun travelParentAggs(predicate: (AggregationBuilder) -> Boolean) {
+    protected inline fun travelParentAggs(action: (AggregationBuilder) -> Unit) {
         if(aggsStack.size < 2)
             throw IllegalStateException("Cannot find parent aggregation, because `aggsStack` only has 1 aggregation group")
 
@@ -221,9 +218,8 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
         for (i in reverseIndx){
             val parentAggs = aggsStack[i].first // AggregatorFactories.Builder
             val parentAgg = parentAggs.aggregatorFactories.last() // AggregationBuilder
-            // 不满足迭代条件则跳出
-            if(!predicate(parentAgg))
-                break
+            // 迭代操作
+            action(parentAgg)
         }
     }
 

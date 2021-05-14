@@ -290,7 +290,7 @@ fun testComplexSearch() {
 }
 ```
 
-而使用原生Java High Level REST Client接口方式, 非常复杂与难看：
+而使用原生Java High Level REST Client接口方式, 非常复杂与难看, 光这么多个条件对应BoolQueryBuilder对象创建与命名与关联就够人喝一壶, 代码量近乎jkorm-es的2倍, 且代码远没有jkorm-es清晰易懂：
 
 ```
 // 构建query builder
@@ -424,7 +424,8 @@ searchSource.aggregation(teamAgg.subAggregation(posAgg).subAggregation(ageAgg))
 }
 ```
 
-方法 `net.jkcode.jkmvc.es._JestKt.flattenAggRows()` 将树型的聚合结果进行扁平化, 转为多行的Map, 每个Map的key是统计字段名, value是统计字段值;
+#### 解析聚合结果
+方法 `net.jkcode.jkmvc.es._JestKt.path: String, aggValueCollector: (bucket: Bucket, row: MutableMap<String, Any>) -> Unit = ::handleSingleValueAgg): ArrayList<Map<String, Any>>` 将树型的聚合结果进行扁平化, 转为多行的Map, 每个Map的key是统计字段名, value是统计字段值;
 如上面代码的结果输出如下:
 
 ```
@@ -435,11 +436,14 @@ searchSource.aggregation(teamAgg.subAggregation(posAgg).subAggregation(ageAgg))
 由此可见, 输出为多行的Map, Map的key是聚合字段名[team, count_position, max_age];
 这种将树型聚合结果进行扁平化, 转为类似于select sql查询结果, 不用逐层去解析聚合结果, 方便开发者像往常一样开发, 简单易理解. 
 
+限制: 只能收集单值聚合的结果, 其他聚合对象需手动收集
+
 ### 2. 复杂聚合
 
 ```
 @Test
 fun testComplexAgg(){
+    // 构建聚合查询
     val query = ESQueryBuilder()
             .index(index)
             .type(type)
@@ -464,11 +468,12 @@ fun testComplexAgg(){
                     aggBy("sum(games.score)", null, false)
                 }
             }
-    println(query.toSearchSource(false))
 
+    // 执行查询
     val result = query.searchDocs()
 
-    // 每个队伍 -- select count(position), sum(salary), sum(games.score), team from player_index group by team;
+    // 解析聚合结果
+    // 每个队伍 -- select count(position), sum(salary), sum(games.score), team from player_index group by team; -- sum(games.score)值错误, 为0, 只能自己算
     val teamRows2 = result.aggregations.flattenAggRows("team"){ bucket, row ->
         handleSingleValueAgg(bucket, row)
         val games = bucket.getAggregation("games", NestedAggregation::class.java) // 嵌套文档的聚合
@@ -476,7 +481,7 @@ fun testComplexAgg(){
     }
     println("统计每个队伍:" + teamRows2)
 
-    // 每个职位 -- select avg(salary), sum(games.score), position from player_index group by position; -- sum(games.score)不能执行
+    // 每个职位 -- select avg(salary), sum(games.score), position from player_index group by position; -- sum(games.score)值错误, 为0, 只能自己算
     val positionRows = result.aggregations.flattenAggRows("position"){ bucket, row ->
         row["avg_salary"] = bucket.getAvgAggregation("avg_salary").avg
         val games = bucket.getAggregation("games", NestedAggregation::class.java) // 嵌套文档的聚合
@@ -484,14 +489,67 @@ fun testComplexAgg(){
     }
     println("统计每个职位:" + positionRows)
 
-    // 每场比赛 -- select sum(games.score) from  player_index group by games.id --
+    // 每场比赛 -- select sum(games.score) from  player_index group by games.id -- 错误: Grouping isn't (yet) compatible with nested fields [games.id]]
     val gameRows = result.aggregations.getAggregation("games", NestedAggregation::class.java)
-            .flattenAggRows("games_id")
+            .flattenAggRows("games.id")
     println("统计每场比赛:" + gameRows)
 
     // 每个队伍+职位 -- select avg(age), team, position from player_index group by team, position;
-    val teamPositionRows = result.aggregations.flattenAggRows("team.position")
+    val teamPositionRows = result.aggregations.flattenAggRows("team>position")
     println("统计每个队伍+职位:" + teamPositionRows)
 }
 ```
 
+而使用原生Java High Level REST Client接口方式, 非常复杂与难看, 光这么多个条件对应AggregationBuilder对象创建与命名与关联就够人喝一壶, 代码量近乎jkorm-es的2倍, 且代码远没有jkorm-es清晰易懂
+
+```
+// 构建聚合查询
+// 每个队伍 -- select count(position), sum(salary), sum(games.score), team from player_index group by team;
+val teamAgg = AggregationBuilders.terms("team").order(Terms.Order.aggregation("games>sum_games_score", false))
+val cardinalityPositionAgg = AggregationBuilders.cardinality("cardinality_position ").field("position");
+val sumSalaryAgg = AggregationBuilders.sum("sum_salary").field("salary");
+teamAgg.subAggregation(cardinalityPositionAgg)
+teamAgg.subAggregation(sumSalaryAgg)
+// 子文档
+val nestedGamesAgg1 = AggregationBuilders.nested("games", "games")
+val sumScoreAgg1 = AggregationBuilders.sum("sum_games_score").field("games.score");
+nestedGamesAgg1.subAggregation(sumScoreAgg1)
+teamAgg.subAggregation(nestedGamesAgg1)
+
+// 每个队伍+职位 -- select avg(age), team, position from player_index group by team, position;
+val subPositionAgg = AggregationBuilders.terms("position")
+val avgAgeAgg = AggregationBuilders.avg("avg_age").field("age");
+subPositionAgg.subAggregation(avgAgeAgg)
+teamAgg.subAggregation(subPositionAgg)
+
+// 每个职位 -- select avg(salary), sum(games.score), position from player_index group by position; -- sum(games.score)不能执行
+val positionAgg = AggregationBuilders.terms("position").order(Terms.Order.aggregation("games>sum_games_score", false))
+val avgSalaryAgg = AggregationBuilders.avg("avg_salary").field("salary");
+positionAgg.subAggregation(avgSalaryAgg)
+// 子文档
+val nestedGamesAgg2 = AggregationBuilders.nested("games", "games")
+val sumScoreAgg2 = AggregationBuilders.sum("sum_games_score").field("games.score");
+nestedGamesAgg2.subAggregation(sumScoreAgg2)
+positionAgg.subAggregation(nestedGamesAgg2)
+
+// 每场比赛 -- select sum(games.score) from  player_index group by games.id
+val nestedGamesAgg3 = AggregationBuilders.nested("games", "games")
+val subGameIdAgg = AggregationBuilders.terms("games.id").order(Terms.Order.aggregation("sum_games_score", false))
+val sumScoreAgg3 = AggregationBuilders.sum("sum_games_score").field("games.score");
+subGameIdAgg.subAggregation(sumScoreAgg3)
+nestedGamesAgg3.subAggregation(subGameIdAgg)
+
+nativebuilder.aggregation(teamAgg);
+nativebuilder.aggregation(positionAgg);
+nativebuilder.aggregation(nestedGamesAgg3);
+
+// 执行查询
+......
+
+// 解析查询结果
+......
+```
+
+对比生成的es搜索DSL如下, 左边是jkorm-es生成代码, 右边是原生API生成代码
+![](img/es/complex-agg-compare.png)
+基本上一样, 只是 terms 聚合多了field定义, 没啥影响
