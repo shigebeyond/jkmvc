@@ -15,7 +15,7 @@ import java.util.ArrayList
  * 聚合例子参考 https://www.cnblogs.com/xionggeclub/p/7975982.html
  * 如果你想过滤后才聚合, 请先使用 filter/must/mustNot/should 等来添加过滤条件
  */
-class AggregationTests {
+class EsAggregationTests {
 
     private val index = "player_index"
 

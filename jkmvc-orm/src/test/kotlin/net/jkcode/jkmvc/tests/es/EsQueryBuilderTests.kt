@@ -119,6 +119,28 @@ class EsQueryBuilderTests {
         return e
     }
 
+    @Test
+    fun testSearchDeleteDoc() {
+        val pageSize = 5
+        val ids = ESQueryBuilder().index(index).type(type).deleteDocs(pageSize, 100000)
+        println("删除" + ids.size + "个文档: id in " + ids)
+    }
+
+    @Test
+    fun testScript() {
+        val query = ESQueryBuilder().index(index).type(type)
+                /**
+                 * http://blog.bootsphp.com/elasticsearch_use_script_fields_with_source
+                 * 保留_source字段的+返回脚本字段(script_fields)
+                 */
+                .select("*")
+                .addFieldScript("nextCargoId", "doc['cargoId'].value+params.step", mapOf("step" to 1)) // 带参数的脚本字段
+                .limit(10)
+        //println(query.toSearchSource())
+        // 由于响应的脚本字段在 fields 属性中, 而不是在 _source 中, 因此 searchDocs() 解析出来的字段并不包含脚本字段
+        println(query.searchDocs(HashMap::class.java))
+    }
+
     /*
 curl 'localhost:9200/recent_order_index/_doc/_search?pretty=true'  -H "Content-Type: application/json" -d '
 '

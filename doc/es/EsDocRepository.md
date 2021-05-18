@@ -1,5 +1,6 @@
 # EsDocRepository
-EsDocRepository 提供了针对实体类的各种基本的CRUD功能。
+EsDocRepository 实体仓储类, 提供了针对实体类的各种基本的CRUD功能。
+以下代码详细参考单元测试类`EsDocRepositoryTests`
 
 ## 1. 实例化 EsDocRepository
 

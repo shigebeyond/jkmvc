@@ -9,7 +9,7 @@ import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggr
 import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
-public class JavaAggregationTests {
+public class JavaEsAggregationTests {
 
     public static void main(String[] args) {
         // 构建聚合查询

@@ -1,217 +1,176 @@
-# jkorm-es库
-jkorm-es库是一个Elasticsearch ORM框架, 底层基于[jest](https://github.com/searchbox-io/Jest), 不但提供简单易用的ORM实体与仓库类, 还提供简单又强大的query dsl语法, 来帮助你快速编写出读写elasticsearch的代码, 简单易读, 开发便捷, 大大降低我们的开发成本.
+# ESQueryBuilder
+es查询构建器，是通过提供类sql的一系列方法，来帮助开发者快速构建原生es查询dsl.
 
-## 添加依赖
+## 6 高级查询
 
-1. gradle
-```
-compile "net.jkcode.jkmvc:jkmvc:1.9.0"
-```
+### 6.1 `Join` 语句
 
-2. maven
-```
-<dependency>
-    <groupId>net.jkcode.jkmvc</groupId>
-    <artifactId>jkmvc</artifactId>
-    <version>1.9.0</version>
-</dependency>
-```
+如果你要联查多个表，则你需要使用 `join()` 与 `on()` 方法. 
 
-## 配置es.yaml
-```yaml
-default: # es配置名, 可有多个配置
-  esUrl: http://localhost:9200 # es server地址, 多个用逗号分割
-  maxTotal: 100 # 连接池中总的最大连接数
-  maxTotalPerRoute: 100 # 每个路由(host+port)的最大连接数
+`join()` 需要2个参数
+* 表名：可以是 `String` 或 `Pair<String, String>` （包含表名+表别名）
+* 连接方式: LEFT（左连接）, RIGHT（右连接）, INNER（内连接）.
+
+`on()` 方法主要用于设置2个关联表的连接条件，与 `where()` 方法类似，但它需要3个参数; 1 左字段名 2 符号 3 右字段名. 多次调用 `on()` 方法会构建多个连接条件，条件之间用 "AND" 操作符来连接
+
+```
+// 使用`JOIN` 来查询出作者 "smith" 关联的所有文章
+query.select("authors.name", "posts.content").from("authors").join("posts").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith").findMaps();
 ```
 
-## 实体类及注解
+生成sql如下：
 
-demo
+```
+SELECT `authors`.`name`, `posts`.`content` FROM `authors` JOIN `posts` ON (`authors`.`id` = `posts`.`author_id`) WHERE `authors`.`name` = "smith"
+```
 
-```kotlin
-@EsDoc("message_index", "_doc")
-open class MessageEntity: OrmEntity() {
+如果你要使用不同的连接方式（LEFT / RIGHT / INNER），你只需要调用 `join("columName", "joinType")`，就是用第二个参数来指定连接方式：
 
-    // 代理属性读写
-    @EsId
-    public var id:Int by property() // 消息id
+```
+// 使用`LEFT JOIN` 来查询出作者 "smith" 关联的所有文章
+query.from("authors").join("posts", "LEFT").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith");
+```
 
-    public var fromUid:Int by property() // 发送人id
+生成sql如下：
 
-    public var toUid:Int by property() // 接收人id
+```
+SELECT `authors`.`name`, `posts`.`content` FROM `authors` LEFT JOIN `posts` ON (`authors`.`id` = `posts`.`author_id`) WHERE `authors`.`name` = "smith"
+```
 
-    public var created:Long by property() // 接收人id
+[!!] 如果你联查的多个表中存在同名的字段，则你在指定返回字段时，最好加上表前缀，来避免sql执行异常. 如果遇到`未明确定义的列（Ambiguous column name）`的错误时，你需要给字段加上表前缀，或者字段别名。
 
-    public var content:String by property() // 消息内容
+### 6.2 聚合函数
 
-    override fun toString(): String {
-        return "MessageEntity(" + toMap() + ")"
-    }
+SQL中提供的聚合函数可以用来统计、求和、求最值等，如 `COUNT()`, `SUM()`, `AVG()`. 他们通常是结合 `groupBy()` 来分组统计，或结合 `having()` 来过滤聚合结果
 
+```
+query.select("username", DbExpr("COUNT(`id`)", "total_posts", false)).from("posts").groupBy("username").having("total_posts", ">=", 10).findMaps()
+```
+
+生成sql如下：
+
+```
+SELECT `username`, COUNT(`id`) AS `total_posts` FROM `posts` GROUP BY `username` HAVING `total_posts` >= 10
+```
+
+### 6.3 子查询
+
+查询构建器对象可以作为很多方法的参数，来构建子查询。让我们用上面的查询，传给新的查询作为子查询：
+
+```
+// subquery
+val sub = DbQueryBuilder().select("username", DbExpr("COUNT(`id`)", "total_posts", false))
+        .from("posts").groupBy("username").having("total_posts", ">=", 10);
+
+// join subquery
+DbQueryBuilder().select("profiles.*", "posts.total_posts").from("profiles")
+.join(DbExpr(sub, "posts", false), "INNER").on("profiles.username", "=", "posts.username").findMaps()
+```
+
+生成sql如下：
+
+```
+SELECT `profiles`.*, `posts`.`total_posts` FROM `profiles` INNER JOIN
+( SELECT `username`, COUNT(`id`) AS `total_posts` FROM `posts` GROUP BY `username` HAVING `total_posts` >= 10 ) `posts`
+ON `profiles`.`username` = `posts`.`username`
+```
+
+Insert 查询也可以接入 Select 子查询
+
+```
+// subquery
+val sub = DbQueryBuilder().select("username", DbExpr("COUNT(`id`)", "total_posts", false))
+.from("posts").groupBy("username").having("total_posts", ">=", 10);
+
+// insert subquery
+DbQueryBuilder().table("post_totals").insertColumns("username", "posts").values(sub).insert()
+```
+
+This will generate the following query:
+
+```
+INSERT INTO `post_totals` (`username`, `posts`) 
+SELECT `username`, COUNT(`id`) AS `total_posts` FROM `posts` GROUP BY `username` HAVING `total_posts` >= 10 
+```
+
+### 6.4 布尔操作符与嵌套子句
+
+多个 `WHERE` 与 `HAVING` 子句是用布尔操作符（`AND`/`OR`）来连接的。无前缀或前缀为 `and` 的方法的操作符是`AND`. 前缀为 `or` 的方法的操作符是`OR`. `WHERE` 与 `HAVING` 子句可以嵌套使用，你可以使用后缀为`open` 的方法来开启一个分组，使用后缀为 `close` 的方法来关闭一个分组. 
+
+```
+query.from("user")
+    .whereOpen()
+        .where("id", "IN", arrayOf(1, 2, 3, 5))
+        .andWhereOpen()
+            .where("lastLogin", "<=", System.currentTimeMillis() / 1000)
+            .orWhere("lastLogin", "IS", null)
+        .andWhereClose()
+    .whereClose()
+    .andWhere("removed","IS", null)
+    .findMaps()
+```
+
+生成sql如下：
+
+```
+SELECT  * FROM `user` WHERE ( `id` IN (1, 2, 3, 5)  AND ( `lastLogin` <= 1511069644 OR `lastLogin` IS null )) AND `removed` IS null
+```
+
+### 6.5 数据库表达式
+
+在 `DbQueryBuilder` 的 `insert/update` 语句中，要保存的字段值总是要被转义 `Db::quote(value:Any?)`。但是有时候字段值是一个原生的表达式与函数调用，此时是不需要转义的。
+
+因此，我们需要数据库表达式 `DbExpr`，用于添加不转义的字段值，表示要保存的字段值是一个sql表达式，如 now() / column1 + 1
+
+```
+DbQueryBuilder().table("user")
+    .set("login_count", DbExpr("login_count + 1")) // 等价于 .set("login_count", "login_count + 1", true)
+    .where("id", "=", 45)
+    .update();
+```
+
+生成sql如下：
+
+```
+UPDATE `user` SET `login_count` = `login_count` + 1 WHERE `id` = 45
+```
+
+[!!] 你必须要事先保证：创建`DbExpr(input:String)` 时传递的表达式是有效并且已转义过的。
+
+## 7 例子
+
+```
+// 获得 Db 对象
+val db: Db = Db.instance()
+
+// 开启事务
+db.transaction {
+    // 插入
+    var id = DbQueryBuilder(db).table("user").insertColumns("name", "age").value("shi", 1).insert("id");
+    println("插入user表：" + id)
+
+    // 查询一条数据
+    val row = DbQueryBuilder(db).table("user").where("id", "=", id).findMap()
+    println("查询user表：" + row)
+
+    // 更新
+    var f = DbQueryBuilder(db).table("user").sets(mapOf("name" to "wang", "age" to 2)).where("id", "=", id).update();
+    println("更新user表：" + f)
+
+    // 查询多条数据
+    val rows = DbQueryBuilder(db).table("user").orderBy("id").limit(1).findMaps()
+    println("查询user表：" + rows)
+
+    // 删除
+    f = DbQueryBuilder(db).table("user").where("id", "=", id).delete();
+    println("删除user表：" + f)
 }
 ```
 
-1. 实体类, 我们继承了db orm中OrmEntity类体系, 主要是方便db orm与es orm相互调用
-
-2. 两个注解：
-
-2.1 `@EsDoc` 作用在类, 标记实体类为文档对象, 一般有3个属性
-```kotlin
-annotation class EsDoc(
-        public val index: String, // 索引名
-        public val type: String = "_doc", // 类型
-        public val esName: String = "default" // es配置名
-)
-```
-
-2.2 `@EsId` 作用在成员变量, 标记一个字段作为_id主键
-
-这2个注解是非常精简的, 仅仅是关注索引名与_id主键, 没有过多关注索引存储(如分片数/副本数)与字段元数据(字段类型/分词器)等等, 这些都是在框架之外由运维人员自行维护的, 从而达到简化代码的目的.
-
-
-## 创建索引
-
-```kotlin
-import net.jkcode.jkmvc.es.EsManager
-
-// gson还是必须用双引号
-var mapping = """{
-    '_doc':{
-        'properties':{
-            'id':{
-                'type':'long'
-            },
-            'fromUid':{
-                'type':'long'
-            },
-            'toUid':{
-                'type':'long'
-            },
-            'content':{
-                'type':'text'
-            },
-            'created':{
-                'type':'long'
-            }
-        }
-    }
-}"""
-// gson还是必须用双引号
-mapping = mapping.replace('\'', '"')
-println(mapping)
-
-val esmgr = EsManager.instance()
-var r = esmgr.createIndex(index)
-println("创建索引[$index]: " + r)
-
-r = esmgr.putMapping(index, type, mapping)
-println("设置索引[$index]映射[$type]: " + r)
-```
-
-
-## 增删改操作
-jkorm-es库通过实体仓储类`EsDocRepository`来提供了针对实体类的各种基本的CRUD功能.
-以下代码详细参考单元测试类`EsDocRepositoryTests`
-
-### 1. 实例化 EsDocRepository
-
-```kotlin
-import net.jkcode.jkmvc.es.EsDocRepository
-
-val rep = EsDocRepository.instance(MessageEntity::class.java)
-```
-
-### 2. 单个保存(id存在就是修改, 否则就是插入)
-```kotlin
-@Test
-fun testSave() {
-    val e = buildEntity(1)
-    val r = rep.save(e)
-    println("插入单个文档: " + r)
-}
-```
-
-
-### 3. 批量保存
-```kotlin
-@Test
-fun testSaveAll() {
-    val items = ArrayList<MessageEntity>()
-
-    for (i in 1..10) {
-        val e = buildEntity(i)
-        items.add(e)
-    }
-
-    rep.saveAll(items)
-    println("批量插入")
-}
-```
-
-### 4. 增量更新
-```kotlin
-@Test
-fun testUpdate() {
-    val e = rep.findById("1")!!
-    e.fromUid = randomInt(10)
-    e.toUid = randomInt(10)
-    val r = rep.update(e)
-    println("更新文档: " + r)
-}
-```
-
-### 5. 单个删除
-```kotlin
-@Test
-fun testDeleteById() {
-    rep.deleteById("1")
-    println("删除id=1文档")
-}
-```
-
-### 6. 批量删除
-```kotlin
-@Test
-fun testDeleteAll() {
-    val pageSize = 5
-    val query = rep.queryBuilder()
-            .must("fromUid", ">=", 0)
-    //val ids = rep.deleteAll(query)
-    val ids = query.deleteDocs(pageSize)
-    println("删除" + ids.size + "个文档: id in " + ids)
-}
-```
-
-### 7. 根据id查询单个
-```kotlin
-@Test
-fun testFindById() {
-    val id = "1"
-    val entity = rep.findById(id)
-    println("查单个：" + entity.toString())
-}
-```
-
-### 8. 查询全部, 并按照id排序
-```kotlin
-@Test
-fun testFindAll() {
-    val query = rep.queryBuilder()
-            //.must("fromUid", ">=", 0)
-            .orderByField("id") // 排序
-            .limit(10) // 分页
-    val (list, size) = rep.findAll(query)
-    println("查到 $size 个文档")
-    for (item in list)
-        println(item)
-}
-```
-
-## 高级查询
+# 高级查询
 以下代码详细参考单元测试类`EsQueryBuilderTests`
 
-### 1. 基本查询(条件+分页+排序)
+## 1. 基本查询(条件+分页+排序)
 
 ```kotlin
 @Test
@@ -256,7 +215,7 @@ searchSource.size(10);
 ![](img/es/search-compare.png)
 基本上一样, 只是select字段的顺序不同, 这是因为jkorm-es使用了HashSet(排重)来接收字段, 导致字段顺序变更
 
-### 2. 复杂查询
+## 2. 复杂查询
 非常复杂的查询, 但使用 jkorm-es 库可以做到非常简单与可读
 
 ```kotlin
@@ -368,10 +327,10 @@ searchSource.sort(sortBuilder);
 ![](img/es/complex-search-compare.png)
 基本上一样, 只是select字段的顺序不同, 这是因为jkorm-es使用了HashSet(排重)来接收字段, 导致字段顺序变更
 
-## 聚合
+# 聚合
 以下代码详细参考单元测试类`EsAggregationTests`
 
-### 1. 简单聚合
+## 1. 简单聚合
 demo: 按照队伍team进行分组(桶)
 
 ```kotlin
@@ -447,7 +406,7 @@ searchSource.aggregation(teamAgg.subAggregation(posAgg).subAggregation(ageAgg))
 }
 ```
 
-#### 解析聚合结果
+### 解析聚合结果
 方法 `net.jkcode.jkmvc.es._JestKt.path: String, aggValueCollector: (bucket: Bucket, row: MutableMap<String, Any>) -> Unit = ::handleSingleValueAgg): ArrayList<Map<String, Any>>` 将树型的聚合结果进行扁平化, 转为多行的Map, 每个Map的key是统计字段名, value是统计字段值;
 如上面代码的结果输出如下:
 
@@ -461,7 +420,7 @@ searchSource.aggregation(teamAgg.subAggregation(posAgg).subAggregation(ageAgg))
 
 限制: 只能收集单值聚合的结果, 其他聚合对象需手动收集
 
-### 2. 复杂聚合
+## 2. 复杂聚合
 
 ```kotlin
 @Test

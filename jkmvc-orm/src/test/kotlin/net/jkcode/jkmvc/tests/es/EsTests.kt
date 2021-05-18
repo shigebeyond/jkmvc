@@ -20,8 +20,8 @@ class EsTests {
 
     private val esmgr = EsManager.instance()
 
-    //private val time = "2021-04-15".toDate().time / 1000
-    private val time = 0L
+    //private val startTime = "2021-04-15".toDate().time / 1000
+    private val startTime = 0L
 
     @Test
     fun testEsId() {
@@ -91,13 +91,13 @@ class EsTests {
     @Test
     fun testAddAliases() {
         val list = Arrays.asList(index)
-        esmgr.addIndexAlias(list, "esindex_alias")
+        esmgr.addIndexAlias(list, "message_index2")
         this.testGetIndexAliases()
     }
 
     @Test
     fun testGetIndexAliases() {
-        esmgr.getIndexAliases(index)
+        println(esmgr.getIndexAliases(index))
     }
 
     @Test
@@ -116,7 +116,7 @@ class EsTests {
     fun testIndexDoc() {
         val e = buildEntity(1)
         val r = esmgr.indexDoc(index, type, e)
-        println("插入单个文档: " + r)
+        println("保存单个文档: " + r)
     }
 
     @Test
@@ -129,7 +129,7 @@ class EsTests {
         }
 
         esmgr.bulkIndexDocs(index, type, items)
-        println("批量插入")
+        println("批量保存")
     }
 
     private fun buildEntity(i: Int): MessageEntity {
@@ -138,10 +138,13 @@ class EsTests {
         e.fromUid = randomInt(10)
         e.toUid = randomInt(10)
         e.content = if(i % 2 == 0) "welcome $i" else "Goodbye $i"
-        e.created = time + i * 60
+        e.created = startTime + i * 60
         return e
     }
 
+    /**
+     * 其实也是部分更新, 只是我先读所有字段, 然后再修改某两个字段, 等同于全部字段更新
+     */
     @Test
     fun testUpdateDoc() {
         val e = esmgr.getDoc(index, type, "1", MessageEntity::class.java)!!
@@ -178,7 +181,7 @@ curl 'localhost:9200/message_index/_doc/_search?pretty=true'  -H "Content-Type: 
      */
     @Test
     fun testSearch() {
-        val ts = time + 120 // 2分钟前
+        val ts = startTime + 120 // 2分钟
         println("timestamp: $ts")
         val query = ESQueryBuilder()
 //                .filter("fromUid", ">=", 7)
@@ -235,17 +238,9 @@ curl 'localhost:9200/message_index/_doc/_search?pretty=true'  -H "Content-Type: 
     @Test
     fun testSearchDeleteDoc() {
         val pageSize = 5
-        val ids = ESQueryBuilder().index(index).type(type).deleteDocs(pageSize, 100000)
+        val query = ESQueryBuilder()
+        val ids = esmgr.deleteDocsByQuery2(index, type, query, pageSize, 100000)
         println("删除" + ids.size + "个文档: id in " + ids)
-    }
-
-    @Test
-    fun testScript() {
-        val query = ESQueryBuilder().index(index).type(type)
-                .addFieldScript("fromUid", "doc['fromUid']+1")
-                .filter("fromUid", ">=", 1)
-                .limit(10)
-        println(query.toSearchSource())
     }
 
     @Test

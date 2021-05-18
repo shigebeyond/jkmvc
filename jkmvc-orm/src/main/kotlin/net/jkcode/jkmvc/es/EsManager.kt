@@ -347,6 +347,20 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
     }
 
     /**
+     * 获取索引对应的别名
+     *
+     * @param index
+     * @return
+     */
+    fun getIndexAliases(index: String): JestResult? {
+        val result = tryExecute {
+            GetAliases.Builder().addIndex(index).build()
+        }
+
+        return result
+    }
+
+    /**
      * 索引优化
      */
     fun optimizeIndex(): CompletableFuture<JestResult> {
@@ -784,18 +798,6 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
         }
 
         handleBulkResult(result)
-    }
-
-    /**
-     * 获取索引对应的别名
-     *
-     * @param index
-     * @return
-     */
-    fun getIndexAliases(index: String): Boolean {
-        return tryExecuteReturnSucceeded {
-            GetAliases.Builder().addIndex(index).build()
-        }
     }
 
     /**
