@@ -1,7 +1,24 @@
 # jkorm-es库
+jkorm-es库是一个Elasticsearch ORM框架, 底层基于[jest](https://github.com/searchbox-io/Jest), 不但提供简单易用的ORM实体与仓库类, 还提供简单又强大的query dsl语法, 来帮助你快速编写出读写elasticsearch的代码, 简单易读, 开发便捷, 大大降低我们的开发成本.
+
+## 添加依赖
+
+1. gradle
+```
+compile "net.jkcode.jkmvc:jkmvc:1.9.0"
+```
+
+2. maven
+```
+<dependency>
+    <groupId>net.jkcode.jkmvc</groupId>
+    <artifactId>jkmvc</artifactId>
+    <version>1.9.0</version>
+</dependency>
+```
 
 ## 配置es.yaml
-```
+```yaml
 default: # es配置名, 可有多个配置
   esUrl: http://localhost:9200 # es server地址, 多个用逗号分割
   maxTotal: 100 # 连接池中总的最大连接数
@@ -12,7 +29,7 @@ default: # es配置名, 可有多个配置
 
 demo
 
-```
+```kotlin
 @EsDoc("message_index", "_doc")
 open class MessageEntity: OrmEntity() {
 
@@ -39,8 +56,8 @@ open class MessageEntity: OrmEntity() {
 
 2. 两个注解：
 
-2.1 `@EsDoc` 作用在类，标记实体类为文档对象，一般有3个属性
-```
+2.1 `@EsDoc` 作用在类, 标记实体类为文档对象, 一般有3个属性
+```kotlin
 annotation class EsDoc(
         public val index: String, // 索引名
         public val type: String = "_doc", // 类型
@@ -48,14 +65,14 @@ annotation class EsDoc(
 )
 ```
 
-2.2 `@EsId` 作用在成员变量，标记一个字段作为_id主键
+2.2 `@EsId` 作用在成员变量, 标记一个字段作为_id主键
 
 这2个注解是非常精简的, 仅仅是关注索引名与_id主键, 没有过多关注索引存储(如分片数/副本数)与字段元数据(字段类型/分词器)等等, 这些都是在框架之外由运维人员自行维护的, 从而达到简化代码的目的.
 
 
 ## 创建索引
 
-```
+```kotlin
 import net.jkcode.jkmvc.es.EsManager
 
 // gson还是必须用双引号
@@ -94,18 +111,18 @@ println("设置索引[$index]映射[$type]: " + r)
 
 
 ## 增删改操作
-jkorm-es库 提供了各种基本的CRUD功能。
+jkorm-es库通过`EsDocRepository`提供了针对实体类的各种基本的CRUD功能.
 
 ### 1. 实例化 EsDocRepository
 
-```
+```kotlin
 import net.jkcode.jkmvc.es.EsDocRepository
 
 val rep = EsDocRepository.instance(MessageEntity::class.java)
 ```
 
-### 2. 单个保存(id存在就是修改，否则就是插入)
-```
+### 2. 单个保存(id存在就是修改, 否则就是插入)
+```kotlin
 @Test
 fun testSave() {
     val e = buildEntity(1)
@@ -116,7 +133,7 @@ fun testSave() {
 
 
 ### 3. 批量保存
-```
+```kotlin
 @Test
 fun testSaveAll() {
     val items = ArrayList<MessageEntity>()
@@ -132,7 +149,7 @@ fun testSaveAll() {
 ```
 
 ### 4. 增量更新
-```
+```kotlin
 @Test
 fun testUpdate() {
     val e = rep.findById("1")!!
@@ -144,7 +161,7 @@ fun testUpdate() {
 ```
 
 ### 5. 单个删除
-```
+```kotlin
 @Test
 fun testDeleteById() {
     rep.deleteById("1")
@@ -153,7 +170,7 @@ fun testDeleteById() {
 ```
 
 ### 6. 批量删除
-```
+```kotlin
 @Test
 fun testDeleteAll() {
     val pageSize = 5
@@ -166,7 +183,7 @@ fun testDeleteAll() {
 ```
 
 ### 7. 根据id查询单个
-```
+```kotlin
 @Test
 fun testFindById() {
     val id = "1"
@@ -175,13 +192,14 @@ fun testFindById() {
 }
 ```
 
-### 8. 查询全部，并按照id排序
-```
+### 8. 查询全部, 并按照id排序
+```kotlin
 @Test
 fun testFindAll() {
     val query = rep.queryBuilder()
             //.must("fromUid", ">=", 0)
-            .orderByField("id")
+            .orderByField("id") // 排序
+            .limit(10) // 分页
     val (list, size) = rep.findAll(query)
     println("查到 $size 个文档")
     for (item in list)
@@ -192,7 +210,7 @@ fun testFindAll() {
 ## 高级查询
 ### 1. 基本查询(条件+分页+排序)
 
-```
+```kotlin
 @Test
 fun testSearch() {
     // 构建query builder
@@ -212,7 +230,7 @@ fun testSearch() {
 ```
 
 而使用原生Java High Level REST Client接口方式：
-```
+```java
 // 构建query builder
 final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 final TermsQueryBuilder searchable = QueryBuilders.termQuery("searchable", true);
@@ -238,7 +256,7 @@ searchSource.size(10);
 ### 2. 复杂查询
 非常复杂的查询, 但使用 jkorm-es 库可以做到非常简单与可读
 
-```
+```kotlin
 /**
  * 复杂查询
  *  对比 https://mp.weixin.qq.com/s/GFRiiQEk-JLpPnCi_WrRqw
@@ -292,7 +310,7 @@ fun testComplexSearch() {
 
 而使用原生Java High Level REST Client接口方式, 非常复杂与难看, 光这么多个条件对应BoolQueryBuilder对象创建与命名与关联就够人喝一壶, 代码量近乎jkorm-es的2倍, 且代码远没有jkorm-es清晰易懂：
 
-```
+```java
 // 构建query builder
 final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 final TermsQueryBuilder startCityId = QueryBuilders.termsQuery("startCityId", Lists.newArrayList(320705L, 931125L));
@@ -351,7 +369,7 @@ searchSource.sort(sortBuilder);
 ### 1. 简单聚合
 demo: 按照队伍team进行分组(桶)
 
-```
+```kotlin
 @Test
 public void testAgg(){
     // 构建聚合查询
@@ -374,7 +392,7 @@ public void testAgg(){
 ```
 
 而使用原生Java High Level REST Client接口方式
-```
+```java
 // 构建聚合查询
 val teamAgg = AggregationBuilders.terms("team ").field("team")
 val posAgg = AggregationBuilders.count("count_position").field("position")
@@ -388,7 +406,7 @@ searchSource.aggregation(teamAgg.subAggregation(posAgg).subAggregation(ageAgg))
 ```
 
 生成的es搜索DSL是一样的
-```
+```json
 {
   "aggregations" : {
     "team " : {
@@ -440,7 +458,7 @@ searchSource.aggregation(teamAgg.subAggregation(posAgg).subAggregation(ageAgg))
 
 ### 2. 复杂聚合
 
-```
+```kotlin
 @Test
 fun testComplexAgg(){
     // 构建聚合查询
@@ -502,43 +520,44 @@ fun testComplexAgg(){
 
 而使用原生Java High Level REST Client接口方式, 非常复杂与难看, 光这么多个条件对应AggregationBuilder对象创建与命名与关联就够人喝一壶, 代码量近乎jkorm-es的2倍, 且代码远没有jkorm-es清晰易懂
 
-```
+```java
 // 构建聚合查询
 // 每个队伍 -- select count(position), sum(salary), sum(games.score), team from player_index group by team;
-val teamAgg = AggregationBuilders.terms("team").order(Terms.Order.aggregation("games>sum_games_score", false))
-val cardinalityPositionAgg = AggregationBuilders.cardinality("cardinality_position ").field("position");
-val sumSalaryAgg = AggregationBuilders.sum("sum_salary").field("salary");
-teamAgg.subAggregation(cardinalityPositionAgg)
-teamAgg.subAggregation(sumSalaryAgg)
+TermsAggregationBuilder teamAgg = AggregationBuilders.terms("team").order(Terms.Order.aggregation("games>sum_games_score", false));
+CardinalityAggregationBuilder cardinalityPositionAgg = AggregationBuilders.cardinality("cardinality_position ").field("position");
+SumAggregationBuilder sumSalaryAgg = AggregationBuilders.sum("sum_salary").field("salary");
+teamAgg.subAggregation(cardinalityPositionAgg);
+teamAgg.subAggregation(sumSalaryAgg);
 // 子文档
-val nestedGamesAgg1 = AggregationBuilders.nested("games", "games")
-val sumScoreAgg1 = AggregationBuilders.sum("sum_games_score").field("games.score");
-nestedGamesAgg1.subAggregation(sumScoreAgg1)
-teamAgg.subAggregation(nestedGamesAgg1)
+NestedAggregationBuilder nestedGamesAgg1 = AggregationBuilders.nested("games", "games");
+SumAggregationBuilder sumScoreAgg1 = AggregationBuilders.sum("sum_games_score").field("games.score");
+nestedGamesAgg1.subAggregation(sumScoreAgg1);
+teamAgg.subAggregation(nestedGamesAgg1);
 
 // 每个队伍+职位 -- select avg(age), team, position from player_index group by team, position;
-val subPositionAgg = AggregationBuilders.terms("position")
-val avgAgeAgg = AggregationBuilders.avg("avg_age").field("age");
-subPositionAgg.subAggregation(avgAgeAgg)
-teamAgg.subAggregation(subPositionAgg)
+TermsAggregationBuilder subPositionAgg = AggregationBuilders.terms("position");
+AvgAggregationBuilder avgAgeAgg = AggregationBuilders.avg("avg_age").field("age");
+subPositionAgg.subAggregation(avgAgeAgg);
+teamAgg.subAggregation(subPositionAgg);
 
 // 每个职位 -- select avg(salary), sum(games.score), position from player_index group by position; -- sum(games.score)不能执行
-val positionAgg = AggregationBuilders.terms("position").order(Terms.Order.aggregation("games>sum_games_score", false))
-val avgSalaryAgg = AggregationBuilders.avg("avg_salary").field("salary");
-positionAgg.subAggregation(avgSalaryAgg)
+TermsAggregationBuilder positionAgg = AggregationBuilders.terms("position").order(Terms.Order.aggregation("games>sum_games_score", false));
+AvgAggregationBuilder avgSalaryAgg = AggregationBuilders.avg("avg_salary").field("salary");
+positionAgg.subAggregation(avgSalaryAgg);
 // 子文档
-val nestedGamesAgg2 = AggregationBuilders.nested("games", "games")
-val sumScoreAgg2 = AggregationBuilders.sum("sum_games_score").field("games.score");
-nestedGamesAgg2.subAggregation(sumScoreAgg2)
-positionAgg.subAggregation(nestedGamesAgg2)
+NestedAggregationBuilder nestedGamesAgg2 = AggregationBuilders.nested("games", "games");
+SumAggregationBuilder sumScoreAgg2 = AggregationBuilders.sum("sum_games_score").field("games.score");
+nestedGamesAgg2.subAggregation(sumScoreAgg2);
+positionAgg.subAggregation(nestedGamesAgg2);
 
 // 每场比赛 -- select sum(games.score) from  player_index group by games.id
-val nestedGamesAgg3 = AggregationBuilders.nested("games", "games")
-val subGameIdAgg = AggregationBuilders.terms("games.id").order(Terms.Order.aggregation("sum_games_score", false))
-val sumScoreAgg3 = AggregationBuilders.sum("sum_games_score").field("games.score");
-subGameIdAgg.subAggregation(sumScoreAgg3)
-nestedGamesAgg3.subAggregation(subGameIdAgg)
+NestedAggregationBuilder nestedGamesAgg3 = AggregationBuilders.nested("games", "games");
+TermsAggregationBuilder subGameIdAgg = AggregationBuilders.terms("games.id").order(Terms.Order.aggregation("sum_games_score", false));
+SumAggregationBuilder sumScoreAgg3 = AggregationBuilders.sum("sum_games_score").field("games.score");
+subGameIdAgg.subAggregation(sumScoreAgg3);
+nestedGamesAgg3.subAggregation(subGameIdAgg);
 
+SearchSourceBuilder nativebuilder = new SearchSourceBuilder();
 nativebuilder.aggregation(teamAgg);
 nativebuilder.aggregation(positionAgg);
 nativebuilder.aggregation(nestedGamesAgg3);

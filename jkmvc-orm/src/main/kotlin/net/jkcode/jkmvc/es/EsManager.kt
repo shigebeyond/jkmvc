@@ -867,7 +867,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * 搜索文档, 并返回有游标的结果集合
      * @param index
      * @param type
-     * @param queryBuilder
+     * @param queryBuilder 查询对象, 分页无效
      * @param pageSize
      * @param scrollTimeInMillis 游标的有效时间, 如果报错`Elasticsearch No search context found for id`, 则加大
      * @param resultMapper 结果转换器, 会将每一页的JestResult(兼容SearchResult/ScrollSearchResult), 转为T对象集合
@@ -885,7 +885,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * 搜索文档, 并返回有游标的结果集合
      * @param index
      * @param type
-     * @param queryBuilder
+     * @param queryBuilder 查询对象, 分页无效
      * @param clazz bean类, 可以是HashMap, 但字段类型不可控, 如long主键值居然被查出为double
      * @param pageSize
      * @param scrollTimeInMillis 游标的有效时间, 如果报错`Elasticsearch No search context found for id`, 则加大
@@ -902,7 +902,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * 开始搜索文档, 并返回有游标的结果集合
      * @param index
      * @param type
-     * @param queryBuilder
+     * @param queryBuilder 查询对象, 分页无效
      * @param pageSize
      * @param scrollTimeInMillis 游标的有效时间, 如果报错`Elasticsearch No search context found for id`, 则加大
      * @return

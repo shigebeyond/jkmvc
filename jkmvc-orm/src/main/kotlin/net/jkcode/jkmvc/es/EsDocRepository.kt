@@ -146,6 +146,7 @@ class EsDocRepository<T: Any>(
 
     /**
      * 开始搜索文档, 并返回有游标的结果集合
+     * @param query 查询对象, 分页无效
      * @param pageSize
      * @param scrollTimeInMillis
      * @return

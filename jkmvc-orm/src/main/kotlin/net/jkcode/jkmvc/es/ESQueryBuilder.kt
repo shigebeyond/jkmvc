@@ -1527,6 +1527,8 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
 
     /**
      * 开始搜索文档, 并返回有游标的结果集合
+     *   分页无效
+     *
      * @param clazz bean类, 可以是HashMap
      * @param pageSize
      * @param scrollTimeInMillis

@@ -83,9 +83,31 @@ class EsDocRepositoryTests {
     fun testFindAll() {
         val query = rep.queryBuilder()
                 //.must("fromUid", ">=", 0)
-                .orderByField("id")
+                .orderByField("id") // 排序
+                .limit(10) // 分页
         val (list, size) = rep.findAll(query)
         println("查到 $size 个文档")
+        for (item in list)
+            println(item)
+    }
+
+    @Test
+    fun testCount() {
+        val query = rep.queryBuilder()
+                //.must("fromUid", ">=", 0)
+        val size = rep.count(query)
+        println("查到 $size 个文档")
+    }
+
+
+    @Test
+    fun testScrollAll() {
+        val query = rep.queryBuilder()
+                //.must("fromUid", ">=", 0)
+                .orderByField("id") // 排序
+                //.limit(1) // 分页无效, 都是查所有数据
+        val list = rep.scrollAll(query, 5)
+        println("查到 ${list.size} 个文档")
         for (item in list)
             println(item)
     }
