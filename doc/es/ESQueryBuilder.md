@@ -1,5 +1,5 @@
 # EsQueryBuilder 查询构建器
-es查询构建器，是通过提供类sql的一系列方法，来帮助开发者快速构建原生es查询dsl.
+es查询构建器，是通过提供类sql的一系列方法，来帮助开发者快速构建原生es查询dsl, 能够大大简化各种复杂的查询.
 
 ## 1 实例化查询构建器
 
@@ -24,13 +24,13 @@ query.index("user_index").type("_doc")
 我们使用`filter()`/`must()`/`mustNot()`/`should()`方法来过滤查询结果。这些方法需要3个参数： 1 字段名 2 操作符 3 字段值. 
 
 ```kotlin
-query.index("user_index").type("_doc").filter("username", "=", "john");
+query.filter("username", "=", "john");
 ```
 
 多次调用 `filter()`/`must()`/`mustNot()`/`should()` 方法会构建多个过滤条件, 并按对应方法名来分组条件, 可参考 `BoolQueryBuilder` 对应的 `filter()`/`must()`/`mustNot()`/`should()` 方法
 
 ```kotlin
-query.index("user_index").type("_doc").should("username", "=", "john").should("username", "=", "jane");
+query.should("username", "=", "john").should("username", "=", "jane");
 ```
 
 你可以使用任意的操作符，如 `IN`, `BETWEEN`, `>`, `=<`, `!=`...  
@@ -38,11 +38,23 @@ query.index("user_index").type("_doc").should("username", "=", "john").should("u
 如果你使用的是多值操作符，则字段值需要传递数组`Array`或列索引`List`
 
 ```kotlin
-query.index("user_index").type("_doc").filter("logins", "<=", 1);
-query.index("user_index").type("_doc").must("logins", ">", 50);
-query.index("user_index").type("_doc").mustNot("username", "IN", arrayOf("john","mark","matt"));
-query.index("user_index").type("_doc").should("joindate", "BETWEEN", Pair(then, now)); // 等价于下面语句
-query.index("user_index").type("_doc").mustBetween("joindate", then, now);
+query.filter("logins", "<=", 1);
+query.must("logins", ">", 50);
+
+// in
+query.mustNot("username", "IN", arrayOf("john","mark","matt"));
+
+// between
+query.should("joindate", "BETWEEN", Pair(then, now)); // 等价于下面语句
+query.shouldBetween("joindate", then, now);
+
+
+// like = match
+query.must("username", "like", "John Wilson"); // 等价于下面语句
+query.must("username", "match", "John Wilson");
+
+// matchPhrase
+query.must("username", "matchPhrase", "John");
 ```
 
 ### 2.3 `select()` 字段名

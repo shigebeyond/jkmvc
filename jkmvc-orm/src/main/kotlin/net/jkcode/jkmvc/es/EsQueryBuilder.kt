@@ -60,6 +60,7 @@ class EsQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
                 "<=",
                 "like", // like = match
                 "match",
+                "matchPhrase",
                 "fuzzy",
                 "wildcard",
                 "prefix",
@@ -501,6 +502,9 @@ class EsQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
 
         if (operator.equals("like", true) || operator.equals("match", true))
             return QueryBuilders.matchQuery(name, value)
+
+        if (operator.equals("matchPhrase", true))
+            return QueryBuilders.matchPhraseQuery(name, value)
 
         if(operator.equals("fuzzy", true))
             return QueryBuilders.fuzzyQuery(name, value)
@@ -1400,6 +1404,9 @@ class EsQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
 
     /**
      * add field script
+     *   官方说明 http://blog.bootsphp.com/elasticsearch_use_script_fields_with_source
+     *   保留_source字段的+返回脚本字段(script_fields) http://blog.bootsphp.com/elasticsearch_use_script_fields_with_source
+     *
      * @param field
      * @param script
      * @param params
