@@ -1,7 +1,7 @@
 package net.jkcode.jkmvc.tests.es
 
 import com.google.common.collect.Lists
-import net.jkcode.jkmvc.es.ESQueryBuilder
+import net.jkcode.jkmvc.es.EsQueryBuilder
 import net.jkcode.jkmvc.es.EsManager
 import net.jkcode.jkmvc.tests.entity.RecentOrder
 import net.jkcode.jkutil.common.randomBoolean
@@ -120,15 +120,26 @@ class EsQueryBuilderTests {
     }
 
     @Test
-    fun testSearchDeleteDoc() {
+    fun testDeleteByQuery2() {
         val pageSize = 5
-        val ids = ESQueryBuilder().index(index).type(type).deleteDocs(pageSize, 100000)
+        val ids = EsQueryBuilder().index(index).type(type).deleteDocs(pageSize, 100000)
         println("删除" + ids.size + "个文档: id in " + ids)
     }
 
+    /**
+     * 通过查询来批量更新
+     */
     @Test
-    fun testScript() {
-        val query = ESQueryBuilder().index(index).type(type)
+    fun testUpdateByQuery() {
+        val query = EsQueryBuilder().index(index).type(type)
+                .must("_id", "1")
+        val r = query.updateDocs("ctx._source.cargoId++")
+        println("通过查询来批量更新: $r")
+    }
+
+    @Test
+    fun testFieldScript() {
+        val query = EsQueryBuilder().index(index).type(type)
                 /**
                  * http://blog.bootsphp.com/elasticsearch_use_script_fields_with_source
                  * 保留_source字段的+返回脚本字段(script_fields)
@@ -147,7 +158,7 @@ curl 'localhost:9200/recent_order_index/_doc/_search?pretty=true'  -H "Content-T
      */
     @Test
     fun testSearch() {
-        val query = ESQueryBuilder()
+        val query = EsQueryBuilder()
                 //.index(index) // 可省略, 因为在 searchDocs(clazz) 会从目标类clazz注解中解析index/type
                 //.type(type)
                 .must("searchable", "=", true)
@@ -190,7 +201,7 @@ curl 'localhost:9200/recent_order_index/_doc/_search?pretty=true'  -H "Content-T
      */
     @Test
     fun testComplexSearch() {
-        val query = ESQueryBuilder()
+        val query = EsQueryBuilder()
                 .index(index)
                 .type(type)
                 .mustWrap { // city

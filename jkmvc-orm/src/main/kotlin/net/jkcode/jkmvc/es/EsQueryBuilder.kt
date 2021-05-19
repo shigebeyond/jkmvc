@@ -37,7 +37,7 @@ import kotlin.collections.HashSet
  * @author shijianhang
  * @date 2021-4-21 下午5:16:59
  */
-class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = EsManager.instance()) {
+class EsQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = EsManager.instance()) {
 
     @JvmOverloads
     constructor(index: String, type: String, esmgr: EsManager = EsManager.instance()):this(esmgr){
@@ -86,7 +86,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
     /**
      * Query type name
      */
-    protected lateinit var type: String
+    protected var type: String = "_doc"
 
     /**
      * Whether index is initial
@@ -322,7 +322,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param index
      * @return this
      */
-    public fun index(index: String): ESQueryBuilder {
+    public fun index(index: String): EsQueryBuilder {
         this.index = index;
         this.indexInited = true
         return this
@@ -333,7 +333,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param type
      * @return this
      */
-    public fun type(type: String): ESQueryBuilder {
+    public fun type(type: String): EsQueryBuilder {
         this.type = type;
         return this;
     }
@@ -343,7 +343,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param type
      * @return this
      */
-    public fun searchType(type: SearchType): ESQueryBuilder {
+    public fun searchType(type: SearchType): EsQueryBuilder {
         this.searchType = type;
         return this
     }
@@ -354,16 +354,17 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @return this
      */
     @JvmOverloads
-    public fun limit(limit: Int, offset: Int = 0): ESQueryBuilder {
+    public fun limit(limit: Int, offset: Int = 0): EsQueryBuilder {
         this.limit = limit;
-        this.offset = offset;
+        if(offset > 0)
+            this.offset = offset;
         return this;
     }
 
     /**
      * Set timeout (seconds) to control how long search is allowed to take.
      */
-    public fun timeout(timeout: Long): ESQueryBuilder {
+    public fun timeout(timeout: Long): EsQueryBuilder {
         this.timeout = timeout
         return this
     }
@@ -373,7 +374,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param fields
      * @return this
      */
-    public fun select(vararg fields: String): ESQueryBuilder {
+    public fun select(vararg fields: String): EsQueryBuilder {
         this.includeFields.addAll(fields)
         return this;
     }
@@ -383,7 +384,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param fields
      * @return this
      */
-    public fun unselect(vararg fields: String): ESQueryBuilder {
+    public fun unselect(vararg fields: String): EsQueryBuilder {
         this.excludeFields.addAll(fields)
         this.includeFields.removeAll(fields)
         return this;
@@ -397,7 +398,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @return this
      */
     @JvmOverloads
-    public fun orderByField(field: String, desc: Boolean = false): ESQueryBuilder {
+    public fun orderByField(field: String, desc: Boolean = false): EsQueryBuilder {
         val order = if (desc) SortOrder.DESC else SortOrder.ASC
         val sort = SortBuilders.fieldSort(field).order(order)
         // 嵌套字段: 设置嵌套路径
@@ -419,7 +420,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @return this
      */
     @JvmOverloads
-    public fun orderByScore(desc: Boolean = false): ESQueryBuilder {
+    public fun orderByScore(desc: Boolean = false): EsQueryBuilder {
         val order = if (desc) SortOrder.DESC else SortOrder.ASC
         val sort = SortBuilders.scoreSort().order(order)
         this.sorts.add(sort)
@@ -434,7 +435,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @return this
      */
     @JvmOverloads
-    public fun orderByScript(script: String, params: Map<String, Any?> = emptyMap(), desc: Boolean = false): ESQueryBuilder {
+    public fun orderByScript(script: String, params: Map<String, Any?> = emptyMap(), desc: Boolean = false): EsQueryBuilder {
         val order = if (desc) SortOrder.DESC else SortOrder.ASC
         val script2 = Script(ScriptType.INLINE, "painless", script, params)
         val sort = SortBuilders.scriptSort(script2, ScriptSortBuilder.ScriptSortType.STRING).order(order)
@@ -451,7 +452,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @return this
      */
     @JvmOverloads
-    public fun orderByGeoDistance(field: String, lat: Double, lon: Double, desc: Boolean = false, unit: DistanceUnit = DistanceUnit.DEFAULT): ESQueryBuilder {
+    public fun orderByGeoDistance(field: String, lat: Double, lon: Double, desc: Boolean = false, unit: DistanceUnit = DistanceUnit.DEFAULT): EsQueryBuilder {
         val order = if (desc) SortOrder.DESC else SortOrder.ASC
         val sort = SortBuilders.geoDistanceSort(field, lat, lon).order(order).unit(unit)
         this.sorts.add(sort)
@@ -492,6 +493,11 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
 
         if (operator == "<=")
             return QueryBuilders.rangeQuery(name).lte(value);
+
+        if (operator.equals("between", true)) {
+            val (from, to) = value as Pair<Any, Any>
+            return QueryBuilders.rangeQuery(name).gte(from).lte(to)
+        }
 
         if (operator.equals("like", true) || operator.equals("match", true))
             return QueryBuilders.matchQuery(name, value)
@@ -534,7 +540,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param value
      * @return this
      */
-    protected inline fun where(wheres: MutableList<QueryBuilder>, name: String, operator: String, value: Any?): ESQueryBuilder {
+    protected inline fun where(wheres: MutableList<QueryBuilder>, name: String, operator: String, value: Any?): EsQueryBuilder {
         if (!isOperator(operator))
             throw IllegalArgumentException("Unkown operator: $operator")
 
@@ -550,7 +556,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param to
      * @return this
      */
-    protected inline fun whereBetween(wheres: MutableList<QueryBuilder>, name: String, from: Any, to: Any): ESQueryBuilder {
+    protected inline fun whereBetween(wheres: MutableList<QueryBuilder>, name: String, from: Any, to: Any): EsQueryBuilder {
         val query = QueryBuilders.rangeQuery(name).gte(from).lte(to)
         wheres.add(query)
         return this;
@@ -567,7 +573,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param distance A distance from the starting geo point. It can be for example "20km".
      * @return this
      */
-    protected inline fun whereGeoDistance(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
+    protected inline fun whereGeoDistance(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distance: String): EsQueryBuilder {
         val query = QueryBuilders.geoDistanceQuery(name).point(lat, lon).distance(distance);
         wheres.add(query)
         return this;
@@ -583,7 +589,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param right
      * @return
      */
-    protected inline fun whereGeoBoundingBox(wheres: MutableList<QueryBuilder>, name: String, top: Double, left: Double, bottom: Double, right: Double): ESQueryBuilder {
+    protected inline fun whereGeoBoundingBox(wheres: MutableList<QueryBuilder>, name: String, top: Double, left: Double, bottom: Double, right: Double): EsQueryBuilder {
         val query = QueryBuilders.geoBoundingBoxQuery(name).setCorners(top, left, bottom, right);
         wheres.add(query)
         return this
@@ -598,7 +604,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param distanceTo A distance to the starting geo point. It can be for example "20km".
      * @return
      */
-    protected inline fun whereGeoDistanceRange(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distanceFrom: String, distanceTo: String): ESQueryBuilder {
+    protected inline fun whereGeoDistanceRange(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distanceFrom: String, distanceTo: String): EsQueryBuilder {
         val query = QueryBuilders.geoDistanceRangeQuery(name, lat, lon).from(distanceFrom).to(distanceTo)
         wheres.add(query)
         return this
@@ -608,7 +614,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * Open a filter/must/mustNot/should sub clauses
      * @return
      */
-    protected inline fun whereOpen(wheres: MutableList<QueryBuilder>): ESQueryBuilder {
+    protected inline fun whereOpen(wheres: MutableList<QueryBuilder>): EsQueryBuilder {
         val query = QueryBuilders.boolQuery()
         wheres.add(query)
         queryStack.push(query to wheres)
@@ -620,7 +626,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param path
      * @return
      */
-    protected inline fun whereNestedOpen(wheres: MutableList<QueryBuilder>, path: String): ESQueryBuilder {
+    protected inline fun whereNestedOpen(wheres: MutableList<QueryBuilder>, path: String): EsQueryBuilder {
         val subquery = QueryBuilders.boolQuery()
         val nestedContainer = QueryBuilders.nestedQuery(path, subquery, ScoreMode.Total)
         wheres.add(nestedContainer)
@@ -634,7 +640,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * Close a filter/must/mustNot/should sub clauses
      * @return
      */
-    protected inline fun whereClose(wheresGetter: ESQueryBuilder.()->MutableList<QueryBuilder>): ESQueryBuilder {
+    protected inline fun whereClose(wheresGetter: EsQueryBuilder.()->MutableList<QueryBuilder>): EsQueryBuilder {
         // 出栈, 获得上一层的where对象
         val (_, preWheres) = queryStack.pop()
         // 出栈后的当前层的where对象
@@ -653,7 +659,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param condition
      * @return this
      */
-    public fun filter(condition: QueryBuilder): ESQueryBuilder {
+    public fun filter(condition: QueryBuilder): EsQueryBuilder {
         filter.add(condition)
         return this
     }
@@ -664,7 +670,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param value
      * @return this
      */
-    public fun filter(name: String, value: Any?): ESQueryBuilder {
+    public fun filter(name: String, value: Any?): EsQueryBuilder {
         return filter(name, prepareOperator(value), value)
     }
 
@@ -675,7 +681,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param value
      * @return this
      */
-    public fun filter(name: String, operator: String, value: Any?): ESQueryBuilder {
+    public fun filter(name: String, operator: String, value: Any?): EsQueryBuilder {
         return where(this.filter, name, operator, value)
     }
 
@@ -684,7 +690,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param name
      * @return this
      */
-    public fun filterExists(name: String): ESQueryBuilder {
+    public fun filterExists(name: String): EsQueryBuilder {
         return filter(name, "exists", null)
     }
 
@@ -695,7 +701,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param to
      * @return this
      */
-    public fun filterBetween(name: String, from: Any, to: Any): ESQueryBuilder {
+    public fun filterBetween(name: String, from: Any, to: Any): EsQueryBuilder {
         return whereBetween(this.filter, name, from, to)
     }
 
@@ -710,7 +716,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param distance A distance from the starting geo point. It can be for example "20km".
      * @return this
      */
-    public fun filterGeoDistance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
+    public fun filterGeoDistance(name: String, lat: Double, lon: Double, distance: String): EsQueryBuilder {
         return whereGeoDistance(this.filter, name, lat, lon, distance)
     }
 
@@ -723,7 +729,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param right
      * @return
      */
-    public fun filterGeoBoundingBox(wheres: MutableList<QueryBuilder>, name: String, top: Double, left: Double, bottom: Double, right: Double): ESQueryBuilder {
+    public fun filterGeoBoundingBox(wheres: MutableList<QueryBuilder>, name: String, top: Double, left: Double, bottom: Double, right: Double): EsQueryBuilder {
         return whereGeoBoundingBox(this.filter, name, top, left, bottom, right)
     }
 
@@ -736,7 +742,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param distanceTo A distance to the starting geo point. It can be for example "20km".
      * @return
      */
-    public fun filterGeoDistanceRange(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distanceFrom: String, distanceTo: String): ESQueryBuilder {
+    public fun filterGeoDistanceRange(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distanceFrom: String, distanceTo: String): EsQueryBuilder {
         return whereGeoDistanceRange(this.filter, name, lat, lon, distanceFrom, distanceTo)
     }
 
@@ -744,7 +750,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * Opens a filter sub clauses
      * @return
      */
-    public fun filterOpen(): ESQueryBuilder {
+    public fun filterOpen(): EsQueryBuilder {
         return whereOpen(this.filter)
     }
 
@@ -752,8 +758,8 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * Opens a filter sub clauses
      * @return
      */
-    public fun filterClose(): ESQueryBuilder {
-        return whereClose(ESQueryBuilder::filter)
+    public fun filterClose(): EsQueryBuilder {
+        return whereClose(EsQueryBuilder::filter)
     }
 
     /**
@@ -761,7 +767,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param action
      * @return
      */
-    public fun filterWrap(action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+    public fun filterWrap(action: EsQueryBuilder.() -> Unit): EsQueryBuilder {
         filterOpen()
         this.action()
         filterClose()
@@ -773,7 +779,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param path
      * @return
      */
-    public fun filterNestedOpen(path: String): ESQueryBuilder {
+    public fun filterNestedOpen(path: String): EsQueryBuilder {
         return whereNestedOpen(this.filter, path)
     }
 
@@ -781,8 +787,8 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * Opens a filter nested sub clauses
      * @return
      */
-    public fun filterNestedClose(): ESQueryBuilder {
-        return whereClose(ESQueryBuilder::filter)
+    public fun filterNestedClose(): EsQueryBuilder {
+        return whereClose(EsQueryBuilder::filter)
     }
 
     /**
@@ -791,7 +797,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param action
      * @return
      */
-    public fun filterNestedWrap(path: String, action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+    public fun filterNestedWrap(path: String, action: EsQueryBuilder.() -> Unit): EsQueryBuilder {
         filterNestedOpen(path)
         this.action()
         filterNestedClose()
@@ -806,7 +812,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param condition
      * @return this
      */
-    public fun must(condition: QueryBuilder): ESQueryBuilder {
+    public fun must(condition: QueryBuilder): EsQueryBuilder {
         must.add(condition)
         return this
     }
@@ -817,7 +823,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param value
      * @return this
      */
-    public fun must(name: String, value: Any?): ESQueryBuilder {
+    public fun must(name: String, value: Any?): EsQueryBuilder {
         return must(name, prepareOperator(value), value)
     }
 
@@ -828,7 +834,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param value
      * @return this
      */
-    public fun must(name: String, operator: String, value: Any?): ESQueryBuilder {
+    public fun must(name: String, operator: String, value: Any?): EsQueryBuilder {
         return where(this.must, name, operator, value)
     }
 
@@ -837,7 +843,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param name
      * @return this
      */
-    public fun mustExists(name: String): ESQueryBuilder {
+    public fun mustExists(name: String): EsQueryBuilder {
         return must(name, "exists", null)
     }
 
@@ -848,7 +854,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param to
      * @return this
      */
-    public fun mustBetween(name: String, from: Any, to: Any): ESQueryBuilder {
+    public fun mustBetween(name: String, from: Any, to: Any): EsQueryBuilder {
         return whereBetween(this.must, name, from, to)
     }
 
@@ -863,7 +869,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param distance A distance from the starting geo point. It can be for example "20km".
      * @return this
      */
-    public fun mustGeoDistance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
+    public fun mustGeoDistance(name: String, lat: Double, lon: Double, distance: String): EsQueryBuilder {
         return whereGeoDistance(this.must, name, lat, lon, distance)
     }
 
@@ -876,7 +882,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param right
      * @return
      */
-    public fun mustGeoBoundingBox(wheres: MutableList<QueryBuilder>, name: String, top: Double, left: Double, bottom: Double, right: Double): ESQueryBuilder {
+    public fun mustGeoBoundingBox(wheres: MutableList<QueryBuilder>, name: String, top: Double, left: Double, bottom: Double, right: Double): EsQueryBuilder {
         return whereGeoBoundingBox(this.must, name, top, left, bottom, right)
     }
 
@@ -889,7 +895,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param distanceTo A distance to the starting geo point. It can be for example "20km".
      * @return
      */
-    public fun mustGeoDistanceRange(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distanceFrom: String, distanceTo: String): ESQueryBuilder {
+    public fun mustGeoDistanceRange(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distanceFrom: String, distanceTo: String): EsQueryBuilder {
         return whereGeoDistanceRange(this.must, name, lat, lon, distanceFrom, distanceTo)
     }
 
@@ -897,7 +903,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * Opens a must sub clauses
      * @return
      */
-    public fun mustOpen(): ESQueryBuilder {
+    public fun mustOpen(): EsQueryBuilder {
         return whereOpen(this.must)
     }
 
@@ -905,8 +911,8 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * Opens a must sub clauses
      * @return
      */
-    public fun mustClose(): ESQueryBuilder {
-        return whereClose(ESQueryBuilder::must)
+    public fun mustClose(): EsQueryBuilder {
+        return whereClose(EsQueryBuilder::must)
     }
 
     /**
@@ -914,7 +920,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param action
      * @return
      */
-    public fun mustWrap(action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+    public fun mustWrap(action: EsQueryBuilder.() -> Unit): EsQueryBuilder {
         mustOpen()
         this.action()
         mustClose()
@@ -926,7 +932,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param path
      * @return
      */
-    public fun mustNestedOpen(path: String): ESQueryBuilder {
+    public fun mustNestedOpen(path: String): EsQueryBuilder {
         return whereNestedOpen(this.must, path)
     }
 
@@ -934,8 +940,8 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * Opens a must nested sub clauses
      * @return
      */
-    public fun mustNestedClose(): ESQueryBuilder {
-        return whereClose(ESQueryBuilder::must)
+    public fun mustNestedClose(): EsQueryBuilder {
+        return whereClose(EsQueryBuilder::must)
     }
 
     /**
@@ -944,7 +950,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param action
      * @return
      */
-    public fun mustNestedWrap(path: String, action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+    public fun mustNestedWrap(path: String, action: EsQueryBuilder.() -> Unit): EsQueryBuilder {
         mustNestedOpen(path)
         this.action()
         mustNestedClose()
@@ -960,7 +966,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param condition
      * @return this
      */
-    public fun mustNot(condition: QueryBuilder): ESQueryBuilder {
+    public fun mustNot(condition: QueryBuilder): EsQueryBuilder {
         mustNot.add(condition)
         return this
     }
@@ -971,7 +977,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param value
      * @return this
      */
-    public fun mustNot(name: String, value: Any?): ESQueryBuilder {
+    public fun mustNot(name: String, value: Any?): EsQueryBuilder {
         return mustNot(name, prepareOperator(value), value)
     }
 
@@ -982,7 +988,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param value
      * @return this
      */
-    public fun mustNot(name: String, operator: String, value: Any?): ESQueryBuilder {
+    public fun mustNot(name: String, operator: String, value: Any?): EsQueryBuilder {
         return where(this.mustNot, name, operator, value)
     }
 
@@ -991,7 +997,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param name
      * @return this
      */
-    public fun mustNotExists(name: String): ESQueryBuilder {
+    public fun mustNotExists(name: String): EsQueryBuilder {
         return mustNot(name, "exists", null)
     }
 
@@ -1002,7 +1008,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param to
      * @return this
      */
-    public fun mustNotBetween(name: String, from: Any, to: Any): ESQueryBuilder {
+    public fun mustNotBetween(name: String, from: Any, to: Any): EsQueryBuilder {
         return whereBetween(this.mustNot, name, from, to)
     }
 
@@ -1017,7 +1023,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param distance A distance from the starting geo point. It can be for example "20km".
      * @return this
      */
-    public fun mustNotGeoDistance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
+    public fun mustNotGeoDistance(name: String, lat: Double, lon: Double, distance: String): EsQueryBuilder {
         return whereGeoDistance(this.mustNot, name, lat, lon, distance)
     }
 
@@ -1030,7 +1036,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param right
      * @return
      */
-    public fun mustNotGeoBoundingBox(wheres: MutableList<QueryBuilder>, name: String, top: Double, left: Double, bottom: Double, right: Double): ESQueryBuilder {
+    public fun mustNotGeoBoundingBox(wheres: MutableList<QueryBuilder>, name: String, top: Double, left: Double, bottom: Double, right: Double): EsQueryBuilder {
         return whereGeoBoundingBox(this.mustNot, name, top, left, bottom, right)
     }
 
@@ -1043,7 +1049,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param distanceTo A distance to the starting geo point. It can be for example "20km".
      * @return
      */
-    public fun mustNotGeoDistanceRange(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distanceFrom: String, distanceTo: String): ESQueryBuilder {
+    public fun mustNotGeoDistanceRange(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distanceFrom: String, distanceTo: String): EsQueryBuilder {
         return whereGeoDistanceRange(this.mustNot, name, lat, lon, distanceFrom, distanceTo)
     }
 
@@ -1051,7 +1057,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * Opens a mustNot sub clauses
      * @return
      */
-    public fun mustNotOpen(): ESQueryBuilder {
+    public fun mustNotOpen(): EsQueryBuilder {
         return whereOpen(this.mustNot)
     }
 
@@ -1059,8 +1065,8 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * Opens a mustNot sub clauses
      * @return
      */
-    public fun mustNotClose(): ESQueryBuilder {
-        return whereClose(ESQueryBuilder::mustNot)
+    public fun mustNotClose(): EsQueryBuilder {
+        return whereClose(EsQueryBuilder::mustNot)
     }
 
     /**
@@ -1068,7 +1074,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param action
      * @return
      */
-    public fun mustNotWrap(action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+    public fun mustNotWrap(action: EsQueryBuilder.() -> Unit): EsQueryBuilder {
         mustNotOpen()
         this.action()
         mustNotClose()
@@ -1080,7 +1086,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param path
      * @return
      */
-    public fun mustNotNestedOpen(path: String): ESQueryBuilder {
+    public fun mustNotNestedOpen(path: String): EsQueryBuilder {
         return whereNestedOpen(this.mustNot, path)
     }
 
@@ -1088,8 +1094,8 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * Opens a mustNot nested sub clauses
      * @return
      */
-    public fun mustNotNestedClose(): ESQueryBuilder {
-        return whereClose(ESQueryBuilder::mustNot)
+    public fun mustNotNestedClose(): EsQueryBuilder {
+        return whereClose(EsQueryBuilder::mustNot)
     }
 
     /**
@@ -1098,7 +1104,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param action
      * @return
      */
-    public fun mustNotNestedWrap(path: String, action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+    public fun mustNotNestedWrap(path: String, action: EsQueryBuilder.() -> Unit): EsQueryBuilder {
         mustNotNestedOpen(path)
         this.action()
         mustNotNestedClose()
@@ -1113,7 +1119,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param condition
      * @return this
      */
-    public fun should(condition: QueryBuilder): ESQueryBuilder {
+    public fun should(condition: QueryBuilder): EsQueryBuilder {
         should.add(condition)
         return this
     }
@@ -1124,7 +1130,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param value
      * @return this
      */
-    public fun should(name: String, value: Any?): ESQueryBuilder {
+    public fun should(name: String, value: Any?): EsQueryBuilder {
         return should(name, prepareOperator(value), value)
     }
 
@@ -1135,7 +1141,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param value
      * @return this
      */
-    public fun should(name: String, operator: String, value: Any?): ESQueryBuilder {
+    public fun should(name: String, operator: String, value: Any?): EsQueryBuilder {
         return where(this.should, name, operator, value)
     }
 
@@ -1144,7 +1150,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param name
      * @return this
      */
-    public fun shouldExists(name: String): ESQueryBuilder {
+    public fun shouldExists(name: String): EsQueryBuilder {
         return should(name, "exists", null)
     }
 
@@ -1155,7 +1161,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param to
      * @return this
      */
-    public fun shouldBetween(name: String, from: Any, to: Any): ESQueryBuilder {
+    public fun shouldBetween(name: String, from: Any, to: Any): EsQueryBuilder {
         return whereBetween(this.should, name, from, to)
     }
 
@@ -1170,7 +1176,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param distance A distance from the starting geo point. It can be for example "20km".
      * @return this
      */
-    public fun shouldGeoDistance(name: String, lat: Double, lon: Double, distance: String): ESQueryBuilder {
+    public fun shouldGeoDistance(name: String, lat: Double, lon: Double, distance: String): EsQueryBuilder {
         return whereGeoDistance(this.should, name, lat, lon, distance)
     }
 
@@ -1183,7 +1189,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param right
      * @return
      */
-    public fun shouldGeoBoundingBox(wheres: MutableList<QueryBuilder>, name: String, top: Double, left: Double, bottom: Double, right: Double): ESQueryBuilder {
+    public fun shouldGeoBoundingBox(wheres: MutableList<QueryBuilder>, name: String, top: Double, left: Double, bottom: Double, right: Double): EsQueryBuilder {
         return whereGeoBoundingBox(this.should, name, top, left, bottom, right)
     }
 
@@ -1196,7 +1202,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param distanceTo A distance to the starting geo point. It can be for example "20km".
      * @return
      */
-    public fun shouldGeoDistanceRange(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distanceFrom: String, distanceTo: String): ESQueryBuilder {
+    public fun shouldGeoDistanceRange(wheres: MutableList<QueryBuilder>, name: String, lat: Double, lon: Double, distanceFrom: String, distanceTo: String): EsQueryBuilder {
         return whereGeoDistanceRange(this.should, name, lat, lon, distanceFrom, distanceTo)
     }
 
@@ -1204,7 +1210,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * Opens a should sub clauses
      * @return
      */
-    public fun shouldOpen(): ESQueryBuilder {
+    public fun shouldOpen(): EsQueryBuilder {
         return whereOpen(this.should)
     }
 
@@ -1212,8 +1218,8 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * Opens a should sub clauses
      * @return
      */
-    public fun shouldClose(): ESQueryBuilder {
-        return whereClose(ESQueryBuilder::should)
+    public fun shouldClose(): EsQueryBuilder {
+        return whereClose(EsQueryBuilder::should)
     }
 
     /**
@@ -1221,7 +1227,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param action
      * @return
      */
-    public fun shouldWrap(action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+    public fun shouldWrap(action: EsQueryBuilder.() -> Unit): EsQueryBuilder {
         shouldOpen()
         this.action()
         shouldClose()
@@ -1233,7 +1239,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param path
      * @return
      */
-    public fun shouldNestedOpen(path: String): ESQueryBuilder {
+    public fun shouldNestedOpen(path: String): EsQueryBuilder {
         return whereNestedOpen(this.should, path)
     }
 
@@ -1241,8 +1247,8 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * Opens a should nested sub clauses
      * @return
      */
-    public fun shouldNestedClose(): ESQueryBuilder {
-        return whereClose(ESQueryBuilder::should)
+    public fun shouldNestedClose(): EsQueryBuilder {
+        return whereClose(EsQueryBuilder::should)
     }
 
     /**
@@ -1251,7 +1257,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param action
      * @return
      */
-    public fun shouldNestedWrap(path: String, action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+    public fun shouldNestedWrap(path: String, action: EsQueryBuilder.() -> Unit): EsQueryBuilder {
         shouldNestedOpen(path)
         this.action()
         shouldNestedClose()
@@ -1268,7 +1274,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @return
      */
     @JvmOverloads
-    public fun aggBy(expr: String, alias: String? = null, asc: Boolean? = null): ESQueryBuilder {
+    public fun aggBy(expr: String, alias: String? = null, asc: Boolean? = null): EsQueryBuilder {
         val exp = AggExpr(expr, alias)
         val agg = exp.toAggregation()
         return aggBy(agg, asc)
@@ -1281,7 +1287,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @return
      */
     @JvmOverloads
-    public fun aggBy(agg: AbstractAggregationBuilder<*>, asc: Boolean? = null): ESQueryBuilder {
+    public fun aggBy(agg: AbstractAggregationBuilder<*>, asc: Boolean? = null): EsQueryBuilder {
         // 添加聚合
         this.currAggs.addAggregator(agg)
 
@@ -1339,7 +1345,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @return
      */
     @JvmOverloads
-    public fun aggByAndWrapSubAgg(expr: String, alias: String? = null, asc: Boolean? = null, subAggAction: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+    public fun aggByAndWrapSubAgg(expr: String, alias: String? = null, asc: Boolean? = null, subAggAction: EsQueryBuilder.() -> Unit): EsQueryBuilder {
         aggBy(expr, alias, asc)
         subAggWrap(subAggAction)
         return this
@@ -1349,7 +1355,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * Open a agg sub clauses
      * @return
      */
-    public fun subAggOpen(): ESQueryBuilder {
+    public fun subAggOpen(): EsQueryBuilder {
         aggsStack.push(nextLevelAggs to currAggs)
         return this
     }
@@ -1358,7 +1364,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * Close a agg sub clauses
      * @return
      */
-    public fun subAggClose(): ESQueryBuilder {
+    public fun subAggClose(): EsQueryBuilder {
         // 出栈, 获得上一层的agg对象
         val (_, preAggs) = aggsStack.pop()
         // 出栈后的当前层的agg对象
@@ -1375,7 +1381,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param action
      * @return
      */
-    public fun subAggWrap(action: ESQueryBuilder.() -> Unit): ESQueryBuilder {
+    public fun subAggWrap(action: EsQueryBuilder.() -> Unit): EsQueryBuilder {
         subAggOpen()
         this.action()
         subAggClose()
@@ -1387,7 +1393,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * Get highlight result
      * @return this
      */
-    public fun highlight(vararg fields: String): ESQueryBuilder {
+    public fun highlight(vararg fields: String): EsQueryBuilder {
         highlightFields.addAll(fields)
         return this;
     }
@@ -1400,7 +1406,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @return
      */
     @JvmOverloads
-    fun addFieldScript(field: String, script: String, params: Map<String, Any?> = emptyMap()): ESQueryBuilder {
+    fun addFieldScript(field: String, script: String, params: Map<String, Any?> = emptyMap()): EsQueryBuilder {
         fieldScripts[field] = Script(ScriptType.INLINE, "painless", script, params)
         return this
     }
@@ -1508,7 +1514,17 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
     }
 
     /**
-     * 搜索文档
+     * 搜索单个文档
+     * @param clazz
+     * @return
+     */
+    fun <T> searchDoc(clazz: Class<T>): T? {
+        initIndexTypeFromClass(clazz)
+        return esmgr.searchDoc(index, type, this, clazz)
+    }
+
+    /**
+     * 搜索多个文档
      * @param clazz
      * @return
      */
@@ -1518,7 +1534,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
     }
 
     /**
-     * 搜索文档
+     * 搜索多个文档
      * @return
      */
     public fun searchDocs(): SearchResult {
@@ -1561,7 +1577,7 @@ class ESQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param scrollTimeInMillis
      */
     @JvmOverloads
-    fun updateDocsByQuery(script: String, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): UpdateByQueryResult {
+    fun updateDocs(script: String, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): UpdateByQueryResult {
         return esmgr.updateDocsByQuery(index, type, script, this, pageSize, scrollTimeInMillis)
     }
 }

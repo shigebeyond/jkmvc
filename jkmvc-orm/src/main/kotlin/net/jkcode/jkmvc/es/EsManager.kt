@@ -590,7 +590,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param scrollTimeInMillis
      */
     @JvmOverloads
-    fun updateDocsByQuery(index: String, type: String, script: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): UpdateByQueryResult {
+    fun updateDocsByQuery(index: String, type: String, script: String, queryBuilder: EsQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): UpdateByQueryResult {
         val xContentBuilder: XContentBuilder = XContentFactory.jsonBuilder()
                 .startObject()
                 .field("query", queryBuilder.toQuery())
@@ -602,7 +602,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
         xContentBuilder.flush()
 
         //val payload = (xContentBuilder.getOutputStream() as ByteArrayOutputStream).toString("UTF-8")
-        val payload = xContentBuilder.toString()
+        val payload = xContentBuilder.bytes().utf8ToString()
 
         return tryExecute {
             UpdateByQuery.Builder(payload)
@@ -643,7 +643,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @return 被删除的id
      */
     @JvmOverloads
-    fun deleteDocsByQuery(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): JestResult? {
+    fun deleteDocsByQuery(index: String, type: String, queryBuilder: EsQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): JestResult? {
         val query = queryBuilder.toQuery().toString()
         return tryExecute {
             DeleteByQuery.Builder(query)
@@ -667,7 +667,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @return 被删除的id
      */
     @JvmOverloads
-    fun deleteDocsByQuery2(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): Collection<String> {
+    fun deleteDocsByQuery2(index: String, type: String, queryBuilder: EsQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): Collection<String> {
         // 查id
         // 原来想先 queryBuilder.select("id"), 可惜不知道id字段是啥
         val ids = scrollDocs(index, type, queryBuilder, pageSize, scrollTimeInMillis){ result ->
@@ -804,14 +804,14 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * 创建查询构建器
      * @return
      */
-    public fun queryBuilder(): ESQueryBuilder{
-        return ESQueryBuilder(this)
+    public fun queryBuilder(): EsQueryBuilder{
+        return EsQueryBuilder(this)
     }
 
     /**
      * 统计行数
      */
-    public fun count(index: String, type: String, queryBuilder: ESQueryBuilder): Long {
+    public fun count(index: String, type: String, queryBuilder: EsQueryBuilder): Long {
         val query = queryBuilder.toSearchSource()
 
         val result: CountResult = tryExecute {
@@ -826,14 +826,28 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
     }
 
     /**
-     * 搜索文档
+     * 搜索单个文档
      * @param index 索引名
      * @param type 类型
      * @param queryBuilder 查询构造
      * @param clazz
      * @return
      */
-    fun <T> searchDocs(index: String, type: String, queryBuilder: ESQueryBuilder, clazz: Class<T>): Pair<List<T>, Long> {
+    fun <T> searchDoc(index: String, type: String, queryBuilder: EsQueryBuilder, clazz: Class<T>): T? {
+        queryBuilder.limit(1)
+        val result: SearchResult = searchDocs(index, type, queryBuilder)
+        return result.getFirstHit(clazz)?.source
+    }
+
+    /**
+     * 搜索多个文档
+     * @param index 索引名
+     * @param type 类型
+     * @param queryBuilder 查询构造
+     * @param clazz
+     * @return
+     */
+    fun <T> searchDocs(index: String, type: String, queryBuilder: EsQueryBuilder, clazz: Class<T>): Pair<List<T>, Long> {
         val result: SearchResult = searchDocs(index, type, queryBuilder)
         val list = result.getHits(clazz).map { hit ->
             hit.source
@@ -842,13 +856,13 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
     }
 
     /**
-     * 搜索文档
+     * 搜索多个文档
      * @param index 索引名
      * @param type 类型
      * @param queryBuilder 查询构造
      * @return
      */
-    public fun searchDocs(index: String, type: String, queryBuilder: ESQueryBuilder): SearchResult {
+    public fun searchDocs(index: String, type: String, queryBuilder: EsQueryBuilder): SearchResult {
         val query = queryBuilder.toSearchSource()
 
         // 执行查询
@@ -876,7 +890,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @return
      */
     @JvmOverloads
-    fun <T> scrollDocs(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000, resultMapper:(JestResult)->Collection<T>): EsScrollCollection<T> {
+    fun <T> scrollDocs(index: String, type: String, queryBuilder: EsQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000, resultMapper:(JestResult)->Collection<T>): EsScrollCollection<T> {
         val result = startScroll(index, type, queryBuilder, pageSize, scrollTimeInMillis)
 
         // 封装为有游标的结果集合, 在迭代中查询下一页, 即调用continueScroll()
@@ -894,7 +908,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @return
      */
     @JvmOverloads
-    fun <T> scrollDocs(index: String, type: String, queryBuilder: ESQueryBuilder, clazz: Class<T>, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): EsScrollCollection<T> {
+    fun <T> scrollDocs(index: String, type: String, queryBuilder: EsQueryBuilder, clazz: Class<T>, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): EsScrollCollection<T> {
         return scrollDocs(index, type, queryBuilder, pageSize, scrollTimeInMillis) { result ->
             result.getSourceAsObjectList(clazz)
         }
@@ -909,7 +923,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param scrollTimeInMillis 游标的有效时间, 如果报错`Elasticsearch No search context found for id`, 则加大
      * @return
      */
-    private fun startScroll(index: String, type: String, queryBuilder: ESQueryBuilder, pageSize: Int, scrollTimeInMillis: Long): SearchResult {
+    private fun startScroll(index: String, type: String, queryBuilder: EsQueryBuilder, pageSize: Int, scrollTimeInMillis: Long): SearchResult {
         val query = queryBuilder.toSearchSource()
 
         // 执行查询

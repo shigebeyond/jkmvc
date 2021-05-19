@@ -217,7 +217,7 @@ fun testFindAll() {
 @Test
 fun testSearch() {
     // 构建query builder
-    val query = ESQueryBuilder()
+    val query = EsQueryBuilder()
             .must("searchable", "=", true)
             .must("driverUserName", "=", "张三")
             .select("cargoId", "driverUserName", "loadAddress", "companyId")
@@ -267,7 +267,7 @@ searchSource.size(10);
  */
 @Test
 fun testComplexSearch() {
-    val query = ESQueryBuilder()
+    val query = EsQueryBuilder()
             .index(index)
             .type(type)
             .mustWrap { // city
@@ -378,7 +378,7 @@ demo: 按照队伍team进行分组(桶)
 @Test
 public void testAgg(){
     // 构建聚合查询
-    val query = ESQueryBuilder()
+    val query = EsQueryBuilder()
         .index(index)
         .type(type)
         .aggByAndWrapSubAgg("team") { // 别名是team
@@ -467,7 +467,7 @@ searchSource.aggregation(teamAgg.subAggregation(posAgg).subAggregation(ageAgg))
 @Test
 fun testComplexAgg(){
     // 构建聚合查询
-    val query = ESQueryBuilder()
+    val query = EsQueryBuilder()
             .index(index)
             .type(type)
             .aggByAndWrapSubAgg("team") { // 每个队伍 -- select count(position), sum(salary), sum(games.score), team from player_index group by team;

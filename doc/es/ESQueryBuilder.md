@@ -1,222 +1,164 @@
-# ESQueryBuilder
+# EsQueryBuilder 查询构建器
 es查询构建器，是通过提供类sql的一系列方法，来帮助开发者快速构建原生es查询dsl.
 
-## 6 高级查询
+## 1 实例化查询构建器
 
-### 6.1 `Join` 语句
-
-如果你要联查多个表，则你需要使用 `join()` 与 `on()` 方法. 
-
-`join()` 需要2个参数
-* 表名：可以是 `String` 或 `Pair<String, String>` （包含表名+表别名）
-* 连接方式: LEFT（左连接）, RIGHT（右连接）, INNER（内连接）.
-
-`on()` 方法主要用于设置2个关联表的连接条件，与 `where()` 方法类似，但它需要3个参数; 1 左字段名 2 符号 3 右字段名. 多次调用 `on()` 方法会构建多个连接条件，条件之间用 "AND" 操作符来连接
-
-```
-// 使用`JOIN` 来查询出作者 "smith" 关联的所有文章
-query.select("authors.name", "posts.content").from("authors").join("posts").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith").findMaps();
-```
-
-生成sql如下：
-
-```
-SELECT `authors`.`name`, `posts`.`content` FROM `authors` JOIN `posts` ON (`authors`.`id` = `posts`.`author_id`) WHERE `authors`.`name` = "smith"
-```
-
-如果你要使用不同的连接方式（LEFT / RIGHT / INNER），你只需要调用 `join("columName", "joinType")`，就是用第二个参数来指定连接方式：
-
-```
-// 使用`LEFT JOIN` 来查询出作者 "smith" 关联的所有文章
-query.from("authors").join("posts", "LEFT").on("authors.id", "=", "posts.author_id").where("authors.name", "=", "smith");
-```
-
-生成sql如下：
-
-```
-SELECT `authors`.`name`, `posts`.`content` FROM `authors` LEFT JOIN `posts` ON (`authors`.`id` = `posts`.`author_id`) WHERE `authors`.`name` = "smith"
-```
-
-[!!] 如果你联查的多个表中存在同名的字段，则你在指定返回字段时，最好加上表前缀，来避免sql执行异常. 如果遇到`未明确定义的列（Ambiguous column name）`的错误时，你需要给字段加上表前缀，或者字段别名。
-
-### 6.2 聚合函数
-
-SQL中提供的聚合函数可以用来统计、求和、求最值等，如 `COUNT()`, `SUM()`, `AVG()`. 他们通常是结合 `groupBy()` 来分组统计，或结合 `having()` 来过滤聚合结果
-
-```
-query.select("username", DbExpr("COUNT(`id`)", "total_posts", false)).from("posts").groupBy("username").having("total_posts", ">=", 10).findMaps()
-```
-
-生成sql如下：
-
-```
-SELECT `username`, COUNT(`id`) AS `total_posts` FROM `posts` GROUP BY `username` HAVING `total_posts` >= 10
-```
-
-### 6.3 子查询
-
-查询构建器对象可以作为很多方法的参数，来构建子查询。让我们用上面的查询，传给新的查询作为子查询：
-
-```
-// subquery
-val sub = DbQueryBuilder().select("username", DbExpr("COUNT(`id`)", "total_posts", false))
-        .from("posts").groupBy("username").having("total_posts", ">=", 10);
-
-// join subquery
-DbQueryBuilder().select("profiles.*", "posts.total_posts").from("profiles")
-.join(DbExpr(sub, "posts", false), "INNER").on("profiles.username", "=", "posts.username").findMaps()
-```
-
-生成sql如下：
-
-```
-SELECT `profiles`.*, `posts`.`total_posts` FROM `profiles` INNER JOIN
-( SELECT `username`, COUNT(`id`) AS `total_posts` FROM `posts` GROUP BY `username` HAVING `total_posts` >= 10 ) `posts`
-ON `profiles`.`username` = `posts`.`username`
-```
-
-Insert 查询也可以接入 Select 子查询
-
-```
-// subquery
-val sub = DbQueryBuilder().select("username", DbExpr("COUNT(`id`)", "total_posts", false))
-.from("posts").groupBy("username").having("total_posts", ">=", 10);
-
-// insert subquery
-DbQueryBuilder().table("post_totals").insertColumns("username", "posts").values(sub).insert()
-```
-
-This will generate the following query:
-
-```
-INSERT INTO `post_totals` (`username`, `posts`) 
-SELECT `username`, COUNT(`id`) AS `total_posts` FROM `posts` GROUP BY `username` HAVING `total_posts` >= 10 
-```
-
-### 6.4 布尔操作符与嵌套子句
-
-多个 `WHERE` 与 `HAVING` 子句是用布尔操作符（`AND`/`OR`）来连接的。无前缀或前缀为 `and` 的方法的操作符是`AND`. 前缀为 `or` 的方法的操作符是`OR`. `WHERE` 与 `HAVING` 子句可以嵌套使用，你可以使用后缀为`open` 的方法来开启一个分组，使用后缀为 `close` 的方法来关闭一个分组. 
-
-```
-query.from("user")
-    .whereOpen()
-        .where("id", "IN", arrayOf(1, 2, 3, 5))
-        .andWhereOpen()
-            .where("lastLogin", "<=", System.currentTimeMillis() / 1000)
-            .orWhere("lastLogin", "IS", null)
-        .andWhereClose()
-    .whereClose()
-    .andWhere("removed","IS", null)
-    .findMaps()
-```
-
-生成sql如下：
-
-```
-SELECT  * FROM `user` WHERE ( `id` IN (1, 2, 3, 5)  AND ( `lastLogin` <= 1511069644 OR `lastLogin` IS null )) AND `removed` IS null
-```
-
-### 6.5 数据库表达式
-
-在 `DbQueryBuilder` 的 `insert/update` 语句中，要保存的字段值总是要被转义 `Db::quote(value:Any?)`。但是有时候字段值是一个原生的表达式与函数调用，此时是不需要转义的。
-
-因此，我们需要数据库表达式 `DbExpr`，用于添加不转义的字段值，表示要保存的字段值是一个sql表达式，如 now() / column1 + 1
-
-```
-DbQueryBuilder().table("user")
-    .set("login_count", DbExpr("login_count + 1")) // 等价于 .set("login_count", "login_count + 1", true)
-    .where("id", "=", 45)
-    .update();
-```
-
-生成sql如下：
-
-```
-UPDATE `user` SET `login_count` = `login_count` + 1 WHERE `id` = 45
-```
-
-[!!] 你必须要事先保证：创建`DbExpr(input:String)` 时传递的表达式是有效并且已转义过的。
-
-## 7 例子
-
-```
-// 获得 Db 对象
-val db: Db = Db.instance()
-
-// 开启事务
-db.transaction {
-    // 插入
-    var id = DbQueryBuilder(db).table("user").insertColumns("name", "age").value("shi", 1).insert("id");
-    println("插入user表：" + id)
-
-    // 查询一条数据
-    val row = DbQueryBuilder(db).table("user").where("id", "=", id).findMap()
-    println("查询user表：" + row)
-
-    // 更新
-    var f = DbQueryBuilder(db).table("user").sets(mapOf("name" to "wang", "age" to 2)).where("id", "=", id).update();
-    println("更新user表：" + f)
-
-    // 查询多条数据
-    val rows = DbQueryBuilder(db).table("user").orderBy("id").limit(1).findMaps()
-    println("查询user表：" + rows)
-
-    // 删除
-    f = DbQueryBuilder(db).table("user").where("id", "=", id).delete();
-    println("删除user表：" + f)
-}
-```
-
-# 高级查询
-以下代码详细参考单元测试类`EsQueryBuilderTests`
-
-## 1. 基本查询(条件+分页+排序)
+直接创建`EsQueryBuilder`对象, 第一个参数是 `EsManager` 对象. 
 
 ```kotlin
-@Test
-fun testSearch() {
-    // 构建query builder
-    val query = ESQueryBuilder()
-            .must("searchable", "=", true)
-            .must("driverUserName", "=", "张三")
-            .select("cargoId", "driverUserName", "loadAddress", "companyId")
-            .orderByField("id")
-            .limit(10, 30)
+val query = EsQueryBuilder(EsManager.instance())
+val query = EsQueryBuilder() // 第一个参数有默认值 EsManager.instance()
+```
 
-    // 执行搜索
-    val (list, size) = query.searchDocs(RecentOrder::class.java)
-    println("查到 $size 个文档")
-    for (item in list)
-        println(item)
+## 2 查询
+
+### 2.1 `index()` 指定索引名, `type()` 指定索引类型
+es7以后废弃type, 默认都是`_doc`
+
+```kotlin
+query.index("user_index").type("_doc") 
+```
+
+### 2.2 `filter()`/`must()`/`mustNot()`/`should()` 条件
+
+我们使用`filter()`/`must()`/`mustNot()`/`should()`方法来过滤查询结果。这些方法需要3个参数： 1 字段名 2 操作符 3 字段值. 
+
+```kotlin
+query.index("user_index").type("_doc").filter("username", "=", "john");
+```
+
+多次调用 `filter()`/`must()`/`mustNot()`/`should()` 方法会构建多个过滤条件, 并按对应方法名来分组条件, 可参考 `BoolQueryBuilder` 对应的 `filter()`/`must()`/`mustNot()`/`should()` 方法
+
+```kotlin
+query.index("user_index").type("_doc").should("username", "=", "john").should("username", "=", "jane");
+```
+
+你可以使用任意的操作符，如 `IN`, `BETWEEN`, `>`, `=<`, `!=`...  
+
+如果你使用的是多值操作符，则字段值需要传递数组`Array`或列索引`List`
+
+```kotlin
+query.index("user_index").type("_doc").filter("logins", "<=", 1);
+query.index("user_index").type("_doc").must("logins", ">", 50);
+query.index("user_index").type("_doc").mustNot("username", "IN", arrayOf("john","mark","matt"));
+query.index("user_index").type("_doc").should("joindate", "BETWEEN", Pair(then, now)); // 等价于下面语句
+query.index("user_index").type("_doc").mustBetween("joindate", then, now);
+```
+
+### 2.3 `select()` 字段名
+
+默认情况下，Select语句会select全部字段（`SELECT * ...`）, 但是你也可以通过调用`EsQueryBuilder::select()` 来指定返回的字段
+
+```kotlin
+query.select("username", "password").index("user_index").type("_doc").must("username", "=", "john");
+```
+
+我们来解释一下上面的链式方法调用。首先，我们调用`select()` 来指定返回的字段；其次，我们调用 `index()` 来指定要查询的索引；最后，我们调用 `where()` 来搜索我们想要的数据。
+
+生成es查询dsl如下
+
+```json
+POST user_index/_doc/_search
+{
+  "query" : {
+    "bool" : {
+      "must" : [
+        {
+          "term" : {
+            "username" : {
+              "value" : "john",
+              "boost" : 1.0
+            }
+          }
+        }
+      ],
+      "disable_coord" : false,
+      "adjust_pure_negative" : true,
+      "boost" : 1.0
+    }
+  },
+  "_source" : {
+    "includes" : [
+      "password",
+      "username"
+    ],
+    "excludes" : [ ]
+  }
 }
 ```
 
-而使用原生Java High Level REST Client接口方式：
-```java
-// 构建query builder
-final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-final TermsQueryBuilder searchable = QueryBuilders.termQuery("searchable", true);
-final TermsQueryBuilder driverUserName = QueryBuilders.termQuery("driverUserName", "张三");
-queryBuilder.must(searchable).must(driverUserName);
+### 2.4 `limit()` 限制行数
 
-SearchSourceBuilder searchSource = new SearchSourceBuilder();
-searchSource.query(queryBuilder);
-searchSource.fetchSource(new String[]{"cargoId", "driverUserName", "loadAddress", "companyId"},
-        new String[0]);
-searchSource.sort("id", SortOrder.ASC);
-searchSource.from(30);
-searchSource.size(10);
+有时候我们查询的索引里有大量数据，但通常我们只需要某几行数据。此时通过调用 `limit(start:Int, offset:Int = 0)` 方法来限制返回某几行
 
-// 执行搜索
-......
+```kotlin
+query.index("post_index").limit(10, 30);
 ```
 
-对比生成的es搜索DSL如下, 左边是jkorm-es生成代码, 右边是原生API生成代码
-![](img/es/search-compare.png)
-基本上一样, 只是select字段的顺序不同, 这是因为jkorm-es使用了HashSet(排重)来接收字段, 导致字段顺序变更
+生成es查询dsl如下：
 
-## 2. 复杂查询
-非常复杂的查询, 但使用 jkorm-es 库可以做到非常简单与可读
+```json
+POST post_index/_doc/_search
+{
+  "from" : 30,
+  "size" : 10
+}
+```
+
+### 2.5 `orderByField()` 排序
+
+你可以需要返回的数据按某个顺序来排列，如按时间倒序/按分数生序。 你可以调用 `orderByField(column:String, direction:String? = null)` 来实现排序，该方法需要2个参数： 1 排序字段名 2 排序方法（可选，默认为`ASC`）。多次调用 `orderByField()` 会追加多个排序字段。
+
+```kotlin
+query.index("post_index").orderByField(`published`, `DESC`);
+```
+
+生成es查询dsl如下：
+
+```json
+{
+  "from" : 30,
+  "size" : 10
+}
+```
+
+### 2.6 执行查询，并获得结果
+
+```kotlin
+val query = EsQueryBuilder().index("user_index").type("_doc")
+
+// 查询单个文档
+val user: User? = query.searchDoc(User::class.java)
+
+// 查询多个文档
+val (users, size) = query.searchDocs(User::class.java) // users类型是List<User>, size类型是Long
+
+// 统计行数
+val count: Long = query.count()
+```
+
+
+## 3 批量更新
+
+如果你要通过查询来批量更新文档, 则可以`EsQueryBuilder.updateDocs(script)`, 其中参数`script`是文档更新的脚本, 详情参考[Update By Query API](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html)
+
+```kotlin
+val query = EsQueryBuilder().index("post_index").must("_id", "1")
+val f:Boolean = query.updateDocs("ctx._source.visit++") // 访问数+1
+```
+
+## 4 批量删除
+
+如果你要通过查询来批量删除文档, 则可以`EsQueryBuilder.deleteDocs(script)`, 其内部实现是先通过游标搜索`EsManager#scrollDocs()`查询出匹配的文档id, 然后再通过`EsManager#bulkDeleteDocs()`来根据id删除文档.
+
+```
+val ids = EsQueryBuilder().index(index).type(type).deleteDocs()
+println("删除" + ids.size + "个文档: id in " + ids)
+```
+
+## 嵌套条件
+
+非常复杂的查询, 但使用 `EsQueryBuilder` 可以做到非常简单与可读
 
 ```kotlin
 /**
@@ -226,7 +168,7 @@ searchSource.size(10);
  */
 @Test
 fun testComplexSearch() {
-    val query = ESQueryBuilder()
+    val query = EsQueryBuilder()
             .index(index)
             .type(type)
             .mustWrap { // city
@@ -326,18 +268,17 @@ searchSource.sort(sortBuilder);
 对比生成的es搜索DSL如下, 左边是jkorm-es生成代码, 右边是原生API生成代码
 ![](img/es/complex-search-compare.png)
 基本上一样, 只是select字段的顺序不同, 这是因为jkorm-es使用了HashSet(排重)来接收字段, 导致字段顺序变更
-
-# 聚合
+## 聚合
 以下代码详细参考单元测试类`EsAggregationTests`
 
-## 1. 简单聚合
+### 6.1 简单聚合
 demo: 按照队伍team进行分组(桶)
 
 ```kotlin
 @Test
 public void testAgg(){
     // 构建聚合查询
-    val query = ESQueryBuilder()
+    val query = EsQueryBuilder()
         .index(index)
         .type(type)
         .aggByAndWrapSubAgg("team") { // 别名是team
@@ -406,7 +347,7 @@ searchSource.aggregation(teamAgg.subAggregation(posAgg).subAggregation(ageAgg))
 }
 ```
 
-### 解析聚合结果
+#### 解析聚合结果
 方法 `net.jkcode.jkmvc.es._JestKt.path: String, aggValueCollector: (bucket: Bucket, row: MutableMap<String, Any>) -> Unit = ::handleSingleValueAgg): ArrayList<Map<String, Any>>` 将树型的聚合结果进行扁平化, 转为多行的Map, 每个Map的key是统计字段名, value是统计字段值;
 如上面代码的结果输出如下:
 
@@ -420,13 +361,13 @@ searchSource.aggregation(teamAgg.subAggregation(posAgg).subAggregation(ageAgg))
 
 限制: 只能收集单值聚合的结果, 其他聚合对象需手动收集
 
-## 2. 复杂聚合
+### 6.2 复杂聚合
 
 ```kotlin
 @Test
 fun testComplexAgg(){
     // 构建聚合查询
-    val query = ESQueryBuilder()
+    val query = EsQueryBuilder()
             .index(index)
             .type(type)
             .aggByAndWrapSubAgg("team") { // 每个队伍 -- select count(position), sum(salary), sum(games.score), team from player_index group by team;

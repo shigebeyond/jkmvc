@@ -63,7 +63,7 @@ class EsDocRepository<T: Any>(
     /**
      * 获得查询构建器
      */
-    fun queryBuilder(): ESQueryBuilder{
+    fun queryBuilder(): EsQueryBuilder{
         return esmgr.queryBuilder().index(index).type(type)
     }
 
@@ -117,7 +117,7 @@ class EsDocRepository<T: Any>(
      * 删多个
      */
     @JvmOverloads
-    fun deleteAll(query: ESQueryBuilder? = null, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): Collection<String> {
+    fun deleteAll(query: EsQueryBuilder? = null, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): Collection<String> {
         return prepareQueryBuilder(query).deleteDocs(pageSize, scrollTimeInMillis)
     }
 
@@ -140,7 +140,7 @@ class EsDocRepository<T: Any>(
      * 查多个
      */
     @JvmOverloads
-    fun findAll(query: ESQueryBuilder? = null): Pair<List<T>, Long> {
+    fun findAll(query: EsQueryBuilder? = null): Pair<List<T>, Long> {
         return prepareQueryBuilder(query).searchDocs(model)
     }
 
@@ -152,7 +152,7 @@ class EsDocRepository<T: Any>(
      * @return
      */
     @JvmOverloads
-    fun scrollAll(query: ESQueryBuilder? = null, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): EsManager.EsScrollCollection<T>{
+    fun scrollAll(query: EsQueryBuilder? = null, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): EsManager.EsScrollCollection<T>{
         return prepareQueryBuilder(query).scrollDocs(model, pageSize, scrollTimeInMillis)
     }
 
@@ -160,14 +160,14 @@ class EsDocRepository<T: Any>(
      * 计数
      */
     @JvmOverloads
-    fun count(query: ESQueryBuilder? = null): Long {
+    fun count(query: EsQueryBuilder? = null): Long {
         return prepareQueryBuilder(query).count()
     }
 
     /**
      * 准备好query buider
      */
-    protected fun prepareQueryBuilder(query: ESQueryBuilder?): ESQueryBuilder {
+    protected fun prepareQueryBuilder(query: EsQueryBuilder?): EsQueryBuilder {
         if(query == null)
             return queryBuilder()
 

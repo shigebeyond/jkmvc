@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.tests.es
 
-import net.jkcode.jkmvc.es.ESQueryBuilder
+import net.jkcode.jkmvc.es.EsQueryBuilder
 import net.jkcode.jkmvc.es.EsManager
 import net.jkcode.jkmvc.es.annotation.esIdProp
 import net.jkcode.jkmvc.es.flattenAggRows
@@ -183,7 +183,7 @@ curl 'localhost:9200/message_index/_doc/_search?pretty=true'  -H "Content-Type: 
     fun testSearch() {
         val ts = startTime + 120 // 2分钟
         println("timestamp: $ts")
-        val query = ESQueryBuilder()
+        val query = EsQueryBuilder()
 //                .filter("fromUid", ">=", 7)
                 .must("toUid", ">=", 8)
                 .must("created", "<=", 120)
@@ -213,7 +213,7 @@ curl 'localhost:9200/message_index/_doc/_search?pretty=true'  -H "Content-Type: 
 
     @Test
     fun testSearch2() {
-        val (list, size) = ESQueryBuilder().index(index).type(type).searchDocs(HashMap::class.java)
+        val (list, size) = EsQueryBuilder().index(index).type(type).searchDocs(HashMap::class.java)
         println("查到 $size 个文档")
         for (item in list)
             println(item)
@@ -222,7 +222,7 @@ curl 'localhost:9200/message_index/_doc/_search?pretty=true'  -H "Content-Type: 
     @Test
     fun testScroll() {
         val pageSize = 5
-        val c = ESQueryBuilder().index(index).type(type).scrollDocs(MessageEntity::class.java, pageSize, 100000)
+        val c = EsQueryBuilder().index(index).type(type).scrollDocs(MessageEntity::class.java, pageSize, 100000)
         val times = c.size / pageSize + 1
         println("记录数=${c.size}, 每次取=$pageSize, 取次数=$times")
         for (item in c)
@@ -238,14 +238,14 @@ curl 'localhost:9200/message_index/_doc/_search?pretty=true'  -H "Content-Type: 
     @Test
     fun testSearchDeleteDoc() {
         val pageSize = 5
-        val query = ESQueryBuilder()
+        val query = EsQueryBuilder()
         val ids = esmgr.deleteDocsByQuery2(index, type, query, pageSize, 100000)
         println("删除" + ids.size + "个文档: id in " + ids)
     }
 
     @Test
     fun testStat() {
-        val query = ESQueryBuilder()
+        val query = EsQueryBuilder()
         query.aggByAndWrapSubAgg("fromUid") {
             aggByAndWrapSubAgg("toUid", null) {
                 aggBy("count(id)", "nid")

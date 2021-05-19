@@ -150,13 +150,13 @@ fun testMultiGetDoc() {
 ```
 
 ## 搜索文档
-通过`ESQueryBuilder`来挂载搜索条件
+通过`EsQueryBuilder`来挂载搜索条件
 ```
 @Test
 fun testSearch() {
     val ts = startTime + 120 // 2分钟
     println("timestamp: $ts")
-    val query = ESQueryBuilder()
+    val query = EsQueryBuilder()
             .filter("fromUid", ">=", 7)
             .must("toUid", ">=", 8)
             .must("created", "<=", 120)
@@ -189,7 +189,7 @@ fun testSearch() {
 @Test
 fun testScroll() {
     val pageSize = 5
-    val c = ESQueryBuilder().index(index).type(type).scrollDocs(MessageEntity::class.java, pageSize, 100000)
+    val c = EsQueryBuilder().index(index).type(type).scrollDocs(MessageEntity::class.java, pageSize, 100000)
     val times = c.size / pageSize + 1
     println("记录数=${c.size}, 每次取=$pageSize, 取次数=$times")
     for (item in c)
@@ -207,12 +207,12 @@ fun testDeleteDoc() {
 ```
 
 ## 搜索并删除文档
-通过`ESQueryBuilder`来挂载搜索条件
+通过`EsQueryBuilder`来挂载搜索条件
 ```kotlin
 @Test
 fun testSearchDeleteDoc() {
     val pageSize = 5
-    val query = ESQueryBuilder()
+    val query = EsQueryBuilder()
     val ids = esmgr.deleteDocsByQuery2(index, type, query, pageSize, 100000)
     println("删除" + ids.size + "个文档: id in " + ids)
 }

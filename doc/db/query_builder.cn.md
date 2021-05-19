@@ -49,7 +49,8 @@ query.from("user").where("username", "=", "john").orWhere("username", "=", "jane
 query.from("user").where("logins", "<=", 1);
 query.from("user").where("logins", ">", 50);
 query.from("user").where("username", "IN", arrayOf("john","mark","matt"));
-query.from("user").where("joindate", "BETWEEN", Pair(then, now));
+query.from("user").where("joindate", "BETWEEN", Pair(then, now)); // 等价于下面语句
+query.from("user").whereBetween("joindate", then, now);
 ```
 
 ### 2.3 `select` 字段名
@@ -103,7 +104,7 @@ SELECT DISTINCT `username` FROM `posts`
 有时候我们查询的表里有大量数据，但通常我们只需要某几行数据。此时通过调用 `limit(start:Int, offset:Int = 0)` 方法来限制返回某几行
 
 ```
-query.from(`posts`).limit(10, 30);
+query.from("posts").limit(10, 30);
 ```
 
 生成sql如下：
@@ -117,7 +118,7 @@ SELECT * FROM `posts` LIMIT 10 OFFSET 30
 你可以需要返回的数据按某个顺序来排列，如按时间倒序/按分数生序。 你可以调用 `orderBy(column:String, direction:String? = null)` 来实现排序，该方法需要2个参数： 1 排序字段名 2 排序方法（可选，默认为`ASC`）。多次调用 `orderBy()` 会追加多个排序字段。
 
 ```
-query.from(`posts`).orderBy(`published`, `DESC`);
+query.from("posts").orderBy(`published`, `DESC`);
 ```
 
 生成sql如下：

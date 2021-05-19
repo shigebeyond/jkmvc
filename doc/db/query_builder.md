@@ -44,7 +44,8 @@ You can use any operator you want.  Examples include `IN`, `BETWEEN`, `>`, `=<`,
 query.from("user").where("logins", "<=", 1);
 query.from("user").where("logins", ">", 50);
 query.from("user").where("username", "IN", arrayOf("john","mark","matt"));
-query.from("user").where("joindate", "BETWEEN", Pair(then, now));
+query.from("user").where("joindate", "BETWEEN", Pair(then, now)); // equals next code
+query.from("user").whereBetween("joindate", then, now);
 ```
 
 ### 2.3 select columns
@@ -98,7 +99,7 @@ SELECT DISTINCT `username` FROM `posts`
 When querying large sets of data, it is often better to limit the results and page through the data one chunk at a time. This is done using the `limit(start:Int, offset:Int = 0)` methods.
 
 ```
-query.from(`posts`).limit(10, 30);
+query.from("posts").limit(10, 30);
 ```
 
 This query would generate the following SQL:
@@ -112,7 +113,7 @@ SELECT * FROM `posts` LIMIT 10 OFFSET 30
 Often you will want the results in a particular order and rather than sorting the results, it's better to have the results returned to you in the correct order. You can do this by using the `orderBy(column:String, direction:String? = null)` method. It takes the column name and an optional direction string as the parameters. Multiple `orderBy()` methods can be used to add additional sorting capability.
 
 ```
-query.from(`posts`).orderBy(`published`, `DESC`);
+query.from("posts").orderBy(`published`, `DESC`);
 ```
 
 This query would generate the following SQL:

@@ -23,7 +23,7 @@ class EsAggregationTests {
 
     private val esmgr = EsManager.instance()
 
-    private val myBuilder = ESQueryBuilder().index(index).type(type)
+    private val myBuilder = EsQueryBuilder().index(index).type(type)
 
     val nativebuilder = SearchSourceBuilder()
 
