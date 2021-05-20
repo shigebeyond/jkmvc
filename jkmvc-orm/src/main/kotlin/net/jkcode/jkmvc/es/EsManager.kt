@@ -505,7 +505,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @return
      */
     @JvmOverloads
-    fun <T> updateDoc(index: String, type: String, script: String, _id: String, params: Map<String, Any?> = emptyMap()): Boolean {
+    fun updateDoc(index: String, type: String, script: String, _id: String, params: Map<String, Any?> = emptyMap()): Boolean {
         val script2 = Script(ScriptType.INLINE, "painless", script, params)
         return tryExecuteReturnSucceeded {
             buildUpdateAction(index, type, script2, _id)
@@ -584,19 +584,27 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      *
      * @param index 索引名
      * @param type  类型
-     * @param script
+     * @param script 脚本
      * @param queryBuilder
+     * @param params 脚本参数
      * @param pageSize
      * @param scrollTimeInMillis
      */
     @JvmOverloads
-    fun updateDocsByQuery(index: String, type: String, script: String, queryBuilder: EsQueryBuilder, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): UpdateByQueryResult {
-        val xContentBuilder: XContentBuilder = XContentFactory.jsonBuilder()
+    fun updateDocsByQuery(index: String, type: String, script: String, queryBuilder: EsQueryBuilder, params: Map<String, Any?> = emptyMap(), pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): UpdateByQueryResult {
+        /*val xContentBuilder: XContentBuilder = XContentFactory.jsonBuilder()
                 .startObject()
                 .field("query", queryBuilder.toQuery())
                 .startObject("script")
                 .field("inline", script)
                 .endObject()
+                .endObject()*/
+
+        val script2 = Script(ScriptType.INLINE, "painless", script, params)
+        val xContentBuilder: XContentBuilder = XContentFactory.jsonBuilder()
+        xContentBuilder.startObject()
+                .field("query", queryBuilder.toQuery())
+                .field("script", script2.toXContent(xContentBuilder, null))
                 .endObject()
 
         xContentBuilder.flush()

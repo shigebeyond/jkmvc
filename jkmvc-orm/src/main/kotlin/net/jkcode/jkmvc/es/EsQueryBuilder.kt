@@ -1579,12 +1579,42 @@ class EsQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * 通过查询来批量更新
      *    参考 https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html
      *
-     * @param script
+     * @param script 脚本
+     * @param params 脚本参数
      * @param pageSize
      * @param scrollTimeInMillis
+     * @return
      */
     @JvmOverloads
-    fun updateDocs(script: String, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): UpdateByQueryResult {
-        return esmgr.updateDocsByQuery(index, type, script, this, pageSize, scrollTimeInMillis)
+    fun updateDocs(script: String, params: Map<String, Any?> = emptyMap(), pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): UpdateByQueryResult {
+        return esmgr.updateDocsByQuery(index, type, script, this, params, pageSize, scrollTimeInMillis)
+    }
+
+    /**
+     * 通过查询来自增
+     *
+     * @param field 字段
+     * @param step 自增步长
+     * @return
+     */
+    @JvmOverloads
+    fun increment(field: String, step: Int = 1): UpdateByQueryResult {
+        return this.updateDocs("ctx._source.${field} += params.step", mapOf(
+            "step" to step
+        ));
+    }
+
+    /**
+     * 通过查询来自减
+     *
+     * @param field 字段
+     * @param step 自减步长
+     * @return
+     */
+    @JvmOverloads
+    fun decrement(field: String, step: Int = 1): UpdateByQueryResult {
+        return this.updateDocs("ctx._source.${field} -= params.step", mapOf(
+            "step" to step
+        ));
     }
 }

@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.es
 
+import io.searchbox.core.UpdateByQueryResult
 import net.jkcode.jkmvc.es.annotation.esDoc
 import net.jkcode.jkmvc.es.annotation.esIdProp
 import net.jkcode.jkutil.common.getPropertyValue
@@ -88,6 +89,34 @@ class EsDocRepository<T: Any>(
     fun update(item: T): Boolean {
         val id = getId(item) ?: throw IllegalArgumentException("Miss _id")
         return esmgr.updateDoc(index, type, item, id)
+    }
+
+    /**
+     * 通过查询来自增
+     *
+     * @param field 字段
+     * @param step 自增步长
+     * @return
+     */
+    @JvmOverloads
+    fun increment(id: String, field: String, step: Int = 1): Boolean {
+        return esmgr.updateDoc(index, type, "ctx._source.${field} += params.step", id, mapOf(
+                "step" to step
+        ));
+    }
+
+    /**
+     * 通过查询来自减
+     *
+     * @param field 字段
+     * @param step 自减步长
+     * @return
+     */
+    @JvmOverloads
+    fun decrement(id: String, field: String, step: Int = 1): Boolean {
+        return esmgr.updateDoc(index, type, "ctx._source.${field} -= params.step", id, mapOf(
+                "step" to step
+        ));
     }
 
     /**
