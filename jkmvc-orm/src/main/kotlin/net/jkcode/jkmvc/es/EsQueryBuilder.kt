@@ -1591,6 +1591,34 @@ class EsQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
     }
 
     /**
+     * 通过查询来设置字段值
+     *
+     * @param field 字段名
+     * @param value 字段值
+     * @return
+     */
+    @JvmOverloads
+    fun updateDocField(field: String, value: Any?): UpdateByQueryResult {
+        return this.updateDocs("ctx._source.${field} += params.$field", mapOf(
+                field to value
+        ));
+    }
+
+    /**
+     * 通过查询来设置字段值
+     *
+     * @param data 字段值
+     * @return
+     */
+    @JvmOverloads
+    fun updateDocFields(data: Map<String, Any?>): UpdateByQueryResult {
+        val script = data.keys.joinToString(";") { field ->
+            "ctx._source.${field} += params.$field"
+        }
+        return this.updateDocs(script, data);
+    }
+
+    /**
      * 通过查询来自增
      *
      * @param field 字段
@@ -1598,7 +1626,7 @@ class EsQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @return
      */
     @JvmOverloads
-    fun increment(field: String, step: Int = 1): UpdateByQueryResult {
+    fun incrementDocField(field: String, step: Int = 1): UpdateByQueryResult {
         return this.updateDocs("ctx._source.${field} += params.step", mapOf(
             "step" to step
         ));
@@ -1612,7 +1640,7 @@ class EsQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @return
      */
     @JvmOverloads
-    fun decrement(field: String, step: Int = 1): UpdateByQueryResult {
+    fun decrementDocField(field: String, step: Int = 1): UpdateByQueryResult {
         return this.updateDocs("ctx._source.${field} -= params.step", mapOf(
             "step" to step
         ));
