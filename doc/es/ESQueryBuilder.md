@@ -49,11 +49,11 @@ query.should("joindate", "BETWEEN", Pair(then, now)); // 等价于下面语句
 query.shouldBetween("joindate", then, now);
 
 
-// like = match
+// like = match (搜索的词被分词)
 query.must("username", "like", "John Wilson"); // 等价于下面语句
 query.must("username", "match", "John Wilson");
 
-// matchPhrase
+// matchPhrase (搜索的词不分词)
 query.must("username", "matchPhrase", "John");
 ```
 

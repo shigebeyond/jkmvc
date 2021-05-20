@@ -600,8 +600,15 @@ gradle :jkmvc-example:build -x test
 16. [using](doc/orm/using.md)
 17. [relation using callback](doc/orm/cbrelation.md)
 
+## es module(ElasticSearch client)
+18. [getting started](doc/es/getting_started.md)
+19. [Entity - mapping es document](doc/es/Entity.md)
+20. [EsManager - manage es index](doc/es/EsManager.md)
+21. [EsDocRepository - as entity repository](doc/es/EsDocRepository.md)
+22. [EsQueryBuilder - query builder](doc/es/EsQueryBuilder.md)
+
 ## other
-18. [deploy](doc/deploy.md)
+23. [deploy](doc/deploy.md)
 
 # 中文文档
 
@@ -628,6 +635,13 @@ gradle :jkmvc-example:build -x test
 16. [使用](doc/orm/using.cn.md)
 17. [基于回调的关联关系](doc/orm/cbrelation.cn.md)
 
+## es模块(ElasticSearch client)
+18. [快速开始](doc/es/getting_started.md)
+19. [实体类 - 映射文档](doc/es/Entity.md)
+20. [EsManager - 管理es索引](doc/es/EsManager.md)
+21. [EsDocRepository - 实体仓库类](doc/es/EsDocRepository.md)
+22. [EsQueryBuilder - 查询构建器](doc/es/EsQueryBuilder.md)
+
 ## 其他
-18. [部署](doc/deploy.cn.md)
-19. [changelog](doc/changelog.md)
+23. [部署](doc/deploy.cn.md)
+24. [changelog](doc/changelog.md)
