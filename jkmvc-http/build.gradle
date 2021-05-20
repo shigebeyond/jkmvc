@@ -4,7 +4,7 @@ dependencies{
     if(env == 'dev')
         compile project(':jkguard')
     else
-        compile "net.jkcode.jkmvc:jkguard:$jkguard_version"
+        compile "net.jkcode:jkguard:$jkguard_version"
 
     // 加密
     compile "commons-codec:commons-codec:1.5"
