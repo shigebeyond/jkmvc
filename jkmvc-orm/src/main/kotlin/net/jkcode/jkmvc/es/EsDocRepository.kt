@@ -152,7 +152,7 @@ class EsDocRepository<T: Any>(
      * @return
      */
     @JvmOverloads
-    fun scrollAll(query: EsQueryBuilder? = null, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): EsManager.EsScrollCollection<T>{
+    fun scrollAll(query: EsQueryBuilder? = null, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): EsScrollCollection<T>{
         return prepareQueryBuilder(query).scrollDocs(model, pageSize, scrollTimeInMillis)
     }
 

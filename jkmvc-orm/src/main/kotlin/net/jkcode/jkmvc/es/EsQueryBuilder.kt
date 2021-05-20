@@ -1558,7 +1558,7 @@ class EsQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @return
      */
     @JvmOverloads
-    fun <T> scrollDocs(clazz: Class<T>, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): EsManager.EsScrollCollection<T> {
+    fun <T> scrollDocs(clazz: Class<T>, pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): EsScrollCollection<T> {
         initIndexTypeFromClass(clazz)
         return esmgr.scrollDocs(index, type, this, clazz, pageSize, scrollTimeInMillis)
     }
