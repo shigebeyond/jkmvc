@@ -99,7 +99,7 @@ class EsDocRepository<T: Any>(
      * @return
      */
     @JvmOverloads
-    fun increment(id: String, field: String, step: Int = 1): Boolean {
+    fun incr(id: String, field: String, step: Int = 1): Boolean {
         return esmgr.updateDoc(index, type, "ctx._source.${field} += params.step", id, mapOf(
                 "step" to step
         ));
@@ -113,7 +113,7 @@ class EsDocRepository<T: Any>(
      * @return
      */
     @JvmOverloads
-    fun decrement(id: String, field: String, step: Int = 1): Boolean {
+    fun decr(id: String, field: String, step: Int = 1): Boolean {
         return esmgr.updateDoc(index, type, "ctx._source.${field} -= params.step", id, mapOf(
                 "step" to step
         ));

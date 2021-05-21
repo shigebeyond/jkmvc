@@ -1595,9 +1595,8 @@ class EsQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param field 字段名
      * @param value 字段值
      */
-    @JvmOverloads
-    fun updateDocField(field: String, value: Any?) {
-        this.updateDocs("ctx._source.${field} += params.$field", mapOf(
+    fun updateField(field: String, value: Any?) {
+        this.updateDocs("ctx._source.${field} = params.$field", mapOf(
                 field to value
         ));
     }
@@ -1607,10 +1606,9 @@ class EsQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      *
      * @param data 字段值
      */
-    @JvmOverloads
-    fun updateDocFields(data: Map<String, Any?>) {
+    fun updateFields(data: Map<String, Any?>) {
         val script = data.keys.joinToString(";") { field ->
-            "ctx._source.${field} += params.$field"
+            "ctx._source.${field} = params.$field"
         }
         this.updateDocs(script, data);
     }
@@ -1622,7 +1620,7 @@ class EsQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param step 自增步长
      */
     @JvmOverloads
-    fun incrementDocField(field: String, step: Int = 1) {
+    fun incrField(field: String, step: Int = 1) {
         this.updateDocs("ctx._source.${field} += params.step", mapOf(
             "step" to step
         ));
@@ -1636,7 +1634,7 @@ class EsQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @return
      */
     @JvmOverloads
-    fun decrementDocField(field: String, step: Int = 1) {
+    fun decrField(field: String, step: Int = 1) {
         this.updateDocs("ctx._source.${field} -= params.step", mapOf(
             "step" to step
         ));
