@@ -10,6 +10,22 @@ ORM 允许你像操作java对象一样，操作数据库。一旦你定义好元
 
 ## 开始
 
+## 1 添加依赖
+1. gradle
+```
+compile "net.jkcode.jkmvc:jkmvc-orm:1.9.0"
+```
+
+2. maven
+```
+<dependency>
+    <groupId>net.jkcode.jkmvc</groupId>
+    <artifactId>jkmvc-orm</artifactId>
+    <version>1.9.0</version>
+</dependency>
+```
+
+## 2 配置
 在使用 ORM 之前，你必须先定义好数据库配置：
 
 vim src/main/resources/dataSources.yaml

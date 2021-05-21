@@ -1,6 +1,21 @@
 # 数据库操作
 
-## 1 数据库配置, 支持读写分离
+## 1 添加依赖
+1. gradle
+```
+compile "net.jkcode.jkmvc:jkmvc-orm:1.9.0"
+```
+
+2. maven
+```
+<dependency>
+    <groupId>net.jkcode.jkmvc</groupId>
+    <artifactId>jkmvc-orm</artifactId>
+    <version>1.9.0</version>
+</dependency>
+```
+
+## 2 数据库配置, 支持读写分离
 
 vim src/main/resources/dataSources.yaml
 
@@ -25,7 +40,7 @@ default:
 你可以配置多个数据库，只要使用不同的数据库名就行
 
 
-## 2 获得数据库操作对象
+## 3 获得数据库操作对象
 
 数据库操作类是 `net.jkcode.jkmvc.db.Db`，主要有2个作用
 1. 管理数据库连接
@@ -40,11 +55,11 @@ default:
 val db = Db.instance();
 ```
 
-## 3 使用 Db 对象来执行sql
+## 4 使用 Db 对象来执行sql
 
 我们先来看看 Db 类的属性与方法
 
-### 3.1 元数据相关的属性与方法
+### 4.1 元数据相关的属性与方法
 
 属性/方法 | 作用
 --- | ---
@@ -52,7 +67,7 @@ dbType: DbType | 获得数据库类型 根据driverClass来获得
 listColumns(table: String): List<String> | 获得表的所有列
 close(): Unit | 关闭
 
-### 3.2 事务相关的方法
+### 4.2 事务相关的方法
 
 方法 | 作用
 --- | ---
@@ -62,14 +77,14 @@ rollback(): Boolean | 回滚事务
 transaction(statement: Db.() -> T): T | 执行事务，封装了事务的开启/提交与回滚的通过逻辑
 isInTransaction(): Boolean | 是否在事务中
 
-### 3.3 执行更新sql的方法
+### 4.3 执行更新sql的方法
 
 方法 | 作用
 --- | ---
 execute(sql: String, params: List<*> = emptyList<Any>(), generatedColumn: String? = null): Long | 执行更新
 batchExecute(sql: String, paramses: List<Any?>): IntArray | 批量更新: 每次更新sql参数不一样
 
-### 3.4 执行查询sql的方法
+### 4.4 执行查询sql的方法
 
 1. 需要转换的底层方法
 
@@ -90,7 +105,7 @@ inline queryValue(sql: String, params: List<*> = emptyList<Any>()): T? | 查询�
 queryMaps(sql: String, params: List<*> = emptyList<Any>(), convertingColumn: Boolean): List<Map<String, Any?>> | 查询多行, 并将每行转为 `Map`
 queryMap(sql: String, params: List<*> = emptyList<Any>(), convertingColumn: Boolean): Map<String, Any?>? | 查询一行, 并转为 `Map`
 
-### 3.5 转义与预览的方法
+### 4.5 转义与预览的方法
 
 属性/方法 | 作用
 --- | ---
@@ -99,14 +114,14 @@ quote(value: Any?): String | 转义值
 quoteColumn(column: CharSequence): String | 转义字段名
 quoteTable(table: CharSequence): String | 转义表名
 
-### 3.6 数据库字段与对象属性名互转的方法，主要用在 model 中
+### 4.6 数据库字段与对象属性名互转的方法，主要用在 model 中
 
 属性/方法 | 作用
 --- | ---
 column2Prop(column: String): String | 根据db字段名，获得对象属性名
 prop2Column(prop: String): String | 根据对象属性名，获得db字段名
 
-## 4 例子
+## 5 例子
 
 ```
 // 获得 Db 对象

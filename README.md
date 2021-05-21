@@ -11,14 +11,30 @@ Inspired by 2 php frameworks: [kohana](https://github.com/kohana/kohana) and [sk
 
 Take `jkmvc/jkmvc-example` for example.
 
-## 1 Gradle add jkmvc dependecies
+## 1 Add jkmvc-http dependecies
 
+1. gradle
 ```
 dependencies{
    compile "net.jkcode.jkmvc:jkmvc-http:1.9.0
    // If you want to use embedded jetty
    compile "net.jkcode.jkmvc:jkmvc-server-jetty:1.9.0
 }
+```
+
+2. maven
+```
+<dependency>
+    <groupId>net.jkcode.jkmvc</groupId>
+    <artifactId>jkmvc-http</artifactId>
+    <version>1.9.0</version>
+</dependency>
+<!-- If you want to use embedded jetty -->
+<dependency>
+    <groupId>net.jkcode.jkmvc</groupId>
+    <artifactId>jkmvc-server-jetty</artifactId>
+    <version>1.9.0</version>
+</dependency>
 ```
 
 ## 2 Configure JkFilter in web.xml
@@ -201,7 +217,23 @@ you can use operator `[]` to visit orm object's property, and also use property 
 
 `delete()` delete data
 
-## 1 Create tables
+## 1 Add dependency
+
+1. gradle
+```
+compile "net.jkcode.jkmvc:jkmvc-orm:1.9.0"
+```
+
+2. maven
+```
+<dependency>
+    <groupId>net.jkcode.jkmvc</groupId>
+    <artifactId>jkmvc-orm</artifactId>
+    <version>1.9.0</version>
+</dependency>
+```
+
+## 2 Create tables
 
 user table
 
@@ -229,7 +261,7 @@ CREATE TABLE `address` (
 ) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8 COMMENT='地址';
 ```
 
-## 2 Create Model
+## 3 Create Model
 
 use model, extends Orm
 
@@ -327,7 +359,7 @@ class AddressModel(id:Int? = null): Orm(id) {
 }
 ```
 
-## 3 Use Model in Controller
+## 4 Use Model in Controller
 
 ```
 package net.jkcode.jkmvc.example.controller

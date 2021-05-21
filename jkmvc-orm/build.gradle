@@ -8,7 +8,6 @@ dependencies{
         compile "net.jkcode:jkutil:$jkutil_version"
     }
 
-
     // datasource
     // single db
     // druid

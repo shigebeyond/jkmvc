@@ -5,14 +5,14 @@ jkorm-es库是一个Elasticsearch ORM框架, 底层基于[jest](https://github.c
 
 1. gradle
 ```
-compile "net.jkcode.jkmvc:jkmvc:1.9.0"
+compile "net.jkcode.jkmvc:jkmvc-orm:1.9.0"
 ```
 
 2. maven
 ```
 <dependency>
     <groupId>net.jkcode.jkmvc</groupId>
-    <artifactId>jkmvc</artifactId>
+    <artifactId>jkmvc-orm</artifactId>
     <version>1.9.0</version>
 </dependency>
 ```

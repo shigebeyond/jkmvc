@@ -10,6 +10,22 @@ By creating relationships between models that follow convention over configurati
 
 ## Getting started
 
+## 1 Add dependency
+1. gradle
+```
+compile "net.jkcode.jkmvc:jkmvc-orm:1.9.0"
+```
+
+2. maven
+```
+<dependency>
+    <groupId>net.jkcode.jkmvc</groupId>
+    <artifactId>jkmvc-orm</artifactId>
+    <version>1.9.0</version>
+</dependency>
+```
+
+## 2 Configure
 Before we use ORM, we must define database configuration.
 
 vim src/main/resources/dataSources.yaml

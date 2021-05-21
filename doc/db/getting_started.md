@@ -1,6 +1,21 @@
 # Manipulate database
 
-## 1 Configure dataSource
+## 1 Add dependency
+1. gradle
+```
+compile "net.jkcode.jkmvc:jkmvc-orm:1.9.0"
+```
+
+2. maven
+```
+<dependency>
+    <groupId>net.jkcode.jkmvc</groupId>
+    <artifactId>jkmvc-orm</artifactId>
+    <version>1.9.0</version>
+</dependency>
+```
+
+## 2 Configure dataSource
 
 vim src/main/resources/dataSources.yaml
 
@@ -24,7 +39,7 @@ default:
 
 You can configure multiple database, as long as you use a different database name.
 
-## 2 Get `Db` object
+## 3 Get `Db` object
 
 Database manipulation class is `net.jkcode.jkmvc.db.Db`, there are 2 usage
 1. Manage database connections
@@ -39,11 +54,11 @@ Just like:
 val db = Db.instance();
 ```
 
-## 3 Use the `Db` object to execute sql
+## 4 Use the `Db` object to execute sql
 
 Let's take a look at `Db` class's properties and methods
 
-### 3.1 Metadata related properties and methods
+### 4.1 Metadata related properties and methods
 
 Property / Method | Function
 --- --- --- ---
@@ -51,7 +66,7 @@ dbType: DbType | Get the database type by driverClass
 listColumns (table: String): List<String> | Get all the columns of the table
 close(): Unit | Close database connection
 
-### 3.2 Transaction-related methods
+### 4.2 Transaction-related methods
 
 Method | Function
 --- --- --- ---
@@ -61,14 +76,14 @@ rollback(): Boolean | Rollbak the transaction
 transaction (statement: Db.() -> T): T | Executes the transaction, encapsulating the transaction code with `begin()` / `commit()` / `rollback()`
 isInTransaction(): Boolean | Check whether in a transaction
 
-### 3.3 Update-sql executing method
+### 4.3 Update-sql executing method
 
 Method | Function
 --- --- --- ---
 execute(sql: String, params: List<*> = emptyList<Any>(), generatedColumn: String? = null): Long | Execute a update-sql
 batchExecute(sql: String, paramses: List<Any?>): IntArray | Batch update
 
-### 3.4 Query-sql executing method
+### 4.4 Query-sql executing method
 
 1. Low level method, which needs `transform`
 
@@ -89,7 +104,7 @@ Method | Function
 queryMaps(sql: String, params: List<*> = emptyList<Any>(), convertingColumn: Boolean): List<Map<String, Any?>> | Query multiple rows, transform each row into `Map`
 queryMap(sql: String, params: List<*> = emptyList<Any>(), convertingColumn: Boolean): Map<String, Any?>? | Query one row, and transform it into `Map`
 
-### 3.5 Quote / Preview sql methods
+### 4.5 Quote / Preview sql methods
 
 Property / Method | Function
 --- --- --- ---
@@ -98,14 +113,14 @@ quote(value: Any?): String | quote value
 quoteColumn(column: CharSequence): String | Quoted column name
 quoteTable(table: CharSequence): String | Quoted table name
 
-### 3.6 Database field and object property name-transforming methods, used in the model
+### 4.6 Database field and object property name-transforming methods, used in the model
 
 Property / Method | Function
 --- --- --- ---
 column2Prop(column: String): String | Get the object property name according the db field name
 prop2Column(prop: String): String | Get the db property name according the object property name
 
-## 4 Example
+## 5 Example
 
 ```
 // get `Db` object
