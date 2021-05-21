@@ -26,15 +26,12 @@ import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.common.xcontent.XContentFactory
 import org.elasticsearch.script.Script
 import org.elasticsearch.script.ScriptType
-import java.io.Closeable
 import java.sql.SQLException
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicInteger
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.set
 
 /**
  * es管理者
@@ -591,7 +588,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
      * @param scrollTimeInMillis
      */
     @JvmOverloads
-    fun updateDocsByQuery(index: String, type: String, script: String, queryBuilder: EsQueryBuilder, params: Map<String, Any?> = emptyMap(), pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): UpdateByQueryResult {
+    fun updateDocsByQuery(index: String, type: String, script: String, queryBuilder: EsQueryBuilder, params: Map<String, Any?> = emptyMap(), pageSize: Int = 1000, scrollTimeInMillis: Long = 3000) {
         /*val xContentBuilder: XContentBuilder = XContentFactory.jsonBuilder()
                 .startObject()
                 .field("query", queryBuilder.toQuery())
@@ -604,15 +601,17 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
         val xContentBuilder: XContentBuilder = XContentFactory.jsonBuilder()
         xContentBuilder.startObject()
                 .field("query", queryBuilder.toQuery())
-                .field("script", script2.toXContent(xContentBuilder, null))
-                .endObject()
+                .field("script")
+                script2.toXContent(xContentBuilder, null) // 写script
+        xContentBuilder.endObject()
 
         xContentBuilder.flush()
 
         //val payload = (xContentBuilder.getOutputStream() as ByteArrayOutputStream).toString("UTF-8")
         val payload = xContentBuilder.bytes().utf8ToString()
+        println("UpdateByQuery: " + payload)
 
-        return tryExecute {
+        val result = tryExecute {
             UpdateByQuery.Builder(payload)
                     .addIndex(index)
                     .addType(type)
@@ -620,6 +619,9 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
                     .setParameter("scroll", scrollTimeInMillis.toString() + "ms")
                     .build()
         }
+
+        if (!result.isSucceeded)
+            throw EsException("UpdateByQuery has failures (Use EsException.getResult() for more detail): ${result.failures}", result)
     }
 
     /**
@@ -716,7 +718,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
                     .build()
         }
 
-        handleBulkResult(result)
+        handleBulkResult(result, "index")
     }
 
     /**
@@ -741,20 +743,18 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
                     .addAction(actions)
                     .build()
         }
-        handleBulkResult(result)
+        handleBulkResult(result, "index")
     }
 
     /**
      * 处理批量结果
      */
-    private fun handleBulkResult(result: BulkResult?) {
-        val bulkResult = BulkResult(result)
-        if (!bulkResult.isSucceeded) {
-            val failedDocs: MutableMap<String, String> = HashMap()
-            for (item in bulkResult.failedItems) {
-                failedDocs[item.id] = item.error
+    private fun handleBulkResult(result: BulkResult, action: String) {
+        if (!result.isSucceeded) {
+            val failedDocs = result.failedItems.map {
+                "Doc[${it.id}]: ${it.error}"
             }
-            throw EsException("Bulk indexing has failures. Use EsException.getFailedDocs() for detailed messages [$failedDocs]", failedDocs)
+            throw EsException("Bulk ${action}ing has failures (Use EsException.getResult() for more detail): $failedDocs", result)
         }
     }
 
@@ -780,7 +780,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
                     .build()
         }
 
-        handleBulkResult(result)
+        handleBulkResult(result, "update")
     }
 
     /**
@@ -805,7 +805,7 @@ class EsManager protected constructor(protected val client: JestHttpClient) {
                     .build()
         }
 
-        handleBulkResult(result)
+        handleBulkResult(result, "delete")
     }
 
     /**

@@ -1583,11 +1583,10 @@ class EsQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @param params 脚本参数
      * @param pageSize
      * @param scrollTimeInMillis
-     * @return
      */
     @JvmOverloads
-    fun updateDocs(script: String, params: Map<String, Any?> = emptyMap(), pageSize: Int = 1000, scrollTimeInMillis: Long = 3000): UpdateByQueryResult {
-        return esmgr.updateDocsByQuery(index, type, script, this, params, pageSize, scrollTimeInMillis)
+    fun updateDocs(script: String, params: Map<String, Any?> = emptyMap(), pageSize: Int = 1000, scrollTimeInMillis: Long = 3000) {
+        esmgr.updateDocsByQuery(index, type, script, this, params, pageSize, scrollTimeInMillis)
     }
 
     /**
@@ -1595,11 +1594,10 @@ class EsQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      *
      * @param field 字段名
      * @param value 字段值
-     * @return
      */
     @JvmOverloads
-    fun updateDocField(field: String, value: Any?): UpdateByQueryResult {
-        return this.updateDocs("ctx._source.${field} += params.$field", mapOf(
+    fun updateDocField(field: String, value: Any?) {
+        this.updateDocs("ctx._source.${field} += params.$field", mapOf(
                 field to value
         ));
     }
@@ -1608,14 +1606,13 @@ class EsQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * 通过查询来设置字段值
      *
      * @param data 字段值
-     * @return
      */
     @JvmOverloads
-    fun updateDocFields(data: Map<String, Any?>): UpdateByQueryResult {
+    fun updateDocFields(data: Map<String, Any?>) {
         val script = data.keys.joinToString(";") { field ->
             "ctx._source.${field} += params.$field"
         }
-        return this.updateDocs(script, data);
+        this.updateDocs(script, data);
     }
 
     /**
@@ -1623,11 +1620,10 @@ class EsQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      *
      * @param field 字段
      * @param step 自增步长
-     * @return
      */
     @JvmOverloads
-    fun incrementDocField(field: String, step: Int = 1): UpdateByQueryResult {
-        return this.updateDocs("ctx._source.${field} += params.step", mapOf(
+    fun incrementDocField(field: String, step: Int = 1) {
+        this.updateDocs("ctx._source.${field} += params.step", mapOf(
             "step" to step
         ));
     }
@@ -1640,8 +1636,8 @@ class EsQueryBuilder @JvmOverloads constructor(protected val esmgr: EsManager = 
      * @return
      */
     @JvmOverloads
-    fun decrementDocField(field: String, step: Int = 1): UpdateByQueryResult {
-        return this.updateDocs("ctx._source.${field} -= params.step", mapOf(
+    fun decrementDocField(field: String, step: Int = 1) {
+        this.updateDocs("ctx._source.${field} -= params.step", mapOf(
             "step" to step
         ));
     }

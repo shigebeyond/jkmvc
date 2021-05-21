@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.es
 
+import io.searchbox.client.JestResult
 import net.jkcode.jkutil.common.JkException
 
 /**
@@ -14,19 +15,19 @@ class EsException : JkException {
     /**
      * 错误的文档
      */
-    public var failedDocs: Map<String, String>
+    public var result: JestResult?
         protected set
 
 
-    public constructor(message: String, failedDocuments: Map<String, String> = emptyMap()) : super(message) {
-        this.failedDocs = failedDocuments
+    public constructor(message: String, failedDocuments: JestResult? = null) : super(message) {
+        this.result = failedDocuments
     }
 
-    public constructor(cause: Throwable, failedDocuments: Map<String, String> = emptyMap()) : super(cause) {
-        this.failedDocs = failedDocuments
+    public constructor(cause: Throwable, failedDocuments: JestResult? = null) : super(cause) {
+        this.result = failedDocuments
     }
 
-    public constructor(message: String, cause: Throwable? = null, failedDocuments: Map<String, String> = emptyMap()) : super(message, cause) {
-        this.failedDocs = failedDocuments
+    public constructor(message: String, cause: Throwable? = null, failedDocuments: JestResult? = null) : super(message, cause) {
+        this.result = failedDocuments
     }
 }
