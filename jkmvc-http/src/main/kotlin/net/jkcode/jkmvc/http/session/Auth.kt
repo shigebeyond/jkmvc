@@ -36,7 +36,7 @@ abstract class Auth: IAuth{
             val clazz = Class.forName(className).kotlin as KClass<out Orm>
             // 检查是否实现了 IAuthUserModel 接口
             if(!IAuthUserModel::class.java.isSuperClass(clazz.java))
-                throw IllegalArgumentException("Invalid user model class [$className]，it must implements interface [net.jkcode.jkmvc.session.IAuthUserModel]");
+                throw IllegalArgumentException("Invalid user model class [$className]，it must implements interface [net.jkcode.jkmvc.http.session.IAuthUserModel]");
             clazz
         }
 
