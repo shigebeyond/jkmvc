@@ -91,6 +91,11 @@ configure controller classes's package paths
 vim src/main/resources/http.yaml
 
 ```
+# 是否调试
+debug: true
+# 静态文件的扩展名
+# static file extension
+staticFileExts: gif|jpg|jpeg|png|bmp|ico|svg|swf|js|css|eot|ttf|woff
 # controller类所在的包路径
 # controller classes's package paths
 controllerPackages:
