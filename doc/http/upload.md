@@ -1,6 +1,6 @@
 # Upload files
 
-Jkmvc uses `servlets.com: cos: 05Nov2002` for uploading files, and improves into a convenient API to handle the upload file.
+Jkmvc uses servlet3.0's `javax.servlet.http.Part` for uploading files, and improves into a convenient API to handle the upload file.
 
 ## 1 Upload configuration
 

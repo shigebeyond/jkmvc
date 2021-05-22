@@ -1,6 +1,6 @@
 # 上传文件
 
-jkmvc对上传包`servlets.com:cos:05Nov2002`进行了二次封装，并提供了便捷的api来处理上传文件。
+jkmvc对上传包servlet3.0的`javax.servlet.http.Part`进行了二次封装，并提供了便捷的api来处理上传文件。
 
 ## 1 上传配置
 

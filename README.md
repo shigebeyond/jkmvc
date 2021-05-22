@@ -613,7 +613,6 @@ gradle :jkmvc-example:build -x test
 ```
 
 # Document
-
 ## http module
 1. [getting started](doc/http/getting_started.md)
 2. [controller](doc/http/controller.md)
@@ -622,33 +621,34 @@ gradle :jkmvc-example:build -x test
 5. [route](doc/http/route.md)
 6. [upload](doc/http/upload.md)
 7. [request handling flow](doc/http/flow.md)
+8. [cookie](doc/http/cookie.md)
+9. [session](doc/http/session.md)
 
 ## db module
-8. [getting started](doc/db/getting_started.md)
-9. [query](doc/db/query.md)
-10. [query builder](doc/db/query_builder.md)
-11. [db expression](doc/db/expr.md)
+10. [getting started](doc/db/getting_started.md)
+11. [query](doc/db/query.md)
+12. [query builder](doc/db/query_builder.md)
+13. [db expression](doc/db/expr.md)
 
 ## orm module
-12. [getting_started](doc/orm/getting_started.md)
-13. [model](doc/orm/model.md)
-14. [relation](doc/orm/relation.md)
-15. [validation](doc/orm/validation.md)
-16. [using](doc/orm/using.md)
-17. [relation using callback](doc/orm/cbrelation.md)
+14. [getting_started](doc/orm/getting_started.md)
+15. [model](doc/orm/model.md)
+16. [relation](doc/orm/relation.md)
+17. [validation](doc/orm/validation.md)
+18. [using](doc/orm/using.md)
+19. [relation using callback](doc/orm/cbrelation.md)
 
 ## es module(ElasticSearch client)
-18. [getting started](doc/es/getting_started.md)
-19. [Entity - mapping es document](doc/es/Entity.md)
-20. [EsManager - manage es index](doc/es/EsManager.md)
-21. [EsDocRepository - as entity repository](doc/es/EsDocRepository.md)
-22. [EsQueryBuilder - query builder](doc/es/EsQueryBuilder.md)
+20. [getting started](doc/es/getting_started.md)
+21. [Entity - mapping es document](doc/es/Entity.md)
+22. [EsManager - manage es index](doc/es/EsManager.md)
+23. [EsDocRepository - as entity repository](doc/es/EsDocRepository.md)
+24. [EsQueryBuilder - query builder](doc/es/EsQueryBuilder.md)
 
 ## other
-23. [deploy](doc/deploy.md)
+25. [deploy](doc/deploy.md)
 
 # 中文文档
-
 ## http模块
 1. [快速开始](doc/http/getting_started.cn.md)
 2. [控制器](doc/http/controller.cn.md)
@@ -657,28 +657,31 @@ gradle :jkmvc-example:build -x test
 5. [路由](doc/http/route.cn.md)
 6. [上传](doc/http/upload.cn.md)
 7. [请求处理流程](doc/http/flow.cn.md)
+8. [cookie](doc/http/cookie.cn.md)
+9. [会话](doc/http/session.cn.md)
+10. [jetty server](doc/http/jetty_server.cn.md)
 
 ## db模块
-8. [快速开始](doc/db/getting_started.cn.md)
-9. [查询](doc/db/query.cn.md)
-10. [sql构建器](doc/db/query_builder.cn.md)
-11. [db表达式](doc/db/expr.cn.md)
+11. [快速开始](doc/db/getting_started.cn.md)
+12. [查询](doc/db/query.cn.md)
+13. [sql构建器](doc/db/query_builder.cn.md)
+14. [db表达式](doc/db/expr.cn.md)
 
 ## orm模块
-12. [快速开始](doc/orm/getting_started.cn.md)
-13. [模型](doc/orm/model.cn.md)
-14. [关联关系](doc/orm/relation.cn.md)
-15. [校验](doc/orm/validation.cn.md)
-16. [使用](doc/orm/using.cn.md)
-17. [基于回调的关联关系](doc/orm/cbrelation.cn.md)
+15. [快速开始](doc/orm/getting_started.cn.md)
+16. [模型](doc/orm/model.cn.md)
+17. [关联关系](doc/orm/relation.cn.md)
+18. [校验](doc/orm/validation.cn.md)
+19. [使用](doc/orm/using.cn.md)
+20. [基于回调的关联关系](doc/orm/cbrelation.cn.md)
 
 ## es模块(ElasticSearch client)
-18. [快速开始](doc/es/getting_started.md)
-19. [实体类 - 映射文档](doc/es/Entity.md)
-20. [EsManager - 管理es索引](doc/es/EsManager.md)
-21. [EsDocRepository - 实体仓库类](doc/es/EsDocRepository.md)
-22. [EsQueryBuilder - 查询构建器](doc/es/EsQueryBuilder.md)
+21. [快速开始](doc/es/getting_started.md)
+22. [实体类 - 映射文档](doc/es/Entity.md)
+23. [EsManager - 管理es索引](doc/es/EsManager.md)
+24. [EsDocRepository - 实体仓库类](doc/es/EsDocRepository.md)
+25. [EsQueryBuilder - 查询构建器](doc/es/EsQueryBuilder.md)
 
 ## 其他
-23. [部署](doc/deploy.cn.md)
-24. [changelog](doc/changelog.md)
+26. [部署](doc/deploy.cn.md)
+27. [changelog](doc/changelog.md)
