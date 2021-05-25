@@ -18,4 +18,4 @@ tempDir: tmp
 启动主类 `net.jkcode.jkmvc.server.JettyServerLauncher`
 
 如果你在idea中通过`Run/Debug Configurations` -> `Application`启动, 请注意指定`use classpath of module`
-![](img/jetty-idea-run.png)
+![](../img/jetty-idea-run.png)
