@@ -18,6 +18,7 @@ compile "net.jkcode.jkmvc:jkmvc-orm:1.9.0"
 ```
 
 ## 配置es.yaml
+vim src/main/resources/es.yaml
 ```yaml
 default: # es配置名, 可有多个配置
   esUrl: http://localhost:9200 # es server地址, 多个用逗号分割
