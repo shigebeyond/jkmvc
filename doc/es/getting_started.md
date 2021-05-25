@@ -1,6 +1,12 @@
 # jkorm-es库
 jkorm-es库是一个Elasticsearch ORM框架, 底层基于[jest](https://github.com/searchbox-io/Jest), 不但提供简单易用的ORM实体与仓库类, 还提供简单又强大的query dsl语法, 来帮助你快速编写出读写elasticsearch的代码, 简单易读, 开发便捷, 大大降低我们的开发成本.
 
+下面做简单的介绍, 详细文档参考
+1. [实体类 - 映射文档](doc/es/Entity.md)
+2. [EsManager - 管理es索引](doc/es/EsManager.md)
+3. [EsDocRepository - 实体仓库类](doc/es/EsDocRepository.md)
+4. [EsQueryBuilder - 查询构建器](doc/es/EsQueryBuilder.md)
+
 ## 添加依赖
 
 1. gradle
