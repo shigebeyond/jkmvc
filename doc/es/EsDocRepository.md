@@ -7,15 +7,15 @@ EsDocRepository 实体仓储类, 提供了针对实体类的各种基本的CRUD�
 ```kotlin
 import net.jkcode.jkmvc.es.EsDocRepository
 
-val rep = EsDocRepository.instance(MessageEntity::class.java)
+val rep = EsDocRepository.instance(MessageEntity::class.java) // 参数是实体类 MessageEntity
 ```
 
 ## 2. 单个保存(id存在就是修改, 否则就是插入)
 ```kotlin
 @Test
 fun testSave() {
-    val e = buildEntity(1)
-    val r = rep.save(e)
+    val e = buildEntity(1) // 构建一个 MessageEntity 对象
+    val r = rep.save(e) // 单个保存
     println("插入单个文档: " + r)
 }
 ```
@@ -28,11 +28,11 @@ fun testSaveAll() {
     val items = ArrayList<MessageEntity>()
 
     for (i in 1..10) {
-        val e = buildEntity(i)
+        val e = buildEntity(i) // 构建一个 MessageEntity 对象
         items.add(e)
     }
 
-    rep.saveAll(items)
+    rep.saveAll(items) // 批量保存
     println("批量插入")
 }
 ```
@@ -41,10 +41,10 @@ fun testSaveAll() {
 ```kotlin
 @Test
 fun testUpdate() {
-    val e = rep.findById("1")!!
+    val e = rep.findById("1")!! // 根据id来查询单个
     e.fromUid = randomInt(10)
     e.toUid = randomInt(10)
-    val r = rep.update(e)
+    val r = rep.update(e) // 增量更新
     println("更新文档: " + r)
 }
 ```
@@ -53,7 +53,7 @@ fun testUpdate() {
 ```kotlin
 @Test
 fun testDeleteById() {
-    rep.deleteById("1")
+    rep.deleteById("1") // 单个删除
     println("删除id=1文档")
 }
 ```
@@ -63,10 +63,10 @@ fun testDeleteById() {
 @Test
 fun testDeleteAll() {
     val pageSize = 5
-    val query = rep.queryBuilder()
+    val query = rep.queryBuilder() // 构建 query builder
             .must("fromUid", ">=", 0)
     //val ids = rep.deleteAll(query)
-    val ids = query.deleteDocs(pageSize)
+    val ids = query.deleteDocs(pageSize) // 根据query builder来查询并删除
     println("删除" + ids.size + "个文档: id in " + ids)
 }
 ```
@@ -76,7 +76,7 @@ fun testDeleteAll() {
 @Test
 fun testFindById() {
     val id = "1"
-    val entity = rep.findById(id)
+    val entity = rep.findById(id) // 根据id来查询单个
     println("查单个：" + entity.toString())
 }
 ```
@@ -85,11 +85,11 @@ fun testFindById() {
 ```kotlin
 @Test
 fun testFindAll() {
-    val query = rep.queryBuilder()
+    val query = rep.queryBuilder() // 构建query builder
             //.must("fromUid", ">=", 0)
             .orderByField("id") // 排序
             .limit(10) // 分页
-    val (list, size) = rep.findAll(query)
+    val (list, size) = rep.findAll(query) // 根据query builder来查询多个
     println("查到 $size 个文档")
     for (item in list)
         println(item)

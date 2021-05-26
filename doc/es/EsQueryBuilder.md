@@ -13,7 +13,8 @@ val query = EsQueryBuilder() // 第一个参数有默认值 EsManager.instance()
 ## 2 查询
 
 ### 2.1 `index()` 指定索引名, `type()` 指定索引类型
-es7以后废弃type, 默认都是`_doc`
+es7以后废弃type, 默认都是`_doc`,
+因此EsQueryBuilder中可以不指定type, 默认取`_doc`
 
 ```kotlin
 query.index("user_index").type("_doc") 

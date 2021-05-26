@@ -179,6 +179,7 @@ class Route(override val regex:String, // 原始正则: <controller>(\/<action>(
 
 	/**
 	 * 构建快速匹配的子串
+	 *   就是最长的非正则的子串
 	 * @return
 	 */
 	protected fun buildFastSubString(): String {
