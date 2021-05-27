@@ -685,3 +685,16 @@ gradle :jkmvc-example:build -x test
 ## 其他
 26. [部署](doc/deploy.cn.md)
 27. [changelog](doc/changelog.md)
+
+## jkorm/mybatis性能测试与对比
+28. [测试场景](sence.md)
+29. [model代码](code_model.md)
+30. [add场景代码](code_add.md)
+31. [update场景代码](code_update.md)
+32. [delete场景代码](code_delete.md)
+33. [getDepWithEmps场景代码](code_getDepWithEmps.md)
+34. [getEmpsByConditionIf场景代码](code_getEmpsByConditionIf.md)
+35. [updateEmpOnDynFields场景代码](code_updateEmpOnDynFields.md)
+36. [getEmpsByIds场景代码](code_getEmpsByIds.md)
+37. [第1轮测试结果](result_round1.md)
+38. [第2轮测试结果](result_round2.md)
