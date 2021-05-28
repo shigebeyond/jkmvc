@@ -260,7 +260,7 @@ searchSource.size(10);
 ```
 
 对比生成的es搜索DSL如下, 左边是jkorm-es生成代码, 右边是原生API生成代码
-![](../../img/es/search-compare.png)
+![](img/search-compare.png)
 基本上一样, 只是select字段的顺序不同, 这是因为jkorm-es使用了HashSet(排重)来接收字段, 导致字段顺序变更
 
 ### 2. 复杂查询
@@ -372,7 +372,7 @@ searchSource.sort(sortBuilder);
 ```
 
 对比生成的es搜索DSL如下, 左边是jkorm-es生成代码, 右边是原生API生成代码
-![](../../img/es/complex-search-compare.png)
+![](img/complex-search-compare.png)
 基本上一样, 只是select字段的顺序不同, 这是因为jkorm-es使用了HashSet(排重)来接收字段, 导致字段顺序变更
 
 ## 聚合
@@ -582,5 +582,5 @@ nativebuilder.aggregation(nestedGamesAgg3);
 ```
 
 对比生成的es搜索DSL如下, 左边是jkorm-es生成代码, 右边是原生API生成代码
-![](../../img/es/complex-agg-compare.png)
+![](img/complex-agg-compare.png)
 基本上一样, 只是 terms 聚合多了field定义, 没啥影响
