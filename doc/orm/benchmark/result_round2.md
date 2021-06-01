@@ -46,7 +46,7 @@ jkorm-druid 总体优于 mybatis
 场景`getEmpsByIds` 优于11.24%, 优太多
 
 ## tps对比(越大越好)
- | 测试场景 | jkorm-druid tps | mybatis tps  | 性能排序 | jkorm-druid/mybatis |  最优 |
+| 测试场景 | jkorm-druid tps | mybatis tps  | 性能排序 | jkorm-druid/mybatis |  最优 |
 |--------|-----------|---------|--------------|--------------|--------------|--------------|
 | add | 897.41 | 886.68 | jkorm-druid > mybatis| 101.21 %  | jkorm-druid|
 | update | 884.88 | 871.26 | jkorm-druid > mybatis| 101.56 %  | jkorm-druid|
