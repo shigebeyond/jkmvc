@@ -47,7 +47,7 @@ jkorm-druid 总体优于 mybatis
 
 ## tps对比(越大越好)
 | 测试场景 | jkorm-druid tps | mybatis tps  | 性能排序 | jkorm-druid/mybatis |  最优 |
-|--------|-----------|---------|--------------|--------------|--------------|--------------|
+|--------|-----------|---------|--------------|--------------|--------------|
 | add | 897.41 | 886.68 | jkorm-druid > mybatis| 101.21 %  | jkorm-druid|
 | update | 884.88 | 871.26 | jkorm-druid > mybatis| 101.56 %  | jkorm-druid|
 | delete | 878.65 | 878.21 | jkorm-druid > mybatis| 100.05 %  | jkorm-druid|
@@ -59,7 +59,7 @@ jkorm-druid 总体优于 mybatis
 
 ## 响应耗时对比(越小越好)
 | 测试场景 | jkorm-druid rt | mybatis rt  | 性能排序 | jkorm-druid/mybatis |  最优 |
-|--------|-----------|---------|--------------|--------------|--------------|--------------|
+|--------|-----------|---------|--------------|--------------|--------------|
 | add | 1.11 | 1.13 | jkorm-druid > mybatis| 98.23 %  | jkorm-druid|
 | update | 1.13 | 1.16 | jkorm-druid > mybatis| 97.41 %  | jkorm-druid|
 | delete | 1.14 | 1.14 | jkorm-druid > mybatis| 100.00 %  | jkorm-druid|
