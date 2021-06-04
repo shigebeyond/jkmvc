@@ -16,15 +16,22 @@ if [ ! -d $PRO ]; then
 	mkdir $PRO
 	cd $PRO
 	echo "解押"$WAR
-	unzip ../$WAR
+	#unzip ../$WAR
+	jar -xvf ../$WAR
 fi
 cd $DIR
+
+# 复制servlet.jar -- gradle中复制
+#if [ ! -f "$PRO/WEB-INF/lib/.servlet-api-3.1.0.jar" ]; then
+#	cp ~/.gradle/caches/modules-2/files-2.1/javax.servlet/javax.servlet-api/3.1.0/3cd63d075497751784b2fa84be59432f4905bf7c/javax.servlet-api-3.1.0.jar $PRO/WEB-INF/lib/
+#fi
 
 # 将 jetty.yaml 中的 webDir 配置项修改为当前项目路径
 sed -i "s/webDir: .*src\/main\/webapp/webDir: $PRO/g" $PRO/WEB-INF/classes/jetty.yaml
 
 echo "启动jetty"
 JAVA_OPTS="-Djava.net.preferIPv4Stack=true -server -Xms1g -Xmx1g -XX:MetaspaceSize=128m -Djava.util.concurrent.ForkJoinPool.common.parallelism=32"
+#JAVA_OPTS="-Djava.net.preferIPv4Stack=true -server"
 
 JAVA_DEBUG_OPTS=""
 if [ "$1" = "debug" ]; then
@@ -33,4 +40,4 @@ fi
 
 SERVER_CLASS='net.jkcode.jkmvc.server.JettyServerLauncher'
 
-java $JAVA_OPTS $JAVA_DEBUG_OPTS -cp $DIR/$PRO/WEB-INF/classes:$DIR/$PRO/WEB-INF/lib/* $SERVER_CLASS
+java $JAVA_OPTS $JAVA_DEBUG_OPTS -cp $DIR/conf:$DIR/$PRO/WEB-INF/classes:$DIR/$PRO/WEB-INF/lib/* $SERVER_CLASS

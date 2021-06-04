@@ -1,8 +1,7 @@
 maxThreads: 0 # io线程数, 如果为0则取Runtime.getRuntime().availableProcessors()*8
 #host: localhost # The network interface this connector binds to as an IP address or a hostname.  If null or 0.0.0.0 then bind to all interfaces.
 port: 8080
-# 如果 jkmvc-example 是根目录, 则不需要 jkmvc-example/ 目录前缀
-webDir: jkmvc-example/src/main/webapp
+webDir: src/main/webapp
 contextPath: /jkmvc-example
 logDir: logs
 tempDir: tmp

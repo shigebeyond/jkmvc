@@ -1,0 +1,38 @@
+# 不同数据库的配置
+# mysql, 命名: 小写+下划线
+default:
+  # 主库
+  master:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://192.168.0.170/test?useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: test_server_db!
+  # 多个从库, 可省略
+  slaves:
+    -
+      driverClassName: com.mysql.jdbc.Driver
+      url: jdbc:mysql://192.168.0.170/test?useUnicode=true&characterEncoding=utf-8
+      username: root
+      password: test_server_db!
+
+# sql server, 命名: 小写+下划线
+#default:
+#  master:
+#    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+#    url: jdbc:sqlserver://192.168.0.56:1433;databaseName=tempdb
+#    username: sa
+#    password: '111111'
+
+# oracle, 命名: 大写+下划线
+#default:
+#  master:
+#    driverClassName: oracle.jdbc.driver.OracleDriver
+#    url: jdbc:oracle:thin:@192.168.0.170:ORCL
+#    # schema - oracle的概念，代表一组数据库对象，在 Db.tables 中延迟加载表字段时，用来过滤 DYPT 库的表，可省略，默认值=username
+#    # schema: admin
+#    username: admin
+#    password: 123456
+#    # 其他属性，格式如：a=1;b=2
+#    connectionProperties: oracle.jdbc.V8Compatible=true
+#    # 查询超时(秒)
+#    queryTimeOut: 0

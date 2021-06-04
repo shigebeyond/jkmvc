@@ -23,12 +23,47 @@ dependencies{
 apply plugin: 'war'
 apply plugin: 'org.akhikhl.gretty'
 
+// 复制war
+task copyWar(type: Copy) {
+    // 对于jenkins的任务, project.name = jenkins_java
+    //println "----------" + project.name + "----------"
+    into "${buildDir}/app"
+    // 由于未指定project.name, 则project.name可能按根目录名来, 而jenkins的根目录名为任务名, 不一定是git项目名
+    //from "${buildDir}/libs/jkmvc-example-${project.version}.war"
+    from("${buildDir}/libs/"){
+        include '*.war'
+    }
+}
+
 // 复制start.sh
 task copyStartSh(type: Copy) {
-    into "${buildDir}/libs"
-    from "start-jetty.sh"
+   into "${buildDir}/app"
+   from "start-jetty.sh"
+   from "fix-miss-jar.sh"
+   from "Dockerfile"
 }
-build.dependsOn(copyStartSh)
+
+// 复制配置文件
+task copyConf(type: Copy) {
+   into "${buildDir}/app/conf"
+   // 需要的配置文件
+   def props = ["dataSources.yaml", "log4j.properties", "auth.yaml", "session.properties", "upload.properties", "jetty.yaml"
+                /*"db.yaml", "orm.properties", "routes.yaml", "http.yaml", "jetty.yaml" // 工程自己就打包在目录classes */]
+   // 项目 resources 目录, 来收集配置文件
+   for(src in rootProject.sourceSets.main.resources){
+      def match = props.any{ p -> src.name.endsWith(p) }
+      if(match){
+        //println(src)
+        from src
+      }
+   }
+}
+
+if (project.hasProperty("all")){
+    build.finalizedBy(copyWar)
+    build.dependsOn(copyStartSh)
+    build.dependsOn(copyConf)
+}
 
 // 启动jetty
 gretty{
