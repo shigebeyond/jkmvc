@@ -27,7 +27,8 @@ cd $DIR
 #fi
 
 # 将 jetty.yaml 中的 webDir 配置项修改为当前项目路径
-sed -i "s/webDir: .*src\/main\/webapp/webDir: $PRO/g" $PRO/WEB-INF/classes/jetty.yaml
+#sed -i "s/webDir: .*src\/main\/webapp/webDir: $PRO/g" $PRO/WEB-INF/classes/jetty.yaml
+sed -i "s/webDir: .*src\/main\/webapp/webDir: $PRO/g" conf/jetty.yaml
 
 echo "启动jetty"
 JAVA_OPTS="-Djava.net.preferIPv4Stack=true -server -Xms1g -Xmx1g -XX:MetaspaceSize=128m -Djava.util.concurrent.ForkJoinPool.common.parallelism=32"

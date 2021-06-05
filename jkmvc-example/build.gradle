@@ -50,7 +50,7 @@ task copyConf(type: Copy) {
    def props = ["dataSources.yaml", "log4j.properties", "auth.yaml", "session.properties", "upload.properties", "jetty.yaml"
                 /*"db.yaml", "orm.properties", "routes.yaml", "http.yaml", "jetty.yaml" // 工程自己就打包在目录classes */]
    // 项目 resources 目录, 来收集配置文件
-   for(src in rootProject.sourceSets.main.resources){
+   for(src in project.sourceSets.main.resources){
       def match = props.any{ p -> src.name.endsWith(p) }
       if(match){
         //println(src)
