@@ -11,7 +11,8 @@ class WelcomeController: Controller() {
      * 主页
      */
     public fun index() {
-        res.renderHtml("hello world");
+        val content = "hello world<br/><a href=\"" + req.absoluteUrl("user/index") + "\">用户管理</a>"
+        res.renderHtml(content);
     }
 
     /**
