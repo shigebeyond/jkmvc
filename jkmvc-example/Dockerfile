@@ -20,6 +20,7 @@ ADD jdk-8u172-linux-x64.tar.gz /usr/local
 #COPY jkmvc-example-1.9.0.war /app/
 COPY *.war /app/
 COPY start-jetty.sh /app/
+COPY conf /app/conf
 
 # 配置 JDK 的环境变量和字符集
 ENV JAVA_HOME /usr/local/jdk1.8.0_172
