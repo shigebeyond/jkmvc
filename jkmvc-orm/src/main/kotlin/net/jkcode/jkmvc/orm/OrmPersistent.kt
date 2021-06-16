@@ -3,7 +3,6 @@ package net.jkcode.jkmvc.orm
 import net.jkcode.jkutil.common.associate
 import net.jkcode.jkutil.common.dbLogger
 import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * ORM之持久化，主要是负责数据库的增删改查
@@ -122,8 +121,9 @@ abstract class OrmPersistent : OrmValid() {
 			val generatedColumn = if (needPk) ormMeta.primaryKey.first() else null // 主键名
 			//val pk = queryBuilder().value(buildDirtyData()).insert(generatedColumn);
 			// 优化性能: 使用编译好的sql
-			val params = buildDirtyValues()
-			val pk = ormMeta.getInsertSql(_dirty.keys).execute(params, generatedColumn, ormMeta.db)
+			val sql = ormMeta.getInsertSql(_dirty.keys)
+			val params = buildDirtyValues(sql.paramNames) // 不是 _dirty.keys, 而是有序的 sql.paramNames
+			val pk = sql.execute(params, generatedColumn, ormMeta.db)
 
 			// 更新内部数据
 			if (needPk)
@@ -175,9 +175,9 @@ abstract class OrmPersistent : OrmValid() {
 	 *
 	 * @return
 	 */
-	protected fun buildDirtyValues(): List<Any?> {
+	protected fun buildDirtyValues(dirtyProps: Collection<String>): List<Any?> {
 		// 挑出变化的属性
-		return _dirty.map { (prop, oldValue) ->
+		return dirtyProps.map { prop ->
 			// 字段值
 			var value = _data[prop]
 			if(value != null && ormMeta.isSerializingProp(prop))
@@ -246,9 +246,10 @@ abstract class OrmPersistent : OrmValid() {
 			// 更新数据库
 			//val result = queryBuilder().sets(buildDirtyData()).where(ormMeta.primaryKey, oldPk /* 原始主键，因为主键可能被修改 */).update();
 			// 优化性能: 使用编译好的sql
-			val params = buildDirtyValues() as MutableList
+			val sql = ormMeta.getUpdateSql(_dirty.keys)
+			val params = buildDirtyValues(sql.paramNames) as MutableList // 不是 _dirty.keys, 而是有序的 sql.paramNames
 			params.addAll(oldPk.columns)// 原始主键，因为主键可能被修改
-			val result = ormMeta.getUpdateSql(_dirty.keys).execute(params, null, ormMeta.db) > 0
+			val result = sql.execute(params, null, ormMeta.db) > 0
 
 			// 触发后置事件
 			triggerAfterUpdate()

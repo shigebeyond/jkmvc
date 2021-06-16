@@ -705,6 +705,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         var sql = sqls[bs]
         if(sql == null){
             sql = sqlFactory()
+            sql.paramNames = ArrayList(props) // 记录参数(属性)顺序, 方便执行sql时按顺序拼接参数, 同时要复制props(不懂他是啥, 如Orm._dirty.keys, 会被清掉的)
             sqls.putIfAbsent(bs.clone() as BitSet, sql) // 设置key/value时, key必须用复制的 BitSet
         }
         return sql

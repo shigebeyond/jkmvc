@@ -28,6 +28,12 @@ abstract class ICompiledSql: IDbQuery() {
     public abstract val dynamicParamsSize:Int;
 
     /**
+     * 参数名, 用于命名参数
+     *   仅用在OrmMeta的预编译sql中, 如getInsertSql()/getUpdateSql(), 记录参数(属性)顺序, 方便执行sql时按顺序拼接参数
+     */
+    internal var paramNames: Collection<String> = emptyList()
+
+    /**
      * 判断是否为空
      * @return
      */
