@@ -584,8 +584,9 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
 
     /**
      * 根据主键查询的sql
+     *   OrmQueryBuilder 是联查时用
      */
-    override val selectSqlByPk: CompiledSql by lazy{
+    override val selectSqlByPk: Pair<CompiledSql, OrmQueryBuilder> by lazy{
         val query = queryBuilder(reused = true)
         // 缓存时联查
         if (cacheMeta != null) {
@@ -595,8 +596,9 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         val pk = primaryKey.map {
             DbExpr.question
         }
-        query.where(primaryKey, pk)
+        val sql = query.where(primaryKey, pk)
                 .compileSelectOne()
+        sql to query
     }
 
     /**
@@ -705,7 +707,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         var sql = sqls[bs]
         if(sql == null){
             sql = sqlFactory()
-            sql.paramNames = ArrayList(props) // 记录参数(属性)顺序, 方便执行sql时按顺序拼接参数, 同时要复制props(不懂他是啥, 如Orm._dirty.keys, 会被清掉的)
+            sql.paramNames = props.toList() // 记录参数(属性)顺序, 方便执行sql时按顺序拼接参数, 同时要复制props(不懂他是啥, 如Orm._dirty.keys, 会被清掉的)
             sqls.putIfAbsent(bs.clone() as BitSet, sql) // 设置key/value时, key必须用复制的 BitSet
         }
         return sql
@@ -739,12 +741,18 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     protected fun <T : IOrm> innerloadByPk(pk: DbKeyValues, item: T? = null): T? {
         //return queryBuilder().where(primaryKey, pk).findRow
-        return selectSqlByPk.findRow(pk.toList(), db) {
+        // 使用预编译sql来查询
+        val (sql, query) = selectSqlByPk
+        val item = sql.findRow(pk.toList(), db) {
             //val result = item ?: model.java.newInstance() as T
             val result = item ?: newInstance() as T
             result.setOriginal(it)
             result
         }
+        // 联查hasMany关系, 因为他是另外的sql
+        if(item != null)
+            query.rowQueryWithMany(item)
+        return item
     }
 
     /**

@@ -279,8 +279,9 @@ interface IOrmMeta {
     /************************************ 查询 *************************************/
     /**
      * 根据主键查询的sql
+     *   OrmQueryBuilder 是联查时用
      */
-    val selectSqlByPk: CompiledSql
+    val selectSqlByPk: Pair<CompiledSql, OrmQueryBuilder>
 
     /**
      * 根据主键删除的sql

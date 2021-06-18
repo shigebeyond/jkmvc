@@ -303,28 +303,36 @@ open class OrmQueryBuilder(protected val ormMeta: OrmMeta, // orm元数据
      */
     public override fun <T:Any> findRow(params: List<*>, db: IDb, transform: (DbResultRow) -> T): T?{
         val result = super.findRow(params, db, transform)
-        // 联查hasMany
+        // 联查hasMany关系
         if(result is IOrm){
-            // 遍历每个hasMany关系的查询结果
-            forEachManyQuery(result){ relation: IRelation, relatedItems:List<IOrm> ->
-                // 设置关联属性
-                result[relation.name] = relatedItems
-            }
-
-            // 遍历每个回调关系的查询结果
-            forEachCbRelationQuery(result){ relation: ICbRelation<out IOrm, *, *>, relatedItems:List<*> ->
-                // 设置关联属性
-                result[relation.name] = if(relation.one2one)
-                                            relatedItems.firstOrNull()
-                                        else
-                                            relatedItems
-            }
+            rowQueryWithMany(result)
         }
 
         // 在联查完后, 才清空联查信息
         clearWith()
 
         return result
+    }
+
+    /**
+     * 一行数据联查hasMany关系
+     * @param item
+     */
+    internal fun rowQueryWithMany(item: IOrm) {
+        // 遍历每个hasMany关系的查询结果
+        forEachManyQuery(item) { relation: IRelation, relatedItems: List<IOrm> ->
+            // 设置关联属性
+            item[relation.name] = relatedItems
+        }
+
+        // 遍历每个回调关系的查询结果
+        forEachCbRelationQuery(item) { relation: ICbRelation<out IOrm, *, *>, relatedItems: List<*> ->
+            // 设置关联属性
+            item[relation.name] = if (relation.one2one)
+                relatedItems.firstOrNull()
+            else
+                relatedItems
+        }
     }
 
     /**
@@ -339,25 +347,31 @@ open class OrmQueryBuilder(protected val ormMeta: OrmMeta, // orm元数据
         if(result.isEmpty())
             return result
 
-        // 联查hasMany
+        // 联查hasMany关系
         if(result.first() is IOrm){
-            val items = result as List<IOrm>
-
-            // 遍历每个hasMany关系的查询结果
-            forEachManyQuery(result){ relation: IRelation, relatedItems:List<IOrm> ->
-                relation.batchSetRelationProp(items, relatedItems)
-            }
-
-            // 遍历每个回调关系的查询结果
-            forEachCbRelationQuery(result){ relation: ICbRelation<out IOrm, *, *>, relatedItems:List<*> ->
-                relation.batchSetRelationProp(items as List<Nothing>, relatedItems as List<Nothing>)
-            }
+            rowsQueryWithMany(result as List<IOrm>)
         }
 
         // 在联查完后, 才清空联查信息
         clearWith()
 
         return result
+    }
+
+    /**
+     * 多行数据联查hasMany关系
+     * @param items
+     */
+    internal fun rowsQueryWithMany(items: List<IOrm>) {
+        // 遍历每个hasMany关系的查询结果
+        forEachManyQuery(items) { relation: IRelation, relatedItems: List<IOrm> ->
+            relation.batchSetRelationProp(items, relatedItems)
+        }
+
+        // 遍历每个回调关系的查询结果
+        forEachCbRelationQuery(items) { relation: ICbRelation<out IOrm, *, *>, relatedItems: List<*> ->
+            relation.batchSetRelationProp(items as List<Nothing>, relatedItems as List<Nothing>)
+        }
     }
 
     /**
