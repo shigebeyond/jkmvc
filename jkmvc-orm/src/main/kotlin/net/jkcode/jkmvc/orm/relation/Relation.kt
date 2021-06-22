@@ -82,6 +82,7 @@ abstract class Relation(
 
     /**
      * 通过编译好的sql, 来延迟查询关联对象
+     *   TODO: 原来想编译为where in key, 以便在联查has_many关联对象时使用, 但可能存在多key的情况, 就不好使用where in
      * @param 当前对象
      * @return 关联对象, 可能多个
      */
