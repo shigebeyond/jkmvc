@@ -6,7 +6,6 @@ import net.jkcode.jkmvc.query.CompiledSql
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.DbQueryBuilder
 import net.jkcode.jkmvc.query.IDbQueryBuilder
-import net.jkcode.jkutil.common.mapToArray
 import kotlin.reflect.KClass
 
 /**
@@ -186,7 +185,7 @@ class HasNThroughRelation(
         // 通过join中间表 查从表
         val tableAlias = middleTable + '.'
         return buildQuery() // 中间表.远端外键 = 从表.远端主键
-                .whereIn(foreignKey.wrap(tableAlias)/*middleTable + '.' + foreignKey*/, items.collectColumn(primaryProp)) as OrmQueryBuilder // 中间表.外键 = 主表.主键
+                .whereIn(foreignKey.wrap(tableAlias)/*middleTable + '.' + foreignKey*/, items.collectColumns(primaryProp)) as OrmQueryBuilder // 中间表.外键 = 主表.主键
     }
 
     /**

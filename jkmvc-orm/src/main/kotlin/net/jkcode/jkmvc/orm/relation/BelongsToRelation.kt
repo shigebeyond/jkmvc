@@ -5,7 +5,6 @@ import net.jkcode.jkmvc.orm.DbKeyValues
 import net.jkcode.jkmvc.query.CompiledSql
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.IDbQueryBuilder
-import net.jkcode.jkutil.common.mapToArray
 import kotlin.reflect.KClass
 
 /**
@@ -70,7 +69,7 @@ class BelongsToRelation(
             return null
 
         // 查主表
-        return queryBuilder().whereIn(primaryKey.wrap(modelName + ".") /*modelName + "." + primaryKey*/, items.collectColumn(foreignProp)) as OrmQueryBuilder // 主表.主键 = 从表.外键
+        return queryBuilder().whereIn(primaryKey.wrap(modelName + ".") /*modelName + "." + primaryKey*/, items.collectColumns(foreignProp)) as OrmQueryBuilder // 主表.主键 = 从表.外键
     }
 
     /**

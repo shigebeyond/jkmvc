@@ -5,7 +5,6 @@ import net.jkcode.jkmvc.orm.DbKeyValues
 import net.jkcode.jkmvc.query.CompiledSql
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.IDbQueryBuilder
-import net.jkcode.jkutil.common.mapToArray
 import kotlin.reflect.KClass
 
 /**
@@ -55,7 +54,7 @@ open class HasNRelation(
             return null
 
         // 查从表
-        return queryBuilder().whereIn(foreignKey.wrap(modelName + ".") /*modelName + "." + foreignKey*/, items.collectColumn(primaryProp)) as OrmQueryBuilder // 从表.外键 = 主表.主键
+        return queryBuilder().whereIn(foreignKey.wrap(modelName + ".") /*modelName + "." + foreignKey*/, items.collectColumns(primaryProp)) as OrmQueryBuilder // 从表.外键 = 主表.主键
     }
 
     /**
@@ -152,7 +151,7 @@ open class HasNRelation(
         val query = queryBuilder()
         val relatedPrimaryKey = ormMeta.primaryKey // 关联对象的主键字段
         if(value is Collection<*>) { // 多个
-            query.whereIn(relatedPrimaryKey, (value as Collection<out IOrm>).collectColumn(relatedPrimaryKey))
+            query.whereIn(relatedPrimaryKey, (value as Collection<out IOrm>).collectColumns(relatedPrimaryKey))
         }else{ // 单个
             val relatedPk = relatedPrimaryKey.getsFrom(value)
             query.where(relatedPrimaryKey, relatedPk)

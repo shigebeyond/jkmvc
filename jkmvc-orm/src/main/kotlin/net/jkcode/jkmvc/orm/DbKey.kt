@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.orm
 
 import net.jkcode.jkmvc.query.IDbQueryBuilder
 import net.jkcode.jkutil.common.isSame
+import net.jkcode.jkutil.common.mapToSet
 import java.util.*
 
 /**
@@ -325,12 +326,14 @@ internal inline fun IOrm.sets(columns: DbKeyNames, values: Any?){
  * @param names 列名
  * @return
  */
-internal fun Collection<out IOrm>.collectColumn(names: DbKeyNames):DbKey<List<Any?>> {
+internal fun Collection<out IOrm>.collectColumns(names: DbKeyNames):List<DbKey<Any?>> {
     if (this.isEmpty())
-        return DbKey.empty as DbKey<List<Any?>>
+        return emptyList()
 
-    return names.map { name ->
-        this.collectColumn(name)
+    return this.map { item -> // 每个元素都是 DbKey
+        names.map { name -> // 构建DbKey中的每个字段值
+            item.get<Any?>(name)
+        }
     }
 }
 
@@ -342,26 +345,42 @@ internal fun Collection<out IOrm>.collectColumn(names: DbKeyNames):DbKey<List<An
  * @param   values   column value
  * @return
  */
-internal fun IDbQueryBuilder.whereIn(columns: DbKeyNames, values: DbKey<List<Any?>>): IDbQueryBuilder {
+internal fun IDbQueryBuilder.whereIn(columns: DbKeyNames, values: List<DbKey<Any?>>): IDbQueryBuilder {
     // 每列有多值
-    // 收集值不同的列
+    // 1 收集值不同的列
     val diffValuesIndexs = ArrayList<Int>()
-    values.forEachColumn { i, value ->
-        if(!value.isSame())
+    columns.forEachColumn { i, col ->
+        val first = values.first().getColumn(i)
+        // 第i列的所有值一样
+        val isSame = values.all {
+            first == it.getColumn(i)
+        }
+        // 记录值不同的列
+        if(!isSame)
             diffValuesIndexs.add(i)
     }
 
-    // TODO: 如果不同值的有多列, 则可以拼接 or 条件
-    if(diffValuesIndexs.size > 1)
-        //throw IllegalArgumentException("DbKeyKt.whereIn()暂时只支持: 只有一列有不同值, 其他列每列有相同值")
-        throw IllegalArgumentException("`DbKeyKt.whereIn()` temporarily only support: only one column's values can be diffrent, the other columns's values must be the same")
+    // 2 只有一列有不同值: 不同值的列用where in, 其他列用where =
+    if(diffValuesIndexs.size <= 1) {
+        columns.forEachColumn { i, col ->
+            if (diffValuesIndexs.contains(i)) { // 不同值的列用 where in
+                IDbQueryBuilder@ this.where(col, "IN", values.mapToSet {
+                    it.getColumn(i)
+                })
+            }else { // 相同值的列用 where =
+                IDbQueryBuilder@ this.where(col, values.first().getColumn(i))
+            }
+        }
+        return this
+    }
 
-    columns.forEachNameValue(values){ name, value, i ->
-        val list = (value as List<*>)
-        if(diffValuesIndexs.contains(i)) // 不同值的列用 where in
-            IDbQueryBuilder@this.where(name, "IN", list.toSet())
-        else // 相同值的列用 where =
-            IDbQueryBuilder@this.where(name, list.first())
+    // 3 多列有不同值, 则拼接 or 条件
+    andWhereWrap {
+        for(value in values) {
+            orWhereWrap {
+                where(columns, value)
+            }
+        }
     }
 
     return this
