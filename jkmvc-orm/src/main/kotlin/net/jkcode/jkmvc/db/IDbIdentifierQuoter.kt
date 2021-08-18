@@ -49,13 +49,17 @@ interface IDbIdentifierQuoter{
      *   mysql为`column`
      *   oracle为"column"
      *   sql server为"column" [column]
-     *
+     *   不处理函数调用
      *   子类做缓存
      *
      * @param column 字段名, 可能是别名 DbExpr
      * @return
      */
     fun quoteColumn(column:CharSequence):String {
+        // 不处理函数调用, 仅用于jkerp在AdvancedFormRowDataListBinder中将转换字段类型, 如cast(j_crm_proposal.dateModified as char)
+        if(column is String && column.contains('('))
+            return column
+
         var table = "";
         var col: String; // 字段
         var alias:String? = null; // 别名
