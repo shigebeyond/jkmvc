@@ -17,10 +17,10 @@ MAINTAINER jkmvcapp
 # https://www.367783.net/hosting/5025.html
 ADD jdk-8u172-linux-x64.tar.gz /usr/local
 # 由于目录名不一定是 jkmvc-example, 则不能写死
-#COPY jkmvc-example-1.9.0.war /app/
-COPY *.war /app/
-COPY start-jetty.sh /app/
-COPY conf /app/conf
+#COPY jkmvc-example-1.9.0.war /apps/jkmvcapp/
+COPY *.war /apps/jkmvcapp/
+COPY start-jetty.sh /apps/jkmvcapp/
+COPY conf /apps/jkmvcapp/conf
 
 # 配置 JDK 的环境变量和字符集
 ENV JAVA_HOME /usr/local/jdk1.8.0_172
@@ -36,4 +36,4 @@ EXPOSE 8082
 #RUN apt-get install unzip
 
 # 启动命令
-ENTRYPOINT ["/app/start-jetty.sh"]
+ENTRYPOINT ["/apps/jkmvcapp/start-jetty.sh"]
