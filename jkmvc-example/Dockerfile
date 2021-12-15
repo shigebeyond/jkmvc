@@ -35,5 +35,5 @@ EXPOSE 8082
 #RUN apt-get update
 #RUN apt-get install unzip
 
-# 启动命令
-ENTRYPOINT ["/apps/jkmvcapp/start-jetty.sh"]
+# 启动命令, 要一直运行，否则命令结束会导致容器结束
+ENTRYPOINT /apps/jkmvcapp/start-jetty.sh
