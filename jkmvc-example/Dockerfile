@@ -1,4 +1,4 @@
-# 拷贝到 build/app目录下, 执行: sudo docker build -t jkmvcapp .; sudo docker #run --name jkmvcapp -d jkmvcapp:latest
+# 拷贝到 build/app目录下, 执行: sudo docker build -t jkmvcapp .; sudo docker run -d -p 8080:8080 --name jkmvcapp jkmvcapp:latest
 
 # 基础镜像
 FROM ubuntu
