@@ -1,4 +1,4 @@
-# 拷贝到 build/app目录下, 执行: sudo docker build -t jkmvcapp .; sudo docker run -d -p 8080:8080 --name jkmvcapp jkmvcapp:latest
+# 先执行 gradle build -x test -Pall, 后执行: sudo docker build -t jkmvcapp .; sudo docker run -d -p 8080:8080 --name jkmvcapp jkmvcapp
 
 # 基础镜像
 FROM ubuntu
@@ -18,9 +18,9 @@ MAINTAINER jkmvcapp
 ADD jdk-8u172-linux-x64.tar.gz /usr/local
 # 由于目录名不一定是 jkmvc-example, 则不能写死
 #COPY jkmvc-example-1.9.0.war /apps/jkmvcapp/
-COPY *.war /apps/jkmvcapp/
-COPY start-jetty.sh /apps/jkmvcapp/
-COPY conf /apps/jkmvcapp/conf
+COPY build/app/*.war /apps/jkmvcapp/
+COPY build/app/start-jetty.sh /apps/jkmvcapp/
+COPY build/app/conf /apps/jkmvcapp/conf
 
 # 配置 JDK 的环境变量和字符集
 ENV JAVA_HOME /usr/local/jdk1.8.0_172
@@ -29,7 +29,7 @@ ENV CLASSPATH .:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
 ENV LANG C.UTF-8
 
 # 暴露端口, 跟jetty.yaml端口一样
-EXPOSE 8082
+EXPOSE 8080
 
 # 安装unzip -- 安装太久, jenkins ssh连接断开了
 #RUN apt-get update
