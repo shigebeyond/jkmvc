@@ -14,6 +14,8 @@ dependencies{
 
     // velocity
     compile 'org.apache.velocity:velocity:1.7'
+    // jphp
+    compile 'org.develnext.jphp:jphp-core:0.9.2' // include jphp with runtime and compiler
 
     // servlet
     compile "javax.servlet:javax.servlet-api:3.1.0" // 因为不引入 war 插件, 因此不能使用功能 providedCompile

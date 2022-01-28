@@ -51,6 +51,9 @@ subprojects{
         maven {
             url 'http://maven.aliyun.com/nexus/content/repositories/snapshots'
         }
+        maven {
+            url "https://jitpack.io"
+        }
         mavenCentral()
         maven {
             url "http://dl.bintray.com/kotlin/kotlin"
