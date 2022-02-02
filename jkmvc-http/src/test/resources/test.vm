@@ -1,0 +1,10 @@
+#foreach($i in [0..9999])
+    Hello $name
+    #foreach($f in $friends)
+        #if($i % 2 == 0)
+            -$f
+        #else
+            +$f
+        #end
+    #end
+#end

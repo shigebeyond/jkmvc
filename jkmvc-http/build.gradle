@@ -12,8 +12,11 @@ dependencies{
     // upload
     compile 'servlets.com:cos:05Nov2002'
 
+    // 模板引擎
     // velocity
     compile 'org.apache.velocity:velocity:1.7'
+    // freemarker
+    compile "org.freemarker:freemarker:2.3.16"
     // jphp
     compile 'org.develnext.jphp:jphp-core:0.9.2' // include jphp with runtime and compiler
 

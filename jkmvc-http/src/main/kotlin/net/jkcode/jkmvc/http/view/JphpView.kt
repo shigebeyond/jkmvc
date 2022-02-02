@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.http.view
 
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
+import net.jkcode.jkmvc.http.view.jphp.JphpLauncher
 
 /**
  * php模板视图
@@ -16,7 +17,7 @@ class JphpView(req: HttpRequest /* 请求对象 */, res: HttpResponse /* 响应�
      * 渲染php模板
      */
     override fun render() {
-
+        JphpLauncher.instance().run(path + ".php", vm, res.outputStream)
     }
 
 }

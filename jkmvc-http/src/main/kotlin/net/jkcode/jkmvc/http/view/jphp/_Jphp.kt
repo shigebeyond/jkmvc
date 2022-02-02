@@ -19,6 +19,7 @@ public inline fun Any?.toMemory(): Memory {
         is Double -> DoubleMemory(this)
         is String -> StringMemory(this)
         is String -> StringMemory(this)
+        is List<*> -> ArrayMemory(this)
 //        is IObject -> StringMemory(this)
         else -> throw IllegalArgumentException("Cannot auto convert [$this] into Memory")
     }

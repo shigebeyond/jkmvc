@@ -18,7 +18,7 @@ class JphpTests {
 
     @Test
     fun testJphpLauncher(){
-        JphpLauncher.run("src/test/resources/index.php", mapOf("name" to "shijianhang"))
+        JphpLauncher.instance().run("src/test/resources/index.php", mapOf("name" to "shijianhang"))
     }
 
 }
