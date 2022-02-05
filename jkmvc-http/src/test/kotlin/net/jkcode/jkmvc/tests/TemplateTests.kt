@@ -43,7 +43,7 @@ class TemplateTests {
     // 测试性能
     fun runPerformance(func: KFunction0<Unit>) {
         val start = System.currentTimeMillis()
-        for (i in 0..1000)
+        for (i in 0 until 1000)
             func.invoke()
         println("执行" + func.name + "()耗时: " + (System.currentTimeMillis() - start) / 1000 + "s") // 5s
     }
