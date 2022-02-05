@@ -1,7 +1,7 @@
 package net.jkcode.jkmvc.tests
 
 import freemarker.template.Configuration
-import net.jkcode.jkmvc.http.jphp.JphpLauncher
+import net.jkcode.jphp.ext.JphpLauncher
 import org.apache.velocity.VelocityContext
 import org.apache.velocity.io.VelocityWriter
 import org.apache.velocity.runtime.RuntimeInstance

@@ -2,7 +2,7 @@ package net.jkcode.jkmvc.http.view
 
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
-import net.jkcode.jkmvc.http.jphp.JphpLauncher
+import net.jkcode.jphp.ext.JphpLauncher
 
 /**
  * php模板视图

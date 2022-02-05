@@ -21,4 +21,8 @@ if(env == 'dev') {
 
     include 'http-benchmark'
     project(':http-benchmark').projectDir = new File('../jkmvc-benchmark/http/jkhttp')
+
+    // jphp-java-ext
+    include 'jphp-java-ext'
+    project(':jphp-java-ext').projectDir = new File('../jphp-java-ext')
 }
