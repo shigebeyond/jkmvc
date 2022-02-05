@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.http.jphp
 
 import net.jkcode.jkutil.common.getAccessibleField
 import net.jkcode.jkutil.common.getMethodByName
+import net.jkcode.jkutil.common.ucFirst
 import php.runtime.Memory
 import php.runtime.annotation.Reflection
 import php.runtime.env.Environment
@@ -19,14 +20,18 @@ import php.runtime.reflection.ClassEntity
 
 /**
  * 包装java对象，用来读写属性+动态调用方法
+ * 1 动态调用方法的实现
  *    仿jphp自带的 JavaObject，但该类并不能动态调用方法
  *    动态调用方法的实现，使用魔术方法，涉及到参数类型+返回值类型转换
+ * 2 属性读写先调动getter/setter
+ * 3 使用
  *    java中的实例化： val obj = WrapJavaObject.of(env, xxx)
  *    php中的实例化: $obj = new WrapJavaObject($xxx);
  */
 @Reflection.Name("php\\lang\\WrapJavaObject")
 class WrapJavaObject(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject>(env, clazz) {
 
+    // 被包装的java对象
     lateinit var obj: Any
 
     @Reflection.Signature
@@ -59,6 +64,8 @@ class WrapJavaObject(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObj
             val name = args[0].toString()
             // 获得方法
             val method = obj.javaClass.getMethodByName(name)
+            if(method == null)
+                throw NoSuchMethodException("类[${obj.javaClass}]无方法[$name]")
             // 用 JavaMethod 包装方法调用
             val method2 = JavaMethod.of(env, method)
             val args2 = args.toMutableList()
@@ -70,10 +77,47 @@ class WrapJavaObject(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObj
         return Memory.NULL
     }
 
-    // ---------------- 抄final类JavaObject实现 ---------------
+    /**
+     * 调用getter
+     */
+    protected fun call_getter(env: Environment, field: String): Memory? {
+        // 获得方法
+        val name = "get" + field.ucFirst()
+        val method = obj.javaClass.getMethodByName(name)
+        if (method == null)
+            return null
+        // 用 JavaMethod 包装方法调用
+        val method2 = JavaMethod.of(env, method)
+        val obj2 = ObjectMemory(JavaObject.of(env, obj)) // 第一个参数是被包装的java对象
+        return method2.invoke(env, obj2)
+    }
+
+    /**
+     * 调用setter
+     */
+    protected fun call_setter(env: Environment, field: String, value: Memory): Memory? {
+        // 获得方法
+        val name = "set" + field.ucFirst()
+        val method = obj.javaClass.getMethodByName(name)
+        if (method == null)
+            return null
+        // 用 JavaMethod 包装方法调用
+        val method2 = JavaMethod.of(env, method)
+        val obj2 = ObjectMemory(JavaObject.of(env, obj)) // 第一个参数是被包装的java对象
+        return method2.invoke(env, obj2, value)
+    }
+
+    // ---------------- 改进final类JavaObject实现，属性读写先调动getter/setter ---------------
     @Reflection.Signature(Reflection.Arg("name"))
     fun __get(env: Environment, vararg args: Memory): Memory {
         val name = args[0].toString()
+
+        // 1 先尝试调用getter
+        val v = call_getter(env, name)
+        if(v != null)
+            return v
+
+        // 2 再读字段
         try {
             val field = obj.javaClass.getField(name)
             field.isAccessible = true
@@ -89,6 +133,12 @@ class WrapJavaObject(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObj
     @Reflection.Signature(value = [Reflection.Arg("name"), Reflection.Arg("value")])
     fun __set(env: Environment, vararg args: Memory): Memory {
         val name = args[0].toString()
+        // 1 先尝试调用setter
+        val v = call_setter(env, name, args[1])
+        if(v != null)
+            return v
+
+        // 2 再写字段
         try {
             val field = obj.javaClass.getField(name)
             field.isAccessible = true

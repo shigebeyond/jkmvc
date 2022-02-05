@@ -10,6 +10,8 @@ import php.runtime.loader.compile.StandaloneCompiler
 import php.runtime.memory.support.MemoryUtils
 import java.io.File
 
+data class Message(var key: String, var message: String)
+
 class JphpTests {
 
     private val context = Context(File("unknown"))
@@ -25,8 +27,10 @@ class JphpTests {
         val lan = JphpLauncher.instance()
         val data = mapOf(
                 "name" to "shijianhang",
-                "info" to mapOf("age" to 11, "addr" to "nanning"),
-                "javaobj" to WrapJavaObject.of(lan.environment, mapOf("goods_id" to 1, "goods_name" to "火龙果", "quantity" to 13))
+                "maparray" to mapOf("age" to 11, "addr" to "nanning"), // 会转换php的array类型（即java的ArrayMemory）
+                // WrapJavaObject
+                "mapjo" to WrapJavaObject.of(lan.environment, mapOf("goods_id" to 1, "goods_name" to "火龙果", "quantity" to 13)),
+                "pojo" to WrapJavaObject.of(lan.environment, Message("title", "jkcode代码库"))
         )
         lan.run("src/test/resources/index.php", data)
     }
