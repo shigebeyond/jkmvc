@@ -51,7 +51,7 @@ subprojects{
         maven {
             url 'http://maven.aliyun.com/nexus/content/repositories/snapshots'
         }
-        maven {
+        maven { // jphp
             url "https://jitpack.io"
         }
         mavenCentral()

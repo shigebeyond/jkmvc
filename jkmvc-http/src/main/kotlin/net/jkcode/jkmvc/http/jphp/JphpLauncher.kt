@@ -1,8 +1,6 @@
-package net.jkcode.jkmvc.http.view.jphp
+package net.jkcode.jkmvc.http.jphp
 
-import org.develnext.jphp.core.opcode.ModuleOpcodePrinter
 import php.runtime.Memory
-import php.runtime.env.CallStack
 import php.runtime.env.CallStackItem
 import php.runtime.env.TraceInfo
 import php.runtime.ext.core.OutputFunctions
@@ -12,7 +10,6 @@ import php.runtime.ext.java.JavaObject
 import php.runtime.launcher.LaunchException
 import php.runtime.launcher.Launcher
 import php.runtime.memory.ArrayMemory
-import php.runtime.memory.StringMemory
 import php.runtime.reflection.support.ReflectionUtils
 import java.io.IOException
 import java.io.OutputStream
@@ -39,6 +36,7 @@ class JphpLauncher protected constructor() : Launcher() {
         // 注册java对象， 方便调用java对象
         val core = compileScope.getExtension("Core")
         compileScope.registerLazyClass(core, JavaObject::class.java)
+        compileScope.registerLazyClass(core, WrapJavaObject::class.java)
 
         // 配置
         readConfig()
