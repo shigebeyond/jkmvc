@@ -48,10 +48,12 @@ class TemplateTests {
         println("执行" + func.name + "()耗时: " + (System.currentTimeMillis() - start) / 1000 + "s") // 5s
     }
 
+    //@Test
     fun runJphp() {
         JphpLauncher.instance().run("$rootPath/test.php", vm, getOutput("jphp"))
     }
 
+    //@Test
     fun runVelocity() {
         // 构建属性
         val props = Properties()
@@ -94,7 +96,7 @@ class TemplateTests {
         }
     }
 
-    @Test
+    //@Test
     fun runFreemarker() {
         val conf = Configuration()
         //加载模板文件(模板的路径)
