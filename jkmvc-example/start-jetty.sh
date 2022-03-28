@@ -18,13 +18,12 @@ if [ ! -d $PRO ]; then
 	echo "解押"$WAR
 	#unzip ../$WAR
 	jar -xvf ../$WAR
-fi
-cd $DIR
 
-# 复制servlet.jar -- gradle中复制
-#if [ ! -f "$PRO/WEB-INF/lib/.servlet-api-3.1.0.jar" ]; then
-#	cp ~/.gradle/caches/modules-2/files-2.1/javax.servlet/javax.servlet-api/3.1.0/3cd63d075497751784b2fa84be59432f4905bf7c/javax.servlet-api-3.1.0.jar $PRO/WEB-INF/lib/
-#fi
+	# 移动servlet.jar
+	mv ../javax.servlet-api-3.1.0.jar WEB-INF/lib/
+fi
+
+cd $DIR
 
 # 将 jetty.yaml 中的 webDir 配置项修改为当前项目路径
 #sed -i "s/webDir: .*src\/main\/webapp/webDir: $PRO/g" $PRO/WEB-INF/classes/jetty.yaml
