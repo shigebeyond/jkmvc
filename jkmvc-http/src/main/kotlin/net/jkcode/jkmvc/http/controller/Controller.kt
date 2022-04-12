@@ -5,10 +5,9 @@ import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jkutil.collection.LazyAllocatedMap
+import net.jkcode.jkutil.common.buildQueryString
 import net.jkcode.jkutil.ttl.HttpRequestScopedTransferableThreadLocal
 import java.io.File
-import java.io.Writer
-import javax.servlet.ServletOutputStream
 
 /**
  * 控制器
@@ -63,10 +62,17 @@ abstract class Controller : IController {
     /**
      * 重定向到指定url
      * @param uri
+     * @param data
      */
-    public override fun redirect(uri: String)
+    public override fun redirect(uri: String, data:Map<String, Any?>)
     {
-        this.res.sendRedirect(this.req.absoluteUrl(uri));
+        var url = this.req.absoluteUrl(uri)
+        var query = data.buildQueryString(true)
+        if(query.isNotEmpty()){
+            val delimiter = if(url.contains('?')) '&' else '?'
+            url = url + delimiter + query
+        }
+        this.res.sendRedirect(url);
     }
 
     /**

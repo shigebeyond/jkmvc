@@ -66,7 +66,7 @@ interface IController{
      * 重定向到指定url
      * @param uri
      */
-    fun redirect(uri: String)
+    fun redirect(uri: String, data:Map<String, Any?> = emptyMap())
 
     /**
      * 执行action
