@@ -1,7 +1,8 @@
-package net.jkcode.jkmvc.http.view
+package net.jkcode.jkmvc.http.jphp
 
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
+import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jphp.ext.JphpLauncher
 
 /**
