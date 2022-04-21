@@ -7,6 +7,8 @@ Inspired by 2 php frameworks: [kohana](https://github.com/kohana/kohana) and [sk
 
 [中文文档](#中文文档)
 
+[性能跟开发效率对比](https://github.com/shigebeyond/jkmvc-benchmark)
+
 # Introduction - web
 
 Take `jkmvc/jkmvc-example` for example.

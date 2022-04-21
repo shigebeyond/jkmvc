@@ -53,11 +53,11 @@ class ControllerClass(public override val clazz: KClass<*> /* controller类 */):
 
     /**
      * 根据类名获得controller名
+     *   去掉 Controller 后缀
      */
     public val name: String by lazy{
         val name = clazz.simpleName!!
-        val end = name.length - 10
-        name.substring(0, end).lcFirst() /* 首字母小写 */
+        name.removeSuffix("Controller").lcFirst() // 首字母小写
     }
 
     /**
