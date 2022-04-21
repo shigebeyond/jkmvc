@@ -9,6 +9,7 @@ import net.jkcode.jkmvc.http.router.RouteException
 import net.jkcode.jkutil.common.*
 import net.jkcode.jkutil.interceptor.RequestInterceptorChain
 import net.jkcode.jkutil.scope.GlobalHttpRequestScope
+import net.jkcode.jphp.ext.JphpLauncher
 import java.lang.reflect.Method
 import java.util.concurrent.CompletableFuture
 import javax.servlet.http.HttpServletRequest
@@ -118,34 +119,56 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
     private fun callController(req: HttpRequest, res: HttpResponse): CompletableFuture<Any?> {
         val oldCtrl = Controller.currentOrNull() // 获得旧的当前controller
 
-        // 0 加拦截
+        // 加拦截
         return interceptorChain.intercept(req) {
-            // 1 获得controller类
-            val clazz: ControllerClass? = ControllerClassLoader.get(req.controller);
-            if (clazz == null)
-                throw RouteException("Controller class not exists：" + req.controller);
-
-            // 2 获得action方法
-            val action: Method? = clazz.getActionMethod(req.action);
-            if (action == null)
-                throw RouteException("Controller ${req.controller} has no method：${req.action}()");
-
-            // 3 创建controller
-            val controller: Controller = clazz.clazz.java.newInstance() as Controller;
-            // 设置req/res属性
-            controller.req = req;
-            controller.res = res;
-
-            Controller.setCurrent(controller)
-
-            // 4 调用controller的action方法
-            //return controller.callActionMethod(action.javaMethod!!)
-            guardInvoke(action, controller, emptyArray())
+            if(req.controller.startsWith('$')) // 如果controller是$开头，则表示走php controller
+                callPhpController(req, res)
+            else // 否则，走java controller
+                callJavaController(req, res)
         }.whenComplete{ r, ex ->
-            // 5 对于内部请求, 需恢复旧的当前controller
+            // 对于内部请求, 需恢复旧的当前controller
             if(oldCtrl != null)
                 Controller.setCurrent(oldCtrl)
         }
+    }
+
+    /**
+     * 调用java的controller
+     */
+    private fun callJavaController(req: HttpRequest, res: HttpResponse): Any? {
+        // 1 获得controller类
+        val clazz: ControllerClass? = ControllerClassLoader.get(req.controller);
+        if (clazz == null)
+            throw RouteException("Controller class not exists：" + req.controller);
+
+        // 2 获得action方法
+        val action: Method? = clazz.getActionMethod(req.action);
+        if (action == null)
+            throw RouteException("Controller ${req.controller} has no method：${req.action}()");
+
+        // 3 创建controller
+        val controller: Controller = clazz.clazz.java.newInstance() as Controller;
+        // 设置req/res属性
+        controller.req = req;
+        controller.res = res;
+
+        Controller.setCurrent(controller)
+
+        // 4 调用controller的action方法
+        //return controller.callActionMethod(action.javaMethod!!)
+        return guardInvoke(action, controller, emptyArray())
+    }
+
+    /**
+     * 调用php的controller
+     */
+    private fun callPhpController(req: HttpRequest, res: HttpResponse){
+        val phpFile = Thread.currentThread().contextClassLoader.getResource("callController.php").path
+        val data = mapOf(
+                "req" to req,
+                "res" to res
+        )
+        JphpLauncher.instance().run(phpFile, data, res.outputStream)
     }
 
     /**

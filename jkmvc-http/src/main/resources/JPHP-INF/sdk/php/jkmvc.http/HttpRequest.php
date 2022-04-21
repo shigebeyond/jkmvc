@@ -54,4 +54,18 @@ class HttpRequest
     function sessionId()
     {
     }
+
+    /**
+     * @return string
+     */
+    function controller()
+    {
+    }
+
+    /**
+     * @return string
+     */
+    function action()
+    {
+    }
 }
