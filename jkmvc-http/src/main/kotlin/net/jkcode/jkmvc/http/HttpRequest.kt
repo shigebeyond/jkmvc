@@ -1,6 +1,5 @@
 package net.jkcode.jkmvc.http
 
-import net.jkcode.jkmvc.http.controller.Controller
 import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
 import net.jkcode.jkmvc.http.router.HttpMethod
@@ -76,7 +75,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		 */
 		@JvmStatic
 		public fun currentOrNull(): HttpRequest? {
-			return Controller.currentOrNull()?.req
+			return HttpState.currentOrNull()?.req
 		}
 	}
 

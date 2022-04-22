@@ -122,7 +122,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      * @return
      */
     private fun callController(req: HttpRequest, res: HttpResponse): CompletableFuture<Any?> {
-        val oldCtrl = Controller.currentOrNull() // 获得旧的当前controller
+        val oldState = HttpState.currentOrNull() // 获得旧的当前状态
 
         // 加拦截
         return interceptorChain.intercept(req) {
@@ -131,9 +131,9 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
             else // 否则，走java controller
                 callJavaController(req, res)
         }.whenComplete{ r, ex ->
-            // 对于内部请求, 需恢复旧的当前controller
-            if(oldCtrl != null)
-                Controller.setCurrent(oldCtrl)
+            // 对于内部请求, 需恢复旧的当前状态
+            if(oldState != null)
+                HttpState.setCurrent(oldState)
         }
     }
 
@@ -157,7 +157,8 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
         controller.req = req;
         controller.res = res;
 
-        Controller.setCurrent(controller)
+        // 设置当前状态
+        HttpState.setCurrent(HttpState(req, res, controller))
 
         // 4 调用controller的action方法
         //return controller.callActionMethod(action.javaMethod!!)
@@ -187,6 +188,10 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      * 调用php的controller
      */
     private fun callPhpController(req: HttpRequest, res: HttpResponse){
+        // 设置当前状态
+        HttpState.setCurrent(HttpState(req, res, null))
+
+        // 执行 callController.php
         val lan = JphpLauncher.instance()
         val phpFile = Thread.currentThread().contextClassLoader.getResource("jphp/callController.php").path
         val data = mapOf(
@@ -219,7 +224,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      * @return
      */
     public override fun getCombineInovkeObject(method: Method): Any {
-        return Controller.current()
+        return HttpState.current().controller!!
     }
 
     /**

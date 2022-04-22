@@ -1,12 +1,10 @@
 package net.jkcode.jkmvc.http.controller
 
-import net.jkcode.jkutil.ttl.SttlCurrentHolder
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jkutil.collection.LazyAllocatedMap
 import net.jkcode.jkutil.common.buildQueryString
-import net.jkcode.jkutil.ttl.HttpRequestScopedTransferableThreadLocal
 import java.io.File
 
 /**
@@ -18,8 +16,6 @@ import java.io.File
  *
  */
 abstract class Controller : IController {
-
-    companion object: SttlCurrentHolder<Controller>(HttpRequestScopedTransferableThreadLocal()) // http请求域的可传递的 ThreadLocal
 
     /**
      * 请求对象

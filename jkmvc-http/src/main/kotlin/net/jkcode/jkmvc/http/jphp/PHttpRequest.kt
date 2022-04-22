@@ -16,13 +16,13 @@ class PHttpRequest(env: Environment, protected val request: HttpRequest) : BaseO
     }
 
     @Reflection.Signature
-    fun header(name: String?): String {
+    fun header(name: String): String {
         return request.getHeader(name)
     }
 
     @Reflection.Signature
-    fun param(name: String?): String? {
-        return request.getParameter(name!!)
+    fun param(name: String): String? {
+        return request.getParameter(name)
     }
 
     @Reflection.Signature
@@ -31,8 +31,13 @@ class PHttpRequest(env: Environment, protected val request: HttpRequest) : BaseO
     }
 
     @Reflection.Signature
-    fun path(): String {
-        return request.pathInfo
+    fun uri(): String {
+        return request.requestURI
+    }
+
+    @Reflection.Signature
+    fun routeUri(): String {
+        return request.routeUri
     }
 
     @Reflection.Signature

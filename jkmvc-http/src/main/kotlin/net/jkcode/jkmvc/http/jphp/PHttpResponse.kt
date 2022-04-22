@@ -47,7 +47,7 @@ class PHttpResponse(env: Environment, protected val response: HttpResponse) : Ba
     }
 
     @Reflection.Signature
-    fun header(name: String?, value: Memory): PHttpResponse {
+    fun header(name: String, value: Memory): PHttpResponse {
         response.addHeader(name, value.toString())
         return this
     }
@@ -65,8 +65,8 @@ class PHttpResponse(env: Environment, protected val response: HttpResponse) : Ba
     }
 
     @Reflection.Signature
-    fun redirect(value: String?): PHttpResponse {
-        response.sendRedirect(value!!)
+    fun redirect(value: String): PHttpResponse {
+        response.sendRedirect(value)
         return this
     }
 

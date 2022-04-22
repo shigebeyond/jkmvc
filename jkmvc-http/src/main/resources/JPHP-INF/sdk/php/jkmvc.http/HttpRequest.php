@@ -37,7 +37,14 @@ class HttpRequest
     /**
      * @return string
      */
-    function path()
+    function uri()
+    {
+    }
+
+    /**
+     * @return string
+     */
+    function routeUri()
     {
     }
 

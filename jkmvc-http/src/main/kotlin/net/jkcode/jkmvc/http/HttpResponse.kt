@@ -1,7 +1,6 @@
 package net.jkcode.jkmvc.http
 
 import com.alibaba.fastjson.JSONObject
-import net.jkcode.jkmvc.http.controller.Controller
 import net.jkcode.jkmvc.http.util.AllPagination
 import net.jkcode.jkmvc.http.util.Pagination
 import net.jkcode.jkmvc.http.view.View
@@ -108,7 +107,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 		 */
 		@JvmStatic
 		public fun currentOrNull(): HttpResponse? {
-			return Controller.currentOrNull()?.res
+			return HttpState.currentOrNull()?.res
 		}
 	}
 
