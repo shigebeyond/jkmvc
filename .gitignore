@@ -8,3 +8,6 @@ out/
 upload/
 logs/
 tmp/
+gradle/
+gradlew
+gradlew.bat

@@ -5,11 +5,16 @@ import net.jkcode.jkmvc.http.*
 import net.jkcode.jkmvc.http.controller.Controller
 import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
+import net.jkcode.jkmvc.http.jphp.PHttpRequest
+import net.jkcode.jkmvc.http.jphp.PHttpResponse
 import net.jkcode.jkmvc.http.router.RouteException
 import net.jkcode.jkutil.common.*
 import net.jkcode.jkutil.interceptor.RequestInterceptorChain
 import net.jkcode.jkutil.scope.GlobalHttpRequestScope
 import net.jkcode.jphp.ext.JphpLauncher
+import php.runtime.env.Environment
+import php.runtime.env.handler.ExceptionHandler
+import php.runtime.lang.exception.BaseBaseException
 import java.lang.reflect.Method
 import java.util.concurrent.CompletableFuture
 import javax.servlet.http.HttpServletRequest
@@ -139,12 +144,12 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
         // 1 获得controller类
         val clazz: ControllerClass? = ControllerClassLoader.get(req.controller);
         if (clazz == null)
-            throw RouteException("Controller class not exists：" + req.controller);
+            throw RouteException("Controller class not exists: " + req.controller);
 
         // 2 获得action方法
         val action: Method? = clazz.getActionMethod(req.action);
         if (action == null)
-            throw RouteException("Controller ${req.controller} has no method：${req.action}()");
+            throw RouteException("Controller ${req.controller} has no method: ${req.action}()");
 
         // 3 创建controller
         val controller: Controller = clazz.clazz.java.newInstance() as Controller;
@@ -160,15 +165,36 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
     }
 
     /**
+     * 接管php异常处理
+     *   特殊处理路由异常
+     */
+    private val phpExceptionHandler = object : ExceptionHandler(null, null) {
+        override fun onException(env: Environment, ex: BaseBaseException): Boolean {
+            // 1 路由异常：直接抛给java
+            var msg = ex.toString()
+            if(msg.contains("$404[")){
+                msg = msg.substringBetween("$404[", "]")
+                throw RouteException(msg, ex)
+            }
+
+            // 2 其他异常：默认处理
+            ExceptionHandler.DEFAULT.onException(env, ex)
+            return false
+        }
+    }
+
+    /**
      * 调用php的controller
      */
     private fun callPhpController(req: HttpRequest, res: HttpResponse){
-        val phpFile = Thread.currentThread().contextClassLoader.getResource("callController.php").path
+        val lan = JphpLauncher.instance()
+        val phpFile = Thread.currentThread().contextClassLoader.getResource("jphp/callController.php").path
         val data = mapOf(
-                "req" to req,
-                "res" to res
+                "req" to PHttpRequest(lan.environment, req),
+                "res" to PHttpResponse(lan.environment, res)
         )
-        JphpLauncher.instance().run(phpFile, data, res.outputStream)
+        //lan.run(phpFile, data, res.outputStream, exceptionHandler = phpExceptionHandler) // 异常处理
+        lan.run(phpFile, data, res.outputStream)
     }
 
     /**

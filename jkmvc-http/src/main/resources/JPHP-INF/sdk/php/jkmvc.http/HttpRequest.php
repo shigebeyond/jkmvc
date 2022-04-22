@@ -68,4 +68,12 @@ class HttpRequest
     function action()
     {
     }
+
+    /**
+     * Get request of current execution
+     * @return HttpRequest
+     */
+    public static function current()
+    {
+    }
 }

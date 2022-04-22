@@ -1,12 +1,14 @@
 package net.jkcode.jkmvc.http.jphp
 
 import net.jkcode.jkmvc.http.HttpRequest
+import php.runtime.Memory
 import php.runtime.annotation.Reflection
 import php.runtime.env.Environment
 import php.runtime.lang.BaseObject
+import php.runtime.memory.ObjectMemory
 
-@Reflection.Name("HttpServerRequest")
-@Reflection.Namespace(JkmvcHttpExtension.Companion.NS)
+@Reflection.Name("HttpRequest")
+@Reflection.Namespace(JkmvcHttpExtension.NS)
 class PHttpRequest(env: Environment, protected val request: HttpRequest) : BaseObject(env) {
 
     @Reflection.Signature
@@ -52,5 +54,14 @@ class PHttpRequest(env: Environment, protected val request: HttpRequest) : BaseO
     @Reflection.Signature
     fun action(): String {
         return request.action
+    }
+
+    companion object{
+
+        @Reflection.Signature
+        @JvmStatic
+        fun current(env: Environment): Memory {
+            return ObjectMemory(PHttpRequest(env, HttpRequest.current()))
+        }
     }
 }

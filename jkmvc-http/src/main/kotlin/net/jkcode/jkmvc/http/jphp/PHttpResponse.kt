@@ -1,16 +1,18 @@
 package net.jkcode.jkmvc.http.jphp
 
+import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
 import php.runtime.Memory
 import php.runtime.annotation.Reflection
 import php.runtime.env.Environment
 import php.runtime.lang.BaseObject
+import php.runtime.memory.ObjectMemory
 import php.runtime.reflection.ClassEntity
 import java.io.IOException
 import java.nio.charset.Charset
 
-@Reflection.Name("HttpServerResponse")
-@Reflection.Namespace(JkmvcHttpExtension.Companion.NS)
+@Reflection.Name("HttpResponse")
+@Reflection.Namespace(JkmvcHttpExtension.NS)
 class PHttpResponse(env: Environment, protected val response: HttpResponse) : BaseObject(env) {
 
     @Reflection.Signature
@@ -72,5 +74,10 @@ class PHttpResponse(env: Environment, protected val response: HttpResponse) : Ba
     fun flush(): PHttpResponse {
         response.flushBuffer()
         return this
+    }
+
+    @Reflection.Signature
+    fun current(env: Environment): Memory {
+        return ObjectMemory(PHttpResponse(env, HttpResponse.current()))
     }
 }

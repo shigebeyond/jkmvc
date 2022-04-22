@@ -72,4 +72,12 @@ class HttpResponse
     public function flush()
     {
     }
+
+    /**
+     * Get response of current execution
+     * @return HttpResponse
+     */
+    public static function current()
+    {
+    }
 }
