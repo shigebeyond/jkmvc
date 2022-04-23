@@ -19,6 +19,9 @@ class PHttpResponse(env: Environment, protected val response: HttpResponse) : Ba
     protected fun __construct() {
     }
 
+    /**
+     * 2个write()方法，不能使用kotlin带参数值的方式来合并，因为php转java调用时, 会根据有无第二个参数, 去选择2个java方法中的一个
+     */
     @Reflection.Signature
     fun write(value: Memory): PHttpResponse {
         write(value, "UTF-8")
@@ -26,7 +29,7 @@ class PHttpResponse(env: Environment, protected val response: HttpResponse) : Ba
     }
 
     @Reflection.Signature
-    fun write(value: Memory, charset: String?): PHttpResponse {
+    fun write(value: Memory, charset: String): PHttpResponse {
         response.outputStream.write(value.getBinaryBytes(Charset.forName(charset)))
         return this
     }

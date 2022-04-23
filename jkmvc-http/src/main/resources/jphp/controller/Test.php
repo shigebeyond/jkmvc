@@ -26,4 +26,8 @@ class Test extends IController{
         echo 'query: ' . $req->query() . "\n";
         echo 'sessionId: ' . $req->sessionId() . "\n";
     }
+
+    function login(){
+        $this->view('login');
+    }
 }
