@@ -27,6 +27,9 @@ class Test extends IController{
         echo 'sessionId: ' . $req->sessionId() . "\n";
     }
 
+    /**
+     * http://localhost:8080/jkmvc-example/$test/login
+     */
     function login(){
         $this->view('login');
     }
