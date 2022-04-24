@@ -31,6 +31,6 @@ class Test extends IController{
      * http://localhost:8080/jkmvc-example/$test/login
      */
     function login(){
-        $this->view('login');
+        $this->view('login', ['msg' => '请输入登录账户和密码']);
     }
 }
