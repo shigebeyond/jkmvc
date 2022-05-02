@@ -4,11 +4,7 @@ import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jkutil.collection.LazyAllocatedMap
-import net.jkcode.jkutil.common.DegradeCommandException
-import net.jkcode.jkutil.common.trySupplierFuture
 import java.io.Writer
-import java.lang.reflect.Method
-import java.util.concurrent.CompletableFuture
 import javax.servlet.ServletOutputStream
 
 /**
@@ -67,32 +63,6 @@ interface IController{
      * @param uri
      */
     fun redirect(uri: String, data:Map<String, Any?> = emptyMap())
-
-    /**
-     * 执行action
-     *   注意：为了区别业务action，该方法不能命名为callAction
-     * @param action action方法
-     */
-    public fun callActionMethod(action: Method): CompletableFuture<Any?> {
-        return trySupplierFuture {
-                // 1 前置处理
-                before()
-
-                // 2 执行真正的处理方法
-                action.invoke(this);
-            //}.whenComplete{ r, ex -> // 不转换结果, 还是会抛异常(如 DegradeCommandException, 不应该往上抛)
-            }.handle{ r, ex -> // whenComplete() + 转换结果
-                // 3 后置处理
-                var result = r
-                if(ex is DegradeCommandException) // 异常自带降级处理
-                    result = ex.handleFallback()
-                else  // 后置处理
-                    result = after(result, ex)
-
-                // 4 渲染结果
-                renderResult(result)
-            }
-    }
 
 
     /**

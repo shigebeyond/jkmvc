@@ -1,11 +1,17 @@
 package net.jkcode.jkmvc.http.controller
 
+import co.paralleluniverse.fibers.Suspendable
+import net.jkcode.jkguard.IMethodMeta
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jkutil.collection.LazyAllocatedMap
+import net.jkcode.jkutil.common.DegradeCommandException
 import net.jkcode.jkutil.common.buildQueryString
+import net.jkcode.jkutil.common.to
+import net.jkcode.jkutil.common.trySupplierFuture
 import java.io.File
+import java.util.concurrent.CompletableFuture
 
 /**
  * 控制器
@@ -69,6 +75,50 @@ abstract class Controller : IController {
             url = url + delimiter + query
         }
         this.res.sendRedirect(url);
+    }
+
+    /**
+     * 执行action方法
+     * @param action action方法
+     */
+    @Suspendable
+    public fun callActionMethod(action: IMethodMeta): CompletableFuture<Any?> {
+        return trySupplierFuture {
+            // 1 前置处理
+            before()
+
+            // 2 执行真正的处理方法
+            action.invoke(this, buildActionParams(action))
+            //}.whenComplete{ r, ex -> // 不转换结果, 还是会抛异常(如 DegradeCommandException, 不应该往上抛)
+        }.handle{ r, ex -> // whenComplete() + 转换结果
+            // 3 后置处理
+            var result = r
+            if(ex is DegradeCommandException) // 异常自带降级处理
+                result = ex.handleFallback()
+            else  // 后置处理
+                result = after(result, ex)
+
+            // 4 渲染结果
+            renderResult(result)
+        }
+    }
+
+    /**
+     * 构建action方法的实参
+     * @param action
+     * @return
+     */
+    protected fun buildActionParams(action: IMethodMeta):Array<Any?>{
+        // 只处理一个参数的情况，且该实参为路由参数id的值
+        if(action.parameterTypes.size == 1){
+            val id = req.routeParams["id"] // 参数值
+            if(id != null) {
+                val paramClass = action.parameterTypes.single() // 参数类型
+                return arrayOf(id.to(paramClass)) // 转类型
+            }
+        }
+
+        return emptyArray()
     }
 
     /**
