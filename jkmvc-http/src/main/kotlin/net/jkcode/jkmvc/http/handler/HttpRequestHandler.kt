@@ -1,5 +1,7 @@
 package net.jkcode.jkmvc.http.handler
 
+import co.paralleluniverse.fibers.Suspendable
+import net.jkcode.jkguard.IMethodMeta
 import net.jkcode.jkguard.MethodGuardInvoker
 import net.jkcode.jkmvc.http.*
 import net.jkcode.jkmvc.http.controller.Controller
@@ -121,6 +123,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      * @param res
      * @return
      */
+    @Suspendable
     private fun callController(req: HttpRequest, res: HttpResponse): CompletableFuture<Any?> {
         val oldState = HttpState.currentOrNull() // 获得旧的当前状态
 
@@ -140,6 +143,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
     /**
      * 调用java的controller
      */
+    @Suspendable
     private fun callJavaController(req: HttpRequest, res: HttpResponse): Any? {
         // 1 获得controller类
         val clazz: ControllerClass? = ControllerClassLoader.get(req.controller);
@@ -223,20 +227,22 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      * @param method
      * @return
      */
-    public override fun getCombineInovkeObject(method: Method): Any {
+    public override fun getCombineInovkeObject(method: IMethodMeta): Any {
         return HttpState.current().controller!!
     }
 
     /**
      * 守护之后真正的调用
-     *    调用controller的action方法
+     *    实现：server端实现是调用原生方法, client端实现是发rpc请求
+     *    => 调用controller的action方法
      *
      * @param action 方法
      * @param controller 对象
      * @param args 参数
      * @return
      */
-    public override fun invokeAfterGuard(action: Method, controller: Any, args: Array<Any?>): CompletableFuture<Any?> {
+    @Suspendable
+    public override fun invokeAfterGuard(action: IMethodMeta, controller: Any, args: Array<Any?>): CompletableFuture<Any?> {
         // 调用controller的action方法
         return (controller as Controller).callActionMethod(action)
     }
