@@ -4,6 +4,7 @@ import net.jkcode.jkmvc.http.router.Route
 import net.jkcode.jkmvc.http.router.Router
 import java.lang.reflect.Method
 import net.jkcode.jkmvc.http.router.ARoute
+import net.jkcode.jkmvc.http.router.route
 
 /**
  * 方法级路由的检测器
@@ -22,7 +23,7 @@ open class MethodRouteDetector {
      */
     public fun detect(controller:String, action: String, method: Method) {
         // 获得注解
-        val annotation = method.getAnnotation(ARoute::class.java)
+        val annotation = method.route
         if(annotation == null)
             return
         // 获得正则
