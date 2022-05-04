@@ -14,9 +14,14 @@ import net.jkcode.jkutil.common.*
 import net.jkcode.jkutil.interceptor.RequestInterceptorChain
 import net.jkcode.jkutil.scope.GlobalHttpRequestScope
 import net.jkcode.jphp.ext.JphpLauncher
+import net.jkcode.jphp.ext.PhpMethodMeta
+import php.runtime.Memory
 import php.runtime.env.Environment
 import php.runtime.env.handler.ExceptionHandler
 import php.runtime.lang.exception.BaseBaseException
+import php.runtime.memory.ObjectMemory
+import php.runtime.memory.StringMemory
+import php.runtime.reflection.ClassEntity
 import java.lang.reflect.Method
 import java.util.concurrent.CompletableFuture
 import javax.servlet.http.HttpServletRequest
@@ -114,6 +119,21 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
     }
 
     /**
+     * 关闭异步请求
+     * @param req
+     * @param ex
+     */
+    private fun endRequest(req: HttpRequest, ex: Throwable?) {
+        // 打印异常
+        if (ex != null)
+            ex.printStackTrace()
+
+        // 关闭异步请求, 仅非内部请求
+        if (req.isAsyncStarted && !req.isInner)
+            req.asyncContext.complete()
+    }
+
+    /**
      * 调用controller与action
      *   1 调用controller
      *   2 记录与恢复原来的controller
@@ -140,6 +160,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
         }
     }
 
+    /***************** 调用java的controller 实现 *****************/
     /**
      * 调用java的controller
      */
@@ -169,6 +190,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
         return guardInvoke(action, controller, emptyArray())
     }
 
+    /***************** 调用php的controller 实现 *****************/
     /**
      * 接管php异常处理
      *   特殊处理路由异常
@@ -207,18 +229,21 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
     }
 
     /**
-     * 关闭异步请求
-     * @param req
-     * @param ex
+     * 守护方法调用 -- 入口
+     *
+     * @param methodName 方法
+     * @param obj 对象
+     * @param args0 参数
+     * @return 结果
      */
-    private fun endRequest(req: HttpRequest, ex: Throwable?) {
-        // 打印异常
-        if (ex != null)
-            ex.printStackTrace()
-
-        // 关闭异步请求, 仅非内部请求
-        if (req.isAsyncStarted && !req.isInner)
-            req.asyncContext.complete()
+    @Suspendable
+    fun guardInvoke(env: Environment, obj: ObjectMemory, methodName: StringMemory, args: Array<Memory>): Memory {
+        // 获得类
+        val classEntity: ClassEntity = obj.value.getReflection()
+        // 获得方法
+        val method = classEntity.findMethod(methodName.toString().toLowerCase())
+        // 调用方法
+        return guardInvoke(PhpMethodMeta(method, this), obj as Any, args as Array<Any?>) as Memory
     }
 
     /***************** MethodGuardInvoker 实现 *****************/
@@ -243,6 +268,9 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      */
     @Suspendable
     public override fun invokeAfterGuard(action: IMethodMeta, controller: Any, args: Array<Any?>): CompletableFuture<Any?> {
+        if(action is PhpMethodMeta)
+            return trySupplierFuture{ action.invoke(controller, *args) }
+
         // 调用controller的action方法
         return (controller as Controller).callActionMethod(action)
     }

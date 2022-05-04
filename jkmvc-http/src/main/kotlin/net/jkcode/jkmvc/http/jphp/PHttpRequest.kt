@@ -1,11 +1,15 @@
 package net.jkcode.jkmvc.http.jphp
 
 import net.jkcode.jkmvc.http.HttpRequest
+import net.jkcode.jkmvc.http.handler.HttpRequestHandler
+import net.jkcode.jphp.ext.PhpMethodMeta
 import php.runtime.Memory
 import php.runtime.annotation.Reflection
 import php.runtime.env.Environment
 import php.runtime.lang.BaseObject
 import php.runtime.memory.ObjectMemory
+import php.runtime.memory.StringMemory
+import php.runtime.reflection.ClassEntity
 
 @Reflection.Name("HttpRequest")
 @Reflection.Namespace(JkmvcHttpExtension.NS)
@@ -67,6 +71,12 @@ class PHttpRequest(env: Environment, protected val request: HttpRequest) : BaseO
         @JvmStatic
         fun current(env: Environment): Memory {
             return ObjectMemory(PHttpRequest(env, HttpRequest.current()))
+        }
+
+        @Reflection.Signature
+        @JvmStatic
+        fun guardInvoke(env: Environment, obj: ObjectMemory, methodName: StringMemory, vararg args: Memory): Memory {
+            return HttpRequestHandler.guardInvoke(env, obj, methodName, args as Array<Memory>)
         }
     }
 }
