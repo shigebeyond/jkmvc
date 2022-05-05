@@ -50,7 +50,7 @@ class TemplateTests {
 
     //@Test
     fun runJphp() {
-        JphpLauncher.instance().run("$rootPath/test.php", vm, getOutput("jphp"))
+        JphpLauncher.run("$rootPath/test.php", vm, getOutput("jphp"))
     }
 
     //@Test

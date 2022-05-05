@@ -13,7 +13,7 @@ import java.nio.charset.Charset
 
 @Reflection.Name("HttpResponse")
 @Reflection.Namespace(JkmvcHttpExtension.NS)
-class PHttpResponse(env: Environment, protected val response: HttpResponse) : BaseObject(env) {
+class PHttpResponse(env: Environment, public val response: HttpResponse) : BaseObject(env) {
 
     @Reflection.Signature
     protected fun __construct() {

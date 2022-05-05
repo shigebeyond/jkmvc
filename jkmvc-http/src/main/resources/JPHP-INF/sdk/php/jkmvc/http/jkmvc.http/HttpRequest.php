@@ -83,4 +83,19 @@ class HttpRequest
     public static function current()
     {
     }
+
+    /**
+     * Set request of current execution by controller
+     */
+    public static function setCurrentByController($controller)
+    {
+    }
+
+    /**
+     * Guard controller's action method invocation
+     * @return
+     */
+    public static function guardInvoke($obj, $methodName, ..$args)
+    {
+    }
 }

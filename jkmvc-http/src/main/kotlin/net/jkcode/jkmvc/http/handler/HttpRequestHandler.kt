@@ -14,7 +14,9 @@ import net.jkcode.jkutil.common.*
 import net.jkcode.jkutil.interceptor.RequestInterceptorChain
 import net.jkcode.jkutil.scope.GlobalHttpRequestScope
 import net.jkcode.jphp.ext.JphpLauncher
+import net.jkcode.jphp.ext.PhpCompletableFuture
 import net.jkcode.jphp.ext.PhpMethodMeta
+import net.jkcode.jphp.ext.tryPhpSupplierFuture
 import php.runtime.Memory
 import php.runtime.env.Environment
 import php.runtime.env.handler.ExceptionHandler
@@ -183,7 +185,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
         controller.res = res;
 
         // 设置当前状态
-        HttpState.setCurrent(HttpState(req, res, controller))
+        HttpState.setCurrentByController(controller)
 
         // 4 调用controller的action方法
         //return controller.callActionMethod(action.javaMethod!!)
@@ -214,11 +216,8 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      * 调用php的controller
      */
     private fun callPhpController(req: HttpRequest, res: HttpResponse){
-        // 设置当前状态
-        HttpState.setCurrent(HttpState(req, res, null))
-
         // 执行 callController.php
-        val lan = JphpLauncher.instance()
+        val lan = JphpLauncher
         val phpFile = Thread.currentThread().contextClassLoader.getResource("jphp/callController.php").path
         val data = mapOf(
                 "req" to PHttpRequest(lan.environment, req),
@@ -239,7 +238,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
     @Suspendable
     fun guardInvoke(env: Environment, obj: ObjectMemory, methodName: StringMemory, args: Array<Memory>): Memory {
         // 获得类
-        val classEntity: ClassEntity = obj.value.getReflection()
+        val classEntity: ClassEntity = obj.value.reflection
         // 获得方法
         val method = classEntity.findMethod(methodName.toString().toLowerCase())
         // 调用方法
@@ -249,10 +248,14 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
     /***************** MethodGuardInvoker 实现 *****************/
     /**
      * 获得调用的对象
+     *   合并后会异步调用其他方法, 原来方法的调用对象会丢失
      * @param method
      * @return
      */
     public override fun getCombineInovkeObject(method: IMethodMeta): Any {
+        if(!JkApp.useSttl) // 必须包装sttl
+            throw IllegalStateException()
+
         return HttpState.current().controller!!
     }
 
@@ -268,10 +271,12 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      */
     @Suspendable
     public override fun invokeAfterGuard(action: IMethodMeta, controller: Any, args: Array<Any?>): CompletableFuture<Any?> {
-        if(action is PhpMethodMeta)
-            return trySupplierFuture{ action.invoke(controller, *args) }
-
         // 调用controller的action方法
+        // 1 php方法: 调用action.invoke(), 涉及到各种转类型
+        if(action is PhpMethodMeta)
+            return PhpCompletableFuture.tryPhpSupplierFuture{ action.invoke(controller, *args) as Memory } as CompletableFuture<Any?>
+
+        // 2 java方法: 也是调用 action.invoke()，只是封装了更多java controller的特性
         return (controller as Controller).callActionMethod(action)
     }
 

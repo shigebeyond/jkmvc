@@ -18,7 +18,7 @@ class PhpView(req: HttpRequest /* 请求对象 */, res: HttpResponse /* 响应�
      * 渲染php模板
      */
     override fun render() {
-        JphpLauncher.instance().run(path + ".php", vm, res.outputStream)
+        JphpLauncher.run(path + ".php", vm, res.outputStream)
     }
 
 }
