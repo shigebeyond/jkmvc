@@ -1,12 +1,11 @@
 package net.jkcode.jkmvc.http.router
 
+import net.jkcode.jkguard.IMethodMeta
 import net.jkcode.jkutil.common.getCachedAnnotation
 import java.lang.reflect.Method
 
 /**
  * 路由注解
- *
- *
  * @author shijianhang<772910474@qq.com>
  * @date 2020-1-6 6:04 PM
  */
@@ -23,4 +22,12 @@ annotation class ARoute(
 public val Method.route: ARoute?
     get(){
         return getCachedAnnotation()
+    }
+
+/**
+ * 获得路由注解
+ */
+public val IMethodMeta.route: ARoute?
+    get(){
+        return getAnnotation()
     }
