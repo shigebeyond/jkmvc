@@ -16,7 +16,6 @@ import net.jkcode.jkutil.scope.GlobalHttpRequestScope
 import net.jkcode.jphp.ext.JphpLauncher
 import net.jkcode.jphp.ext.PhpCompletableFuture
 import net.jkcode.jphp.ext.PhpMethodMeta
-import net.jkcode.jphp.ext.tryPhpSupplierFuture
 import php.runtime.Memory
 import php.runtime.env.Environment
 import php.runtime.env.handler.ExceptionHandler

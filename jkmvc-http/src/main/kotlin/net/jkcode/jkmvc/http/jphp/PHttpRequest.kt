@@ -78,9 +78,12 @@ class PHttpRequest(env: Environment, public val request: HttpRequest) : BaseObje
             HttpState.setCurrentByController(controller)
         }
 
+        /**
+         * 守护action方法调用
+         */
         @Reflection.Signature
         @JvmStatic
-        fun guardInvoke(env: Environment, obj: ObjectMemory, methodName: StringMemory, vararg args: Memory): Memory {
+        fun guardActionInvoke(env: Environment, obj: ObjectMemory, methodName: StringMemory, vararg args: Memory): Memory {
             return HttpRequestHandler.guardInvoke(env, obj, methodName, args as Array<Memory>)
         }
     }

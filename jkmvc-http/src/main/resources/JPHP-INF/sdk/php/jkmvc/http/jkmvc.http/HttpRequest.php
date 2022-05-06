@@ -95,7 +95,7 @@ class HttpRequest
      * Guard controller's action method invocation
      * @return
      */
-    public static function guardInvoke($obj, $methodName, ..$args)
+    public static function guardActionInvoke($obj, $methodName, ..$args)
     {
     }
 }

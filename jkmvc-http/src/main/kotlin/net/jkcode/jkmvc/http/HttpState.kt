@@ -20,14 +20,14 @@ data class HttpState(
     companion object: SttlCurrentHolder<HttpState>(HttpRequestScopedTransferableThreadLocal()) // http请求域的可传递的 ThreadLocal
     {
         /**
-         * 设置当前http状态
+         * 通过java controller，来设置当前http状态
          */
         fun setCurrentByController(controller: Controller) {
             setCurrent(HttpState(controller.req, controller.res, controller))
         }
 
         /**
-         * 设置当前http状态
+         * 通过php controller，来设置当前http状态
          */
         fun setCurrentByController(controller: ObjectMemory) {
             val preq = controller.getPropJavaValue("req") as PHttpRequest

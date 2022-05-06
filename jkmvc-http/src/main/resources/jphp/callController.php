@@ -72,5 +72,8 @@ if (!method_exists($controller, $action)) // 检查action方法
 // 实例化controller
 $controller = new $controller($req, $res);
 
+// 设置当前http状态
+HttpRequest::setCurrentByController($controller);
+
 // 调用action方法
 $controller->$action();
