@@ -1,8 +1,6 @@
 package net.jkcode.jkmvc.orm
 
-import net.jkcode.jkutil.common.containsAny
 import net.jkcode.jkutil.common.getPathPropertyValue
-import java.lang.UnsupportedOperationException
 
 /**
  * ORM
