@@ -2,7 +2,14 @@
 namespace php\jkmvc\http;
 define('APPPATH', dirname(__FILE__)); // 应用目录
 
-// controller基类
+/**
+ * callController.php负责工作
+ *   1 定义controller基类
+ *   2 创建controller实例
+ *   3 HttpState.setCurrentByController()
+ *   4 guardInvoke(), 即调用action
+ */
+// 1 定义controller基类
 if(!class_exists('php\jkmvc\http\IController', FALSE)) // 检查controller基类, 一般不需要, 但如果修改了该文件, 会重新加载就会导致重复创建类
     abstract class IController {
         public $req; // 请求对象
@@ -69,11 +76,12 @@ $action = $req->action();
 if (!method_exists($controller, $action)) // 检查action方法
     throw new Exception("$404[Controller {$controller} has no method: {$action}()]");
 
-// 实例化controller
+// 3 实例化controller
 $controller = new $controller($req, $res);
 
-// 设置当前http状态
+// 4 设置当前http状态
 HttpRequest::setCurrentByController($controller);
 
-// 调用action方法
-$controller->$action();
+// 5 调用action方法
+// $controller->$action($req->param('id'));
+HttpRequest::guardInvoke($controller, $action, $req->param('id'))
