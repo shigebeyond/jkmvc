@@ -79,12 +79,14 @@ class PHttpRequest(env: Environment, public val request: HttpRequest) : BaseObje
         }
 
         /**
-         * 守护action方法调用
-         *   http controller的方法不会像rpc service的方法那样， 有明确类型的参数或响应， 如多个参数是在函数体获得的
+         * 守护方法调用
+         *   http controller的方法不会像rpc service的方法那样符合guardInvoke要求（有明确类型的参数或响应）
+         *   如多个参数不是在函数声明中指定的，而是在函数体获得的，如返回值不仅仅是业务对象，外面还包了{code, msg, data}一层来适应json响应规范，这样不符合 KeyCombine/GroupCombine 的要求
+         *   因此，你可以在php action方法实现中，继续调用 HttpRequest::guardInvoke(其他方法)，以便符合guardInvoke要求
          */
         @Reflection.Signature
         @JvmStatic
-        fun guardActionInvoke(env: Environment, obj: ObjectMemory, methodName: StringMemory, vararg args: Memory): Memory {
+        fun guardInvoke(env: Environment, obj: ObjectMemory, methodName: StringMemory, vararg args: Memory): Memory {
             return HttpRequestHandler.guardInvoke(obj, methodName, args as Array<Memory>, env)
         }
     }
