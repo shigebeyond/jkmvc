@@ -80,11 +80,12 @@ class PHttpRequest(env: Environment, public val request: HttpRequest) : BaseObje
 
         /**
          * 守护action方法调用
+         *   http controller的方法不会像rpc service的方法那样， 有明确类型的参数或响应， 如多个参数是在函数体获得的
          */
         @Reflection.Signature
         @JvmStatic
         fun guardActionInvoke(env: Environment, obj: ObjectMemory, methodName: StringMemory, vararg args: Memory): Memory {
-            return HttpRequestHandler.guardInvoke(env, obj, methodName, args as Array<Memory>)
+            return HttpRequestHandler.guardInvoke(obj, methodName, args as Array<Memory>, env)
         }
     }
 }

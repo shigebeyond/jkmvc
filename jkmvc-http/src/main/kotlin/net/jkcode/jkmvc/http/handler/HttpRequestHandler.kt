@@ -226,6 +226,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
         lan.run(phpFile, data, res.outputStream)
     }
 
+    /***************** MethodGuardInvoker 实现 *****************/
     /**
      * 守护方法调用 -- 入口
      *
@@ -235,7 +236,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      * @return 结果
      */
     @Suspendable
-    fun guardInvoke(env: Environment, obj: ObjectMemory, methodName: StringMemory, args: Array<Memory>): Memory {
+    fun guardInvoke(obj: ObjectMemory, methodName: StringMemory, args: Array<Memory>, env: Environment): Memory {
         // 获得类
         val classEntity: ClassEntity = obj.value.reflection
         // 获得方法
@@ -244,7 +245,6 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
         return guardInvoke(PhpMethodMeta(method, this), obj as Any, args as Array<Any?>) as Memory
     }
 
-    /***************** MethodGuardInvoker 实现 *****************/
     /**
      * 获得调用的对象
      *   合并后会异步调用其他方法, 原来方法的调用对象会丢失
