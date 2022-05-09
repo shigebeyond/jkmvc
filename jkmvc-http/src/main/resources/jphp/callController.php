@@ -83,5 +83,6 @@ $controller = new $controller($req, $res);
 HttpRequest::setCurrentByController($controller);
 
 // 5 调用action方法
-// $controller->$action($req->param('id'));
-HttpRequest::guardInvoke($controller, $action, $req->param('id'))
+$id = $req->param('id');
+// $controller->$action($id);
+HttpRequest::guardInvoke($controller, $action, [$id]);

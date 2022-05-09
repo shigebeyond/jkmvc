@@ -247,19 +247,6 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
     }
 
     /**
-     * 获得调用的对象
-     *   合并后会异步调用其他方法, 原来方法的调用对象会丢失
-     * @param method
-     * @return
-     */
-    public override fun getCombineInovkeObject(method: IMethodMeta): Any {
-        if(!JkApp.useSttl) // 必须包装sttl
-            throw IllegalStateException()
-
-        return HttpState.current().controller!!
-    }
-
-    /**
      * 守护之后真正的调用
      *    实现：server端实现是调用原生方法, client端实现是发rpc请求
      *    => 调用controller的action方法
@@ -278,6 +265,19 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
 
         // 2 java方法: 也是调用 action.invoke()，只是封装了更多java controller的特性
         return (controller as Controller).callActionMethod(action)
+    }
+
+    /**
+     * 获得调用的对象
+     *   合并后会异步调用其他方法, 原来方法的调用对象会丢失
+     * @param method
+     * @return
+     */
+    public override fun getCombineInovkeObject(method: IMethodMeta): Any {
+        if(!JkApp.useSttl) // 必须包装sttl
+            throw IllegalStateException()
+
+        return HttpState.current().controller!!
     }
 
 }
