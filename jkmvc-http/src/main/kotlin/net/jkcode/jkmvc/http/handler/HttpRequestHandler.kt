@@ -14,7 +14,7 @@ import net.jkcode.jkutil.common.*
 import net.jkcode.jkutil.interceptor.RequestInterceptorChain
 import net.jkcode.jkutil.scope.GlobalHttpRequestScope
 import net.jkcode.jphp.ext.JphpLauncher
-import net.jkcode.jphp.ext.PhpCompletableFuture
+import net.jkcode.jphp.ext.PhpReturnCompletableFuture
 import net.jkcode.jphp.ext.PhpMethodMeta
 import php.runtime.Memory
 import php.runtime.env.Environment
@@ -213,6 +213,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
 
     /**
      * 调用php的controller
+     *   callController.php负责工作： 1 定义controller基类 2 创建controller实例 3 HttpState.setCurrentByController() 4 guardInvoke()即调用action
      */
     private fun callPhpController(req: HttpRequest, res: HttpResponse){
         // 执行 callController.php
@@ -273,7 +274,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
         // 调用controller的action方法
         // 1 php方法: 调用action.invoke(), 涉及到各种转类型
         if(action is PhpMethodMeta)
-            return PhpCompletableFuture.tryPhpSupplierFuture{ action.invoke(controller, *args) as Memory }
+            return PhpReturnCompletableFuture.tryPhpSupplierFuture{ action.invoke(controller, *args) as Memory }
 
         // 2 java方法: 也是调用 action.invoke()，只是封装了更多java controller的特性
         return (controller as Controller).callActionMethod(action)
