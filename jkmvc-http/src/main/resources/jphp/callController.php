@@ -2,6 +2,8 @@
 namespace php\jkmvc\http;
 define('APPPATH', dirname(__FILE__)); // 应用目录
 
+// TODO: 为了优化性能, 可适当减少判断的代码, 如判断文件/类/方法存不存在, 以便减少php代码, 压榨点性能; 这样最后包一层try, 然后转化下对用户友好的异常
+
 /**
  * callController.php负责工作
  *   1 定义controller基类
