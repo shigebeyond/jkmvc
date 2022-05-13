@@ -88,7 +88,7 @@ abstract class Controller : IController {
             before()
 
             // 2 执行真正的处理方法
-            action.invoke(this, buildActionParams(action))
+            action.invoke(this, *buildActionParams(action))
             //}.whenComplete{ r, ex -> // 不转换结果, 还是会抛异常(如 DegradeCommandException, 不应该往上抛)
         }.handle{ r, ex -> // whenComplete() + 转换结果
             // 3 后置处理
