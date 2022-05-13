@@ -22,15 +22,19 @@ data class GroupRange(var start:Int, var end:Int){
  *  将简化的路由正则，转换为完整的正则：主要是将<参数>替换为子正则
  *
  * <code>
- * 	   // 将 <controller>(\/<action>(\/<id>)?)? 编译为 /([^\/]+)(\/([^\/]+)\/(\d+)?)?/
+ * 	   // 将 <controller>(\/<action>(\/<id:\d+>)?)? 编译为 /([^\/]+)(\/([^\/]+)\/(\d+)?)?/
  *     // 其中参数对子正则的映射关系保存在 paramGroupMapping 中
  *     val route = Route(
- *        "<controller>(\/<action>(\/<id>)?)?",
- *         mapOf(
+ *        "<controller>(\/<action>(\/<id>)?)?", // uri正则
+ *         mapOf( // 参数的子正则
  *           "controller" to "[a-z]+",
  *           "action" to "[a-z]+",
  *           "id" to "\d+",
  *         )
+ *     );
+ *     // 或
+ *     val route = Route(
+ *        "<controller:[a-z]+>(\/<action:[a-z]+>(\/<id:\d+>)?)?" // uri正则，也可以带参数的子正则
  *     );
  * </code>
  *
@@ -39,8 +43,8 @@ data class GroupRange(var start:Int, var end:Int){
  *     route.mathes('welcome/index');
  * </code>
  */
-class Route(override val regex:String, // 原始正则: <controller>(\/<action>(\/<id>)?)?
-			override val paramRegex:Map<String, String> = emptyMap(), // 参数的子正则
+class Route(override val regex:String, // 原始正则: <controller>(\/<action>(\/<id:\d+>)?)?
+			override val paramRegex:MutableMap<String, String> = HashMap(), // 参数的子正则
 			override val defaults:Map<String, String>? = null, // 参数的默认值
 			override val method: HttpMethod = HttpMethod.ALL, // http方法
 			override val controller: String? = null, // controller, 仅当方法级注解路由时有效
@@ -48,11 +52,11 @@ class Route(override val regex:String, // 原始正则: <controller>(\/<action>(
 ): IRoute {
 
 	// 仅在方法级注解路由时调用
-	constructor(regex:String, // 原始正则: <controller>(\/<action>(\/<id>)?)?
+	constructor(regex:String, // 原始正则: <controller>(\/<action>(\/<id:\d+>)?)?
 				method: HttpMethod, // http方法
 				controller: String?, // controller, 仅当方法级注解路由时有效
 				action: String? // action, 仅当方法级注解路由时有效
-	):this(regex, emptyMap(), emptyMap(), method, controller, action)
+	):this(regex, HashMap(), emptyMap(), method, controller, action)
 
 	companion object{
 		/**
@@ -67,7 +71,7 @@ class Route(override val regex:String, // 原始正则: <controller>(\/<action>(
 	protected var groupRegex:String;
 
 	/**
-	 * 编译后正则: 将 <controller>(\/<action>(\/<id>)?)? 编译为 /([^\/]+)(\/([^\/]+)\/(\d+)?)?/
+	 * 编译后正则: 将 <controller>(\/<action>(\/<id:\d+>)?)? 编译为 /([^\/]+)(\/([^\/]+)\/(\d+)?)?/
 	 *   其中参数对子正则的映射关系保存在 paramGroupMapping 中
 	 */
 	protected var compiledRegex:Regex;
@@ -106,15 +110,19 @@ class Route(override val regex:String, // 原始正则: <controller>(\/<action>(
 		if(controller == null && action != null || controller != null && action == null)
 			throw IllegalArgumentException("controller/action must all-null or all-not-null")
 
-		// 对参数加括号，参数也变为子正则, 用括号包住
-		groupRegex = "<[\\w\\d]+>".toRegex().replace(regex){ result: MatchResult ->
-			"(${result.value})" // 用括号包住, 变为子正则
+		// 对参数名加括号，匹配<controller>或<id:\d+>，参数名也变为子正则, 用括号包住
+		groupRegex = "<([\\w\\d]+)(:([^>]+))?>".toRegex().replace(regex){ result: MatchResult ->
+			val paramName = result.groups[1]!!.value; // 参数名
+			val paramReg = result.groups[3]?.value; // 参数子正则
+			if(paramReg != null)
+				paramRegex[paramName] = paramReg // 记录参数的子正则
+			"(<$paramName>)" // 用括号包住, 变为子正则： <controller> 变为 (<controller>)， <id:\d+> 变为 (<id>) 并记录id参数的子正则为\d+
 		}
 		// 计算子正则的范围
 		groupRangs = buildGroupRangs()
 		// 构建参数对子正则的映射
 		paramGroupMapping = buildParamGroupMapping()
-		// 编译参数正则: 将<参数>替换为对应的带参数的子正则
+		// 编译参数正则: 将<参数名>替换为对应的带参数的子正则
 		var compileRegex = "<([\\w\\d]+)>".toRegex().replace(groupRegex){ result: MatchResult ->
 			val paramName = result.groups[1]!!.value; // 参数名
 			paramRegex.getOrDefault(paramName, REGEX_PARAM)!! // 替换参数正则
@@ -139,7 +147,7 @@ class Route(override val regex:String, // 原始正则: <controller>(\/<action>(
 				levels.add(rangs.size); // 层级 + 1
 				rangs.add(GroupRange(i + 1, -1)) // 记录(开始
 			}else if(groupRegex[i] == ')'){ // 子正则结束
-				val level = levels.removeAt(levels.lastIndex) // // 层级 - 1
+				val level = levels.removeAt(levels.lastIndex) // 层级 - 1
 				rangs[level].end = i // 记录)结束
 			}
 		}

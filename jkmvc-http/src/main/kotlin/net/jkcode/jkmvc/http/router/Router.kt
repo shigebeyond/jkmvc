@@ -6,6 +6,7 @@ import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.httpLogger
 import java.lang.reflect.Method
 import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * 路由器
@@ -46,11 +47,11 @@ object Router: IRouter
 			// url正则
 			val regex = item["regex"] as String
 			// 参数正则
-			val paramRegex = item["paramRegex"] as Map<String, String>
+			val paramRegex = item["paramRegex"] as MutableMap<String, String>?
 			// 参数正则
 			val defaults = item["defaults"] as Map<String, String>
 			// 添加路由规则
-			val route = Route(regex, paramRegex, defaults)
+			val route = Route(regex, paramRegex ?: HashMap(), defaults)
 			addRoute(name, route)
 			// 识别默认路由
 			if(name == "default")
