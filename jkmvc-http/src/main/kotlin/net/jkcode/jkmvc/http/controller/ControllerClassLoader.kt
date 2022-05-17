@@ -45,7 +45,7 @@ object ControllerClassLoader : IControllerClassLoader, ClassScanner() {
      *
      * @param relativePath 类文件相对路径
      */
-    public override fun collectClass(relativePath: String) {
+    public override fun collectClassFile(relativePath: String) {
         // 过滤Controller的类文件
         if(!relativePath.endsWith("Controller.class"))
             return
