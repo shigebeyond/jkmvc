@@ -38,7 +38,7 @@ open class JkFilter() : Filter {
         /**
          * 插件列表
          */
-        public val plugins: List<IPlugin> = pluginConfig.classes2Instances("interceptors")
+        public val plugins: List<IPlugin> = pluginConfig.classes2Instances("httpServerPlugins")
 
         /**
          * 单例
