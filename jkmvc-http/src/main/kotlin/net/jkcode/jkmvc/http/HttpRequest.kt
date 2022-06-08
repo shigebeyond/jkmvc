@@ -18,12 +18,8 @@ import javax.servlet.ServletContext
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import kotlin.collections.HashMap
-import kotlin.collections.Map
-import kotlin.collections.MutableMap
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.firstOrNull
-import kotlin.collections.iterator
 import kotlin.collections.set
 
 /**
@@ -481,8 +477,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		}
 
 	/**
-	 * 获得cookie值
-	 *
+	 * 获得单个cookie值
 	 * <code>
 	 *     val theme = Cookie::get("theme", "blue");
 	 * </code>
@@ -495,6 +490,16 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		return this.cookies?.firstOrNull{
 			it.name == name
 		}
+	}
+
+	/**
+	 * 获得所有cookie值
+	 * @return a map of cookies
+	 */
+	public fun getCookieMap(): Map<String, Cookie> {
+		return this.cookies?.associate {
+			it.name to it
+		} ?: emptyMap()
 	}
 
 	/**
