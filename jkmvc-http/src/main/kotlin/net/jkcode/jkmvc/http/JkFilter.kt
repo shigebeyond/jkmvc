@@ -31,16 +31,6 @@ open class JkFilter() : Filter {
         protected val staticFileExts: List<String> = config.getString("staticFileExts", "gif|jpg|jpeg|png|bmp|ico|swf|js|css|eot|ttf|woff")!!.split('|')
 
         /**
-         * 插件配置
-         */
-        public val pluginConfig: Config = Config.instance("plugin", "yaml")
-
-        /**
-         * 插件列表
-         */
-        public val plugins: List<IPlugin> = pluginConfig.classes2Instances("httpServerPlugins")
-
-        /**
          * 单例
          */
         protected var inst: JkFilter? = null
@@ -90,8 +80,7 @@ open class JkFilter() : Filter {
             urlPrefix = ""
 
         // 4 初始化插件
-        for(p in plugins)
-            p.start()
+        PluginLoader.loadPlugins()
 
         // 5 加载路由配置
         Router.load()
@@ -180,8 +169,5 @@ open class JkFilter() : Filter {
      * 析构
      */
     override fun destroy() {
-        // 关闭插件
-        for(p in plugins)
-            p.close()
     }
 }
