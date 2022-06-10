@@ -702,3 +702,6 @@ gradle :jkmvc-example:build -x test
 36. [getEmpsByIds场景代码](doc/orm/benchmark/code_getEmpsByIds.md)
 37. [第1轮测试结果](doc/orm/benchmark/result_round1.md)
 38. [第2轮测试结果](doc/orm/benchmark/result_round2.md)
+
+# 其他
+[变更历史](doc/changelog.md)
