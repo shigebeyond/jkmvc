@@ -176,7 +176,7 @@ staticFileExts: gif|jpg|jpeg|png|bmp|ico|svg|swf|js|css|eot|ttf|woff
 # controller类所在的包路径
 controllerPackages:
     - net.jkcode.jkmvc.example.controller
-# 视图目录
+# 视图目录, 根目录为webapp
 viewDir:
 ```
 

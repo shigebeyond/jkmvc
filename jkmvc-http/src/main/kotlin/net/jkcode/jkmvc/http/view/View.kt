@@ -6,6 +6,7 @@ import net.jkcode.jkmvc.http.setAttributes
 import net.jkcode.jkutil.collection.LazyAllocatedMap
 import net.jkcode.jkutil.common.Config
 import java.io.FileNotFoundException
+import java.util.*
 
 /**
  * 视图
@@ -28,7 +29,7 @@ open class View(override val req: HttpRequest, // 请求对象
 		public val config = Config.instance("http", "yaml")
 
 		/**
-		 * 视图目录
+		 * 视图目录, 根目录为webapp
 		 */
 		public val viewDir: String = config["viewDir"] ?: "/"
 	}

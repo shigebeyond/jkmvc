@@ -17,4 +17,4 @@ tempDir: tmp
 Run the main class `net.jkcode.jkmvc.server.JettyServerLauncher`
 
 If you run through `Run/Debug Configurations` -> `Application` in idea, you must config `use classpath of module`
-![](../img/jetty-idea-run.png)
+![](img/jetty-idea-run.png)
