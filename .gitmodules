@@ -1,0 +1,15 @@
+[submodule "jkguard"]
+    path = jkguard
+    url = git@github.com:shigebeyond/jkguard.git
+[submodule "jkmvc-benchmark"]
+    path = jkmvc-benchmark
+    url = git@github.com:shigebeyond/jkmvc-benchmark.git
+[submodule "jkbenchmark"]
+    path = jkbenchmark
+    url = git@github.com:shigebeyond/jkbenchmark.git
+[submodule "jphp-java-ext"]
+    path = jphp-java-ext
+    url = git@github.com:shigebeyond/jphp-java-ext.git
+[submodule "jkutil"]
+    path = jkutil
+    url = git@github.com:shigebeyond/jkutil.git
