@@ -229,7 +229,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
 
     /***************** MethodGuardInvoker 实现 *****************/
     /**
-     * 守护方法调用 -- 入口
+     * 守护php方法调用 -- 入口
      *
      * @param methodName 方法
      * @param obj 对象
