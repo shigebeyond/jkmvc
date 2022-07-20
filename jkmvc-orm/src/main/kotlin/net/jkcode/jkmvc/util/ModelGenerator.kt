@@ -5,6 +5,7 @@ import net.jkcode.jkutil.common.format
 import net.jkcode.jkutil.common.prepareDirectory
 import net.jkcode.jkmvc.db.Db
 import net.jkcode.jkmvc.db.DbColumn
+import net.jkcode.jkutil.common.ucFirst
 import java.io.File
 import java.util.*
 
@@ -45,7 +46,7 @@ class ModelGenerator(val srcDir:String /* 源码目录 */,
      */
     private fun getType(column: DbColumn):String{
         val clazz = column.logicType.toJavaType(true, column.precision, column.scale)
-        return clazz.name.replace("java.lang.", "")
+        return clazz.name.replace("java.lang.", "").ucFirst()
     }
 
     /**

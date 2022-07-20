@@ -122,26 +122,26 @@ public enum class DbColumnLogicType private constructor(
      */
     public open fun toJavaType(tryPrimitiveType: Boolean,  precision: Int? = null, scale: Int? = null): Class<*>{
         // 对 DECIMAL/NUMERIC 尝试转为原始类型
-        if(tryPrimitiveType && (this == DECIMAL || this == NUMERIC)){
+        if(tryPrimitiveType && (this.code.contains("int") || this == DECIMAL || this == NUMERIC)){
             if(scale == 0){ // 整型
                 if(precision == null)
                     return BigInteger::class.java
 
                 // max int: 2147483647 --10位
                 if(precision <= 10)
-                    return Int.javaClass
+                    return Int::class.java
 
                 // max long: 9223372036854775807 -- 19位
-                if(precision <= 10)
-                    return Long.javaClass
+                if(precision > 10 || this == BIGINT)
+                    return Long::class.java
             }else if(precision != null){ // 浮点型
                 // max float: 340282346638528860000000000000000000000 --39位
                 if(precision <= 39)
-                    return Float.javaClass
+                    return Float::class.java
 
                 // max double: 179769313486231570000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 -- 309位
                 if(precision <= 309)
-                    return Double.javaClass
+                    return Double::class.java
             }
         }
         return javaType
