@@ -31,7 +31,7 @@ public abstract class IJavaOrmMeta : IOrmMeta  {
      * @param convertingValue 查询时是否智能转换字段值
      * @param convertingColumn 查询时是否智能转换字段名
      * @param withSelect with()联查时自动select关联表的字段
-     * @param reused 是否复用的
+     * @param reused 是否复用, 框架保证复用的OrmQueryBuilder实例是线程安全的
      * @return
      */
     @JvmOverloads

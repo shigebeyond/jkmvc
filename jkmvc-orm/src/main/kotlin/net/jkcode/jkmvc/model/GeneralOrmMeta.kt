@@ -31,7 +31,7 @@ open class GeneralOrmMeta(label: String, // 模型中文名
      * @param convertingValue 查询时是否智能转换字段值
      * @param convertingColumn 查询时是否智能转换字段名
      * @param withSelect with()联查时自动select关联表的字段
-     * @param reused 是否复用的 -- 暂不支持
+     * @param reused 是否复用 -- 暂不支持
      * @return
      */
     public override fun queryBuilder(convertingValue: Boolean, convertingColumn: Boolean, withSelect: Boolean, reused: Boolean): OrmQueryBuilder {
