@@ -121,11 +121,11 @@ abstract class BaseSingleDb(name:String /* 标识 */) : Db(name) {
      */
     public override fun close(){
         // 关闭主库连接
-        if(connUsed and 1 > 0)
+        if((connUsed and 1) > 0)
             masterConn.close()
         // 关闭从库连接
-        if(connUsed and 2 > 0)
-            if(connUsed and 1 == 0 || masterConn != slaveConn) // 检查从库 != 主库, 防止重复关闭
+        if((connUsed and 2) > 0)
+            if((connUsed and 1) == 0 || masterConn != slaveConn) // 检查从库 != 主库, 防止重复关闭
                 slaveConn.close()
     }
 }
