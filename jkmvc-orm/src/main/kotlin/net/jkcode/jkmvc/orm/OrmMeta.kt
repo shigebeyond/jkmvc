@@ -2,10 +2,7 @@ package net.jkcode.jkmvc.orm
 
 import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.converters.basic.DateConverter
-import net.jkcode.jkmvc.db.Db
-import net.jkcode.jkmvc.db.DbColumn
-import net.jkcode.jkmvc.db.DbTable
-import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkmvc.db.*
 import net.jkcode.jkmvc.orm.relation.*
 import net.jkcode.jkmvc.orm.serialize.OrmConverter
 import net.jkcode.jkmvc.query.CompiledSql
@@ -390,7 +387,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @return
      */
     public override fun <T> transactionWhenHandlingEvent(events: String, withHasRelations: Boolean, statement: () -> T): T {
-        val needTrans = canHandleAnyEvent(events) || withHasRelations
+        val needTrans = hasHandleAnyEvent(events) || withHasRelations
         return db.transaction(!needTrans, statement)
     }
 
@@ -583,6 +580,13 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     }
 
     /**
+     * 是否使用预编译sql来做常规查询, 以便提升编译性能
+     *    预编译sql: selectSqlByPk/deleteSqlByPk/getInsertSql()/getUpdateSql()
+     *    仅用于常规查询: OrmPersistent 中的 loadByPk()/delete()/create()/update()
+     */
+    override val precompileSql: Boolean = true
+
+    /**
      * 根据主键查询的sql
      *   OrmQueryBuilder 是联查时用
      */
@@ -719,7 +723,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param convertingValue 查询时是否智能转换字段值
      * @param convertingColumn 查询时是否智能转换字段名
      * @param withSelect with()联查时自动select关联表的字段
-     * @param reused 是否复用的
+     * @param reused 是否复用的, 仅在
      * @return
      */
     public override fun queryBuilder(convertingValue: Boolean, convertingColumn: Boolean, withSelect: Boolean, reused: Boolean): OrmQueryBuilder {
@@ -740,19 +744,31 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param item 要赋值的对象
      */
     protected fun <T : IOrm> innerloadByPk(pk: DbKeyValues, item: T? = null): T? {
-        //return queryBuilder().where(primaryKey, pk).findRow
-        // 使用预编译sql来查询
+        // 1 不预编译sql
+        if(!precompileSql)
+            return queryBuilder().where(primaryKey, pk).findRow {
+                result2model(it, item)
+            }
+
+        // 2 使用预编译sql来查询
         val (sql, query) = selectSqlByPk
         val item = sql.findRow(pk.toList(), db) {
-            //val result = item ?: model.java.newInstance() as T
-            val result = item ?: newInstance() as T
-            result.setOriginal(it)
-            result
+            result2model(it, item)
         }
         // 联查hasMany关系, 因为他是另外的sql
         if(item != null)
             query.rowQueryWithMany(item)
         return item
+    }
+
+    /**
+     * db查询结果转模型实例
+     */
+    private fun <T : IOrm> result2model(it: DbResultRow, item: T?): T {
+        //val result = item ?: model.java.newInstance() as T
+        val result = item ?: newInstance() as T
+        result.setOriginal(it)
+        return result
     }
 
     /**

@@ -278,23 +278,34 @@ interface IOrmMeta {
 
     /************************************ 查询 *************************************/
     /**
+     * 是否使用预编译sql来做常规查询, 以便提升编译性能
+     *    预编译sql: selectSqlByPk/deleteSqlByPk/getInsertSql()/getUpdateSql()
+     *    仅用于常规查询: OrmPersistent 中的 loadByPk()/delete()/create()/update()
+     */
+    val precompileSql: Boolean
+
+    /**
      * 根据主键查询的sql
-     *   OrmQueryBuilder 是联查时用
+     *   用在 OrmMeta.findByPk() / OrmPersistent.loadByPk()
+     *   而 OrmQueryBuilder 是联查时用
      */
     val selectSqlByPk: Pair<CompiledSql, OrmQueryBuilder>
 
     /**
      * 根据主键删除的sql
+     *   用在 OrmPersistent.delete()
      */
     val deleteSqlByPk: CompiledSql
 
     /**
      * 获得插入的sql
+     *    用在 OrmPersistent.create()
      */
     fun getInsertSql(insertProps: Collection<String>): CompiledSql
 
     /**
      * 获得更新的sql
+     *    用在 OrmPersistent.update()
      */
     fun getUpdateSql(updateProps: Collection<String>): CompiledSql
 
@@ -430,11 +441,11 @@ interface IOrmMeta {
     val processableEvents: List<String>
 
     /**
-     * 能否处理任一事件(只是增删改, 不包含查)
+     * 是否有处理任一事件(只是增删改, 不包含查)
      * @param events 多个事件名，以|分隔，如 beforeCreate|afterCreate
      * @return
      */
-    fun canHandleAnyEvent(events:String): Boolean{
+    fun hasHandleAnyEvent(events:String): Boolean{
         return processableEvents.any { event ->
             events.contains(event)
         }

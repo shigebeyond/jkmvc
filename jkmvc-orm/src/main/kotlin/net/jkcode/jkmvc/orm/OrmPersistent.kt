@@ -119,11 +119,13 @@ abstract class OrmPersistent : OrmValid() {
 
 			// 插入数据库
 			val generatedColumn = if (needPk) ormMeta.primaryKey.first() else null // 主键名
-			//val pk = queryBuilder().value(buildDirtyData()).insert(generatedColumn);
-			// 优化性能: 使用编译好的sql
-			val sql = ormMeta.getInsertSql(_dirty.keys)
-			val params = buildDirtyValues(sql.paramNames) // 不是 _dirty.keys, 而是有序的 sql.paramNames
-			val pk = sql.execute(params, generatedColumn, ormMeta.db)
+			val pk:Long
+			if(ormMeta.precompileSql) { // 优化性能: 使用编译好的sql
+				val sql = ormMeta.getInsertSql(_dirty.keys)
+				val params = buildDirtyValues(sql.paramNames) // 不是 _dirty.keys, 而是有序的 sql.paramNames
+				pk = sql.execute(params, generatedColumn, ormMeta.db)
+			}else
+				pk = queryBuilder().value(buildDirtyData()).insert(generatedColumn);
 
 			// 更新内部数据
 			if (needPk)
@@ -244,12 +246,14 @@ abstract class OrmPersistent : OrmValid() {
 			removeCache()
 
 			// 更新数据库
-			//val result = queryBuilder().sets(buildDirtyData()).where(ormMeta.primaryKey, oldPk /* 原始主键，因为主键可能被修改 */).update();
-			// 优化性能: 使用编译好的sql
-			val sql = ormMeta.getUpdateSql(_dirty.keys)
-			val params = buildDirtyValues(sql.paramNames) as MutableList // 不是 _dirty.keys, 而是有序的 sql.paramNames
-			params.addAll(oldPk.columns)// 原始主键，因为主键可能被修改
-			val result = sql.execute(params, null, ormMeta.db) > 0
+			val result:Boolean
+			if(ormMeta.precompileSql) { // 优化性能: 使用编译好的sql
+				val sql = ormMeta.getUpdateSql(_dirty.keys)
+				val params = buildDirtyValues(sql.paramNames) as MutableList // 不是 _dirty.keys, 而是有序的 sql.paramNames
+				params.addAll(oldPk.columns)// 原始主键，因为主键可能被修改
+				result = sql.execute(params, null, ormMeta.db) > 0
+			}else
+				result = queryBuilder().sets(buildDirtyData()).where(ormMeta.primaryKey, oldPk /* 原始主键，因为主键可能被修改 */).update()
 
 			// 触发后置事件
 			triggerAfterUpdate()
@@ -295,9 +299,11 @@ abstract class OrmPersistent : OrmValid() {
 				removeHasNRelationsByDelete()
 
 			// 删除数据
-			//val result = queryBuilder().where(ormMeta.primaryKey, pk).delete();
-			// 优化性能: 使用编译好的sql
-			val result = ormMeta.deleteSqlByPk.execute(pk.toList(), null, ormMeta.db) > 0
+			val result: Boolean
+			if(ormMeta.precompileSql) // 优化性能: 使用编译好的sql
+				result = ormMeta.deleteSqlByPk.execute(pk.toList(), null, ormMeta.db) > 0
+			else
+				result = queryBuilder().where(ormMeta.primaryKey, pk).delete();
 
 			// 触发后置事件
 			afterDelete()
