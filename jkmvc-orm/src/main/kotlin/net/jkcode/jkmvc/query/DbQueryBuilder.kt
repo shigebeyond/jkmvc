@@ -73,7 +73,9 @@ open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : 
         // 编译动作子句 + 修饰子句
         // 其中，sql收集编译好的语句，compiledSql.staticParams收集静态参数
         val sql = StringBuilder();
-        this.compileAction(db, sql).compileDecoration(db, sql);
+        compileAction(db, sql)
+        if(action != SqlAction.INSERT) // 只有select/update/delete才需要where子句, insert不需要
+            compileDecoration(db, sql);
 
         // 收集编译好的sql
         compiledSql.sql = sql.toString()
