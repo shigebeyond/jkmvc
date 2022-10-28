@@ -1,13 +1,12 @@
 package net.jkcode.jkmvc.db
 
-import net.jkcode.jkutil.common.dbLogger
-import net.jkcode.jkutil.common.mapToArray
 import net.jkcode.jkmvc.db.sharding.ShardingDb
 import net.jkcode.jkmvc.db.single.DruidSingleDb
+import net.jkcode.jkutil.common.dbLogger
+import net.jkcode.jkutil.common.mapToArray
 import net.jkcode.jkutil.ttl.AllRequestScopedTransferableThreadLocal
 import java.io.Closeable
 import java.io.InputStream
-import java.lang.StringBuilder
 import java.sql.Connection
 import java.sql.SQLException
 import java.util.*
@@ -38,7 +37,7 @@ abstract class Db protected constructor(
                 // 请求结束要调用 close() 来关闭连接
                 val dbs = get()
                 for((name, db) in dbs) {
-                    //dbLogger.debug("Close db: {}", name)
+                    dbLogger.debug("Close db [{}] when request end", name)
                     db.close()
                 }
                 dbs.clear()
@@ -67,6 +66,10 @@ abstract class Db protected constructor(
         }
 
     }
+
+    @Volatile
+    public var closed = false
+        protected set
 
     /**
      * 主库连接

@@ -39,7 +39,7 @@ class CompiledSql : ICompiledSql() {
 
             // 预览sql
             if(DbConfig.debug && sql != "")
-                dbLogger.debug("编译好的sql：{}", previewSql())
+                dbLogger.debug("Preview sql：{}", previewSql())
         }*/
 
     /**
@@ -131,7 +131,7 @@ class CompiledSql : ICompiledSql() {
 
         // 预览sql
         if(DbConfig.debug)
-            dbLogger.debug("实际的sql：{}", previewSql(dynamicParams, fromIndex))
+            dbLogger.debug("Preview sql：{}", previewSql(dynamicParams, fromIndex))
 
         return result;
     }
