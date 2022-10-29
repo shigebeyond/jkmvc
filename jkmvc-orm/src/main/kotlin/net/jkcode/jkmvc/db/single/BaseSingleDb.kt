@@ -4,6 +4,7 @@ import net.jkcode.jkmvc.db.ClosableDataSource
 import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.randomInt
 import net.jkcode.jkmvc.db.Db
+import net.jkcode.jkmvc.db.DbException
 import net.jkcode.jkutil.common.dbLogger
 import java.sql.Connection
 
@@ -52,6 +53,8 @@ abstract class BaseSingleDb(name:String /* 标识 */) : Db(name) {
         connUsed = connUsed or 1
         // 新建连接
         val conn = dataSource.connection
+        if(conn.isClosed)
+            throw DbException("Fail to get master connection for db [$name]")
         dbLogger.debug("Db [{}] create master connection: {}", name, conn)
         conn
     }
@@ -70,6 +73,8 @@ abstract class BaseSingleDb(name:String /* 标识 */) : Db(name) {
             connUsed = connUsed or 2
             // 新建连接
             val conn = dataSource.connection
+            if(conn.isClosed)
+                throw DbException("Fail to get master connection for db [$name]")
             dbLogger.debug("Db [{}] create slave connection: {}", name, conn)
             conn
         }
@@ -133,10 +138,8 @@ abstract class BaseSingleDb(name:String /* 标识 */) : Db(name) {
         // 关闭从库连接
         if((connUsed and 2) > 0
             && ((connUsed and 1) == 0 || masterConn != slaveConn)){ // 检查从库 != 主库, 防止重复关闭
-                dbLogger.debug("Db [{}] close slave connection: {}", name, slaveConn)
-                slaveConn.close()
+            dbLogger.debug("Db [{}] close slave connection: {}", name, slaveConn)
+            slaveConn.close()
         }
-
-        closed = true
     }
 }

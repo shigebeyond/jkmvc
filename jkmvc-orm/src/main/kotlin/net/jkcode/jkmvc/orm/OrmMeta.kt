@@ -730,7 +730,8 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         // 复用
         if(reused){
             val query = reusedQueryBuilders.get()
-            query.reuse(convertingValue, convertingColumn, withSelect)
+            // 重置属性，特别是重置旧的已关闭的db
+            query.reuse(this.db, convertingValue, convertingColumn, withSelect)
             return query
         }
 

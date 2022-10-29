@@ -48,6 +48,7 @@ abstract class OrmPersistent : OrmValid() {
 
 	/**
 	 * 获得sql构建器
+	 *   注意是复用的
 	 * @return
 	 */
 	public override fun queryBuilder(): OrmQueryBuilder {

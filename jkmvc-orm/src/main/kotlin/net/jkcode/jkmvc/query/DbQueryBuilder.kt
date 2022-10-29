@@ -13,7 +13,17 @@ import net.jkcode.jkmvc.db.IDb
  * @author shijianhang
  * @date 2016-10-13
  */
-open class DbQueryBuilder(public override val defaultDb: IDb = Db.instance()) : DbQueryBuilderDecoration() {
+open class DbQueryBuilder(
+        internal var myDefaultDb: IDb? = null // 本次请求我自定义的默认db
+) : DbQueryBuilderDecoration() {
+
+    /**
+     * 默认db
+     *   DbQueryBuilder 有可能被多个请求复用, 因此虽然优先读 myDefaultDb, 但要保证 myDefaultDb 可写
+     *   在新的请求中复用 myDefaultDb 时, 需重置 myDefaultDb, 参考 OrmMeta.reusedQueryBuilders + OrmQueryBuilder.reuse()
+     */
+    public override val defaultDb: IDb
+        get() = myDefaultDb ?: Db.instance()
 
     /**
      * 获得sql查询构建器

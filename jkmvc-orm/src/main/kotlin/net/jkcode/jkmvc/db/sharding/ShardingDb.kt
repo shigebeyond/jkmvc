@@ -105,7 +105,5 @@ class ShardingDb(name:String /* 标识 */) : Db(name) {
         // 关闭连接
         if(connUsed)
             masterConn.close()
-
-        closed = true
     }
 }

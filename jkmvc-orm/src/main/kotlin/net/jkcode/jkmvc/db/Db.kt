@@ -67,10 +67,6 @@ abstract class Db protected constructor(
 
     }
 
-    @Volatile
-    public var closed = false
-        protected set
-
     /**
      * 主库连接
      */

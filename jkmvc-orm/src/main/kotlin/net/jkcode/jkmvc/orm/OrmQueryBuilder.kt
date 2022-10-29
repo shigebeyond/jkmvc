@@ -64,8 +64,10 @@ open class OrmQueryBuilder(protected val ormMeta: OrmMeta, // orm元数据
 
     /**
      * 复用查询构建器
+     *    注意：特别是重置旧的已关闭的db
      */
-    internal fun reuse(convertingValue: Boolean, convertingColumn: Boolean, withSelect: Boolean){
+    internal fun reuse(db: IDb?, convertingValue: Boolean, convertingColumn: Boolean, withSelect: Boolean){
+        this.myDefaultDb = db
         this.convertingValue = convertingValue
         this.convertingColumn = convertingColumn
         this.withSelect = withSelect
