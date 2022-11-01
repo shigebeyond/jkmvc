@@ -116,14 +116,19 @@ open class JkFilter() : Filter {
         if(req.isAsyncSupported // 支持异常
                 && !isInnerReq // 非内部请求: 内部请求的处理还是放到跟父请求的同一个线程处理
                 && !config.getBoolean("debug")!!) { // 非调试
-            // 异步上下文, 在完成异步操作后, 需要调用 actx.complete() 来关闭异步响应, 调用下放到 RequestHandler.handle()
-            val actx = req.startAsync(req, res)
-
-            // 异步处理请求
+            // 异步处理
             try {
                 //actx.start { // web server线程池
                 CommonExecutor.execute { // 其他线程池
+                    // 启动异步上下文, 在完成异步操作后, 需要调用 actx.complete() 来关闭
+                    val actx = req.startAsync(req, res)
+                    // 异步处理
                     handleRequest(actx.request as HttpServletRequest, actx.response as HttpServletResponse, chain)
+                        .whenComplete { r, ex ->
+                            // 关闭异步上下文
+                            //req.asyncContext.complete()
+                            actx.complete()
+                        }
                 }
             }catch (e: RejectedExecutionException){
                 httpLogger.errorAndPrint("JkFilter处理请求错误: 公共线程池已满", e)
@@ -162,7 +167,12 @@ open class JkFilter() : Filter {
      * @return
      */
     protected open fun handleRequest(req: HttpServletRequest, res: HttpServletResponse, chain: FilterChain): CompletableFuture<*> {
-        return HttpRequestHandler.handle(req, res)
+        val f = HttpRequestHandler.handle(req, res)
+        f.exceptionally { ex ->
+            httpLogger.errorAndPrint(ex.message!!, ex)
+            null
+        }
+        return f
     }
 
     /**

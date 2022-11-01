@@ -26,4 +26,8 @@ class RouteResult(
                     route.action!! // 方法级注解路由
                 else
                     params["action"]!! // 全局配置路由
+
+    override fun toString(): String {
+        return "controller=[$controller], action=[$action]"
+    }
 }

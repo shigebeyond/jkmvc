@@ -37,7 +37,7 @@ abstract class Db protected constructor(
                 // 请求结束要调用 close() 来关闭连接
                 val dbs = get()
                 for((name, db) in dbs) {
-                    dbLogger.debug("Close db [{}] when request end", name)
+                    //dbLogger.debug("Close db [{}] when request end", name)
                     db.close()
                 }
                 dbs.clear()

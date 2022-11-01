@@ -2,11 +2,13 @@ package net.jkcode.jkmvc.http
 
 import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
+import net.jkcode.jkmvc.http.handler.HttpRequestHandler
 import net.jkcode.jkmvc.http.router.HttpMethod
 import net.jkcode.jkmvc.http.router.RouteException
 import net.jkcode.jkmvc.http.router.RouteResult
 import net.jkcode.jkmvc.http.router.Router
 import net.jkcode.jkutil.common.enumeration
+import net.jkcode.jkutil.common.httpLogger
 import net.jkcode.jkutil.common.toNullable
 import net.jkcode.jkutil.common.trim
 import net.jkcode.jkutil.lock.IKeyLock
@@ -150,13 +152,13 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	/**
 	 * 当前匹配的路由结果
 	 */
-	public lateinit var routeResult: RouteResult
+	public var routeResult: RouteResult? = null
 
 	/**
 	 * 当前匹配的路由参数
 	 */
 	public val routeParams:Map<String, String>
-		get() = routeResult.params
+		get() = routeResult!!.params
 
 	/**
 	 * 解析路由
@@ -164,22 +166,25 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 */
 	public fun parseRoute(): Boolean {
 		// 解析路由
-		val result = Router.parse(routeUri, httpMethod);
+		routeResult = Router.parse(routeUri, httpMethod);
 
-		if(result != null){
-			this.routeResult = result
-			return true;
-		}
+		// 打印请求
+		httpLogger.debug("{}请求uri: {} {}, contextPath: {}, 匹配路由: {}", if (isInner) "内部" else "", method, routeUri, contextPath, routeResult)
 
-		return false;
+		// 打印curl
+		if (!isInner && !isUpload) // 上传请求，要等到设置了上传子目录，才能访问请求参数
+			httpLogger.debug(buildCurlCommand())
+
+		return routeResult != null
 	}
+
 
 	/**
 	 * 获得当前controller
 	 * @return
 	 */
 	public val controller: String
-		get() = routeResult.controller
+		get() = routeResult!!.controller
 
 	/**
 	 * 获得当前controller类
@@ -193,7 +198,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 * @return
 	 */
 	public val action: String
-		get() = routeResult.action
+		get() = routeResult!!.action
 
 	/*************************** 合并http参数+路由参数 *****************************/
 	/**
@@ -223,7 +228,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		for((k, v) in routeParams){
 			// 全局配置路由: 不合并controller/action, 防止覆盖http请求参数
 			// 方法级注解路由: 压根没有获得controller/action路由参数的需求, 因为你在目标方法中开发了, 不至于反过来问是哪个方法
-			if(!(routeResult.route.isGlobal && (k == "controller" || k == "action")))
+			if(!(routeResult!!.route.isGlobal && (k == "controller" || k == "action")))
 				result[k] = arrayOf(v)
 		}
 		return result
