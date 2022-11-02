@@ -67,6 +67,13 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): IHt
         }
 
     /**
+     * 上传的子目录
+     *    就是在 UploadFileUtil.uploadRootDirectory 根目录下, 当前业务或租户对应的子目录
+     *    如在多租户应用的拦截器修改该值为租户id
+     */
+    public var uploadSubDir: String = ""
+
+    /**
      * 上传请求中文件参数
      */
     public val partFileMap: Map<String, List<PartFile>> by lazy{

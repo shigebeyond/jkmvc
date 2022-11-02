@@ -162,6 +162,7 @@ open class JkFilter() : Filter {
 
     /**
      * 处理请求
+     *   方便复用与重载
      * @param req
      * @param res
      * @return

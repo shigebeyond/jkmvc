@@ -57,25 +57,25 @@ object UploadFileUtil {
     /**
      * 准备好上传目录 = 根目录/子目录
      *
-     * @param uploadDirectory 上传子目录
+     * @param subDir 上传子目录
      * @return
      */
-    private fun prepareUploadDirectory(uploadDirectory: String): String {
+    private fun prepareUploadDirectory(subDir: String): String {
         /*// 1 绝对目录
-        if(FileSystems.getDefault().getPath(uploadDirectory).isAbsolute){
+        if(FileSystems.getDefault().getPath(subDir).isAbsolute){
             // 如果目录不存在，则创建
-            uploadDirectory.prepareDirectory()
-            return uploadDirectory
+            subDir.prepareDirectory()
+            return subDir
         }
         */
         // 2 相对目录
         // 上传目录 = 根目录/子目录
         var path: String = uploadRootDirectory + File.separatorChar
-        if(uploadDirectory != "")
-            path = path + uploadDirectory + File.separatorChar
+        if(subDir != "")
+            path = path + subDir + File.separatorChar
         // 如果目录不存在，则创建
-        if(!preparedDirs.contains(uploadDirectory)) {
-            preparedDirs.add(uploadDirectory)
+        if(!preparedDirs.contains(subDir)) {
+            preparedDirs.add(subDir)
             path.prepareDirectory()
         }
         return path
@@ -86,12 +86,12 @@ object UploadFileUtil {
      *   保存文件前被调用
      *
      * @param fileName 文件名
-     * @param uploadDirectory 上传子目录
+     * @param subDir 上传子目录
      * @return
      */
-    public fun prepareUploadFile(fileName: String, uploadDirectory: String): File {
+    public fun prepareUploadFile(fileName: String, subDir: String): File {
         //准备好上传目录, 并构建文件
-        val file = File(prepareUploadDirectory(uploadDirectory), fileName)
+        val file = File(prepareUploadDirectory(subDir), fileName)
         // 文件创建或重命名
         return file.createOrRename()
     }
@@ -103,7 +103,7 @@ object UploadFileUtil {
      * @return
      */
     public fun getFileRelativePath(file: String): String {
-        return file.substringAfter(uploadRootDirectory)
+        return file.substringAfter(uploadRootDirectory + File.separatorChar)
     }
 
     /********************* 读/删文件 *********************/

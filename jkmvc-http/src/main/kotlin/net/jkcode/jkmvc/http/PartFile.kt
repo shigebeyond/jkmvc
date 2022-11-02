@@ -86,20 +86,20 @@ class PartFile(protected val part: Part): Part by part {
 
     /**
      * 另存文件, 并返回相对路径
-     * @param uploadDirectory
      * @return
      */
-    public fun storeAndGetRelativePath(uploadDirectory:String = ""): String? {
+    public fun storeAndGetRelativePath(): String? {
         // 文件名
         var fileName = part.submittedFileName
         if(fileName.isNullOrEmpty() /* && part.size == 0L */){
             httpLogger.warn("上传文件名为空")
             return null
         }
-
         fileName = URLDecoder.decode(fileName, "UTF-8")
+        // 上传子目录
+        val subDir = HttpRequest.current().uploadSubDir
         // 准备好上传文件路径
-        val file = UploadFileUtil.prepareUploadFile(fileName, uploadDirectory)
+        val file = UploadFileUtil.prepareUploadFile(fileName, subDir)
         // 另存文件
         write(file.absolutePath)
 
