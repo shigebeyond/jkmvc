@@ -313,48 +313,52 @@ interface IOrmMeta {
      * 根据主键值来加载数据
      * @param pks 要查询的主键
      * @param item 要赋值的对象
+     * @param useCache 是否使用缓存
      */
-    public fun loadByPk(vararg pks: Any, item: IOrm){
+    public fun loadByPk(vararg pks: Any, item: IOrm, useCache: Boolean = true){
         if(pks.isNotEmpty())
-            loadByPk(DbKeyValues(*pks), item)
+            loadByPk(DbKeyValues(*pks), item, useCache = useCache)
     }
 
     /**
      * 根据主键值来加载数据
      * @param pk 要查询的主键
      * @param item 要赋值的对象
+     * @param useCache 是否使用缓存
      */
-    public fun loadByPk(pk: DbKeyValues, item: IOrm)
+    public fun loadByPk(pk: DbKeyValues, item: IOrm, useCache: Boolean = true)
 
     /**
      * 根据主键值来查找数据
      * @param pks 要查询的主键
+     * @param useCache 是否使用缓存
      * @return
      */
-    public fun <T: IOrm> findByPk(vararg pks: Any): T?{
+    public fun <T: IOrm> findByPk(vararg pks: Any, useCache: Boolean = true): T?{
         if(pks.isEmpty())
             return null
 
-        return findByPk(DbKeyValues(*pks))
+        return findByPk(DbKeyValues(*pks), useCache = useCache)
     }
 
     /**
      * 根据主键值来查找数据
      * @param pk 要查询的主键
+     * @param useCache 是否使用缓存
      * @return
      */
-    public fun <T: IOrm> findByPk(pk: DbKeyValues): T?
+    public fun <T: IOrm> findByPk(pk: DbKeyValues, useCache: Boolean = true): T?
 
     /**
      * 检查是否存在主键值对应的数据
      * @param pks 要检查的主键
      * @return
      */
-    public fun existByPk(vararg pks: Any): Boolean {
+    public fun existByPk(vararg pks: Any, useCache: Boolean = true): Boolean {
         if(pks.isEmpty())
             return false
 
-        return existByPk(DbKeyValues(*pks))
+        return existByPk(DbKeyValues(*pks), useCache = useCache)
     }
 
     /**
@@ -362,8 +366,8 @@ interface IOrmMeta {
      * @param pk 要查询的主键
      * @return
      */
-    public fun existByPk(pk: DbKeyValues): Boolean{
-        return findByPk<IOrm>(pk) != null
+    public fun existByPk(pk: DbKeyValues, useCache: Boolean = true): Boolean{
+        return findByPk<IOrm>(pk, useCache = useCache) != null
     }
 
     /**

@@ -10,14 +10,15 @@ import net.jkcode.jkutil.common.getPathPropertyValue
  * @author shijianhang
  * @date 2016-10-10 上午12:52:34
  */
-abstract class Orm(vararg pks: Any/* 主键值, 非null */) : OrmRelated() {
+abstract class Orm @JvmOverloads constructor(vararg pks: Any/* 主键值, 非null */, useCache: Boolean = true /* 是否使用缓存 */) : OrmRelated() {
 
-    constructor(singlePk: Any?): this(*(if(singlePk == null) emptyArray() else arrayOf(singlePk)))
+    @JvmOverloads
+    constructor(singlePk: Any?, useCache: Boolean = true): this(*(if(singlePk == null) emptyArray() else arrayOf(singlePk)), useCache = useCache)
 
     init{
         // 根据主键值来加载数据
         if(pks.isNotEmpty())
-            loadByPk(*pks)
+            loadByPk(*pks, useCache = useCache)
     }
 
     /**

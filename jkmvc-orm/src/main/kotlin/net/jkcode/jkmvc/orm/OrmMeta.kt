@@ -776,20 +776,30 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * 根据主键值来加载数据
      * @param pk 要查询的主键
      * @param item 要赋值的对象
+     * @param useCache 是否使用缓存
      */
-    public override fun loadByPk(pk: DbKeyValues, item: IOrm) {
-        //innerloadByPk(pk, item)
-        getOrPutCache(pk, item)
+    public override fun loadByPk(pk: DbKeyValues, item: IOrm, useCache: Boolean) {
+        if(useCache) { // 用缓存
+            getOrPutCache(pk, item)
+            return
+        }
+
+        // 不用缓存
+        innerloadByPk(pk, item)
     }
 
     /**
      * 根据主键值来查找数据
      * @param pk 要查询的主键
+     * @param useCache 是否使用缓存
      * @return
      */
-    public override fun <T : IOrm> findByPk(pk: DbKeyValues): T? {
-        //return innerloadByPk(pk)
-        return getOrPutCache(pk)
+    public override fun <T : IOrm> findByPk(pk: DbKeyValues, useCache: Boolean): T? {
+        if(useCache) // 用缓存
+            return getOrPutCache(pk)
+
+        // 不用缓存
+        return innerloadByPk(pk)
     }
 
     /**
@@ -804,7 +814,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         if (isPkEmpty(pk))
             return false
 
-        val item = findByPk<IOrm>(pk)
+        val item = findByPk<IOrm>(pk, useCache = false)
         if (item != null && item.loaded)
             return item.delete(withHasRelations)
 

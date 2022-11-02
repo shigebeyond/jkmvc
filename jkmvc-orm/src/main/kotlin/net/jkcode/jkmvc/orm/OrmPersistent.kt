@@ -60,10 +60,11 @@ abstract class OrmPersistent : OrmValid() {
 	 *   如果是复合主键, 则参数按 ormMeta.primaryKey 中定义的字段的属性来传值
 	 *
 	 * @param pks
+	 * @param useCache 是否使用缓存
 	 */
-	public override fun loadByPk(pk: DbKeyValues) {
+	public override fun loadByPk(pk: DbKeyValues, useCache: Boolean) {
 		if (!isPkEmpty(pk))
-			ormMeta.loadByPk(pk, this)
+			ormMeta.loadByPk(pk, this, useCache = useCache)
 	}
 
 	/**
@@ -71,7 +72,7 @@ abstract class OrmPersistent : OrmValid() {
 	 */
 	public override fun reload(){
 		this.clear()
-		loadByPk(this.pk)
+		loadByPk(this.pk, useCache = false)
 	}
 
 	/**
@@ -98,7 +99,7 @@ abstract class OrmPersistent : OrmValid() {
 		// 有主键则检查主键是否存在
 		if(checkPkExists) {
 			val pk = this.pk
-			if (!ormMeta.isPkEmpty(pk) && ormMeta.existByPk(pk))
+			if (!ormMeta.isPkEmpty(pk) && ormMeta.existByPk(pk, useCache = false))
 				throw OrmException("Fail to create [${ormMeta.name}]: Primary key $pk exists")
 		}
 

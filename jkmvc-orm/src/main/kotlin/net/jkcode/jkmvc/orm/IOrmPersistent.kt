@@ -49,10 +49,11 @@ interface IOrmPersistent : IOrmValid {
 	 *   如果是复合主键, 则参数按 ormMeta.primaryKey 中定义的字段的属性来传值
 	 *
 	 * @param pks
+	 * @param useCache 是否使用缓存
 	 */
-	fun loadByPk(vararg pks: Any) {
+	fun loadByPk(vararg pks: Any, useCache: Boolean = true) {
 		if(pks.isNotEmpty())
-			loadByPk(DbKeyValues(*pks)) // 有缓存
+			loadByPk(DbKeyValues(*pks), useCache = useCache) // 有缓存
 	}
 
 	/**
@@ -60,8 +61,9 @@ interface IOrmPersistent : IOrmValid {
 	 *   如果是复合主键, 则参数按 ormMeta.primaryKey 中定义的字段的属性来传值
 	 *
 	 * @param pks
+	 * @param useCache 是否使用缓存
 	 */
-	fun loadByPk(pk: DbKeyValues)
+	fun loadByPk(pk: DbKeyValues, useCache: Boolean = true)
 
 	/**
 	 * 重新加载
