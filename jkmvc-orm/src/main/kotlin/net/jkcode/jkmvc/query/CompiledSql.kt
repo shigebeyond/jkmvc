@@ -39,7 +39,7 @@ class CompiledSql : ICompiledSql() {
 
             // 预览sql
             if(DbConfig.debug && sql != "")
-                dbLogger.debug("Preview sql：{}", previewSql())
+                dbLogger.debug("Preview sql: {}", previewSql())
         }*/
 
     /**
@@ -130,8 +130,8 @@ class CompiledSql : ICompiledSql() {
         }
 
         // 预览sql
-        if(DbConfig.debug)
-            dbLogger.debug("Preview sql：{}", previewSql(dynamicParams, fromIndex))
+//        if(DbConfig.debug)
+//            dbLogger.debug("Preview sql: {}", previewSql(dynamicParams, fromIndex))
 
         return result;
     }

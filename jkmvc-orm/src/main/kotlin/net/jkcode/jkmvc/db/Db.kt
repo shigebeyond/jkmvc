@@ -61,7 +61,7 @@ abstract class Db protected constructor(
                     DbConfig.customDbClass!!.constructors.first().newInstance(name) as Db
                 else if (DbConfig.isSharding(name.toString())) // 分库
                     ShardingDb(name.toString())
-                else // 单库
+                else // 单库: DruidSingleDb/HikariSingleDb
                     DruidSingleDb(name.toString())
             }
         }
@@ -258,7 +258,7 @@ abstract class Db protected constructor(
     protected inline fun <T> tryExecute(sql: String, params: List<*>, action: ()->T): T{
         try{
             val result = action.invoke()
-            if(dbLogger.isDebugEnabled)
+            if(DbConfig.debug && dbLogger.isDebugEnabled)
                 dbLogger.debug("Execute sql: {}", ColorFormatter.applyTextColor(previewSql(sql, params), 32))
             return result
         }catch (e:SQLException){
