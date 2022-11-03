@@ -114,6 +114,11 @@ interface IOrmMeta {
     val props: List<String>
 
     /**
+     * 主键之外的属性名
+     */
+    val propsExcludePk: List<String>
+
+    /**
      * 对象属性名+关系名
      */
     val propsAndRelations: List<String>

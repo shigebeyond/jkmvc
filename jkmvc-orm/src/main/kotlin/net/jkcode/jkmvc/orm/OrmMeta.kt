@@ -252,6 +252,13 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     }
 
     /**
+     * 主键之外的属性名
+     */
+    public override val propsExcludePk: List<String> by lazy{
+        props - primaryProp.columns
+    }
+
+    /**
      * 对象属性名+关系名
      */
     public override val propsAndRelations: List<String> by lazy {
@@ -729,7 +736,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     public override fun queryBuilder(convertingValue: Boolean, convertingColumn: Boolean, withSelect: Boolean, reused: Boolean): OrmQueryBuilder {
         // 复用
         if(reused){
-            val query = reusedQueryBuilders.get()
+            val query = reusedQueryBuilders.get() // 递归调用 queryBuilder(reused = false)
             // 重置属性，特别是重置旧的已关闭的db
             query.reuse(this.db, convertingValue, convertingColumn, withSelect)
             return query
