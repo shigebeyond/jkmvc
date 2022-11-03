@@ -280,7 +280,10 @@ public val Part.isFile: Boolean
 public fun <T : Orm> T.fromRequest(req: HttpRequest, include: List<String> = emptyList(), exclude: List<String> = emptyList()): T {
     // 1 文本参数
     val columns = if (include.isEmpty())
-                    this.ormMeta.propsExcludePk // 默认主键外的所有列
+                    if(this.loaded) // 已加载: 取主键外的所有列, 对应update()
+                        this.ormMeta.propsExcludePk
+                    else // 未加载: 所有列, 对应create()
+                        this.ormMeta.props
                 else
                     include
 
