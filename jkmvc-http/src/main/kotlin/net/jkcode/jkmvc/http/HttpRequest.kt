@@ -7,10 +7,7 @@ import net.jkcode.jkmvc.http.router.HttpMethod
 import net.jkcode.jkmvc.http.router.RouteException
 import net.jkcode.jkmvc.http.router.RouteResult
 import net.jkcode.jkmvc.http.router.Router
-import net.jkcode.jkutil.common.enumeration
-import net.jkcode.jkutil.common.httpLogger
-import net.jkcode.jkutil.common.toNullable
-import net.jkcode.jkutil.common.trim
+import net.jkcode.jkutil.common.*
 import net.jkcode.jkutil.lock.IKeyLock
 import net.jkcode.jkutil.validator.RuleValidator
 import java.net.URLDecoder
@@ -169,7 +166,7 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		routeResult = Router.parse(routeUri, httpMethod);
 
 		// 打印请求
-		httpLogger.debug("{}请求uri: {} {}, contextPath: {}, 匹配路由: {}", if (isInner) "内部" else "", method, routeUri, contextPath, routeResult)
+		httpLogger.debug(ColorFormatter.applyTextColor("{}请求uri: {} {}, contextPath: {}, 匹配路由: {}", 36), if (isInner) "内部" else "", method, routeUri, contextPath, routeResult)
 
 		// 打印curl
 		if (!isInner && !isUpload) // 上传请求，要等到设置了上传子目录，才能访问请求参数

@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.db
 
 import net.jkcode.jkmvc.db.sharding.ShardingDb
 import net.jkcode.jkmvc.db.single.DruidSingleDb
+import net.jkcode.jkutil.common.ColorFormatter
 import net.jkcode.jkutil.common.dbLogger
 import net.jkcode.jkutil.common.mapToArray
 import net.jkcode.jkutil.ttl.AllRequestScopedTransferableThreadLocal
@@ -258,7 +259,7 @@ abstract class Db protected constructor(
         try{
             val result = action.invoke()
             if(dbLogger.isDebugEnabled)
-                dbLogger.debug("Execute sql: {}", previewSql(sql, params))
+                dbLogger.debug("Execute sql: {}", ColorFormatter.applyTextColor(previewSql(sql, params), 32))
             return result
         }catch (e:SQLException){
             dbLogger.error("Error [{}] on sql: {}", e.message, previewSql(sql, params))

@@ -555,6 +555,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     private fun <T : IOrm> innerGetOrPutCache(pk: DbKeyValues, item: T?, expires: Long): T? {
         // 读缓存, 无则读db
         val key = getCacheKey(pk)
+        dbLogger.debug("Load from cache: model={}, key={}", name, key)
         return cache.getOrPut(key, expires) {
             // 读db
             val item = innerloadByPk(pk, item)
