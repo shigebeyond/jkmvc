@@ -16,7 +16,17 @@ abstract class OrmPersistent : OrmValid() {
 	/**
 	 * 判断当前记录是否存在于db: 有原始数据就认为它是存在的
 	 */
-	public override var loaded:Boolean = false;
+	public override var loaded:Boolean = false
+		set(value) {
+			field = value
+			/* 清理_dirty
+			因为有缓存的加载数据, 即 OrmMeta.getOrPutCache() 会调用 item.fromMap((cacheItem as Orm).getData()) + item.loaded = true
+			而fromMap()会调用set()进而设置_dirty, 这会导致后续更新字段错乱
+			因此在loaded的setter中修正_dirty
+			*/
+			if(value)
+				_dirty.clear()
+		}
 
 	/**
 	 * 元数据
