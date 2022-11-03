@@ -598,7 +598,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      *   OrmQueryBuilder 是联查时用
      */
     override val selectSqlByPk: Pair<CompiledSql, OrmQueryBuilder> by lazy{
-        val query = queryBuilder(reused = true)
+        val query = reuseQueryBuilder()
         // 缓存时联查
         if (cacheMeta != null) {
             cacheMeta!!.applyQueryWiths(query)
@@ -619,7 +619,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
         val pk = primaryKey.map {
             DbExpr.question
         }
-        queryBuilder(reused = true)
+        reuseQueryBuilder()
             .where(primaryKey, pk) // 查询主键
             .compileDelete()
     }
@@ -642,7 +642,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             val values = insertProps.mapToArray {
                 DbExpr.question
             }
-            queryBuilder(reused = true)
+            reuseQueryBuilder()
                     .insertColumns(*colums) // 列
                     .value(*values) // 值
                     .compileInsert()
@@ -664,7 +664,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             val pk = primaryKey.map {
                 DbExpr.question
             }
-            val query = queryBuilder(reused = true)
+            val query = reuseQueryBuilder()
                     .where(primaryKey, pk) // 过滤主键
             for (prop in updateProps) {
                 val col = prop2Column(prop)
@@ -730,20 +730,23 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param convertingValue 查询时是否智能转换字段值
      * @param convertingColumn 查询时是否智能转换字段名
      * @param withSelect with()联查时自动select关联表的字段
-     * @param reused 是否复用, 框架保证复用的OrmQueryBuilder实例是线程安全的
      * @return
      */
-    public override fun queryBuilder(convertingValue: Boolean, convertingColumn: Boolean, withSelect: Boolean, reused: Boolean): OrmQueryBuilder {
-        // 复用
-        if(reused){
-            val query = reusedQueryBuilders.get() // 递归调用 queryBuilder(reused = false)
-            // 重置属性，特别是重置旧的已关闭的db
-            query.reuse(this.db, convertingValue, convertingColumn, withSelect)
-            return query
-        }
-
-        // 不复用
+    public override fun queryBuilder(convertingValue: Boolean, convertingColumn: Boolean, withSelect: Boolean): OrmQueryBuilder {
         return OrmQueryBuilder(this, convertingValue, convertingColumn, withSelect, queryListener)
+    }
+
+    /**
+     * 复用 QueryBuilder, 仅用在预编译sql中
+     *    框架保证复用的OrmQueryBuilder实例是线程安全的
+     */
+    protected fun reuseQueryBuilder(): OrmQueryBuilder {
+        val query = reusedQueryBuilders.get()
+        // 不管三七二十一, clear()就对了, 保证复用对象干净, 有些OrmMeta子类(如SaasOrmMeta)会重写queryBuild()会带一些查询条件之类的
+        query.clear()
+        // 重置属性，特别是重置旧的已关闭的db
+        query.reset(this.db, false, false, true)
+        return query
     }
 
     /**
@@ -860,7 +863,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             // value字段值
             val values = DbExpr.question.repeateToArray(columns.size)
             // columns 顺序
-            val query = queryBuilder(reused = true).insertColumns(*columns.toTypedArray()).value(*values)
+            val query = reuseQueryBuilder().insertColumns(*columns.toTypedArray()).value(*values)
 
             // 构建参数
             val params: ArrayList<Any?> = ArrayList()
@@ -908,7 +911,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
             }
 
             // 构建update语句
-            val query = queryBuilder(reused = true)
+            val query = reuseQueryBuilder()
             // set字段: 取全部字段, 不能取第一个元素的字段, 因为每个元素可能修改的字段都不一样, 这样会导致其他元素漏掉更新某些字段
             //val props = (items.first() as OrmEntity).getDoc().keys
             val props = ArrayList(this.props)
@@ -951,7 +954,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      */
     public override fun batchDelete(vararg pks: Any): IntArray {
         // 构建delete语句
-        val query = queryBuilder(reused = true).where(primaryKey, DbExpr.question)
+        val query = reuseQueryBuilder().where(primaryKey, DbExpr.question)
 
         // 构建参数
         val params: ArrayList<Any?> = ArrayList()

@@ -63,10 +63,10 @@ open class OrmQueryBuilder(protected val ormMeta: OrmMeta, // orm元数据
     protected val withCb:MutableList<String> = LinkedList()
 
     /**
-     * 复用查询构建器
+     * 重置查询构建器
      *    注意：特别是重置旧的已关闭的db
      */
-    internal fun reuse(db: IDb?, convertingValue: Boolean, convertingColumn: Boolean, withSelect: Boolean){
+    internal fun reset(db: IDb?, convertingValue: Boolean, convertingColumn: Boolean, withSelect: Boolean){
         this.myDefaultDb = db
         this.convertingValue = convertingValue
         this.convertingColumn = convertingColumn
