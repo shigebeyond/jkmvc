@@ -9,7 +9,7 @@ import net.jkcode.jkmvc.orm.OrmQueryBuilder
  */
 data class RelationConditions(
         public val conditions :Map<String, Any?>, // 查询条件
-        public val queryAction: ((query: OrmQueryBuilder, lazy: Boolean)->Unit)? // 查询对象的回调函数
+        public var queryAction: ((query: OrmQueryBuilder, lazy: Boolean)->Unit)? // 查询对象的回调函数
 ){
     companion object{
 
@@ -21,6 +21,25 @@ data class RelationConditions(
 
     public val size: Int
         get() = conditions.size + if(queryAction == null) 0 else 1
+
+    /**
+     * 添加回调函数
+     *   即合并2个回调函数
+     * @param nextAction 下个回调函数
+     */
+    public fun addQueryAction(nextAction: (query: OrmQueryBuilder, lazy: Boolean)->Unit){
+        if(queryAction == null) {
+            queryAction = nextAction
+            return
+        }
+
+        // 合并2个回调函数
+        val preAction = queryAction
+        queryAction = { query, lazy ->
+            preAction!!(query, lazy)
+            nextAction(query, lazy)
+        }
+    }
 
     /**
      * 对query builder应用联查

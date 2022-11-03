@@ -1049,7 +1049,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param relation
      * @return
      */
-    public fun addRelation(name: String, relation: IRelation): OrmMeta {
+    public open fun addRelation(name: String, relation: IRelation): OrmMeta {
         // 检查关系的主键外键是否存在
         relation.checkKeyExist()
 
