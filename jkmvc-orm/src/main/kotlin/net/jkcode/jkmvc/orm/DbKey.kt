@@ -192,7 +192,7 @@ class DbKey<T> {
 typealias DbKeyNames = DbKey<String>
 
 // 主键的字段值
-internal typealias DbKeyValues = DbKey<Any?>
+public typealias DbKeyValues = DbKey<Any?>
 
 /*************************** 普通类扩展 ******************************/
 /**

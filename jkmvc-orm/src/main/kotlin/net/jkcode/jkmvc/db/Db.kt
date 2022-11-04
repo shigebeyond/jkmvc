@@ -24,7 +24,7 @@ import java.util.*
 abstract class Db protected constructor(
         public override val name: CharSequence, // 标识
         public override val dbMeta: IDbMeta = DbMeta.get(name) // 元数据
-) : IDb(), IDbMeta by dbMeta, Closeable {
+) : IDb, IDbMeta by dbMeta, Closeable {
 
     companion object {
 

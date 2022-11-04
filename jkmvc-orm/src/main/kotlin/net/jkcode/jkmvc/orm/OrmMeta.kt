@@ -569,7 +569,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param pk
      * @return
      */
-    protected fun getCacheKey(pk: DbKeyValues): String {
+    protected open fun getCacheKey(pk: DbKeyValues): String {
         return pk.columns.joinToString("_", "orm:$dbName:$name:")
     }
 
