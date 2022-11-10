@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.tests.model
 
 import net.jkcode.jkmvc.orm.Orm
 import net.jkcode.jkmvc.orm.OrmMeta
+import net.jkcode.jkmvc.orm.PkGenerator
 
 /**
  * 用户模型
@@ -13,6 +14,9 @@ class UserModel(id:Int? = null): Orm(id) {
     // company object is ormMeta data for model
     companion object m: OrmMeta(UserModel::class){
         init {
+            //主键生成器
+            //pkGenerator = PkGenerator.SNOWFLAKE
+
             // 添加标签 + 规则
             // add label and rule for field
             addRule("name", "姓名", "notEmpty")
