@@ -136,32 +136,37 @@ interface IOrmMeta {
     val emptyToNullForeignProps: List<String>
 
     /**
-     * 创建时间
+     * 主键生成器: uuid/snowflake
+     */
+    val pkGenerator: PkGenerator?
+
+    /**
+     * 创建时间属性
      */
     val createdDateProp: String?
 
     /**
-     * 创建人id
+     * 创建人id属性
      */
     val createdByProp: String?
 
     /**
-     * 创建人名
+     * 创建人名属性
      */
     val createdByNameProp: String?
 
     /**
-     * 修改时间
+     * 修改时间属性
      */
     val modifiedDateProp: String?
 
     /**
-     * 修改人id
+     * 修改人id属性
      */
     val modifiedByProp: String?
 
     /**
-     * 修改人名
+     * 修改人名属性
      */
     val modifiedByNameProp: String?
 

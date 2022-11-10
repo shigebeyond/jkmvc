@@ -454,17 +454,26 @@ abstract class OrmPersistent : OrmValid() {
 	 * 设置创建时间/人的字段
 	 */
 	protected fun setCreatedProps() {
-		// 创建时间
+		// 填充主键: 仅限于只有一个主键，且主键没有设置的情况
+		if(ormMeta.pkGenerator != null && ormMeta.primaryProp.size == 1){
+			val prop = ormMeta.primaryProp.first()
+			if(!isDirty(prop)) {
+				val pk = ormMeta.pkGenerator!!.generate(ormMeta)
+				this[prop] = pk
+			}
+		}
+
+		// 填充创建时间
 		if (ormMeta.createdDateProp != null)
 			this[ormMeta.createdDateProp!!] = Date()
 
 		val user = getCurrentUserIdAndName()
 		if (user != null) {
-			// 创建人id
+			// 填充创建人id
 			val (uid, uname) = user
 			if (ormMeta.createdByProp != null)
 				this[ormMeta.createdByProp!!] = uid
-			// 创建人名
+			// 填充创建人名
 			if (ormMeta.createdByNameProp != null)
 				this[ormMeta.createdByNameProp!!] = uname
 		}
@@ -474,17 +483,17 @@ abstract class OrmPersistent : OrmValid() {
 	 * 设置更新时间/人的字段
 	 */
 	protected fun setUpdateProps() {
-		// 修改时间
+		// 填充修改时间
 		if (ormMeta.modifiedDateProp != null)
 			this[ormMeta.modifiedDateProp!!] = Date()
 
 		val user = getCurrentUserIdAndName()
 		if (user != null) {
-			// 修改人id
+			// 填充修改人id
 			val (uid, uname) = user
 			if (ormMeta.modifiedByProp != null)
 				this[ormMeta.modifiedByProp!!] = uid
-			// 修改人名
+			// 填充修改人名
 			if (ormMeta.modifiedByNameProp != null)
 				this[ormMeta.modifiedByNameProp!!] = uname
 		}

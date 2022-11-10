@@ -288,6 +288,11 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     }
 
     /**
+     * 主键生成器: uuid/snowflake
+     */
+    public override var pkGenerator: PkGenerator? = null
+
+    /**
      * 创建时间
      */
     public override val createdDateProp: String? by lazy {
@@ -295,35 +300,35 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     }
 
     /**
-     * 创建人id
+     * 创建人id属性
      */
     public override val createdByProp: String? by lazy {
         getExistProp(config["createdByProp"])
     }
 
     /**
-     * 创建人名
+     * 创建人名属性
      */
     public override val createdByNameProp: String? by lazy {
         getExistProp(config["createdByNameProp"])
     }
 
     /**
-     * 修改时间
+     * 修改时间属性
      */
     public override val modifiedDateProp: String? by lazy {
         getExistProp(config["modifiedDateProp"])
     }
 
     /**
-     * 修改人id
+     * 修改人id属性
      */
     public override val modifiedByProp: String? by lazy {
         getExistProp(config["modifiedByProp"])
     }
 
     /**
-     * 修改人名
+     * 修改人名属性
      */
     public override val modifiedByNameProp: String? by lazy {
         getExistProp(config["modifiedByNameProp"])

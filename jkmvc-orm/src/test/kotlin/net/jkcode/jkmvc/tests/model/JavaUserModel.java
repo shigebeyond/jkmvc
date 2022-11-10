@@ -1,17 +1,14 @@
 package net.jkcode.jkmvc.tests.model;
 
-import com.google.common.collect.Maps;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function2;
-import kotlin.jvm.internal.Reflection;
-import kotlin.reflect.KClass;
-import net.jkcode.jkmvc.orm.*;
+import net.jkcode.jkmvc.orm.Orm;
+import net.jkcode.jkmvc.orm.OrmMeta;
+import net.jkcode.jkmvc.orm.OrmQueryBuilder;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
-import kotlin.jvm.functions.Function1;
 
 public final class JavaUserModel extends Orm
 {
