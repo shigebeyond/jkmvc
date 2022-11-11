@@ -255,7 +255,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 
 		//通知客户端文件的下载    URLEncoder.encode解决文件名中文的问题
 		res.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(file.name, "utf-8"))
-		res.contentType = req.session.servletContext.getMimeType(file.getName()) ?: "application/octet-stream"
+		res.contentType = req.session.servletContext.getMimeType(file.name) ?: "application/octet-stream"
 
 		// 输出文件
 		res.outputStream.writeFile(file)

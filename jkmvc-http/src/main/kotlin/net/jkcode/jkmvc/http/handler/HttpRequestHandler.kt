@@ -190,11 +190,11 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      */
     @Suspendable
     fun guardInvoke(obj: ObjectMemory, methodName: StringMemory, args: Array<Memory>, env: Environment): Memory {
-        // 获得类
+        // 获得php类
         val classEntity: ClassEntity = obj.value.reflection
-        // 获得方法
+        // 获得php方法
         val method = classEntity.findMethod(methodName.toString().toLowerCase())
-        // 调用方法
+        // 调用php方法
         return guardInvoke(PhpMethodMeta(method, this), obj as Any, args as Array<Any?>) as Memory
     }
 
