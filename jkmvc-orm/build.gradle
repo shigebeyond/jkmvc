@@ -1,11 +1,11 @@
 dependencies{
     // other project
     if(env == 'dev') {
-        // jkutil
         compile project(':jkutil')
+        compile project(':jphp-java-ext')
     }else{
-        // jkutil
         compile "net.jkcode:jkutil:$jkutil_version"
+        compile "net.jkcode:jphp-java-ext:$jphp_java_ext_version"
     }
 
     // datasource

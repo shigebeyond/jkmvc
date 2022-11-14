@@ -6,11 +6,6 @@ dependencies{
     else
         compile "net.jkcode:jkguard:$jkguard_version"
 
-    if(env == 'dev')
-        compile project(':jphp-java-ext')
-    else
-        compile "net.jkcode:jphp-java-ext:$jphp_java_ext_version"
-
     // 加密
     compile "commons-codec:commons-codec:1.5"
 

@@ -760,7 +760,7 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
      * @param pk 要查询的主键
      * @param item 要赋值的对象
      */
-    protected fun <T : IOrm> innerloadByPk(pk: DbKeyValues, item: T? = null): T? {
+    internal fun <T : IOrm> innerloadByPk(pk: DbKeyValues, item: T? = null): T? {
         // 1 不预编译sql
         if(!precompileSql)
             return queryBuilder().where(primaryKey, pk).findRow {
