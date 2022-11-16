@@ -1,5 +1,5 @@
 # Get started
-You can just use demo code [jkmvc-example](https://github.com/shigebeyond/jkmvc/tree/master/jkmvc-example)
+You can just use demo code [jkmvc-example](/jkmvc-example)
 
 ## 1 create project
 

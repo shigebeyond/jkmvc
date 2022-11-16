@@ -1,5 +1,5 @@
 # 开始
-详细可参考 [jkmvc-example](https://github.com/shigebeyond/jkmvc/tree/master/jkmvc-example)
+详细可参考 [jkmvc-example](/jkmvc-example)
 
 ## 1 创建工程
 

@@ -6,7 +6,7 @@
 1. 请求参数格式为 `@param 参数名*:类型=默认值`，其中`*`表示必填
 2. 返回值（响应）格式为`@return [类名]`，响应数据结构优先取方法注释中`@return`链接的类，如果没有再取方法返回值类型;
 
-例子：参考[UserController.kt](https://github.com/shigebeyond/jkmvc-example/blob/master/src/main/kotlin/net/jkcode/jkmvc/example/controller/UserController.kt)
+例子：参考[UserController.kt](/jkmvc-example/src/main/kotlin/net/jkcode/jkmvc/example/controller/UserController.kt)
 ```kotlin
 /**
  * 详情页
