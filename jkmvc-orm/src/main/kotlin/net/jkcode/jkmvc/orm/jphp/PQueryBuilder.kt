@@ -8,7 +8,6 @@ import net.jkcode.jkutil.common.mapToArray
 import net.jkcode.jphp.ext.toPureArray
 import net.jkcode.jphp.ext.toPureList
 import net.jkcode.jphp.ext.toPureMap
-import php.runtime.Memory
 import php.runtime.annotation.Reflection
 import php.runtime.env.Environment
 import php.runtime.ext.java.JavaObject
@@ -56,7 +55,8 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @param alias 别名
      * @return
      */
-    @Reflection.Signature(Reflection.Arg("table"), Reflection.Arg("alias", optional = Reflection.Optional("NULL")))
+    @Reflection.Signature
+    @JvmOverloads
     fun table(table:String, alias:String? = null): ObjectMemory {
         return from(table, alias)
     }
@@ -69,6 +69,7 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @return
      */
     @Reflection.Signature
+    @JvmOverloads
     fun from(table:String, alias:String? = null): ObjectMemory{
         query.from(table, alias)
         return objMem
@@ -187,6 +188,7 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @return
      */
     @Reflection.Signature
+    @JvmOverloads
     fun join(table: CharSequence, type: String = "INNER"): ObjectMemory{
         val type = if(type.isBlank()) "INNER" else type
         query.join(table, type)
@@ -343,7 +345,8 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @return
      */
     @Reflection.Signature
-    fun whereCondition(condition: String, params: ArrayMemory): ObjectMemory{
+    @JvmOverloads
+    fun whereCondition(condition: String, params: ArrayMemory? = null): ObjectMemory{
         return andWhereCondition(condition, params)
     }
 
@@ -355,7 +358,8 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @return
      */
     @Reflection.Signature
-    fun andWhereCondition(condition: String, params: ArrayMemory): ObjectMemory{
+    @JvmOverloads
+    fun andWhereCondition(condition: String, params: ArrayMemory? = null): ObjectMemory{
         query.andWhereCondition(condition, params.toPureList())
         return objMem
     }
@@ -368,7 +372,8 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @return
      */
     @Reflection.Signature
-    fun orWhereCondition(condition: String, params: ArrayMemory): ObjectMemory{
+    @JvmOverloads
+    fun orWhereCondition(condition: String, params: ArrayMemory? = null): ObjectMemory{
         query.orWhereCondition(condition, params.toPureList())
         return objMem
     }
@@ -510,7 +515,8 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @return
      */
     @Reflection.Signature
-    fun havingCondition(condition: String, params: ArrayMemory): ObjectMemory{
+    @JvmOverloads
+    fun havingCondition(condition: String, params: ArrayMemory? = null): ObjectMemory{
         return andHavingCondition(condition, params)
     }
 
@@ -522,7 +528,8 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @return
      */
     @Reflection.Signature
-    fun andHavingCondition(condition: String, params: ArrayMemory): ObjectMemory{
+    @JvmOverloads
+    fun andHavingCondition(condition: String, params: ArrayMemory? = null): ObjectMemory{
         query.andHavingCondition(condition, params.toPureList())
         return objMem
     }
@@ -535,7 +542,8 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @return
      */
     @Reflection.Signature
-    fun orHavingCondition(condition: String, params: ArrayMemory): ObjectMemory{
+    @JvmOverloads
+    fun orHavingCondition(condition: String, params: ArrayMemory? = null): ObjectMemory{
         query.orHavingCondition(condition, params.toPureList())
         return objMem
     }
@@ -612,6 +620,7 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @return
      */
     @Reflection.Signature
+    @JvmOverloads
     fun orderBy(column: String, direction: String? = null): ObjectMemory{
         query.orderBy(column, direction)
         return objMem
@@ -641,6 +650,7 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @return
      */
     @Reflection.Signature
+    @JvmOverloads
     fun limit(limit: Int, offset: Int = 0): ObjectMemory{
         query.limit(limit, offset)
         return objMem
@@ -665,7 +675,8 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @return 一个数据
      */
     @Reflection.Signature
-    public fun find(params: ArrayMemory): Map<String, Any?>? {
+    @JvmOverloads
+    public fun find(params: ArrayMemory? = null): Map<String, Any?>? {
         return query.findMap(params.toPureList())
     }
 
@@ -676,7 +687,8 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @return 全部数据
      */
     @Reflection.Signature
-    public fun findAll(params: ArrayMemory): List<Map<String, Any?>> {
+    @JvmOverloads
+    public fun findAll(params: ArrayMemory? = null): List<Map<String, Any?>> {
         return query.findMaps(params.toPureList())
     }
 
@@ -688,7 +700,8 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @return
      */
     @Reflection.Signature
-    public fun count(params: ArrayMemory):Int{
+    @JvmOverloads
+    public fun count(params: ArrayMemory? = null):Int{
         return query.count(params.toPureList())
     }
 
@@ -701,7 +714,8 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @return
      */
     @Reflection.Signature
-    public fun sum(column: String, params: ArrayMemory):Int{
+    @JvmOverloads
+    public fun sum(column: String, params: ArrayMemory? = null):Int{
         return query.sum(column, params.toPureList())
     }
 
@@ -714,7 +728,8 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @return 新增的id
      */
     @Reflection.Signature
-    public fun insert(generatedColumn:String?, params: ArrayMemory): Long {
+    @JvmOverloads
+    public fun insert(generatedColumn:String?, params: ArrayMemory? = null): Long {
         val generatedColumn = if(generatedColumn.isNullOrBlank()) null else generatedColumn
         return query.insert(generatedColumn, params.toPureList())
     }
@@ -727,7 +742,8 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @return
      */
     @Reflection.Signature
-    public fun update(params: ArrayMemory): Boolean {
+    @JvmOverloads
+    public fun update(params: ArrayMemory? = null): Boolean {
         return query.update(params.toPureList())
     }
 
@@ -739,7 +755,8 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @return
      */
     @Reflection.Signature
-    public fun delete(params: ArrayMemory): Boolean {
+    @JvmOverloads
+    public fun delete(params: ArrayMemory? = null): Boolean {
         return query.delete(params.toPureList())
     }
 
@@ -751,7 +768,8 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @return
      */
     @Reflection.Signature
-    public fun incr(column: String, step: Int, params: ArrayMemory): Boolean{
+    @JvmOverloads
+    public fun incr(column: String, step: Int, params: ArrayMemory? = null): Boolean{
         return query.incr(column, step, params.toPureList())
     }
 
@@ -800,8 +818,9 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      * @return
      */
     @Reflection.Signature
-    public fun with(name: String, columns: ArrayMemory): ObjectMemory {
-        if(columns.size() > 0) {
+    @JvmOverloads
+    public fun with(name: String, columns: ArrayMemory? = null): ObjectMemory {
+        if(columns != null && columns.size() > 0) {
             val cols = SelectColumnList(columns.toPureList() as List<String>)
             ormQuery.with(name, true, cols)
         }else {

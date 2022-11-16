@@ -42,7 +42,7 @@ class Model
      * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
      * @return
      */
-    function save(): bool{
+    function save($withHasRelations): bool{
     }
 
     /**
@@ -51,7 +51,7 @@ class Model
      * @param checkPkExists 是否检查主键存在
      * @return 新增数据的主键
      */
-    function create(): int{
+    function create($withHasRelations): int{
     }
 
     /**
@@ -59,7 +59,7 @@ class Model
      * @param withHasRelations 是否连带保存 hasOne/hasMany 的关联关系
      * @return
      */
-    function update(): bool{
+    function update($withHasRelations): bool{
     }
 
     /**
@@ -67,7 +67,7 @@ class Model
      * @param withHasRelations 是否连带删除 hasOne/hasMany 的关联关系
      * @return
      */
-    function delete(): bool{
+    function delete($withHasRelations): bool{
     }
 
 }

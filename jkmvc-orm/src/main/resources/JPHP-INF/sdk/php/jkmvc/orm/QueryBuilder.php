@@ -219,7 +219,7 @@ class QueryBuilder
      * @param   params
      * @return
      */
-    function whereCondition(string $condition, array $params): QueryBuilder{
+    function whereCondition(string $condition, array $params = []): QueryBuilder{
     }
 
     /**
@@ -229,7 +229,7 @@ class QueryBuilder
      * @param   params
      * @return
      */
-    function andWhereCondition(string $condition, array $params): QueryBuilder{
+    function andWhereCondition(string $condition, array $params = []): QueryBuilder{
     }
 
     /**
@@ -239,7 +239,7 @@ class QueryBuilder
      * @param   params
      * @return
      */
-    function orWhereCondition(string $condition, array $params): QueryBuilder{
+    function orWhereCondition(string $condition, array $params = []): QueryBuilder{
     }
 
     /**
@@ -348,7 +348,7 @@ class QueryBuilder
      * @param   params
      * @return
      */
-    function havingCondition(string $condition, array $params): QueryBuilder{
+    function havingCondition(string $condition, array $params = []): QueryBuilder{
     }
 
     /**
@@ -358,7 +358,7 @@ class QueryBuilder
      * @param   params
      * @return
      */
-    function andHavingCondition(string $condition, array $params): QueryBuilder{
+    function andHavingCondition(string $condition, array $params = []): QueryBuilder{
     }
 
     /**
@@ -368,7 +368,7 @@ class QueryBuilder
      * @param   params
      * @return
      */
-    function orHavingCondition(string $condition, array $params): QueryBuilder{
+    function orHavingCondition(string $condition, array $params = []): QueryBuilder{
     }
 
     /**
@@ -483,7 +483,7 @@ class QueryBuilder
      * @param db 数据库连接
      * @return
      */
-    function count(array $params):Int{
+    function count(array $params = []):Int{
     }
 
     /**
@@ -494,7 +494,7 @@ class QueryBuilder
      * @param db 数据库连接
      * @return
      */
-    function sum(string $column, array $params):Int{
+    function sum(string $column, array $params = []):Int{
     }
 
     /**
@@ -505,7 +505,7 @@ class QueryBuilder
      *  @param db 数据库连接
      * @return 新增的id
      */
-    function insert(string $generatedColumn, array $params): Long {
+    function insert(string $generatedColumn, array $params = []): Long {
     }
 
     /**
@@ -515,7 +515,7 @@ class QueryBuilder
      * @param db 数据库连接
      * @return
      */
-    function update(array $params): Boolean {
+    function update(array $params = []): Boolean {
     }
 
     /**
@@ -525,7 +525,7 @@ class QueryBuilder
      * @param db 数据库连接
      * @return
      */
-    function delete(array $params): Boolean {
+    function delete(array $params = []): Boolean {
     }
 
     /**
@@ -535,7 +535,7 @@ class QueryBuilder
      * @param db 数据库连接
      * @return
      */
-    function incr(string $column, int $step, array $params): Boolean{
+    function incr(string $column, int $step, array $params = []): Boolean{
     }
 
     /**

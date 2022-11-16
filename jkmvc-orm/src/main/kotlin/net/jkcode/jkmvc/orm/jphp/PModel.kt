@@ -1,7 +1,6 @@
 package net.jkcode.jkmvc.orm.jphp
 
 import net.jkcode.jkmvc.orm.*
-import net.jkcode.jkutil.common.newInstance
 import net.jkcode.jphp.ext.call_getter
 import net.jkcode.jphp.ext.call_setter
 import net.jkcode.jphp.ext.toJavaObject
@@ -26,33 +25,26 @@ import kotlin.reflect.KClass
 @Reflection.Namespace(JkmvcOrmExtension.NS)
 open class PModel(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject>(env, clazz) {
 
-    // model名
-    lateinit var name: String
-
-    // model类
-    lateinit var modelClass: KClass<out Orm>
-
     /**
      * model对象
      *   递延加载，可能不会创建
      */
     val model: Orm by lazy{
-        modelClass.newInstance() as Orm
+        ormMeta.newInstance() as Orm
     }
 
     /**
      * orm元数据
      */
-    val ormMeta: OrmMeta
-        get() = modelClass.modelOrmMeta
+    lateinit var ormMeta: OrmMeta
 
     /**
      * 构造函数
      */
     @Reflection.Signature
-    fun __construct(name: String): Memory {
-        this.name = name
-        modelClass = Class.forName(name).kotlin as KClass<out Orm>
+    fun __construct(className: String): Memory {
+        val clazz = Class.forName(className).kotlin as KClass<out Orm>
+        ormMeta = clazz.modelOrmMeta
         return Memory.NULL
     }
 
@@ -135,8 +127,8 @@ open class PModel(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject
      * @return
      */
     @Reflection.Signature
-    fun save(): Boolean{
-        val withHasRelations = false
+    @JvmOverloads
+    fun save(withHasRelations: Boolean = false): Boolean{
         return model.save(withHasRelations)
     }
 
@@ -147,8 +139,8 @@ open class PModel(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject
      * @return 新增数据的主键
      */
     @Reflection.Signature
-    fun create(): Long{
-        val withHasRelations = false
+    @JvmOverloads
+    fun create(withHasRelations: Boolean = false): Long{
         return model.create(withHasRelations)
     }
 
@@ -158,8 +150,8 @@ open class PModel(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject
      * @return
      */
     @Reflection.Signature
-    fun update(): Boolean{
-        val withHasRelations = false
+    @JvmOverloads
+    fun update(withHasRelations: Boolean = false): Boolean{
         return model.update(withHasRelations)
     }
 
@@ -169,8 +161,8 @@ open class PModel(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject
      * @return
      */
     @Reflection.Signature
-    fun delete(): Boolean{
-        val withHasRelations = false
+    @JvmOverloads
+    fun delete(withHasRelations: Boolean = false): Boolean{
         return model.delete(withHasRelations)
     }
 

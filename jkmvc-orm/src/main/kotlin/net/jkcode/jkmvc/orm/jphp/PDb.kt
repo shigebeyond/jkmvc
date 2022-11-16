@@ -80,7 +80,8 @@ open class PDb(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject>(e
      * @return
      */
     @Reflection.Signature
-    fun previewSql(sql: String, params: ArrayMemory): String{
+    @JvmOverloads
+    fun previewSql(sql: String, params: ArrayMemory? = null): String{
         return proxyDb.previewSql(sql, params.toPureList())
     }
 
@@ -93,7 +94,8 @@ open class PDb(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject>(e
      * @return
      */
     @Reflection.Signature
-    fun query(sql: String, params: ArrayMemory): List<Map<String, Any?>> {
+    @JvmOverloads
+    fun query(sql: String, params: ArrayMemory? = null): List<Map<String, Any?>> {
         return proxyDb.queryMaps(sql, params.toPureList())
     }
 
@@ -105,7 +107,8 @@ open class PDb(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject>(e
      * @return
      */
     @Reflection.Signature
-    fun execute(sql: String, params: ArrayMemory): Long{
+    @JvmOverloads
+    fun execute(sql: String, params: ArrayMemory? = null): Long{
         val generatedColumn:String? = null
         return proxyDb.execute(sql, params.toPureList(), generatedColumn)
     }
