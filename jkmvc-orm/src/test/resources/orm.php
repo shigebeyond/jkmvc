@@ -23,9 +23,12 @@ if($users){
 $model = new Model("net.jkcode.jkmvc.tests.model.UserModel");
 echo "创建用户: $uid\n";
 $model->id = $uid + 1;
-$model->age = 11;
-$model->username = 'shi';
-$model->password = 'shi';
+$age = mt_rand(0, 10);
+$model->age = $age;
+$name = 'shi'.$age;
+$model->username = $name;
+$model->password = $name;
+$model->name = $name;
 $model->create();
 
 echo "加载用户: $uid\n";
@@ -34,16 +37,20 @@ echo "$model \n";
 
 echo "查找用户: $uid\n";
 $user = $model->find($uid);
-var_dump($user);
+echo "$user \n";
 
 // db query builder
 echo "查找用户: $uid\n";
 $qb = $db->queryBuilder();
-$user = $qb->table("user")->where('id', '=', $uid)->find([]);
+$user = $qb->table("user")->where('id', '=', $uid)->findRow();
 var_dump($user);
 
 // orm query builder
 echo "查找用户: $uid\n";
 $qb = $model->queryBuilder();
-$user = $qb->with('home')->where('user.id', '=', $uid)->find([]);
-var_dump($user);
+$user = $qb->with('home')->where('user.id', '=', $uid)->findModel();
+echo "$user \n";
+
+echo "更新用户: $uid\n";
+$user->age = $user->age + 2;
+$user->save();

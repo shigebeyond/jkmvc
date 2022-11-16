@@ -18,6 +18,7 @@ import kotlin.reflect.KClass
 
 /**
  * 包装model
+ *    java中的实例化： val model = PModel.of(env, orm实例)
  *    php中的实例化: $model = new Model("net.jkcode.jkmvc.tests.model.UserModel");
  *    php中的方法调用: $model["id"] = 1; $model->create();
  */
@@ -26,17 +27,24 @@ import kotlin.reflect.KClass
 open class PModel(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject>(env, clazz) {
 
     /**
+     * orm元数据
+     */
+    protected lateinit var ormMeta: OrmMeta
+
+    /**
      * model对象
      *   递延加载，可能不会创建
      */
-    val model: Orm by lazy{
-        ormMeta.newInstance() as Orm
-    }
+    protected var model: IOrm? = null
 
     /**
-     * orm元数据
+     * 获得或创建model对象
      */
-    lateinit var ormMeta: OrmMeta
+    protected fun getOrCreateModel(): IOrm{
+        if(model == null)
+            model = ormMeta.newInstance()
+        return model!!
+    }
 
     /**
      * 构造函数
@@ -65,12 +73,12 @@ open class PModel(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject
         val name = args[0].toString()
 
         // 1 先尝试调用getter
-        var v = call_getter(env, model, name)
+        var v = call_getter(env, getOrCreateModel(), name)
         if (v != null)
             return v
 
         // 2 再读字段
-        return MemoryUtils.valueOf(env, model.get(name))
+        return MemoryUtils.valueOf(env, getOrCreateModel().get(name))
         return Memory.NULL
     }
 
@@ -81,12 +89,12 @@ open class PModel(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject
     fun __set(env: Environment, vararg args: Memory): Memory {
         val name = args[0].toString()
         // 1 先尝试调用setter
-        val v = call_setter(env, model, name, args[1])
+        val v = call_setter(env, getOrCreateModel(), name, args[1])
         if (v != null)
             return v
 
         // 2 再写字段
-        model.set(name, args[1].toJavaObject())
+        getOrCreateModel().set(name, args[1].toJavaObject())
         return Memory.NULL
     }
 
@@ -96,7 +104,7 @@ open class PModel(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject
     @Reflection.Signature
     fun load(env: Environment, pk: Memory) {
         val pks: Array<Any> = buildPK(pk)
-        model.loadByPk(*pks)
+        getOrCreateModel().loadByPk(*pks)
     }
 
     /**
@@ -129,7 +137,7 @@ open class PModel(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject
     @Reflection.Signature
     @JvmOverloads
     fun save(withHasRelations: Boolean = false): Boolean{
-        return model.save(withHasRelations)
+        return getOrCreateModel().save(withHasRelations)
     }
 
     /**
@@ -141,7 +149,7 @@ open class PModel(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject
     @Reflection.Signature
     @JvmOverloads
     fun create(withHasRelations: Boolean = false): Long{
-        return model.create(withHasRelations)
+        return getOrCreateModel().create(withHasRelations)
     }
 
     /**
@@ -152,7 +160,7 @@ open class PModel(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject
     @Reflection.Signature
     @JvmOverloads
     fun update(withHasRelations: Boolean = false): Boolean{
-        return model.update(withHasRelations)
+        return getOrCreateModel().update(withHasRelations)
     }
 
     /**
@@ -163,11 +171,25 @@ open class PModel(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject
     @Reflection.Signature
     @JvmOverloads
     fun delete(withHasRelations: Boolean = false): Boolean{
-        return model.delete(withHasRelations)
+        return getOrCreateModel().delete(withHasRelations)
     }
 
     @Reflection.Signature
     open fun __toString(env: Environment): String {
-        return model.toString()
+        return getOrCreateModel().toString()
+    }
+
+    companion object {
+
+        /**
+         * java中获得单例
+         */
+        @JvmStatic
+        fun of(env: Environment, model: Orm): PModel {
+            val obj = PModel(env, env.fetchClass(JkmvcOrmExtension.NS + "\\Model"))
+            obj.model = model
+            obj.ormMeta = model.ormMeta
+            return obj
+        }
     }
 }

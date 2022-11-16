@@ -1,7 +1,7 @@
 package net.jkcode.jkmvc.orm.jphp
 
-import net.jkcode.jkmvc.orm.OrmQueryBuilder
-import net.jkcode.jkmvc.orm.SelectColumnList
+import net.jkcode.jkmvc.db.IDb
+import net.jkcode.jkmvc.orm.*
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.IDbQueryBuilder
 import net.jkcode.jkutil.common.mapToArray
@@ -676,7 +676,7 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      */
     @Reflection.Signature
     @JvmOverloads
-    public fun find(params: ArrayMemory? = null): Map<String, Any?>? {
+    public fun findRow(params: ArrayMemory? = null): Map<String, Any?>? {
         return query.findMap(params.toPureList())
     }
 
@@ -688,8 +688,40 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
      */
     @Reflection.Signature
     @JvmOverloads
-    public fun findAll(params: ArrayMemory? = null): List<Map<String, Any?>> {
+    public fun findRows(params: ArrayMemory? = null): List<Map<String, Any?>> {
         return query.findMaps(params.toPureList())
+    }
+
+    /**
+     * 查找多个： select 语句
+     *
+     * @param params 参数
+     * @return 列表
+     */
+    @Reflection.Signature
+    @JvmOverloads
+    public fun findModels(env: Environment, params: ArrayMemory? = null): List<PModel> {
+        val ormMeta = ormQuery.ormMeta
+        return ormQuery.findRows {
+            val model = ormMeta.result2model<Orm>(it)
+            PModel.of(env, model)
+        }
+    }
+
+    /**
+     * 查找一个： select ... limit 1语句
+     *
+     * @param params 参数
+     * @return 一个数据
+     */
+    @Reflection.Signature
+    @JvmOverloads
+    public fun findModel(env: Environment, params: ArrayMemory? = null): PModel? {
+        val ormMeta = ormQuery.ormMeta
+        return ormQuery.findRow {
+            val model = ormMeta.result2model<Orm>(it)
+            PModel.of(env, model)
+        }
     }
 
     /**

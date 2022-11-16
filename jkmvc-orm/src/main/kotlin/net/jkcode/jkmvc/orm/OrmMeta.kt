@@ -781,8 +781,10 @@ open class OrmMeta(public override val model: KClass<out IOrm>, // 模型类
     /**
      * db查询结果转模型实例
      */
-    private fun <T : IOrm> result2model(it: DbResultRow, item: T?): T {
+    inline fun <T : IOrm> result2model(it: DbResultRow, item: T? = null): T {
+        // 实例化
         //val result = item ?: model.java.newInstance() as T
+        // 使用无参数构造函数/可变参数构造参数来实例化
         val result = item ?: newInstance() as T
         result.setOriginal(it)
         return result

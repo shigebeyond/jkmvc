@@ -464,7 +464,7 @@ class QueryBuilder
      * @param params 参数
      * @return 一个数据
      */
-    function find(array params): array{
+    function findRow(array params = []): array{
     }
 
     /**
@@ -473,7 +473,7 @@ class QueryBuilder
      * @param params 参数
      * @return 全部数据
      */
-    function findAll(array params): array{
+    function findRows(array params = []): array{
     }
 
     /**
