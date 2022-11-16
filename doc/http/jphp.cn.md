@@ -15,7 +15,7 @@ phpControllerPref: $
 => 如果路由解析的控制器名是以`$` 为前缀，则调用php控制器，否则调用java控制器
 
 ### 2 php代码的目录结构
-参考 [demo代码](jkmvc-http/src/main/resources/jphp)
+参考 [demo代码](/jkmvc-http/src/main/resources/jphp)
 ```
 jkmvc/jkmvc-http/src/main/resources/jphp
 ├── callController.php // 内嵌的小型php mvc框架
@@ -26,7 +26,7 @@ jkmvc/jkmvc-http/src/main/resources/jphp
 ```
 
 ### 3 控制器
-参考 [demo控制器](jkmvc-http/src/main/resources/jphp/controller/Test.php)
+参考 [demo控制器](/jkmvc-http/src/main/resources/jphp/controller/Test.php)
 
 ```
 <?php
@@ -68,7 +68,7 @@ class Test extends IController{
 ```
 
 ### 4 视图
-参考 [demo视图](jkmvc-http/src/main/resources/jphp/views/login.php)
+参考 [demo视图](/jkmvc-http/src/main/resources/jphp/views/login.php)
 ```
 <html>
     <head>
@@ -113,7 +113,7 @@ class Test extends IController{
 
 ### 5 运行结果
 1. 访问 http://localhost:8080/jkmvc-example/$test/index/1?name=shi
-![index](doc/http/img/php-index.png)
+![index](/doc/http/img/php-index.png)
 
 2. 访问 http://localhost:8080/jkmvc-example/$test/login
-![view](doc/http/img/php-view.png)
+![view](/doc/http/img/php-view.png)
