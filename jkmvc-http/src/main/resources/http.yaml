@@ -10,3 +10,6 @@ controllerPackages:
 # 视图目录, 根目录为webapp
 # view directory
 viewDir:
+# php控制器名的前缀, 要求不是字母, 以区分java控制器名
+# php controller prefix
+phpControllerPref: $

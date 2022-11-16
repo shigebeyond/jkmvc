@@ -44,6 +44,11 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
     public val config = Config.instance("http", "yaml")
 
     /**
+     * php控制器名的前缀, 要求不是字母, 以区分java控制器名
+     */
+    public val phpControllerPref: String = config.getString("phpControllerPref", "$")!!
+
+    /**
      * http请求处理的拦截器
      */
     public override val interceptors: List<IHttpRequestInterceptor> = config.classes2Instances("interceptors")
@@ -102,7 +107,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
         // 1 加拦截
         return interceptorChain.intercept(req) {
             // 2 解析与调用controller
-            if (req.controller.startsWith('$')) // 如果controller是$开头，则表示走php controller
+            if (req.controller.startsWith(phpControllerPref)) // 如果controller是$开头，则表示走php controller
                 callPhpController(req, res)
             else // 否则，走java controller
                 callJavaController(req, res)

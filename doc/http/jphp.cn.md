@@ -4,9 +4,18 @@ jkmvc 整合jphp技术, 支持同构异语言(java/php)及相互调用, 以便�
 一般而言, 整合jphp(动态语言)给java平台添加动态性的动机, 主要是用在网关或视图引擎上, 特别是网关上的路由、转发、聚合服务、熔断降级限流等的动态修改, 代码修改无须重启java服务, 同时php也会编译为字节码来保证性能, 另外php从语法、学习成本、使用成本、web应用、流行度、招聘等都是较好选择, 因此该整合技术是兼顾了效率与性能的较"实惠"的技术。
 
 # 实现
+### 1 php控制器名前缀配置
+http.yaml
+```yaml
+# php控制器名的前缀, 要求不是字母, 以区分java控制器名
+# php controller prefix
+phpControllerPref: $
+```
 
-- 1 php代码的目录结构
-参考 [demo代码](https://github.com/shigebeyond/jkmvc/tree/master/jkmvc-http/src/main/resources/jphp)
+=> 如果路由解析的控制器名是以`$` 为前缀，则调用php控制器，否则调用java控制器
+
+### 2 php代码的目录结构
+参考 [demo代码](jkmvc-http/src/main/resources/jphp)
 ```
 jkmvc/jkmvc-http/src/main/resources/jphp
 ├── callController.php // 内嵌的小型php mvc框架
@@ -16,8 +25,8 @@ jkmvc/jkmvc-http/src/main/resources/jphp
     └── login.php // demo视图
 ```
 
-- 2 控制器
-参考 [demo控制器](https://github.com/shigebeyond/jkmvc/blob/master/jkmvc-http/src/main/resources/jphp/controller/Test.php)
+### 3 控制器
+参考 [demo控制器](jkmvc-http/src/main/resources/jphp/controller/Test.php)
 
 ```
 <?php
@@ -58,8 +67,8 @@ class Test extends IController{
 }
 ```
 
-- 3 视图
-参考 [demo视图](https://github.com/shigebeyond/jkmvc/blob/master/jkmvc-http/src/main/resources/jphp/views/login.php)
+### 4 视图
+参考 [demo视图](jkmvc-http/src/main/resources/jphp/views/login.php)
 ```
 <html>
     <head>
@@ -102,4 +111,9 @@ class Test extends IController{
 <html>
 ```
 
-- 4. 运行结果
+### 5 运行结果
+1. 访问 http://localhost:8080/jkmvc-example/$test/index/1?name=shi
+![index](doc/http/img/php-index.png)
+
+2. 访问 http://localhost:8080/jkmvc-example/$test/login
+![view](doc/http/img/php-view.png)
