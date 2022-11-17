@@ -26,6 +26,11 @@ interface IOrmValid : IOrmEntity {
     }
 
     /**
+     * 脏的字段
+     */
+    val dirtyColumns: Set<String>
+
+    /**
      * 标记字段为脏
      * @param column 字段名
      * @param flag 是否脏

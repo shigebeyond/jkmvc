@@ -50,6 +50,12 @@ abstract class OrmValid : IOrm, OrmEntity() {
     }
 
     /**
+     * 脏的字段
+     */
+    public override val dirtyColumns: Set<String>
+        get() = _dirty.keys
+
+    /**
      * 标记字段为脏
      * @param column 字段名
      * @param flag 是否脏
