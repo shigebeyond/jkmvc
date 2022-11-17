@@ -185,10 +185,10 @@ open class PModel(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject
          * java中获得单例
          */
         @JvmStatic
-        fun of(env: Environment, model: Orm): PModel {
+        fun of(env: Environment, item: Orm): PModel {
             val obj = PModel(env, env.fetchClass(JkmvcOrmExtension.NS + "\\Model"))
-            obj.model = model
-            obj.ormMeta = model.ormMeta
+            obj.model = item
+            obj.ormMeta = item.ormMeta
             return obj
         }
     }

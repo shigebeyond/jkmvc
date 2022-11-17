@@ -1,9 +1,9 @@
 package net.jkcode.jkmvc.orm.jphp
 
-import net.jkcode.jkmvc.db.IDb
 import net.jkcode.jkmvc.orm.*
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.IDbQueryBuilder
+import net.jkcode.jkutil.common.mapSelf
 import net.jkcode.jkutil.common.mapToArray
 import net.jkcode.jphp.ext.toPureArray
 import net.jkcode.jphp.ext.toPureList
@@ -39,7 +39,7 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
     lateinit var query: IDbQueryBuilder
 
     // 代理的orm query builder
-    val ormQuery: OrmQueryBuilder
+    inline val ormQuery: OrmQueryBuilder
         get() = query as OrmQueryBuilder
 
     // 缓存php内存对象，因为链式调用多，一般会创建很多内存对象，因此要复用内存对象
@@ -693,6 +693,23 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
     }
 
     /**
+     * 查找一个： select ... limit 1语句
+     *
+     * @param params 参数
+     * @return 一个数据
+     */
+    @Reflection.Signature
+    @JvmOverloads
+    public fun findModel(env: Environment, params: ArrayMemory? = null): PModel? {
+        val item = ormQuery.findRow(params.toPureList()) {
+            ormQuery.ormMeta.result2model<Orm>(it) // 此处需返回Orm对象，不能转为PModel对象，否则影响联查
+        }
+        if(item == null)
+            return null
+        return PModel.of(env, item)
+    }
+
+    /**
      * 查找多个： select 语句
      *
      * @param params 参数
@@ -702,25 +719,12 @@ open class PQueryBuilder(env: Environment, clazz: ClassEntity) : BaseWrapper<Jav
     @JvmOverloads
     public fun findModels(env: Environment, params: ArrayMemory? = null): List<PModel> {
         val ormMeta = ormQuery.ormMeta
-        return ormQuery.findRows {
-            val model = ormMeta.result2model<Orm>(it)
-            PModel.of(env, model)
+        val items = ormQuery.findRows(params.toPureList()) {
+            ormMeta.result2model<Orm>(it) // 此处需返回Orm对象，不能转为PModel对象，否则影响联查
         }
-    }
-
-    /**
-     * 查找一个： select ... limit 1语句
-     *
-     * @param params 参数
-     * @return 一个数据
-     */
-    @Reflection.Signature
-    @JvmOverloads
-    public fun findModel(env: Environment, params: ArrayMemory? = null): PModel? {
-        val ormMeta = ormQuery.ormMeta
-        return ormQuery.findRow {
-            val model = ormMeta.result2model<Orm>(it)
-            PModel.of(env, model)
+        // 复用list
+        return items.mapSelf {
+            PModel.of(env, it)
         }
     }
 

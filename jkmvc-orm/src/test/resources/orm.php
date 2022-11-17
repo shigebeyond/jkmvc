@@ -21,15 +21,16 @@ if($users){
 
 // model操作
 $model = new Model("net.jkcode.jkmvc.tests.model.UserModel");
-echo "创建用户: $uid\n";
+echo "创建用户\n";
 $model->id = $uid + 1;
-$age = mt_rand(0, 10);
-$model->age = $age;
-$name = 'shi'.$age;
+$model->age = mt_rand(0, 10);
+$name = 'shi-'.$uid;
 $model->username = $name;
 $model->password = $name;
 $model->name = $name;
 $model->create();
+if($uid == 0)
+    $uid = $model->id;
 
 echo "加载用户: $uid\n";
 $model->load($uid);
@@ -41,15 +42,22 @@ echo "$user \n";
 
 // db query builder
 echo "查找用户: $uid\n";
-$qb = $db->queryBuilder();
-$user = $qb->table("user")->where('id', '=', $uid)->findRow();
+$user = $db->queryBuilder()->table("user")->where('id', '=', $uid)->findRow();
 var_dump($user);
+
+echo "查找所有用户\n";
+$users = $db->queryBuilder()->table("user")->findRows();
+var_dump($users);
 
 // orm query builder
 echo "查找用户: $uid\n";
-$qb = $model->queryBuilder();
-$user = $qb->with('home')->where('user.id', '=', $uid)->findModel();
+$user = $model->queryBuilder()->with('home')->with('addresses')->where('user.id', '=', $uid)->findModel();
 echo "$user \n";
+
+echo "查找所有用户\n";
+$users = $model->queryBuilder()->with('addresses')->findModels();
+foreach($users as $user)
+    echo "$user \n";
 
 echo "更新用户: $uid\n";
 $user->age = $user->age + 2;
