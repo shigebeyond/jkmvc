@@ -613,7 +613,31 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 			for (cookie in this.cookies)
 				client.addCookie(cookie.toNettyCookie())
 		}
+		// query string
+		var url2: String
+		if(this.isGet)
+			url2 = url + "?" + this.queryString
+		else
+			url2 = url
+		// 参数
+		var params: String? = null
+		if(this.isPost)
+			params = this.parameterMap.buildQueryString(true)
 		// 发送请求, 并获得响应
-		return client.send(this.method.toUpperCase(), url, null, ContentType.APPLICATION_OCTET_STREAM, headers)
+		return client.send(this.method.toUpperCase(), url2, params, ContentType.APPLICATION_OCTET_STREAM, headers)
+	}
+
+	/**
+	 * 转发请求，并返回响应
+	 * @param url
+	 * @param res
+	 * @param useHeaders 是否使用请求头
+	 * @param useCookies 是否使用cookie
+	 * @return 异步响应
+	 */
+	public fun transferAndReturn(url: String, res: HttpResponse, useHeaders: Boolean = false, useCookies: Boolean = false): CompletableFuture<Void> {
+		return this.transfer(url, useHeaders, useCookies).thenAccept{
+			res.outputStream.writeFromInput(it.responseBodyAsStream)
+		}
 	}
 }

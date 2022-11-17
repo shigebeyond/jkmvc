@@ -83,18 +83,18 @@ class PHttpRequest(env: Environment, public val request: HttpRequest) : BaseObje
     }
 
     /**
-     * 使用 http client 转发请求
+     * 转发请求，并返回响应
+     *   因为是异步处理, 因此在action方法最后一行必须返回该函数的返回值
      * @param url
+     * @param res
      * @param useHeaders 是否使用请求头
      * @param useCookies 是否使用cookie
      * @return 异步响应
      */
     @Reflection.Signature
     @JvmOverloads
-    public fun transfer(url: String, useHeaders: Boolean = false, useCookies: Boolean = false): CompletableFuture<String> {
-        return request.transfer(url, useHeaders, useCookies).thenApply {
-            it.responseBody
-        }
+    public fun transferAndReturn(url: String, res: PHttpResponse, useHeaders: Boolean = false, useCookies: Boolean = false): CompletableFuture<Void> {
+        return request.transferAndReturn(url, res.response, useHeaders, useCookies)
     }
 
     companion object{

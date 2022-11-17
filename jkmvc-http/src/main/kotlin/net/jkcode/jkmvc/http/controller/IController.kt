@@ -5,6 +5,7 @@ import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jkutil.collection.LazyAllocatedMap
 import java.io.Writer
+import java.util.concurrent.CompletableFuture
 import javax.servlet.ServletOutputStream
 
 /**
@@ -93,4 +94,15 @@ interface IController{
         // 处理结果
         return result
     }
+
+
+    /**
+     * 转发请求，并返回响应
+     *   因为是异步处理, 因此在action方法最后一行必须返回该函数的返回值
+     * @param url
+     * @param useHeaders 是否使用请求头
+     * @param useCookies 是否使用cookie
+     * @return 异步响应
+     */
+    fun transferAndReturn(url: String, useHeaders: Boolean = false, useCookies: Boolean = false): CompletableFuture<Void>
 }

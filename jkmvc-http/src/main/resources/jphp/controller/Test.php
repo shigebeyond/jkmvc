@@ -33,4 +33,11 @@ class Test extends IController{
     function login(){
         $this->view('login', ['msg' => '请输入登录账户和密码']);
     }
+
+    /**
+     * http://localhost:8080/jkmvc-example/$test/transfer
+     */
+    function transfer(){
+        return $this->transferAndReturn('https://www.baidu.com/s?wd=jkmvc')
+    }
 }
