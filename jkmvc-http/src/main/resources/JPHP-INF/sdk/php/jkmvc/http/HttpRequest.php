@@ -93,6 +93,15 @@ class HttpRequest
     }
 
     /**
+     * 使用 http client 转发请求
+     * @param url
+     * @param useHeaders 是否使用请求头
+     * @param useCookies 是否使用cookie
+     * @return 异步响应
+     */
+    function transfer($url, $useHeaders = false, $useCookies = false)
+
+    /**
      * Get request of current execution
      * @return HttpRequest
      */

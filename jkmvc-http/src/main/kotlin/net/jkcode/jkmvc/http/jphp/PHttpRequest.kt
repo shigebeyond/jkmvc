@@ -9,6 +9,7 @@ import php.runtime.env.Environment
 import php.runtime.lang.BaseObject
 import php.runtime.memory.ObjectMemory
 import php.runtime.memory.StringMemory
+import java.util.concurrent.CompletableFuture
 
 @Reflection.Name("HttpRequest")
 @Reflection.Namespace(JkmvcHttpExtension.NS)
@@ -79,6 +80,21 @@ class PHttpRequest(env: Environment, public val request: HttpRequest) : BaseObje
     @Reflection.Signature
     fun action(): String {
         return request.action
+    }
+
+    /**
+     * 使用 http client 转发请求
+     * @param url
+     * @param useHeaders 是否使用请求头
+     * @param useCookies 是否使用cookie
+     * @return 异步响应
+     */
+    @Reflection.Signature
+    @JvmOverloads
+    public fun transfer(url: String, useHeaders: Boolean = false, useCookies: Boolean = false): CompletableFuture<String> {
+        return request.transfer(url, useHeaders, useCookies).thenApply {
+            it.responseBody
+        }
     }
 
     companion object{

@@ -2,16 +2,19 @@ package net.jkcode.jkmvc.http
 
 import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
-import net.jkcode.jkmvc.http.handler.HttpRequestHandler
 import net.jkcode.jkmvc.http.router.HttpMethod
 import net.jkcode.jkmvc.http.router.RouteException
 import net.jkcode.jkmvc.http.router.RouteResult
 import net.jkcode.jkmvc.http.router.Router
 import net.jkcode.jkutil.common.*
+import net.jkcode.jkutil.http.ContentType
+import net.jkcode.jkutil.http.HttpClient
 import net.jkcode.jkutil.lock.IKeyLock
 import net.jkcode.jkutil.validator.RuleValidator
+import org.asynchttpclient.Response
 import java.net.URLDecoder
 import java.util.*
+import java.util.concurrent.CompletableFuture
 import javax.servlet.RequestDispatcher
 import javax.servlet.ServletContext
 import javax.servlet.http.Cookie
@@ -538,6 +541,15 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	}
 
 	/**
+	 * 获得请求头的map
+	 */
+	public fun getHeaderMap(): Map<String, String> {
+		return this.headerNames.associate { name ->
+			name to getHeader(name)
+		}
+	}
+
+	/**
 	 * 构建curl命令
 	 * @return
 	 */
@@ -581,5 +593,27 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		}
 
 		return cmd.toString()
+	}
+
+	/**
+	 * 使用 http client 转发请求
+	 * @param url
+	 * @param useHeaders 是否使用请求头
+	 * @param useCookies 是否使用cookie
+	 * @return 异步响应
+	 */
+	public fun transfer(url: String, useHeaders: Boolean = false, useCookies: Boolean = false): CompletableFuture<Response> {
+		val client = HttpClient()
+		// 请求头
+		var headers: Map<String, String> = emptyMap()
+		if(useHeaders)
+			headers = this.getHeaderMap()
+		// cookie
+		if(useCookies) {
+			for (cookie in this.cookies)
+				client.addCookie(cookie.toNettyCookie())
+		}
+		// 发送请求, 并获得响应
+		return client.send(this.method.toUpperCase(), url, null, ContentType.APPLICATION_OCTET_STREAM, headers)
 	}
 }
