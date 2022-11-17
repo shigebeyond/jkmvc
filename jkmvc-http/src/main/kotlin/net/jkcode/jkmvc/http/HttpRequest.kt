@@ -636,8 +636,13 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 * @return 异步响应
 	 */
 	public fun transferAndReturn(url: String, res: HttpResponse, useHeaders: Boolean = false, useCookies: Boolean = false): CompletableFuture<Void> {
-		return this.transfer(url, useHeaders, useCookies).thenAccept{
-			res.outputStream.writeFromInput(it.responseBodyAsStream)
+		return this.transfer(url, useHeaders, useCookies).whenComplete{ r, ex ->
+			if(ex == null) {
+				res.outputStream.writeFromInput(r.responseBodyAsStream)
+			}else{
+				httpLogger.errorAndPrint("转发请求[$url]出错: ", ex)
+				throw ex
+			}
 		}
 	}
 }
