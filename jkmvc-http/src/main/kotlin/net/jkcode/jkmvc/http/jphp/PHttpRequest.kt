@@ -53,6 +53,23 @@ class PHttpRequest(env: Environment, public val request: HttpRequest) : BaseObje
         return request.getSession(true).id
     }
 
+    /**
+     * 设置上传的子目录(上传文件要存的子目录)
+     *   要在调用file()之前设置
+     */
+    @Reflection.Signature
+    fun setUploadSubDir(uploadSubDir: String) {
+        request.uploadSubDir = uploadSubDir
+    }
+
+    /**
+     * 保存上传文件, 并返回相对路径
+     */
+    @Reflection.Signature
+    fun file(name: String): String? {
+        return request.storePartFileAndGetRelativePath(name)
+    }
+
     @Reflection.Signature
     fun controller(): String {
         //去掉$开头

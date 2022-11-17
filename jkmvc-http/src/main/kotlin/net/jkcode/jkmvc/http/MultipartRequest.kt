@@ -67,9 +67,10 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): IHt
         }
 
     /**
-     * 上传的子目录
+     * 上传的子目录(上传文件要存的子目录)
      *    就是在 UploadFileUtil.uploadRootDirectory 根目录下, 当前业务或租户对应的子目录
      *    如在多租户应用的拦截器修改该值为租户id
+     *    需在保存之前调用，如在storePartFileAndGetRelativePath()之前
      */
     public var uploadSubDir: String = ""
 

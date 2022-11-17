@@ -63,6 +63,22 @@ class HttpRequest
     }
 
     /**
+     * 设置上传的子目录(上传文件要存的子目录)
+     *   要在调用file()之前设置
+     * @param $uploadSubDir
+     */
+    function setUploadSubDir($uploadSubDir) {
+    }
+
+    /**
+     * 保存上传文件, 并返回相对路径
+     * @param $name
+     * @return string
+     */
+    function file($name) {
+    }
+
+    /**
      * @return string
      */
     function controller()
