@@ -3,6 +3,7 @@ package net.jkcode.jkmvc.http.jphp
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpState
 import net.jkcode.jkmvc.http.handler.HttpRequestHandler
+import org.asynchttpclient.Response
 import php.runtime.Memory
 import php.runtime.annotation.Reflection
 import php.runtime.env.Environment
@@ -93,7 +94,7 @@ class PHttpRequest(env: Environment, public val request: HttpRequest) : BaseObje
      */
     @Reflection.Signature
     @JvmOverloads
-    public fun transferAndReturn(url: String, res: PHttpResponse, useHeaders: Boolean = false, useCookies: Boolean = false): CompletableFuture<Void> {
+    public fun transferAndReturn(url: String, res: PHttpResponse, useHeaders: Boolean = false, useCookies: Boolean = false): CompletableFuture<Response> {
         return request.transferAndReturn(url, res.response, useHeaders, useCookies)
     }
 

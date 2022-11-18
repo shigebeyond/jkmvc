@@ -20,6 +20,7 @@ abstract class IHttpRequest(req: HttpServletRequest): HttpServletRequestWrapper(
         generateId("HttpRequest")
     }
 
+    /******************** 内部请求 *********************/
     /**
      * 是否内部请求
      */

@@ -19,7 +19,9 @@ import javax.servlet.RequestDispatcher
 import javax.servlet.ServletContext
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
@@ -595,6 +597,45 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		return cmd.toString()
 	}
 
+	/*************************** 转发请求 *****************************/
+	/**
+	 * query string中的参数名
+	 */
+	public val queryParamNames: Set<String> by lazy {
+		val matches: Sequence<MatchResult> = "&?([^=&])+=".toRegex().findAll(req.queryString)
+		matches.mapTo(HashSet()) { it.groups[1]!!.value }
+	}
+
+	/**
+	 * post表单中的参数名
+	 */
+	public val postParamNames: Set<String> by lazy {
+		if (isGet)
+			emptySet()
+		else
+			req.parameterNames.subtract(queryParamNames)
+	}
+
+	/**
+	 * query string中的参数
+	 */
+	public val queryParams: Map<String, Array<String>>
+		get(){
+			return queryParamNames.associate { name ->
+				name to getParameterValues(name)!!
+			}
+		}
+
+	/**
+	 * post表单中的参数
+	 */
+	public val postParams: Map<String, Array<String>>
+		get(){
+			return postParamNames.associate { name ->
+				name to getParameterValues(name)!!
+			}
+		}
+
 	/**
 	 * 使用 http client 转发请求
 	 * @param url
@@ -613,16 +654,18 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 			for (cookie in this.cookies)
 				client.addCookie(cookie.toNettyCookie())
 		}
-		// query string
+		// query string参数
 		var url2: String
 		if(this.isGet)
 			url2 = url + "?" + this.queryString
 		else
 			url2 = url
-		// 参数
+		// post参数
 		var params: String? = null
-		if(this.isPost)
-			params = this.parameterMap.buildQueryString(true)
+		if(this.isPost) {
+			//params = req.parameterMap.buildQueryString(true)
+			params = postParams.buildQueryString(true)
+		}
 		// 发送请求, 并获得响应
 		return client.send(this.method.toUpperCase(), url2, params, ContentType.APPLICATION_OCTET_STREAM, headers)
 	}
@@ -635,10 +678,10 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 * @param useCookies 是否使用cookie
 	 * @return 异步响应
 	 */
-	public fun transferAndReturn(url: String, res: HttpResponse, useHeaders: Boolean = false, useCookies: Boolean = false): CompletableFuture<Void> {
+	public fun transferAndReturn(url: String, res: HttpResponse, useHeaders: Boolean = false, useCookies: Boolean = false): CompletableFuture<Response> {
 		return this.transfer(url, useHeaders, useCookies).whenComplete{ r, ex ->
 			if(ex == null) {
-				res.outputStream.writeFromInput(r.responseBodyAsStream)
+				res.renderTransferResponse(r)
 			}else{
 				httpLogger.errorAndPrint("转发请求[$url]出错: ", ex)
 				throw ex

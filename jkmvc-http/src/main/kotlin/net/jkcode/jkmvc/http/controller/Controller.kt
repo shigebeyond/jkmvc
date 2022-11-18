@@ -10,6 +10,7 @@ import net.jkcode.jkutil.common.DegradeCommandException
 import net.jkcode.jkutil.common.buildQueryString
 import net.jkcode.jkutil.common.to
 import net.jkcode.jkutil.common.trySupplierFuture
+import org.asynchttpclient.Response
 import java.io.File
 import java.util.concurrent.CompletableFuture
 
@@ -169,7 +170,7 @@ abstract class Controller : IController {
      * @param useCookies 是否使用cookie
      * @return 异步响应
      */
-    override fun transferAndReturn(url: String, useHeaders: Boolean, useCookies: Boolean): CompletableFuture<Void> {
-        return req.transferAndReturn(url, res, useHeaders, useCookies);
+    override fun transferAndReturn(url: String, useHeaders: Boolean, useCookies: Boolean): CompletableFuture<Response> {
+        return req.transferAndReturn(url, res, useHeaders, useCookies)
     }
 }

@@ -4,6 +4,7 @@ import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jkutil.collection.LazyAllocatedMap
+import org.asynchttpclient.Response
 import java.io.Writer
 import java.util.concurrent.CompletableFuture
 import javax.servlet.ServletOutputStream
@@ -104,5 +105,5 @@ interface IController{
      * @param useCookies 是否使用cookie
      * @return 异步响应
      */
-    fun transferAndReturn(url: String, useHeaders: Boolean = false, useCookies: Boolean = false): CompletableFuture<Void>
+    fun transferAndReturn(url: String, useHeaders: Boolean = false, useCookies: Boolean = false): CompletableFuture<Response>
 }
