@@ -290,19 +290,18 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 	public fun renderTransferResponse(r: Response)
 	{
 		rendered = true
-		httpLogger.debug("Render transfered response: {}", r)
+		httpLogger.debug("Render transfered response: {}", r.headers)
 		res.contentType = r.contentType
+		res.status = r.statusCode
+		for((name, value) in r.headers) {
+			res.addHeader(name, value)
+		}
 		// 输出
-		/* 1 outputStream输出字节报错
-		错在: org.eclipse.jetty.http.HttpGenerator.generateResponse(HttpGenerator.java:362)
-		出错代码: `_persistent=(info.getVersion().ordinal() > HttpVersion.HTTP_1_0.ordinal());`
-		错误原因: info.getVersion() 为null, 经调试发现 info 对象中只有status属性为200, 其他属性(如version)均为null
-		解决: 不要获得字节, 而是获得文本
-		 */
-//		res.outputStream.write(r.responseBodyAsBytes)
+		// 1 outputStream输出字节
+//		res.outputStream.writeFromInput(r.responseBodyAsStream)
 //		res.outputStream.flush()
-		// 2 writer输出文本成功
-		prepareWriter().print(r.responseBody);
+		// 2 writer输出文本
+		res.writer.print(r.responseBody);
 	}
 
 	/**

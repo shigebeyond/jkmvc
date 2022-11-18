@@ -113,7 +113,7 @@ open class JkFilter() : Filter {
         }
 
         // 1 异步处理
-        if(req.isAsyncSupported // 支持异常
+        if(req.isAsyncSupported // 支持异步
                 && !isInnerReq // 非内部请求: 内部请求的处理还是放到跟父请求的同一个线程处理
                 && !config.getBoolean("debug")!!) { // 非调试
             // 异步处理
@@ -137,7 +137,7 @@ open class JkFilter() : Filter {
         }
 
         // 2 同步处理
-        handleRequest(req, res as HttpServletResponse, chain)
+        handleRequest(req, res as HttpServletResponse, chain).get() // 同步必须要调用get()来等待
     }
 
     /**

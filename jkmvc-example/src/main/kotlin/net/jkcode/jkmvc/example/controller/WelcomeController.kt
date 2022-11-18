@@ -30,8 +30,11 @@ class WelcomeController: Controller() {
      */
     public fun transfer(): CompletableFuture<Response> {
         val city: String = req["city"]!!
+//        return transferAndReturn("http://platinum.shikee.com/data/34256140?v=1410824790")
+//        return transferAndReturn("http://list.shikee.com")
 //        return transferAndReturn("https://www.tianqi.com/$city")
-        return transferAndReturn("https://search.gitee.com/?skin=rec&type=repository&q=jkmvc")
+        return transferAndReturn("http://platinum.shikee.com/34257228.html")
+//        return transferAndReturn("https://search.gitee.com/?skin=rec&type=repository&q=jkmvc")
     }
 
 }

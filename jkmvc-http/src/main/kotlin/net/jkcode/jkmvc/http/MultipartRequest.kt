@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import net.jkcode.jkutil.common.*
-import sun.misc.IOUtils
 import java.util.*
 import javax.servlet.http.HttpServletRequest
 import kotlin.collections.HashMap
@@ -156,7 +155,7 @@ abstract class MultipartRequest(req: HttpServletRequest /* 请求对象 */): IHt
      * @return
      */
     public fun parseJson(): Any {
-        val bytes = IOUtils.readFully(inputStream, -1, false)
+        val bytes = inputStream.readBytes()
         return JSON.parse(bytes)
     }
 
