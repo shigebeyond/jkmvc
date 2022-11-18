@@ -5,7 +5,8 @@ import net.jkcode.jkutil.common.httpLogger
 import net.jkcode.jkutil.common.prepareDirectory
 import net.jkcode.jkutil.scope.ClosingOnShutdown
 import org.apache.jasper.runtime.TldScanner
-import org.eclipse.jetty.server.NCSARequestLog
+import org.eclipse.jetty.server.CustomRequestLog
+//import org.eclipse.jetty.server.NCSARequestLog
 import org.eclipse.jetty.server.NetworkConnector
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
@@ -101,7 +102,8 @@ class JettyServer : Closeable{
         val logDir: String = config["logDir"]!!
         logDir.prepareDirectory() // 准备好目录
 
-        val requestLog = NCSARequestLog()
+        val requestLog = CustomRequestLog("$logDir/jetty.log")
+        /*val requestLog = NCSARequestLog()
         requestLog.setFilename("$logDir/jetty.log")
         requestLog.setFilenameDateFormat("yyyy-MM-dd")
         requestLog.setRetainDays(10)
@@ -109,7 +111,7 @@ class JettyServer : Closeable{
         requestLog.setAppend(true)
         requestLog.setLogTimeZone("Asia/Shanghai")
         requestLog.setLogDateFormat("yyyy-MM-dd HH:mm:ss SSS")
-        requestLog.setLogLatency(true)
+        requestLog.setLogLatency(true)*/
 
         val logHandler = RequestLogHandler()
         logHandler.setRequestLog(requestLog)

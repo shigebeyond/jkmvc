@@ -1,5 +1,5 @@
 # 是否调试
-debug: true
+debug: false
 # 静态文件的扩展名
 # static file extension
 staticFileExts: gif|jpg|jpeg|png|bmp|ico|svg|swf|js|css|eot|ttf|woff
