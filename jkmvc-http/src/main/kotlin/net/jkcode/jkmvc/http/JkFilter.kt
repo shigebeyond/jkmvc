@@ -118,10 +118,10 @@ open class JkFilter() : Filter {
                 && !config.getBoolean("debug")!!) { // 非调试
             // 异步处理
             try {
+                // 启动异步上下文: 1 必须在线程池之前调用, 否则jetty报状态错误 2 在完成异步操作后, 需要调用 actx.complete() 来关闭
+                val actx = req.startAsync(req, res)
                 //actx.start { // web server线程池
                 CommonExecutor.execute { // 其他线程池
-                    // 启动异步上下文, 在完成异步操作后, 需要调用 actx.complete() 来关闭
-                    val actx = req.startAsync(req, res)
                     // 异步处理
                     handleRequest(actx.request as HttpServletRequest, actx.response as HttpServletResponse, chain)
                         .whenComplete { r, ex ->

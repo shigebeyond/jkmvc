@@ -11,7 +11,6 @@ import net.jkcode.jkutil.http.ContentType
 import net.jkcode.jkutil.http.HttpClient
 import net.jkcode.jkutil.lock.IKeyLock
 import net.jkcode.jkutil.validator.RuleValidator
-import org.apache.commons.lang3.SerializationUtils
 import org.asynchttpclient.Response
 import java.net.URLDecoder
 import java.util.*
@@ -20,7 +19,6 @@ import javax.servlet.RequestDispatcher
 import javax.servlet.ServletContext
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 import kotlin.collections.component1
@@ -680,21 +678,8 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	 * @return 异步响应
 	 */
 	public fun transferAndReturn(url: String, res: HttpResponse, useHeaders: Boolean = false, useCookies: Boolean = false): CompletableFuture<Response> {
-		// 读jetty请求的元数据, 异步处理下会丢失
-		var metaData: Any? = null
-		if(req.javaClass.name == "org.eclipse.jetty.server.Request") {
-			metaData = req.javaClass.getMethod("getMetaData").invoke(req)
-			metaData = metaData.copyBean(metaData)
-			metaData.copyProps("_uri")
-		}
 		// 转发请求
 		return this.transfer(url, useHeaders, useCookies).thenApply{ r ->
-				// 恢复jetty请求的元数据
-				if(metaData != null) {
-					//val paramClass = Class.forName("org.eclipse.jetty.http.MetaData.Request") // 报错: 找不到类型
-					val paramClass = metaData.javaClass
-					req.javaClass.getMethod("setMetaData", paramClass).invoke(req, metaData)
-				}
 				res.renderTransferResponse(r)
 			r
 		}
