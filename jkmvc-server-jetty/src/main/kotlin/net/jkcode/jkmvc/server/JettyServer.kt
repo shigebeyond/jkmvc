@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.server
 
-//import org.eclipse.jetty.server.NCSARequestLog
+import org.eclipse.jetty.server.NCSARequestLog
 
 import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.httpLogger
@@ -8,7 +8,7 @@ import net.jkcode.jkutil.common.prepareDirectory
 import net.jkcode.jkutil.scope.ClosingOnShutdown
 import org.apache.jasper.runtime.TldScanner
 import org.apache.jasper.servlet.JspServlet
-import org.eclipse.jetty.server.CustomRequestLog
+//import org.eclipse.jetty.server.CustomRequestLog
 import org.eclipse.jetty.server.NetworkConnector
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
@@ -105,8 +105,11 @@ class JettyServer : Closeable{
         val logDir: String = config["logDir"]!!
         logDir.prepareDirectory() // 准备好目录
 
-        val requestLog = CustomRequestLog("$logDir/jetty.log")
-        /*val requestLog = NCSARequestLog()
+        // jetty10
+//        val requestLog = CustomRequestLog("$logDir/jetty.log")
+
+        // jetty9
+        val requestLog = NCSARequestLog()
         requestLog.setFilename("$logDir/jetty.log")
         requestLog.setFilenameDateFormat("yyyy-MM-dd")
         requestLog.setRetainDays(10)
@@ -114,7 +117,7 @@ class JettyServer : Closeable{
         requestLog.setAppend(true)
         requestLog.setLogTimeZone("Asia/Shanghai")
         requestLog.setLogDateFormat("yyyy-MM-dd HH:mm:ss SSS")
-        requestLog.setLogLatency(true)*/
+        requestLog.setLogLatency(true)
 
         val logHandler = RequestLogHandler()
         logHandler.setRequestLog(requestLog)
@@ -141,9 +144,10 @@ class JettyServer : Closeable{
         tempDir.prepareDirectory() // 准备好目录
         context.setTempDirectory(File(tempDir))
 
+        // jetty10
         //for jsp support
 //        context.addServlet(JspServlet::class.java, "/*.jsp") // 报错： java.lang.IllegalArgumentException: Servlet Spec 12.2 violation: glob '*' can only exist at end of prefix based matches: bad spec "/*.jsp"
-        context.addServlet(JspServlet::class.java, "*.jsp")
+//        context.addServlet(JspServlet::class.java, "*.jsp")
 
         return context
     }
