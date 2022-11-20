@@ -1,0 +1,70 @@
+<configuration>
+    <!-- 控制台输出 -->
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />
+
+    <!-- 自定义属性 -->
+    <!--<property name="pattern" value="%-5level %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %logger{36} [%file:%line] - %msg%n"/>-->
+    <property name="pattern" value="%-5level %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %logger{36} - %msg%n"/>
+
+    <!-- 控制台输出 -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 文件滚动输出 -->
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/error.log</file>
+        <append>true</append>
+        <prudent>false</prudent>
+
+        <!-- 日志文件rolling策略:按天生成日志文件 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>logs/error.log.%d{yyyyMMdd}</FileNamePattern>
+            <!-- 文件在磁盘上保留天数 -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+
+        <!-- 日志输出格式 -->
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${pattern}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+
+        <!-- 日志等级,可省 -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+
+    <!-- 异步写文件中，避免每次都IO操作 -->
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>10000</queueSize>
+        <appender-ref ref="file" />
+    </appender>
+
+    <!-- org包使用console输出，日志级别为error -->
+    <logger name="org" level="error">
+        <appender-ref ref="console"/>
+    </logger>
+    <logger name="com" level="error">
+        <appender-ref ref="console"/>
+    </logger>
+    <logger name="net" level="error">
+        <appender-ref ref="console"/>
+    </logger>
+    <root level="fatal">
+        <appender-ref ref="console"/>
+    </root>
+    <!-- net.jkcode包使用console跟file输出，日志级别为debug -->
+    <logger name="net.jkcode" level="debug" additivity="false">
+        <appender-ref ref="console"/>
+        <appender-ref ref="file"/>
+    </logger>
+    <logger name="org.eclipse.jetty" level="debug" additivity="false">
+        <appender-ref ref="console"/>
+        <appender-ref ref="file"/>
+    </logger>
+</configuration>
