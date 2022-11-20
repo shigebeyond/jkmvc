@@ -172,6 +172,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      * 调用php的controller
      *   callController.php负责工作： 1 定义controller基类 2 创建controller实例 3 HttpState.setCurrentByController() 4 guardInvoke()即调用action
      */
+    @Suspendable
     private fun callPhpController(req: HttpRequest, res: HttpResponse){
         // 执行 callController.php
         val lan = JphpLauncher
