@@ -1,12 +1,14 @@
 package net.jkcode.jkmvc.server
 
+//import org.eclipse.jetty.server.NCSARequestLog
+
 import net.jkcode.jkutil.common.Config
 import net.jkcode.jkutil.common.httpLogger
 import net.jkcode.jkutil.common.prepareDirectory
 import net.jkcode.jkutil.scope.ClosingOnShutdown
 import org.apache.jasper.runtime.TldScanner
+import org.apache.jasper.servlet.JspServlet
 import org.eclipse.jetty.server.CustomRequestLog
-//import org.eclipse.jetty.server.NCSARequestLog
 import org.eclipse.jetty.server.NetworkConnector
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
@@ -16,6 +18,7 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.webapp.WebAppContext
 import java.io.Closeable
 import java.io.File
+import java.util.*
 
 
 /**
@@ -128,6 +131,7 @@ class JettyServer : Closeable{
         context.setWar(webDir)
         context.setDescriptor("$webDir/WEB-INF/web.xml");
         context.setResourceBase(webDir);
+        context.setExtractWAR(true);
         context.setDisplayName("jetty");
         context.setClassLoader(Thread.currentThread().getContextClassLoader());
         context.setConfigurationDiscovered(true);
@@ -136,7 +140,11 @@ class JettyServer : Closeable{
         val tempDir: String = config["tempDir"]!!
         tempDir.prepareDirectory() // 准备好目录
         context.setTempDirectory(File(tempDir))
-        
+
+        //for jsp support
+//        context.addServlet(JspServlet::class.java, "/*.jsp") // 报错： java.lang.IllegalArgumentException: Servlet Spec 12.2 violation: glob '*' can only exist at end of prefix based matches: bad spec "/*.jsp"
+        context.addServlet(JspServlet::class.java, "*.jsp")
+
         return context
     }
 
