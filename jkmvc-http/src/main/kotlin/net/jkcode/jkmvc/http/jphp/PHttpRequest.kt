@@ -100,19 +100,11 @@ class PHttpRequest(env: Environment, public val request: HttpRequest) : BaseObje
     @Reflection.Signature
     @JvmOverloads
     public fun transferAndReturn(url: String, res: PHttpResponse, useHeaders: Boolean = false, useCookies: Boolean = false): CompletableFuture<Any?> {
-        /*return request.transferAndReturn(url, res.response, useHeaders, useCookies).thenApply {
+        return request.transferAndReturn(url, res.response, useHeaders, useCookies).thenApply {
             // 不返回org.asynchttpclient.Response对象, 因为jphp无法转换
             // 直接返回null
             null
-        }*/
-        // 测试
-        val future = CompletableFuture<Any?>()
-        CommonMilliTimer.newTimeout(object : TimerTask {
-            override fun run(timeout: Timeout) {
-                future.complete(null)
-            }
-        }, 60, TimeUnit.MILLISECONDS)
-        return future
+        }
     }
 
     companion object{
