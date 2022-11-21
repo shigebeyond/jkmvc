@@ -27,7 +27,7 @@ public val Method.route: ARoute?
 /**
  * 获得路由注解
  */
-public val IMethodMeta.route: ARoute?
+public val IMethodMeta<*>.route: ARoute?
     get(){
         return getAnnotation()
     }

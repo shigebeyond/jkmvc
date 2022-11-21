@@ -83,7 +83,7 @@ abstract class Controller : IController {
      * @param action action方法
      */
     @Suspendable
-    public fun callActionMethod(action: IMethodMeta): CompletableFuture<Any?> {
+    public fun callActionMethod(action: IMethodMeta<*>): CompletableFuture<Any?> {
         return trySupplierFuture {
             // 1 前置处理
             before()
@@ -109,7 +109,7 @@ abstract class Controller : IController {
      * @param action
      * @return
      */
-    protected fun buildActionParams(action: IMethodMeta):Array<Any?>{
+    protected fun buildActionParams(action: IMethodMeta<*>):Array<Any?>{
         // 只处理一个参数的情况，且该实参为路由参数id的值
         if(action.parameterTypes.size == 1){
             val id = req.routeParams["id"] // 参数值

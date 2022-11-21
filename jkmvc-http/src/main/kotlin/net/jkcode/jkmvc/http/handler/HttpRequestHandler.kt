@@ -170,7 +170,8 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
 
     /**
      * 调用php的controller
-     *   callController.php负责工作： 1 定义controller基类 2 创建controller实例 3 HttpState.setCurrentByController() 4 guardInvoke()即调用action
+     *   1 callController.php负责工作： 1 定义controller基类 2 创建controller实例 3 HttpState.setCurrentByController() 4 guardInvoke()即调用action
+     *   2 JphpLauncher.run()中php执行结果有可能是WrapCompletableFuture, 他直接返回future, 以便调用端处理异步结果
      */
     @Suspendable
     private fun callPhpController(req: HttpRequest, res: HttpResponse): Any? {
@@ -181,6 +182,8 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
                 "req" to PHttpRequest(lan.environment, req),
                 "res" to PHttpResponse(lan.environment, res)
         )
+
+        // JphpLauncher.run()中php执行结果有可能是WrapCompletableFuture, 他直接返回future, 以便调用端处理异步结果
         //return lan.run(phpFile, data, res.outputStream, exceptionHandler = phpExceptionHandler) // 异常处理
         return lan.run(phpFile, data, res.outputStream)
     }
@@ -201,10 +204,10 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
         // 获得php方法
         val method = classEntity.findMethod(methodName.toString().toLowerCase())
         // 调用php方法
-        val r = guardInvoke(PhpMethodMeta(method, this), obj as Any, args as Array<Any?>)
+        val ret = guardInvoke(PhpMethodMeta(method, this), obj as Any, args as Array<Any?>)
         // 返回值函数 PhpMethodMeta#getResultFromFuture() 中同步结果值有可能是null或java对象, 异步结果是PhpReturnCompletableFuture
-        //return r as Memory
-        return r
+        //return ret as Memory
+        return ret
     }
 
     /**
@@ -218,12 +221,12 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      * @return
      */
     @Suspendable
-    public override fun invokeAfterGuard(action: IMethodMeta, controller: Any, args: Array<Any?>): CompletableFuture<Any?> {
+    public override fun invokeAfterGuard(action: IMethodMeta<*>, controller: Any, args: Array<Any?>): CompletableFuture<Any?> {
         // 调用controller的action方法
         // 1 php方法: 调用action.invoke(), 涉及到各种转类型
         if(action is PhpMethodMeta)
             return PhpReturnCompletableFuture.tryPhpSupplierFuture{
-                action.invoke(controller, *args) as Memory
+                action.invoke(controller, *args)
             }
 
         // 2 java方法: 也是调用 action.invoke()，只是封装了更多java controller的特性
@@ -236,7 +239,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      * @param method
      * @return
      */
-    public override fun getCombineInovkeObject(method: IMethodMeta): Any {
+    public override fun getCombineInovkeObject(method: IMethodMeta<*>): Any {
         if(!JkApp.useSttl) // 必须包装sttl
             throw IllegalStateException()
 
