@@ -98,5 +98,6 @@ HttpRequest::setCurrentByController($controller);
 
 // 5 调用action方法
 $id = $req->param('id');
-// $controller->$action($id);
-HttpRequest::guardInvoke($controller, $action, [$id]);
+// 需return, 有可能返回值是 CompleteFuture, 而外部调用方需要
+// return $controller->$action($id);
+return HttpRequest::guardInvoke($controller, $action, [$id]);

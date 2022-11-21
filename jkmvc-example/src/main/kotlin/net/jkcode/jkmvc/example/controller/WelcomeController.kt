@@ -29,8 +29,7 @@ class WelcomeController: Controller() {
      * 测试转发请求
      *   http://localhost:8080/jkmvc-example/welcome/transfer
      */
-    public fun transfer(): CompletableFuture<Response> {
-        // return transferAndReturn("http://www.baidu.com/s?wd=jkmvc")
+    public fun transfer(): CompletableFuture<*> {
         return transferAndReturn("https://search.gitee.com/?skin=rec&type=repository&q=jkmvc")
     }
 

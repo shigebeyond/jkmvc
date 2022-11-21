@@ -298,10 +298,10 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 		}
 		// 输出
 		// 1 outputStream输出字节
-//		res.outputStream.writeFromInput(r.responseBodyAsStream)
-//		res.outputStream.flush()
+		res.outputStream.writeFromInput(r.responseBodyAsStream)
+		res.outputStream.flush()
 		// 2 writer输出文本
-		res.writer.print(r.responseBody);
+//		res.writer.print(r.responseBody);
 	}
 
 	/**

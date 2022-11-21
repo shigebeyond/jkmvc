@@ -173,7 +173,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      *   callController.php负责工作： 1 定义controller基类 2 创建controller实例 3 HttpState.setCurrentByController() 4 guardInvoke()即调用action
      */
     @Suspendable
-    private fun callPhpController(req: HttpRequest, res: HttpResponse){
+    private fun callPhpController(req: HttpRequest, res: HttpResponse): Any? {
         // 执行 callController.php
         val lan = JphpLauncher
         val phpFile = Thread.currentThread().contextClassLoader.getResource("jphp/callController.php").path
@@ -181,27 +181,30 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
                 "req" to PHttpRequest(lan.environment, req),
                 "res" to PHttpResponse(lan.environment, res)
         )
-        //lan.run(phpFile, data, res.outputStream, exceptionHandler = phpExceptionHandler) // 异常处理
-        lan.run(phpFile, data, res.outputStream)
+        //return lan.run(phpFile, data, res.outputStream, exceptionHandler = phpExceptionHandler) // 异常处理
+        return lan.run(phpFile, data, res.outputStream)
     }
 
     /***************** MethodGuardInvoker 实现 *****************/
     /**
      * 守护php方法调用 -- 入口
-     *
+     *    注意: 返回值函数 PhpMethodMeta#getResultFromFuture() 中同步结果值有可能是null或java对象, 异步结果是PhpReturnCompletableFuture
      * @param methodName 方法
      * @param obj 对象
      * @param args0 参数
      * @return 结果
      */
     @Suspendable
-    fun guardInvoke(obj: ObjectMemory, methodName: StringMemory, args: Array<Memory>, env: Environment): Memory {
+    fun guardInvoke(obj: ObjectMemory, methodName: StringMemory, args: Array<Memory>, env: Environment): Any? {
         // 获得php类
         val classEntity: ClassEntity = obj.value.reflection
         // 获得php方法
         val method = classEntity.findMethod(methodName.toString().toLowerCase())
         // 调用php方法
-        return guardInvoke(PhpMethodMeta(method, this), obj as Any, args as Array<Any?>) as Memory
+        val r = guardInvoke(PhpMethodMeta(method, this), obj as Any, args as Array<Any?>)
+        // 返回值函数 PhpMethodMeta#getResultFromFuture() 中同步结果值有可能是null或java对象, 异步结果是PhpReturnCompletableFuture
+        //return r as Memory
+        return r
     }
 
     /**
@@ -219,7 +222,9 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
         // 调用controller的action方法
         // 1 php方法: 调用action.invoke(), 涉及到各种转类型
         if(action is PhpMethodMeta)
-            return PhpReturnCompletableFuture.tryPhpSupplierFuture{ action.invoke(controller, *args) as Memory }
+            return PhpReturnCompletableFuture.tryPhpSupplierFuture{
+                action.invoke(controller, *args) as Memory
+            }
 
         // 2 java方法: 也是调用 action.invoke()，只是封装了更多java controller的特性
         return (controller as Controller).callActionMethod(action)

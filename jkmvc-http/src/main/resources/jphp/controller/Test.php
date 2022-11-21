@@ -38,6 +38,6 @@ class Test extends IController{
      * http://localhost:8080/jkmvc-example/$test/transfer
      */
     function transfer(){
-        return $this->transferAndReturn('https://www.baidu.com/s?wd=jkmvc')
+        return $this->transferAndReturn("https://search.gitee.com/?skin=rec&type=repository&q=jkmvc");
     }
 }

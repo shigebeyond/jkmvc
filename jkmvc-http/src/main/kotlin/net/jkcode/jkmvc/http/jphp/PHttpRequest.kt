@@ -1,8 +1,12 @@
 package net.jkcode.jkmvc.http.jphp
 
+import io.netty.util.Timeout
+import io.netty.util.TimerTask
 import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpState
 import net.jkcode.jkmvc.http.handler.HttpRequestHandler
+import net.jkcode.jkutil.common.CommonMilliTimer
+import net.jkcode.jkutil.common.CommonSecondTimer
 import org.asynchttpclient.Response
 import php.runtime.Memory
 import php.runtime.annotation.Reflection
@@ -11,6 +15,7 @@ import php.runtime.lang.BaseObject
 import php.runtime.memory.ObjectMemory
 import php.runtime.memory.StringMemory
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
 
 @Reflection.Name("HttpRequest")
 @Reflection.Namespace(JkmvcHttpExtension.NS)
@@ -90,12 +95,24 @@ class PHttpRequest(env: Environment, public val request: HttpRequest) : BaseObje
      * @param res
      * @param useHeaders 是否使用请求头
      * @param useCookies 是否使用cookie
-     * @return 异步响应
+     * @return 异步结果
      */
     @Reflection.Signature
     @JvmOverloads
-    public fun transferAndReturn(url: String, res: PHttpResponse, useHeaders: Boolean = false, useCookies: Boolean = false): CompletableFuture<Response> {
-        return request.transferAndReturn(url, res.response, useHeaders, useCookies)
+    public fun transferAndReturn(url: String, res: PHttpResponse, useHeaders: Boolean = false, useCookies: Boolean = false): CompletableFuture<Any?> {
+        /*return request.transferAndReturn(url, res.response, useHeaders, useCookies).thenApply {
+            // 不返回org.asynchttpclient.Response对象, 因为jphp无法转换
+            // 直接返回null
+            null
+        }*/
+        // 测试
+        val future = CompletableFuture<Any?>()
+        CommonMilliTimer.newTimeout(object : TimerTask {
+            override fun run(timeout: Timeout) {
+                future.complete(null)
+            }
+        }, 60, TimeUnit.MILLISECONDS)
+        return future
     }
 
     companion object{
@@ -114,13 +131,15 @@ class PHttpRequest(env: Environment, public val request: HttpRequest) : BaseObje
 
         /**
          * 守护php方法调用
+         *   1 php action中调用
          *   http controller的方法不会像rpc service的方法那样符合guardInvoke要求（有明确类型的参数或响应）
          *   如多个参数不是在函数声明中指定的，而是在函数体获得的，如返回值不仅仅是业务对象，外面还包了{code, msg, data}一层来适应json响应规范，这样不符合 KeyCombine/GroupCombine 的要求
          *   因此，你可以在php action方法实现中，继续调用 HttpRequest::guardInvoke(其他方法)，以便符合guardInvoke要求
+         *   2 关于返回值: PhpMethodMeta#getResultFromFuture() 中同步结果值有可能是null或java对象, 异步结果是PhpReturnCompletableFuture
          */
         @Reflection.Signature
         @JvmStatic
-        fun guardInvoke(env: Environment, obj: ObjectMemory, methodName: StringMemory, vararg args: Memory): Memory {
+        fun guardInvoke(env: Environment, obj: ObjectMemory, methodName: StringMemory, vararg args: Memory): Any? {
             return HttpRequestHandler.guardInvoke(obj, methodName, args as Array<Memory>, env)
         }
     }
