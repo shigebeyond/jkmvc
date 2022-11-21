@@ -63,8 +63,10 @@
         <appender-ref ref="console"/>
         <appender-ref ref="file"/>
     </logger>
+    <!--
     <logger name="org.eclipse.jetty" level="debug" additivity="false">
         <appender-ref ref="console"/>
         <appender-ref ref="file"/>
     </logger>
+    -->
 </configuration>
