@@ -91,9 +91,12 @@ interface IController{
     fun after(result: Any?, t: Throwable? = null): Any? {
         // 处理异常
         if(t != null){
+            // 日志
             val msg = "处理请求[${req.routeUri}]出错: ${t.message}"
             httpLogger.errorColor(msg, t)
-            return null
+            // 输出500错误
+            res.sendError(500, msg)
+            return null // 返回null后, res不再渲染
         }
 
         // 处理结果
