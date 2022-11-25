@@ -1,19 +1,18 @@
 package net.jkcode.jkmvc.http.jphp
 
-import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
+import org.asynchttpclient.Response
 import php.runtime.Memory
 import php.runtime.annotation.Reflection
 import php.runtime.env.Environment
 import php.runtime.lang.BaseObject
 import php.runtime.memory.ObjectMemory
-import php.runtime.reflection.ClassEntity
-import java.io.IOException
+import java.io.InputStream
 import java.nio.charset.Charset
 
 @Reflection.Name("HttpResponse")
 @Reflection.Namespace(JkmvcHttpExtension.NS)
-class PHttpResponse(env: Environment, public val response: HttpResponse) : BaseObject(env) {
+class PHttpResponse(env: Environment, public val res: HttpResponse) : BaseObject(env) {
 
     @Reflection.Signature
     protected fun __construct() {
@@ -30,7 +29,7 @@ class PHttpResponse(env: Environment, public val response: HttpResponse) : BaseO
 
     @Reflection.Signature
     fun write(value: Memory, charset: String): PHttpResponse {
-        response.outputStream.write(value.getBinaryBytes(Charset.forName(charset)))
+        res.outputStream.write(value.getBinaryBytes(Charset.forName(charset)))
         return this
     }
 
@@ -42,45 +41,75 @@ class PHttpResponse(env: Environment, public val response: HttpResponse) : BaseO
 
     @Reflection.Signature
     fun status(status: Int, @Reflection.Nullable message: String?): PHttpResponse {
-        response.status = status
+        res.status = status
         if (message != null && !message.isEmpty()) {
-            response.sendError(status, message)
+            res.sendError(status, message)
         }
         return this
     }
 
     @Reflection.Signature
     fun header(name: String, value: Memory): PHttpResponse {
-        response.addHeader(name, value.toString())
+        res.addHeader(name, value.toString())
         return this
     }
 
     @Reflection.Signature
     fun contentType(value: String?): PHttpResponse {
-        response.contentType = value
+        res.contentType = value
         return this
     }
 
     @Reflection.Signature
     fun contentLength(value: Long): PHttpResponse {
-        response.setContentLengthLong(value)
+        res.setContentLengthLong(value)
         return this
     }
 
     @Reflection.Signature
     fun redirect(value: String): PHttpResponse {
-        response.sendRedirect(value)
+        res.sendRedirect(value)
         return this
     }
 
     @Reflection.Signature
     fun flush(): PHttpResponse {
-        response.flushBuffer()
+        res.flushBuffer()
         return this
     }
 
     @Reflection.Signature
-    fun current(env: Environment): Memory {
-        return ObjectMemory(PHttpResponse(env, HttpResponse.current()))
+    public fun renderHtml(content:String){
+        res.renderHtml(content)
+    }
+
+    @Reflection.Signature
+    public fun renderText(content:String){
+        res.renderText(content)
+    }
+
+    @Reflection.Signature
+    public fun renderXml(content:String){
+        res.renderXml(content)
+    }
+
+    @Reflection.Signature
+    public fun renderFile(file: String){
+        res.renderFile(file)
+    }
+
+    @Reflection.Signature
+    @JvmOverloads
+    public fun renderJson(code:Int, message:String = "success", data:Any? = null){
+        res.renderJson(code, message, data)
+    }
+
+    companion object{
+
+        @Reflection.Signature
+        @JvmStatic
+        fun current(env: Environment): Memory {
+            return ObjectMemory(PHttpResponse(env, HttpResponse.current()))
+        }
     }
 }

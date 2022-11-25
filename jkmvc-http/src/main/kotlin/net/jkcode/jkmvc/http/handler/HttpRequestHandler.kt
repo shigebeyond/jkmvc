@@ -150,28 +150,9 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
 
     /***************** 调用php的controller 实现 *****************/
     /**
-     * 接管php异常处理
-     *   特殊处理路由异常
-     */
-    private val phpExceptionHandler = object : ExceptionHandler(null, null) {
-        override fun onException(env: Environment, ex: BaseBaseException): Boolean {
-            // 1 路由异常：直接抛给java
-            var msg = ex.toString()
-            if(msg.contains("$404[")){
-                msg = msg.substringBetween("$404[", "]")
-                throw RouteException(msg, ex)
-            }
-
-            // 2 其他异常：默认处理
-            ExceptionHandler.DEFAULT.onException(env, ex)
-            return false
-        }
-    }
-
-    /**
      * 调用php的controller
      *   1 callController.php负责工作： 1 定义controller基类 2 创建controller实例 3 HttpState.setCurrentByController() 4 guardInvoke()即调用action
-     *   2 JphpLauncher.run()中php执行结果有可能是WrapCompletableFuture, 他直接返回future, 以便调用端处理异步结果
+     *   2 JphpLauncher.run()中php执行结果有可能是PCompletableFuture, 他直接返回future, 以便调用端处理异步结果
      */
     @Suspendable
     private fun callPhpController(req: HttpRequest, res: HttpResponse): Any? {
@@ -183,8 +164,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
                 "res" to PHttpResponse(lan.environment, res)
         )
 
-        // JphpLauncher.run()中php执行结果有可能是WrapCompletableFuture, 他直接返回future, 以便调用端处理异步结果
-        //return lan.run(phpFile, data, res.outputStream, exceptionHandler = phpExceptionHandler) // 异常处理
+        // JphpLauncher.run()中php执行结果有可能是PCompletableFuture, 他直接返回future, 以便调用端处理异步结果
         return lan.run(phpFile, data, res.outputStream)
     }
 

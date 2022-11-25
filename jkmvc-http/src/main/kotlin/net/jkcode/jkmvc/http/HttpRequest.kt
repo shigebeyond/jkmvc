@@ -252,6 +252,77 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 		return allParams[key]
 	}
 
+	/**
+	 * 合并多个参数为对象
+	 *    值是数组的多个参数, 转对象数组
+	 * @param names 参数名数组, 必须保证所有参数值的数组长度都一致
+	 */
+	public fun combineParams(names: Array<String>): List<Map<String, String?>> {
+		val n = getParameterValues(names.first())?.size ?: 0
+		if(n == 0)
+			return emptyList()
+		val range = 0 until n
+		val ret = range.map{
+			HashMap<String, String?>()
+		}
+		for (name in names){
+			val values = getParameterValues(name)
+			if(values == null)
+				continue
+			if(values.size != 0)
+				throw IllegalStateException("HttpRequest.combineParams(参数名)调用时需保证所有参数值的数组长度都一致: 参数[$name]值长度为${values.size}, 要求长度为$n")
+			for (i in range){
+				ret[i][name] = values[i]
+			}
+		}
+		return ret
+	}
+
+	/**
+	 * 将参数名以 namePrefix 为前缀的参数合并为对象 -- 一维参数转多维对象
+	 *    如 fields[0][name]=a&fields[0][type]=int(10) unsigned&fields[0][default]=0&fields[0][comment]=a&fields[0][is_null]=NOT NULL
+	 *    合并转为对象 [{"name":"a","type":"int(10) unsigned","default":"0","comment":"a","is_null":"NOT NULL"}]
+	 * @param namePrefix 参数名前缀
+	 * @return
+	 */
+	public fun params2Object(namePrefix: String): Map<String, Any?> {
+		val params = req.parameterMap
+		if(params.isEmpty())
+			return emptyMap()
+
+		val namePrefix = "$namePrefix["
+		val propRegx = "\\[([^\\]]+)\\]".toRegex()
+		val ret = HashMap<String, Any?>()
+		for((name, values) in params){
+			// 参数名满足前缀
+			if(name.startsWith(namePrefix)){
+				// 多级属性路径
+				val keys = propRegx.findAllGroupValue(name, 1)
+				// 填充多级属性, 直到最后一级
+				var data: HashMap<String, Any?> = ret
+				for (i in 0 until (keys.size - 1)){
+					val key = keys[i]
+					// 一层层往下走
+					data = data.getOrPut(key){
+						HashMap<String, Any?>()
+					} as HashMap<String, Any?>
+				}
+				data[keys.last()] = values.firstOrNull()
+			}
+		}
+		return ret
+	}
+
+	/**
+	 * 设置'.'分割的路径下的子项值
+	 *
+	 * @param path '.'分割的路径
+	 * @param value 目标值
+	 */
+	protected fun setPath(obj: HashMap<String, Any?>, path:String, value:Any?) {
+
+	}
+
 	/*************************** 参数的获取/判断/校验 *****************************/
 	/**
 	 * 检查是否有请求参数(包含路由参数)

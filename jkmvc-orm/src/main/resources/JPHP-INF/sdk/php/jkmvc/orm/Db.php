@@ -20,6 +20,18 @@ class Db
     }
 
     /**
+     * 获得db名
+     */
+    function getName(){
+    }
+
+    /**
+     * 获得表前缀
+     */
+    function getTablePrefix(){
+    }
+
+    /**
      * 开启事务
      */
     function begin(){

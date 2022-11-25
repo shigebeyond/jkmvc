@@ -234,6 +234,15 @@ internal class DbMeta(public override val name: CharSequence /* 标识 */) : IDb
         }
 
     /**
+     * 获得表前缀
+     */
+    override val tablePrefix: String
+        get() {
+            // TODO: 支持从配置文件中读取
+            return ""
+        }
+
+    /**
      * 主库配置, 只支持单机db, 不支持sharding db
      */
     public override val masterConfig: Config

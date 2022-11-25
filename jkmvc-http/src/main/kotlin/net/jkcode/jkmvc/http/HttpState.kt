@@ -32,7 +32,7 @@ data class HttpState(
         fun setCurrentByController(controller: ObjectMemory) {
             val preq = controller.getPropJavaValue("req") as PHttpRequest
             val pres = controller.getPropJavaValue("res") as PHttpResponse
-            setCurrent(HttpState(preq.request, pres.response, controller))
+            setCurrent(HttpState(preq.req, pres.res, controller))
         }
 
     }

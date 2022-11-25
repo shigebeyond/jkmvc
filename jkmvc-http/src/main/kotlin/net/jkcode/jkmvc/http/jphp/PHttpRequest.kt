@@ -1,13 +1,7 @@
 package net.jkcode.jkmvc.http.jphp
 
-import io.netty.util.Timeout
-import io.netty.util.TimerTask
-import net.jkcode.jkmvc.http.HttpRequest
-import net.jkcode.jkmvc.http.HttpState
+import net.jkcode.jkmvc.http.*
 import net.jkcode.jkmvc.http.handler.HttpRequestHandler
-import net.jkcode.jkutil.common.CommonMilliTimer
-import net.jkcode.jkutil.common.CommonSecondTimer
-import org.asynchttpclient.Response
 import php.runtime.Memory
 import php.runtime.annotation.Reflection
 import php.runtime.env.Environment
@@ -15,11 +9,10 @@ import php.runtime.lang.BaseObject
 import php.runtime.memory.ObjectMemory
 import php.runtime.memory.StringMemory
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.TimeUnit
 
 @Reflection.Name("HttpRequest")
 @Reflection.Namespace(JkmvcHttpExtension.NS)
-class PHttpRequest(env: Environment, public val request: HttpRequest) : BaseObject(env) {
+class PHttpRequest(env: Environment, public val req: HttpRequest) : BaseObject(env) {
 
     @Reflection.Signature
     protected fun __construct() {
@@ -27,37 +20,77 @@ class PHttpRequest(env: Environment, public val request: HttpRequest) : BaseObje
 
     @Reflection.Signature
     fun header(name: String): String {
-        return request.getHeader(name)
+        return req.getHeader(name)
     }
 
     @Reflection.Signature
-    fun param(name: String): String? {
-        return request.getParameter(name)
+    @JvmOverloads
+    fun param(name: String, valueAsArray: Boolean = false): Any? {
+        val value = req.getParameterValues(name)
+        if(valueAsArray)
+            return value
+        return value?.firstOrNull()
+    }
+
+    /**
+     * 获得所有参数
+     * @param valueAsArray 值是否作为数组
+     * @return
+     */
+    @Reflection.Signature
+    @JvmOverloads
+    fun params(valueAsArray: Boolean = false): Map<String, Any?> {
+        if(valueAsArray)
+            return req.parameterMap
+
+        return HttpParamMap(req.parameterMap)
     }
 
     @Reflection.Signature
     fun query(): String {
-        return request.queryString
+        return req.queryString
+    }
+
+    /**
+     * 合并多个参数为对象
+     *    值是数组的多个参数, 转对象数组
+     * @param names 参数名数组, 必须保证所有参数值的数组长度都一致
+     */
+    @Reflection.Signature
+    fun combineParams(names: Array<String>): List<Map<String, Any?>>{
+        return req.combineParams(names)
+    }
+
+    /**
+     * 将参数名以 namePrefix 为前缀的参数合并为对象 -- 一维参数转多维对象
+     *    如 fields[0][name]=a&fields[0][type]=int(10) unsigned&fields[0][default]=0&fields[0][comment]=a&fields[0][is_null]=NOT NULL
+     *    合并转为对象 [{"name":"a","type":"int(10) unsigned","default":"0","comment":"a","is_null":"NOT NULL"}]
+     * @param namePrefix 参数名前缀
+     * @return
+     */
+    @Reflection.Signature
+    public fun params2Object(namePrefix: String): Map<String, Any?> {
+        return req.params2Object(namePrefix)
     }
 
     @Reflection.Signature
     fun uri(): String {
-        return request.requestURI
+        return req.requestURI
     }
 
     @Reflection.Signature
     fun routeUri(): String {
-        return request.routeUri
+        return req.routeUri
     }
 
     @Reflection.Signature
     fun method(): String {
-        return request.method
+        return req.method
     }
 
     @Reflection.Signature
     fun sessionId(): String {
-        return request.getSession(true).id
+        return req.getSession(true).id
     }
 
     /**
@@ -66,7 +99,7 @@ class PHttpRequest(env: Environment, public val request: HttpRequest) : BaseObje
      */
     @Reflection.Signature
     fun setUploadSubDir(uploadSubDir: String) {
-        request.uploadSubDir = uploadSubDir
+        req.uploadSubDir = uploadSubDir
     }
 
     /**
@@ -74,18 +107,81 @@ class PHttpRequest(env: Environment, public val request: HttpRequest) : BaseObje
      */
     @Reflection.Signature
     fun file(name: String): String? {
-        return request.storePartFileAndGetRelativePath(name)
+        return req.storePartFileAndGetRelativePath(name)
     }
 
     @Reflection.Signature
     fun controller(): String {
         //去掉$开头
-        return request.controller.removePrefix("$")
+        return req.controller.removePrefix("$")
     }
 
     @Reflection.Signature
     fun action(): String {
-        return request.action
+        return req.action
+    }
+
+    /**
+     * 是否内部请求: INCLUDE/FORWARD
+     * @return
+     */
+    @Reflection.Signature
+    public fun isInner(): Boolean{
+        return req.isInner
+    }
+
+    /**
+     * 是否post请求
+     * @return
+     */
+    @Reflection.Signature
+    public fun isPost(): Boolean{
+        return req.isPost
+    }
+
+    /**
+     * 是否option请求
+     * @return
+     */
+    @Reflection.Signature
+    public fun isOptions(): Boolean{
+        return req.isOptions
+    }
+
+    /**
+     * 是否get请求
+     * @return
+     */
+    @Reflection.Signature
+    public fun isGet(): Boolean{
+        return req.isGet
+    }
+
+    /**
+     * 是否 multipart 请求
+     * @return
+     */
+    @Reflection.Signature
+    public fun isMultipartContent(): Boolean{
+        return req.isMultipartContent
+    }
+
+    /**
+     * 是否上传文件的请求
+     * @return
+     */
+    @Reflection.Signature
+    public fun isUpload(): Boolean{
+        return req.isUpload
+    }
+
+    /**
+     * 是否ajax请求
+     * @return
+     */
+    @Reflection.Signature
+    public fun isAjax(): Boolean{
+        return req.isAjax
     }
 
     /**
@@ -100,7 +196,7 @@ class PHttpRequest(env: Environment, public val request: HttpRequest) : BaseObje
     @Reflection.Signature
     @JvmOverloads
     public fun transferAndReturn(url: String, res: PHttpResponse, useHeaders: Boolean = false, useCookies: Boolean = false): CompletableFuture<Any?> {
-        return request.transferAndReturn(url, res.response, useHeaders, useCookies).thenApply {
+        return req.transferAndReturn(url, res.res, useHeaders, useCookies).thenApply {
             // 不返回org.asynchttpclient.Response对象, 因为jphp无法转换
             // 直接返回null
             null

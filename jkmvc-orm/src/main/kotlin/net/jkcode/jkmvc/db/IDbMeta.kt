@@ -1,6 +1,7 @@
 package net.jkcode.jkmvc.db
 
 import net.jkcode.jkutil.common.Config
+import php.runtime.annotation.Reflection
 
 /**
  * db元数据
@@ -50,6 +51,11 @@ interface IDbMeta: IDbIdentifierQuoter, IDbValueQuoter {
      *    可省略，默认值=username
      */
     val schema: String?
+
+    /**
+     * 获得表前缀
+     */
+    val tablePrefix: String
 
     /**
      * 主库配置

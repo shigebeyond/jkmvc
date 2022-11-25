@@ -1,6 +1,8 @@
 <?php
 namespace php\jkmvc\http; // 定义 IController 类时需要
 define('APPPATH', dirname(__FILE__)); // 应用目录
+define('CONTROLLERPATH', APPPATH . '/controller/'); // 应用目录
+define('VIEWPATH', APPPATH . '/view/'); // 应用目录
 
 // TODO: 为了优化性能, 可适当减少判断的代码, 如判断文件/类/方法存不存在, 以便减少php代码, 压榨点性能; 这样最后包一层try, 然后转化下对用户友好的异常
 
@@ -34,12 +36,14 @@ if(!class_exists('php\jkmvc\http\IController', FALSE)) // 检查controller基类
             // 释放变量
             if($data)
                 extract($data);
+            // 在view中引用控制器
+            $controller = $this;
 
             // 开输出缓冲
             ob_start();
 
             // 找到视图
-            $file = APPPATH . '/views/' . $file . '.php';
+            $file = VIEWPATH . $file . '.php';
             if(!file_exists($file))  // 检查视图文件
                 throw new \Exception("View not exists: $file");
 
@@ -61,23 +65,11 @@ if(!class_exists('php\jkmvc\http\IController', FALSE)) // 检查controller基类
                 ob_end_clean();
             }
         }
-
-        /**
-         * 转发请求，并返回响应
-         *    因为是异步处理, 因此在action方法最后一行必须返回该函数的返回值
-         * @param $url
-         * @param $useHeaders 是否使用请求头
-         * @param $useCookies 是否使用cookie
-         * @return 异步响应
-         */
-        function transferAndReturn($url, $useHeaders = false, $useCookies = false){
-            return $this->req->transferAndReturn($url, $this->res, $useHeaders, $useCookies);
-        }
     }
 
 // 引入controller文件
 $controller = ucfirst($req->controller());
-$file = APPPATH . '/controller/' . $controller . '.php';
+$file = CONTROLLERPATH . $controller . '.php';
 if(!file_exists($file)) // 检查controller文件
     throw new \Exception("$404[Controller file not exists: $controller]");
 

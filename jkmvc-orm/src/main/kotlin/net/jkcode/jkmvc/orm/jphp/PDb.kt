@@ -22,21 +22,21 @@ import php.runtime.reflection.ClassEntity
 open class PDb(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject>(env, clazz) {
 
     // db配置名
-    lateinit var name: String
+    lateinit var _name: String
 
     /**
      * 代理的db
      *   必须实时获得，因为代理的db的作用域是请求级的
      */
     val proxyDb: Db
-        get() = Db.instance(name)
+        get() = Db.instance(_name)
 
     @Reflection.Signature
     fun __construct(name: String): Memory {
         if (name.isBlank())
-            this.name = "default"
+            this._name = "default"
         else
-            this.name = name
+            this._name = name
         return Memory.NULL
     }
 
@@ -47,6 +47,22 @@ open class PDb(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject>(e
     fun queryBuilder(env: Environment): ObjectMemory {
         val qb = PQueryBuilder.of(env, DbQueryBuilder(proxyDb))
         return qb.objMem
+    }
+
+    /**
+     * 获得db名
+     */
+    @Reflection.Signature
+    fun getName(): String {
+        return _name
+    }
+
+    /**
+     * 获得表前缀
+     */
+    @Reflection.Signature
+    fun getTablePrefix(): String {
+        return proxyDb.tablePrefix
     }
 
     /**
@@ -134,7 +150,7 @@ open class PDb(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject>(e
         @JvmStatic
         fun instance(env: Environment, name: String = "default"): Memory {
             val db = PDb(env, env.fetchClass(JkmvcOrmExtension.NS + "\\Db"))
-            db.name = name
+            db._name = name
             return ObjectMemory(db)
         }
     }

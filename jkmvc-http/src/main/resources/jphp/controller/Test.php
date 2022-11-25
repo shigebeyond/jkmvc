@@ -25,6 +25,7 @@ class Test extends IController{
         echo 'routeParam: ' . $req->param('id') . "\n";
         echo 'query: ' . $req->query() . "\n";
         echo 'sessionId: ' . $req->sessionId() . "\n";
+        echo 'all params: ' . print_r($req->params(), true) . "\n";
     }
 
     /**

@@ -21,7 +21,7 @@ jkmvc/jkmvc-http/src/main/resources/jphp
 ├── callController.php // 内嵌的小型php mvc框架
 ├── controller // 控制器目录
 │   └── Test.php // demo控制器
-└── views // 视图目录
+└── view // 视图目录
     └── login.php // demo视图
 ```
 
@@ -68,7 +68,7 @@ class Test extends IController{
 ```
 
 ### 4 视图
-参考 [demo视图](/jkmvc-http/src/main/resources/jphp/views/login.php)
+参考 [demo视图](/jkmvc-http/src/main/resources/jphp/view/login.php)
 ```
 <html>
     <head>
