@@ -82,22 +82,15 @@ interface IController{
 
     /**
      * 后置处理
-     *   因为这是请求的最后处理(包含异常处理), 你最好不要再往上抛异常
-     *
+     *   异常默认往上抛, 在 JkFilter.handleRequest() 统一处理(日志+渲染500错误)
      * @param result action方法执行结果
      * @param t action方法执行抛出的异常
      * @return
      */
     fun after(result: Any?, t: Throwable? = null): Any? {
         // 处理异常
-        if(t != null){
-            // 日志
-            val msg = "处理请求[${req.routeUri}]出错: ${t.message}"
-            httpLogger.errorColor(msg, t)
-            // 输出500错误
-            res.sendError(500, msg)
-            return null // 返回null后, res不再渲染
-        }
+        if(t != null)
+            throw t
 
         // 处理结果
         return result

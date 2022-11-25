@@ -162,15 +162,21 @@ open class JkFilter() : Filter {
 
     /**
      * 处理请求
-     *   方便复用与重载
+     *   1 方便复用与重载
+     *   2 统一处理(日志+渲染500错误)， 如果你先改变错误渲染，直接重写该方法
      * @param req
      * @param res
      * @return
      */
     protected open fun handleRequest(req: HttpServletRequest, res: HttpServletResponse, chain: FilterChain): CompletableFuture<*> {
         val f = HttpRequestHandler.handle(req, res)
-        f.exceptionally { ex ->
-            httpLogger.errorColor(ex.message!!, ex)
+        f.exceptionally { t ->
+            // 异常日志
+            val err = t.message ?: t.cause?.message
+            val msg = "处理请求[${req.requestURI}]出错: ${err}"
+            httpLogger.errorColor(msg, t)
+            // 渲染500错误
+            res.sendError(500, msg)
             null
         }
         return f

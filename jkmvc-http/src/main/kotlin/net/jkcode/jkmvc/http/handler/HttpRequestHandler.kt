@@ -205,9 +205,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
         // 调用controller的action方法
         // 1 php方法: 调用action.invoke(), 涉及到各种转类型
         if(action is PhpMethodMeta)
-            return PhpReturnCompletableFuture.tryPhpSupplierFuture{
-                action.invoke(controller, *args)
-            }
+            return action.tryInvokeFuture(controller, *args)
 
         // 2 java方法: 也是调用 action.invoke()，只是封装了更多java controller的特性
         return (controller as Controller).callActionMethod(action)
