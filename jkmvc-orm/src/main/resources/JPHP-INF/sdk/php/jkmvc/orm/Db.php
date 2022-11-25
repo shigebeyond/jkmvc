@@ -26,6 +26,12 @@ class Db
     }
 
     /**
+     * 获得schema
+     */
+    function getSchema() {
+    }
+
+    /**
      * 获得表前缀
      */
     function getTablePrefix(){

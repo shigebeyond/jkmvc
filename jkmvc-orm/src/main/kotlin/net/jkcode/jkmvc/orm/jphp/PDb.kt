@@ -50,11 +50,19 @@ open class PDb(env: Environment, clazz: ClassEntity) : BaseWrapper<JavaObject>(e
     }
 
     /**
-     * 获得db名
+     * 获得db配置名
      */
     @Reflection.Signature
     fun getName(): String {
         return _name
+    }
+
+    /**
+     * 获得schema
+     */
+    @Reflection.Signature
+    fun getSchema(): String? {
+        return proxyDb.schema
     }
 
     /**
