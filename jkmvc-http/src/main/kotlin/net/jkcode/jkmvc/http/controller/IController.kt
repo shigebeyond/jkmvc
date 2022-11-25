@@ -4,6 +4,9 @@ import net.jkcode.jkmvc.http.HttpRequest
 import net.jkcode.jkmvc.http.HttpResponse
 import net.jkcode.jkmvc.http.view.View
 import net.jkcode.jkutil.collection.LazyAllocatedMap
+import net.jkcode.jkutil.common.ColorFormatter
+import net.jkcode.jkutil.common.errorColor
+import net.jkcode.jkutil.common.httpLogger
 import org.asynchttpclient.Response
 import java.io.Writer
 import java.util.concurrent.CompletableFuture
@@ -88,7 +91,8 @@ interface IController{
     fun after(result: Any?, t: Throwable? = null): Any? {
         // 处理异常
         if(t != null){
-            t.printStackTrace()
+            val msg = "处理请求[${req.routeUri}]出错: ${t.message}"
+            httpLogger.errorColor(msg, t)
             return null
         }
 

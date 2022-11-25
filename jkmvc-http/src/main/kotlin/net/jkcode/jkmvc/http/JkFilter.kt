@@ -131,7 +131,7 @@ open class JkFilter() : Filter {
                         }
                 }
             }catch (e: RejectedExecutionException){
-                httpLogger.errorAndPrint("JkFilter处理请求错误: 公共线程池已满", e)
+                httpLogger.errorColor("JkFilter处理请求错误: 公共线程池已满", e)
             }
             return;
         }
@@ -170,7 +170,7 @@ open class JkFilter() : Filter {
     protected open fun handleRequest(req: HttpServletRequest, res: HttpServletResponse, chain: FilterChain): CompletableFuture<*> {
         val f = HttpRequestHandler.handle(req, res)
         f.exceptionally { ex ->
-            httpLogger.errorAndPrint(ex.message!!, ex)
+            httpLogger.errorColor(ex.message!!, ex)
             null
         }
         return f
