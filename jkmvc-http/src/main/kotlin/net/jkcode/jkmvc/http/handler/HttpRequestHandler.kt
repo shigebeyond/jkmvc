@@ -23,6 +23,7 @@ import php.runtime.lang.exception.BaseBaseException
 import php.runtime.memory.ObjectMemory
 import php.runtime.memory.StringMemory
 import php.runtime.reflection.ClassEntity
+import java.io.ByteArrayOutputStream
 import java.lang.reflect.Method
 import java.util.concurrent.CompletableFuture
 import javax.servlet.http.HttpServletRequest
@@ -153,6 +154,7 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
      * 调用php的controller
      *   1 callController.php负责工作： 1 定义controller基类 2 创建controller实例 3 HttpState.setCurrentByController() 4 guardInvoke()即调用action
      *   2 JphpLauncher.run()中php执行结果有可能是PCompletableFuture, 他直接返回future, 以便调用端处理异步结果
+     *   3 对jphp的输出，要使用 HttpResponse.writeBytesByUsedStream() 来输出到响应中
      */
     @Suspendable
     private fun callPhpController(req: HttpRequest, res: HttpResponse): Any? {
@@ -164,8 +166,14 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
                 "res" to PHttpResponse(lan.environment, res)
         )
 
+        // 需接收输出，不能直接使用res.outputStream，因为php文件中也可能会做响应输出(如调用 res.writer), 而jetty server实现中 OutputStream 与 Writer 流是不兼容的，多次输出也只能用一个
+//        val out = res.outputStream
+        val out = ByteArrayOutputStream()
         // JphpLauncher.run()中php执行结果有可能是PCompletableFuture, 他直接返回future, 以便调用端处理异步结果
-        return lan.run(phpFile, data, res.outputStream)
+        val ret = lan.run(phpFile, data, out)
+        // 使用响应中已用过的输出流来输出, 解决OutputStream 与 Writer 流是不兼容的问题
+        res.writeBytesByUsedStream(out)
+        return ret
     }
 
     /***************** MethodGuardInvoker 实现 *****************/

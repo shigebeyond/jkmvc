@@ -12,6 +12,7 @@ import org.apache.commons.lang.StringEscapeUtils
 import org.asynchttpclient.Response
 import java.io.*
 import java.net.URLEncoder
+import javax.servlet.ServletOutputStream
 import javax.servlet.http.HttpServletResponse
 import javax.servlet.http.HttpServletResponseWrapper
 
@@ -125,6 +126,54 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 		internal set
 
 	/**
+	 * 输出是否使用Writer，否则使用OutputStream
+	 */
+	protected var useWriter: Boolean? = null
+
+	/**
+	 * 重写来标记 useWriter
+	 *   检查useWriter, 因为jetty server实现中 OutputStream 与 Writer 流是不兼容的，多次输出也只能用一个
+	 */
+	override fun getOutputStream(): ServletOutputStream {
+		if(useWriter == true)
+			throw IllegalStateException("已调用 res.getWriter(), 不能再调用 res.getOutputStream(), 两个方法不兼容")
+		useWriter = false
+		return res.outputStream
+	}
+
+	/**
+	 * 重写来标记 useWriter
+	 *   检查useWriter, 因为jetty server实现中 OutputStream 与 Writer 流是不兼容的，多次输出也只能用一个
+	 */
+	override fun getWriter(): PrintWriter {
+		if(useWriter == false)
+			throw IllegalStateException("已调用 res.getOutputStream(), 不能再调用 res.getWriter(), 两个方法不兼容")
+		useWriter = true
+		return res.writer
+	}
+
+	/**
+	 * 使用已用过的输出流来输出
+	 *   可能在该方法调用前，响应就输出过；而jetty server实现中 OutputStream 与 Writer 流是不兼容的，多次输出也只能用一个
+	 *
+	 * @param output 主要是jphp的输出流，要输出到响应
+	 */
+	fun writeBytesByUsedStream(output: ByteArrayOutputStream) {
+		if(output.size() == 0)
+			return
+
+		// 使用已用过的输出流来输出
+		if(useWriter == true){ // 使用Writer
+			//val content = output.toString("UTF-8")
+			val content = output.toString()
+			prepareWriter().write(content)
+		} else // 使用OutputStream
+			output.writeTo(res.outputStream)
+
+		//output.close() //无用
+	}
+
+	/**
 	 * 获得writer
 	 */
 	public fun prepareWriter(): PrintWriter
@@ -136,7 +185,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 		if(res.contentType.isNullOrBlank())
 			res.contentType = "text/html;charset=UTF-8";
 
-		return res.writer
+		return writer
 	}
 
 	override fun sendRedirect(location: String) {
@@ -259,8 +308,8 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 		res.contentType = req.session.servletContext.getMimeType(file.name) ?: "application/octet-stream"
 
 		// 输出文件
-		res.outputStream.writeFile(file)
-		res.outputStream.flush()
+		outputStream.writeFile(file)
+		outputStream.flush()
 	}
 
 	/**
@@ -279,7 +328,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 		res.contentType = req.session.servletContext.getMimeType(name) ?: "application/octet-stream"
 
 		// 输出文件
-		res.outputStream.writeFromInput(input)
+		outputStream.writeFromInput(input)
 	}
 
 	/**
@@ -298,10 +347,10 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 		}
 		// 输出
 		// 1 outputStream输出字节
-		res.outputStream.writeFromInput(r.responseBodyAsStream)
-		res.outputStream.flush()
+		outputStream.writeFromInput(r.responseBodyAsStream)
+		outputStream.flush()
 		// 2 writer输出文本
-//		res.writer.print(r.responseBody);
+//		writer.print(r.responseBody);
 	}
 
 	/**
