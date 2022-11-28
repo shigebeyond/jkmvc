@@ -90,8 +90,8 @@ public val HttpServletRequest.isUpload: Boolean
  */
 public val HttpServletRequest.isAjax: Boolean
     get() {
-        return "XMLHttpRequest".equals(getHeader("x-requested-with"), true) // // 通过XMLHttpRequest发送请求
-                && "text/javascript, application/javascript, */*".equals(getHeader("Accept"), true); // 通过jsonp来发送请求
+        return "XMLHttpRequest".equals(getHeader("x-requested-with"), true) // 通过XMLHttpRequest发送请求
+                || "text/javascript, application/javascript, */*".equals(getHeader("Accept"), true); // 通过jsonp来发送请求
     }
 
 /**

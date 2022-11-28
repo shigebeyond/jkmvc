@@ -547,7 +547,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 		// json响应
 		val obj = JSONObject()
 		obj["code"] = code
-		obj["message"] = message
+		obj["msg"] = message
 		obj["data"] = normalizeData(data)
 		renderJson(obj)
 	}
@@ -568,7 +568,7 @@ class HttpResponse(res:HttpServletResponse /* 响应对象 */, protected val req
 		// json响应
 		val obj = JSONObject()
 		obj["code"] = code
-		obj["message"] = message
+		obj["msg"] = message
 		obj["data"] = normalizeData(items)
 
 		// 构造分页json

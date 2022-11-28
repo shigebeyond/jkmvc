@@ -1,11 +1,13 @@
 package net.jkcode.jkmvc.http.jphp
 
 import net.jkcode.jkmvc.http.HttpResponse
+import net.jkcode.jphp.ext.toJavaObject
 import org.asynchttpclient.Response
 import php.runtime.Memory
 import php.runtime.annotation.Reflection
 import php.runtime.env.Environment
 import php.runtime.lang.BaseObject
+import php.runtime.memory.ArrayMemory
 import php.runtime.memory.ObjectMemory
 import java.io.InputStream
 import java.nio.charset.Charset
@@ -100,7 +102,10 @@ class PHttpResponse(env: Environment, public val res: HttpResponse) : BaseObject
 
     @Reflection.Signature
     @JvmOverloads
-    public fun renderJson(code:Int, message:String = "success", data:Any? = null){
+    public fun renderJson(code:Int, message:String = "success", data: Any? = null){
+        var data = data
+        if(data is ArrayMemory)
+            data = data?.toJavaObject()
         res.renderJson(code, message, data)
     }
 

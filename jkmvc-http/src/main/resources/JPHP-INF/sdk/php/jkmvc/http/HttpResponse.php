@@ -73,6 +73,21 @@ class HttpResponse
     {
     }
 
+    public function renderHtml(string $content){
+    }
+
+    public function renderText(string $content){
+    }
+
+    public function renderXml(string $content){
+    }
+
+    public function renderFile(string $file){
+    }
+
+    public function renderJson(int $code, string $message = "success", array $data = []){
+    }
+
     /**
      * Get response of current execution
      * @return HttpResponse
