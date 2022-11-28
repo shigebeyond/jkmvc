@@ -160,7 +160,8 @@ object HttpRequestHandler : IHttpRequestHandler, MethodGuardInvoker() {
     private fun callPhpController(req: HttpRequest, res: HttpResponse): Any? {
         // 执行 callController.php
         val lan = JphpLauncher
-        val phpFile = Thread.currentThread().contextClassLoader.getResource("jphp/callController.php").path
+        //val phpFile = Thread.currentThread().contextClassLoader.getResource("jphp/callController.php").path
+        val phpFile = req.webRootDirectory + "/jphp/callController.php"
         val data = mapOf(
                 "req" to PHttpRequest(lan.environment, req),
                 "res" to PHttpResponse(lan.environment, res)

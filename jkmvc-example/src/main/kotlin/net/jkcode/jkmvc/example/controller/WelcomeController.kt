@@ -13,7 +13,10 @@ class WelcomeController: Controller() {
      * 主页
      */
     public fun index() {
-        val content = "hello world<br/><a href=\"" + req.absoluteUrl("user/index") + "\">用户管理</a>"
+        val content = "hello world" +
+                "<br/><a href=\"" + req.absoluteUrl("user/index") + "\">用户管理</a>" +
+                "<br/><a href=\"" + req.absoluteUrl("\$test/index") + "\">jphp测试</a>" +
+                "<br/><a href=\"" + req.absoluteUrl("\$test/login") + "\">jphp视图</a>"
         res.renderHtml(content);
     }
 
