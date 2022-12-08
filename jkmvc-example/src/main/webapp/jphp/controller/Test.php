@@ -1,6 +1,8 @@
 <?php
 use php\jkmvc\http\IController;
 use php\jkmvc\http\HttpRequest;
+use php\jkmvc\http\HttpRequest;
+use php\lang\CompletableFuture;
 
 class Test extends IController{
 
@@ -36,9 +38,19 @@ class Test extends IController{
     }
 
     /**
-     * http://localhost:8080/jkmvc-example/$test/transfer
+     * http://localhost:8080/jkmvc-example/$test/transferGit
      */
-    function transfer(){
+    function transferGit(){
         return $this->transferAndReturn("https://search.gitee.com/?skin=rec&type=repository&q=jkmvc");
+    }
+
+    /**
+     * http://localhost:8080/jkmvc-example/$test/joinFuture
+     */
+    function joinFuture(){
+        $f1 = $this->transfer("http://platinum.shikee.com/data/34519102");
+        $f2 = $this->transfer("http://platinum.shikee.com/data/34499569");
+        $f = CompletableFuture::join([$f1, $f2]);
+        var_dump($f->get());
     }
 }

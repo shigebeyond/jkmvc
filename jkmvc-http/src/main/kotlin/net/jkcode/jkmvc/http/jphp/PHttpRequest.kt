@@ -2,6 +2,7 @@ package net.jkcode.jkmvc.http.jphp
 
 import net.jkcode.jkmvc.http.*
 import net.jkcode.jkmvc.http.handler.HttpRequestHandler
+import org.asynchttpclient.Response
 import php.runtime.Memory
 import php.runtime.annotation.Reflection
 import php.runtime.env.Environment
@@ -182,6 +183,21 @@ class PHttpRequest(env: Environment, public val req: HttpRequest) : BaseObject(e
     @Reflection.Signature
     public fun isAjax(): Boolean{
         return req.isAjax
+    }
+
+    /**
+     * 使用 http client 转发请求
+     * @param url
+     * @param useHeaders 是否使用请求头
+     * @param useCookies 是否使用cookie
+     * @return 异步响应
+     */
+    @Reflection.Signature
+    @JvmOverloads
+    public fun transfer(url: String, useHeaders: Boolean = false, useCookies: Boolean = false): CompletableFuture<String> {
+        return req.transfer(url, useHeaders, useCookies).thenApply { r ->
+            r.responseBody
+        }
     }
 
     /**

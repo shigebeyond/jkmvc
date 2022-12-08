@@ -65,6 +65,30 @@ if(!class_exists('php\jkmvc\http\IController', FALSE)) // 检查controller基类
                 ob_end_clean();
             }
         }
+
+        /**
+         * 转发请求，并返回响应
+         *    因为是异步处理, 因此在action方法最后一行必须返回该函数的返回值
+         * @param $url
+         * @param $useHeaders 是否使用请求头
+         * @param $useCookies 是否使用cookie
+         * @return 异步响应
+         */
+        public function transfer($url, $useHeaders = false, $useCookies = false){
+            return $this->req->transfer($url, $useHeaders, $useCookies);
+        }
+
+        /**
+         * 转发请求，并返回响应
+         *    因为是异步处理, 因此在action方法最后一行必须返回该函数的返回值
+         * @param $url
+         * @param $useHeaders 是否使用请求头
+         * @param $useCookies 是否使用cookie
+         * @return 异步结果
+         */
+        public function transferAndReturn($url, $useHeaders = false, $useCookies = false){
+            return $this->req->transferAndReturn($url, $this->res, $useHeaders, $useCookies);
+        }
     }
 
 // 引入controller文件
