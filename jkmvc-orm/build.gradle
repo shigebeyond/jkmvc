@@ -28,4 +28,7 @@ dependencies{
     compile 'org.elasticsearch:elasticsearch:5.5.3'
     compile 'io.searchbox:jest:5.3.3'
 
+    // canal
+    compile 'com.alibaba.otter:canal.client:1.0.12'
+
 }
