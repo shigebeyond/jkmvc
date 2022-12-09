@@ -690,21 +690,22 @@ gradle :jkmvc-example:build -x test
 28. [EsQueryBuilder - 查询构建器](doc/es/EsQueryBuilder.md)
 
 ## 其他
-29. [部署](doc/deploy.cn.md)
-30. [changelog](doc/changelog.md)
+29. [canal模块](doc/canal.md)
+30. [部署](doc/deploy.cn.md)
+31. [changelog](doc/changelog.md)
 
 ## jkorm/mybatis性能测试与对比
-31. [测试场景](doc/orm/benchmark/sence.md)
-32. [model代码](doc/orm/benchmark/code_model.md)
-33. [add场景代码](doc/orm/benchmark/code_add.md)
-34. [update场景代码](doc/orm/benchmark/code_update.md)
-35. [delete场景代码](doc/orm/benchmark/code_delete.md)
-36. [getDepWithEmps场景代码](doc/orm/benchmark/code_getDepWithEmps.md)
-37. [getEmpsByConditionIf场景代码](doc/orm/benchmark/code_getEmpsByConditionIf.md)
-38. [updateEmpOnDynFields场景代码](doc/orm/benchmark/code_updateEmpOnDynFields.md)
-39. [getEmpsByIds场景代码](doc/orm/benchmark/code_getEmpsByIds.md)
-40. [第1轮测试结果](doc/orm/benchmark/result_round1.md)
-41. [第2轮测试结果](doc/orm/benchmark/result_round2.md)
+32. [测试场景](doc/orm/benchmark/sence.md)
+33. [model代码](doc/orm/benchmark/code_model.md)
+34. [add场景代码](doc/orm/benchmark/code_add.md)
+35. [update场景代码](doc/orm/benchmark/code_update.md)
+36. [delete场景代码](doc/orm/benchmark/code_delete.md)
+37. [getDepWithEmps场景代码](doc/orm/benchmark/code_getDepWithEmps.md)
+38. [getEmpsByConditionIf场景代码](doc/orm/benchmark/code_getEmpsByConditionIf.md)
+39. [updateEmpOnDynFields场景代码](doc/orm/benchmark/code_updateEmpOnDynFields.md)
+40. [getEmpsByIds场景代码](doc/orm/benchmark/code_getEmpsByIds.md)
+41. [第1轮测试结果](doc/orm/benchmark/result_round1.md)
+42. [第2轮测试结果](doc/orm/benchmark/result_round2.md)
 
 # 其他
 [变更历史](doc/changelog.md)
