@@ -31,7 +31,7 @@ if(!class_exists('php\jkmvc\http\IController', FALSE)) // 检查controller基类
          * @param $is_return 是否返回视图内容，否则直接响应输出
          * @return string
          */
-        public function view($file, $data = NULL, $is_return = FALSE)
+        protected function view($file, $data = NULL, $is_return = FALSE)
         {
             // 释放变量
             if($data)
@@ -74,7 +74,7 @@ if(!class_exists('php\jkmvc\http\IController', FALSE)) // 检查controller基类
          * @param $useCookies 是否使用cookie
          * @return 异步响应
          */
-        public function transfer($url, $useHeaders = false, $useCookies = false){
+        protected function transfer($url, $useHeaders = false, $useCookies = false){
             return $this->req->transfer($url, $useHeaders, $useCookies);
         }
 
@@ -86,7 +86,7 @@ if(!class_exists('php\jkmvc\http\IController', FALSE)) // 检查controller基类
          * @param $useCookies 是否使用cookie
          * @return 异步结果
          */
-        public function transferAndReturn($url, $useHeaders = false, $useCookies = false){
+        protected function transferAndReturn($url, $useHeaders = false, $useCookies = false){
             return $this->req->transferAndReturn($url, $this->res, $useHeaders, $useCookies);
         }
     }
