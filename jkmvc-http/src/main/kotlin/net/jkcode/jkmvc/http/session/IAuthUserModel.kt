@@ -21,13 +21,13 @@ interface IAuthUserModel : IOrm {
     }
 
     /**
-     * 加密字符串，用于加密密码
+     * 加密密码
      *
-     * @param str
+     * @param password
      * @return
      */
-    fun hash(str: String): String {
-        return DigestUtils.md5Hex(str + sessionConfig["salt"]);
+    fun hashPassword(password: String): String {
+        return DigestUtils.md5Hex(password + sessionConfig["salt"]);
     }
 
     /**
@@ -36,6 +36,6 @@ interface IAuthUserModel : IOrm {
     override fun beforeCreate(){
         // 加密密码
         val field:String = sessionConfig["passwordField"]!!
-        this[field] = hash(this[field])
+        this[field] = hashPassword(this[field])
     }
 }

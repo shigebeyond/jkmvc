@@ -82,7 +82,7 @@ abstract class Auth: IAuth{
             return null;
 
         //　检查密码
-        val p1 = user.hash(password)
+        val p1 = user.hashPassword(password)
         val p2 = user.get(sessionConfig["passwordField"]!!) ?: ""
         if(p1 != p2)
             return null;
