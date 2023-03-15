@@ -24,7 +24,7 @@ class TokenAuth : Auth() {
         if (token == null)
             null
         else // 根据token获得用户
-            tokenManager.getUser(token)?.component1()
+            tokenManager.getUser(token)
     }
 
     /**
@@ -64,7 +64,7 @@ class TokenAuth : Auth() {
      */
     protected override fun afterLogin(user: IAuthUserModel) {
         //生成登录token
-        val token = tokenManager.createToken(user)
+        val token = tokenManager.generateToken(user)
         HttpRequest.currentOrNull()?.setAttribute("token", token);
     }
 

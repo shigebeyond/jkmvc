@@ -12,20 +12,20 @@ import net.jkcode.jkmvc.http.session.IAuthUserModel
  */
 interface ITokenManager {
     /**
-     * 为指定用户创建一个token
+     * 为指定用户生成一个token+缓存用户信息
      *
      * @param user 指定用户
      * @return 生成的token
      */
-    fun createToken(user: IAuthUserModel): String
+    fun generateToken(user: IAuthUserModel): String
 
     /**
      * 获得token相关的用户
      *
      * @param token
-     * @return [用户, tokenId]
+     * @return 用户
      */
-    fun getUser(token: String): Pair<IAuthUserModel, String>?
+    fun getUser(token: String): IAuthUserModel?
 
     /**
      * 清除token

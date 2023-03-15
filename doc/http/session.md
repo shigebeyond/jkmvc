@@ -16,7 +16,7 @@ usernameField = username
 # password field name
 passwordField = password
 # password salt
-passwordSalt = .$%^#*!)06zth
+salt = .$%^#*!)06zth
 ```
 
 `userModel` is UserModel class, which represents the logined user, and you should define it yourself.

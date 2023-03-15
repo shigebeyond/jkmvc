@@ -15,8 +15,8 @@ userModel = net.jkcode.jkmvc.example.model.UserModel
 usernameField = username
 # 密码字段
 passwordField = password
-# 密码加密的盐
-passwordSalt = .$%^#*!)06zth
+# 加密的盐
+salt = .$%^#*!)06zth
 ```
 
 其中`userModel`是开发者自己实现的用户模型类, 表示当前会话中登录的用户

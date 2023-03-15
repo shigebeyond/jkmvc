@@ -16,3 +16,4 @@ jkmvc-benchmark
 jkbenchmark
 jphp-java-ext
 jkutil
+*.out
