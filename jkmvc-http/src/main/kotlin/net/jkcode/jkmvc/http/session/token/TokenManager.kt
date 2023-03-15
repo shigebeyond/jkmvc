@@ -49,7 +49,8 @@ object TokenManager : ITokenManager {
      * 签名
      */
     private fun sign(text: String, key: String): String{
-        return HmacUtils.hmacSha256Hex(key, text)
+        val sign = HmacUtils.hmacSha256(key, text)
+        return Base64.encodeBase64String(sign)
     }
 
     /**
