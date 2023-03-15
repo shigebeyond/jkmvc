@@ -6,7 +6,7 @@ import net.jkcode.jkmvc.http.session.Auth
 import net.jkcode.jkmvc.http.session.IAuthUserModel
 import net.jkcode.jkmvc.orm.modelOrmMeta
 import org.apache.commons.codec.binary.Base64
-import org.apache.commons.codec.digest.DigestUtils
+import org.apache.commons.codec.digest.HmacUtils
 
 /**
  * 用缓存来管理token, 改进的jwt
@@ -46,6 +46,13 @@ object TokenManager : ITokenManager {
     }
 
     /**
+     * 签名
+     */
+    private fun sign(text: String, key: String): String{
+        return HmacUtils.hmacSha256Hex(key, text)
+    }
+
+    /**
      * 为指定用户生成一个token+缓存用户信息
      *
      * @param user 指定用户的id
@@ -69,7 +76,7 @@ object TokenManager : ITokenManager {
 
         // 计算签名
         var payload = encodeBase64(userId) + '.' + encodeBase64(expired.toString())
-        val sign = DigestUtils.sha256Hex(payload + '.' + sessionConfig["salt"]);
+        val sign = sign(payload, sessionConfig["salt"]!!);
 
         // token = userId + 过期时间 + 签名
         return payload + '.' + sign
@@ -88,7 +95,7 @@ object TokenManager : ITokenManager {
         var (userId, expired, sign) = parts
 
         // 校验签名
-        val sign2 = DigestUtils.sha256Hex(userId + '.' + expired + '.' + sessionConfig["salt"]);
+        val sign2 = sign(userId + '.' + expired, sessionConfig["salt"]!!);
         if(sign != sign2)
             throw IllegalArgumentException("token校验签名错误")
 
