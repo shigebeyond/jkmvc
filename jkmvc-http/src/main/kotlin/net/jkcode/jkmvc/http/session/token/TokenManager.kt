@@ -69,10 +69,10 @@ object TokenManager : ITokenManager {
 
         // 计算签名
         var payload = encodeBase64(userId) + '.' + encodeBase64(expired.toString())
-        val sign = DigestUtils.sha256(payload + '.' + sessionConfig["salt"]);
+        val sign = DigestUtils.sha256Hex(payload + '.' + sessionConfig["salt"]);
 
         // token = userId + 过期时间 + 签名
-        return userId + '.' + expired + '.' + sign
+        return payload + '.' + sign
     }
 
     /**
@@ -82,7 +82,7 @@ object TokenManager : ITokenManager {
      */
     public fun parseToken(token: String): String {
         // 解析token
-        val parts = token.split(',')
+        val parts = token.split('.')
         if(parts.size < 3)
             throw IllegalArgumentException("token格式错误")
         var (userId, expired, sign) = parts
