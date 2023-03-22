@@ -1,5 +1,6 @@
 package net.jkcode.jkmvc.http
 
+import com.alibaba.fastjson.JSON
 import net.jkcode.jkmvc.http.controller.ControllerClass
 import net.jkcode.jkmvc.http.controller.ControllerClassLoader
 import net.jkcode.jkmvc.http.router.HttpMethod
@@ -314,13 +315,12 @@ class HttpRequest(req:HttpServletRequest): MultipartRequest(req)
 	}
 
 	/**
-	 * 设置'.'分割的路径下的子项值
-	 *
-	 * @param path '.'分割的路径
-	 * @param value 目标值
+	 * 获得json数据
+	 *    请求体是json字符串
 	 */
-	protected fun setPath(obj: HashMap<String, Any?>, path:String, value:Any?) {
-
+	public fun getJsonData(): Any? {
+		val json = req.reader.readText()
+		return JSON.parse(json)
 	}
 
 	/*************************** 参数的获取/判断/校验 *****************************/
