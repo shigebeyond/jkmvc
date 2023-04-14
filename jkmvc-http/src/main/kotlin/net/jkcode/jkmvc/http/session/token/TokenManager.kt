@@ -92,13 +92,13 @@ object TokenManager : ITokenManager {
         // 解析token
         val parts = token.split('.')
         if(parts.size < 3)
-            throw IllegalArgumentException("token格式错误")
+            throw IllegalArgumentException("token格式错误: $token")
         var (userId, expired, sign) = parts
 
         // 校验签名
         val sign2 = sign(userId + '.' + expired, sessionConfig["salt"]!!);
         if(sign != sign2)
-            throw IllegalArgumentException("token校验签名错误")
+            throw IllegalArgumentException("token校验签名错误: $token")
 
         userId = decodeBase64(userId)
         expired = decodeBase64(expired)
@@ -106,7 +106,7 @@ object TokenManager : ITokenManager {
         // 校验过期
         val expiredTs = expired.toLong() * 1000
         if (System.currentTimeMillis() > expiredTs)
-            throw IllegalArgumentException("token已过期")
+            throw IllegalArgumentException("token已过期: $token")
 
         return userId
     }
