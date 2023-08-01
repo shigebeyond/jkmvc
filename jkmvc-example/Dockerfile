@@ -2,7 +2,7 @@
 # 访问 http://localhost:8080/
 
 # 基础镜像
-FROM java
+FROM openjdk:8-jre-alpine
 
 # 描述
 MAINTAINER jkmvceg
